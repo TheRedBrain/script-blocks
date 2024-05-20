@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/dialogue_block"
+    }
+  }
+}

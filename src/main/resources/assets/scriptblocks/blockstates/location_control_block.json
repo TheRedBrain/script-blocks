@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/location_control_block"
+    }
+  }
+}

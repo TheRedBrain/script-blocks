@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/relay_trigger_block"
+    }
+  }
+}

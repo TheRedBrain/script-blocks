@@ -1,0 +1,396 @@
+{
+	"flat_world_preset.scriptblocks.bam_flat_level_preset": "Adventure",
+	"flat_world_preset.scriptblocks.adventure_map_1": "Adventure Map 1",
+	"generator.scriptblocks.adventure": "Adventure",
+
+	"wip": "WIP",
+
+	"gui.edit": "Edit",
+	"gui.choose": "Choose",
+	"gui.save": "Save",
+	"gui.add": "Add",
+	"gui.remove": "Remove",
+	"gui.delete": "Delete",
+	"gui.close": "Close",
+	"gui.list_entry.add": "Add new entry",
+	"gui.list_entry.remove": "Remove entry",
+	"gui.edit_teleporter_title": "Edit Teleporter",
+
+
+	"gui.area_block.triggered_true_label": "Triggered Override: True",
+	"gui.area_block.triggered_false_label": "Triggered Override: False",
+	"gui.area_block.hide_area_label": "Hide Area",
+	"gui.area_block.show_area_label": "Show Area",
+	"gui.area_block.area_dimensions_label": "Area Dimensions",
+	"gui.area_block.area_position_offset_label": "Area Position Offset",
+
+	"gui.area_block.status_effect_identifier_label": "Effect Identifier",
+	"gui.area_block.status_effect_amplifier_label": "Effect Amplifier",
+	"gui.area_block.ambient_true_label": "Effect Is Ambient: True",
+	"gui.area_block.ambient_false_label": "Effect Is Ambient: False",
+	"gui.area_block.hide_particles_label": "Effect Hides Particles",
+	"gui.area_block.show_particles_label": "Effect Shows Particles",
+	"gui.area_block.hide_icon_label": "Effect Hides Icon",
+	"gui.area_block.show_icon_label": "Effect Shows Icon",
+
+	"gui.area_block.join_message_label": "Join Message",
+	"gui.area_block.leave_message_label": "Leave Message",
+	"gui.area_block.triggered_message_label": "Triggered Message",
+
+	"gui.area_block.pre_timer_label": "X = ",
+	"gui.area_block.post_timer_label": " Seconds",
+
+	"gui.area_block.screenPage.area": "Area",
+	"gui.area_block.screenPage.applied_effect": "Applied Effect",
+	"gui.area_block.screenPage.messages": "Messages",
+	"gui.area_block.screenPage.trigger_settings": "Trigger Settings",
+
+	"gui.area_block.message_mode.announcement": "Show messages as announcement.",
+	"gui.area_block.message_mode.chat": "Show messages in chat.",
+	"gui.area_block.message_mode.overlay": "Show messages as overlay.",
+
+	"gui.area_block.trigger_mode.always": "Can always trigger.",
+	"gui.area_block.trigger_mode.once": "Can trigger once per player.",
+	"gui.area_block.trigger_mode.timed": "Can trigger once every X seconds per player.",
+
+	"gui.area_block.triggered_mode.continuous": "Gets triggered every time.",
+	"gui.area_block.triggered_mode.once": "Gets triggered once.",
+
+
+	"gui.triggered_message_block.toggle_show_message_area_button_label.on": "Show Message Area: On",
+	"gui.triggered_message_block.toggle_show_message_area_button_label.off": "Show Message Area: Off",
+	"gui.triggered_message_block.message_area_dimensions_label": "Activation Area Dimensions",
+	"gui.triggered_message_block.message_area_position_offset_label": "Activation Area Offset",
+	"gui.triggered_message_block.toggle_overlay_button_label.on": "Overlay",
+	"gui.triggered_message_block.toggle_overlay_button_label.off": "Chat",
+
+	"gui.triggered_message_block.trigger_mode.continuous": "Trigger Mode: Continuous",
+	"gui.triggered_message_block.trigger_mode.once": "Trigger Mode: Once",
+
+
+	"gui.housing_screen.creativeScreenPage.influence": "Influence Settings",
+	"gui.housing_screen.creativeScreenPage.entrance": "Entrance Settings",
+	"gui.housing_screen.creativeScreenPage.triggered_block": "Triggered Block Settings",
+	"gui.housing_screen.creativeScreenPage.owner": "Owner Settings",
+
+	"gui.housing_block.ownerMode.dimension_owner": "Dimension Owner",
+	"gui.housing_block.ownerMode.interaction": "Interaction",
+
+	"gui.housing_screen.not_in_a_house": "You are not in a house",
+
+	"gui.housing_screen.co_owner_list.title": "Co Owners",
+	"gui.housing_screen.co_owner_list.description": "Can build and interact with all blocks",
+	"gui.housing_screen.trusted_list.title": "Trusted People",
+	"gui.housing_screen.trusted_list.description": "Can interact with all blocks",
+	"gui.housing_screen.guest_list.title": "Guests",
+	"gui.housing_screen.guest_list.description": "Can interact with doors and food blocks",
+
+	"gui.housing_screen.title.owner": "You own this house",
+	"gui.housing_screen.title.co_owner": "You are a co-owner of this house",
+	"gui.housing_screen.title.trusted": "You are trusted in this house",
+	"gui.housing_screen.title.guest": "You are a guest in this house",
+	"gui.housing_screen.title.stranger": "You are a stranger in this house",
+	"gui.housing_screen.leave_current_house_button_label": "Leave house",
+	"gui.housing_screen.open_reset_house_screen_button_label": "Reset buildable area",
+	"gui.housing_screen.toggle_adventure_building_off_button_label": "Stop building",
+	"gui.housing_screen.toggle_adventure_building_on_button_label": "Start building",
+	"gui.housing_screen.unclaim_house_button_label": "Unclaim this house",
+	"gui.housing_screen.claim_house_button_label": "Claim this house",
+	"gui.housing_screen.open_co_owner_list_button_label": "Open Co-Owner List",
+	"gui.housing_screen.new_co_owner_field.place_holder": "New Co-Owner Name",
+	"gui.housing_screen.add_new_co_owner_button_label": "Add as Co-Owner",
+	"gui.housing_screen.open_trusted_list_button_label": "Open Trusted List",
+	"gui.housing_screen.new_trusted_person_field.place_holder": "New Trusted Name",
+	"gui.housing_screen.add_new_trusted_person_button_label": "Add as Trusted",
+	"gui.housing_screen.open_guest_list_button_label": "Open Guest List",
+	"gui.housing_screen.new_guest_field.place_holder": "New Guest Name",
+	"gui.housing_screen.add_new_guest_button_label": "Add as Guest",
+	"gui.housing_screen.remove_list_entry_button_label": "Remove",
+
+	"gui.housing_screen.hide_influence_area_label": "Hide Influence Area",
+	"gui.housing_screen.show_influence_area_label": "Show Influence Area",
+	"gui.housing_screen.influence_area_dimensions_label": "Influence Area Dimensions",
+	"gui.housing_screen.influence_area_position_offset_label": "Influence Area Position Offset",
+	"gui.housing_screen.entrance_position_offset_label": "Entrance Position Offset",
+	"gui.housing_screen.entrance_orientation_label": "Entrance Orientation",
+
+	"gui.housing_screen.tabHousesList.button": "Your houses",
+	"gui.housing_screen.tabHousesList.title": "Your houses",
+	"gui.housing_screen.tabCurrentHouse.button": "Current house",
+	"gui.housing_screen.tabCurrentHouse.title.owner": "You own this house",
+	"gui.housing_screen.tabCurrentHouse.title.co_owner": "You are a co-owner of this house",
+	"gui.housing_screen.tabCurrentHouse.title.trusted": "You are trusted in this house",
+	"gui.housing_screen.tabCurrentHouse.title.guest": "You are a guest in this house",
+	"gui.housing_screen.tabCurrentHouse.title.stranger": "You are a stranger in this house",
+	"gui.housing_screen.tabCurrentHouse.toggleAdventureBuildingEffectButton.off": "Disable building",
+	"gui.housing_screen.tabCurrentHouse.toggleAdventureBuildingEffectButton.on": "Enable building",
+	"gui.housing_screen.tabCurrentHouse.editHousingButton": "Configure this house",
+	"gui.housing_screen.tabCurrentHouse.leaveCurrentHouseButton": "Leave this house",
+	"gui.housing_screen.tabEditHouse.title": "House Configuration",
+	"gui.housing_screen.tabEditHouse.coOwnerList.title": "Co Owners",
+	"gui.housing_screen.tabEditHouse.coOwnerList.title.tooltip": "Can build and interact with all blocks",
+	"gui.housing_screen.tabEditHouse.trustedList.title": "Trusted People",
+	"gui.housing_screen.tabEditHouse.trustedList.title.tooltip": "Can interact with all blocks",
+	"gui.housing_screen.tabEditHouse.guestList.title": "Guests",
+	"gui.housing_screen.tabEditHouse.guestList.title.tooltip": "Can interact with doors and food blocks",
+	"gui.housing_screen.tabEditHouse.addEntry": "Add player",
+
+
+	"gui.interactive_loot_block.loot_acquired_0": "More stuff!",
+	"gui.interactive_loot_block.loot_acquired_1": "My Precious!",
+	"gui.interactive_loot_block.loot_acquired_2": "Valuable Things!",
+	"gui.interactive_loot_block.loot_acquired_3": "Looooot!",
+	"gui.interactive_loot_block.loot_acquired_4": "Shiny!",
+	"gui.interactive_loot_block.loot_table_identifier_label": "Loot Table Identifier",
+
+
+	"gui.delay_trigger_block.triggeredBlockTriggerDelay": "Trigger Delay in ticks",
+
+
+	"gui.relay_trigger_block.hide_area_label": "Hide Area",
+	"gui.relay_trigger_block.show_area_label": "Show Area",
+	"gui.relay_trigger_block.resets_area_label": "Resets Area",
+	"gui.relay_trigger_block.triggers_area_label": "Triggers Area",
+	"gui.relay_trigger_block.area_dimensions_label": "Area Dimensions",
+	"gui.relay_trigger_block.area_position_offset_label": "Area Position Offset",
+
+	"gui.relay_trigger_block.newTriggeredBlockChanceLabel": "Trigger Chance: ",
+
+	"gui.relay_trigger_block.selectionMode.list": "Selection Mode: List",
+	"gui.relay_trigger_block.selectionMode.area": "Selection Mode: Area",
+
+	"gui.relay_trigger_block.triggerMode.normal": "Mode: Normal",
+	"gui.relay_trigger_block.triggerMode.random": "Mode: Random",
+	"gui.relay_trigger_block.triggerMode.binomial_urn": "Mode: Binomial Urn",
+	"gui.relay_trigger_block.triggerMode.hyper_geometric_urn": "Mode: Hyper Geometric Urn",
+
+
+	"gui.teleporter_block.regeneration_confirm_screen.title": "Do you want to regenerate this dungeon?",
+	"gui.teleporter_block.confirmDungeonRegenerationButton": "Yes",
+	"gui.teleporter_block.cancelDungeonRegenerationButton": "No",
+	"gui.teleporter_block.regenerateDimensionFailed": "Something went wrong with regenerating the dungeon. Try visiting it without regenerating.",
+
+	"gui.teleporter_block.teleporter_name_field.label": "Teleporter Name",
+	"gui.teleporter_block.teleporter_name_field.place_holder": "Teleporter Name Label",
+	"gui.teleporter_block.target_owner_field.label": "Instance Owner",
+	"gui.teleporter_block.target_owner_field.place_holder": "Target Owner Label",
+	"gui.teleporter_block.target_identifier_field.label": "Target Identifier",
+	"gui.teleporter_block.target_identifier_field.place_holder": "Target Identifier Label",
+	"gui.teleporter_block.target_entrance_field.label": "Target Entrance",
+	"gui.teleporter_block.target_entrance_field.place_holder": "Target Entrance Label",
+	"gui.teleporter_block.teleport_button.label": "Teleport",
+	"gui.teleporter_block.teleport_button.place_holder": "Teleport Button Label",
+	"gui.teleporter_block.cancel_teleport_button.label": "Cancel Teleport",
+	"gui.teleporter_block.cancel_teleport_button.place_holder": "Cancel Teleport Button Label",
+
+	"gui.teleporter_block.key_item_is_consumed": "will be consumed.",
+	"gui.teleporter_block.key_item_is_required": "is required.",
+
+	"gui.teleporter_block.location_is_public": "This instance is public",
+
+	"gui.teleporter_block.regenerateDungeonButton": "Regenerate",
+	"gui.teleporter_block.regenerateDungeonButton.tooltip.active": "Regenerate the selected dungeon instance",
+	"gui.teleporter_block.regenerateDungeonButton.tooltip.inactive": "This instance can only be regenerated by the owner",
+	"gui.teleporter_block.updateCurrentTeleportationTargetEntryButton": "Select new instance",
+	"gui.teleporter_block.currentTeleportationTargetEntry.label": "Owner of the dungeon instance",
+
+	"gui.teleporter_block.creativeScreenPage.activation": "Activation Settings",
+	"gui.teleporter_block.creativeScreenPage.teleportation_mode": "Teleportation Settings",
+	"gui.teleporter_block.creativeScreenPage.adventure_screen_customization": "Adventure Screen Settings",
+
+	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
+	"gui.teleporter_block.show_adventure_screen_label": "Show Adventure Screen",
+	"gui.teleporter_block.hide_activation_area_label": "Hide Activation Area",
+	"gui.teleporter_block.show_activation_area_label": "Show Activation Area",
+	"gui.teleporter_block.activation_area_dimensions_label": "Activation Area Dimensions",
+	"gui.teleporter_block.activation_area_position_offset_label": "Activation Area Offset",
+	"gui.teleporter_block.access_position_offset_label": "Access Position Offset",
+	"gui.teleporter_block.toggle_set_access_position_button_label.on": "Set On Teleport: On",
+	"gui.teleporter_block.toggle_set_access_position_button_label.off": "Set On Teleport: Off",
+	"gui.teleporter_block.toggle_only_teleport_dimension_owner_button_label.on": "Dimension Owner Only: On",
+	"gui.teleporter_block.toggle_only_teleport_dimension_owner_button_label.off": "Dimension Owner Only: Off",
+	"gui.teleporter_block.toggle_teleport_team_button_label.on": "Teleport Team: On",
+	"gui.teleporter_block.toggle_teleport_team_button_label.off": "Teleport Team: Off",
+	"gui.teleporter_block.toggle_show_regenerate_button_button_label.on": "Show Regenerate Button: On",
+	"gui.teleporter_block.toggle_show_regenerate_button_button_label.off": "Show Regenerate Button: Off",
+
+	"gui.teleporter_block.teleportation_mode_label": "Teleportation Mode",
+	"gui.teleporter_block.teleportation_mode.direct": "Direct",
+	"gui.teleporter_block.teleportation_mode.spawn_points": "Spawn Points",
+	"gui.teleporter_block.teleportation_mode.locations": "Locations",
+
+	"gui.teleporter_block.spawn_point_type_label": "Spawn Point Type",
+	"gui.teleporter_block.spawn_point_type.world_spawn": "World Spawn",
+	"gui.teleporter_block.spawn_point_type.player_spawn": "Player Spawn",
+	"gui.teleporter_block.spawn_point_type.player_location_access_position": "Location Access Position",
+
+	"gui.teleporter_block.direct_teleport_position_offset_label": "Teleportation Target Position Offset",
+	"gui.teleporter_block.direct_teleport_orientation_label": "Teleportation Target Orientation",
+	"gui.teleporter_block.location_type_label": "Location Type",
+	"gui.teleporter_block.locationType.world_spawn": "World Spawn",
+	"gui.teleporter_block.locationType.player_spawn": "Player Spawn",
+	"gui.teleporter_block.locationType.dimension_access_position": "Dimension Access Position",
+	"gui.teleporter_block.add_new_location_button_label": "Add new entry",
+	"gui.teleporter_block.remove_location_button_label": "Remove entry",
+	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
+
+	"gui.teleporter_block.requiredItemStackSlot.tooltip": "Item required for Teleportation",
+	"gui.teleporter_block.keyItemButton.yes": "Use Item: Yes",
+	"gui.teleporter_block.keyItemButton.no": "Use Item: No",
+	"gui.teleporter_block.teleportButtonLabel.tooltip": "Label of left Button in Adventure GUI",
+	"gui.teleporter_block.cancelTeleportButtonLabel.tooltip": "Label of right Button in Adventure GUI",
+
+
+	"gui.location_controller_block.main_entrance.position_offset": "Main Entrance Position",
+	"gui.location_controller_block.main_entrance.orientation": "Yaw/Pitch",
+	"gui.location_controller_block.toggle_should_always_reset_button_label.on": "Always reset when entered: True",
+	"gui.location_controller_block.toggle_should_always_reset_button_label.off": "Always reset when entered: False",
+
+	"gui.location_controller_block.new_side_entrance.position_offset": "New Side Entrance Position",
+	"gui.location_controller_block.new_side_entrance.name": "Name",
+	"gui.location_controller_block.new_side_entrance.orientation": "Yaw/Pitch",
+
+	"gui.location_controller_block.screenPage.main_entrance": "Main Entrance",
+	"gui.location_controller_block.screenPage.side_entrances": "Side Entrances",
+	"gui.location_controller_block.screenPage.triggered_block": "Triggered Block",
+
+
+	"gui.dialogue_screen.item_cost_too_high": "You don't have the required items!",
+
+	"gui.dialogue_screen.creativeScreenPage.dialogue_used_blocks": "Used Blocks",
+	"gui.dialogue_screen.creativeScreenPage.dialogue_triggered_blocks": "Triggered Blocks",
+	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",
+
+
+	"gui.triggered_spawner_block.spawner_bound_entity_name_field_label": "Name",
+	"gui.triggered_spawner_block.spawner_bound_entity_model_identifier_field_label": "Model Identifier",
+	"gui.triggered_spawner_block.spawner_bound_entity_texture_identifier_field_label": "Texture Identifier",
+	"gui.triggered_spawner_block.spawner_bound_entity_animations_identifier_field_label": "Animations Identifier",
+	"gui.triggered_spawner_block.spawner_bound_entity_bounding_box_height_field_label": "Bounding Box Height",
+	"gui.triggered_spawner_block.spawner_bound_entity_bounding_box_width_field_label": "Bounding Box Width",
+	"gui.triggered_spawner_block.spawner_bound_entity_loot_table_identifier_field_label": "Loot Table Identifier",
+
+	"gui.triggered_spawner_block.spawner_bound_villager_entity_profession_identifier_field_label": "Villager Profession",
+	"gui.triggered_spawner_block.spawner_bound_villager_entity_type_identifier_field_label": "Villager Biome Type",
+	"gui.triggered_spawner_block.spawner_bound_villager_entity_level_field_label": "Villager Level",
+
+	"gui.triggered_spawner_block.spawning_mode_label": "Spawning Mode",
+	"gui.triggered_spawner_block.entity_mode_label": "Entity Mode",
+	"gui.triggered_spawner_block.entity_spawn_position_offset_label": "Entity Spawn Position Offset",
+	"gui.triggered_spawner_block.entity_spawn_orientation_pitch_label": "Entity Spawn Orientation Pitch",
+	"gui.triggered_spawner_block.entity_spawn_orientation_yaw_label": "Entity Spawn Orientation Yaw",
+	"gui.triggered_spawner_block.entity_type_label": "Entity Type Identifier",
+	"gui.triggered_spawner_block.open_spawner_bound_entity_config_screen_button_label": "Open Spawner Bound Entity Config",
+	"gui.triggered_spawner_block.open_spawner_bound_villager_entity_config_screen_button_label": "Open Spawner Bound Villager Entity Config",
+
+	"gui.triggered_spawner_block.creativeScreenPage.misc": "Misc",
+	"gui.triggered_spawner_block.creativeScreenPage.entity_attribute_modifier": "Entity Attribute Modifiers",
+	"gui.triggered_spawner_block.creativeScreenPage.use_relay_block": "Use Relay Block",
+	"gui.triggered_spawner_block.creativeScreenPage.triggered_block": "Triggered Block",
+
+	"gui.triggered_spawner_block.useRelayBlockPositionOffset": "Use Relay Block Position Offset",
+
+	"gui.triggered_spawner_block.spawning_mode.once": "Once",
+	"gui.triggered_spawner_block.spawning_mode.continuous": "Continuous",
+	"gui.triggered_spawner_block.spawning_mode.bound": "Bound",
+	"gui.triggered_spawner_block.spawning_mode.bound_respawn": "Bound Respawn",
+
+	"gui.triggered_spawner_block.entity_mode.identifier": "Identifier",
+	"gui.triggered_spawner_block.entity_mode.spawner_bound_entity": "Spawner Bound Entity",
+	"gui.triggered_spawner_block.entity_mode.spawner_bound_villager_entity": "Spawner Bound Villager Entity",
+
+	"gui.triggered_spawner_block.new_entity_attribute_modifier_identifier_label": "Attribute Identifier",
+	"gui.triggered_spawner_block.new_entity_attribute_modifier_name_label": "Name",
+	"gui.triggered_spawner_block.new_entity_attribute_modifier_value_label": "Value",
+
+
+	"gui.triggered_block.newTriggeredBlockPositionOffset": "New Triggered Block Position Offset",
+	"gui.triggered_block.triggeredBlockPositionOffset": "Triggered Block Position Offset",
+
+	"gui.triggered_block.triggeredBlockPositionOffsetX.placeholder": "X",
+	"gui.triggered_block.triggeredBlockPositionOffsetY.placeholder": "Y",
+	"gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder": "Z",
+	
+	"gui.triggered_block.toggle_triggered_block_resets_button_label.on": "Is Reset",
+	"gui.triggered_block.toggle_triggered_block_resets_button_label.off": "Is Triggered",
+
+
+	"gui.shop_block.trade_button_label": "Trade",
+
+
+	"block.scriptblocks.use_relay_oak_door": "Use Relay Oak Door",
+	"block.scriptblocks.use_relay_iron_door": "Use Relay Iron Door",
+	"block.scriptblocks.use_relay_spruce_door": "Use Relay Spruce Door",
+	"block.scriptblocks.use_relay_birch_door": "Use Relay Birch Door",
+	"block.scriptblocks.use_relay_jungle_door": "Use Relay Jungle Door",
+	"block.scriptblocks.use_relay_acacia_door": "Use Relay Acacia Door",
+	"block.scriptblocks.use_relay_cherry_door": "Use Relay Cherry Door",
+	"block.scriptblocks.use_relay_dark_oak_door": "Use Relay Dark Oak Door",
+	"block.scriptblocks.use_relay_mangrove_door": "Use Relay Mangrove Door",
+	"block.scriptblocks.use_relay_bamboo_door": "Use Relay Bamboo Door",
+	"block.scriptblocks.use_relay_crimson_door": "Use Relay Crimson Door",
+	"block.scriptblocks.use_relay_warped_door": "Use Relay Warped Door",
+
+	"block.scriptblocks.use_relay_oak_trapdoor": "Use Relay Oak Trapdoor",
+	"block.scriptblocks.use_relay_iron_trapdoor": "Use Relay Iron Trapdoor",
+	"block.scriptblocks.use_relay_spruce_trapdoor": "Use Relay Spruce Trapdoor",
+	"block.scriptblocks.use_relay_birch_trapdoor": "Use Relay Birch Trapdoor",
+	"block.scriptblocks.use_relay_jungle_trapdoor": "Use Relay Jungle Trapdoor",
+	"block.scriptblocks.use_relay_acacia_trapdoor": "Use Relay Acacia Trapdoor",
+	"block.scriptblocks.use_relay_cherry_trapdoor": "Use Relay Cherry Trapdoor",
+	"block.scriptblocks.use_relay_dark_oak_trapdoor": "Use Relay Dark Oak Trapdoor",
+	"block.scriptblocks.use_relay_mangrove_trapdoor": "Use Relay Mangrove Trapdoor",
+	"block.scriptblocks.use_relay_bamboo_trapdoor": "Use Relay Bamboo Trapdoor",
+	"block.scriptblocks.use_relay_crimson_trapdoor": "Use Relay Crimson Trapdoor",
+	"block.scriptblocks.use_relay_warped_trapdoor": "Use Relay Warped Trapdoor",
+
+	"block.scriptblocks.use_relay_chest": "Use Relay Chest",
+	"block.scriptblocks.locked_use_relay_chest": "Locked Use Relay Chest",
+
+	"block.scriptblocks.area_block": "Area Block",
+	"block.scriptblocks.delay_trigger_block": "Delay Trigger Block",
+	"block.scriptblocks.dialogue_block": "Dialogue Block",
+	"block.scriptblocks.entrance_delegation_block": "Entrance Delegation Block",
+	"block.scriptblocks.housing_block": "Housing Block",
+	"block.scriptblocks.interactive_loot_block": "Interactive Loot Block",
+	"block.scriptblocks.jigsaw_placer_block": "Jigsaw Placer Block",
+	"block.scriptblocks.location_control_block": "Location Control Block",
+	"block.scriptblocks.mimic_block": "Mimic Block",
+	"block.scriptblocks.mimic_fallback_block": "Mimic Fallback Block",
+	"block.scriptblocks.redstone_trigger_block": "Redstone Trigger Block",
+	"block.scriptblocks.relay_trigger_block": "Relay Trigger Block",
+	"block.scriptblocks.shop_block": "Shop Block",
+	"block.scriptblocks.teleporter_block": "Teleporter Block",
+	"block.scriptblocks.triggered_advancement_checker_block": "Triggered Advancement Checker Block",
+	"block.scriptblocks.triggered_counter_block": "Triggered Counter Block",
+	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
+	"block.scriptblocks.use_relay_block": "Use Relay Block",
+
+
+	"gamerule.scriptBlocksDropThemself": "Script Blocks drop themself when mined in survival",
+
+
+	"hud.message.onlyDimensionOwnerCanTeleport": "Only the dimension owner can teleport",
+	"hud.message.keyIsNeeded": "You need a key.",
+	"hud.message.script_block.update_successful": "Update successful",
+
+
+	"item.scriptblocks.block_position_distance_meter": "Block Position Distance Meter",
+
+	"item.scriptblocks.block_position_distance_meter.set_root_mode.true": "Set Root Block Position on shift-right click",
+	"item.scriptblocks.block_position_distance_meter.set_root_mode.false": "Set Offset Block Position on shift-right click",
+
+	"item.scriptblocks.block_position_distance_meter.root_mode": "Root Mode",
+	"item.scriptblocks.block_position_distance_meter.offset_mode": "Offset Mode",
+
+	"item.scriptblocks.block_position_distance_meter.tooltip.root_pos": "Root Position: %s, %s, %s.",
+	"item.scriptblocks.block_position_distance_meter.tooltip.offset_pos": "Offset Position: %s, %s, %s.",
+	"item.scriptblocks.block_position_distance_meter.tooltip.offset": "Offset: %s, %s, %s.",
+
+	"item.scriptblocks.block_position_distance_meter.set_root_block": "New Root Block Position: %s, %s, %s.",
+	"item.scriptblocks.block_position_distance_meter.set_offset_block": "New Offset Block Position: %s, %s, %s.",
+	"item.scriptblocks.block_position_distance_meter.info": "Offset is %s, %s, %s.",
+
+
+	"itemGroup.scriptblocks.script_blocks": "Script Blocks"
+}

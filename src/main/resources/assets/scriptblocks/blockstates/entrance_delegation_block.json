@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/entrance_delegation_block"
+    }
+  }
+}

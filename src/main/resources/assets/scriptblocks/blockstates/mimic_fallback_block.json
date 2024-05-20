@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/mimic_fallback_block"
+    }
+  }
+}

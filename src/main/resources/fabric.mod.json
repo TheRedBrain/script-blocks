@@ -1,41 +1,49 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
-	"version": "${version}",
-	"name": "Example mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"id": "scriptblocks",
+	"version": "1.0.0",
+
+	"name": "Script Blocks",
+	"description": "Adds various blocks and mechanics which assist map makers and dungeon builders.",
 	"authors": [
-		"Me!"
+		"TheRedBrain"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/TheRedBrain/scriptblocks"
 	},
-	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
+	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
+			"com.github.theredbrain.scriptblocks.ScriptBlocksMod"
 		],
 		"client": [
-			"com.example.ExampleModClient"
+			"com.github.theredbrain.scriptblocks.ScriptBlocksModClient"
+		],
+		"cardinal-components-entity": [
+			"com.github.theredbrain.scriptblocks.registry.ComponentsRegistry"
+		],
+		"modmenu": [
+			"com.github.theredbrain.scriptblocks.client.compatibility.ModMenuCompatibility"
+		]
+	},
+	"custom": {
+		"cardinal-components": [
+			"scriptblocks:current_housing_block_pos",
+			"scriptblocks:player_location_access_pos"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
-		{
-			"config": "modid.client.mixins.json",
-			"environment": "client"
-		}
+		"scriptblocks.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.15.9",
-		"minecraft": "~1.20.4",
+		"minecraft": "1.20.1",
 		"java": ">=17",
-		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
+		"fabric-api": "*",
+		"cloth-config": ">=11.1.106",
+		"q_misc_util": ">=3.3.7",
+		"cardinal-components-base": ">=5.2.2",
+		"cardinal-components-entity": ">=5.2.2"
 	}
 }
