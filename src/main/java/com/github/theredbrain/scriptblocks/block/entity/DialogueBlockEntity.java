@@ -27,7 +27,7 @@ import java.util.List;
 public class DialogueBlockEntity extends RotatedBlockEntity {
 
     private HashMap<String, BlockPos> dialogueUsedBlocks = new HashMap<>();
-    private HashMap<String, BlockPos> dialogueTriggeredBlocks = new HashMap<>();
+    private HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocks = new HashMap<>();
 
     // TODO convert to a map?
     private List<MutablePair<String, MutablePair<String, String>>> startingDialogueList = new ArrayList<>();
@@ -52,9 +52,10 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
         for (int i = 0; i < dialogueTriggeredBlocksKeys.size(); i++) {
             String key = dialogueTriggeredBlocksKeys.get(i);
             nbt.putString("dialogueTriggeredBlocks_key_" + i, key);
-            nbt.putInt("dialogueTriggeredBlocks_entry_X_" + i, this.dialogueTriggeredBlocks.get(key).getX());
-            nbt.putInt("dialogueTriggeredBlocks_entry_Y_" + i, this.dialogueTriggeredBlocks.get(key).getY());
-            nbt.putInt("dialogueTriggeredBlocks_entry_Z_" + i, this.dialogueTriggeredBlocks.get(key).getZ());
+            nbt.putInt("dialogueTriggeredBlocks_entry_X_" + i, this.dialogueTriggeredBlocks.get(key).getLeft().getX());
+            nbt.putInt("dialogueTriggeredBlocks_entry_Y_" + i, this.dialogueTriggeredBlocks.get(key).getLeft().getY());
+            nbt.putInt("dialogueTriggeredBlocks_entry_Z_" + i, this.dialogueTriggeredBlocks.get(key).getLeft().getZ());
+            nbt.putBoolean("dialogueTriggeredBlocks_entry_resets_" + i, this.dialogueTriggeredBlocks.get(key).getRight());
         }
 
         nbt.putInt("startingDialogueListSize", this.startingDialogueList.size());
@@ -82,11 +83,12 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
         this.dialogueTriggeredBlocks.clear();
         int dialogueTriggeredBlocksKeysSize = nbt.getInt("dialogueTriggeredBlocksKeysSize");
         for (int i = 0; i < dialogueTriggeredBlocksKeysSize; i++) {
-            this.dialogueTriggeredBlocks.put(nbt.getString("dialogueTriggeredBlocks_key_" + i), new BlockPos(
-                    MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_X_" + i), -48, 48),
-                    MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Y_" + i), -48, 48),
-                    MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Z_" + i), -48, 48)
-            ));
+            this.dialogueTriggeredBlocks.put(nbt.getString("dialogueTriggeredBlocks_key_" + i), new MutablePair<>(
+                    new BlockPos(
+                            MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_X_" + i), -48, 48),
+                            MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Y_" + i), -48, 48),
+                            MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Z_" + i), -48, 48)
+                    ), nbt.getBoolean("dialogueTriggeredBlocks_entry_resets_" + i)));
         }
 
         this.startingDialogueList.clear();
@@ -167,12 +169,12 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
         return true;
     }
 
-    public HashMap<String, BlockPos> getDialogueTriggeredBlocks() {
+    public HashMap<String, MutablePair<BlockPos, Boolean>> getDialogueTriggeredBlocks() {
         return this.dialogueTriggeredBlocks;
     }
 
     // TODO check if input is valid
-    public boolean setDialogueTriggeredBlocks(HashMap<String, BlockPos> dialogueTriggeredBlocks) {
+    public boolean setDialogueTriggeredBlocks(HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocks) {
         this.dialogueTriggeredBlocks = dialogueTriggeredBlocks;
         return true;
     }
@@ -194,39 +196,39 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
                 BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
                 List<String> keys = new ArrayList<>(this.dialogueUsedBlocks.keySet());
                 for (String key : keys) {
-                    BlockPos oldBlockPos = this.dialogueUsedBlocks.get(key);
-                    this.dialogueUsedBlocks.put(key, BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos, blockRotation));
+                    this.dialogueUsedBlocks.compute(key, (k, oldBlockPos) -> BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos, blockRotation));
                 }
                 keys = new ArrayList<>(this.dialogueTriggeredBlocks.keySet());
                 for (String key : keys) {
-                    BlockPos oldBlockPos = this.dialogueTriggeredBlocks.get(key);
-                    this.dialogueTriggeredBlocks.put(key, BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos, blockRotation));
+                    MutablePair<BlockPos, Boolean> oldBlockPos = this.dialogueTriggeredBlocks.get(key);
+                    oldBlockPos.setLeft(BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos.getLeft(), blockRotation));
+                    this.dialogueTriggeredBlocks.put(key, oldBlockPos);
                 }
                 this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
             }
             if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
                 List<String> keys = new ArrayList<>(this.dialogueUsedBlocks.keySet());
                 for (String key : keys) {
-                    BlockPos oldBlockPos = this.dialogueUsedBlocks.get(key);
-                    this.dialogueUsedBlocks.put(key, BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.FRONT_BACK));
+                    this.dialogueUsedBlocks.compute(key, (k, oldBlockPos) -> BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.FRONT_BACK));
                 }
                 keys = new ArrayList<>(this.dialogueTriggeredBlocks.keySet());
                 for (String key : keys) {
-                    BlockPos oldBlockPos = this.dialogueTriggeredBlocks.get(key);
-                    this.dialogueTriggeredBlocks.put(key, BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.FRONT_BACK));
+                    MutablePair<BlockPos, Boolean> oldBlockPos = this.dialogueTriggeredBlocks.get(key);
+                    oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.FRONT_BACK));
+                    this.dialogueTriggeredBlocks.put(key, oldBlockPos);
                 }
                 this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
             }
             if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
                 List<String> keys = new ArrayList<>(this.dialogueUsedBlocks.keySet());
                 for (String key : keys) {
-                    BlockPos oldBlockPos = this.dialogueUsedBlocks.get(key);
-                    this.dialogueUsedBlocks.put(key, BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.LEFT_RIGHT));
+                    this.dialogueUsedBlocks.compute(key, (k, oldBlockPos) -> BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.LEFT_RIGHT));
                 }
                 keys = new ArrayList<>(this.dialogueTriggeredBlocks.keySet());
                 for (String key : keys) {
-                    BlockPos oldBlockPos = this.dialogueTriggeredBlocks.get(key);
-                    this.dialogueTriggeredBlocks.put(key, BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.LEFT_RIGHT));
+                    MutablePair<BlockPos, Boolean> oldBlockPos = this.dialogueTriggeredBlocks.get(key);
+                    oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.LEFT_RIGHT));
+                    this.dialogueTriggeredBlocks.put(key, oldBlockPos);
                 }
                 this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
             }

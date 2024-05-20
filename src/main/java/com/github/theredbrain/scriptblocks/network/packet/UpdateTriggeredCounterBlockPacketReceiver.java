@@ -26,9 +26,9 @@ public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetw
 
         BlockPos triggeredCounterBlockPosition = packet.triggeredCounterBlockPosition;
 
-        List<MutablePair<Integer, BlockPos>> triggeredBlocksList = packet.triggeredBlocksList;
-        HashMap<Integer, BlockPos> triggeredBlocks = new HashMap<>();
-        for (MutablePair<Integer, BlockPos> usedBlock : triggeredBlocksList) {
+        List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = packet.triggeredBlocksList;
+        HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
+        for (MutablePair<Integer, MutablePair<BlockPos, Boolean>> usedBlock : triggeredBlocksList) {
             triggeredBlocks.put(usedBlock.getLeft(), usedBlock.getRight());
         }
 

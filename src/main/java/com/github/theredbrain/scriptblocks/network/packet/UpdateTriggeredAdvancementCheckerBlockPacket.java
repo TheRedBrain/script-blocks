@@ -16,19 +16,25 @@ public class UpdateTriggeredAdvancementCheckerBlockPacket implements FabricPacke
 
     public final BlockPos firstTriggeredBlockPositionOffset;
 
+    public final boolean firstTriggeredBlockResets;
+
     public final BlockPos secondTriggeredBlockPositionOffset;
+
+    public final boolean secondTriggeredBlockResets;
 
     public final String checkedAdvancementIdentifier;
 
-    public UpdateTriggeredAdvancementCheckerBlockPacket(BlockPos triggeredAdvancementCheckerBlockPosition, BlockPos firstTriggeredBlockPositionOffset, BlockPos secondTriggeredBlockPositionOffset, String checkedAdvancementIdentifier) {
+    public UpdateTriggeredAdvancementCheckerBlockPacket(BlockPos triggeredAdvancementCheckerBlockPosition, BlockPos firstTriggeredBlockPositionOffset, boolean firstTriggeredBlockResets, BlockPos secondTriggeredBlockPositionOffset, boolean secondTriggeredBlockResets, String checkedAdvancementIdentifier) {
         this.triggeredAdvancementCheckerBlockPosition = triggeredAdvancementCheckerBlockPosition;
         this.firstTriggeredBlockPositionOffset = firstTriggeredBlockPositionOffset;
+        this.firstTriggeredBlockResets = firstTriggeredBlockResets;
         this.secondTriggeredBlockPositionOffset = secondTriggeredBlockPositionOffset;
+        this.secondTriggeredBlockResets = secondTriggeredBlockResets;
         this.checkedAdvancementIdentifier = checkedAdvancementIdentifier;
     }
 
     public UpdateTriggeredAdvancementCheckerBlockPacket(PacketByteBuf buf) {
-        this(buf.readBlockPos(), buf.readBlockPos(), buf.readBlockPos(), buf.readString());
+        this(buf.readBlockPos(), buf.readBlockPos(), buf.readBoolean(), buf.readBlockPos(), buf.readBoolean(), buf.readString());
     }
     @Override
     public PacketType<?> getType() {
@@ -38,7 +44,9 @@ public class UpdateTriggeredAdvancementCheckerBlockPacket implements FabricPacke
     public void write(PacketByteBuf buf) {
         buf.writeBlockPos(this.triggeredAdvancementCheckerBlockPosition);
         buf.writeBlockPos(this.firstTriggeredBlockPositionOffset);
+        buf.writeBoolean(this.firstTriggeredBlockResets);
         buf.writeBlockPos(this.secondTriggeredBlockPositionOffset);
+        buf.writeBoolean(this.secondTriggeredBlockResets);
         buf.writeString(this.checkedAdvancementIdentifier);
     }
 

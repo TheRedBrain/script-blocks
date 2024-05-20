@@ -18,15 +18,15 @@ public class UpdateTriggeredCounterBlockPacket implements FabricPacket {
 
     public final BlockPos triggeredCounterBlockPosition;
 
-    public final List<MutablePair<Integer, BlockPos>> triggeredBlocksList;
+    public final List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList;
 
-    public UpdateTriggeredCounterBlockPacket(BlockPos triggeredCounterBlockPosition, List<MutablePair<Integer, BlockPos>> triggeredBlocksList) {
+    public UpdateTriggeredCounterBlockPacket(BlockPos triggeredCounterBlockPosition, List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList) {
         this.triggeredCounterBlockPosition = triggeredCounterBlockPosition;
         this.triggeredBlocksList = triggeredBlocksList;
     }
 
     public UpdateTriggeredCounterBlockPacket(PacketByteBuf buf) {
-        this(buf.readBlockPos(), buf.readList(new PacketByteBufUtils.MutablePairIntegerBlockPosReader()));
+        this(buf.readBlockPos(), buf.readList(new PacketByteBufUtils.MutablePairIntegerMutablePairBlockPosBooleanReader()));
     }
     @Override
     public PacketType<?> getType() {
@@ -35,7 +35,7 @@ public class UpdateTriggeredCounterBlockPacket implements FabricPacket {
     @Override
     public void write(PacketByteBuf buf) {
         buf.writeBlockPos(this.triggeredCounterBlockPosition);
-        buf.writeCollection(this.triggeredBlocksList, new PacketByteBufUtils.MutablePairIntegerBlockPosWriter());
+        buf.writeCollection(this.triggeredBlocksList, new PacketByteBufUtils.MutablePairIntegerMutablePairBlockPosBooleanWriter());
     }
 
 }

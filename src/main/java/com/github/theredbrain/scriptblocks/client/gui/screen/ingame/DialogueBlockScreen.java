@@ -81,6 +81,8 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
     private TextFieldWidget newDialogueTriggeredBlockPositionOffsetXField;
     private TextFieldWidget newDialogueTriggeredBlockPositionOffsetYField;
     private TextFieldWidget newDialogueTriggeredBlockPositionOffsetZField;
+    private CyclingButtonWidget<Boolean> toggleNewDialogueTriggeredBlockResetsButton;
+    private boolean newDialogueTriggeredBlockResets;
     private ButtonWidget addDialogueTriggeredBlockButton;
 
     private ButtonWidget removeStartingDialogueEntryButton;
@@ -96,7 +98,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
     private final boolean showCreativeScreen;
     private CreativeScreenPage creativeScreenPage;
     private List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
-    private List<MutablePair<String, BlockPos>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
+    private List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
     private List<MutablePair<String, MutablePair<String, String>>> startingDialogueList = new ArrayList<>(List.of());
     private List<Identifier> unlockedAnswersList = new ArrayList<>(List.of());
     private List<Identifier> visibleAnswersList = new ArrayList<>(List.of());
@@ -261,7 +263,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 
     private void addDialogueTriggeredBlockEntry() {
         String newDialogueTriggeredBlockIdentifier = this.newDialogueTriggeredBlockIdentifierField.getText();
-        for (MutablePair<String, BlockPos> entry : this.dialogueTriggeredBlocksList) {
+        for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : this.dialogueTriggeredBlocksList) {
             if (entry.getLeft().equals(newDialogueTriggeredBlockIdentifier)) {
                 if (this.client != null && this.client.player != null) {
                     this.client.player.sendMessage(Text.translatable("gui.dialogue_block.entry_already_in_list"));
@@ -271,10 +273,13 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
         }
         this.dialogueTriggeredBlocksList.add(
                 new MutablePair<>(newDialogueTriggeredBlockIdentifier,
-                        new BlockPos(
-                                ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetXField.getText()),
-                                ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetYField.getText()),
-                                ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetZField.getText())
+                        new MutablePair<>(
+                                new BlockPos(
+                                        ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetXField.getText()),
+                                        ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetYField.getText()),
+                                        ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetZField.getText())
+                                ),
+                                this.newDialogueTriggeredBlockResets
                         )
                 )
         );
@@ -456,17 +461,22 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
         this.newDialogueTriggeredBlockIdentifierField.setMaxLength(128);
         this.addSelectableChild(this.newDialogueTriggeredBlockIdentifierField);
 
-        this.newDialogueTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 162, 100, 20, Text.empty());
+        this.newDialogueTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 162, 50, 20, Text.empty());
         this.newDialogueTriggeredBlockPositionOffsetXField.setMaxLength(128);
         this.addSelectableChild(this.newDialogueTriggeredBlockPositionOffsetXField);
 
-        this.newDialogueTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 162, 100, 20, Text.empty());
+        this.newDialogueTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 162, 50, 20, Text.empty());
         this.newDialogueTriggeredBlockPositionOffsetYField.setMaxLength(128);
         this.addSelectableChild(this.newDialogueTriggeredBlockPositionOffsetYField);
 
-        this.newDialogueTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 162, 100, 20, Text.empty());
+        this.newDialogueTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 162, 50, 20, Text.empty());
         this.newDialogueTriggeredBlockPositionOffsetZField.setMaxLength(128);
         this.addSelectableChild(this.newDialogueTriggeredBlockPositionOffsetZField);
+
+        this.newDialogueTriggeredBlockResets = false;
+        this.toggleNewDialogueTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.newDialogueTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 162, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+            this.newDialogueTriggeredBlockResets = triggeredBlockResets;
+        }));
 
         this.addDialogueTriggeredBlockButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addDialogueTriggeredBlockEntry()).dimensions(this.width / 2 - 4 - 150, 186, 300, 20).build());
 
@@ -531,6 +541,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
         this.newDialogueTriggeredBlockPositionOffsetXField.setVisible(false);
         this.newDialogueTriggeredBlockPositionOffsetYField.setVisible(false);
         this.newDialogueTriggeredBlockPositionOffsetZField.setVisible(false);
+        this.toggleNewDialogueTriggeredBlockResetsButton.visible = false;
 
         this.addDialogueTriggeredBlockButton.visible = false;
 
@@ -593,6 +604,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
                 this.newDialogueTriggeredBlockPositionOffsetXField.setVisible(true);
                 this.newDialogueTriggeredBlockPositionOffsetYField.setVisible(true);
                 this.newDialogueTriggeredBlockPositionOffsetZField.setVisible(true);
+                this.toggleNewDialogueTriggeredBlockResetsButton.visible = true;
 
                 this.addDialogueTriggeredBlockButton.visible = true;
 
@@ -640,7 +652,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
     @Override
     public void resize(MinecraftClient client, int width, int height) {
         List<MutablePair<String, BlockPos>> list = new ArrayList<>(this.dialogueUsedBlocksList);
-        List<MutablePair<String, BlockPos>> list1 = new ArrayList<>(this.dialogueTriggeredBlocksList);
+        List<MutablePair<String, MutablePair<BlockPos, Boolean>>> list1 = new ArrayList<>(this.dialogueTriggeredBlocksList);
         List<MutablePair<String, MutablePair<String, String>>> list2 = new ArrayList<>(this.startingDialogueList);
         List<Identifier> list3 = new ArrayList<>(this.unlockedAnswersList);
         List<Identifier> list4 = new ArrayList<>(this.visibleAnswersList);

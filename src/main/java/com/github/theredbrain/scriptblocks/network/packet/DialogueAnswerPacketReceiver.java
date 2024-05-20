@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
+import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
@@ -9,6 +10,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
@@ -158,18 +160,24 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
             // trigger block
             String triggeredBlock = dialogueAnswer.getTriggeredBlock();
             if (triggeredBlock != null) {
-                List<MutablePair<String, BlockPos>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
+                List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
                 List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueTriggeredBlocks().keySet());
                 for (String key : keyList) {
                     dialogueTriggeredBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueTriggeredBlocks().get(key)));
                 }
-                for (MutablePair<String, BlockPos> entry : dialogueTriggeredBlocksList) {
+                for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocksList) {
                     if (entry.getLeft().equals(triggeredBlock)) {
 
-                        BlockPos blockPos = entry.getRight().add(dialogueBlockPos);
 
-                        if (player.getWorld().getBlockEntity(blockPos) instanceof Triggerable triggerable) {
-                            triggerable.trigger();
+                        BlockEntity blockEntity = player.getWorld().getBlockEntity(entry.getRight().getLeft().add(dialogueBlockPos));
+
+                        if (blockEntity != dialogueBlockEntity) {
+                            boolean triggeredBlockResets = entry.getRight().getRight();
+                            if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+                                resetable.reset();
+                            } else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+                                triggerable.trigger();
+                            }
                         }
                         break;
                     }

@@ -15,14 +15,16 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
-    private HashMap<Integer, BlockPos> triggeredBlocks = new HashMap<>();
+    private HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
     private int counter = 0;
+
     public TriggeredCounterBlockEntity(BlockPos pos, BlockState state) {
         super(EntityRegistry.TRIGGERED_COUNTER_BLOCK_ENTITY, pos, state);
     }
@@ -34,9 +36,10 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
         for (int i = 0; i < triggeredBlocksKeys.size(); i++) {
             int key = triggeredBlocksKeys.get(i);
             nbt.putInt("triggeredBlocks_key_" + i, key);
-            nbt.putInt("triggeredBlocks_entry_X_" + i, this.triggeredBlocks.get(key).getX());
-            nbt.putInt("triggeredBlocks_entry_Y_" + i, this.triggeredBlocks.get(key).getY());
-            nbt.putInt("triggeredBlocks_entry_Z_" + i, this.triggeredBlocks.get(key).getZ());
+            nbt.putInt("triggeredBlocks_entry_X_" + i, this.triggeredBlocks.get(key).getLeft().getX());
+            nbt.putInt("triggeredBlocks_entry_Y_" + i, this.triggeredBlocks.get(key).getLeft().getY());
+            nbt.putInt("triggeredBlocks_entry_Z_" + i, this.triggeredBlocks.get(key).getLeft().getZ());
+            nbt.putBoolean("triggeredBlocks_entry_resets_" + i, this.triggeredBlocks.get(key).getRight());
         }
 
         nbt.putInt("counter", this.counter);
@@ -49,11 +52,12 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
         this.triggeredBlocks.clear();
         int triggeredBlocksKeysSize = nbt.getInt("triggeredBlocksKeysSize");
         for (int i = 0; i < triggeredBlocksKeysSize; i++) {
-            this.triggeredBlocks.put(nbt.getInt("triggeredBlocks_key_" + i), new BlockPos(
-                    MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_X_" + i), -48, 48),
-                    MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Y_" + i), -48, 48),
-                    MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Z_" + i), -48, 48)
-            ));
+            this.triggeredBlocks.put(nbt.getInt("triggeredBlocks_key_" + i), new MutablePair<>(
+                    new BlockPos(
+                            MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_X_" + i), -48, 48),
+                            MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Y_" + i), -48, 48),
+                            MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Z_" + i), -48, 48)
+                    ), nbt.getBoolean("triggeredBlocks_entry_resets_" + i)));
         }
 
         this.counter = nbt.getInt("counter");
@@ -75,16 +79,16 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
             return false;
         }
         if (player.getEntityWorld().isClient) {
-            ((DuckPlayerEntityMixin)player).scriptblocks$openTriggeredCounterBlockScreen(this);
+            ((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredCounterBlockScreen(this);
         }
         return true;
     }
 
-    public HashMap<Integer, BlockPos> getTriggeredBlocks() {
+    public HashMap<Integer, MutablePair<BlockPos, Boolean>> getTriggeredBlocks() {
         return triggeredBlocks;
     }
 
-    public boolean setTriggeredBlocks(HashMap<Integer, BlockPos> triggeredBlocks) {
+    public boolean setTriggeredBlocks(HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks) {
         this.triggeredBlocks = triggeredBlocks;
         return true;
     }
@@ -93,10 +97,15 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
         if (this.world != null) {
             this.counter++;
             if (this.triggeredBlocks.containsKey(this.counter)) {
-                BlockPos blockPos = this.triggeredBlocks.get(this.counter);
-                BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + blockPos.getX(), this.pos.getY() + blockPos.getY(), this.pos.getZ() + blockPos.getZ()));
-                if (blockEntity instanceof Triggerable triggerable && blockEntity != this) {
-                    triggerable.trigger();
+                MutablePair<BlockPos, Boolean> triggeredBlock = this.triggeredBlocks.get(this.counter);
+                BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlock.getLeft().getX(), this.pos.getY() + triggeredBlock.getLeft().getY(), this.pos.getZ() + triggeredBlock.getLeft().getZ()));
+                if (blockEntity != this) {
+                    boolean triggeredBlockResets = triggeredBlock.getRight();
+                    if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+                        resetable.reset();
+                    } else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+                        triggerable.trigger();
+                    }
                 }
             }
         }
@@ -114,24 +123,27 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
                 BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
                 List<Integer> keys = new ArrayList<>(this.triggeredBlocks.keySet());
                 for (Integer key : keys) {
-                    BlockPos oldBlockPos = this.triggeredBlocks.get(key);
-                    this.triggeredBlocks.put(key, BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos, blockRotation));
+                    MutablePair<BlockPos, Boolean> oldBlockPos = this.triggeredBlocks.get(key);
+                    oldBlockPos.setLeft(BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos.getLeft(), blockRotation));
+                    this.triggeredBlocks.put(key, oldBlockPos);
                 }
                 this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
             }
             if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
                 List<Integer> keys = new ArrayList<>(this.triggeredBlocks.keySet());
                 for (Integer key : keys) {
-                    BlockPos oldBlockPos = this.triggeredBlocks.get(key);
-                    this.triggeredBlocks.put(key, BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.FRONT_BACK));
+                    MutablePair<BlockPos, Boolean> oldBlockPos = this.triggeredBlocks.get(key);
+                    oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.FRONT_BACK));
+                    this.triggeredBlocks.put(key, oldBlockPos);
                 }
                 this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
             }
             if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
                 List<Integer> keys = new ArrayList<>(this.triggeredBlocks.keySet());
                 for (Integer key : keys) {
-                    BlockPos oldBlockPos = this.triggeredBlocks.get(key);
-                    this.triggeredBlocks.put(key, BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos, BlockMirror.LEFT_RIGHT));
+                    MutablePair<BlockPos, Boolean> oldBlockPos = this.triggeredBlocks.get(key);
+                    oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.LEFT_RIGHT));
+                    this.triggeredBlocks.put(key, oldBlockPos);
                 }
                 this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
             }

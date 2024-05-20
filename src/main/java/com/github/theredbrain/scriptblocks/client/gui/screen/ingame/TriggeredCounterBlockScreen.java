@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
@@ -45,10 +46,12 @@ public class TriggeredCounterBlockScreen extends Screen {
     private TextFieldWidget newTriggeredBlockPositionOffsetXField;
     private TextFieldWidget newTriggeredBlockPositionOffsetYField;
     private TextFieldWidget newTriggeredBlockPositionOffsetZField;
+    private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
+    private boolean triggeredBlockResets;
     private ButtonWidget addNewTriggeredBlockPositionOffsetButton;
     private ButtonWidget saveButton;
     private ButtonWidget cancelButton;
-    private List<MutablePair<Integer, BlockPos>> triggeredBlocksList = new ArrayList<>(List.of());
+    private List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = new ArrayList<>(List.of());
     private int scrollPosition = 0;
     private float scrollAmount = 0.0f;
     private boolean mouseClicked = false;
@@ -60,7 +63,7 @@ public class TriggeredCounterBlockScreen extends Screen {
 
     private void addTriggeredBlockEntry() {
         int newTriggeredBlockCounter = ItemUtils.parseInt(this.newTriggeredBlockCounterField.getText());
-        for (MutablePair<Integer, BlockPos> entry : this.triggeredBlocksList) {
+        for (MutablePair<Integer, MutablePair<BlockPos, Boolean>> entry : this.triggeredBlocksList) {
             if (entry.getLeft().equals(newTriggeredBlockCounter)) {
                 if (this.client != null && this.client.player != null) {
                     this.client.player.sendMessage(Text.translatable("gui.dialogue_block.entry_already_in_list"));
@@ -71,10 +74,13 @@ public class TriggeredCounterBlockScreen extends Screen {
         this.triggeredBlocksList.add(
                 new MutablePair<>(
                         ItemUtils.parseInt(this.newTriggeredBlockCounterField.getText()),
+                        new MutablePair<>(
                         new BlockPos(
                                 ItemUtils.parseInt(this.newTriggeredBlockPositionOffsetXField.getText()),
                                 ItemUtils.parseInt(this.newTriggeredBlockPositionOffsetYField.getText()),
                                 ItemUtils.parseInt(this.newTriggeredBlockPositionOffsetZField.getText())
+                        ),
+                                this.triggeredBlockResets
                         )
                 )
         );
@@ -113,18 +119,24 @@ public class TriggeredCounterBlockScreen extends Screen {
         this.removeListEntryButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteTriggeredBlockEntry(2)).dimensions(this.width / 2 + 54, 68, 100, 20).build());
         this.removeListEntryButton3 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteTriggeredBlockEntry(3)).dimensions(this.width / 2 + 54, 92, 100, 20).build());
         this.removeListEntryButton4 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteTriggeredBlockEntry(4)).dimensions(this.width / 2 + 54, 116, 100, 20).build());
-        this.newTriggeredBlockCounterField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 153, 75, 20, Text.translatable(""));
+        this.newTriggeredBlockCounterField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 153, 50, 20, Text.translatable(""));
         this.newTriggeredBlockCounterField.setPlaceholder(NEW_TRIGGERED_BLOCK_COUNTER_FIELD_PLACEHOLDER_TEXT);
         this.addSelectableChild(this.newTriggeredBlockCounterField);
-        this.newTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 75, 153, 75, 20, Text.translatable(""));
+        this.newTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 153, 50, 20, Text.translatable(""));
         this.newTriggeredBlockPositionOffsetXField.setPlaceholder(NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT);
         this.addSelectableChild(this.newTriggeredBlockPositionOffsetXField);
-        this.newTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 153, 75, 20, Text.translatable(""));
+        this.newTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 153, 50, 20, Text.translatable(""));
         this.newTriggeredBlockPositionOffsetYField.setPlaceholder(NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT);
         this.addSelectableChild(this.newTriggeredBlockPositionOffsetYField);
-        this.newTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 83, 153, 75, 20, Text.translatable(""));
+        this.newTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 8, 153, 50, 20, Text.translatable(""));
         this.newTriggeredBlockPositionOffsetZField.setPlaceholder(NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT);
         this.addSelectableChild(this.newTriggeredBlockPositionOffsetZField);
+
+        this.triggeredBlockResets = false;
+        this.toggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 62, 153, 100, 20, Text.empty(), (button, triggeredBlockResets) -> {
+            this.triggeredBlockResets = triggeredBlockResets;
+        }));
+
         this.addNewTriggeredBlockPositionOffsetButton = this.addDrawableChild(ButtonWidget.builder(ADD_BUTTON_LABEL_TEXT, button -> this.addTriggeredBlockEntry()).dimensions(this.width / 2 - 4 - 150, 177, 300, 20).build());
         this.saveButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 201, 150, 20).build());
         this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 201, 150, 20).build());
@@ -143,6 +155,7 @@ public class TriggeredCounterBlockScreen extends Screen {
         this.newTriggeredBlockPositionOffsetXField.setVisible(false);
         this.newTriggeredBlockPositionOffsetYField.setVisible(false);
         this.newTriggeredBlockPositionOffsetZField.setVisible(false);
+        this.toggleTriggeredBlockResetsButton.visible = false;
 
         this.addNewTriggeredBlockPositionOffsetButton.visible = false;
         this.saveButton.visible = false;
@@ -168,6 +181,7 @@ public class TriggeredCounterBlockScreen extends Screen {
         this.newTriggeredBlockPositionOffsetXField.setVisible(true);
         this.newTriggeredBlockPositionOffsetYField.setVisible(true);
         this.newTriggeredBlockPositionOffsetZField.setVisible(true);
+        this.toggleTriggeredBlockResetsButton.visible = true;
 
         this.addNewTriggeredBlockPositionOffsetButton.visible = true;
         this.saveButton.visible = true;
@@ -176,7 +190,7 @@ public class TriggeredCounterBlockScreen extends Screen {
 
     @Override
     public void resize(MinecraftClient client, int width, int height) {
-        List<MutablePair<Integer, BlockPos>> list = new ArrayList<>(this.triggeredBlocksList);
+        List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> list = new ArrayList<>(this.triggeredBlocksList);
         String string = this.newTriggeredBlockCounterField.getText();
         String string1 = this.newTriggeredBlockPositionOffsetXField.getText();
         String string2 = this.newTriggeredBlockPositionOffsetYField.getText();
@@ -252,7 +266,7 @@ public class TriggeredCounterBlockScreen extends Screen {
 //            context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
             context.drawTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 0, 0, 6, 7);
         }
-        context.drawTextWithShadow(this.textRenderer, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 74, 140, 0xA0A0A0);
+        context.drawTextWithShadow(this.textRenderer, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 99, 140, 0xA0A0A0);
         this.newTriggeredBlockCounterField.render(context, mouseX, mouseY, delta);
         this.newTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
         this.newTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);

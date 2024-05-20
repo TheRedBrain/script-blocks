@@ -10,6 +10,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTriggeredAdvancementCheckerBlockPacket> {
     @Override
@@ -23,7 +24,11 @@ public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements Ser
 
         BlockPos firstTriggeredBlockPositionOffset = packet.firstTriggeredBlockPositionOffset;
 
+        boolean firstTriggeredBlockResets = packet.firstTriggeredBlockResets;
+
         BlockPos secondTriggeredBlockPositionOffset = packet.secondTriggeredBlockPositionOffset;
+
+        boolean secondTriggeredBlockResets = packet.secondTriggeredBlockResets;
 
         String checkedAdvancementIdentifier = packet.checkedAdvancementIdentifier;
 
@@ -35,14 +40,8 @@ public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements Ser
         BlockState blockState = world.getBlockState(triggeredAdvancementCheckerBlockPosition);
 
         if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity) {
-            if (!triggeredAdvancementCheckerBlockEntity.setFirstTriggeredBlockPositionOffset(firstTriggeredBlockPositionOffset)) {
-                player.sendMessage(Text.translatable("triggered_advancement_checker_block.firstTriggeredBlockPositionOffset.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!triggeredAdvancementCheckerBlockEntity.setSecondTriggeredBlockPositionOffset(secondTriggeredBlockPositionOffset)) {
-                player.sendMessage(Text.translatable("triggered_advancement_checker_block.secondTriggeredBlockPositionOffset.invalid"), false);
-                updateSuccessful = false;
-            }
+            triggeredAdvancementCheckerBlockEntity.setFirstTriggeredBlock(new MutablePair<>(firstTriggeredBlockPositionOffset, firstTriggeredBlockResets));
+            triggeredAdvancementCheckerBlockEntity.setSecondTriggeredBlock(new MutablePair<>(secondTriggeredBlockPositionOffset, secondTriggeredBlockResets));
             if (!triggeredAdvancementCheckerBlockEntity.setCheckedAdvancementIdentifier(checkedAdvancementIdentifier)) {
                 player.sendMessage(Text.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
                 updateSuccessful = false;

@@ -33,9 +33,9 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
             dialogueUsedBlocksMap.put(usedBlock.getLeft(), usedBlock.getRight());
         }
 
-        List<MutablePair<String, BlockPos>> dialogueTriggeredBlocksList = packet.dialogueTriggeredBlocksList;
-        HashMap<String, BlockPos> dialogueTriggeredBlocksMap = new HashMap<>();
-        for (MutablePair<String, BlockPos> triggeredBlock : dialogueTriggeredBlocksList) {
+        List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = packet.dialogueTriggeredBlocksList;
+        HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocksMap = new HashMap<>();
+        for (MutablePair<String, MutablePair<BlockPos, Boolean>> triggeredBlock : dialogueTriggeredBlocksList) {
             dialogueTriggeredBlocksMap.put(triggeredBlock.getLeft(), triggeredBlock.getRight());
         }
 

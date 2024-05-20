@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
@@ -25,9 +26,13 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
     private TextFieldWidget firstTriggeredBlockPositionOffsetXField;
     private TextFieldWidget firstTriggeredBlockPositionOffsetYField;
     private TextFieldWidget firstTriggeredBlockPositionOffsetZField;
+    private CyclingButtonWidget<Boolean> toggleFirstTriggeredBlockResetsButton;
+    private boolean firstTriggeredBlockResets;
     private TextFieldWidget secondTriggeredBlockPositionOffsetXField;
     private TextFieldWidget secondTriggeredBlockPositionOffsetYField;
     private TextFieldWidget secondTriggeredBlockPositionOffsetZField;
+    private CyclingButtonWidget<Boolean> toggleSecondTriggeredBlockResetsButton;
+    private boolean secondTriggeredBlockResets;
     private TextFieldWidget checkedAdvancementIdentifierField;
 
     public TriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock) {
@@ -47,31 +52,41 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 
     @Override
     protected void init() {
-        this.firstTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 70, 100, 20, Text.translatable(""));
+        this.firstTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 70, 50, 20, Text.empty());
         this.firstTriggeredBlockPositionOffsetXField.setMaxLength(128);
-        this.firstTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlockPositionOffset().getX()));
+        this.firstTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlock().getLeft().getX()));
         this.addSelectableChild(this.firstTriggeredBlockPositionOffsetXField);
-        this.firstTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 70, 100, 20, Text.translatable(""));
+        this.firstTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 70, 50, 20, Text.empty());
         this.firstTriggeredBlockPositionOffsetYField.setMaxLength(128);
-        this.firstTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlockPositionOffset().getY()));
+        this.firstTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlock().getLeft().getY()));
         this.addSelectableChild(this.firstTriggeredBlockPositionOffsetYField);
-        this.firstTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 70, 100, 20, Text.translatable(""));
+        this.firstTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 70, 50, 20, Text.empty());
         this.firstTriggeredBlockPositionOffsetZField.setMaxLength(128);
-        this.firstTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlockPositionOffset().getZ()));
+        this.firstTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlock().getLeft().getZ()));
         this.addSelectableChild(this.firstTriggeredBlockPositionOffsetZField);
-        this.secondTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 105, 100, 20, Text.translatable(""));
+        this.firstTriggeredBlockResets = this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlock().getRight();
+        this.toggleFirstTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.firstTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 70, 150, 20, Text.empty(), (button, firstTriggeredBlockResets) -> {
+            this.firstTriggeredBlockResets = firstTriggeredBlockResets;
+        }));
+
+        this.secondTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 105, 50, 20, Text.empty());
         this.secondTriggeredBlockPositionOffsetXField.setMaxLength(128);
-        this.secondTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlockPositionOffset().getX()));
+        this.secondTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlock().getLeft().getX()));
         this.addSelectableChild(this.secondTriggeredBlockPositionOffsetXField);
-        this.secondTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 105, 100, 20, Text.translatable(""));
+        this.secondTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 105, 50, 20, Text.empty());
         this.secondTriggeredBlockPositionOffsetYField.setMaxLength(128);
-        this.secondTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlockPositionOffset().getY()));
+        this.secondTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlock().getLeft().getY()));
         this.addSelectableChild(this.secondTriggeredBlockPositionOffsetYField);
-        this.secondTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 105, 100, 20, Text.translatable(""));
+        this.secondTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 105, 50, 20, Text.empty());
         this.secondTriggeredBlockPositionOffsetZField.setMaxLength(128);
-        this.secondTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlockPositionOffset().getZ()));
+        this.secondTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlock().getLeft().getZ()));
         this.addSelectableChild(this.secondTriggeredBlockPositionOffsetZField);
-        this.checkedAdvancementIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 140, 300, 20, Text.translatable(""));
+        this.secondTriggeredBlockResets = this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlock().getRight();
+        this.toggleSecondTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.secondTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 105, 150, 20, Text.empty(), (button, secondTriggeredBlockResets) -> {
+            this.secondTriggeredBlockResets = secondTriggeredBlockResets;
+        }));
+
+        this.checkedAdvancementIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 140, 300, 20, Text.empty());
         this.checkedAdvancementIdentifierField.setMaxLength(128);
         this.checkedAdvancementIdentifierField.setText(this.triggeredAdvancementCheckerBlock.getCheckedAdvancementIdentifier());
         this.addSelectableChild(this.checkedAdvancementIdentifierField);
@@ -89,6 +104,8 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
         String string4 = this.secondTriggeredBlockPositionOffsetYField.getText();
         String string5 = this.secondTriggeredBlockPositionOffsetZField.getText();
         String string6 = this.checkedAdvancementIdentifierField.getText();
+        boolean bl = this.firstTriggeredBlockResets;
+        boolean bl2 = this.secondTriggeredBlockResets;
         this.init(client, width, height);
         this.firstTriggeredBlockPositionOffsetXField.setText(string);
         this.firstTriggeredBlockPositionOffsetYField.setText(string1);
@@ -97,6 +114,8 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
         this.secondTriggeredBlockPositionOffsetYField.setText(string4);
         this.secondTriggeredBlockPositionOffsetZField.setText(string5);
         this.checkedAdvancementIdentifierField.setText(string6);
+        this.firstTriggeredBlockResets = bl;
+        this.secondTriggeredBlockResets = bl2;
     }
 
     private boolean updateTriggeredAdvancementCheckerBlock() {
@@ -107,11 +126,13 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
                         ItemUtils.parseInt(this.firstTriggeredBlockPositionOffsetYField.getText()),
                         ItemUtils.parseInt(this.firstTriggeredBlockPositionOffsetZField.getText())
                 ),
+                this.firstTriggeredBlockResets,
                 new BlockPos(
                         ItemUtils.parseInt(this.secondTriggeredBlockPositionOffsetXField.getText()),
                         ItemUtils.parseInt(this.secondTriggeredBlockPositionOffsetYField.getText()),
                         ItemUtils.parseInt(this.secondTriggeredBlockPositionOffsetZField.getText())
                 ),
+                this.secondTriggeredBlockResets,
                 this.checkedAdvancementIdentifierField.getText()
         ));
         return true;
