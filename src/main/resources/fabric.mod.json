@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "scriptblocks",
-	"version": "1.0.0",
+	"version": "${version}",
 
 	"name": "Script Blocks",
 	"description": "Adds various blocks and mechanics which assist map makers and dungeon builders.",
@@ -9,7 +9,7 @@
 		"TheRedBrain"
 	],
 	"contact": {
-		"sources": "https://github.com/TheRedBrain/scriptblocks"
+		"sources": "https://github.com/TheRedBrain/script-blocks"
 	},
 	"license": "MIT",
 	"environment": "*",
