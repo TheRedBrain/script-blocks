@@ -30,5 +30,6 @@ public class StatusEffectsRegistry {
         Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("edit_housing_resistance_effect"), EDIT_HOUSING_RESISTANCE_EFFECT);
         // utility effects
         Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("adventure_building_effect"), ADVENTURE_BUILDING_EFFECT);
+        Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("portal_resistance_effect"), PORTAL_RESISTANCE_EFFECT);
     }
 }

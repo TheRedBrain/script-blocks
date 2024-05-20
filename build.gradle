@@ -30,7 +30,7 @@ repositories {
 		url = 'https://maven.ladysnake.org/releases'
 	}
 
-	// Mixin Squared, Immersive Portals
+	// Immersive Portals
 	maven {
 		url 'https://jitpack.io'
 	}
@@ -97,6 +97,25 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}
+}
+
+import com.modrinth.minotaur.dependencies.ModDependency
+modrinth {
+	token = System.getenv("MODRINTH_TOKEN")
+	projectId = 'ubmgmYs9' // The ID of your Modrinth project. Slugs will not work.
+	versionNumber = mod_version
+	versionType = "alpha" // can also be "beta" or "alpha"
+	uploadFile = remapJar
+	gameVersions = ['1.20.1'] // An array of game versions the version supports
+	loaders = ['fabric']
+	dependencies = [
+			new ModDependency('P7dR8mSH', 'required'), // Fabric API
+			new ModDependency('9s6osm5g', 'required'), // Cloth Config
+			new ModDependency('zJpHMkdD', 'required'), // Immersive Portals
+			new ModDependency('K01OU20C', 'required'), // Cardinal Components
+			new ModDependency('7zlUOZvb', 'required') // Azure Lib
+	]
+	changelog = "${update_changelog}"
 }
 
 // configure the maven publication

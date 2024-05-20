@@ -13,13 +13,6 @@ import java.util.SortedSet;
 
 public class ItemUtils {
 
-    /**
-     * {@return whether this item should provide its attribute modifiers and if should be rendered}
-     */
-    public static boolean isUsable(ItemStack stack) {
-        return stack.getDamage() < stack.getMaxDamage() - 1/* || stack.isIn(Tags.EMPTY_HAND_WEAPONS)*/; // TODO
-    }
-
     public static ItemStack getItemStackFromVirtualItemStack(VirtualItemStack virtualItemStack) {
         NbtCompound nbt = new NbtCompound();
 
