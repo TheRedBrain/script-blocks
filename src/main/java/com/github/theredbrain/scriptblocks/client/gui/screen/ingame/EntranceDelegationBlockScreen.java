@@ -18,8 +18,8 @@ import net.minecraft.util.math.BlockPos;
 
 @Environment(value= EnvType.CLIENT)
 public class EntranceDelegationBlockScreen extends Screen {
-    private static final Text DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.location_controller_block.main_entrance.position_offset");
-    private static final Text DELEGATED_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.main_entrance.orientation");
+    private static final Text DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.entrance_delegation_block.entrance_position_offset");
+    private static final Text DELEGATED_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.entrance_delegation_block.entrance_orientation");
     private final EntranceDelegationBlockEntity entranceDelegationBlock;
     private TextFieldWidget mainEntrancePositionOffsetXField;
     private TextFieldWidget mainEntrancePositionOffsetYField;

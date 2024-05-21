@@ -46,6 +46,7 @@ import java.util.Optional;
 public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandler> {
     private static final Text ADD_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
     private static final Text REMOVE_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
+    private static final Text ENTRY_ALREADY_IN_LIST_TEXT = Text.translatable("gui.dialogue_block.entry_already_in_list");
     public static final Identifier BACKGROUND_218_197_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/generic_218_197_background.png");
     private static final Identifier SCROLL_BAR_BACKGROUND_8_35_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_35");
     private static final Identifier SCROLL_BAR_BACKGROUND_8_87_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_87");
@@ -233,7 +234,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
         for (MutablePair<String, BlockPos> entry : this.dialogueUsedBlocksList) {
             if (entry.getLeft().equals(newDialogueUsedBlockIdentifier)) {
                 if (this.client != null && this.client.player != null) {
-                    this.client.player.sendMessage(Text.translatable("gui.dialogue_block.entry_already_in_list"));
+                    this.client.player.sendMessage(ENTRY_ALREADY_IN_LIST_TEXT);
                 }
                 return;
             }
@@ -266,7 +267,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
         for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : this.dialogueTriggeredBlocksList) {
             if (entry.getLeft().equals(newDialogueTriggeredBlockIdentifier)) {
                 if (this.client != null && this.client.player != null) {
-                    this.client.player.sendMessage(Text.translatable("gui.dialogue_block.entry_already_in_list"));
+                    this.client.player.sendMessage(ENTRY_ALREADY_IN_LIST_TEXT);
                 }
                 return;
             }

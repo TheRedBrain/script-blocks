@@ -21,7 +21,7 @@ import net.minecraft.util.math.BlockPos;
 public class TriggeredAdvancementCheckerBlockScreen extends Screen {
     private static final Text FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_advancement_checker_block.first_triggered_block_position_offset_label");
     private static final Text SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_advancement_checker_block.second_triggered_block_position_offset_label");
-    private static final Text CHECKED_STATUS_EFFECT_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.triggered_advancement_checker_block.checked_status_effect_identifier_label");
+    private static final Text CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.triggered_advancement_checker_block.checked_advancement_identifier_label");
     private final TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock;
     private TextFieldWidget firstTriggeredBlockPositionOffsetXField;
     private TextFieldWidget firstTriggeredBlockPositionOffsetYField;
@@ -149,7 +149,7 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
         this.secondTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
         this.secondTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
         this.secondTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-        context.drawTextWithShadow(this.textRenderer, CHECKED_STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, 0xA0A0A0);
+        context.drawTextWithShadow(this.textRenderer, CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, 0xA0A0A0);
         this.checkedAdvancementIdentifierField.render(context, mouseX, mouseY, delta);
     }
 

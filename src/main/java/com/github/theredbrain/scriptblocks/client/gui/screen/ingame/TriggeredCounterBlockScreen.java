@@ -27,7 +27,7 @@ import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
 public class TriggeredCounterBlockScreen extends Screen {
-    private static final Text NEW_TRIGGERED_BLOCK_COUNTER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.newTriggeredBlockCounter.placeholder");
+    private static final Text NEW_TRIGGERED_BLOCK_COUNTER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_counter_block.counter_threshold.placeholder");
     private static final Text NEW_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.newTriggeredBlockPositionOffset");
     private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetX.placeholder");
     private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetY.placeholder");

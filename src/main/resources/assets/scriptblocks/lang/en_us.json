@@ -57,6 +57,30 @@
 	"gui.area_block.triggered_mode.once": "Gets triggered once.",
 
 
+	"gui.dialogue_block.entry_already_in_list": "Entry already in list",
+
+
+	"gui.entrance_delegation_block.entrance_position_offset": "Entrance Position Offset",
+	"gui.entrance_delegation_block.entrance_orientation": "Entrance Yaw/Pitch",
+
+
+	"gui.entity_attribute_modifier.operation.addition": "Addition",
+	"gui.entity_attribute_modifier.operation.multiply_base": "Multiply Base",
+	"gui.entity_attribute_modifier.operation.multiply_total": "Multiply Total",
+	"gui.entity_attribute_modifier.operation.0": "Addition",
+	"gui.entity_attribute_modifier.operation.1": "Multiply Base",
+	"gui.entity_attribute_modifier.operation.2": "Multiply Total",
+
+
+	"gui.triggered_advancement_checker_block.first_triggered_block_position_offset_label": "First Triggered Block Position Offset",
+	"gui.triggered_advancement_checker_block.second_triggered_block_position_offset_label": "Second Triggered Block Position Offset",
+	"gui.triggered_advancement_checker_block.checked_advancement_identifier_label": "Checked Advancement Identifier",
+
+
+
+	"gui.triggered_counter_block.counter_threshold.placeholder": "Threshold",
+
+
 	"gui.triggered_message_block.toggle_show_message_area_button_label.on": "Show Message Area: On",
 	"gui.triggered_message_block.toggle_show_message_area_button_label.off": "Show Message Area: Off",
 	"gui.triggered_message_block.message_area_dimensions_label": "Activation Area Dimensions",
@@ -68,6 +92,9 @@
 	"gui.triggered_message_block.trigger_mode.once": "Trigger Mode: Once",
 
 
+	"gui.use_relay_block.relayBlockPositionOffset": "Relay Block Position Offset",
+
+
 	"gui.housing_screen.creativeScreenPage.influence": "Influence Settings",
 	"gui.housing_screen.creativeScreenPage.entrance": "Entrance Settings",
 	"gui.housing_screen.creativeScreenPage.triggered_block": "Triggered Block Settings",
@@ -75,6 +102,8 @@
 
 	"gui.housing_block.ownerMode.dimension_owner": "Dimension Owner",
 	"gui.housing_block.ownerMode.interaction": "Interaction",
+
+	"gui.housing_block.reset_owner_button_label": "Reset Owner",
 
 	"gui.housing_screen.not_in_a_house": "You are not in a house",
 
@@ -240,19 +269,25 @@
 	"gui.teleporter_block.teleportButtonLabel.tooltip": "Label of left Button in Adventure GUI",
 	"gui.teleporter_block.cancelTeleportButtonLabel.tooltip": "Label of right Button in Adventure GUI",
 
+	"gui.teleporter_block.location_already_in_list": "Location is already in the list",
 
-	"gui.location_controller_block.main_entrance.position_offset": "Main Entrance Position",
+
+	"gui.location_controller_block.main_entrance.position_offset": "Main Entrance Position Offset",
 	"gui.location_controller_block.main_entrance.orientation": "Yaw/Pitch",
 	"gui.location_controller_block.toggle_should_always_reset_button_label.on": "Always reset when entered: True",
 	"gui.location_controller_block.toggle_should_always_reset_button_label.off": "Always reset when entered: False",
 
-	"gui.location_controller_block.new_side_entrance.position_offset": "New Side Entrance Position",
+	"gui.location_controller_block.new_side_entrance.position_offset": "New Side Entrance Position Offset",
 	"gui.location_controller_block.new_side_entrance.name": "Name",
 	"gui.location_controller_block.new_side_entrance.orientation": "Yaw/Pitch",
 
 	"gui.location_controller_block.screenPage.main_entrance": "Main Entrance",
 	"gui.location_controller_block.screenPage.side_entrances": "Side Entrances",
 	"gui.location_controller_block.screenPage.triggered_block": "Triggered Block",
+
+
+	"gui.mimic_block.activeMimicBlockPositionOffset": "Active Mimic Block Position Offset",
+	"gui.mimic_block.inactiveMimicBlockPositionOffset": "Inactive Mimic Block Position Offset",
 
 
 	"gui.dialogue_screen.item_cost_too_high": "You don't have the required items!",
