@@ -17,7 +17,7 @@ public class StatusEffectsRegistry {
     public static final StatusEffect EDIT_HOUSING_RESISTANCE_EFFECT = new NeutralStatusEffect();
     //endregion housing effects
 
-    public static final StatusEffect ADVENTURE_BUILDING_EFFECT = new NeutralStatusEffect();
+    public static final StatusEffect BUILDING_MODE = new NeutralStatusEffect();
     public static final StatusEffect PORTAL_RESISTANCE_EFFECT = new NeutralStatusEffect();
 
     public static void registerEffects() {
@@ -29,7 +29,7 @@ public class StatusEffectsRegistry {
         Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("housing_stranger_effect"), HOUSING_STRANGER_EFFECT);
         Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("edit_housing_resistance_effect"), EDIT_HOUSING_RESISTANCE_EFFECT);
         // utility effects
-        Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("adventure_building_effect"), ADVENTURE_BUILDING_EFFECT);
+        Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("building_mode"), BUILDING_MODE);
         Registry.register(Registries.STATUS_EFFECT, ScriptBlocksMod.identifier("portal_resistance_effect"), PORTAL_RESISTANCE_EFFECT);
     }
 }

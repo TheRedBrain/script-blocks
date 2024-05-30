@@ -372,7 +372,9 @@ public class RelayTriggerBlockScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         if (this.selectionMode == RelayTriggerBlockEntity.SelectionMode.AREA) {
 
             context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
@@ -406,6 +408,8 @@ public class RelayTriggerBlockScreen extends Screen {
 
             this.triggerAmountField.render(context, mouseX, mouseY, delta);
         }
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

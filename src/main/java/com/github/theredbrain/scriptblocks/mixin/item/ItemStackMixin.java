@@ -42,7 +42,7 @@ public abstract class ItemStackMixin {
         BlockPos blockPos = context.getBlockPos();
 
         CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(context.getWorld(), blockPos, false);
-        if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(StatusEffectsRegistry.ADVENTURE_BUILDING_EFFECT)/* && !bl*/ && !this.canPlaceOn(context.getWorld().getRegistryManager().get(RegistryKeys.BLOCK), cachedBlockPosition)) {
+        if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)/* && !bl*/ && !this.canPlaceOn(context.getWorld().getRegistryManager().get(RegistryKeys.BLOCK), cachedBlockPosition)) {
             return ActionResult.PASS;
         }
         Item item = this.getItem();

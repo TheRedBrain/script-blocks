@@ -17,6 +17,10 @@
 	"gui.edit_teleporter_title": "Edit Teleporter",
 
 
+	"effect.scriptblocks.building_mode": "Building Mode",
+	"effect.scriptblocks.building_mode.description": "Unleash your creativity.",
+
+
 	"gui.area_block.triggered_true_label": "Triggered Override: True",
 	"gui.area_block.triggered_false_label": "Triggered Override: False",
 	"gui.area_block.hide_area_label": "Hide Area",

@@ -35,7 +35,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
     @Inject(method = "processBlockBreakingAction", at = @At("HEAD"), cancellable = true)
     public void processBlockBreakingAction(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
         if (action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
-            if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.ADVENTURE_BUILDING_EFFECT)) {
+            if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
                 this.finishMining(pos, sequence, "creative destroy");
                 ci.cancel();
             }
@@ -45,7 +45,7 @@ public abstract class ServerPlayerInteractionManagerMixin {
 
     @Inject(method = "tryBreakBlock", at = @At("HEAD"), cancellable = true)
     public void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.ADVENTURE_BUILDING_EFFECT)) {
+        if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
             BlockState blockState = this.world.getBlockState(pos);
             BlockEntity blockEntity = this.world.getBlockEntity(pos);
             Block block = blockState.getBlock();

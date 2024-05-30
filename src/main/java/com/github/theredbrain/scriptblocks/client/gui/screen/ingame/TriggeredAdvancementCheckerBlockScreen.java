@@ -140,7 +140,9 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         context.drawTextWithShadow(this.textRenderer, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 60, 0xA0A0A0);
         this.firstTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
         this.firstTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
@@ -151,6 +153,8 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
         this.secondTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
         context.drawTextWithShadow(this.textRenderer, CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, 0xA0A0A0);
         this.checkedAdvancementIdentifierField.render(context, mouseX, mouseY, delta);
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

@@ -1088,7 +1088,9 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         if (this.showCreativeTab) {
             if (this.creativeScreenPage == CreativeScreenPage.ACTIVATION) {
                 context.drawTextWithShadow(this.textRenderer, ACTIVATION_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
@@ -1223,6 +1225,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 //                }
             }
         }
+
+        super.render(context, mouseX, mouseY, delta);
 //        context.drawTextWithShadow(this.textRenderer, CONSUME_KEY_ITEMSTACK_LABEL_TEXT, this.width / 2 - 153, 221, 0x404040);
     }
 

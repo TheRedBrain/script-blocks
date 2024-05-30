@@ -316,7 +316,7 @@ public class HousingScreen extends Screen {
 
         boolean isAdventureBuilding = false;
         if (this.client != null && this.client.player != null) {
-            isAdventureBuilding = this.client.player.hasStatusEffect(StatusEffectsRegistry.ADVENTURE_BUILDING_EFFECT);
+            isAdventureBuilding = this.client.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE);
         }
         this.toggleAdventureBuildingEffectButton = this.addDrawableChild(ButtonWidget.builder(isAdventureBuilding ? TOGGLE_ADVENTURE_BUILDING_OFF_BUTTON_LABEL_TEXT : TOGGLE_ADVENTURE_BUILDING_ON_BUTTON_LABEL_TEXT, button -> this.toggleAdventureBuildingEffect()).dimensions(this.x + 7, this.y + 20, this.backgroundWidth - 14, 20).build());
 
@@ -762,7 +762,9 @@ public class HousingScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         if (this.showCreativeTab) {
             if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
                 context.drawTextWithShadow(this.textRenderer, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
@@ -840,6 +842,8 @@ public class HousingScreen extends Screen {
                 }
             }
         }
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
@@ -909,7 +913,7 @@ public class HousingScreen extends Screen {
 
     private void toggleAdventureBuildingEffect() {
         ClientPlayNetworking.send(new AddStatusEffectPacket(
-                Registries.STATUS_EFFECT.getId(StatusEffectsRegistry.ADVENTURE_BUILDING_EFFECT),
+                Registries.STATUS_EFFECT.getId(StatusEffectsRegistry.BUILDING_MODE),
                 -1,
                 0,
                 false,

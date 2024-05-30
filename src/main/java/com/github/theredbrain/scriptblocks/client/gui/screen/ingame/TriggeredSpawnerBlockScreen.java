@@ -632,7 +632,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-        super.render(context, mouseX, mouseY, delta);
+        this.renderBackground(context);
 
         if (this.showSpawnerBoundEntityConfigScreen) {
 
@@ -711,6 +711,8 @@ public class TriggeredSpawnerBlockScreen extends Screen {
                 this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
             }
         }
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

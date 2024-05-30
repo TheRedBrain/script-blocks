@@ -336,7 +336,9 @@ public class AreaBlockScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         if (this.screenPage == ScreenPage.AREA) {
             context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
             this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
@@ -370,6 +372,8 @@ public class AreaBlockScreen extends Screen {
                 context.drawTextWithShadow(this.textRenderer, POST_TIMER_LABEL_TEXT, i, 167, 0xA0A0A0);
             }
         }
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

@@ -255,7 +255,9 @@ public class TriggeredCounterBlockScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.triggeredBlocksList.size()); i++) {
             context.drawTextWithShadow(this.textRenderer, this.triggeredBlocksList.get(i).toString(), this.width / 2 - 141, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
         }
@@ -271,6 +273,8 @@ public class TriggeredCounterBlockScreen extends Screen {
         this.newTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
         this.newTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
         this.newTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

@@ -287,7 +287,9 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         if (this.showCreativeScreen) {
             this.shopIdentifierField.render(context, mouseX, mouseY, delta);
         } else {
@@ -328,6 +330,8 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
                 context.drawTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 0, 0, 6, 7);
             }
         }
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

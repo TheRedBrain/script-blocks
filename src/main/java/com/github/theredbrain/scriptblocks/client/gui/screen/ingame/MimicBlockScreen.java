@@ -114,7 +114,9 @@ public class MimicBlockScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+
+        this.renderBackground(context);
+
         context.drawTextWithShadow(this.textRenderer, ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 71, 0xA0A0A0);
         this.activeMimicBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
         this.activeMimicBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
@@ -124,6 +126,8 @@ public class MimicBlockScreen extends Screen {
         this.inactiveMimicBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
         this.inactiveMimicBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
         this.inactiveMimicBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
