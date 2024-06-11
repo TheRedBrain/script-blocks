@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.client.gui.screen.ingame.DialogueBloc
 import com.github.theredbrain.scriptblocks.client.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.client.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.client.render.block.entity.*;
+import com.github.theredbrain.scriptblocks.client.render.renderer.BossEntityRenderer;
 import com.github.theredbrain.scriptblocks.client.render.renderer.SpawnerBoundEntityRenderer;
 import com.github.theredbrain.scriptblocks.client.render.renderer.SpawnerBoundVillagerEntityRenderer;
 import com.github.theredbrain.scriptblocks.config.ClientConfig;
@@ -76,6 +77,7 @@ public class ScriptBlocksModClient implements ClientModInitializer {
 	}
 
 	private void registerEntityRenderer() {
+		EntityRendererRegistry.register(EntityRegistry.BOSS_ENTITY, BossEntityRenderer::new);
 		EntityRendererRegistry.register(EntityRegistry.SPAWNER_BOUND_ENTITY, SpawnerBoundEntityRenderer::new);
 		EntityRendererRegistry.register(EntityRegistry.SPAWNER_BOUND_VILLAGER_ENTITY, SpawnerBoundVillagerEntityRenderer::new);
 	}

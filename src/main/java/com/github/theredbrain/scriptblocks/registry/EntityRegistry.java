@@ -2,9 +2,11 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.entity.*;
+import com.github.theredbrain.scriptblocks.entity.mob.BossEntity;
 import com.github.theredbrain.scriptblocks.entity.mob.SpawnerBoundEntity;
 import com.github.theredbrain.scriptblocks.entity.passive.SpawnerBoundVillagerEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityDimensions;
@@ -15,6 +17,9 @@ import net.minecraft.registry.Registry;
 
 public class EntityRegistry {
 
+    public static final EntityType<BossEntity> BOSS_ENTITY = Registry.register(Registries.ENTITY_TYPE,
+            ScriptBlocksMod.identifier("boss_entity"),
+            FabricEntityTypeBuilder.create(SpawnGroup.MISC, BossEntity::new).dimensions(new EntityDimensions(0.6F, 1.8F, false)).build());
     public static final EntityType<SpawnerBoundEntity> SPAWNER_BOUND_ENTITY = Registry.register(Registries.ENTITY_TYPE,
             ScriptBlocksMod.identifier("spawner_bound_entity"),
             FabricEntityTypeBuilder.create(SpawnGroup.MISC, SpawnerBoundEntity::new).dimensions(new EntityDimensions(0.6F, 1.8F, false)).build());
@@ -68,6 +73,9 @@ public class EntityRegistry {
     public static final BlockEntityType<AreaBlockEntity> AREA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
             ScriptBlocksMod.identifier("area_block"),
             FabricBlockEntityTypeBuilder.create(AreaBlockEntity::new, BlockRegistry.AREA_BLOCK).build());
+    public static final BlockEntityType<BossControllerBlockEntity> BOSS_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+            ScriptBlocksMod.identifier("boss_controller_block"),
+            FabricBlockEntityTypeBuilder.create(BossControllerBlockEntity::new, BlockRegistry.BOSS_CONTROLLER_BLOCK).build());
     public static final BlockEntityType<TriggeredAdvancementCheckerBlockEntity> TRIGGERED_ADVANCEMENT_CHECKER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
             ScriptBlocksMod.identifier("triggered_advancement_checker_block"),
             FabricBlockEntityTypeBuilder.create(TriggeredAdvancementCheckerBlockEntity::new, BlockRegistry.TRIGGERED_ADVANCEMENT_CHECKER_BLOCK).build());
@@ -107,5 +115,11 @@ public class EntityRegistry {
     //endregion Script Blocks
 
     public static void init() {
+    }
+
+    public static void registerEntityAttributes() {
+        FabricDefaultAttributeRegistry.register(EntityRegistry.SPAWNER_BOUND_ENTITY, SpawnerBoundEntity.createLivingAttributes());
+        FabricDefaultAttributeRegistry.register(EntityRegistry.SPAWNER_BOUND_VILLAGER_ENTITY, SpawnerBoundVillagerEntity.createMobAttributes());
+        FabricDefaultAttributeRegistry.register(EntityRegistry.BOSS_ENTITY, BossEntity.createLivingAttributes());
     }
 }

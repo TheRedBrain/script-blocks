@@ -32,11 +32,13 @@ public class ScriptBlocksMod implements ModInitializer {
 		// Registry
 		BlockRegistry.init();
 		EntityRegistry.init();
+		EntityRegistry.registerEntityAttributes();
 		DimensionsManager.init();
 		EventsRegistry.initializeEvents();
 		DialoguesRegistry.init();
 		DialogueAnswersRegistry.init();
 		ShopsRegistry.init();
+		BossesRegistry.init();
 		LocationsRegistry.init();
 		ItemRegistry.init();
 		ItemGroupRegistry.init();

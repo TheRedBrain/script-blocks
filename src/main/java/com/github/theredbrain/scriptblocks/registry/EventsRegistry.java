@@ -18,6 +18,7 @@ public class EventsRegistry {
             sender.sendPacket(ServerPacketRegistry.SYNC_DIALOGUE_ANSWERS, DialogueAnswersRegistry.getEncodedRegistry()); // TODO convert to packet
             sender.sendPacket(ServerPacketRegistry.SYNC_LOCATIONS, LocationsRegistry.getEncodedRegistry()); // TODO convert to packet
             sender.sendPacket(ServerPacketRegistry.SYNC_SHOPS, ShopsRegistry.getEncodedRegistry()); // TODO convert to packet
+            sender.sendPacket(ServerPacketRegistry.SYNC_BOSSES, BossesRegistry.getEncodedRegistry()); // TODO convert to packet
         });
     }
 

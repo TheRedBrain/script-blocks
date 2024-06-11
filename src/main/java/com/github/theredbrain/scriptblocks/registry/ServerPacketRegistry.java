@@ -22,6 +22,7 @@ public class ServerPacketRegistry {
     public static final Identifier SYNC_DIALOGUE_ANSWERS = ScriptBlocksMod.identifier("sync_dialogue_answers");
     public static final Identifier SYNC_LOCATIONS = ScriptBlocksMod.identifier("sync_locations");
     public static final Identifier SYNC_SHOPS = ScriptBlocksMod.identifier("sync_shops");
+    public static final Identifier SYNC_BOSSES = ScriptBlocksMod.identifier("sync_bosses");
 //    public static final Identifier SYNC_WEAPON_POSES = ScriptBlocksMod.identifier("sync_weapon_poses");
 
     public static void init() {
@@ -77,6 +78,8 @@ public class ServerPacketRegistry {
 //        ServerPlayNetworking.registerGlobalReceiver(UpdateMannequinModelPartsPacket.TYPE, new UpdateMannequinModelPartsPacketReceiver());
 //
 //        ServerPlayNetworking.registerGlobalReceiver(ExportImportMannequinEquipmentPacket.TYPE, new ExportImportMannequinEquipmentPacketReceiver());
+
+        ServerPlayNetworking.registerGlobalReceiver(UpdateBossControllerBlockPacket.TYPE, new UpdateBossControllerBlockPacketReceiver());
 
         ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredSpawnerBlockPacket.TYPE, new UpdateTriggeredSpawnerBlockPacketReceiver());
 
