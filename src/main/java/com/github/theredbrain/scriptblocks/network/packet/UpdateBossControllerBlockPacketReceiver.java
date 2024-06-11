@@ -64,15 +64,15 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
                 player.sendMessage(Text.translatable("shop_block.bossIdentifier.invalid"), false);
                 updateSuccessful = false;
             }
-            if (!bossControllerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset)) {
+            if (!bossControllerBlockEntity.setBossSpawnPositionOffset(entitySpawnPositionOffset)) {
                 player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
                 updateSuccessful = false;
             }
-            if (!bossControllerBlockEntity.setEntitySpawnPositionPitch(entitySpawnOrientationPitch)) {
+            if (!bossControllerBlockEntity.setBossSpawnPositionPitch(entitySpawnOrientationPitch)) {
                 player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
                 updateSuccessful = false;
             }
-            if (!bossControllerBlockEntity.setEntitySpawnPositionYaw(entitySpawnOrientationYaw)) {
+            if (!bossControllerBlockEntity.setBossSpawnPositionYaw(entitySpawnOrientationYaw)) {
                 player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
                 updateSuccessful = false;
             }

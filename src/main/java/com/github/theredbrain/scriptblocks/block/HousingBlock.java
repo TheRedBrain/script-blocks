@@ -53,8 +53,8 @@ public class HousingBlock extends RotatedBlockWithEntity {
             ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).setValue(housingBlockEntity.getPos());
             if (world.isClient) {
                 ((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
-                return ActionResult.SUCCESS;
             }
+            return ActionResult.SUCCESS;
         }
         return ActionResult.PASS;
     }

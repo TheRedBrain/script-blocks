@@ -21,7 +21,7 @@ public class UpdateShopBlockPacketReceiver implements ServerPlayNetworking.PlayP
         }
 
         BlockPos shopBlockPosition = packet.shopBlockPosition;
-        String shopIdentifer = packet.shopIdentifier;
+        String shopIdentifier = packet.shopIdentifier;
 
         World world = player.getWorld();
 
@@ -32,8 +32,8 @@ public class UpdateShopBlockPacketReceiver implements ServerPlayNetworking.PlayP
 
         if (blockEntity instanceof ShopBlockEntity shopBlockEntity) {
 
-            if (!shopBlockEntity.setShopIdentifier(shopIdentifer)) {
-                player.sendMessage(Text.translatable("shop_block.shopIdentifer.invalid"), false);
+            if (!shopBlockEntity.setShopIdentifier(shopIdentifier)) {
+                player.sendMessage(Text.translatable("shop_block.shopIdentifier.invalid"), false);
                 updateSuccessful = false;
             }
             if (updateSuccessful) {

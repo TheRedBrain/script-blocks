@@ -199,20 +199,20 @@ public class BossControllerBlockScreen extends Screen {
         this.addSelectableChild(this.bossIdentifierField);
 
         this.entitySpawnPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 100, 20, Text.empty());
-        this.entitySpawnPositionOffsetXField.setText(Integer.toString(this.bossControllerBlock.getEntitySpawnPositionOffset().getX()));
+        this.entitySpawnPositionOffsetXField.setText(Integer.toString(this.bossControllerBlock.getBossSpawnPositionOffset().getX()));
         this.addSelectableChild(this.entitySpawnPositionOffsetXField);
         this.entitySpawnPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 90, 100, 20, Text.empty());
-        this.entitySpawnPositionOffsetYField.setText(Integer.toString(this.bossControllerBlock.getEntitySpawnPositionOffset().getY()));
+        this.entitySpawnPositionOffsetYField.setText(Integer.toString(this.bossControllerBlock.getBossSpawnPositionOffset().getY()));
         this.addSelectableChild(this.entitySpawnPositionOffsetYField);
         this.entitySpawnPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 90, 100, 20, Text.empty());
-        this.entitySpawnPositionOffsetZField.setText(Integer.toString(this.bossControllerBlock.getEntitySpawnPositionOffset().getZ()));
+        this.entitySpawnPositionOffsetZField.setText(Integer.toString(this.bossControllerBlock.getBossSpawnPositionOffset().getZ()));
         this.addSelectableChild(this.entitySpawnPositionOffsetZField);
 
         this.entitySpawnOrientationPitchField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 150, 20, Text.empty());
-        this.entitySpawnOrientationPitchField.setText(Double.toString(this.bossControllerBlock.getEntitySpawnOrientationPitch()));
+        this.entitySpawnOrientationPitchField.setText(Double.toString(this.bossControllerBlock.getBossSpawnOrientationPitch()));
         this.addSelectableChild(this.entitySpawnOrientationPitchField);
         this.entitySpawnOrientationYawField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 125, 150, 20, Text.empty());
-        this.entitySpawnOrientationYawField.setText(Double.toString(this.bossControllerBlock.getEntitySpawnOrientationYaw()));
+        this.entitySpawnOrientationYawField.setText(Double.toString(this.bossControllerBlock.getBossSpawnOrientationYaw()));
         this.addSelectableChild(this.entitySpawnOrientationYawField);
 
         // --- boss triggered blocks page ---

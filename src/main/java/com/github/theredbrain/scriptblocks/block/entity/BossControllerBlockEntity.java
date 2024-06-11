@@ -10,12 +10,16 @@ import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -61,10 +65,12 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
     private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
 
     private String bossIdentifier = "";
-    
+
     private BlockPos bossSpawnPositionOffset = new BlockPos(0, 1, 0);
     private double bossSpawnOrientationPitch = 0.0;
     private double bossSpawnOrientationYaw = 0.0;
+
+    Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
     private HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks = new HashMap<>();
 
@@ -74,7 +80,6 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         this.phaseTimer = 0;
         this.currentPhaseId = -1;
         this.currentPhase = null;
-//        this.setEntityType(bC.boss.bossEntityTypeId());
     }
 
     public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -147,16 +152,16 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             nbt.remove("areaPositionOffsetZ");
         }
 
-        if (!this.bossIdentifier.equals("")) {
+        if (!this.bossIdentifier.isEmpty()) {
             nbt.putString("bossIdentifier", this.bossIdentifier);
         }
 
-        nbt.putInt("entitySpawnPositionOffsetX", this.bossSpawnPositionOffset.getX());
-        nbt.putInt("entitySpawnPositionOffsetY", this.bossSpawnPositionOffset.getY());
-        nbt.putInt("entitySpawnPositionOffsetZ", this.bossSpawnPositionOffset.getZ());
+        nbt.putInt("bossSpawnPositionOffsetX", this.bossSpawnPositionOffset.getX());
+        nbt.putInt("bossSpawnPositionOffsetY", this.bossSpawnPositionOffset.getY());
+        nbt.putInt("bossSpawnPositionOffsetZ", this.bossSpawnPositionOffset.getZ());
 
-        nbt.putDouble("entitySpawnOrientationPitch", this.bossSpawnOrientationPitch);
-        nbt.putDouble("entitySpawnOrientationYaw", this.bossSpawnOrientationYaw);
+        nbt.putDouble("bossSpawnOrientationPitch", this.bossSpawnOrientationPitch);
+        nbt.putDouble("bossSpawnOrientationYaw", this.bossSpawnOrientationYaw);
 
         List<String> bossTriggeredBlocksKeys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
         nbt.putInt("bossTriggeredBlocksKeysSize", bossTriggeredBlocksKeys.size());
@@ -201,13 +206,13 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         }
 
         this.bossSpawnPositionOffset = new BlockPos(
-                MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetX"), -48, 48),
-                MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetY"), -48, 48),
-                MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetZ"), -48, 48)
+                MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetX"), -48, 48),
+                MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetY"), -48, 48),
+                MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetZ"), -48, 48)
         );
 
-        this.bossSpawnOrientationPitch = nbt.getDouble("entitySpawnOrientationPitch");
-        this.bossSpawnOrientationYaw = nbt.getDouble("entitySpawnOrientationYaw");
+        this.bossSpawnOrientationPitch = nbt.getDouble("bossSpawnOrientationPitch");
+        this.bossSpawnOrientationYaw = nbt.getDouble("bossSpawnOrientationYaw");
 
         this.bossTriggeredBlocks.clear();
         int bossTriggeredBlocksKeysSize = nbt.getInt("bossTriggeredBlocksKeysSize");
@@ -243,9 +248,11 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         if (!world.isClient && bC.currentPhase != null && bC.boss != null) {
             bC.globalTimer++;
             bC.phaseTimer++;
-            if (bC.currentPhase.globalTimerThreshold() >= bC.globalTimer) {
+            int globalTimerThreshold = bC.currentPhase.globalTimerThreshold();
+            int phaseTimerThreshold = bC.currentPhase.phaseTimerThreshold();
+            if (globalTimerThreshold > -1 && bC.globalTimer >= globalTimerThreshold) {
                 advancePhase(bC);
-            } else if (bC.currentPhase.phaseTimerThreshold() >= bC.phaseTimer) {
+            } else if (phaseTimerThreshold > -1 && bC.phaseTimer >= phaseTimerThreshold) {
                 advancePhase(bC);
             }
         }
@@ -287,12 +294,21 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
     private static void endBattle(BossControllerBlockEntity bC) {
         endPhase(bC);
         bC.currentPhase = null;
+        if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
+            Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
+            if (entity != null) {
+                entity.discard();
+            }
+            bC.bossEntityUuid = null;
+        }
     }
 
     private static void startPhase(BossControllerBlockEntity bC) {
         Boss.Phase phase = bC.currentPhase;
 
         ScriptBlocksMod.info("startPhase: " + phase.animationsIdentifierString());
+        bC.entityAttributeModifiers = getEntityAttributeModifiers(bC.currentPhase);
+
         // trigger block
         String triggeredBlock = phase.triggeredBlockAtStart();
         if (triggeredBlock != null) {
@@ -323,13 +339,22 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             }
         }
 
-        // modify boss entity TODO
+        // modify boss entity
         if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
             Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
             if (entity instanceof BossEntity) {
                 ((BossEntity) entity).setAnimationIdentifierString(bC.currentPhase.animationsIdentifierString());
                 ((BossEntity) entity).setModelIdentifierString(bC.currentPhase.modelIdentifierString());
                 ((BossEntity) entity).setTextureIdentifierString(bC.currentPhase.textureIdentifierString());
+            }
+            if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
+                AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
+                bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
+                    EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
+                    if (entityAttributeInstance != null) {
+                        entityAttributeInstance.addPersistentModifier((EntityAttributeModifier) attributeModifier);
+                    }
+                });
             }
         }
     }
@@ -368,13 +393,38 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             }
         }
 
-        // modify boss entity TODO
+        // modify boss entity
+        if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
+            Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
+            if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
+                AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
+                bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
+                    EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
+                    if (entityAttributeInstance != null) {
+                        entityAttributeInstance.removeModifier(attributeModifier.getId());
+                    }
+                });
+            }
+        }
     }
 
-    public static void boosReachedHealthThreshold(int healthThreshold, BossControllerBlockEntity bC) {
+    public static void bossReachedHealthThreshold(int healthThreshold, BossControllerBlockEntity bC) {
 
     }
 
+    private static Multimap<EntityAttribute, EntityAttributeModifier> getEntityAttributeModifiers(Boss.Phase phase) {
+        Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+
+        for (Boss.Phase.EntityAttributeModifier entityAttributeModifier : phase.entityAttributeModifiers()) {
+            Optional<EntityAttribute> optional = Registries.ATTRIBUTE
+                    .getOrEmpty(Identifier.tryParse(entityAttributeModifier.identifier()));
+            if (optional.isPresent()) {
+                EntityAttribute key = optional.get();
+                entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.name(), entityAttributeModifier.value(), EntityAttributeModifier.Operation.fromId(entityAttributeModifier.operation())));
+            }
+        }
+        return entityAttributeModifiers;
+    }
 
     private static boolean spawnBossEntity(BossControllerBlockEntity bC) {
         if (bC.world instanceof ServerWorld serverWorld) {
@@ -386,7 +436,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             double d = (double) bC.pos.getX() + bC.bossSpawnPositionOffset.getX() + 0.5;
             double e = (double) bC.pos.getY() + bC.bossSpawnPositionOffset.getY();
             double f = (double) bC.pos.getZ() + bC.bossSpawnPositionOffset.getZ() + 0.5;
-            if (!serverWorld.isSpaceEmpty(optional.get().createSimpleBoundingBox(d, e, f))) return false;
+            if (!serverWorld.isSpaceEmpty(optional.get().createSimpleBoundingBox(d, e, f))) {
+                ScriptBlocksMod.info("not enough space for spawning");
+                return false;
+            }
             BlockPos blockPos = BlockPos.ofFloored(d, e, f);
             Entity entity2 = EntityType.loadEntityWithPassengers(bC.entityTypeCompound, bC.world, entity -> {
                 entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
@@ -402,32 +455,15 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             if (entity2 instanceof MobEntity) {
                 if (bC.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
                     NbtCompound entityNbt = new NbtCompound();
-                    ((MobEntity)entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, entityNbt);
+                    ((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, entityNbt);
                 }
             }
             if (entity2 instanceof BossEntity) {
                 ((BossEntity) entity2).setAnimationIdentifierString(bC.currentPhase.animationsIdentifierString());
                 ((BossEntity) entity2).setBossControllerBlockPos(bC.pos);
-//                ((IsSpawnerBound)entity2).setBoundingBoxHeight(this.spawnerBoundEntityBoundingBoxHeight);
-//                ((IsSpawnerBound)entity2).setBoundingBoxWidth(this.spawnerBoundEntityBoundingBoxWidth);
                 ((BossEntity) entity2).setModelIdentifierString(bC.currentPhase.modelIdentifierString());
-//                ((IsSpawnerBound)entity2).setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
                 ((BossEntity) entity2).setTextureIdentifierString(bC.currentPhase.textureIdentifierString());
-//                ((SpawnerBoundEntity)entity2).setNoGravity(true);
-
-//                entityNbt.putString("spawnerBoundEntityName", this.spawnerBoundEntityName);
-
-//                if (this.spawnerBoundEntityLootTableIdentifier != null) {
-//                    entityNbt.putString("DeathLootTable", this.spawnerBoundEntityLootTableIdentifier.toString());
-//                }
             }
-//            if (entity2 instanceof VillagerDataContainer) {
-//                ((VillagerDataContainer) entity2).setVillagerData(new VillagerData(
-//                        Registries.VILLAGER_TYPE.get(new Identifier(this.villagerType)),
-//                        Registries.VILLAGER_PROFESSION.get(new Identifier(this.villagerProfession)),
-//                        this.villagerLevel
-//                ));
-//            }
             if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
                 ScriptBlocksMod.info("spawnNewEntityAndPassengers not successful");
                 return false;
@@ -562,7 +598,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             this.entityTypeCompound.putString("id", Registries.ENTITY_TYPE.getId(entityType).toString());
             return true;
         }
-        return entityTypeId.equals("");
+        return entityTypeId.isEmpty();
     }
 
     //region Getter & Setter
@@ -595,33 +631,34 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         this.calculateAreaBox = true;
         return true;
     }
-    public BlockPos getEntitySpawnPositionOffset() {
+
+    public BlockPos getBossSpawnPositionOffset() {
         return this.bossSpawnPositionOffset;
     }
 
     // TODO check if input is valid
-    public boolean setEntitySpawnPositionOffset(BlockPos entitySpawnPositionOffset) {
-        this.bossSpawnPositionOffset = entitySpawnPositionOffset;
+    public boolean setBossSpawnPositionOffset(BlockPos bossSpawnPositionOffset) {
+        this.bossSpawnPositionOffset = bossSpawnPositionOffset;
         return true;
     }
 
-    public double getEntitySpawnOrientationPitch() {
+    public double getBossSpawnOrientationPitch() {
         return bossSpawnOrientationPitch;
     }
 
     // TODO check if input is valid
-    public boolean setEntitySpawnPositionPitch(double entitySpawnPositionPitch) {
-        this.bossSpawnOrientationPitch = entitySpawnPositionPitch;
+    public boolean setBossSpawnPositionPitch(double bossSpawnPositionPitch) {
+        this.bossSpawnOrientationPitch = bossSpawnPositionPitch;
         return true;
     }
 
-    public double getEntitySpawnOrientationYaw() {
+    public double getBossSpawnOrientationYaw() {
         return bossSpawnOrientationYaw;
     }
 
     // TODO check if input is valid
-    public boolean setEntitySpawnPositionYaw(double entitySpawnPositionYaw) {
-        this.bossSpawnOrientationYaw = entitySpawnPositionYaw;
+    public boolean setBossSpawnPositionYaw(double bossSpawnPositionYaw) {
+        this.bossSpawnOrientationYaw = bossSpawnPositionYaw;
         return true;
     }
 
