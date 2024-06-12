@@ -44,6 +44,9 @@ import java.util.*;
 
 public class BossControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
+    // TODO define defaults
+    private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
+
 
     private long globalTimer;
     private long phaseTimer;
@@ -62,11 +65,11 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
     private Box area = null;
     private boolean showArea = false;
     private Vec3i areaDimensions = Vec3i.ZERO;
-    private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
+    private BlockPos areaPositionOffset = POSITION_OFFSET_DEFAULT;
 
     private String bossIdentifier = "";
 
-    private BlockPos bossSpawnPositionOffset = new BlockPos(0, 1, 0);
+    private BlockPos bossSpawnPositionOffset = POSITION_OFFSET_DEFAULT;
     private double bossSpawnOrientationPitch = 0.0;
     private double bossSpawnOrientationYaw = 0.0;
 
@@ -93,6 +96,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
     @Override
     protected void writeNbt(NbtCompound nbt) {
+
+        super.writeNbt(nbt);
 
         if (this.showArea) {
             nbt.putBoolean("showArea", true);
@@ -134,35 +139,47 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             nbt.remove("areaDimensionsZ");
         }
 
-        if (this.areaPositionOffset.getX() != 0) {
+        BlockPos areaPositionOffset = this.areaPositionOffset;
+        if (!areaPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
             nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-        } else {
-            nbt.remove("areaPositionOffsetX");
-        }
-
-        if (this.areaPositionOffset.getY() != 0) {
             nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-        } else {
-            nbt.remove("areaPositionOffsetY");
-        }
-
-        if (this.areaPositionOffset.getZ() != 0) {
             nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
         } else {
+            nbt.remove("areaPositionOffsetX");
+            nbt.remove("areaPositionOffsetY");
             nbt.remove("areaPositionOffsetZ");
         }
 
         if (!this.bossIdentifier.isEmpty()) {
             nbt.putString("bossIdentifier", this.bossIdentifier);
+        } else {
+            nbt.remove("bossIdentifier");
         }
 
-        nbt.putInt("bossSpawnPositionOffsetX", this.bossSpawnPositionOffset.getX());
-        nbt.putInt("bossSpawnPositionOffsetY", this.bossSpawnPositionOffset.getY());
-        nbt.putInt("bossSpawnPositionOffsetZ", this.bossSpawnPositionOffset.getZ());
+        BlockPos bossSpawnPositionOffset = this.bossSpawnPositionOffset;
+        if (!bossSpawnPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
+            nbt.putInt("bossSpawnPositionOffsetX", this.bossSpawnPositionOffset.getX());
+            nbt.putInt("bossSpawnPositionOffsetY", this.bossSpawnPositionOffset.getY());
+            nbt.putInt("bossSpawnPositionOffsetZ", this.bossSpawnPositionOffset.getZ());
+        } else {
+            nbt.remove("bossSpawnPositionOffsetX");
+            nbt.remove("bossSpawnPositionOffsetY");
+            nbt.remove("bossSpawnPositionOffsetZ");
+        }
 
-        nbt.putDouble("bossSpawnOrientationPitch", this.bossSpawnOrientationPitch);
-        nbt.putDouble("bossSpawnOrientationYaw", this.bossSpawnOrientationYaw);
+        if (this.bossSpawnOrientationPitch != 0.0) {
+            nbt.putDouble("bossSpawnOrientationPitch", this.bossSpawnOrientationPitch);
+        } else {
+            nbt.remove("bossSpawnOrientationPitch");
+        }
 
+        if (this.bossSpawnOrientationYaw != 0.0) {
+            nbt.putDouble("bossSpawnOrientationYaw", this.bossSpawnOrientationYaw);
+        } else {
+            nbt.remove("bossSpawnOrientationYaw8");
+        }
+
+        // TODO convert to an nbt element
         List<String> bossTriggeredBlocksKeys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
         nbt.putInt("bossTriggeredBlocksKeysSize", bossTriggeredBlocksKeys.size());
         for (int i = 0; i < bossTriggeredBlocksKeys.size(); i++) {
@@ -174,47 +191,71 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             nbt.putBoolean("bossTriggeredBlocks_entry_resets_" + i, this.bossTriggeredBlocks.get(key).getRight());
         }
 
-        nbt.put("EntityTypeCompound", this.entityTypeCompound);
+        if (!Objects.equals(this.entityTypeCompound, new NbtCompound())) {
+            nbt.put("EntityTypeCompound", this.entityTypeCompound);
+        } else {
+            nbt.remove("EntityTypeCompound");
+        }
 
         if (this.bossEntityUuid != null) {
             nbt.putUuid("bossEntityUuid", this.bossEntityUuid);
+        } else {
+            nbt.remove("bossEntityUuid");
         }
     }
 
     @Override
     public void readNbt(NbtCompound nbt) {
 
-        this.showArea = nbt.getBoolean("showArea");
+        super.readNbt(nbt);
+
+        if (nbt.contains("showArea", NbtElement.BYTE_TYPE)) {
+            this.showArea = nbt.getBoolean("showArea");
+        }
 
         if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
             this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
             this.calculateAreaBox = true;
         }
 
-        int i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
-        int j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
-        int k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
-        this.areaDimensions = new Vec3i(i, j, k);
+        if (nbt.contains("areaDimensionsX", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsY", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsZ", NbtElement.INT_TYPE)) {
+            this.areaDimensions = new Vec3i(
+                    MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
+                    MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
+                    MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
+            );
+        }
 
-        int l = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
-        int m = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
-        int n = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
-        this.areaPositionOffset = new BlockPos(l, m, n);
+        if (nbt.contains("areaPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetZ", NbtElement.INT_TYPE)) {
+            this.areaPositionOffset = new BlockPos(
+                    MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
+            );
+        }
 
-        if (nbt.contains("bossIdentifier")) {
+        if (nbt.contains("bossIdentifier", NbtElement.STRING_TYPE)) {
             this.bossIdentifier = nbt.getString("bossIdentifier");
         }
 
-        this.bossSpawnPositionOffset = new BlockPos(
-                MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetX"), -48, 48),
-                MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetY"), -48, 48),
-                MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetZ"), -48, 48)
-        );
+        if (nbt.contains("bossSpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("bossSpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("bossSpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
+            this.bossSpawnPositionOffset = new BlockPos(
+                    MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetX"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetY"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetZ"), -48, 48)
+            );
+        }
 
-        this.bossSpawnOrientationPitch = nbt.getDouble("bossSpawnOrientationPitch");
-        this.bossSpawnOrientationYaw = nbt.getDouble("bossSpawnOrientationYaw");
+        if (nbt.contains("bossSpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
+            this.bossSpawnOrientationPitch = nbt.getDouble("bossSpawnOrientationPitch");
+        }
+
+        if (nbt.contains("bossSpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
+            this.bossSpawnOrientationYaw = nbt.getDouble("bossSpawnOrientationYaw");
+        }
 
         this.bossTriggeredBlocks.clear();
+        // TODO convert to an nbt element
         int bossTriggeredBlocksKeysSize = nbt.getInt("bossTriggeredBlocksKeysSize");
         for (int b = 0; b < bossTriggeredBlocksKeysSize; b++) {
             this.bossTriggeredBlocks.put(nbt.getString("bossTriggeredBlocks_key_" + b), new MutablePair<>(
@@ -307,7 +348,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
     private static void startPhase(BossControllerBlockEntity bC) {
         Boss.Phase phase = bC.currentPhase;
 
-        ScriptBlocksMod.info("startPhase: " + phase.animationsIdentifierString());
+        ScriptBlocksMod.info("startPhase");
         bC.entityAttributeModifiers = getEntityAttributeModifiers(bC.currentPhase);
 
         // trigger block
@@ -343,18 +384,21 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         // modify boss entity
         if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
             Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
-            if (entity instanceof MobEntity) {
-                ((DuckMobEntityMixin) entity).scriptblocks$setBossHealthThreshold(bC.currentPhase.bossHealthThreshold());
-                ((DuckMobEntityMixin) entity).scriptblocks$setBossPhase(bC.currentPhaseId);
-            }
-            if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
-                AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
-                bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
-                    EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
-                    if (entityAttributeInstance != null) {
-                        entityAttributeInstance.addPersistentModifier((EntityAttributeModifier) attributeModifier);
-                    }
-                });
+            if (entity instanceof MobEntity mobEntity) {
+                ((DuckMobEntityMixin) mobEntity).scriptblocks$setBossHealthThreshold(bC.currentPhase.bossHealthThreshold());
+                ((DuckMobEntityMixin) mobEntity).scriptblocks$setBossPhase(bC.currentPhaseId);
+                if (!bC.entityAttributeModifiers.isEmpty()) {
+                    AttributeContainer attributeContainer = mobEntity.getAttributes();
+                    bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
+                        EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
+                        if (entityAttributeInstance != null) {
+                            entityAttributeInstance.addPersistentModifier((EntityAttributeModifier) attributeModifier);
+                        }
+                    });
+                }
+                if (bC.currentPhase.newHealthRatio() > 0.0) {
+                    mobEntity.setHealth(mobEntity.getMaxHealth() * Math.min(1.0F, bC.currentPhase.newHealthRatio()));
+                }
             }
         }
     }

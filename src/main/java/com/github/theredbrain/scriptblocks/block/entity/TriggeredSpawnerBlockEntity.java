@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -32,8 +31,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.village.VillagerData;
-import net.minecraft.village.VillagerDataContainer;
 import net.minecraft.world.WorldEvents;
 import net.minecraft.world.event.GameEvent;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -43,32 +40,20 @@ import java.util.*;
 
 public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
-    private BlockPos entitySpawnPositionOffset = new BlockPos(0, 1, 0);
+    private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
+
+    private BlockPos entitySpawnPositionOffset = POSITION_OFFSET_DEFAULT;
     private double entitySpawnOrientationPitch = 0.0;
     private double entitySpawnOrientationYaw = 0.0;
     @Nullable
     private UUID boundEntityUuid = null;
 
     private SpawningMode spawningMode = SpawningMode.ONCE;
-    private EntityMode entityMode = EntityMode.IDENTIFIER;
 
     private Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
-    private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-    private BlockPos useRelayBlockPositionOffset = new BlockPos(0, 0, 0);
-
-    // TODO remove
-    String spawnerBoundEntityName = "";
-    Identifier spawnerBoundEntityModelIdentifier = ScriptBlocksMod.identifier("spawner_bound_entity/default_spawner_bound_entity");;
-    Identifier spawnerBoundEntityTextureIdentifier = ScriptBlocksMod.identifier("spawner_bound_entity/default_spawner_bound_entity");;
-    Identifier spawnerBoundEntityAnimationsIdentifier = ScriptBlocksMod.identifier("spawner_bound_entity/default_spawner_bound_entity");
-    float spawnerBoundEntityBoundingBoxHeight = 1.8f;
-    float spawnerBoundEntityBoundingBoxWidth = 0.8f;
-    Identifier spawnerBoundEntityLootTableIdentifier = ScriptBlocksMod.identifier("spawner_bound_entity/default_spawner_bound_entity");;
-
-    private String villagerProfession = "none";
-    private String villagerType = "plains";
-    private int villagerLevel = 1;
+    private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(POSITION_OFFSET_DEFAULT, false);
+    private BlockPos useRelayBlockPositionOffset = POSITION_OFFSET_DEFAULT;
 
     private boolean triggered = false;
     private NbtCompound entityTypeCompound = new NbtCompound();
@@ -82,30 +67,54 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
         super.writeNbt(nbt);
 
-        nbt.putString("spawnerBoundEntityName", this.spawnerBoundEntityName);
-        nbt.putString("spawnerBoundEntityModelIdentifier", this.spawnerBoundEntityModelIdentifier != null ? this.spawnerBoundEntityModelIdentifier.toString() : "");
-        nbt.putString("spawnerBoundEntityTextureIdentifier", this.spawnerBoundEntityTextureIdentifier != null ? this.spawnerBoundEntityTextureIdentifier.toString() : "");
-        nbt.putString("spawnerBoundEntityAnimationsIdentifier", this.spawnerBoundEntityAnimationsIdentifier != null ? this.spawnerBoundEntityAnimationsIdentifier.toString() : "");
-        nbt.putFloat("spawnerBoundEntityBoundingBoxHeight", this.spawnerBoundEntityBoundingBoxHeight);
-        nbt.putFloat("spawnerBoundEntityBoundingBoxWidth", this.spawnerBoundEntityBoundingBoxWidth);
-        nbt.putString("spawnerBoundEntityLootTableIdentifier", this.spawnerBoundEntityLootTableIdentifier != null ? this.spawnerBoundEntityLootTableIdentifier.toString() : "");
+        BlockPos entitySpawnPositionOffset = this.entitySpawnPositionOffset;
+        if (!entitySpawnPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
+            nbt.putInt("entitySpawnPositionOffsetX", entitySpawnPositionOffset.getX());
+            nbt.putInt("entitySpawnPositionOffsetY", entitySpawnPositionOffset.getY());
+            nbt.putInt("entitySpawnPositionOffsetZ", entitySpawnPositionOffset.getZ());
+        } else {
+            nbt.remove("entitySpawnPositionOffsetX");
+            nbt.remove("entitySpawnPositionOffsetY");
+            nbt.remove("entitySpawnPositionOffsetZ");
+        }
 
-        nbt.putInt("entitySpawnPositionOffsetX", this.entitySpawnPositionOffset.getX());
-        nbt.putInt("entitySpawnPositionOffsetY", this.entitySpawnPositionOffset.getY());
-        nbt.putInt("entitySpawnPositionOffsetZ", this.entitySpawnPositionOffset.getZ());
+        if (this.entitySpawnOrientationPitch != 0.0) {
+            nbt.putDouble("entitySpawnOrientationPitch", this.entitySpawnOrientationPitch);
+        } else {
+            nbt.remove("entitySpawnOrientationPitch");
+        }
 
-        nbt.putDouble("entitySpawnOrientationPitch", this.entitySpawnOrientationPitch);
-        nbt.putDouble("entitySpawnOrientationYaw", this.entitySpawnOrientationYaw);
+        if (this.entitySpawnOrientationYaw != 0.0) {
+            nbt.putDouble("entitySpawnOrientationYaw", this.entitySpawnOrientationYaw);
+        } else {
+            nbt.remove("entitySpawnOrientationYaw");
+        }
 
-        nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-        nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-        nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-        nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+        BlockPos triggeredBlockPositionOffset = this.triggeredBlock.getLeft();
+        if (!triggeredBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
+            nbt.putInt("triggeredBlockPositionOffsetX", triggeredBlockPositionOffset.getX());
+            nbt.putInt("triggeredBlockPositionOffsetY", triggeredBlockPositionOffset.getY());
+            nbt.putInt("triggeredBlockPositionOffsetZ", triggeredBlockPositionOffset.getZ());
+            nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+        } else {
+            nbt.remove("triggeredBlockPositionOffsetX");
+            nbt.remove("triggeredBlockPositionOffsetY");
+            nbt.remove("triggeredBlockPositionOffsetZ");
+            nbt.remove("triggeredBlockResets");
+        }
 
-        nbt.putInt("useRelayedBlockPositionOffsetX", this.useRelayBlockPositionOffset.getX());
-        nbt.putInt("useRelayedBlockPositionOffsetY", this.useRelayBlockPositionOffset.getY());
-        nbt.putInt("useRelayedBlockPositionOffsetZ", this.useRelayBlockPositionOffset.getZ());
+        BlockPos useRelayBlockPositionOffset = this.useRelayBlockPositionOffset;
+        if (!useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
+            nbt.putInt("useRelayedBlockPositionOffsetX", useRelayBlockPositionOffset.getX());
+            nbt.putInt("useRelayedBlockPositionOffsetY", useRelayBlockPositionOffset.getY());
+            nbt.putInt("useRelayedBlockPositionOffsetZ", useRelayBlockPositionOffset.getZ());
+        } else {
+            nbt.remove("useRelayedBlockPositionOffsetX");
+            nbt.remove("useRelayedBlockPositionOffsetY");
+            nbt.remove("useRelayedBlockPositionOffsetZ");
+        }
 
+        // TODO convert to an nbt element
         List<EntityAttribute> entityAttributeModifiersKeys = new ArrayList<>(this.entityAttributeModifiers.keySet());
         nbt.putInt("entityAttributeModifiersKeysSize", entityAttributeModifiersKeys.size());
         for (int i = 0; i < entityAttributeModifiersKeys.size(); i++) {
@@ -119,29 +128,24 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
             }
         }
 
-        nbt.putString("spawningMode", this.spawningMode.asString());
-
-        nbt.putString("entityMode", this.entityMode.asString());
-
-        nbt.putBoolean("triggered", this.triggered);
-
-        nbt.put("EntityTypeCompound", this.entityTypeCompound);
-
-        if (this.villagerLevel > 1) {
-            nbt.putInt("villagerLevel", this.villagerLevel);
+        if (this.spawningMode != SpawningMode.ONCE) {
+            nbt.putString("spawningMode", this.spawningMode.asString());
+        } else {
+            nbt.remove("spawningMode");
         }
 
-        if (!this.villagerProfession.equals("none")) {
-            nbt.putString("villagerProfession", this.villagerProfession);
+        if (this.triggered) {
+            nbt.putBoolean("triggered", true);
+        } else {
+            nbt.remove("triggered");
         }
 
-        if (!this.villagerType.equals("plains")) {
-            nbt.putString("villagerType", this.villagerType);
+        if (!Objects.equals(this.entityTypeCompound, new NbtCompound())) {
+            nbt.put("EntityTypeCompound", this.entityTypeCompound);
+        } else {
+            nbt.remove("EntityTypeCompound");
         }
 
-        if (this.boundEntityUuid != null) {
-            nbt.putUuid("boundEntityUuid", this.boundEntityUuid);
-        }
     }
 
     @Override
@@ -149,33 +153,40 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
         super.readNbt(nbt);
 
-        this.spawnerBoundEntityName = nbt.getString("spawnerBoundEntityName");
-        this.spawnerBoundEntityModelIdentifier = Identifier.tryParse(nbt.getString("spawnerBoundEntityModelIdentifier"));
-        this.spawnerBoundEntityTextureIdentifier = Identifier.tryParse(nbt.getString("spawnerBoundEntityTextureIdentifier"));
-        this.spawnerBoundEntityAnimationsIdentifier = Identifier.tryParse(nbt.getString("spawnerBoundEntityAnimationsIdentifier"));
-        this.spawnerBoundEntityBoundingBoxHeight = nbt.getFloat("spawnerBoundEntityBoundingBoxHeight");
-        this.spawnerBoundEntityBoundingBoxWidth = nbt.getFloat("spawnerBoundEntityBoundingBoxWidth");
-        this.spawnerBoundEntityLootTableIdentifier = Identifier.tryParse(nbt.getString("spawnerBoundEntityLootTableIdentifier"));
+        if (nbt.contains("entitySpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
+            this.entitySpawnPositionOffset = new BlockPos(
+                    MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetX"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetY"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetZ"), -48, 48)
+            );
+        }
 
-        this.entitySpawnPositionOffset = new BlockPos(
-                MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetX"), -48, 48),
-                MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetY"), -48, 48),
-                MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetZ"), -48, 48)
-        );
+        if (nbt.contains("entitySpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
+            this.entitySpawnOrientationPitch = nbt.getDouble("entitySpawnOrientationPitch");
+        }
 
-        this.entitySpawnOrientationPitch = nbt.getDouble("entitySpawnOrientationPitch");
-        this.entitySpawnOrientationYaw = nbt.getDouble("entitySpawnOrientationYaw");
+        if (nbt.contains("entitySpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
+            this.entitySpawnOrientationYaw = nbt.getDouble("entitySpawnOrientationYaw");
+        }
 
-        int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-        int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-        int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-        this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+        if (nbt.contains("triggeredBlockPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("triggeredBlockPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("triggeredBlockPositionOffsetZ", NbtElement.INT_TYPE) || nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
+            this.triggeredBlock = new MutablePair<>(
+                    new BlockPos(
+                            MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+                            MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+                            MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+                    ),
+                    nbt.getBoolean("triggeredBlockResets")
+            );
+        }
 
-        this.useRelayBlockPositionOffset = new BlockPos(
-                MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetX"), -48, 48),
-                MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetY"), -48, 48),
-                MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetZ"), -48, 48)
-        );
+        if (nbt.contains("useRelayedBlockPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("useRelayedBlockPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("useRelayedBlockPositionOffsetZ", NbtElement.INT_TYPE)) {
+            this.useRelayBlockPositionOffset = new BlockPos(
+                    MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetX"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetY"), -48, 48),
+                    MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetZ"), -48, 48)
+            );
+        }
 
         this.entityAttributeModifiers.clear();
         int entityAttributeModifiersKeysSize = nbt.getInt("entityAttributeModifiersKeysSize");
@@ -191,32 +202,16 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
             }
         }
 
-        this.spawningMode = SpawningMode.byName(nbt.getString("spawningMode")).orElseGet(() -> SpawningMode.ONCE);
+        if (nbt.contains("spawningMode", NbtElement.STRING_TYPE)) {
+            this.spawningMode = SpawningMode.byName(nbt.getString("spawningMode")).orElseGet(() -> SpawningMode.ONCE);
+        }
 
-        this.entityMode = EntityMode.byName(nbt.getString("entityMode")).orElseGet(() -> EntityMode.IDENTIFIER);
-
-        this.triggered = nbt.getBoolean("triggered");
+        if (nbt.contains("triggered", NbtElement.BYTE_TYPE)) {
+            this.triggered = nbt.getBoolean("triggered");
+        }
 
         if (nbt.contains("EntityTypeCompound", NbtElement.COMPOUND_TYPE)) {
             this.entityTypeCompound = nbt.getCompound("EntityTypeCompound");
-        }
-
-        if (nbt.contains("villagerLevel", NbtElement.INT_TYPE)) {
-            this.villagerLevel = nbt.getInt("villagerLevel");
-        } else {
-            this.villagerLevel = 1;
-        }
-
-        if (nbt.contains("villagerProfession", NbtElement.STRING_TYPE)) {
-            this.villagerProfession = nbt.getString("villagerProfession");
-        } else {
-            this.villagerProfession = "none";
-        }
-
-        if (nbt.contains("villagerType", NbtElement.STRING_TYPE)) {
-            this.villagerType = nbt.getString("villagerType");
-        } else {
-            this.villagerType = "plains";
         }
 
         if (nbt.containsUuid("boundEntityUuid")) {
@@ -292,15 +287,6 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
         return true;
     }
 
-    public EntityMode getEntityMode() {
-        return this.entityMode;
-    }
-
-    public boolean setEntityMode(EntityMode entityMode) {
-        this.entityMode = entityMode;
-        return true;
-    }
-
     public String getEntityTypeId() {
         if (this.entityTypeCompound != null && this.entityTypeCompound.contains("id")) {
             return this.entityTypeCompound.getString("id");
@@ -315,7 +301,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
             this.entityTypeCompound.putString("id", Registries.ENTITY_TYPE.getId(entityType).toString());
             return true;
         }
-        return entityTypeId.equals("");
+        return entityTypeId.isEmpty();
     }
 
     public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
@@ -332,120 +318,6 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
     public void setUseRelayBlockPositionOffset(BlockPos useRelayedBlockPositionOffset) {
         this.useRelayBlockPositionOffset = useRelayedBlockPositionOffset;
-    }
-
-    public String getSpawnerBoundEntityName() {
-        return this.spawnerBoundEntityName;
-    }
-
-    public void setSpawnerBoundEntityName(String spawnerBoundEntityName) {
-        this.spawnerBoundEntityName = spawnerBoundEntityName;
-    }
-
-    public Identifier getSpawnerBoundEntityModelIdentifier() {
-        return this.spawnerBoundEntityModelIdentifier;
-    }
-
-    public boolean setSpawnerBoundEntityModelIdentifier(String spawnerBoundEntityModelIdentifier) {
-        if (Identifier.isValid(spawnerBoundEntityModelIdentifier)) {
-            this.spawnerBoundEntityModelIdentifier = new Identifier(spawnerBoundEntityModelIdentifier);
-            return true;
-        }
-        if (spawnerBoundEntityModelIdentifier.equals("")) {
-            this.spawnerBoundEntityModelIdentifier = null;
-            return true;
-        }
-        return false;
-    }
-
-    public Identifier getSpawnerBoundEntityTextureIdentifier() {
-        return this.spawnerBoundEntityTextureIdentifier;
-    }
-
-    public boolean setSpawnerBoundEntityTextureIdentifier(String spawnerBoundEntityTextureIdentifier) {
-        if (Identifier.isValid(spawnerBoundEntityTextureIdentifier)) {
-            this.spawnerBoundEntityTextureIdentifier = new Identifier(spawnerBoundEntityTextureIdentifier);
-            return true;
-        }
-        if (spawnerBoundEntityTextureIdentifier.equals("")) {
-            this.spawnerBoundEntityTextureIdentifier = null;
-            return true;
-        }
-        return false;
-    }
-
-    public Identifier getSpawnerBoundEntityAnimationsIdentifier() {
-        return this.spawnerBoundEntityAnimationsIdentifier;
-    }
-
-    public boolean setSpawnerBoundEntityAnimationsIdentifier(String spawnerBoundEntityAnimationsIdentifier) {
-        if (Identifier.isValid(spawnerBoundEntityAnimationsIdentifier)) {
-            this.spawnerBoundEntityAnimationsIdentifier = new Identifier(spawnerBoundEntityAnimationsIdentifier);
-            return true;
-        }
-        if (spawnerBoundEntityAnimationsIdentifier.equals("")) {
-            this.spawnerBoundEntityAnimationsIdentifier = null;
-            return true;
-        }
-        return false;
-    }
-
-    public double getSpawnerBoundEntityBoundingBoxHeight() {
-        return this.spawnerBoundEntityBoundingBoxHeight;
-    }
-
-    public boolean setSpawnerBoundEntityBoundingBoxHeight(float spawnerBoundEntityBoundingBoxHeight) {
-        this.spawnerBoundEntityBoundingBoxHeight = spawnerBoundEntityBoundingBoxHeight;
-        return true;
-    }
-
-    public double getSpawnerBoundEntityBoundingBoxWidth() {
-        return this.spawnerBoundEntityBoundingBoxWidth;
-    }
-
-    public boolean setSpawnerBoundEntityBoundingBoxWidth(float spawnerBoundEntityBoundingBoxWidth) {
-        this.spawnerBoundEntityBoundingBoxWidth = spawnerBoundEntityBoundingBoxWidth;
-        return true;
-    }
-
-    public Identifier getSpawnerBoundEntityLootTableIdentifier() {
-        return this.spawnerBoundEntityLootTableIdentifier;
-    }
-
-    public boolean setSpawnerBoundEntityLootTableIdentifier(String spawnerBoundEntityLootTableIdentifier) {
-        if (Identifier.isValid(spawnerBoundEntityLootTableIdentifier)) {
-            this.spawnerBoundEntityLootTableIdentifier = new Identifier(spawnerBoundEntityLootTableIdentifier);
-            return true;
-        }
-        if (spawnerBoundEntityLootTableIdentifier.equals("")) {
-            this.spawnerBoundEntityLootTableIdentifier = null;
-            return true;
-        }
-        return false;
-    }
-
-    public String getVillagerProfession() {
-        return villagerProfession;
-    }
-
-    public void setVillagerProfession(String villagerProfession) {
-        this.villagerProfession = villagerProfession;
-    }
-
-    public String getVillagerType() {
-        return villagerType;
-    }
-
-    public void setVillagerType(String villagerType) {
-        this.villagerType = villagerType;
-    }
-
-    public int getVillagerLevel() {
-        return villagerLevel;
-    }
-
-    public void setVillagerLevel(int villagerLevel) {
-        this.villagerLevel = villagerLevel;
     }
 
     //endregion getter/setter
@@ -486,7 +358,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
         if (this.triggered) {
             this.triggered = false;
         }
-        if ((this.spawningMode == SpawningMode.BOUND || this.spawningMode == SpawningMode.BOUND_RESPAWN) && this.boundEntityUuid != null && this.world instanceof ServerWorld serverWorld) {
+        if (this.boundEntityUuid != null && this.world instanceof ServerWorld serverWorld) {
             Entity entity = serverWorld.getEntity(this.boundEntityUuid);
             if (entity != null) {
                 entity.discard();
@@ -497,12 +369,12 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
     @Override
     public void trigger() {
-        if ((this.spawningMode == SpawningMode.ONCE && !this.triggered) || this.spawningMode == SpawningMode.CONTINUOUS) {
+        if (
+                ((this.spawningMode == SpawningMode.BOUND || this.spawningMode == SpawningMode.ONCE) && !this.triggered)
+                || this.spawningMode == SpawningMode.CONTINUOUS
+                || (this.spawningMode == SpawningMode.BOUND_RESPAWN && this.boundEntityUuid == null)
+        ) {
             if (this.spawnEntity()) {
-                this.triggered = true;
-            }
-        } else if ((this.spawningMode == SpawningMode.BOUND && !this.triggered) || (this.spawningMode == SpawningMode.BOUND_RESPAWN && this.boundEntityUuid == null)) {
-            if (this.spawnBoundEntity()) {
                 this.triggered = true;
             }
         }
@@ -544,91 +416,13 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
             if (entity2 == null) {
                 return false;
             }
-            entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), 0.0f, 0.0f);
-            if (entity2 instanceof MobEntity) {
-                if (this.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
-                    ((MobEntity)entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, null);
-                }
-            }
-            if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
-                return false;
-            }
-            serverWorld.syncWorldEvent(WorldEvents.SPAWNER_SPAWNS_MOB, this.pos, 0);
-            serverWorld.emitGameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
-            if (entity2 instanceof MobEntity) {
-                ((MobEntity)entity2).playSpawnEffects();
-
-                if (!this.entityAttributeModifiers.isEmpty()) {
-                    AttributeContainer attributeContainer = ((MobEntity) entity2).getAttributes();
-                    this.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
-                        EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute)attribute);
-                        if (entityAttributeInstance != null) {
-                            entityAttributeInstance.removeModifier(attributeModifier.getId());
-                            entityAttributeInstance.addPersistentModifier((EntityAttributeModifier)attributeModifier);
-                        }
-                        if (attribute == EntityAttributes.GENERIC_MAX_HEALTH) {
-                            ((MobEntity) entity2).setHealth((float) ((MobEntity) entity2).getAttributes().getValue(EntityAttributes.GENERIC_MAX_HEALTH));
-                        }
-                    });
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    private boolean spawnBoundEntity() {
-        if (this.world instanceof ServerWorld serverWorld) {
-            Optional<EntityType<?>> optional = EntityType.fromNbt(this.entityTypeCompound);
-            if (optional.isEmpty()) {
-                return false;
-            }
-            double d = (double)this.pos.getX() + this.entitySpawnPositionOffset.getX() + 0.5;
-            double e = (double)this.pos.getY() + this.entitySpawnPositionOffset.getY();
-            double f = (double)this.pos.getZ() + this.entitySpawnPositionOffset.getZ() + 0.5;
-            if (!serverWorld.isSpaceEmpty(optional.get().createSimpleBoundingBox(d, e, f))) return false;
-            BlockPos blockPos = BlockPos.ofFloored(d, e, f);
-            Entity entity2 = EntityType.loadEntityWithPassengers(this.entityTypeCompound, world, entity -> {
-                entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
-                return entity;
-            });
-            if (entity2 == null) {
-                return false;
-            }
             entity2.setBodyYaw((float) this.entitySpawnOrientationYaw);
             entity2.setHeadYaw((float) this.entitySpawnOrientationYaw);
             entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) this.entitySpawnOrientationYaw, (float) this.entitySpawnOrientationPitch);
             if (entity2 instanceof MobEntity) {
                 if (this.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
-                    NbtCompound entityNbt = new NbtCompound();
-//                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosX", this.pos.getX());
-//                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosY", this.pos.getY());
-//                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosZ", this.pos.getZ());
-                    ((MobEntity)entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, entityNbt);
+                    ((MobEntity)entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, null);
                 }
-            }
-//            if (entity2 instanceof IsSpawnerBound) {
-//                ((IsSpawnerBound)entity2).setAnimationIdentifierString(this.spawnerBoundEntityAnimationsIdentifier.toString());
-//                ((IsSpawnerBound)entity2).setBoundSpawnerBlockPos(this.pos);
-//                ((IsSpawnerBound)entity2).setBoundingBoxHeight(this.spawnerBoundEntityBoundingBoxHeight);
-//                ((IsSpawnerBound)entity2).setBoundingBoxWidth(this.spawnerBoundEntityBoundingBoxWidth);
-//                ((IsSpawnerBound)entity2).setModelIdentifierString(this.spawnerBoundEntityModelIdentifier.toString());
-//                ((IsSpawnerBound)entity2).setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
-//                ((IsSpawnerBound)entity2).setTextureIdentifierString(this.spawnerBoundEntityTextureIdentifier.toString());
-////                ((SpawnerBoundEntity)entity2).setNoGravity(true);
-//
-////                entityNbt.putString("spawnerBoundEntityName", this.spawnerBoundEntityName);
-//
-////                if (this.spawnerBoundEntityLootTableIdentifier != null) {
-////                    entityNbt.putString("DeathLootTable", this.spawnerBoundEntityLootTableIdentifier.toString());
-////                }
-//            }
-            if (entity2 instanceof VillagerDataContainer) {
-                ((VillagerDataContainer) entity2).setVillagerData(new VillagerData(
-                        Registries.VILLAGER_TYPE.get(new Identifier(this.villagerType)),
-                        Registries.VILLAGER_PROFESSION.get(new Identifier(this.villagerProfession)),
-                        this.villagerLevel
-                ));
             }
             if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
                 return false;
@@ -653,11 +447,16 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
                     });
                 }
                 if (entity2 instanceof MobEntity mobEntity) {
-                    mobEntity.setPersistent();
+                    ((MobEntity)entity2).playSpawnEffects(); // TODO make optional
 
-                    // TODO make them optional
-                    ((DuckMobEntityMixin)mobEntity).scriptblocks$setControllerBlockPos(this.pos);
-                    ((DuckMobEntityMixin)mobEntity).scriptblocks$setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
+                    if (this.spawningMode == SpawningMode.BOUND || this.spawningMode == SpawningMode.BOUND_RESPAWN) {
+                        mobEntity.setPersistent();
+                        ((DuckMobEntityMixin)mobEntity).scriptblocks$setControllerBlockPos(this.pos);
+                    }
+
+                    if (!this.useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
+                        ((DuckMobEntityMixin) mobEntity).scriptblocks$setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
+                    }
                 }
             }
             return true;
@@ -689,32 +488,6 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
         public Text asText() {
             return Text.translatable("gui.triggered_spawner_block.spawning_mode." + this.name);
-        }
-    }
-
-    public static enum EntityMode implements StringIdentifiable
-    {
-        IDENTIFIER("identifier"),
-        SPAWNER_BOUND_ENTITY("spawner_bound_entity"),
-        SPAWNER_BOUND_VILLAGER_ENTITY("spawner_bound_villager_entity");
-
-        private final String name;
-
-        private EntityMode(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String asString() {
-            return this.name;
-        }
-
-        public static Optional<EntityMode> byName(String name) {
-            return Arrays.stream(EntityMode.values()).filter(entityMode -> entityMode.asString().equals(name)).findFirst();
-        }
-
-        public Text asText() {
-            return Text.translatable("gui.triggered_spawner_block.entity_mode." + this.name);
         }
     }
 }

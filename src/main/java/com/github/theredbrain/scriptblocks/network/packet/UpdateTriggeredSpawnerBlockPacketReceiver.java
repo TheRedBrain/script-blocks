@@ -33,29 +33,13 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 
         BlockPos triggeredSpawnerBlockPosition = packet.triggeredSpawnerBlockPosition;
 
-        String spawnerBoundEntityName = packet.spawnerBoundEntityName;
-        String spawnerBoundEntityModelIdentifier = packet.spawnerBoundEntityModelIdentifier;
-        String spawnerBoundEntityTextureIdentifier = packet.spawnerBoundEntityTextureIdentifier;
-        String spawnerBoundEntityAnimationsIdentifier = packet.spawnerBoundEntityAnimationsIdentifier;
-        float spawnerBoundEntityBoundingBoxHeight = packet.spawnerBoundEntityBoundingBoxHeight;
-        float spawnerBoundEntityBoundingBoxWidth = packet.spawnerBoundEntityBoundingBoxWidth;
-        String spawnerBoundEntityLootTableIdentifier = packet.spawnerBoundEntityLootTableIdentifier;
-
         BlockPos entitySpawnPositionOffset = packet.entitySpawnPositionOffset;
         double entitySpawnOrientationPitch = packet.entitySpawnOrientationPitch;
         double entitySpawnOrientationYaw = packet.entitySpawnOrientationYaw;
 
         TriggeredSpawnerBlockEntity.SpawningMode spawningMode = packet.spawningMode;
-        TriggeredSpawnerBlockEntity.EntityMode entityMode = packet.entityMode;
 
-        String entityTypeId = "";
-        if (entityMode == TriggeredSpawnerBlockEntity.EntityMode.IDENTIFIER) {
-            entityTypeId = packet.entityTypeId;
-        } else if (entityMode == TriggeredSpawnerBlockEntity.EntityMode.SPAWNER_BOUND_ENTITY) {
-            entityTypeId = "scriptblocks:spawner_bound_entity";
-        } else if (entityMode == TriggeredSpawnerBlockEntity.EntityMode.SPAWNER_BOUND_VILLAGER_ENTITY) {
-            entityTypeId = "scriptblocks:spawner_bound_villager_entity";
-        }
+        String entityTypeId = packet.entityTypeId;
 
         List<MutablePair<String, EntityAttributeModifier>> entityAttributeModifiersList = packet.entityAttributeModifiersList;
         Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
@@ -69,10 +53,6 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
         BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
         boolean triggeredBlockResets = packet.triggeredBlockResets;
 
-        String villagerProfession = packet.villagerProfession;
-        String villagerType = packet.villagerType;
-        int villagerLevel = packet.villagerLevel;
-
         World world = player.getWorld();
 
         boolean updateSuccessful = true;
@@ -81,31 +61,7 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
         BlockState blockState = world.getBlockState(triggeredSpawnerBlockPosition);
 
         if (blockEntity instanceof TriggeredSpawnerBlockEntity triggeredSpawnerBlockEntity) {
-            triggeredSpawnerBlockEntity.setSpawnerBoundEntityName(spawnerBoundEntityName);
-            if (!triggeredSpawnerBlockEntity.setSpawnerBoundEntityModelIdentifier(spawnerBoundEntityModelIdentifier)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.spawnerBoundEntityModelIdentifier.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!triggeredSpawnerBlockEntity.setSpawnerBoundEntityTextureIdentifier(spawnerBoundEntityTextureIdentifier)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.spawnerBoundEntityTextureIdentifier.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!triggeredSpawnerBlockEntity.setSpawnerBoundEntityAnimationsIdentifier(spawnerBoundEntityAnimationsIdentifier)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.spawnerBoundEntityAnimationsIdentifier.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!triggeredSpawnerBlockEntity.setSpawnerBoundEntityBoundingBoxHeight(spawnerBoundEntityBoundingBoxHeight)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.spawnerBoundEntityBoundingBoxHeight.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!triggeredSpawnerBlockEntity.setSpawnerBoundEntityBoundingBoxWidth(spawnerBoundEntityBoundingBoxWidth)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.spawnerBoundEntityBoundingBoxWidth.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!triggeredSpawnerBlockEntity.setSpawnerBoundEntityLootTableIdentifier(spawnerBoundEntityLootTableIdentifier)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.spawnerBoundEntityLootTableIdentifier.invalid"), false);
-                updateSuccessful = false;
-            }
+            triggeredSpawnerBlockEntity.reset();
             if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset)) {
                 player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
                 updateSuccessful = false;
@@ -122,10 +78,6 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
                 player.sendMessage(Text.translatable("triggered_spawner_block.spawningMode.invalid"), false);
                 updateSuccessful = false;
             }
-            if (!triggeredSpawnerBlockEntity.setEntityMode(entityMode)) {
-                player.sendMessage(Text.translatable("triggered_spawner_block.entityMode.invalid"), false);
-                updateSuccessful = false;
-            }
             if (!triggeredSpawnerBlockEntity.setEntityType(entityTypeId)) {
                 player.sendMessage(Text.translatable("triggered_spawner_block.entityTypeId.invalid"), false);
                 updateSuccessful = false;
@@ -136,9 +88,6 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
             }
             triggeredSpawnerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
             triggeredSpawnerBlockEntity.setUseRelayBlockPositionOffset(useRelayBlockPositionOffset);
-            triggeredSpawnerBlockEntity.setVillagerProfession(villagerProfession);
-            triggeredSpawnerBlockEntity.setVillagerType(villagerType);
-            triggeredSpawnerBlockEntity.setVillagerLevel(villagerLevel);
             if (updateSuccessful) {
                 player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
             }

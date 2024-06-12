@@ -33,30 +33,15 @@ import java.util.*;
 
 @Environment(value= EnvType.CLIENT)
 public class TriggeredSpawnerBlockScreen extends Screen {
-    private static final Text SPAWNER_BOUND_ENTITY_NAME_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_name_field_label");
-    private static final Text SPAWNER_BOUND_ENTITY_MODEL_IDENTIFIER_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_model_identifier_field_label");
-    private static final Text SPAWNER_BOUND_ENTITY_TEXTURE_IDENTIFIER_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_texture_identifier_field_label");
-    private static final Text SPAWNER_BOUND_ENTITY_ANIMATIONS_IDENTIFIER_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_animations_identifier_field_label");
-    private static final Text SPAWNER_BOUND_ENTITY_LOOT_TABLE_BOUNDING_BOX_HEIGHT_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_bounding_box_height_field_label");
-    private static final Text SPAWNER_BOUND_ENTITY_LOOT_TABLE_BOUNDING_BOX_WIDTH_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_bounding_box_width_field_label");
-    private static final Text SPAWNER_BOUND_ENTITY_LOOT_TABLE_IDENTIFIER_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_entity_loot_table_identifier_field_label");
-    private static final Text SPAWNER_BOUND_VILLAGER_ENTITY_PROFESSION_IDENTIFIER_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_villager_entity_profession_identifier_field_label");
-    private static final Text SPAWNER_BOUND_VILLAGER_ENTITY_TYPE_IDENTIFIER_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_villager_entity_type_identifier_field_label");
-    private static final Text SPAWNER_BOUND_VILLAGER_ENTITY_LEVEL_FIELD_LABLE_TEXT = Text.translatable("gui.triggered_spawner_block.spawner_bound_villager_entity_level_field_label");
     private static final Text ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_position_offset_label");
     private static final Text ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_pitch_label");
     private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_yaw_label");
     private static final Text SPAWNING_MODE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.spawning_mode_label");
-    private static final Text ENTITY_MODE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_mode_label");
     private static final Text ENTITY_TYPE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_type_label");
-    private static final Text OPEN_SPAWNER_BOUND_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.open_spawner_bound_entity_config_screen_button_label");
-    private static final Text OPEN_SPAWNER_BOUND_VILLAGER_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.open_spawner_bound_villager_entity_config_screen_button_label");
     private static final Text REMOVE_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
     private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_IDENTIFIER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_identifier_label");
     private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_NAME_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_name_label");
     private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_value_label");
-    private static final Text CLOSE_SPAWNER_BOUND_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.close");
-    private static final Text CLOSE_SPAWNER_BOUND_VILLAGER_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.close");
     private static final Text USE_RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.useRelayBlockPositionOffset");
     private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
 
@@ -64,20 +49,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
     private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
 
     private final TriggeredSpawnerBlockEntity triggeredSpawnerBlock;
-
-    private TextFieldWidget spawnerBoundEntityNameField;
-    private TextFieldWidget spawnerBoundEntityModelIdentifierField;
-    private TextFieldWidget spawnerBoundEntityTextureIdentifierField;
-    private TextFieldWidget spawnerBoundEntityAnimationsIdentifierField;
-    private TextFieldWidget spawnerBoundEntityBoundingBoxHeightField;
-    private TextFieldWidget spawnerBoundEntityBoundingBoxWidthField;
-    private TextFieldWidget spawnerBoundEntityLootTableIdentifierField;
-    private ButtonWidget closeSpawnerBoundEntityConfigScreenButton;
-
-    private TextFieldWidget villagerProfessionIdentifierStringField;
-    private TextFieldWidget villagerTypeIdentifierStringField;
-    private TextFieldWidget villagerLevelField;
-    private ButtonWidget closeSpawnerBoundVillagerEntityConfigScreenButton;
 
     private CyclingButtonWidget<CreativeScreenPage> creativeScreenPageButton;
     private TextFieldWidget entitySpawnPositionOffsetXField;
@@ -87,12 +58,8 @@ public class TriggeredSpawnerBlockScreen extends Screen {
     private TextFieldWidget entitySpawnOrientationYawField;
     private CyclingButtonWidget<TriggeredSpawnerBlockEntity.SpawningMode> cycleSpawningModeButton;
     private TriggeredSpawnerBlockEntity.SpawningMode spawningMode;
-    private CyclingButtonWidget<TriggeredSpawnerBlockEntity.EntityMode> cycleEntityModeButton;
-    private TriggeredSpawnerBlockEntity.EntityMode entityMode;
     
     private TextFieldWidget entityTypeIdField;
-    private ButtonWidget openSpawnerBoundEntityConfigScreenButton;
-    private ButtonWidget openSpawnerBoundVillagerEntityConfigScreenButton;
 
     private ButtonWidget removeListEntryButton0;
     private ButtonWidget removeListEntryButton1;
@@ -119,8 +86,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
     List<MutablePair<String, EntityAttributeModifier>> entityAttributeModifiersList = new ArrayList<>();
     private CreativeScreenPage creativeScreenPage;
     private EntityAttributeModifier.Operation newEntityAttributeModifierOperation;
-    private boolean showSpawnerBoundEntityConfigScreen = false;
-    private boolean showSpawnerBoundVillagerEntityConfigScreen = false;
     private int scrollPosition = 0;
     private float scrollAmount = 0.0f;
     private boolean mouseClicked = false;
@@ -162,29 +127,8 @@ public class TriggeredSpawnerBlockScreen extends Screen {
         } else if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.MULTIPLY_TOTAL) {
             this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADDITION;
         }
-//        this.newEntityAttributeModifierOperationButton.setMessage(Text.translatable("gui.entity_attribute_modifier.operation." + this.newEntityAttributeModifierOperation.asString()));
         this.newEntityAttributeModifierOperationButton.setMessage(Text.translatable("gui.entity_attribute_modifier.operation." + this.newEntityAttributeModifierOperation.getId()));
         updateWidgets();
-    }
-
-    private void openSpawnerBoundEntityConfigScreen() {
-        this.showSpawnerBoundEntityConfigScreen = true;
-        this.updateWidgets();
-    }
-
-    private void closeSpawnerBoundEntityConfigScreen() {
-        this.showSpawnerBoundEntityConfigScreen = false;
-        this.updateWidgets();
-    }
-
-    private void openSpawnerBoundVillagerEntityConfigScreen() {
-        this.showSpawnerBoundVillagerEntityConfigScreen = true;
-        this.updateWidgets();
-    }
-
-    private void closeSpawnerBoundVillagerEntityConfigScreen() {
-        this.showSpawnerBoundVillagerEntityConfigScreen = false;
-        this.updateWidgets();
     }
 
     private void done() {
@@ -209,60 +153,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
                 this.entityAttributeModifiersList.add(new MutablePair<>(String.valueOf(Registries.ATTRIBUTE.getId(key)), entityAttributeModifier));
             }
         }
-
-        // region spawner bound entity config
-        this.spawnerBoundEntityNameField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 20, 300, 20, Text.empty());
-        this.spawnerBoundEntityNameField.setMaxLength(128);
-        this.spawnerBoundEntityNameField.setText(this.triggeredSpawnerBlock.getSpawnerBoundEntityName());
-        this.addSelectableChild(this.spawnerBoundEntityNameField);
-        Identifier spawnerBoundEntityModelIdentifier = this.triggeredSpawnerBlock.getSpawnerBoundEntityModelIdentifier();
-        this.spawnerBoundEntityModelIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
-        this.spawnerBoundEntityModelIdentifierField.setMaxLength(128);
-        this.spawnerBoundEntityModelIdentifierField.setText(spawnerBoundEntityModelIdentifier != null ? spawnerBoundEntityModelIdentifier.toString() : "");
-        this.addSelectableChild(this.spawnerBoundEntityModelIdentifierField);
-        Identifier spawnerBoundEntityTextureIdentifier = this.triggeredSpawnerBlock.getSpawnerBoundEntityTextureIdentifier();
-        this.spawnerBoundEntityTextureIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
-        this.spawnerBoundEntityTextureIdentifierField.setMaxLength(128);
-        this.spawnerBoundEntityTextureIdentifierField.setText(spawnerBoundEntityTextureIdentifier != null ? spawnerBoundEntityTextureIdentifier.toString() : "");
-        this.addSelectableChild(this.spawnerBoundEntityTextureIdentifierField);
-        Identifier spawnerBoundEntityAnimationsIdentifier = this.triggeredSpawnerBlock.getSpawnerBoundEntityAnimationsIdentifier();
-        this.spawnerBoundEntityAnimationsIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
-        this.spawnerBoundEntityAnimationsIdentifierField.setMaxLength(128);
-        this.spawnerBoundEntityAnimationsIdentifierField.setText(spawnerBoundEntityAnimationsIdentifier != null ? spawnerBoundEntityAnimationsIdentifier.toString() : "");
-        this.addSelectableChild(this.spawnerBoundEntityAnimationsIdentifierField);
-        this.spawnerBoundEntityBoundingBoxHeightField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 150, 20, Text.empty());
-        this.spawnerBoundEntityBoundingBoxHeightField.setMaxLength(128);
-        this.spawnerBoundEntityBoundingBoxHeightField.setText(Double.toString(this.triggeredSpawnerBlock.getSpawnerBoundEntityBoundingBoxHeight()));
-        this.addSelectableChild(this.spawnerBoundEntityBoundingBoxHeightField);
-        this.spawnerBoundEntityBoundingBoxWidthField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 160, 150, 20, Text.empty());
-        this.spawnerBoundEntityBoundingBoxWidthField.setMaxLength(128);
-        this.spawnerBoundEntityBoundingBoxWidthField.setText(Double.toString(this.triggeredSpawnerBlock.getSpawnerBoundEntityBoundingBoxWidth()));
-        this.addSelectableChild(this.spawnerBoundEntityBoundingBoxWidthField);
-        Identifier spawnerBoundEntityLootTableIdentifier = this.triggeredSpawnerBlock.getSpawnerBoundEntityLootTableIdentifier();
-        this.spawnerBoundEntityLootTableIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 195, 300, 20, Text.empty());
-        this.spawnerBoundEntityLootTableIdentifierField.setMaxLength(128);
-        this.spawnerBoundEntityLootTableIdentifierField.setText(spawnerBoundEntityLootTableIdentifier != null ? spawnerBoundEntityLootTableIdentifier.toString() : "");
-        this.addSelectableChild(this.spawnerBoundEntityLootTableIdentifierField);
-        this.closeSpawnerBoundEntityConfigScreenButton = this.addDrawableChild(ButtonWidget.builder(CLOSE_SPAWNER_BOUND_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT, button -> this.closeSpawnerBoundEntityConfigScreen()).dimensions(this.width / 2 - 154, 219, 300, 20).build());
-        // endregion spawner bound entity config
-
-        // region spawner bound villager entity config
-        String villagerProfessionIdentifierString = this.triggeredSpawnerBlock.getVillagerProfession();
-        this.villagerProfessionIdentifierStringField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
-        this.villagerProfessionIdentifierStringField.setMaxLength(128);
-        this.villagerProfessionIdentifierStringField.setText(villagerProfessionIdentifierString);
-        this.addSelectableChild(this.villagerProfessionIdentifierStringField);
-        String villagerTypeIdentifierString = this.triggeredSpawnerBlock.getVillagerType();
-        this.villagerTypeIdentifierStringField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
-        this.villagerTypeIdentifierStringField.setMaxLength(128);
-        this.villagerTypeIdentifierStringField.setText(villagerTypeIdentifierString);
-        this.addSelectableChild(this.villagerTypeIdentifierStringField);
-        this.villagerLevelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
-        this.villagerLevelField.setMaxLength(128);
-        this.villagerLevelField.setText(Double.toString(this.triggeredSpawnerBlock.getVillagerLevel()));
-        this.addSelectableChild(this.villagerLevelField);
-        this.closeSpawnerBoundVillagerEntityConfigScreenButton = this.addDrawableChild(ButtonWidget.builder(CLOSE_SPAWNER_BOUND_VILLAGER_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT, button -> this.closeSpawnerBoundVillagerEntityConfigScreen()).dimensions(this.width / 2 - 154, 219, 300, 20).build());
-        // endregion spawner bound villager entity config
 
         this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(CreativeScreenPage::asText).values((CreativeScreenPage[]) CreativeScreenPage.values()).initially(this.creativeScreenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, creativeScreenPage) -> {
             this.creativeScreenPage = creativeScreenPage;
@@ -293,15 +183,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
             this.spawningMode = spawningMode;
         }));
 
-        this.entityMode = this.triggeredSpawnerBlock.getEntityMode();
-        this.cycleEntityModeButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredSpawnerBlockEntity.EntityMode::asText).values((TriggeredSpawnerBlockEntity.EntityMode[]) TriggeredSpawnerBlockEntity.EntityMode.values()).initially(this.entityMode).omitKeyText().build(this.width / 2 + 4, 130, 150, 20, Text.empty(), (button, entityMode) -> {
-            this.entityMode = entityMode;
-            this.updateWidgets();
-        }));
-
-        this.openSpawnerBoundEntityConfigScreenButton = this.addDrawableChild(ButtonWidget.builder(OPEN_SPAWNER_BOUND_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT, button -> this.openSpawnerBoundEntityConfigScreen()).dimensions(this.width / 2 - 154, 165, 300, 20).build());
-        this.openSpawnerBoundVillagerEntityConfigScreenButton = this.addDrawableChild(ButtonWidget.builder(OPEN_SPAWNER_BOUND_VILLAGER_ENTITY_CONFIG_SCREEN_BUTTON_LABEL_TEXT, button -> this.openSpawnerBoundVillagerEntityConfigScreen()).dimensions(this.width / 2 - 154, 165, 300, 20).build());
-
         this.entityTypeIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 165, 300, 20, Text.empty());
         this.entityTypeIdField.setMaxLength(128);
         this.entityTypeIdField.setText(this.triggeredSpawnerBlock.getEntityTypeId());
@@ -320,7 +201,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
         this.newEntityAttributeModifierValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 188, 100, 20, Text.empty());
         this.newEntityAttributeModifierValueField.setPlaceholder(NEW_ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT);
         this.addSelectableChild(this.newEntityAttributeModifierValueField);
-//        this.newEntityAttributeModifierOperationButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.entity_attribute_modifier.operation." + this.newEntityAttributeModifierOperation.asString()), button -> this.cycleNewEntityAttributeModifierOperationButton()).dimensions(this.width / 2 - 50, 188, 100, 20).build());
         this.newEntityAttributeModifierOperationButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.entity_attribute_modifier.operation." + this.newEntityAttributeModifierOperation.getId()), button -> this.cycleNewEntityAttributeModifierOperationButton()).dimensions(this.width / 2 - 50, 188, 100, 20).build());
         this.addNewEntityAttributeModifierButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.list_entry.add"), button -> this.addNewEntityAttributeModifier()).dimensions(this.width / 2 + 54, 188, 100, 20).build());
 
@@ -366,20 +246,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 
     private void updateWidgets() {
 
-        this.spawnerBoundEntityNameField.setVisible(false);
-        this.spawnerBoundEntityModelIdentifierField.setVisible(false);
-        this.spawnerBoundEntityTextureIdentifierField.setVisible(false);
-        this.spawnerBoundEntityAnimationsIdentifierField.setVisible(false);
-        this.spawnerBoundEntityBoundingBoxHeightField.setVisible(false);
-        this.spawnerBoundEntityBoundingBoxWidthField.setVisible(false);
-        this.spawnerBoundEntityLootTableIdentifierField.setVisible(false);
-        this.closeSpawnerBoundEntityConfigScreenButton.visible = false;
-
-        this.villagerProfessionIdentifierStringField.setVisible(false);
-        this.villagerTypeIdentifierStringField.setVisible(false);
-        this.villagerLevelField.setVisible(false);
-        this.closeSpawnerBoundVillagerEntityConfigScreenButton.visible = false;
-
         this.creativeScreenPageButton.visible = false;
         
         this.entitySpawnPositionOffsetXField.setVisible(false);
@@ -388,11 +254,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 
         this.cycleSpawningModeButton.visible = false;
 
-        this.cycleEntityModeButton.visible = false;
-
         this.entityTypeIdField.setVisible(false);
-        this.openSpawnerBoundEntityConfigScreenButton.visible = false;
-        this.openSpawnerBoundVillagerEntityConfigScreenButton.visible = false;
 
         this.removeListEntryButton0.visible = false;
         this.removeListEntryButton1.visible = false;
@@ -415,26 +277,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
         this.doneButton.visible = false;
         this.cancelButton.visible = false;
 
-        if (this.showSpawnerBoundEntityConfigScreen) {
-
-            this.spawnerBoundEntityNameField.setVisible(true);
-            this.spawnerBoundEntityModelIdentifierField.setVisible(true);
-            this.spawnerBoundEntityTextureIdentifierField.setVisible(true);
-            this.spawnerBoundEntityAnimationsIdentifierField.setVisible(true);
-            this.spawnerBoundEntityBoundingBoxHeightField.setVisible(true);
-            this.spawnerBoundEntityBoundingBoxWidthField.setVisible(true);
-            this.spawnerBoundEntityLootTableIdentifierField.setVisible(true);
-            this.closeSpawnerBoundEntityConfigScreenButton.visible = true;
-
-        } else if (this.showSpawnerBoundVillagerEntityConfigScreen) {
-
-            this.villagerProfessionIdentifierStringField.setVisible(true);
-            this.villagerTypeIdentifierStringField.setVisible(true);
-            this.villagerLevelField.setVisible(true);
-            this.closeSpawnerBoundVillagerEntityConfigScreenButton.visible = true;
-
-        } else {
-
             this.creativeScreenPageButton.visible = true;
 
             if (this.creativeScreenPage == CreativeScreenPage.MISC) {
@@ -445,21 +287,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 
                 this.cycleSpawningModeButton.visible = true;
 
-                this.cycleEntityModeButton.visible = true;
-
-                if (this.entityMode == TriggeredSpawnerBlockEntity.EntityMode.IDENTIFIER) {
-
                     this.entityTypeIdField.setVisible(true);
-
-                } else if (this.entityMode == TriggeredSpawnerBlockEntity.EntityMode.SPAWNER_BOUND_ENTITY) {
-
-                    this.openSpawnerBoundEntityConfigScreenButton.visible = true;
-
-                } else if (this.entityMode == TriggeredSpawnerBlockEntity.EntityMode.SPAWNER_BOUND_VILLAGER_ENTITY) {
-
-                    this.openSpawnerBoundVillagerEntityConfigScreenButton.visible = true;
-
-                }
 
             } else if (this.creativeScreenPage == CreativeScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
@@ -499,7 +327,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
             this.doneButton.visible = true;
             this.cancelButton.visible = true;
 
-        }
+//        }
     }
 
     @Override
@@ -509,8 +337,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
         String string = this.entitySpawnPositionOffsetXField.getText();
         String string1 = this.entitySpawnPositionOffsetYField.getText();
         String string2 = this.entitySpawnPositionOffsetZField.getText();
-//        String string2 = this.entitySpawnOrientationPitchField.getText();
-//        String string2 = this.entitySpawnOrientationYawField.getText();
         String string3 = this.spawningMode.asString();
         String string4 = this.entityTypeIdField.getText();
         String string5 = this.useRelayBlockPositionOffsetXField.getText();
@@ -525,8 +351,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
         this.entitySpawnPositionOffsetXField.setText(string);
         this.entitySpawnPositionOffsetYField.setText(string1);
         this.entitySpawnPositionOffsetZField.setText(string2);
-//        this.entitySpawnOrientationPitchField.setText(string2);
-//        this.entitySpawnOrientationYawField.setText(string2);
         this.spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.byName(string3).orElseGet(() -> TriggeredSpawnerBlockEntity.SpawningMode.ONCE);
         this.entityTypeIdField.setText(string4);
         this.useRelayBlockPositionOffsetXField.setText(string5);
@@ -593,13 +417,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
         ClientPlayNetworking.send(
                 new UpdateTriggeredSpawnerBlockPacket(
                         this.triggeredSpawnerBlock.getPos(),
-                        this.spawnerBoundEntityNameField.getText(),
-                        this.spawnerBoundEntityModelIdentifierField.getText(),
-                        this.spawnerBoundEntityTextureIdentifierField.getText(),
-                        this.spawnerBoundEntityAnimationsIdentifierField.getText(),
-                        ItemUtils.parseFloat(this.spawnerBoundEntityBoundingBoxHeightField.getText()),
-                        ItemUtils.parseFloat(this.spawnerBoundEntityBoundingBoxWidthField.getText()),
-                        this.spawnerBoundEntityLootTableIdentifierField.getText(),
                         new BlockPos(
                                 ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getText()),
                                 ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getText()),
@@ -608,7 +425,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
                         ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getText()),
                         ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getText()),
                         this.spawningMode.asString(),
-                        this.entityMode.asString(),
                         this.entityTypeIdField.getText(),
                         this.entityAttributeModifiersList,
                         new BlockPos(
@@ -621,10 +437,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
                                 ItemUtils.parseInt(this.useRelayBlockPositionOffsetXField.getText()),
                                 ItemUtils.parseInt(this.useRelayBlockPositionOffsetYField.getText()),
                                 ItemUtils.parseInt(this.useRelayBlockPositionOffsetZField.getText())
-                        ),
-                        this.villagerProfessionIdentifierStringField.getText(),
-                        this.villagerTypeIdentifierStringField.getText(),
-                        ItemUtils.parseInt(this.villagerLevelField.getText())
+                        )
                 )
         );
     }
@@ -634,33 +447,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 
         this.renderBackground(context);
 
-        if (this.showSpawnerBoundEntityConfigScreen) {
-
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_NAME_FIELD_LABLE_TEXT, this.width / 2 - 153, 10, 0xA0A0A0);
-            this.spawnerBoundEntityNameField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_MODEL_IDENTIFIER_FIELD_LABLE_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-            this.spawnerBoundEntityModelIdentifierField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_TEXTURE_IDENTIFIER_FIELD_LABLE_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-            this.spawnerBoundEntityTextureIdentifierField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_ANIMATIONS_IDENTIFIER_FIELD_LABLE_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-            this.spawnerBoundEntityAnimationsIdentifierField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_LOOT_TABLE_BOUNDING_BOX_HEIGHT_FIELD_LABLE_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-            this.spawnerBoundEntityBoundingBoxHeightField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_LOOT_TABLE_BOUNDING_BOX_WIDTH_FIELD_LABLE_TEXT, this.width / 2 + 5, 150, 0xA0A0A0);
-            this.spawnerBoundEntityBoundingBoxWidthField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_ENTITY_LOOT_TABLE_IDENTIFIER_FIELD_LABLE_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
-            this.spawnerBoundEntityLootTableIdentifierField.render(context, mouseX, mouseY, delta);
-
-        } else if (this.showSpawnerBoundVillagerEntityConfigScreen) {
-
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_VILLAGER_ENTITY_PROFESSION_IDENTIFIER_FIELD_LABLE_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-            this.villagerProfessionIdentifierStringField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_VILLAGER_ENTITY_TYPE_IDENTIFIER_FIELD_LABLE_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-            this.villagerTypeIdentifierStringField.render(context, mouseX, mouseY, delta);
-            context.drawTextWithShadow(this.textRenderer, SPAWNER_BOUND_VILLAGER_ENTITY_LEVEL_FIELD_LABLE_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-            this.villagerLevelField.render(context, mouseX, mouseY, delta);
-
-        } else {
             if (this.creativeScreenPage == CreativeScreenPage.MISC) {
                 context.drawTextWithShadow(this.textRenderer, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 50, 0xA0A0A0);
                 this.entitySpawnPositionOffsetXField.render(context, mouseX, mouseY, delta);
@@ -673,12 +459,10 @@ public class TriggeredSpawnerBlockScreen extends Screen {
                 this.entitySpawnOrientationYawField.render(context, mouseX, mouseY, delta);
 
                 context.drawTextWithShadow(this.textRenderer, SPAWNING_MODE_LABEL_TEXT, this.width / 2 - 153, 120, 0xA0A0A0);
-                context.drawTextWithShadow(this.textRenderer, ENTITY_MODE_LABEL_TEXT, this.width / 2 + 5, 120, 0xA0A0A0);
 
-                if (this.entityMode == TriggeredSpawnerBlockEntity.EntityMode.IDENTIFIER) {
                     context.drawTextWithShadow(this.textRenderer, ENTITY_TYPE_LABEL_TEXT, this.width / 2 - 153, 155, 0xA0A0A0);
                     this.entityTypeIdField.render(context, mouseX, mouseY, delta);
-                }
+//                }
             } else if (this.creativeScreenPage == CreativeScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
                 for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.entityAttributeModifiersList.size()); i++) {
@@ -710,7 +494,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
                 this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
                 this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
             }
-        }
+//        }
 
         super.render(context, mouseX, mouseY, delta);
     }
