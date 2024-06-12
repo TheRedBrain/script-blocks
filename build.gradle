@@ -34,11 +34,6 @@ repositories {
 	maven {
 		url 'https://jitpack.io'
 	}
-
-	// Azure Lib
-	maven {
-		url 'https://libs.azuredoom.com:4443/mods'
-	}
 }
 
 dependencies {
@@ -62,9 +57,6 @@ dependencies {
 	// Cardinal Components
 	modImplementation ("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
 	modImplementation ("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
-
-	// Azure Lib
-	modImplementation("mod.azure.azurelib:azurelib-fabric-${project.minecraft_version}:${project.azure_lib_version}")
 
 	// Mod Menu
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
@@ -112,8 +104,7 @@ modrinth {
 			new ModDependency('P7dR8mSH', 'required'), // Fabric API
 			new ModDependency('9s6osm5g', 'required'), // Cloth Config
 			new ModDependency('zJpHMkdD', 'required'), // Immersive Portals
-			new ModDependency('K01OU20C', 'required'), // Cardinal Components
-			new ModDependency('7zlUOZvb', 'required') // Azure Lib
+			new ModDependency('K01OU20C', 'required') // Cardinal Components
 	]
 	changelog = "${update_changelog}"
 }

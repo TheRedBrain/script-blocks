@@ -5,7 +5,7 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
-import com.github.theredbrain.scriptblocks.entity.mob.BossEntity;
+import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -268,12 +268,13 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
         if (bC.boss != null) {
             ScriptBlocksMod.info("bC.boss != null");
-            bC.setEntityType(bC.boss.bossEntityTypeId());
-            bC.currentPhaseId = 0;
-            bC.currentPhase = bC.boss.phases()[0];
-            if (spawnBossEntity(bC)) {
-                ScriptBlocksMod.info("boss spawned");
-                startPhase(bC);
+            if (bC.setEntityType(bC.boss.bossEntityTypeId())) {
+                bC.currentPhaseId = 0;
+                bC.currentPhase = bC.boss.phases()[0];
+                if (spawnBossEntity(bC)) {
+                    ScriptBlocksMod.info("boss spawned");
+                    startPhase(bC);
+                }
             }
         }
     }
@@ -342,11 +343,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         // modify boss entity
         if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
             Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
-            if (entity instanceof BossEntity) {
-                ((BossEntity) entity).setAnimationIdentifierString(bC.currentPhase.animationsIdentifierString());
-                ((BossEntity) entity).setModelIdentifierString(bC.currentPhase.modelIdentifierString());
-                ((BossEntity) entity).setTextureIdentifierString(bC.currentPhase.textureIdentifierString());
-                ((BossEntity) entity).setBossHealthThreshold(bC.currentPhase.bossHealthThreshold());
+            if (entity instanceof MobEntity) {
+                ((DuckMobEntityMixin) entity).scriptblocks$setBossHealthThreshold(bC.currentPhase.bossHealthThreshold());
+                ((DuckMobEntityMixin) entity).scriptblocks$setBossPhase(bC.currentPhaseId);
             }
             if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
                 AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
@@ -459,12 +458,6 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
                     ((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, entityNbt);
                 }
             }
-            if (entity2 instanceof BossEntity) {
-                ((BossEntity) entity2).setAnimationIdentifierString(bC.currentPhase.animationsIdentifierString());
-                ((BossEntity) entity2).setBossControllerBlockPos(bC.pos);
-                ((BossEntity) entity2).setModelIdentifierString(bC.currentPhase.modelIdentifierString());
-                ((BossEntity) entity2).setTextureIdentifierString(bC.currentPhase.textureIdentifierString());
-            }
             if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
                 ScriptBlocksMod.info("spawnNewEntityAndPassengers not successful");
                 return false;
@@ -474,22 +467,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
             if (entity2 instanceof LivingEntity) {
 
                 bC.bossEntityUuid = ((LivingEntity) entity2).getUuid();
-
-//                if (!this.entityAttributeModifiers.isEmpty()) {
-//                    AttributeContainer attributeContainer = ((LivingEntity)entity2).getAttributes();
-//                    this.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
-//                        EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
-//                        if (entityAttributeInstance != null) {
-//                            entityAttributeInstance.removeModifier(attributeModifier.getId());
-//                            entityAttributeInstance.addPersistentModifier((EntityAttributeModifier) attributeModifier);
-//                        }
-//                        if (attribute == EntityAttributes.GENERIC_MAX_HEALTH) {
-//                            ((LivingEntity)entity2).setHealth((float) ((LivingEntity)entity2).getAttributes().getValue(EntityAttributes.GENERIC_MAX_HEALTH));
-//                        }
-//                    });
-//                }
                 if (entity2 instanceof MobEntity mobEntity) {
                     mobEntity.setPersistent();
+                    ((DuckMobEntityMixin)mobEntity).scriptblocks$setControllerBlockPos(bC.pos);
                 }
             }
             return true;

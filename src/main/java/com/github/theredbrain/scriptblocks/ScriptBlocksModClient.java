@@ -4,9 +4,6 @@ import com.github.theredbrain.scriptblocks.client.gui.screen.ingame.DialogueBloc
 import com.github.theredbrain.scriptblocks.client.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.client.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.client.render.block.entity.*;
-import com.github.theredbrain.scriptblocks.client.render.renderer.BossEntityRenderer;
-import com.github.theredbrain.scriptblocks.client.render.renderer.SpawnerBoundEntityRenderer;
-import com.github.theredbrain.scriptblocks.client.render.renderer.SpawnerBoundVillagerEntityRenderer;
 import com.github.theredbrain.scriptblocks.config.ClientConfig;
 import com.github.theredbrain.scriptblocks.config.ClientConfigWrapper;
 import com.github.theredbrain.scriptblocks.registry.*;
@@ -15,7 +12,6 @@ import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
@@ -35,7 +31,6 @@ public class ScriptBlocksModClient implements ClientModInitializer {
 		KeyBindingsRegistry.registerKeyBindings();
 		registerTransparency();
 		registerBlockEntityRenderer();
-		registerEntityRenderer();
 		registerScreens();
 		EventsRegistry.initializeClientEvents();
 	}
@@ -74,12 +69,6 @@ public class ScriptBlocksModClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(EntityRegistry.AREA_BLOCK_ENTITY, StatusEffectApplierBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.RELAY_TRIGGER_BLOCK_ENTITY, RelayTriggerBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntityRenderer::new);
-	}
-
-	private void registerEntityRenderer() {
-		EntityRendererRegistry.register(EntityRegistry.BOSS_ENTITY, BossEntityRenderer::new);
-		EntityRendererRegistry.register(EntityRegistry.SPAWNER_BOUND_ENTITY, SpawnerBoundEntityRenderer::new);
-		EntityRendererRegistry.register(EntityRegistry.SPAWNER_BOUND_VILLAGER_ENTITY, SpawnerBoundVillagerEntityRenderer::new);
 	}
 
 	private void registerScreens() {

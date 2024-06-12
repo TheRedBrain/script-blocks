@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.entity.IsSpawnerBound;
+import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -57,6 +57,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
     private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
     private BlockPos useRelayBlockPositionOffset = new BlockPos(0, 0, 0);
 
+    // TODO remove
     String spawnerBoundEntityName = "";
     Identifier spawnerBoundEntityModelIdentifier = ScriptBlocksMod.identifier("spawner_bound_entity/default_spawner_bound_entity");;
     Identifier spawnerBoundEntityTextureIdentifier = ScriptBlocksMod.identifier("spawner_bound_entity/default_spawner_bound_entity");;
@@ -600,28 +601,28 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
             if (entity2 instanceof MobEntity) {
                 if (this.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
                     NbtCompound entityNbt = new NbtCompound();
-                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosX", this.pos.getX());
-                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosY", this.pos.getY());
-                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosZ", this.pos.getZ());
+//                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosX", this.pos.getX());
+//                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosY", this.pos.getY());
+//                    entityNbt.putInt("scriptblocks$boundSpawnerBlockPosZ", this.pos.getZ());
                     ((MobEntity)entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, entityNbt);
                 }
             }
-            if (entity2 instanceof IsSpawnerBound) {
-                ((IsSpawnerBound)entity2).setAnimationIdentifierString(this.spawnerBoundEntityAnimationsIdentifier.toString());
-                ((IsSpawnerBound)entity2).setBoundSpawnerBlockPos(this.pos);
-                ((IsSpawnerBound)entity2).setBoundingBoxHeight(this.spawnerBoundEntityBoundingBoxHeight);
-                ((IsSpawnerBound)entity2).setBoundingBoxWidth(this.spawnerBoundEntityBoundingBoxWidth);
-                ((IsSpawnerBound)entity2).setModelIdentifierString(this.spawnerBoundEntityModelIdentifier.toString());
-                ((IsSpawnerBound)entity2).setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
-                ((IsSpawnerBound)entity2).setTextureIdentifierString(this.spawnerBoundEntityTextureIdentifier.toString());
-//                ((SpawnerBoundEntity)entity2).setNoGravity(true);
-
-//                entityNbt.putString("spawnerBoundEntityName", this.spawnerBoundEntityName);
-
-//                if (this.spawnerBoundEntityLootTableIdentifier != null) {
-//                    entityNbt.putString("DeathLootTable", this.spawnerBoundEntityLootTableIdentifier.toString());
-//                }
-            }
+//            if (entity2 instanceof IsSpawnerBound) {
+//                ((IsSpawnerBound)entity2).setAnimationIdentifierString(this.spawnerBoundEntityAnimationsIdentifier.toString());
+//                ((IsSpawnerBound)entity2).setBoundSpawnerBlockPos(this.pos);
+//                ((IsSpawnerBound)entity2).setBoundingBoxHeight(this.spawnerBoundEntityBoundingBoxHeight);
+//                ((IsSpawnerBound)entity2).setBoundingBoxWidth(this.spawnerBoundEntityBoundingBoxWidth);
+//                ((IsSpawnerBound)entity2).setModelIdentifierString(this.spawnerBoundEntityModelIdentifier.toString());
+//                ((IsSpawnerBound)entity2).setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
+//                ((IsSpawnerBound)entity2).setTextureIdentifierString(this.spawnerBoundEntityTextureIdentifier.toString());
+////                ((SpawnerBoundEntity)entity2).setNoGravity(true);
+//
+////                entityNbt.putString("spawnerBoundEntityName", this.spawnerBoundEntityName);
+//
+////                if (this.spawnerBoundEntityLootTableIdentifier != null) {
+////                    entityNbt.putString("DeathLootTable", this.spawnerBoundEntityLootTableIdentifier.toString());
+////                }
+//            }
             if (entity2 instanceof VillagerDataContainer) {
                 ((VillagerDataContainer) entity2).setVillagerData(new VillagerData(
                         Registries.VILLAGER_TYPE.get(new Identifier(this.villagerType)),
@@ -653,6 +654,10 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
                 }
                 if (entity2 instanceof MobEntity mobEntity) {
                     mobEntity.setPersistent();
+
+                    // TODO make them optional
+                    ((DuckMobEntityMixin)mobEntity).scriptblocks$setControllerBlockPos(this.pos);
+                    ((DuckMobEntityMixin)mobEntity).scriptblocks$setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
                 }
             }
             return true;

@@ -2,30 +2,12 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.entity.*;
-import com.github.theredbrain.scriptblocks.entity.mob.BossEntity;
-import com.github.theredbrain.scriptblocks.entity.mob.SpawnerBoundEntity;
-import com.github.theredbrain.scriptblocks.entity.passive.SpawnerBoundVillagerEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
 public class EntityRegistry {
-
-    public static final EntityType<BossEntity> BOSS_ENTITY = Registry.register(Registries.ENTITY_TYPE,
-            ScriptBlocksMod.identifier("boss_entity"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, BossEntity::new).dimensions(new EntityDimensions(0.6F, 1.8F, false)).build());
-    public static final EntityType<SpawnerBoundEntity> SPAWNER_BOUND_ENTITY = Registry.register(Registries.ENTITY_TYPE,
-            ScriptBlocksMod.identifier("spawner_bound_entity"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, SpawnerBoundEntity::new).dimensions(new EntityDimensions(0.6F, 1.8F, false)).build());
-    public static final EntityType<SpawnerBoundVillagerEntity> SPAWNER_BOUND_VILLAGER_ENTITY = Registry.register(Registries.ENTITY_TYPE,
-            ScriptBlocksMod.identifier("spawner_bound_villager_entity"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, SpawnerBoundVillagerEntity::new).dimensions(new EntityDimensions(0.6F, 1.95F, false)).build());
 
     //region Script Blocks
     public static final BlockEntityType<InteractiveLootBlockEntity> INTERACTIVE_LOOT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
@@ -115,11 +97,5 @@ public class EntityRegistry {
     //endregion Script Blocks
 
     public static void init() {
-    }
-
-    public static void registerEntityAttributes() {
-        FabricDefaultAttributeRegistry.register(EntityRegistry.SPAWNER_BOUND_ENTITY, SpawnerBoundEntity.createLivingAttributes());
-        FabricDefaultAttributeRegistry.register(EntityRegistry.SPAWNER_BOUND_VILLAGER_ENTITY, SpawnerBoundVillagerEntity.createMobAttributes());
-        FabricDefaultAttributeRegistry.register(EntityRegistry.BOSS_ENTITY, BossEntity.createLivingAttributes());
     }
 }
