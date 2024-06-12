@@ -294,7 +294,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
     private static void endBattle(BossControllerBlockEntity bC) {
         endPhase(bC);
         bC.currentPhase = null;
-        if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
+        if (bC.boss.discardEntityAtEnd() && bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
             Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
             if (entity != null) {
                 entity.discard();
@@ -346,6 +346,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
                 ((BossEntity) entity).setAnimationIdentifierString(bC.currentPhase.animationsIdentifierString());
                 ((BossEntity) entity).setModelIdentifierString(bC.currentPhase.modelIdentifierString());
                 ((BossEntity) entity).setTextureIdentifierString(bC.currentPhase.textureIdentifierString());
+                ((BossEntity) entity).setBossHealthThreshold(bC.currentPhase.bossHealthThreshold());
             }
             if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
                 AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
@@ -408,8 +409,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         }
     }
 
-    public static void bossReachedHealthThreshold(int healthThreshold, BossControllerBlockEntity bC) {
-
+    public static void bossReachedHealthThreshold(BossControllerBlockEntity bC) {
+        advancePhase(bC);
     }
 
     private static Multimap<EntityAttribute, EntityAttributeModifier> getEntityAttributeModifiers(Boss.Phase phase) {

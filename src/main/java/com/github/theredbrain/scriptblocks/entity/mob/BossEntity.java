@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.entity.mob;
 
+import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import mod.azure.azurelib.animatable.GeoEntity;
 import mod.azure.azurelib.core.animatable.instance.AnimatableInstanceCache;
@@ -16,6 +17,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Arm;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -30,6 +32,7 @@ public class BossEntity extends LivingEntity implements GeoEntity {
     public static final TrackedData<String> MODEL_IDENTIFIER_STRING;
 //    public static final TrackedData<BlockPos> USE_RELAY_BLOCK_POS;
     public static final TrackedData<String> TEXTURE_IDENTIFIER_STRING;
+    public static final TrackedData<Integer> BOSS_HEALTH_THRESHOLD;
 
     public BossEntity(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -45,6 +48,7 @@ public class BossEntity extends LivingEntity implements GeoEntity {
         this.dataTracker.startTracking(MODEL_IDENTIFIER_STRING, "");
 //        this.dataTracker.startTracking(USE_RELAY_BLOCK_POS, new BlockPos(0, -100, 0));
         this.dataTracker.startTracking(TEXTURE_IDENTIFIER_STRING, "");
+        this.dataTracker.startTracking(BOSS_HEALTH_THRESHOLD, -1);
     }
 
     @Override
@@ -165,14 +169,19 @@ public class BossEntity extends LivingEntity implements GeoEntity {
 //    }
 
     @Override
-    public void onDeath(DamageSource damageSource) {
-        super.onDeath(damageSource);
-        if (this.getWorld() instanceof ServerWorld serverWorld && this.getBossControllerBlockPos() != null) {
-            BlockEntity blockEntity = serverWorld.getBlockEntity(this.getBossControllerBlockPos());
-            if (blockEntity instanceof TriggeredSpawnerBlockEntity triggeredSpawnerBlockEntity) {
-                triggeredSpawnerBlockEntity.onBoundEntityKilled();
+    public void setHealth(float health) {
+        float healthThreshold = this.getBossHealthThreshold();
+        if (health <= healthThreshold) {
+            health = healthThreshold;
+            this.getBossControllerBlockPos();
+            if (this.getWorld() instanceof ServerWorld serverWorld && this.getBossControllerBlockPos() != null) {
+                BlockEntity blockEntity = serverWorld.getBlockEntity(this.getBossControllerBlockPos());
+                if (blockEntity instanceof BossControllerBlockEntity bossControllerBlockEntity) {
+                    BossControllerBlockEntity.bossReachedHealthThreshold(bossControllerBlockEntity);
+                }
             }
         }
+        super.setHealth(health);
     }
 
     public BlockPos getBossControllerBlockPos() {
@@ -215,6 +224,13 @@ public class BossEntity extends LivingEntity implements GeoEntity {
     }
     public void setTextureIdentifierString(String textureIdentifierString) {
         this.dataTracker.set(TEXTURE_IDENTIFIER_STRING, textureIdentifierString);
+    }
+
+    public int getBossHealthThreshold() {
+        return this.dataTracker.get(BOSS_HEALTH_THRESHOLD);
+    }
+    public void setBossHealthThreshold(int bossHealthThreshold) {
+        this.dataTracker.set(BOSS_HEALTH_THRESHOLD, bossHealthThreshold);
     }
 
 //    public BlockPos getUseRelayBlockPos() {
@@ -273,5 +289,6 @@ public class BossEntity extends LivingEntity implements GeoEntity {
         MODEL_IDENTIFIER_STRING = DataTracker.registerData(BossEntity.class, TrackedDataHandlerRegistry.STRING);
 //        USE_RELAY_BLOCK_POS = DataTracker.registerData(BossEntity.class, TrackedDataHandlerRegistry.BLOCK_POS);
         TEXTURE_IDENTIFIER_STRING = DataTracker.registerData(BossEntity.class, TrackedDataHandlerRegistry.STRING);
+        BOSS_HEALTH_THRESHOLD = DataTracker.registerData(BossEntity.class, TrackedDataHandlerRegistry.INTEGER);
     }
 }
