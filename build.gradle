@@ -34,6 +34,16 @@ repositories {
 	maven {
 		url 'https://jitpack.io'
 	}
+
+	// Slot Customization API
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content {
+			includeGroup "maven.modrinth"
+		}
+	}
+
 }
 
 dependencies {
@@ -60,7 +70,10 @@ dependencies {
 
 	// Mod Menu
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
-	
+
+	// Slot Customization API
+	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
+
 }
 
 processResources {
@@ -104,7 +117,8 @@ modrinth {
 			new ModDependency('P7dR8mSH', 'required'), // Fabric API
 			new ModDependency('9s6osm5g', 'required'), // Cloth Config
 			new ModDependency('zJpHMkdD', 'required'), // Immersive Portals
-			new ModDependency('K01OU20C', 'required') // Cardinal Components
+			new ModDependency('K01OU20C', 'required'), // Cardinal Components
+			new ModDependency('QYZ7JTtD', 'required') // Slot Customization API
 	]
 	changelog = "${update_changelog}"
 }

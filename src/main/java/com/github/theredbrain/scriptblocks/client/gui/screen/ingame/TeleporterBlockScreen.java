@@ -10,9 +10,9 @@ import com.github.theredbrain.scriptblocks.network.packet.TeleportFromTeleporter
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockPacket;
 import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
-import com.github.theredbrain.scriptblocks.screen.DuckSlotMixin;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -681,7 +681,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
         this.cancelButton.visible = false;
 
         for (Slot slot : this.handler.slots) {
-            ((DuckSlotMixin) slot).scriptblocks$setDisabledOverride(true);
+            ((SlotCustomization) slot).slotcustomizationapi$setDisabledOverride(true);
         }
 
         if (this.showCreativeTab) {

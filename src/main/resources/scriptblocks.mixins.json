@@ -6,7 +6,6 @@
     "entity.mob.MobEntityMixin",
     "entity.player.PlayerEntityMixin",
     "item.ItemStackMixin",
-    "screen.SlotMixin",
     "server.network.ServerPlayerEntityMixin",
     "server.network.ServerPlayerInteractionManagerMixin",
     "structure.pool.StructurePoolBasedGeneratorMixin",

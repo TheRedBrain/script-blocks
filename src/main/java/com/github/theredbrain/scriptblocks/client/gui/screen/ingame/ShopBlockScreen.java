@@ -4,9 +4,9 @@ import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacket;
-import com.github.theredbrain.scriptblocks.screen.DuckSlotMixin;
 import com.github.theredbrain.scriptblocks.screen.ShopBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -156,7 +156,7 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
         }
 
         for (Slot slot : this.handler.slots) {
-            ((DuckSlotMixin) slot).scriptblocks$setDisabledOverride(this.showCreativeScreen);
+            ((SlotCustomization) slot).slotcustomizationapi$setDisabledOverride(this.showCreativeScreen);
         }
 
         this.backgroundWidth = 176;
