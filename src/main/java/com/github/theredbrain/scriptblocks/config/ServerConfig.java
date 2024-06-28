@@ -8,32 +8,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Config(
-        name = "server"
+		name = "server"
 )
 public class ServerConfig implements ConfigData {
-    @Comment("""
-            World Spawn is chosen randomly from the following lists.
-            It is recommended to set the gamerule 'spawnRadius' to 0.
-            """)
-    public boolean use_predefined_position_for_world_spawn = false;
-    @Comment("""
-            A random value from worldSpawnXList is chosen.
-            If worldSpawnYList and worldSpawnZList have an entry
-            at the same index, that is the new Spawn Point.
-            If not, the normal Spawn Point is used.
-            """)
-    public List<Integer> worldSpawnXList = new ArrayList<>();
-    public List<Integer> worldSpawnYList = new ArrayList<>();
-    public List<Integer> worldSpawnZList = new ArrayList<>();
-    @Comment("Set to 'true' for the vanilla behaviour")
-    public boolean shouldJigSawGenerationBeDeterministic = true;
-    @Comment("Set to 'true' for the vanilla behaviour")
-    public boolean shouldJigSawStructuresBeRandomlyRotated = true;
-    @Comment("Additional debug log is shown in the console.")
-    public boolean show_debug_log = false;
-    @Comment("Additional debug messages are send in game.")
-    public boolean show_debug_messages = false;
-    public ServerConfig() {
+	@Comment("""
+			World Spawn is chosen randomly from the following lists.
+			It is recommended to set the gamerule 'spawnRadius' to 0.
+			""")
+	public boolean use_predefined_position_for_world_spawn = false;
+	@Comment("""
+			A random value from worldSpawnXList is chosen.
+			If worldSpawnYList and worldSpawnZList have an entry
+			at the same index, that is the new Spawn Point.
+			If not, the normal Spawn Point is used.
+			""")
+	public List<Integer> worldSpawnXList = new ArrayList<>();
+	public List<Integer> worldSpawnYList = new ArrayList<>();
+	public List<Integer> worldSpawnZList = new ArrayList<>();
+	@Comment("Set to 'true' for the vanilla behaviour")
+	public boolean shouldJigSawGenerationBeDeterministic = true;
+	@Comment("Set to 'true' for the vanilla behaviour")
+	public boolean shouldJigSawStructuresBeRandomlyRotated = true;
+	@Comment("Additional debug log is shown in the console.")
+	public boolean show_debug_log = false;
+	@Comment("Additional debug messages are send in game.")
+	public boolean show_debug_messages = false;
 
-    }
+	public ServerConfig() {
+
+	}
 }

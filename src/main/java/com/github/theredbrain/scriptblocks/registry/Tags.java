@@ -6,7 +6,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 
 public class Tags {
-    //region EntityTags
+	//region EntityTags
 //    public static final TagKey<EntityType<?>> ATTACKS_WITH_BASHING = TagKey.of(RegistryKeys.ENTITY_TYPE, ScriptBlocksMod.identifier("attacks_with_bashing"));
 //    public static final TagKey<EntityType<?>> ATTACKS_WITH_PIERCING = TagKey.of(RegistryKeys.ENTITY_TYPE, ScriptBlocksMod.identifier("attacks_with_piercing"));
 //    public static final TagKey<EntityType<?>> ATTACKS_WITH_SLASHING = TagKey.of(RegistryKeys.ENTITY_TYPE, ScriptBlocksMod.identifier("attacks_with_slashing"));
@@ -106,11 +106,11 @@ public class Tags {
 //    public static final TagKey<DamageType> HAS_LIGHTNING_DIVISION_OF_0_9 = TagKey.of(RegistryKeys.DAMAGE_TYPE, ScriptBlocksMod.identifier("has_lightning_division_of_0_9"));
 //    public static final TagKey<DamageType> HAS_LIGHTNING_DIVISION_OF_1 = TagKey.of(RegistryKeys.DAMAGE_TYPE, ScriptBlocksMod.identifier("has_lightning_division_of_1"));
 
-    //endregion DamageTypeTags
-    //region ItemTags
-    public static final TagKey<Item> INTERACTIVE_STONE_BLOCK_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("tools/interactive_stone_block_tools"));
-    public static final TagKey<Item> INTERACTIVE_OAK_LOG_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("tools/interactive_oak_log_tools"));
-    public static final TagKey<Item> KEYS_FOR_LOCKED_USE_RELAY_CHEST = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("keys_for_locked_use_relay_chest"));
+	//endregion DamageTypeTags
+	//region ItemTags
+	public static final TagKey<Item> INTERACTIVE_STONE_BLOCK_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("tools/interactive_stone_block_tools"));
+	public static final TagKey<Item> INTERACTIVE_OAK_LOG_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("tools/interactive_oak_log_tools"));
+	public static final TagKey<Item> KEYS_FOR_LOCKED_USE_RELAY_CHEST = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("keys_for_locked_use_relay_chest"));
 //    public static final TagKey<Item> ADVENTURE_HOTBAR_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("adventure_hotbar_items"));
 //    public static final TagKey<Item> ATTACK_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("attack_items"));
 //    public static final TagKey<Item> TWO_HANDED_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("two_handed_items"));
@@ -146,5 +146,5 @@ public class Tags {
 //
 //    // special necklaces
 //    public static final TagKey<Item> TELEPORT_HOME_NECKLACES = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("teleport_home_necklaces"));
-    //endregion ItemTags
+	//endregion ItemTags
 }

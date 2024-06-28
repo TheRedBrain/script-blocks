@@ -18,36 +18,36 @@ import qouteall.q_misc_util.api.DimensionAPI;
 
 public class DimensionsManager {
 
-    public static void init() {
+	public static void init() {
 //        DimensionAPI.suppressExperimentalWarningForNamespace("scriptblocks");
 //        DimensionAPI.registerDimensionTemplate(
 //                "player_locations", PLAYER_LOCATIONS_DIMENSION_TEMPLATE
 //        );
-    }
+	}
 
-    public static void addAndSaveDynamicDimension(Identifier dimensionId, MinecraftServer server) {
-        // may throw exception here
-        DynamicRegistryManager manager = server.getRegistryManager();
+	public static void addAndSaveDynamicDimension(Identifier dimensionId, MinecraftServer server) {
+		// may throw exception here
+		DynamicRegistryManager manager = server.getRegistryManager();
 
-        Registry<DimensionType> dimensionTypeRegistry = manager.get(RegistryKeys.DIMENSION_TYPE);
+		Registry<DimensionType> dimensionTypeRegistry = manager.get(RegistryKeys.DIMENSION_TYPE);
 
-        RegistryEntry.Reference<DimensionType> dimensionTypeReference = dimensionTypeRegistry.entryOf(RegistryKey.of(RegistryKeys.DIMENSION_TYPE, new Identifier("overworld")));
+		RegistryEntry.Reference<DimensionType> dimensionTypeReference = dimensionTypeRegistry.entryOf(RegistryKey.of(RegistryKeys.DIMENSION_TYPE, new Identifier("overworld")));
 
-        Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = manager.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
+		Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = manager.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
 
-        RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocksMod.identifier("player_locations_dimension")));
+		RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocksMod.identifier("player_locations_dimension")));
 
-        FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
+		FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
 // add the dimension
-        DimensionAPI.addDimensionDynamically(
-                dimensionId,
-                new DimensionOptions(
-                        dimensionTypeReference,
-                        chunkGenerator
-    )
-);
+		DimensionAPI.addDimensionDynamically(
+				dimensionId,
+				new DimensionOptions(
+						dimensionTypeReference,
+						chunkGenerator
+				)
+		);
 //        DimensionAPI.addDimensionDynamically(server, dimensionId, PLAYER_LOCATIONS_DIMENSION_TEMPLATE.createLevelStem(server));
-    }
+	}
 
 //    public static final DimensionTemplate PLAYER_LOCATIONS_DIMENSION_TEMPLATE = new DimensionTemplate(
 //            DimensionTypes.OVERWORLD,

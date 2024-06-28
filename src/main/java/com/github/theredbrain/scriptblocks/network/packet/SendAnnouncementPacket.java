@@ -7,26 +7,28 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 
 public class SendAnnouncementPacket implements FabricPacket {
-    public static final PacketType<SendAnnouncementPacket> TYPE = PacketType.create(
-            ScriptBlocksMod.identifier("send_announcement"),
-            SendAnnouncementPacket::new
-    );
+	public static final PacketType<SendAnnouncementPacket> TYPE = PacketType.create(
+			ScriptBlocksMod.identifier("send_announcement"),
+			SendAnnouncementPacket::new
+	);
 
-    public final Text announcement;
+	public final Text announcement;
 
-    public SendAnnouncementPacket(Text announcement) {
-        this.announcement = announcement;
-    }
+	public SendAnnouncementPacket(Text announcement) {
+		this.announcement = announcement;
+	}
 
-    public SendAnnouncementPacket(PacketByteBuf buf) {
-        this(buf.readText());
-    }
-    @Override
-    public PacketType<?> getType() {
-        return TYPE;
-    }
-    @Override
-    public void write(PacketByteBuf buf) {
-        buf.writeText(this.announcement);
-    }
+	public SendAnnouncementPacket(PacketByteBuf buf) {
+		this(buf.readText());
+	}
+
+	@Override
+	public PacketType<?> getType() {
+		return TYPE;
+	}
+
+	@Override
+	public void write(PacketByteBuf buf) {
+		buf.writeText(this.announcement);
+	}
 }

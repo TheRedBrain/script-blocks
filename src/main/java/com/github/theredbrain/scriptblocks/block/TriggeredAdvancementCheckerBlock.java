@@ -15,33 +15,33 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class TriggeredAdvancementCheckerBlock extends RotatedBlockWithEntity {
-    public TriggeredAdvancementCheckerBlock(Settings settings) {
-        super(settings);
-    }
+	public TriggeredAdvancementCheckerBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<TriggeredAdvancementCheckerBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<TriggeredAdvancementCheckerBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new TriggeredAdvancementCheckerBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new TriggeredAdvancementCheckerBlockEntity(pos, state);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlockEntity);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlockEntity);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }

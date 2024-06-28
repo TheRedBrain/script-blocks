@@ -31,124 +31,124 @@ import java.util.List;
 
 public class ShopBlockScreenHandler extends ScreenHandler {
 
-    private PlayerInventory playerInventory;
-    private final World world;
-    private ShopBlockEntity shopBlockEntity;
-    private @Nullable Shop shop;
-    private List<Shop.Deal> dealsList = new ArrayList<>(List.of());
-    private List<Shop.Deal> unlockedDealsList = new ArrayList<>(List.of());
-    private List<Shop.Deal> stockedDealsList = new ArrayList<>(List.of());
-    private int unlockedDealsCounter = 0;
-    private int stockedDealsCounter = 0;
-    Runnable contentsChangedListener = () -> {
-    };
-    public final Inventory inventory = new SimpleInventory(9) {
-        @Override
-        public int getMaxCountPerStack() {
-            return 999;
-        }
+	private PlayerInventory playerInventory;
+	private final World world;
+	private ShopBlockEntity shopBlockEntity;
+	private @Nullable Shop shop;
+	private List<Shop.Deal> dealsList = new ArrayList<>(List.of());
+	private List<Shop.Deal> unlockedDealsList = new ArrayList<>(List.of());
+	private List<Shop.Deal> stockedDealsList = new ArrayList<>(List.of());
+	private int unlockedDealsCounter = 0;
+	private int stockedDealsCounter = 0;
+	Runnable contentsChangedListener = () -> {
+	};
+	public final Inventory inventory = new SimpleInventory(9) {
+		@Override
+		public int getMaxCountPerStack() {
+			return 999;
+		}
 
-        @Override
-        public void markDirty() {
-            super.markDirty();
-            ShopBlockScreenHandler.this.onContentChanged(this);
-            ShopBlockScreenHandler.this.contentsChangedListener.run();
-        }
-    };
+		@Override
+		public void markDirty() {
+			super.markDirty();
+			ShopBlockScreenHandler.this.onContentChanged(this);
+			ShopBlockScreenHandler.this.contentsChangedListener.run();
+		}
+	};
 
-    private BlockPos blockPos;
+	private BlockPos blockPos;
 
-    private boolean showCreativeTab;
+	private boolean showCreativeTab;
 
-    public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-        this(syncId, playerInventory, buf.readBlockPos(), playerInventory.player.isCreativeLevelTwoOp());
-    }
+	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+		this(syncId, playerInventory, buf.readBlockPos(), playerInventory.player.isCreativeLevelTwoOp());
+	}
 
-    public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, BlockPos blockPos, boolean showCreativeTab) {
-        super(ScreenHandlerTypesRegistry.SHOP_BLOCK_SCREEN_HANDLER, syncId);
-        this.playerInventory = playerInventory;
-        this.world = playerInventory.player.getWorld();
-        this.blockPos = blockPos;
-        this.showCreativeTab = showCreativeTab;
-        BlockEntity blockEntity = this.world.getBlockEntity(this.blockPos);
-        if (blockEntity instanceof ShopBlockEntity) {
-            this.shopBlockEntity = (ShopBlockEntity) blockEntity;
-            Shop shop = null;
-            String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
-            if (!shopIdentifier.equals("")) {
-                shop = ShopsRegistry.getShop(new Identifier(shopIdentifier));
-            }
-            this.shop = shop;
-            if (shop != null) {
-                this.dealsList = shop.getDealList();
-            }
-        }
-        int i;
-        // hotbar
-        for (i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 188));
-        }
-        // main inventory
-        for (i = 0; i < 3; ++i) {
-            for (int j = 0; j < 9; ++j) {
-                this.addSlot(new Slot(playerInventory, j + (i + 1) * 9, 8 + j * 18, 130 + i * 18));
-            }
-        }
-        // player offers
-        for (i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(inventory, i, 8 + i * 18, 98));
-        }
-    }
+	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, BlockPos blockPos, boolean showCreativeTab) {
+		super(ScreenHandlerTypesRegistry.SHOP_BLOCK_SCREEN_HANDLER, syncId);
+		this.playerInventory = playerInventory;
+		this.world = playerInventory.player.getWorld();
+		this.blockPos = blockPos;
+		this.showCreativeTab = showCreativeTab;
+		BlockEntity blockEntity = this.world.getBlockEntity(this.blockPos);
+		if (blockEntity instanceof ShopBlockEntity) {
+			this.shopBlockEntity = (ShopBlockEntity) blockEntity;
+			Shop shop = null;
+			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
+			if (!shopIdentifier.equals("")) {
+				shop = ShopsRegistry.getShop(new Identifier(shopIdentifier));
+			}
+			this.shop = shop;
+			if (shop != null) {
+				this.dealsList = shop.getDealList();
+			}
+		}
+		int i;
+		// hotbar
+		for (i = 0; i < 9; ++i) {
+			this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 188));
+		}
+		// main inventory
+		for (i = 0; i < 3; ++i) {
+			for (int j = 0; j < 9; ++j) {
+				this.addSlot(new Slot(playerInventory, j + (i + 1) * 9, 8 + j * 18, 130 + i * 18));
+			}
+		}
+		// player offers
+		for (i = 0; i < 9; ++i) {
+			this.addSlot(new Slot(inventory, i, 8 + i * 18, 98));
+		}
+	}
 
-    public BlockPos getBlockPos() {
-        return this.blockPos;
-    }
+	public BlockPos getBlockPos() {
+		return this.blockPos;
+	}
 
-    public boolean getShowCreativeTab() {
-        return this.showCreativeTab;
-    }
+	public boolean getShowCreativeTab() {
+		return this.showCreativeTab;
+	}
 
-    public ShopBlockEntity getShopBlockEntity() {
-        return this.shopBlockEntity;
-    }
+	public ShopBlockEntity getShopBlockEntity() {
+		return this.shopBlockEntity;
+	}
 
-    @Nullable
-    public Shop getShop() {
-        return this.shop;
-    }
+	@Nullable
+	public Shop getShop() {
+		return this.shop;
+	}
 
-    public List<Shop.Deal> getDealsList() {
-        return this.dealsList;
-    }
+	public List<Shop.Deal> getDealsList() {
+		return this.dealsList;
+	}
 
-    public List<Shop.Deal> getUnlockedDealsList() {
-        return this.unlockedDealsList;
-    }
+	public List<Shop.Deal> getUnlockedDealsList() {
+		return this.unlockedDealsList;
+	}
 
-    public List<Shop.Deal> getStockedDealsList() {
-        return this.stockedDealsList;
-    }
+	public List<Shop.Deal> getStockedDealsList() {
+		return this.stockedDealsList;
+	}
 
-    public int getUnlockedDealsCounter() {
-        return this.unlockedDealsCounter;
-    }
+	public int getUnlockedDealsCounter() {
+		return this.unlockedDealsCounter;
+	}
 
-    public int getStockedDealsCounter() {
-        return this.stockedDealsCounter;
-    }
+	public int getStockedDealsCounter() {
+		return this.stockedDealsCounter;
+	}
 
-    public Inventory getInventory() {
-        return this.inventory;
-    }
+	public Inventory getInventory() {
+		return this.inventory;
+	}
 
-    public void setContentsChangedListener(Runnable contentsChangedListener) {
-        this.contentsChangedListener = contentsChangedListener;
-    }
+	public void setContentsChangedListener(Runnable contentsChangedListener) {
+		this.contentsChangedListener = contentsChangedListener;
+	}
 
-    @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
-        ItemStack itemStack = ItemStack.EMPTY;
-        // TODO
+	@Override
+	public ItemStack quickMove(PlayerEntity player, int slot) {
+		ItemStack itemStack = ItemStack.EMPTY;
+		// TODO
 //        Slot slot2 = this.slots.get(slot);
 //        if (slot2 != null && slot2.hasStack()) {
 //            ItemStack itemStack2 = slot2.getStack();
@@ -190,55 +190,55 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 //            }
 //        }
 //
-        return itemStack;
-    }
+		return itemStack;
+	}
 
-    @Override
-    public boolean canUse(PlayerEntity player) {
-        return true;
-    }
+	@Override
+	public boolean canUse(PlayerEntity player) {
+		return true;
+	}
 
-    @Override
-    public boolean onButtonClick(PlayerEntity player, int id) {
-        if (id < this.stockedDealsList.size()) {
-            Shop.Deal currentDeal = this.stockedDealsList.get(id);
-            if (currentDeal != null && player instanceof  ServerPlayerEntity serverPlayerEntity) {
-                ServerPlayNetworking.send(serverPlayerEntity,
-                        new TradeWithShopPacket(
-                                this.shopBlockEntity.getShopIdentifier(),
-                                id
-                        )
-                );
-            }
-        }
-        return true;
-    }
+	@Override
+	public boolean onButtonClick(PlayerEntity player, int id) {
+		if (id < this.stockedDealsList.size()) {
+			Shop.Deal currentDeal = this.stockedDealsList.get(id);
+			if (currentDeal != null && player instanceof ServerPlayerEntity serverPlayerEntity) {
+				ServerPlayNetworking.send(serverPlayerEntity,
+						new TradeWithShopPacket(
+								this.shopBlockEntity.getShopIdentifier(),
+								id
+						)
+				);
+			}
+		}
+		return true;
+	}
 
-    @Override
-    public void onClosed(PlayerEntity player) {
-        super.onClosed(player);
-        if (player instanceof ServerPlayerEntity) {
-            this.dropInventory(player, this.inventory);
-        }
-    }
+	@Override
+	public void onClosed(PlayerEntity player) {
+		super.onClosed(player);
+		if (player instanceof ServerPlayerEntity) {
+			this.dropInventory(player, this.inventory);
+		}
+	}
 
-    public void calculateUnlockedAndStockedDeals() {
+	public void calculateUnlockedAndStockedDeals() {
 
-        ScriptBlocksMod.info("calculateUnlockedAndStockedDeals");
+		ScriptBlocksMod.info("calculateUnlockedAndStockedDeals");
 
 //        ClientAdvancementManager advancementHandler = null;
-        PlayerAdvancementTracker playerAdvancementTracker = null;
-        ServerAdvancementLoader serverAdvancementLoader = null;
+		PlayerAdvancementTracker playerAdvancementTracker = null;
+		ServerAdvancementLoader serverAdvancementLoader = null;
 
-        if (this.playerInventory.player instanceof ServerPlayerEntity serverPlayerEntity) {
-            playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
-            MinecraftServer minecraftServer = serverPlayerEntity.getServer();
-            if (minecraftServer != null) {
-                serverAdvancementLoader = minecraftServer.getAdvancementLoader();
-            }
-        }
-        String lockAdvancementIdentifier;
-        String unlockAdvancementIdentifier;
+		if (this.playerInventory.player instanceof ServerPlayerEntity serverPlayerEntity) {
+			playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
+			MinecraftServer minecraftServer = serverPlayerEntity.getServer();
+			if (minecraftServer != null) {
+				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
+			}
+		}
+		String lockAdvancementIdentifier;
+		String unlockAdvancementIdentifier;
 
 //        if (this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity) {
 //
@@ -247,54 +247,54 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 //            advancementHandler = clientPlayerEntity.networkHandler.getAdvancementHandler();
 //        }
 
-        if (playerAdvancementTracker != null && serverAdvancementLoader != null) {
-            this.unlockedDealsList.clear();
-            this.unlockedDealsCounter = 0;
+		if (playerAdvancementTracker != null && serverAdvancementLoader != null) {
+			this.unlockedDealsList.clear();
+			this.unlockedDealsCounter = 0;
 
-            ScriptBlocksMod.info("advancementHandler != null");
+			ScriptBlocksMod.info("advancementHandler != null");
 
-            ScriptBlocksMod.info("this.dealsList.size(): " + this.dealsList.size());
+			ScriptBlocksMod.info("this.dealsList.size(): " + this.dealsList.size());
 
-            for (int i = 0; i < this.dealsList.size(); i++) {
+			for (int i = 0; i < this.dealsList.size(); i++) {
 
-                Shop.Deal deal = this.dealsList.get(i);
-                lockAdvancementIdentifier = deal.getLockAdvancement();
-                unlockAdvancementIdentifier = deal.getUnlockAdvancement();
+				Shop.Deal deal = this.dealsList.get(i);
+				lockAdvancementIdentifier = deal.getLockAdvancement();
+				unlockAdvancementIdentifier = deal.getUnlockAdvancement();
 
 //                AdvancementEntry lockAdvancementEntry = null;
-                Advancement lockAdvancement = null;
-                if (!lockAdvancementIdentifier.isEmpty()) {
-                    lockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementIdentifier));
-                }
+				Advancement lockAdvancement = null;
+				if (!lockAdvancementIdentifier.isEmpty()) {
+					lockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementIdentifier));
+				}
 //                AdvancementEntry unlockAdvancementEntry = null;
-                Advancement unlockAdvancement = null;
-                if (!unlockAdvancementIdentifier.isEmpty()) {
-                    unlockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementIdentifier));
-                }
-                if ((lockAdvancementIdentifier.isEmpty() || (lockAdvancement != null && !playerAdvancementTracker.getProgress(lockAdvancement).isDone())) &&
-                        (unlockAdvancementIdentifier.isEmpty() || (unlockAdvancement != null && playerAdvancementTracker.getProgress(unlockAdvancement).isDone()))) {
-                    this.unlockedDealsList.add(deal);
-                    this.unlockedDealsCounter++;
-                } else {
-                    this.unlockedDealsList.add(null);
-                }
-            }
-        }
+				Advancement unlockAdvancement = null;
+				if (!unlockAdvancementIdentifier.isEmpty()) {
+					unlockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementIdentifier));
+				}
+				if ((lockAdvancementIdentifier.isEmpty() || (lockAdvancement != null && !playerAdvancementTracker.getProgress(lockAdvancement).isDone())) &&
+						(unlockAdvancementIdentifier.isEmpty() || (unlockAdvancement != null && playerAdvancementTracker.getProgress(unlockAdvancement).isDone()))) {
+					this.unlockedDealsList.add(deal);
+					this.unlockedDealsCounter++;
+				} else {
+					this.unlockedDealsList.add(null);
+				}
+			}
+		}
 
-        this.stockedDealsList.clear();
-        this.stockedDealsCounter = 0;
-        for (Shop.Deal deal : this.unlockedDealsList) {
-            if (deal != null) {
-                // TODO keep track of times traded, per player or per block, depending on deal.
+		this.stockedDealsList.clear();
+		this.stockedDealsCounter = 0;
+		for (Shop.Deal deal : this.unlockedDealsList) {
+			if (deal != null) {
+				// TODO keep track of times traded, per player or per block, depending on deal.
 //                int dealMaxStockCount = deal.getMaxStockCount();
 //                if (dealMaxStockCount == -1) {
 //                  this.stockedDealsList.add(deal);
 //                }
-                this.stockedDealsList.add(deal);
-                this.stockedDealsCounter++;
-            } else {
-                this.stockedDealsList.add(null);
-            }
-        }
-    }
+				this.stockedDealsList.add(deal);
+				this.stockedDealsCounter++;
+			} else {
+				this.stockedDealsList.add(null);
+			}
+		}
+	}
 }

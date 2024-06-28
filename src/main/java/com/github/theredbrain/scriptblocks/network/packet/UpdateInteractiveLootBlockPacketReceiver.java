@@ -12,27 +12,27 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateInteractiveLootBlockPacket> {
-    @Override
-    public void receive(UpdateInteractiveLootBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateInteractiveLootBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos interactiveLootBlockPosition = packet.interactiveLootBlockPosition;
+		BlockPos interactiveLootBlockPosition = packet.interactiveLootBlockPosition;
 
-        String lootTableIdentifierString = packet.lootTableIdentifierString;
+		String lootTableIdentifierString = packet.lootTableIdentifierString;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        BlockEntity blockEntity = world.getBlockEntity(interactiveLootBlockPosition);
-        BlockState blockState = world.getBlockState(interactiveLootBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(interactiveLootBlockPosition);
+		BlockState blockState = world.getBlockState(interactiveLootBlockPosition);
 
-        if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
-            interactiveLootBlockEntity.setLootTableIdentifierString(lootTableIdentifierString);
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            interactiveLootBlockEntity.markDirty();
-            world.updateListeners(interactiveLootBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
+			interactiveLootBlockEntity.setLootTableIdentifierString(lootTableIdentifierString);
+			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			interactiveLootBlockEntity.markDirty();
+			world.updateListeners(interactiveLootBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

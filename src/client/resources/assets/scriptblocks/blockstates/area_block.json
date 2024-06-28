@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "": {
-      "model": "scriptblocks:block/area_block"
-    }
-  }
+	"variants": {
+		"": {
+			"model": "scriptblocks:block/area_block"
+		}
+	}
 }

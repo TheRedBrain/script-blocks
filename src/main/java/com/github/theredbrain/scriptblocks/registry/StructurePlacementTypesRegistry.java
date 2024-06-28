@@ -7,11 +7,11 @@ import net.minecraft.registry.Registry;
 import net.minecraft.world.gen.chunk.placement.StructurePlacementType;
 
 public class StructurePlacementTypesRegistry {
-    public static StructurePlacementType<FixedStructurePlacement> FIXED = () -> {
-        return FixedStructurePlacement.CODEC;
-    };
+	public static StructurePlacementType<FixedStructurePlacement> FIXED = () -> {
+		return FixedStructurePlacement.CODEC;
+	};
 
-    public static void register() {
-        Registry.register(Registries.STRUCTURE_PLACEMENT, ScriptBlocksMod.identifier("fixed"), FIXED);
-    }
+	public static void register() {
+		Registry.register(Registries.STRUCTURE_PLACEMENT, ScriptBlocksMod.identifier("fixed"), FIXED);
+	}
 }

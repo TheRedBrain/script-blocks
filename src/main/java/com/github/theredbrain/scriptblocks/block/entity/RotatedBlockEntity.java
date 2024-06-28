@@ -9,33 +9,34 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public abstract class RotatedBlockEntity extends BlockEntity {
-    protected int rotated = 0;
-    protected boolean x_mirrored = false;
-    protected boolean z_mirrored = false;
-    public RotatedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(type, pos, state);
-    }
+	protected int rotated = 0;
+	protected boolean x_mirrored = false;
+	protected boolean z_mirrored = false;
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
+	public RotatedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
+	}
 
-        nbt.putInt("rotated", this.rotated);
-        nbt.putBoolean("x_mirrored", this.x_mirrored);
-        nbt.putBoolean("z_mirrored", this.z_mirrored);
-    }
+	@Override
+	protected void writeNbt(NbtCompound nbt) {
+		super.writeNbt(nbt);
 
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
+		nbt.putInt("rotated", this.rotated);
+		nbt.putBoolean("x_mirrored", this.x_mirrored);
+		nbt.putBoolean("z_mirrored", this.z_mirrored);
+	}
 
-        this.rotated = MathHelper.clamp(nbt.getInt("rotated"), 0, 3);
-        this.x_mirrored = nbt.getBoolean("x_mirrored");
-        this.z_mirrored = nbt.getBoolean("z_mirrored");
-        if (this.getCachedState().getBlock() instanceof RotatedBlockWithEntity) {
-            this.onRotate(this.getCachedState());
-        }
-    }
+	@Override
+	public void readNbt(NbtCompound nbt) {
+		super.readNbt(nbt);
 
-    protected abstract void onRotate(BlockState state);
+		this.rotated = MathHelper.clamp(nbt.getInt("rotated"), 0, 3);
+		this.x_mirrored = nbt.getBoolean("x_mirrored");
+		this.z_mirrored = nbt.getBoolean("z_mirrored");
+		if (this.getCachedState().getBlock() instanceof RotatedBlockWithEntity) {
+			this.onRotate(this.getCachedState());
+		}
+	}
+
+	protected abstract void onRotate(BlockState state);
 }

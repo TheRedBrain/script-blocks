@@ -15,33 +15,33 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class EntranceDelegationBlock extends RotatedBlockWithEntity {
-    public EntranceDelegationBlock(Settings settings) {
-        super(settings);
-    }
+	public EntranceDelegationBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<EntranceDelegationBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<EntranceDelegationBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new EntranceDelegationBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new EntranceDelegationBlockEntity(pos, state);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openEntranceDelegationBlockScreen(entranceDelegationBlockEntity);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openEntranceDelegationBlockScreen(entranceDelegationBlockEntity);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }

@@ -12,34 +12,34 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class UpdateUseRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateUseRelayBlockPacket> {
-    @Override
-    public void receive(UpdateUseRelayBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateUseRelayBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos useRelayBlockPosition = packet.useRelayBlockPosition;
+		BlockPos useRelayBlockPosition = packet.useRelayBlockPosition;
 
-        BlockPos relayBlockPositionOffset = packet.relayBlockPositionOffset;
+		BlockPos relayBlockPositionOffset = packet.relayBlockPositionOffset;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        boolean updateSuccessful = true;
+		boolean updateSuccessful = true;
 
-        BlockEntity blockEntity = world.getBlockEntity(useRelayBlockPosition);
-        BlockState blockState = world.getBlockState(useRelayBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(useRelayBlockPosition);
+		BlockState blockState = world.getBlockState(useRelayBlockPosition);
 
-        if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
-            if (!useRelayBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset)) {
-                player.sendMessage(Text.translatable("use_relay_block.relayBlockPositionOffset.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (updateSuccessful) {
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            }
-            useRelayBlockEntity.markDirty();
-            world.updateListeners(useRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
+			if (!useRelayBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset)) {
+				player.sendMessage(Text.translatable("use_relay_block.relayBlockPositionOffset.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (updateSuccessful) {
+				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
+			useRelayBlockEntity.markDirty();
+			world.updateListeners(useRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

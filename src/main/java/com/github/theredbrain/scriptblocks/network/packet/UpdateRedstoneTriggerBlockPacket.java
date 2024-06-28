@@ -7,35 +7,37 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 
 public class UpdateRedstoneTriggerBlockPacket implements FabricPacket {
-    public static final PacketType<UpdateRedstoneTriggerBlockPacket> TYPE = PacketType.create(
-            ScriptBlocksMod.identifier("update_redstone_trigger_block"),
-            UpdateRedstoneTriggerBlockPacket::new
-    );
+	public static final PacketType<UpdateRedstoneTriggerBlockPacket> TYPE = PacketType.create(
+			ScriptBlocksMod.identifier("update_redstone_trigger_block"),
+			UpdateRedstoneTriggerBlockPacket::new
+	);
 
-    public final BlockPos redstoneTriggerBlockPosition;
+	public final BlockPos redstoneTriggerBlockPosition;
 
-    public final BlockPos triggeredBlockPositionOffset;
+	public final BlockPos triggeredBlockPositionOffset;
 
-    public final boolean triggeredBlockResets;
+	public final boolean triggeredBlockResets;
 
-    public UpdateRedstoneTriggerBlockPacket(BlockPos redstoneTriggerBlockPosition, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets) {
-        this.redstoneTriggerBlockPosition = redstoneTriggerBlockPosition;
-        this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
-        this.triggeredBlockResets = triggeredBlockResets;
-    }
+	public UpdateRedstoneTriggerBlockPacket(BlockPos redstoneTriggerBlockPosition, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets) {
+		this.redstoneTriggerBlockPosition = redstoneTriggerBlockPosition;
+		this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
+		this.triggeredBlockResets = triggeredBlockResets;
+	}
 
-    public UpdateRedstoneTriggerBlockPacket(PacketByteBuf buf) {
-        this(buf.readBlockPos(), buf.readBlockPos(), buf.readBoolean());
-    }
-    @Override
-    public PacketType<?> getType() {
-        return TYPE;
-    }
-    @Override
-    public void write(PacketByteBuf buf) {
-        buf.writeBlockPos(this.redstoneTriggerBlockPosition);
-        buf.writeBlockPos(this.triggeredBlockPositionOffset);
-        buf.writeBoolean(this.triggeredBlockResets);
-    }
+	public UpdateRedstoneTriggerBlockPacket(PacketByteBuf buf) {
+		this(buf.readBlockPos(), buf.readBlockPos(), buf.readBoolean());
+	}
+
+	@Override
+	public PacketType<?> getType() {
+		return TYPE;
+	}
+
+	@Override
+	public void write(PacketByteBuf buf) {
+		buf.writeBlockPos(this.redstoneTriggerBlockPosition);
+		buf.writeBlockPos(this.triggeredBlockPositionOffset);
+		buf.writeBoolean(this.triggeredBlockResets);
+	}
 
 }

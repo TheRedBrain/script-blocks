@@ -24,50 +24,55 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = ServerPlayerInteractionManager.class, priority = 950)
 public abstract class ServerPlayerInteractionManagerMixin {
 
-    @Shadow @Final protected ServerPlayerEntity player;
+	@Shadow
+	@Final
+	protected ServerPlayerEntity player;
 
-    @Shadow protected ServerWorld world;
+	@Shadow
+	protected ServerWorld world;
 
-    @Shadow private GameMode gameMode;
+	@Shadow
+	private GameMode gameMode;
 
-    @Shadow public abstract void finishMining(BlockPos pos, int sequence, String reason);
+	@Shadow
+	public abstract void finishMining(BlockPos pos, int sequence, String reason);
 
-    @Inject(method = "processBlockBreakingAction", at = @At("HEAD"), cancellable = true)
-    public void processBlockBreakingAction(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
-        if (action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
-            if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
-                this.finishMining(pos, sequence, "creative destroy");
-                ci.cancel();
-            }
-        }
+	@Inject(method = "processBlockBreakingAction", at = @At("HEAD"), cancellable = true)
+	public void processBlockBreakingAction(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
+		if (action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
+			if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+				this.finishMining(pos, sequence, "creative destroy");
+				ci.cancel();
+			}
+		}
 
-    }
+	}
 
-    @Inject(method = "tryBreakBlock", at = @At("HEAD"), cancellable = true)
-    public void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
-            BlockState blockState = this.world.getBlockState(pos);
-            BlockEntity blockEntity = this.world.getBlockEntity(pos);
-            Block block = blockState.getBlock();
-            if (block instanceof OperatorBlock && !this.player.isCreativeLevelTwoOp()) {
-                this.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL);
-                cir.setReturnValue(false);
-                cir.cancel();
-            }
-            block.onBreak(this.world, pos, blockState, this.player);
-            boolean bl = this.world.removeBlock(pos, false);
-            if (bl) {
-                block.onBroken(this.world, pos, blockState);
-            }
-            ItemStack itemStack = this.player.getMainHandStack();
-            ItemStack itemStack2 = itemStack.copy();
-            boolean bl2 = this.player.canHarvest(blockState);
-            itemStack.postMine(this.world, blockState, pos, this.player);
-            if (bl && bl2) {
-                block.afterBreak(this.world, this.player, pos, blockState, blockEntity, itemStack2);
-            }
-            cir.setReturnValue(true);
-            cir.cancel();
-        }
-    }
+	@Inject(method = "tryBreakBlock", at = @At("HEAD"), cancellable = true)
+	public void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+		if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+			BlockState blockState = this.world.getBlockState(pos);
+			BlockEntity blockEntity = this.world.getBlockEntity(pos);
+			Block block = blockState.getBlock();
+			if (block instanceof OperatorBlock && !this.player.isCreativeLevelTwoOp()) {
+				this.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL);
+				cir.setReturnValue(false);
+				cir.cancel();
+			}
+			block.onBreak(this.world, pos, blockState, this.player);
+			boolean bl = this.world.removeBlock(pos, false);
+			if (bl) {
+				block.onBroken(this.world, pos, blockState);
+			}
+			ItemStack itemStack = this.player.getMainHandStack();
+			ItemStack itemStack2 = itemStack.copy();
+			boolean bl2 = this.player.canHarvest(blockState);
+			itemStack.postMine(this.world, blockState, pos, this.player);
+			if (bl && bl2) {
+				block.afterBreak(this.world, this.player, pos, blockState, blockEntity, itemStack2);
+			}
+			cir.setReturnValue(true);
+			cir.cancel();
+		}
+	}
 }

@@ -25,334 +25,333 @@ import java.util.List;
 import java.util.Optional;
 
 public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Triggerable {
-    private SelectionMode selectionMode = SelectionMode.LIST;
-    private boolean showArea = false;
-    private boolean resetsArea = false;
-    private Vec3i areaDimensions = Vec3i.ZERO;
-    private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
+	private SelectionMode selectionMode = SelectionMode.LIST;
+	private boolean showArea = false;
+	private boolean resetsArea = false;
+	private Vec3i areaDimensions = Vec3i.ZERO;
+	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
 
-    private List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(List.of());
-    private TriggerMode triggerMode = TriggerMode.NORMAL;
-    private int triggerAmount = 1;
-    public RelayTriggerBlockEntity(BlockPos pos, BlockState state) {
-        super(EntityRegistry.RELAY_TRIGGER_BLOCK_ENTITY, pos, state);
-    }
+	private List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(List.of());
+	private TriggerMode triggerMode = TriggerMode.NORMAL;
+	private int triggerAmount = 1;
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
+	public RelayTriggerBlockEntity(BlockPos pos, BlockState state) {
+		super(EntityRegistry.RELAY_TRIGGER_BLOCK_ENTITY, pos, state);
+	}
 
-        nbt.putString("selectionMode", this.selectionMode.asString());
+	@Override
+	protected void writeNbt(NbtCompound nbt) {
 
-        nbt.putBoolean("showArea", this.showArea);
+		nbt.putString("selectionMode", this.selectionMode.asString());
 
-        nbt.putBoolean("resetsArea", this.resetsArea);
+		nbt.putBoolean("showArea", this.showArea);
 
-        nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-        nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-        nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
+		nbt.putBoolean("resetsArea", this.resetsArea);
 
-        nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-        nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-        nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
+		nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
+		nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
+		nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
 
-        nbt.putInt("triggeredBlocksSize", triggeredBlocks.size());
-        for (int i = 0; i < this.triggeredBlocks.size(); i++) {
-            BlockPos triggeredBlock = this.triggeredBlocks.get(i).left.left;
-            nbt.putInt("triggeredBlockPositionOffsetX_" + i, triggeredBlock.getX());
-            nbt.putInt("triggeredBlockPositionOffsetY_" + i, triggeredBlock.getY());
-            nbt.putInt("triggeredBlockPositionOffsetZ_" + i, triggeredBlock.getZ());
-            nbt.putBoolean("triggeredBlockResets_" + i, this.triggeredBlocks.get(i).left.right);
-            nbt.putInt("triggeredBlockChance_" + i, this.triggeredBlocks.get(i).right);
-        }
+		nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
+		nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
+		nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
 
-        nbt.putString("triggerMode", this.triggerMode.asString());
+		nbt.putInt("triggeredBlocksSize", triggeredBlocks.size());
+		for (int i = 0; i < this.triggeredBlocks.size(); i++) {
+			BlockPos triggeredBlock = this.triggeredBlocks.get(i).left.left;
+			nbt.putInt("triggeredBlockPositionOffsetX_" + i, triggeredBlock.getX());
+			nbt.putInt("triggeredBlockPositionOffsetY_" + i, triggeredBlock.getY());
+			nbt.putInt("triggeredBlockPositionOffsetZ_" + i, triggeredBlock.getZ());
+			nbt.putBoolean("triggeredBlockResets_" + i, this.triggeredBlocks.get(i).left.right);
+			nbt.putInt("triggeredBlockChance_" + i, this.triggeredBlocks.get(i).right);
+		}
 
-        nbt.putInt("triggerAmount", this.triggerAmount);
+		nbt.putString("triggerMode", this.triggerMode.asString());
 
-        super.writeNbt(nbt);
-    }
+		nbt.putInt("triggerAmount", this.triggerAmount);
 
-    @Override
-    public void readNbt(NbtCompound nbt) {
+		super.writeNbt(nbt);
+	}
 
-        this.selectionMode = SelectionMode.byName(nbt.getString("selectionMode")).orElseGet(() -> SelectionMode.LIST);
+	@Override
+	public void readNbt(NbtCompound nbt) {
 
-        this.showArea = nbt.getBoolean("showArea");
+		this.selectionMode = SelectionMode.byName(nbt.getString("selectionMode")).orElseGet(() -> SelectionMode.LIST);
 
-        this.resetsArea = nbt.getBoolean("resetsArea");
+		this.showArea = nbt.getBoolean("showArea");
 
-        int i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
-        int j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
-        int k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
-        this.areaDimensions = new Vec3i(i, j, k);
+		this.resetsArea = nbt.getBoolean("resetsArea");
 
-        i = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
-        j = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
-        k = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
-        this.areaPositionOffset = new BlockPos(i, j, k);
+		int i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
+		int j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
+		int k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
+		this.areaDimensions = new Vec3i(i, j, k);
 
-        int triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
-        this.triggeredBlocks = new ArrayList<>(List.of());
-        for (i = 0; i < triggeredBlocksSize; i++) {
-            int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX_" + i), -48, 48);
-            int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY_" + i), -48, 48);
-            int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ_" + i), -48, 48);
-            boolean bl = nbt.getBoolean("triggeredBlockResets_" + i);
-            int chance = MathHelper.clamp(nbt.getInt("triggeredBlockChance_" + i), 0, 100);
-            this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
-        }
+		i = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
+		j = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
+		k = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
+		this.areaPositionOffset = new BlockPos(i, j, k);
 
-        this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElseGet(() -> TriggerMode.NORMAL);
+		int triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
+		this.triggeredBlocks = new ArrayList<>(List.of());
+		for (i = 0; i < triggeredBlocksSize; i++) {
+			int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX_" + i), -48, 48);
+			int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY_" + i), -48, 48);
+			int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ_" + i), -48, 48);
+			boolean bl = nbt.getBoolean("triggeredBlockResets_" + i);
+			int chance = MathHelper.clamp(nbt.getInt("triggeredBlockChance_" + i), 0, 100);
+			this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
+		}
 
-        this.triggerAmount = nbt.getInt("triggerAmount");
+		this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElseGet(() -> TriggerMode.NORMAL);
 
-        super.readNbt(nbt);
-    }
+		this.triggerAmount = nbt.getInt("triggerAmount");
 
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+		super.readNbt(nbt);
+	}
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
-    }
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
 
-    public SelectionMode getSelectionMode() {
-        return this.selectionMode;
-    }
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return this.createNbt();
+	}
 
-    public void setSelectionMode(SelectionMode selectionMode) {
-        this.selectionMode = selectionMode;
-    }
+	public SelectionMode getSelectionMode() {
+		return this.selectionMode;
+	}
 
-    public boolean getShowArea() {
-        return showArea;
-    }
+	public void setSelectionMode(SelectionMode selectionMode) {
+		this.selectionMode = selectionMode;
+	}
 
-    public void setShowArea(boolean showArea) {
-        this.showArea = showArea;
-    }
+	public boolean getShowArea() {
+		return showArea;
+	}
 
-    public boolean getResetsArea() {
-        return resetsArea;
-    }
+	public void setShowArea(boolean showArea) {
+		this.showArea = showArea;
+	}
 
-    public void setResetsArea(boolean resetsArea) {
-        this.resetsArea = resetsArea;
-    }
+	public boolean getResetsArea() {
+		return resetsArea;
+	}
 
-    public Vec3i getAreaDimensions() {
-        return areaDimensions;
-    }
+	public void setResetsArea(boolean resetsArea) {
+		this.resetsArea = resetsArea;
+	}
 
-    public void setAreaDimensions(Vec3i areaDimensions) {
-        this.areaDimensions = areaDimensions;
-    }
+	public Vec3i getAreaDimensions() {
+		return areaDimensions;
+	}
 
-    public BlockPos getAreaPositionOffset() {
-        return areaPositionOffset;
-    }
+	public void setAreaDimensions(Vec3i areaDimensions) {
+		this.areaDimensions = areaDimensions;
+	}
 
-    public void setAreaPositionOffset(BlockPos areaPositionOffset) {
-        this.areaPositionOffset = areaPositionOffset;
-    }
+	public BlockPos getAreaPositionOffset() {
+		return areaPositionOffset;
+	}
 
-    public List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> getTriggeredBlocks() {
-        return triggeredBlocks;
-    }
+	public void setAreaPositionOffset(BlockPos areaPositionOffset) {
+		this.areaPositionOffset = areaPositionOffset;
+	}
 
-    public void setTriggeredBlocks(List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks) {
-        this.triggeredBlocks = triggeredBlocks;
-    }
+	public List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> getTriggeredBlocks() {
+		return triggeredBlocks;
+	}
 
-    public TriggerMode getTriggerMode() {
-        return triggerMode;
-    }
+	public void setTriggeredBlocks(List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks) {
+		this.triggeredBlocks = triggeredBlocks;
+	}
 
-    public void setTriggerMode(TriggerMode triggerMode) {
-        this.triggerMode = triggerMode;
-    }
+	public TriggerMode getTriggerMode() {
+		return triggerMode;
+	}
 
-    public int getTriggerAmount() {
-        return triggerAmount;
-    }
+	public void setTriggerMode(TriggerMode triggerMode) {
+		this.triggerMode = triggerMode;
+	}
 
-    public void setTriggerAmount(int triggerAmount) {
-        this.triggerAmount = triggerAmount;
-    }
+	public int getTriggerAmount() {
+		return triggerAmount;
+	}
 
-    @Override
-    public void trigger() {
-        if (this.world != null) {
-            BlockEntity blockEntity;
-            if (this.selectionMode == SelectionMode.LIST) {
-                if (this.triggerMode == TriggerMode.NORMAL) {
-                    for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-                        BlockPos triggeredBlockPos = triggeredBlock.left.left;
-                        blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlockPos.getX(), this.pos.getY() + triggeredBlockPos.getY(), this.pos.getZ() + triggeredBlockPos.getZ()));
-                        if (blockEntity == this) {
-                            continue;
-                        }
-                        if (triggeredBlock.getLeft().getRight()) {
-                            if (blockEntity instanceof Resetable resetable) {
-                                resetable.reset();
-                            }
-                        } else {
-                            if (blockEntity instanceof Triggerable triggerable) {
-                                triggerable.trigger();
-                            }
-                        }
-                    }
-                } else if (this.triggerMode == TriggerMode.RANDOM) {
-                    for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-                        int chance = this.world.random.nextInt(100);
-                        if (chance <= triggeredBlock.right) {
-                            BlockPos triggeredBlockPos = triggeredBlock.left.left;
-                            blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlockPos.getX(), this.pos.getY() + triggeredBlockPos.getY(), this.pos.getZ() + triggeredBlockPos.getZ()));
-                            if (blockEntity == this) {
-                                continue;
-                            }
-                            if (triggeredBlock.getLeft().getRight()) {
-                                if (blockEntity instanceof Resetable resetable) {
-                                    resetable.reset();
-                                }
-                            } else {
-                                if (blockEntity instanceof Triggerable triggerable) {
-                                    triggerable.trigger();
-                                }
-                            }
-                        }
-                    }
-                } else if (this.triggerMode == TriggerMode.BINOMIAL_URN) { // TODO
-                    ScriptBlocksMod.info("this mode is WIP");
-                } else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC_URN) { // TODO
-                    ScriptBlocksMod.info("this mode is WIP");
-                }
-            } else if (this.selectionMode == SelectionMode.AREA) {
-                Vec3i activationAreaDimensions = this.getAreaDimensions();
-                BlockPos blockPos = new BlockPos(this.pos.getX() + this.areaPositionOffset.getX(), this.pos.getY() + this.areaPositionOffset.getY(), this.pos.getZ() + this.areaPositionOffset.getZ());
-                for (int i = 0; i < activationAreaDimensions.getX(); i++) {
-                    for (int j = 0; j < activationAreaDimensions.getY(); j++) {
-                        for (int k = 0; k < activationAreaDimensions.getZ(); k++) {
-                            blockEntity = world.getBlockEntity(new BlockPos(blockPos.getX() + i, blockPos.getY() + j, blockPos.getZ() + k));
-                            if (blockEntity == this) {
-                                continue;
-                            }
-                            if (this.resetsArea) {
-                                if (blockEntity instanceof Resetable resetable) {
-                                    resetable.reset();
-                                }
-                            } else {
-                                if (blockEntity instanceof Triggerable triggerable) {
-                                    triggerable.trigger();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+	public void setTriggerAmount(int triggerAmount) {
+		this.triggerAmount = triggerAmount;
+	}
 
-    @Override
-    protected void onRotate(BlockState state) {
-        if (state.getBlock() instanceof RotatedBlockWithEntity) {
-            if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-                BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+	@Override
+	public void trigger() {
+		if (this.world != null) {
+			BlockEntity blockEntity;
+			if (this.selectionMode == SelectionMode.LIST) {
+				if (this.triggerMode == TriggerMode.NORMAL) {
+					for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+						BlockPos triggeredBlockPos = triggeredBlock.left.left;
+						blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlockPos.getX(), this.pos.getY() + triggeredBlockPos.getY(), this.pos.getZ() + triggeredBlockPos.getZ()));
+						if (blockEntity == this) {
+							continue;
+						}
+						if (triggeredBlock.getLeft().getRight()) {
+							if (blockEntity instanceof Resetable resetable) {
+								resetable.reset();
+							}
+						} else {
+							if (blockEntity instanceof Triggerable triggerable) {
+								triggerable.trigger();
+							}
+						}
+					}
+				} else if (this.triggerMode == TriggerMode.RANDOM) {
+					for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+						int chance = this.world.random.nextInt(100);
+						if (chance <= triggeredBlock.right) {
+							BlockPos triggeredBlockPos = triggeredBlock.left.left;
+							blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlockPos.getX(), this.pos.getY() + triggeredBlockPos.getY(), this.pos.getZ() + triggeredBlockPos.getZ()));
+							if (blockEntity == this) {
+								continue;
+							}
+							if (triggeredBlock.getLeft().getRight()) {
+								if (blockEntity instanceof Resetable resetable) {
+									resetable.reset();
+								}
+							} else {
+								if (blockEntity instanceof Triggerable triggerable) {
+									triggerable.trigger();
+								}
+							}
+						}
+					}
+				} else if (this.triggerMode == TriggerMode.BINOMIAL_URN) { // TODO
+					ScriptBlocksMod.info("this mode is WIP");
+				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC_URN) { // TODO
+					ScriptBlocksMod.info("this mode is WIP");
+				}
+			} else if (this.selectionMode == SelectionMode.AREA) {
+				Vec3i activationAreaDimensions = this.getAreaDimensions();
+				BlockPos blockPos = new BlockPos(this.pos.getX() + this.areaPositionOffset.getX(), this.pos.getY() + this.areaPositionOffset.getY(), this.pos.getZ() + this.areaPositionOffset.getZ());
+				for (int i = 0; i < activationAreaDimensions.getX(); i++) {
+					for (int j = 0; j < activationAreaDimensions.getY(); j++) {
+						for (int k = 0; k < activationAreaDimensions.getZ(); k++) {
+							blockEntity = world.getBlockEntity(new BlockPos(blockPos.getX() + i, blockPos.getY() + j, blockPos.getZ() + k));
+							if (blockEntity == this) {
+								continue;
+							}
+							if (this.resetsArea) {
+								if (blockEntity instanceof Resetable resetable) {
+									resetable.reset();
+								}
+							} else {
+								if (blockEntity instanceof Triggerable triggerable) {
+									triggerable.trigger();
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
-                MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
-                this.areaPositionOffset = offsetArea.getLeft();
-                this.areaDimensions = offsetArea.getRight();
+	@Override
+	protected void onRotate(BlockState state) {
+		if (state.getBlock() instanceof RotatedBlockWithEntity) {
+			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
 
-                List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
-                for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-                    newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(triggeredBlock.getLeft().getLeft(), blockRotation), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
-                }
-                this.triggeredBlocks = newTriggeredBlocks;
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
+				this.areaPositionOffset = offsetArea.getLeft();
+				this.areaDimensions = offsetArea.getRight();
 
-                this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
-            }
-            if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
+				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(triggeredBlock.getLeft().getLeft(), blockRotation), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
+				}
+				this.triggeredBlocks = newTriggeredBlocks;
 
-                MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
-                this.areaPositionOffset = offsetArea.getLeft();
-                this.areaDimensions = offsetArea.getRight();
+				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+			}
+			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
 
-                List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
-                for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-                    newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
-                }
-                this.triggeredBlocks = newTriggeredBlocks;
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
+				this.areaPositionOffset = offsetArea.getLeft();
+				this.areaDimensions = offsetArea.getRight();
 
-                this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
-            }
-            if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
+				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
+				}
+				this.triggeredBlocks = newTriggeredBlocks;
 
-                MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
-                this.areaPositionOffset = offsetArea.getLeft();
-                this.areaDimensions = offsetArea.getRight();
+				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+			}
+			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
 
-                List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
-                for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-                    newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.LEFT_RIGHT), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
-                }
-                this.triggeredBlocks = newTriggeredBlocks;
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
+				this.areaPositionOffset = offsetArea.getLeft();
+				this.areaDimensions = offsetArea.getRight();
 
-                this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
-            }
-        }
-    }
+				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
+				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.LEFT_RIGHT), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
+				}
+				this.triggeredBlocks = newTriggeredBlocks;
 
-    public static enum SelectionMode implements StringIdentifiable
-    {
-        LIST("list"),
-        AREA("area");
+				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+			}
+		}
+	}
 
-        private final String name;
+	public static enum SelectionMode implements StringIdentifiable {
+		LIST("list"),
+		AREA("area");
 
-        private SelectionMode(String name) {
-            this.name = name;
-        }
+		private final String name;
 
-        @Override
-        public String asString() {
-            return this.name;
-        }
+		private SelectionMode(String name) {
+			this.name = name;
+		}
 
-        public static Optional<SelectionMode> byName(String name) {
-            return Arrays.stream(SelectionMode.values()).filter(selectionMode -> selectionMode.asString().equals(name)).findFirst();
-        }
+		@Override
+		public String asString() {
+			return this.name;
+		}
 
-        public Text asText() {
-            return Text.translatable("gui.relay_trigger_block.selectionMode." + this.name);
-        }
-    }
+		public static Optional<SelectionMode> byName(String name) {
+			return Arrays.stream(SelectionMode.values()).filter(selectionMode -> selectionMode.asString().equals(name)).findFirst();
+		}
 
-    public static enum TriggerMode implements StringIdentifiable
-    {
-        NORMAL("normal"),
-        RANDOM("random"),
-        BINOMIAL_URN("binomial_urn"),
-        HYPER_GEOMETRIC_URN("hyper_geometric_urn");
+		public Text asText() {
+			return Text.translatable("gui.relay_trigger_block.selectionMode." + this.name);
+		}
+	}
 
-        private final String name;
+	public static enum TriggerMode implements StringIdentifiable {
+		NORMAL("normal"),
+		RANDOM("random"),
+		BINOMIAL_URN("binomial_urn"),
+		HYPER_GEOMETRIC_URN("hyper_geometric_urn");
 
-        private TriggerMode(String name) {
-            this.name = name;
-        }
+		private final String name;
 
-        @Override
-        public String asString() {
-            return this.name;
-        }
+		private TriggerMode(String name) {
+			this.name = name;
+		}
 
-        public static Optional<TriggerMode> byName(String name) {
-            return Arrays.stream(TriggerMode.values()).filter(triggerMode -> triggerMode.asString().equals(name)).findFirst();
-        }
+		@Override
+		public String asString() {
+			return this.name;
+		}
 
-        public Text asText() {
-            return Text.translatable("gui.relay_trigger_block.triggerMode." + this.name);
-        }
-    }
+		public static Optional<TriggerMode> byName(String name) {
+			return Arrays.stream(TriggerMode.values()).filter(triggerMode -> triggerMode.asString().equals(name)).findFirst();
+		}
+
+		public Text asText() {
+			return Text.translatable("gui.relay_trigger_block.triggerMode." + this.name);
+		}
+	}
 }

@@ -4,16 +4,20 @@ import net.minecraft.util.math.BlockPos;
 
 public interface DuckMobEntityMixin {
 
-    float scriptblocks$getBossHealthThreshold();
-    void scriptblocks$setBossHealthThreshold(float bossHealthThreshold);
+	float scriptblocks$getBossHealthThreshold();
 
-    int scriptblocks$getBossPhase();
-    void scriptblocks$setBossPhase(int bossPhase);
+	void scriptblocks$setBossHealthThreshold(float bossHealthThreshold);
 
-    BlockPos scriptblocks$getControllerBlockPos();
-    void scriptblocks$setControllerBlockPos(BlockPos controllerBlockPos);
+	int scriptblocks$getBossPhase();
 
-    BlockPos scriptblocks$getUseRelayBlockPos();
-    void scriptblocks$setUseRelayBlockPos(BlockPos useRelayBlockPos);
+	void scriptblocks$setBossPhase(int bossPhase);
+
+	BlockPos scriptblocks$getControllerBlockPos();
+
+	void scriptblocks$setControllerBlockPos(BlockPos controllerBlockPos);
+
+	BlockPos scriptblocks$getUseRelayBlockPos();
+
+	void scriptblocks$setUseRelayBlockPos(BlockPos useRelayBlockPos);
 
 }

@@ -13,35 +13,35 @@ import net.minecraft.world.World;
 
 public class UpdateShopBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateShopBlockPacket> {
 
-    @Override
-    public void receive(UpdateShopBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateShopBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos shopBlockPosition = packet.shopBlockPosition;
-        String shopIdentifier = packet.shopIdentifier;
+		BlockPos shopBlockPosition = packet.shopBlockPosition;
+		String shopIdentifier = packet.shopIdentifier;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        boolean updateSuccessful = true;
+		boolean updateSuccessful = true;
 
-        BlockEntity blockEntity = world.getBlockEntity(shopBlockPosition);
-        BlockState blockState = world.getBlockState(shopBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(shopBlockPosition);
+		BlockState blockState = world.getBlockState(shopBlockPosition);
 
-        if (blockEntity instanceof ShopBlockEntity shopBlockEntity) {
+		if (blockEntity instanceof ShopBlockEntity shopBlockEntity) {
 
-            if (!shopBlockEntity.setShopIdentifier(shopIdentifier)) {
-                player.sendMessage(Text.translatable("shop_block.shopIdentifier.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (updateSuccessful) {
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            }
-            shopBlockEntity.markDirty();
-            world.updateListeners(shopBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
+			if (!shopBlockEntity.setShopIdentifier(shopIdentifier)) {
+				player.sendMessage(Text.translatable("shop_block.shopIdentifier.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (updateSuccessful) {
+				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
+			shopBlockEntity.markDirty();
+			world.updateListeners(shopBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
 
-    }
+	}
 }

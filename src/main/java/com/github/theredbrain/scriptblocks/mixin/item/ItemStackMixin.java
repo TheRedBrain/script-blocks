@@ -20,36 +20,37 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
-    @Shadow
-    public Item getItem() {
-        throw new AssertionError();
-    }
+	@Shadow
+	public Item getItem() {
+		throw new AssertionError();
+	}
 
-    @Shadow
-    public Text getName() {
-        throw new AssertionError();
-    }
+	@Shadow
+	public Text getName() {
+		throw new AssertionError();
+	}
 
-    @Shadow public abstract boolean canPlaceOn(Registry<Block> blockRegistry, CachedBlockPosition pos);
+	@Shadow
+	public abstract boolean canPlaceOn(Registry<Block> blockRegistry, CachedBlockPosition pos);
 
-    /**
-     * @author TheRedBrain
-     * @reason TODO
-     */
-    @Overwrite
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        PlayerEntity playerEntity = context.getPlayer();
-        BlockPos blockPos = context.getBlockPos();
+	/**
+	 * @author TheRedBrain
+	 * @reason TODO
+	 */
+	@Overwrite
+	public ActionResult useOnBlock(ItemUsageContext context) {
+		PlayerEntity playerEntity = context.getPlayer();
+		BlockPos blockPos = context.getBlockPos();
 
-        CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(context.getWorld(), blockPos, false);
-        if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)/* && !bl*/ && !this.canPlaceOn(context.getWorld().getRegistryManager().get(RegistryKeys.BLOCK), cachedBlockPosition)) {
-            return ActionResult.PASS;
-        }
-        Item item = this.getItem();
-        ActionResult actionResult = item.useOnBlock(context);
-        if (playerEntity != null && actionResult.shouldIncrementStat()) {
-            playerEntity.incrementStat(Stats.USED.getOrCreateStat(item));
-        }
-        return actionResult;
-    }
+		CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(context.getWorld(), blockPos, false);
+		if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)/* && !bl*/ && !this.canPlaceOn(context.getWorld().getRegistryManager().get(RegistryKeys.BLOCK), cachedBlockPosition)) {
+			return ActionResult.PASS;
+		}
+		Item item = this.getItem();
+		ActionResult actionResult = item.useOnBlock(context);
+		if (playerEntity != null && actionResult.shouldIncrementStat()) {
+			playerEntity.incrementStat(Stats.USED.getOrCreateStat(item));
+		}
+		return actionResult;
+	}
 }

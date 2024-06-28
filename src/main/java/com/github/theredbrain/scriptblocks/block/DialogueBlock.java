@@ -23,56 +23,56 @@ import org.jetbrains.annotations.Nullable;
 
 public class DialogueBlock extends RotatedBlockWithEntity {
 
-    public DialogueBlock(Settings settings) {
-        super(settings);
-    }
+	public DialogueBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<DialogueBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<DialogueBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new DialogueBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new DialogueBlockEntity(pos, state);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient) {
-            return ActionResult.SUCCESS;
-        }
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DialogueBlockEntity) {
-            player.openHandledScreen(createDialogueBlockScreenHandlerFactory(state, world, pos, ""));
-        }
-        return ActionResult.CONSUME;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		if (world.isClient) {
+			return ActionResult.SUCCESS;
+		}
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof DialogueBlockEntity) {
+			player.openHandledScreen(createDialogueBlockScreenHandlerFactory(state, world, pos, ""));
+		}
+		return ActionResult.CONSUME;
+	}
 
-    public static NamedScreenHandlerFactory createDialogueBlockScreenHandlerFactory(BlockState state, World world, BlockPos pos, String dialogueIdentifierString) {
-        return new ExtendedScreenHandlerFactory() {
-            @Override
-            public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-                buf.writeBlockPos(pos);
-                buf.writeString(dialogueIdentifierString);
-            }
+	public static NamedScreenHandlerFactory createDialogueBlockScreenHandlerFactory(BlockState state, World world, BlockPos pos, String dialogueIdentifierString) {
+		return new ExtendedScreenHandlerFactory() {
+			@Override
+			public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+				buf.writeBlockPos(pos);
+				buf.writeString(dialogueIdentifierString);
+			}
 
-            @Override
-            public Text getDisplayName() {
-                return Text.empty();
-            }
+			@Override
+			public Text getDisplayName() {
+				return Text.empty();
+			}
 
-            @Nullable
-            @Override
-            public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-                return new DialogueBlockScreenHandler(syncId, playerInventory, player.isCreativeLevelTwoOp(), pos, dialogueIdentifierString);
-            }
-        };
-    }
+			@Nullable
+			@Override
+			public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+				return new DialogueBlockScreenHandler(syncId, playerInventory, player.isCreativeLevelTwoOp(), pos, dialogueIdentifierString);
+			}
+		};
+	}
 }

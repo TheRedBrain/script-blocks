@@ -1,17 +1,17 @@
 {
-  "required": true,
-  "package": "com.github.theredbrain.scriptblocks.mixin",
-  "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "entity.mob.MobEntityMixin",
-    "entity.player.PlayerEntityMixin",
-    "item.ItemStackMixin",
-    "server.network.ServerPlayerEntityMixin",
-    "server.network.ServerPlayerInteractionManagerMixin",
-    "structure.pool.StructurePoolBasedGeneratorMixin",
-    "world.WorldMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+	"required": true,
+	"package": "com.github.theredbrain.scriptblocks.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"entity.mob.MobEntityMixin",
+		"entity.player.PlayerEntityMixin",
+		"item.ItemStackMixin",
+		"server.network.ServerPlayerEntityMixin",
+		"server.network.ServerPlayerInteractionManagerMixin",
+		"structure.pool.StructurePoolBasedGeneratorMixin",
+		"world.WorldMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
 }

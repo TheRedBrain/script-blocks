@@ -16,33 +16,33 @@ import org.jetbrains.annotations.Nullable;
 
 public class RelayTriggerBlock extends RotatedBlockWithEntity {
 
-    public RelayTriggerBlock(Settings settings) {
-        super(settings);
-    }
+	public RelayTriggerBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<RelayTriggerBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<RelayTriggerBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new RelayTriggerBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new RelayTriggerBlockEntity(pos, state);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openRelayTriggerBlockScreen(relayTriggerBlockEntity);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openRelayTriggerBlockScreen(relayTriggerBlockEntity);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }

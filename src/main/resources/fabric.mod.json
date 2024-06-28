@@ -2,7 +2,6 @@
 	"schemaVersion": 1,
 	"id": "scriptblocks",
 	"version": "${version}",
-
 	"name": "Script Blocks",
 	"description": "Adds various blocks and mechanics which assist map makers and dungeon builders.",
 	"authors": [

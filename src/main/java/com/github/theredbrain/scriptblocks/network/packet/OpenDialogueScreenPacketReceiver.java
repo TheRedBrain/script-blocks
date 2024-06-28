@@ -10,17 +10,17 @@ import net.minecraft.world.World;
 
 public class OpenDialogueScreenPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<OpenDialogueScreenPacket> {
 
-    @Override
-    public void receive(OpenDialogueScreenPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(OpenDialogueScreenPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        String responseDialogueIdentifier = packet.responseDialogueIdentifier;
+		String responseDialogueIdentifier = packet.responseDialogueIdentifier;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        BlockEntity blockEntity = world.getBlockEntity(packet.dialogueBlockPos);
+		BlockEntity blockEntity = world.getBlockEntity(packet.dialogueBlockPos);
 
-        if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
-            player.openHandledScreen(DialogueBlock.createDialogueBlockScreenHandlerFactory(dialogueBlockEntity.getCachedState(), world, dialogueBlockEntity.getPos(), responseDialogueIdentifier));
-        }
-    }
+		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
+			player.openHandledScreen(DialogueBlock.createDialogueBlockScreenHandlerFactory(dialogueBlockEntity.getCachedState(), world, dialogueBlockEntity.getPos(), responseDialogueIdentifier));
+		}
+	}
 }

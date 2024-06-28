@@ -1,3 +1,3 @@
 {
-  "parent": "scriptblocks:block/location_control_block"
+	"parent": "scriptblocks:block/location_control_block"
 }

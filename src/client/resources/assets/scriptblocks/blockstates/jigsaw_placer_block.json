@@ -1,57 +1,57 @@
 {
-  "variants": {
-    "orientation=down_east": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 90,
-      "y": 90
-    },
-    "orientation=down_north": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 90
-    },
-    "orientation=down_south": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 90,
-      "y": 180
-    },
-    "orientation=down_west": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 90,
-      "y": 270
-    },
-    "orientation=east_up": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "y": 90
-    },
-    "orientation=north_up": {
-      "model": "scriptblocks:block/jigsaw_placer_block"
-    },
-    "orientation=south_up": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "y": 180
-    },
-    "orientation=up_east": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 270,
-      "y": 270
-    },
-    "orientation=up_north": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 270,
-      "y": 180
-    },
-    "orientation=up_south": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 270
-    },
-    "orientation=up_west": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "x": 270,
-      "y": 90
-    },
-    "orientation=west_up": {
-      "model": "scriptblocks:block/jigsaw_placer_block",
-      "y": 270
-    }
-  }
+	"variants": {
+		"orientation=down_east": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 90,
+			"y": 90
+		},
+		"orientation=down_north": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 90
+		},
+		"orientation=down_south": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 90,
+			"y": 180
+		},
+		"orientation=down_west": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 90,
+			"y": 270
+		},
+		"orientation=east_up": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"y": 90
+		},
+		"orientation=north_up": {
+			"model": "scriptblocks:block/jigsaw_placer_block"
+		},
+		"orientation=south_up": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"y": 180
+		},
+		"orientation=up_east": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 270,
+			"y": 270
+		},
+		"orientation=up_north": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 270,
+			"y": 180
+		},
+		"orientation=up_south": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 270
+		},
+		"orientation=up_west": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"x": 270,
+			"y": 90
+		},
+		"orientation=west_up": {
+			"model": "scriptblocks:block/jigsaw_placer_block",
+			"y": 270
+		}
+	}
 }

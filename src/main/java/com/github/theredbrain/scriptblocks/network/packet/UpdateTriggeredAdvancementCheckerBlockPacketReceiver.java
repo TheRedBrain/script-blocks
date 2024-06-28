@@ -13,44 +13,44 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTriggeredAdvancementCheckerBlockPacket> {
-    @Override
-    public void receive(UpdateTriggeredAdvancementCheckerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateTriggeredAdvancementCheckerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos triggeredAdvancementCheckerBlockPosition = packet.triggeredAdvancementCheckerBlockPosition;
+		BlockPos triggeredAdvancementCheckerBlockPosition = packet.triggeredAdvancementCheckerBlockPosition;
 
-        BlockPos firstTriggeredBlockPositionOffset = packet.firstTriggeredBlockPositionOffset;
+		BlockPos firstTriggeredBlockPositionOffset = packet.firstTriggeredBlockPositionOffset;
 
-        boolean firstTriggeredBlockResets = packet.firstTriggeredBlockResets;
+		boolean firstTriggeredBlockResets = packet.firstTriggeredBlockResets;
 
-        BlockPos secondTriggeredBlockPositionOffset = packet.secondTriggeredBlockPositionOffset;
+		BlockPos secondTriggeredBlockPositionOffset = packet.secondTriggeredBlockPositionOffset;
 
-        boolean secondTriggeredBlockResets = packet.secondTriggeredBlockResets;
+		boolean secondTriggeredBlockResets = packet.secondTriggeredBlockResets;
 
-        String checkedAdvancementIdentifier = packet.checkedAdvancementIdentifier;
+		String checkedAdvancementIdentifier = packet.checkedAdvancementIdentifier;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        boolean updateSuccessful = true;
+		boolean updateSuccessful = true;
 
-        BlockEntity blockEntity = world.getBlockEntity(triggeredAdvancementCheckerBlockPosition);
-        BlockState blockState = world.getBlockState(triggeredAdvancementCheckerBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(triggeredAdvancementCheckerBlockPosition);
+		BlockState blockState = world.getBlockState(triggeredAdvancementCheckerBlockPosition);
 
-        if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity) {
-            triggeredAdvancementCheckerBlockEntity.setFirstTriggeredBlock(new MutablePair<>(firstTriggeredBlockPositionOffset, firstTriggeredBlockResets));
-            triggeredAdvancementCheckerBlockEntity.setSecondTriggeredBlock(new MutablePair<>(secondTriggeredBlockPositionOffset, secondTriggeredBlockResets));
-            if (!triggeredAdvancementCheckerBlockEntity.setCheckedAdvancementIdentifier(checkedAdvancementIdentifier)) {
-                player.sendMessage(Text.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (updateSuccessful) {
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            }
-            triggeredAdvancementCheckerBlockEntity.markDirty();
-            world.updateListeners(triggeredAdvancementCheckerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity) {
+			triggeredAdvancementCheckerBlockEntity.setFirstTriggeredBlock(new MutablePair<>(firstTriggeredBlockPositionOffset, firstTriggeredBlockResets));
+			triggeredAdvancementCheckerBlockEntity.setSecondTriggeredBlock(new MutablePair<>(secondTriggeredBlockPositionOffset, secondTriggeredBlockResets));
+			if (!triggeredAdvancementCheckerBlockEntity.setCheckedAdvancementIdentifier(checkedAdvancementIdentifier)) {
+				player.sendMessage(Text.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (updateSuccessful) {
+				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
+			triggeredAdvancementCheckerBlockEntity.markDirty();
+			world.updateListeners(triggeredAdvancementCheckerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

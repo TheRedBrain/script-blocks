@@ -5,7 +5,11 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.config.ClientConfig;
 import com.github.theredbrain.scriptblocks.config.ClientConfigWrapper;
-import com.github.theredbrain.scriptblocks.registry.*;
+import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
+import com.github.theredbrain.scriptblocks.registry.ClientPacketRegistry;
+import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.render.block.entity.HousingBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.MimicBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.RelayTriggerBlockEntityRenderer;
@@ -15,18 +19,22 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 
+@Environment(value = EnvType.CLIENT)
 public class ScriptBlocksModClient implements ClientModInitializer {
 	public static ClientConfig clientConfig;
+
 	@Override
 	public void onInitializeClient() {
 		// Config
 		AutoConfig.register(ClientConfigWrapper.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
-		clientConfig = ((ClientConfigWrapper)AutoConfig.getConfigHolder(ClientConfigWrapper.class).getConfig()).client;
+		clientConfig = ((ClientConfigWrapper) AutoConfig.getConfigHolder(ClientConfigWrapper.class).getConfig()).client;
 
 		// Packets
 		ClientPacketRegistry.init();

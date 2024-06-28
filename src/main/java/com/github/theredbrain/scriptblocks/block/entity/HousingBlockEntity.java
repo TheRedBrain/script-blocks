@@ -26,347 +26,352 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class HousingBlockEntity extends RotatedBlockEntity {
-    private String ownerUuid = "";
-    private boolean isOwnerSet;
-    private List<String> coOwnerList = new ArrayList<>(List.of());
-    private List<String> trustedList = new ArrayList<>(List.of());
-    private List<String> guestList = new ArrayList<>(List.of());
-    private boolean showInfluenceArea = false;
-    private Vec3i influenceAreaDimensions = Vec3i.ZERO;
-    private BlockPos influenceAreaPositionOffset = new BlockPos(0, 1, 0);
-    private OwnerMode ownerMode = OwnerMode.DIMENSION_OWNER;
-    private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-    public HousingBlockEntity(BlockPos pos, BlockState state) {
-        super(EntityRegistry.HOUSING_BLOCK_ENTITY, pos, state);
-        this.isOwnerSet = false;
-    }
+	private String ownerUuid = "";
+	private boolean isOwnerSet;
+	private List<String> coOwnerList = new ArrayList<>(List.of());
+	private List<String> trustedList = new ArrayList<>(List.of());
+	private List<String> guestList = new ArrayList<>(List.of());
+	private boolean showInfluenceArea = false;
+	private Vec3i influenceAreaDimensions = Vec3i.ZERO;
+	private BlockPos influenceAreaPositionOffset = new BlockPos(0, 1, 0);
+	private OwnerMode ownerMode = OwnerMode.DIMENSION_OWNER;
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
-        nbt.putString("ownerUuid", this.ownerUuid);
-        nbt.putBoolean("isOwnerSet", isOwnerSet);
+	public HousingBlockEntity(BlockPos pos, BlockState state) {
+		super(EntityRegistry.HOUSING_BLOCK_ENTITY, pos, state);
+		this.isOwnerSet = false;
+	}
 
-        int coOwnerListSize = coOwnerList.size();
-        nbt.putInt("coOwnerListSize", coOwnerListSize);
-        for (int i = 0; i<coOwnerListSize; i++) {
-            nbt.putString("coOwnerListEntry" + i, this.coOwnerList.get(i));
-        }
+	@Override
+	protected void writeNbt(NbtCompound nbt) {
+		nbt.putString("ownerUuid", this.ownerUuid);
+		nbt.putBoolean("isOwnerSet", isOwnerSet);
 
-        int trustedListSize = trustedList.size();
-        nbt.putInt("trustedListSize", trustedListSize);
-        for (int i = 0; i<trustedListSize; i++) {
-            nbt.putString("trustedListEntry" + i, this.trustedList.get(i));
-        }
+		int coOwnerListSize = coOwnerList.size();
+		nbt.putInt("coOwnerListSize", coOwnerListSize);
+		for (int i = 0; i < coOwnerListSize; i++) {
+			nbt.putString("coOwnerListEntry" + i, this.coOwnerList.get(i));
+		}
 
-        int guestListSize = guestList.size();
-        nbt.putInt("guestListSize", guestListSize);
-        for (int i = 0; i<guestListSize; i++) {
-            nbt.putString("guestListEntry" + i, this.guestList.get(i));
-        }
+		int trustedListSize = trustedList.size();
+		nbt.putInt("trustedListSize", trustedListSize);
+		for (int i = 0; i < trustedListSize; i++) {
+			nbt.putString("trustedListEntry" + i, this.trustedList.get(i));
+		}
 
-        nbt.putBoolean("showInfluenceArea", this.showInfluenceArea);
+		int guestListSize = guestList.size();
+		nbt.putInt("guestListSize", guestListSize);
+		for (int i = 0; i < guestListSize; i++) {
+			nbt.putString("guestListEntry" + i, this.guestList.get(i));
+		}
 
-        nbt.putInt("influenceAreaDimensionsX", this.influenceAreaDimensions.getX());
-        nbt.putInt("influenceAreaDimensionsY", this.influenceAreaDimensions.getY());
-        nbt.putInt("influenceAreaDimensionsZ", this.influenceAreaDimensions.getZ());
+		nbt.putBoolean("showInfluenceArea", this.showInfluenceArea);
 
-        nbt.putInt("influenceAreaPositionOffsetX", this.influenceAreaPositionOffset.getX());
-        nbt.putInt("influenceAreaPositionOffsetY", this.influenceAreaPositionOffset.getY());
-        nbt.putInt("influenceAreaPositionOffsetZ", this.influenceAreaPositionOffset.getZ());
+		nbt.putInt("influenceAreaDimensionsX", this.influenceAreaDimensions.getX());
+		nbt.putInt("influenceAreaDimensionsY", this.influenceAreaDimensions.getY());
+		nbt.putInt("influenceAreaDimensionsZ", this.influenceAreaDimensions.getZ());
 
-        nbt.putString("ownerMode", this.ownerMode.asString());
+		nbt.putInt("influenceAreaPositionOffsetX", this.influenceAreaPositionOffset.getX());
+		nbt.putInt("influenceAreaPositionOffsetY", this.influenceAreaPositionOffset.getY());
+		nbt.putInt("influenceAreaPositionOffsetZ", this.influenceAreaPositionOffset.getZ());
 
-        nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-        nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-        nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-        nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+		nbt.putString("ownerMode", this.ownerMode.asString());
 
-        super.writeNbt(nbt);
-    }
+		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
+		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
+		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
+		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        this.ownerUuid = nbt.getString("ownerUuid");
-        this.isOwnerSet = nbt.getBoolean("isOwnerSet");
+		super.writeNbt(nbt);
+	}
 
-        this.coOwnerList = new ArrayList<>(List.of());
-        this.trustedList = new ArrayList<>(List.of());
-        this.guestList = new ArrayList<>(List.of());
+	@Override
+	public void readNbt(NbtCompound nbt) {
+		this.ownerUuid = nbt.getString("ownerUuid");
+		this.isOwnerSet = nbt.getBoolean("isOwnerSet");
 
-        int coOwnerListSize = nbt.getInt("coOwnerListSize");
-        for (int i = 0; i<coOwnerListSize; i++) {
-            this.coOwnerList.add(nbt.getString("coOwnerListEntry" + i));
-        }
+		this.coOwnerList = new ArrayList<>(List.of());
+		this.trustedList = new ArrayList<>(List.of());
+		this.guestList = new ArrayList<>(List.of());
 
-        int trustedListSize = nbt.getInt("trustedListSize");
-        for (int i = 0; i<trustedListSize; i++) {
-            this.trustedList.add(nbt.getString("trustedListEntry" + i));
-        }
+		int coOwnerListSize = nbt.getInt("coOwnerListSize");
+		for (int i = 0; i < coOwnerListSize; i++) {
+			this.coOwnerList.add(nbt.getString("coOwnerListEntry" + i));
+		}
 
-        int guestListSize = nbt.getInt("guestListSize");
-        for (int i = 0; i<guestListSize; i++) {
-            this.guestList.add(nbt.getString("guestListEntry" + i));
-        }
+		int trustedListSize = nbt.getInt("trustedListSize");
+		for (int i = 0; i < trustedListSize; i++) {
+			this.trustedList.add(nbt.getString("trustedListEntry" + i));
+		}
 
-        this.showInfluenceArea = nbt.getBoolean("showInfluenceArea");
+		int guestListSize = nbt.getInt("guestListSize");
+		for (int i = 0; i < guestListSize; i++) {
+			this.guestList.add(nbt.getString("guestListEntry" + i));
+		}
 
-        int i = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsX"), 0, 48);
-        int j = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsY"), 0, 48);
-        int k = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsZ"), 0, 48);
-        this.influenceAreaDimensions = new Vec3i(i, j, k);
+		this.showInfluenceArea = nbt.getBoolean("showInfluenceArea");
 
-        int l = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetX"), -48, 48);
-        int m = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetY"), -48, 48);
-        int n = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetZ"), -48, 48);
-        this.influenceAreaPositionOffset = new BlockPos(l, m, n);
+		int i = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsX"), 0, 48);
+		int j = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsY"), 0, 48);
+		int k = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsZ"), 0, 48);
+		this.influenceAreaDimensions = new Vec3i(i, j, k);
 
-        this.ownerMode = OwnerMode.byName(nbt.getString("ownerMode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
+		int l = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetX"), -48, 48);
+		int m = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetY"), -48, 48);
+		int n = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetZ"), -48, 48);
+		this.influenceAreaPositionOffset = new BlockPos(l, m, n);
 
-        int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-        int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-        int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-        this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		this.ownerMode = OwnerMode.byName(nbt.getString("ownerMode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
 
-        super.readNbt(nbt);
-    }
+		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
+		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
+		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
+		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+		super.readNbt(nbt);
+	}
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
-    }
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
 
-    public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity blockEntity) {
-        if (!world.isClient && world.getTime() % 20L == 0L) {
-            if (blockEntity.hasWorld() && !blockEntity.isOwnerSet && blockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
-                blockEntity.ownerUuid = initOwner(blockEntity.world);
-                if (UUIDUtilities.isStringValidUUID(blockEntity.ownerUuid)) {
-                    ScriptBlocksMod.info(blockEntity.ownerUuid);
-                    blockEntity.isOwnerSet = true;
-                }
-            }
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return this.createNbt();
+	}
 
-            Box box = new Box(
-                    blockEntity.pos.getX() + blockEntity.influenceAreaPositionOffset.getX(),
-                    blockEntity.pos.getY() + blockEntity.influenceAreaPositionOffset.getY(),
-                    blockEntity.pos.getZ() + blockEntity.influenceAreaPositionOffset.getZ(),
-                    blockEntity.pos.getX() + blockEntity.influenceAreaPositionOffset.getX() + blockEntity.influenceAreaDimensions.getX(),
-                    blockEntity.pos.getY() + blockEntity.influenceAreaPositionOffset.getY() + blockEntity.influenceAreaDimensions.getY(),
-                    blockEntity.pos.getZ() + blockEntity.influenceAreaPositionOffset.getZ() + blockEntity.influenceAreaDimensions.getZ()
-            );
-            List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, box);
-            Iterator var11 = list.iterator();
+	public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity blockEntity) {
+		if (!world.isClient && world.getTime() % 20L == 0L) {
+			if (blockEntity.hasWorld() && !blockEntity.isOwnerSet && blockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
+				blockEntity.ownerUuid = initOwner(blockEntity.world);
+				if (UUIDUtilities.isStringValidUUID(blockEntity.ownerUuid)) {
+					ScriptBlocksMod.info(blockEntity.ownerUuid);
+					blockEntity.isOwnerSet = true;
+				}
+			}
 
-            PlayerEntity playerEntity;
-            while (var11.hasNext()) {
-                playerEntity = (PlayerEntity) var11.next();
+			Box box = new Box(
+					blockEntity.pos.getX() + blockEntity.influenceAreaPositionOffset.getX(),
+					blockEntity.pos.getY() + blockEntity.influenceAreaPositionOffset.getY(),
+					blockEntity.pos.getZ() + blockEntity.influenceAreaPositionOffset.getZ(),
+					blockEntity.pos.getX() + blockEntity.influenceAreaPositionOffset.getX() + blockEntity.influenceAreaDimensions.getX(),
+					blockEntity.pos.getY() + blockEntity.influenceAreaPositionOffset.getY() + blockEntity.influenceAreaDimensions.getY(),
+					blockEntity.pos.getZ() + blockEntity.influenceAreaPositionOffset.getZ() + blockEntity.influenceAreaDimensions.getZ()
+			);
+			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, box);
+			Iterator var11 = list.iterator();
 
-                String playerName = playerEntity.getName().getString();
-                String playerUuid = playerEntity.getUuidAsString();
-                if (Objects.equals(playerUuid, blockEntity.getOwnerUuid())) {
-                    playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
-                } else if (blockEntity.getCoOwnerList().contains(playerName)) {
-                    playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT, 100, 0, true, false, false));
-                } else if (blockEntity.getTrustedList().contains(playerName)) {
-                    playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT, 100, 0, true, false, false));
-                } else if (blockEntity.getGuestList().contains(playerName)) {
-                    playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_GUEST_EFFECT, 100, 0, true, false, false));
-                } else {
-                    playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT, 100, 0, true, false, false));
-                }
-                ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(playerEntity).setValue(blockEntity.pos);
-            }
-        }
-    }
+			PlayerEntity playerEntity;
+			while (var11.hasNext()) {
+				playerEntity = (PlayerEntity) var11.next();
 
-    public String getOwnerUuid() {
-        return this.ownerUuid;
-    }
+				String playerName = playerEntity.getName().getString();
+				String playerUuid = playerEntity.getUuidAsString();
+				if (Objects.equals(playerUuid, blockEntity.getOwnerUuid())) {
+					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
+				} else if (blockEntity.getCoOwnerList().contains(playerName)) {
+					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT, 100, 0, true, false, false));
+				} else if (blockEntity.getTrustedList().contains(playerName)) {
+					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT, 100, 0, true, false, false));
+				} else if (blockEntity.getGuestList().contains(playerName)) {
+					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_GUEST_EFFECT, 100, 0, true, false, false));
+				} else {
+					playerEntity.addStatusEffect(new StatusEffectInstance(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT, 100, 0, true, false, false));
+				}
+				ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(playerEntity).setValue(blockEntity.pos);
+			}
+		}
+	}
 
-    public boolean setOwnerUuid(String ownerUuid) {
-        if (ownerUuid.equals("")) {
-            this.ownerUuid = ownerUuid;
-            return true;
-        }
-        if (UUIDUtilities.isStringValidUUID(ownerUuid)) {
-            this.ownerUuid = ownerUuid;
-            return true;
-        }
-        return false;
-    }
+	public String getOwnerUuid() {
+		return this.ownerUuid;
+	}
 
-    public List<String> getCoOwnerList() {
-        return this.coOwnerList;
-    }
+	public boolean setOwnerUuid(String ownerUuid) {
+		if (ownerUuid.equals("")) {
+			this.ownerUuid = ownerUuid;
+			return true;
+		}
+		if (UUIDUtilities.isStringValidUUID(ownerUuid)) {
+			this.ownerUuid = ownerUuid;
+			return true;
+		}
+		return false;
+	}
 
-    public boolean setCoOwnerList(List<String> coOwnerList) {
-        this.coOwnerList = coOwnerList;
-        return true;
-    }
+	public List<String> getCoOwnerList() {
+		return this.coOwnerList;
+	}
 
-    public List<String> getTrustedList() {
-        return this.trustedList;
-    }
+	public boolean setCoOwnerList(List<String> coOwnerList) {
+		this.coOwnerList = coOwnerList;
+		return true;
+	}
 
-    public boolean setTrustedList(List<String> trustedList) {
-        this.trustedList = trustedList;
-        return true;
-    }
+	public List<String> getTrustedList() {
+		return this.trustedList;
+	}
 
-    public List<String> getGuestList() {
-        return this.guestList;
-    }
+	public boolean setTrustedList(List<String> trustedList) {
+		this.trustedList = trustedList;
+		return true;
+	}
 
-    public boolean setGuestList(List<String> guestList) {
-        this.guestList = guestList;
-        return true;
-    }
+	public List<String> getGuestList() {
+		return this.guestList;
+	}
 
-    public boolean getShowInfluenceArea() {
-        return this.showInfluenceArea;
-    }
+	public boolean setGuestList(List<String> guestList) {
+		this.guestList = guestList;
+		return true;
+	}
 
-    public boolean setShowInfluenceArea(boolean showInfluenceArea) {
-        this.showInfluenceArea = showInfluenceArea;
-        return true;
-    }
+	public boolean getShowInfluenceArea() {
+		return this.showInfluenceArea;
+	}
 
-    public Vec3i getInfluenceAreaDimensions() {
-        return this.influenceAreaDimensions;
-    }
+	public boolean setShowInfluenceArea(boolean showInfluenceArea) {
+		this.showInfluenceArea = showInfluenceArea;
+		return true;
+	}
 
-    // TODO check if input is valid
-    public boolean setInfluenceAreaDimensions(Vec3i influenceAreaDimensions) {
-        this.influenceAreaDimensions = influenceAreaDimensions;
-        return true;
-    }
+	public Vec3i getInfluenceAreaDimensions() {
+		return this.influenceAreaDimensions;
+	}
 
-    public BlockPos getRestrictBlockBreakingAreaPositionOffset() {
-        return this.influenceAreaPositionOffset;
-    }
+	// TODO check if input is valid
+	public boolean setInfluenceAreaDimensions(Vec3i influenceAreaDimensions) {
+		this.influenceAreaDimensions = influenceAreaDimensions;
+		return true;
+	}
 
-    // TODO check if input is valid
-    public boolean setRestrictBlockBreakingAreaPositionOffset(BlockPos influenceAreaPositionOffset) {
-        this.influenceAreaPositionOffset = influenceAreaPositionOffset;
-        return true;
-    }
+	public BlockPos getRestrictBlockBreakingAreaPositionOffset() {
+		return this.influenceAreaPositionOffset;
+	}
 
-    public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
-        return this.triggeredBlock;
-    }
+	// TODO check if input is valid
+	public boolean setRestrictBlockBreakingAreaPositionOffset(BlockPos influenceAreaPositionOffset) {
+		this.influenceAreaPositionOffset = influenceAreaPositionOffset;
+		return true;
+	}
 
-    public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
-        this.triggeredBlock = triggeredBlock;
-    }
+	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
+		return this.triggeredBlock;
+	}
 
-    public OwnerMode getOwnerMode() {
-        return this.ownerMode;
-    }
+	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
+		this.triggeredBlock = triggeredBlock;
+	}
 
-    public boolean setOwnerMode(OwnerMode ownerMode) {
-        this.ownerMode = ownerMode;
-        return true;
-    }
+	public OwnerMode getOwnerMode() {
+		return this.ownerMode;
+	}
 
-    public boolean isOwnerSet() {
-        return this.isOwnerSet;
-    }
+	public boolean setOwnerMode(OwnerMode ownerMode) {
+		this.ownerMode = ownerMode;
+		return true;
+	}
 
-    public void setIsOwnerSet(boolean isOwnerSet) {
-        this.isOwnerSet = isOwnerSet;
-    }
+	public boolean isOwnerSet() {
+		return this.isOwnerSet;
+	}
 
-    private static String initOwner(World world) {
-        if (world != null) {
-            String worldRegistryKey = world.getRegistryKey().getValue().getPath();
-            String[] parts = worldRegistryKey.split("_");
-            String uuidString = parts[0];
-            if (UUIDUtilities.isStringValidUUID(uuidString)) {
-                return uuidString;
-            }
-        }
-        return "";
-    }
+	public void setIsOwnerSet(boolean isOwnerSet) {
+		this.isOwnerSet = isOwnerSet;
+	}
 
-    public boolean influenceAreaContains(BlockPos pos) {
-        return (double)(pos.getX() + 1) > (this.pos.getX() + this.influenceAreaPositionOffset.getX())
-                && (double)pos.getX() < (this.pos.getX() + this.influenceAreaPositionOffset.getX() + this.influenceAreaDimensions.getX())
-                && (double)(pos.getY() + 1) > (this.pos.getY() + this.influenceAreaPositionOffset.getY())
-                && (double)pos.getY() < (this.pos.getY() + this.influenceAreaPositionOffset.getY() + this.influenceAreaDimensions.getY())
-                && (double)(pos.getZ() + 1) > (this.pos.getZ() + this.influenceAreaPositionOffset.getZ())
-                && (double)pos.getZ() < (this.pos.getZ() + this.influenceAreaPositionOffset.getZ() + this.influenceAreaDimensions.getZ());
-    }
+	private static String initOwner(World world) {
+		if (world != null) {
+			String worldRegistryKey = world.getRegistryKey().getValue().getPath();
+			String[] parts = worldRegistryKey.split("_");
+			String uuidString = parts[0];
+			if (UUIDUtilities.isStringValidUUID(uuidString)) {
+				return uuidString;
+			}
+		}
+		return "";
+	}
 
-    public void trigger() {
-        if (this.world != null) {
-            BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
-            if (blockEntity != this) {
-                boolean triggeredBlockResets = this.triggeredBlock.getRight();
-                if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
-                    resetable.reset();
-                } else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
-                    triggerable.trigger();
-                }
-            }
-        }
-    }
+	public boolean influenceAreaContains(BlockPos pos) {
+		return (double) (pos.getX() + 1) > (this.pos.getX() + this.influenceAreaPositionOffset.getX())
+				&& (double) pos.getX() < (this.pos.getX() + this.influenceAreaPositionOffset.getX() + this.influenceAreaDimensions.getX())
+				&& (double) (pos.getY() + 1) > (this.pos.getY() + this.influenceAreaPositionOffset.getY())
+				&& (double) pos.getY() < (this.pos.getY() + this.influenceAreaPositionOffset.getY() + this.influenceAreaDimensions.getY())
+				&& (double) (pos.getZ() + 1) > (this.pos.getZ() + this.influenceAreaPositionOffset.getZ())
+				&& (double) pos.getZ() < (this.pos.getZ() + this.influenceAreaPositionOffset.getZ() + this.influenceAreaDimensions.getZ());
+	}
 
-    @Override
-    protected void onRotate(BlockState state) {
-        if (state.getBlock() instanceof RotatedBlockWithEntity) {
-            if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-                BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
-                this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
-                MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.influenceAreaPositionOffset, this.influenceAreaDimensions, blockRotation);
-                this.influenceAreaPositionOffset = offsetArea.getLeft();
-                this.influenceAreaDimensions = offsetArea.getRight();
-                this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
-            }
-            if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
-                this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
-                MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.influenceAreaPositionOffset, this.influenceAreaDimensions, BlockMirror.FRONT_BACK);
-                this.influenceAreaPositionOffset = offsetArea.getLeft();
-                this.influenceAreaDimensions = offsetArea.getRight();
-                this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
-            }
-            if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
-                this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-                MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.influenceAreaPositionOffset, this.influenceAreaDimensions, BlockMirror.LEFT_RIGHT);
-                this.influenceAreaPositionOffset = offsetArea.getLeft();
-                this.influenceAreaDimensions = offsetArea.getRight();
-                this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
-            }
-        }
-    }
+	public void trigger() {
+		if (this.world != null) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.triggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
+			}
+		}
+	}
 
-    public static enum OwnerMode implements StringIdentifiable
-    {
-        DIMENSION_OWNER("dimension_owner"),
-        INTERACTION("interaction");
+	@Override
+	protected void onRotate(BlockState state) {
+		if (state.getBlock() instanceof RotatedBlockWithEntity) {
+			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.influenceAreaPositionOffset, this.influenceAreaDimensions, blockRotation);
+				this.influenceAreaPositionOffset = offsetArea.getLeft();
+				this.influenceAreaDimensions = offsetArea.getRight();
+				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+			}
+			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.influenceAreaPositionOffset, this.influenceAreaDimensions, BlockMirror.FRONT_BACK);
+				this.influenceAreaPositionOffset = offsetArea.getLeft();
+				this.influenceAreaDimensions = offsetArea.getRight();
+				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+			}
+			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.influenceAreaPositionOffset, this.influenceAreaDimensions, BlockMirror.LEFT_RIGHT);
+				this.influenceAreaPositionOffset = offsetArea.getLeft();
+				this.influenceAreaDimensions = offsetArea.getRight();
+				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+			}
+		}
+	}
 
-        private final String name;
+	public static enum OwnerMode implements StringIdentifiable {
+		DIMENSION_OWNER("dimension_owner"),
+		INTERACTION("interaction");
 
-        private OwnerMode(String name) {
-            this.name = name;
-        }
+		private final String name;
 
-        @Override
-        public String asString() {
-            return this.name;
-        }
+		private OwnerMode(String name) {
+			this.name = name;
+		}
 
-        public static Optional<OwnerMode> byName(String name) {
-            return Arrays.stream(OwnerMode.values()).filter(ownerMode -> ownerMode.asString().equals(name)).findFirst();
-        }
+		@Override
+		public String asString() {
+			return this.name;
+		}
 
-        public Text asText() {
-            return Text.translatable("gui.housing_block.ownerMode." + this.name);
-        }
-    }
+		public static Optional<OwnerMode> byName(String name) {
+			return Arrays.stream(OwnerMode.values()).filter(ownerMode -> ownerMode.asString().equals(name)).findFirst();
+		}
+
+		public Text asText() {
+			return Text.translatable("gui.housing_block.ownerMode." + this.name);
+		}
+	}
 }

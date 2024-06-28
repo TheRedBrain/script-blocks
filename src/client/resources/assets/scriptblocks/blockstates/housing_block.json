@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "": {
-      "model": "scriptblocks:block/housing_block"
-    }
-  }
+	"variants": {
+		"": {
+			"model": "scriptblocks:block/housing_block"
+		}
+	}
 }

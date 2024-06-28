@@ -13,74 +13,75 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class UseRelayBlockEntity extends RotatedBlockEntity {
-    private BlockPos relayBlockPositionOffset = new BlockPos(0, -1, 0);
-    public UseRelayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
-        super(type, pos, state);
-    }
+	private BlockPos relayBlockPositionOffset = new BlockPos(0, -1, 0);
 
-    public UseRelayBlockEntity(BlockPos pos, BlockState state) {
-        this(EntityRegistry.USE_RELAY_BLOCK_ENTITY, pos, state);
-    }
+	public UseRelayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
+	}
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
-        nbt.putInt("relayBlockPositionOffsetX", this.relayBlockPositionOffset.getX());
-        nbt.putInt("relayBlockPositionOffsetY", this.relayBlockPositionOffset.getY());
-        nbt.putInt("relayBlockPositionOffsetZ", this.relayBlockPositionOffset.getZ());
+	public UseRelayBlockEntity(BlockPos pos, BlockState state) {
+		this(EntityRegistry.USE_RELAY_BLOCK_ENTITY, pos, state);
+	}
 
-        super.writeNbt(nbt);
-    }
+	@Override
+	protected void writeNbt(NbtCompound nbt) {
+		nbt.putInt("relayBlockPositionOffsetX", this.relayBlockPositionOffset.getX());
+		nbt.putInt("relayBlockPositionOffsetY", this.relayBlockPositionOffset.getY());
+		nbt.putInt("relayBlockPositionOffsetZ", this.relayBlockPositionOffset.getZ());
 
-    @Override
-    public void readNbt(NbtCompound nbt) {
-        int l = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetX"), -48, 48);
-        int m = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetY"), -48, 48);
-        int n = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetZ"), -48, 48);
-        this.relayBlockPositionOffset = new BlockPos(l, m, n);
+		super.writeNbt(nbt);
+	}
 
-        super.readNbt(nbt);
-    }
+	@Override
+	public void readNbt(NbtCompound nbt) {
+		int l = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetX"), -48, 48);
+		int m = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetY"), -48, 48);
+		int n = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetZ"), -48, 48);
+		this.relayBlockPositionOffset = new BlockPos(l, m, n);
 
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+		super.readNbt(nbt);
+	}
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
-    }
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
 
-    public BlockPos getRelayBlockPositionOffset() {
-        return relayBlockPositionOffset;
-    }
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return this.createNbt();
+	}
 
-    public boolean setRelayBlockPositionOffset(BlockPos relayBlockPositionOffset) {
-        if (relayBlockPositionOffset.getX() == 0 && relayBlockPositionOffset.getY() == 0 && relayBlockPositionOffset.getZ() == 0) {
-            return false;
-        }
-        int x = MathHelper.clamp(relayBlockPositionOffset.getX(), -48, 48);
-        int y = MathHelper.clamp(relayBlockPositionOffset.getY(), -48, 48);
-        int z = MathHelper.clamp(relayBlockPositionOffset.getZ(), -48, 48);
-        this.relayBlockPositionOffset = new BlockPos(x, y, z);
-        return true;
-    }
+	public BlockPos getRelayBlockPositionOffset() {
+		return relayBlockPositionOffset;
+	}
 
-    @Override
-    protected void onRotate(BlockState state) {
-        if (state.getBlock() instanceof RotatedBlockWithEntity) {
-            if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-                BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
-                this.relayBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.relayBlockPositionOffset, blockRotation);
-                this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
-            }
-            if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
-                this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.FRONT_BACK);
-                this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
-            }
-            if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
-                this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.LEFT_RIGHT);
-                this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
-            }
-        }
-    }
+	public boolean setRelayBlockPositionOffset(BlockPos relayBlockPositionOffset) {
+		if (relayBlockPositionOffset.getX() == 0 && relayBlockPositionOffset.getY() == 0 && relayBlockPositionOffset.getZ() == 0) {
+			return false;
+		}
+		int x = MathHelper.clamp(relayBlockPositionOffset.getX(), -48, 48);
+		int y = MathHelper.clamp(relayBlockPositionOffset.getY(), -48, 48);
+		int z = MathHelper.clamp(relayBlockPositionOffset.getZ(), -48, 48);
+		this.relayBlockPositionOffset = new BlockPos(x, y, z);
+		return true;
+	}
+
+	@Override
+	protected void onRotate(BlockState state) {
+		if (state.getBlock() instanceof RotatedBlockWithEntity) {
+			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+				this.relayBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.relayBlockPositionOffset, blockRotation);
+				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+			}
+			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.FRONT_BACK);
+				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+			}
+			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+			}
+		}
+	}
 }

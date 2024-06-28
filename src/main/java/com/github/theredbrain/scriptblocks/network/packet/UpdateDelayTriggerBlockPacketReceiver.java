@@ -13,39 +13,39 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateDelayTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateDelayTriggerBlockPacket> {
-    @Override
-    public void receive(UpdateDelayTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateDelayTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos delayTriggerBlockPosition = packet.delayTriggerBlockPosition;
+		BlockPos delayTriggerBlockPosition = packet.delayTriggerBlockPosition;
 
-        BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
+		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
 
-        boolean triggeredBlockResets = packet.triggeredBlockResets;
+		boolean triggeredBlockResets = packet.triggeredBlockResets;
 
-        int triggerDelay = packet.triggerDelay;
+		int triggerDelay = packet.triggerDelay;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        boolean updateSuccessful = true;
+		boolean updateSuccessful = true;
 
-        BlockEntity blockEntity = world.getBlockEntity(delayTriggerBlockPosition);
-        BlockState blockState = world.getBlockState(delayTriggerBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(delayTriggerBlockPosition);
+		BlockState blockState = world.getBlockState(delayTriggerBlockPosition);
 
-        if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity) {
-            delayTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-            if (!delayTriggerBlockEntity.setTriggerDelay(triggerDelay)) {
-                player.sendMessage(Text.translatable("delay_trigger_block.triggerDelay.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (updateSuccessful) {
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            }
-            delayTriggerBlockEntity.markDirty();
-            world.updateListeners(delayTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity) {
+			delayTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			if (!delayTriggerBlockEntity.setTriggerDelay(triggerDelay)) {
+				player.sendMessage(Text.translatable("delay_trigger_block.triggerDelay.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (updateSuccessful) {
+				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
+			delayTriggerBlockEntity.markDirty();
+			world.updateListeners(delayTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

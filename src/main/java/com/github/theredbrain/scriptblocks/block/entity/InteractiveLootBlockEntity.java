@@ -15,73 +15,73 @@ import java.util.Set;
 import java.util.UUID;
 
 public class InteractiveLootBlockEntity extends BlockEntity implements Resetable {
-    private Set<UUID> playerSet = new HashSet<>();
-    private String lootTableIdentifierString = "";
+	private Set<UUID> playerSet = new HashSet<>();
+	private String lootTableIdentifierString = "";
 
-    public InteractiveLootBlockEntity(BlockPos pos, BlockState state) {
-        super(EntityRegistry.INTERACTIVE_LOOT_BLOCK_ENTITY, pos, state);
-    }
+	public InteractiveLootBlockEntity(BlockPos pos, BlockState state) {
+		super(EntityRegistry.INTERACTIVE_LOOT_BLOCK_ENTITY, pos, state);
+	}
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
+	@Override
+	protected void writeNbt(NbtCompound nbt) {
 
-        List<UUID> list = this.playerSet.stream().toList();
-        int listSize = list.size();
-        nbt.putInt("listSize", listSize);
-        for (int i = 0; i < listSize; i++) {
-            nbt.putUuid("listEntry_" + i, list.get(i));
-        }
+		List<UUID> list = this.playerSet.stream().toList();
+		int listSize = list.size();
+		nbt.putInt("listSize", listSize);
+		for (int i = 0; i < listSize; i++) {
+			nbt.putUuid("listEntry_" + i, list.get(i));
+		}
 
-        if (!this.lootTableIdentifierString.equals("")) {
-            nbt.putString("lootTableIdentifierString", this.lootTableIdentifierString);
-        }
+		if (!this.lootTableIdentifierString.equals("")) {
+			nbt.putString("lootTableIdentifierString", this.lootTableIdentifierString);
+		}
 
-        super.writeNbt(nbt);
-    }
+		super.writeNbt(nbt);
+	}
 
-    @Override
-    public void readNbt(NbtCompound nbt) {
+	@Override
+	public void readNbt(NbtCompound nbt) {
 
-        this.playerSet.clear();
-        int listSize = nbt.getInt("listSize");
-        for (int i = 0; i < listSize; i++) {
-            if (nbt.containsUuid("listEntry_" + i)) {
-                this.playerSet.add(nbt.getUuid("listEntry_" + i));
-            }
-        }
+		this.playerSet.clear();
+		int listSize = nbt.getInt("listSize");
+		for (int i = 0; i < listSize; i++) {
+			if (nbt.containsUuid("listEntry_" + i)) {
+				this.playerSet.add(nbt.getUuid("listEntry_" + i));
+			}
+		}
 
-        this.lootTableIdentifierString = nbt.getString("lootTableIdentifierString");
+		this.lootTableIdentifierString = nbt.getString("lootTableIdentifierString");
 
-        super.readNbt(nbt);
-    }
+		super.readNbt(nbt);
+	}
 
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
-    }
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return this.createNbt();
+	}
 
-    public String getLootTableIdentifierString() {
-        return this.lootTableIdentifierString;
-    }
+	public String getLootTableIdentifierString() {
+		return this.lootTableIdentifierString;
+	}
 
-    public void setLootTableIdentifierString(String lootTableIdentifierString) {
-        this.lootTableIdentifierString = lootTableIdentifierString;
-    }
+	public void setLootTableIdentifierString(String lootTableIdentifierString) {
+		this.lootTableIdentifierString = lootTableIdentifierString;
+	}
 
-    public boolean isPlayerInSet(PlayerEntity playerEntity) {
-        return this.playerSet.contains(playerEntity.getUuid());
-    }
+	public boolean isPlayerInSet(PlayerEntity playerEntity) {
+		return this.playerSet.contains(playerEntity.getUuid());
+	}
 
-    public boolean addPlayerToSet(PlayerEntity playerEntity) {
-        return this.playerSet.add(playerEntity.getUuid());
-    }
+	public boolean addPlayerToSet(PlayerEntity playerEntity) {
+		return this.playerSet.add(playerEntity.getUuid());
+	}
 
-    @Override
-    public void reset() {
-        this.playerSet.clear();
-    }
+	@Override
+	public void reset() {
+		this.playerSet.clear();
+	}
 }

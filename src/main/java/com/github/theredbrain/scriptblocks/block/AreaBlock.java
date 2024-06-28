@@ -18,40 +18,40 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class AreaBlock extends RotatedBlockWithEntity {
-    public AreaBlock(Settings settings) {
-        super(settings);
-    }
+	public AreaBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<AreaBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<AreaBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new AreaBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new AreaBlockEntity(pos, state);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+	@Override
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.AREA_BLOCK_ENTITY, AreaBlockEntity::tick);
-        return checkType(type, EntityRegistry.AREA_BLOCK_ENTITY, AreaBlockEntity::tick);
-    }
+		return checkType(type, EntityRegistry.AREA_BLOCK_ENTITY, AreaBlockEntity::tick);
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof AreaBlockEntity areaBlockEntity && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openAreaBlockScreen(areaBlockEntity);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof AreaBlockEntity areaBlockEntity && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openAreaBlockScreen(areaBlockEntity);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }

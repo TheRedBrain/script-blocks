@@ -16,45 +16,45 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateLocationControlBlockPacket> {
-    @Override
-    public void receive(UpdateLocationControlBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateLocationControlBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos locationControlBlockPosition = packet.locationControlBlockPosition;
+		BlockPos locationControlBlockPosition = packet.locationControlBlockPosition;
 
-        BlockPos mainEntrancePositionOffset = packet.mainEntrancePositionOffset;
-        double mainEntranceYaw = packet.mainEntranceYaw;
-        double mainEntrancePitch = packet.mainEntrancePitch;
+		BlockPos mainEntrancePositionOffset = packet.mainEntrancePositionOffset;
+		double mainEntranceYaw = packet.mainEntranceYaw;
+		double mainEntrancePitch = packet.mainEntrancePitch;
 
-        HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
+		HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
 
-        for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrance : packet.sideEntrancesList) {
-            sideEntrances.put(sideEntrance.getLeft(), sideEntrance.getRight());
-        }
+		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrance : packet.sideEntrancesList) {
+			sideEntrances.put(sideEntrance.getLeft(), sideEntrance.getRight());
+		}
 
-        BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
-        boolean triggeredBlockResets = packet.triggeredBlockResets;
+		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
+		boolean triggeredBlockResets = packet.triggeredBlockResets;
 
-        boolean shouldAlwaysReset = packet.shouldAlwaysReset;
+		boolean shouldAlwaysReset = packet.shouldAlwaysReset;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
-        BlockState blockState = world.getBlockState(locationControlBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
+		BlockState blockState = world.getBlockState(locationControlBlockPosition);
 
-        if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
+		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
 
-            locationControlBlockEntity.setMainEntrance(new MutablePair<>(mainEntrancePositionOffset, new MutablePair<>(mainEntranceYaw, mainEntrancePitch)));
-            locationControlBlockEntity.setSideEntrances(sideEntrances);
-            locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-            locationControlBlockEntity.setShouldAlwaysReset(shouldAlwaysReset);
+			locationControlBlockEntity.setMainEntrance(new MutablePair<>(mainEntrancePositionOffset, new MutablePair<>(mainEntranceYaw, mainEntrancePitch)));
+			locationControlBlockEntity.setSideEntrances(sideEntrances);
+			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			locationControlBlockEntity.setShouldAlwaysReset(shouldAlwaysReset);
 
-            player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            locationControlBlockEntity.markDirty();
-            world.updateListeners(locationControlBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			locationControlBlockEntity.markDirty();
+			world.updateListeners(locationControlBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

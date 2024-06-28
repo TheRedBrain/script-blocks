@@ -19,38 +19,38 @@ import org.jetbrains.annotations.Nullable;
 
 public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorBlock {
 
-    public TeleporterBlock(Settings settings) {
-        super(settings);
-    }
+	public TeleporterBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<TeleporterBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<TeleporterBlock> getCodec() {
+		return null;
+	}
 
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new TeleporterBlockEntity(pos, state);
-    }
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new TeleporterBlockEntity(pos, state);
+	}
 
-    @Override
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+	@Override
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
-        return checkType(type, EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
-    }
+		return checkType(type, EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient) {
-            return ActionResult.SUCCESS;
-        }
-        player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-        return ActionResult.CONSUME;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		if (world.isClient) {
+			return ActionResult.SUCCESS;
+		}
+		player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+		return ActionResult.CONSUME;
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 }

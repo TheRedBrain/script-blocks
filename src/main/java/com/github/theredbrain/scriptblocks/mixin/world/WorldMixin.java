@@ -15,38 +15,42 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 
 @Mixin(World.class)
-public abstract class WorldMixin implements WorldAccess  {
-    @Shadow @Final protected MutableWorldProperties properties;
+public abstract class WorldMixin implements WorldAccess {
+	@Shadow
+	@Final
+	protected MutableWorldProperties properties;
 
-    @Shadow @Final public Random random;
+	@Shadow
+	@Final
+	public Random random;
 
-    /**
-     * @author TheRedBrain
-     * @reason TODO
-     */
-    @Overwrite
-    public BlockPos getSpawnPos() {
-        if (ScriptBlocksMod.serverConfig.use_predefined_position_for_world_spawn) {
-            List<Integer> worldSpawnXList = ScriptBlocksMod.serverConfig.worldSpawnXList;
-            List<Integer> worldSpawnYList = ScriptBlocksMod.serverConfig.worldSpawnYList;
-            List<Integer> worldSpawnZList = ScriptBlocksMod.serverConfig.worldSpawnZList;
-            int listSize = worldSpawnXList.size();
-            if (listSize > 0) {
-                int spawnPointIndex = this.random.nextBetweenExclusive(0, listSize);
-                if (spawnPointIndex < worldSpawnXList.size() && spawnPointIndex < worldSpawnYList.size() && spawnPointIndex < worldSpawnZList.size()) {
-                    BlockPos pos = new BlockPos(worldSpawnXList.get(spawnPointIndex), worldSpawnYList.get(spawnPointIndex), worldSpawnZList.get(spawnPointIndex));
-                    if (this.getWorldBorder().contains(pos)) {
-                        return pos;
-                    }
-                }
-            }
-        }
-        BlockPos blockPos = new BlockPos(this.properties.getSpawnX(), this.properties.getSpawnY(), this.properties.getSpawnZ());
-        if (!this.getWorldBorder().contains(blockPos)) {
-            blockPos = this.getTopPosition(Heightmap.Type.MOTION_BLOCKING, BlockPos.ofFloored(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
-        }
-        return blockPos;
-    }
+	/**
+	 * @author TheRedBrain
+	 * @reason TODO
+	 */
+	@Overwrite
+	public BlockPos getSpawnPos() {
+		if (ScriptBlocksMod.serverConfig.use_predefined_position_for_world_spawn) {
+			List<Integer> worldSpawnXList = ScriptBlocksMod.serverConfig.worldSpawnXList;
+			List<Integer> worldSpawnYList = ScriptBlocksMod.serverConfig.worldSpawnYList;
+			List<Integer> worldSpawnZList = ScriptBlocksMod.serverConfig.worldSpawnZList;
+			int listSize = worldSpawnXList.size();
+			if (listSize > 0) {
+				int spawnPointIndex = this.random.nextBetweenExclusive(0, listSize);
+				if (spawnPointIndex < worldSpawnXList.size() && spawnPointIndex < worldSpawnYList.size() && spawnPointIndex < worldSpawnZList.size()) {
+					BlockPos pos = new BlockPos(worldSpawnXList.get(spawnPointIndex), worldSpawnYList.get(spawnPointIndex), worldSpawnZList.get(spawnPointIndex));
+					if (this.getWorldBorder().contains(pos)) {
+						return pos;
+					}
+				}
+			}
+		}
+		BlockPos blockPos = new BlockPos(this.properties.getSpawnX(), this.properties.getSpawnY(), this.properties.getSpawnZ());
+		if (!this.getWorldBorder().contains(blockPos)) {
+			blockPos = this.getTopPosition(Heightmap.Type.MOTION_BLOCKING, BlockPos.ofFloored(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
+		}
+		return blockPos;
+	}
 
 //    /**
 //     * @author TheRedBrain

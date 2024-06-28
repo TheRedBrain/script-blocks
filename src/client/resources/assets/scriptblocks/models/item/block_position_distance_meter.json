@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/handheld",
-  "textures": {
-    "layer0": "scriptblocks:item/block_position_distance_meter"
-  }
+	"parent": "minecraft:item/handheld",
+	"textures": {
+		"layer0": "scriptblocks:item/block_position_distance_meter"
+	}
 }

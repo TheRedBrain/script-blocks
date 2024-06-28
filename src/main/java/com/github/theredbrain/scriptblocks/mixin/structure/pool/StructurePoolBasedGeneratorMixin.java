@@ -40,127 +40,130 @@ import java.util.Optional;
 @Mixin(StructurePoolBasedGenerator.class)
 public abstract class StructurePoolBasedGeneratorMixin {
 
-    @Shadow
-    @Final
-    static Logger LOGGER;
+	@Shadow
+	@Final
+	static Logger LOGGER;
 
-    @Shadow
-    private static Optional<BlockPos> findStartingJigsawPos(StructurePoolElement pool, Identifier id, BlockPos pos, BlockRotation rotation, StructureTemplateManager structureManager, ChunkRandom random) {
-        throw new AssertionError();
-    }
+	@Shadow
+	private static Optional<BlockPos> findStartingJigsawPos(StructurePoolElement pool, Identifier id, BlockPos pos, BlockRotation rotation, StructureTemplateManager structureManager, ChunkRandom random) {
+		throw new AssertionError();
+	}
 
-    @Shadow private static void generate(NoiseConfig noiseConfig, int maxSize, boolean modifyBoundingBox, ChunkGenerator chunkGenerator, StructureTemplateManager structureTemplateManager, HeightLimitView heightLimitView, Random random, Registry<StructurePool> structurePoolRegistry, PoolStructurePiece firstPiece, List<PoolStructurePiece> pieces, VoxelShape pieceShape) {
-        throw new AssertionError();
-    }
+	@Shadow
+	private static void generate(NoiseConfig noiseConfig, int maxSize, boolean modifyBoundingBox, ChunkGenerator chunkGenerator, StructureTemplateManager structureTemplateManager, HeightLimitView heightLimitView, Random random, Registry<StructurePool> structurePoolRegistry, PoolStructurePiece firstPiece, List<PoolStructurePiece> pieces, VoxelShape pieceShape) {
+		throw new AssertionError();
+	}
 
-    /**
-     * @author TheRedBrain
-     * @reason
-     */
-    @Overwrite
-    public static Optional<Structure.StructurePosition> generate(
-            Structure.Context context,
-            RegistryEntry<StructurePool> structurePool,
-            Optional<Identifier> id,
-            int size,
-            BlockPos pos,
-            boolean useExpansionHack,
-            Optional<Heightmap.Type> projectStartToHeightmap,
-            int maxDistanceFromCenter
-    ) {
-        DynamicRegistryManager dynamicRegistryManager = context.dynamicRegistryManager();
-        ChunkGenerator chunkGenerator = context.chunkGenerator();
-        StructureTemplateManager structureTemplateManager = context.structureTemplateManager();
-        HeightLimitView heightLimitView = context.world();
-        ChunkRandom chunkRandom = context.random(); // generates always same jigsaw combination in the same chunk/position
-        if (!ScriptBlocksMod.serverConfig.shouldJigSawGenerationBeDeterministic) {
-            chunkRandom.setSeed(Random.create().nextLong()); // this randomizes the jigsaw generation even in the same chunk/position
-        }
-        Registry<StructurePool> registry = dynamicRegistryManager.get(RegistryKeys.TEMPLATE_POOL);
-        BlockRotation blockRotation = BlockRotation.random(chunkRandom); // this randomizes the initial rotation of every jigsaw structure
-        if (!ScriptBlocksMod.serverConfig.shouldJigSawStructuresBeRandomlyRotated) {
-            blockRotation = BlockRotation.NONE; // this sets the initial rotation to always be the same
-        }
-        StructurePool structurePool2 = structurePool.value();
-        StructurePoolElement structurePoolElement = structurePool2.getRandomElement(chunkRandom);
-        if (structurePoolElement == EmptyPoolElement.INSTANCE) {
-            return Optional.empty();
-        } else {
-            BlockPos blockPos;
-            if (id.isPresent()) {
-                Identifier identifier = (Identifier)id.get();
-                Optional<BlockPos> optional = findStartingJigsawPos(structurePoolElement, identifier, pos, blockRotation, structureTemplateManager, chunkRandom);
-                if (optional.isEmpty()) {
-                    LOGGER.error(
-                            "No starting jigsaw {} found in start pool {}", identifier, structurePool.getKey().map(key -> key.getValue().toString()).orElse("<unregistered>")
-                    );
-                    return Optional.empty();
-                }
+	// TODO replace with MODIFYVARIABLE
 
-                blockPos = (BlockPos)optional.get();
-            } else {
-                blockPos = pos;
-            }
+	/**
+	 * @author TheRedBrain
+	 * @reason
+	 */
+	@Overwrite
+	public static Optional<Structure.StructurePosition> generate(
+			Structure.Context context,
+			RegistryEntry<StructurePool> structurePool,
+			Optional<Identifier> id,
+			int size,
+			BlockPos pos,
+			boolean useExpansionHack,
+			Optional<Heightmap.Type> projectStartToHeightmap,
+			int maxDistanceFromCenter
+	) {
+		DynamicRegistryManager dynamicRegistryManager = context.dynamicRegistryManager();
+		ChunkGenerator chunkGenerator = context.chunkGenerator();
+		StructureTemplateManager structureTemplateManager = context.structureTemplateManager();
+		HeightLimitView heightLimitView = context.world();
+		ChunkRandom chunkRandom = context.random(); // generates always same jigsaw combination in the same chunk/position
+		if (!ScriptBlocksMod.serverConfig.shouldJigSawGenerationBeDeterministic) {
+			chunkRandom.setSeed(Random.create().nextLong()); // this randomizes the jigsaw generation even in the same chunk/position
+		}
+		Registry<StructurePool> registry = dynamicRegistryManager.get(RegistryKeys.TEMPLATE_POOL);
+		BlockRotation blockRotation = BlockRotation.random(chunkRandom); // this randomizes the initial rotation of every jigsaw structure
+		if (!ScriptBlocksMod.serverConfig.shouldJigSawStructuresBeRandomlyRotated) {
+			blockRotation = BlockRotation.NONE; // this sets the initial rotation to always be the same
+		}
+		StructurePool structurePool2 = structurePool.value();
+		StructurePoolElement structurePoolElement = structurePool2.getRandomElement(chunkRandom);
+		if (structurePoolElement == EmptyPoolElement.INSTANCE) {
+			return Optional.empty();
+		} else {
+			BlockPos blockPos;
+			if (id.isPresent()) {
+				Identifier identifier = (Identifier) id.get();
+				Optional<BlockPos> optional = findStartingJigsawPos(structurePoolElement, identifier, pos, blockRotation, structureTemplateManager, chunkRandom);
+				if (optional.isEmpty()) {
+					LOGGER.error(
+							"No starting jigsaw {} found in start pool {}", identifier, structurePool.getKey().map(key -> key.getValue().toString()).orElse("<unregistered>")
+					);
+					return Optional.empty();
+				}
 
-            Vec3i vec3i = blockPos.subtract(pos);
-            BlockPos blockPos2 = pos.subtract(vec3i);
-            PoolStructurePiece poolStructurePiece = new PoolStructurePiece(
-                    structureTemplateManager,
-                    structurePoolElement,
-                    blockPos2,
-                    structurePoolElement.getGroundLevelDelta(),
-                    blockRotation,
-                    structurePoolElement.getBoundingBox(structureTemplateManager, blockPos2, blockRotation)
-            );
-            BlockBox blockBox = poolStructurePiece.getBoundingBox();
-            int i = (blockBox.getMaxX() + blockBox.getMinX()) / 2;
-            int j = (blockBox.getMaxZ() + blockBox.getMinZ()) / 2;
-            int k;
-            if (projectStartToHeightmap.isPresent()) {
-                k = pos.getY() + chunkGenerator.getHeightOnGround(i, j, (Heightmap.Type)projectStartToHeightmap.get(), heightLimitView, context.noiseConfig());
-            } else {
-                k = blockPos2.getY();
-            }
+				blockPos = (BlockPos) optional.get();
+			} else {
+				blockPos = pos;
+			}
 
-            int l = blockBox.getMinY() + poolStructurePiece.getGroundLevelDelta();
-            poolStructurePiece.translate(0, k - l, 0);
-            int m = k + vec3i.getY();
-            return Optional.of(
-                    new Structure.StructurePosition(
-                            new BlockPos(i, m, j),
-                            collector -> {
-                                List<PoolStructurePiece> list = Lists.<PoolStructurePiece>newArrayList();
-                                list.add(poolStructurePiece);
-                                if (size > 0) {
-                                    Box box = new Box(
-                                            (double)(i - maxDistanceFromCenter),
-                                            (double)(m - maxDistanceFromCenter),
-                                            (double)(j - maxDistanceFromCenter),
-                                            (double)(i + maxDistanceFromCenter + 1),
-                                            (double)(m + maxDistanceFromCenter + 1),
-                                            (double)(j + maxDistanceFromCenter + 1)
-                                    );
-                                    VoxelShape voxelShape = VoxelShapes.combineAndSimplify(VoxelShapes.cuboid(box), VoxelShapes.cuboid(Box.from(blockBox)), BooleanBiFunction.ONLY_FIRST);
-                                    generate(
-                                            context.noiseConfig(),
-                                            size,
-                                            useExpansionHack,
-                                            chunkGenerator,
-                                            structureTemplateManager,
-                                            heightLimitView,
-                                            chunkRandom,
-                                            registry,
-                                            poolStructurePiece,
-                                            list,
-                                            voxelShape
-                                    );
-                                    list.forEach(collector::addPiece);
-                                }
-                            }
-                    )
-            );
-        }
-    }
+			Vec3i vec3i = blockPos.subtract(pos);
+			BlockPos blockPos2 = pos.subtract(vec3i);
+			PoolStructurePiece poolStructurePiece = new PoolStructurePiece(
+					structureTemplateManager,
+					structurePoolElement,
+					blockPos2,
+					structurePoolElement.getGroundLevelDelta(),
+					blockRotation,
+					structurePoolElement.getBoundingBox(structureTemplateManager, blockPos2, blockRotation)
+			);
+			BlockBox blockBox = poolStructurePiece.getBoundingBox();
+			int i = (blockBox.getMaxX() + blockBox.getMinX()) / 2;
+			int j = (blockBox.getMaxZ() + blockBox.getMinZ()) / 2;
+			int k;
+			if (projectStartToHeightmap.isPresent()) {
+				k = pos.getY() + chunkGenerator.getHeightOnGround(i, j, (Heightmap.Type) projectStartToHeightmap.get(), heightLimitView, context.noiseConfig());
+			} else {
+				k = blockPos2.getY();
+			}
+
+			int l = blockBox.getMinY() + poolStructurePiece.getGroundLevelDelta();
+			poolStructurePiece.translate(0, k - l, 0);
+			int m = k + vec3i.getY();
+			return Optional.of(
+					new Structure.StructurePosition(
+							new BlockPos(i, m, j),
+							collector -> {
+								List<PoolStructurePiece> list = Lists.<PoolStructurePiece>newArrayList();
+								list.add(poolStructurePiece);
+								if (size > 0) {
+									Box box = new Box(
+											(double) (i - maxDistanceFromCenter),
+											(double) (m - maxDistanceFromCenter),
+											(double) (j - maxDistanceFromCenter),
+											(double) (i + maxDistanceFromCenter + 1),
+											(double) (m + maxDistanceFromCenter + 1),
+											(double) (j + maxDistanceFromCenter + 1)
+									);
+									VoxelShape voxelShape = VoxelShapes.combineAndSimplify(VoxelShapes.cuboid(box), VoxelShapes.cuboid(Box.from(blockBox)), BooleanBiFunction.ONLY_FIRST);
+									generate(
+											context.noiseConfig(),
+											size,
+											useExpansionHack,
+											chunkGenerator,
+											structureTemplateManager,
+											heightLimitView,
+											chunkRandom,
+											registry,
+											poolStructurePiece,
+											list,
+											voxelShape
+									);
+									list.forEach(collector::addPiece);
+								}
+							}
+					)
+			);
+		}
+	}
 
 //    /**
 //     * @author TheRedBrain

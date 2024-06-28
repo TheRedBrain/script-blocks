@@ -1,3 +1,3 @@
 {
-  "parent": "scriptblocks:block/mimic_fallback_block"
+	"parent": "scriptblocks:block/mimic_fallback_block"
 }

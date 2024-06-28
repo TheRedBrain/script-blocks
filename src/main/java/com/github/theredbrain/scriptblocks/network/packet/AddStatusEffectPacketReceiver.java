@@ -10,34 +10,34 @@ import net.minecraft.util.Identifier;
 
 public class AddStatusEffectPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<AddStatusEffectPacket> {
 
-    @Override
-    public void receive(AddStatusEffectPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(AddStatusEffectPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        Identifier effectId = packet.effectId;
-        int duration = packet.duration;
-        int amplifier = packet.amplifier;
-        boolean ambient = packet.ambient;
-        boolean showParticles = packet.showParticles;
-        boolean showIcon = packet.showIcon;
-        boolean toggle = packet.toggle;
+		Identifier effectId = packet.effectId;
+		int duration = packet.duration;
+		int amplifier = packet.amplifier;
+		boolean ambient = packet.ambient;
+		boolean showParticles = packet.showParticles;
+		boolean showIcon = packet.showIcon;
+		boolean toggle = packet.toggle;
 
-        StatusEffect statusEffect = Registries.STATUS_EFFECT.get(effectId);
+		StatusEffect statusEffect = Registries.STATUS_EFFECT.get(effectId);
 
-        if (statusEffect != null) {
+		if (statusEffect != null) {
 //            if (player.hasStatusEffect(statusEffect)) {
 //                player.removeStatusEffect(statusEffect);
 //            }
 //            if (!toggle) {
 //                player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
 //            }
-            if (toggle && player.hasStatusEffect(statusEffect)) {
-                player.removeStatusEffect(statusEffect);
-            } else if (player.hasStatusEffect(statusEffect)) {
-                player.removeStatusEffect(statusEffect);
-                player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
-            } else {
-                player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
-            }
-        }
-    }
+			if (toggle && player.hasStatusEffect(statusEffect)) {
+				player.removeStatusEffect(statusEffect);
+			} else if (player.hasStatusEffect(statusEffect)) {
+				player.removeStatusEffect(statusEffect);
+				player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
+			} else {
+				player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
+			}
+		}
+	}
 }

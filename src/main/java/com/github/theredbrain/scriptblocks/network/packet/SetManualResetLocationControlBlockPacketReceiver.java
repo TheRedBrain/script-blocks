@@ -11,28 +11,28 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class SetManualResetLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<SetManualResetLocationControlBlockPacket> {
-    @Override
-    public void receive(SetManualResetLocationControlBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(SetManualResetLocationControlBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos locationControlBlockPosition = packet.locationControlBlockPosition;
+		BlockPos locationControlBlockPosition = packet.locationControlBlockPosition;
 
-        boolean manualReset = packet.manualReset;
+		boolean manualReset = packet.manualReset;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
-        BlockState blockState = world.getBlockState(locationControlBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
+		BlockState blockState = world.getBlockState(locationControlBlockPosition);
 
-        if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
+		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
 
-            locationControlBlockEntity.setManualReset(manualReset);
+			locationControlBlockEntity.setManualReset(manualReset);
 
-            locationControlBlockEntity.markDirty();
-            world.updateListeners(locationControlBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+			locationControlBlockEntity.markDirty();
+			world.updateListeners(locationControlBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

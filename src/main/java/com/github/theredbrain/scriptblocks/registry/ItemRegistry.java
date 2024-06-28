@@ -13,18 +13,18 @@ import org.jetbrains.annotations.Nullable;
 
 public class ItemRegistry {
 
-    public static final Item BLOCK_POSITION_DISTANCE_METER = registerItem("block_position_distance_meter", new BlockPositionDistanceMeterItem(new FabricItemSettings().maxCount(1)), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Item BLOCK_POSITION_DISTANCE_METER = registerItem("block_position_distance_meter", new BlockPositionDistanceMeterItem(new FabricItemSettings().maxCount(1)), ItemGroupRegistry.SCRIPT_BLOCKS);
 
-    private static Item registerItem(String name, Item item, @Nullable RegistryKey<ItemGroup> itemGroup) {
+	private static Item registerItem(String name, Item item, @Nullable RegistryKey<ItemGroup> itemGroup) {
 
-        if (itemGroup != null) {
-            ItemGroupEvents.modifyEntriesEvent(itemGroup).register(content -> {
-                content.add(item);
-            });
-        }
-        return Registry.register(Registries.ITEM, ScriptBlocksMod.identifier(name), item);
-    }
+		if (itemGroup != null) {
+			ItemGroupEvents.modifyEntriesEvent(itemGroup).register(content -> {
+				content.add(item);
+			});
+		}
+		return Registry.register(Registries.ITEM, ScriptBlocksMod.identifier(name), item);
+	}
 
-    public static void init() {
-    }
+	public static void init() {
+	}
 }

@@ -6,7 +6,6 @@ import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
@@ -37,172 +36,172 @@ import java.util.List;
 
 public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<DialogueAnswerPacket> {
 
-    @Override
-    public void receive(DialogueAnswerPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(DialogueAnswerPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        BlockPos dialogueBlockPos = packet.dialogueBlockPos;
+		BlockPos dialogueBlockPos = packet.dialogueBlockPos;
 
-        Identifier answerIdentifier = packet.answerIdentifier;
+		Identifier answerIdentifier = packet.answerIdentifier;
 
-        DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.getDialogueAnswer(answerIdentifier);
+		DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.getDialogueAnswer(answerIdentifier);
 
-        MinecraftServer server = player.getServer();
+		MinecraftServer server = player.getServer();
 
-        if (dialogueAnswer != null && server != null && player.getWorld().getBlockEntity(dialogueBlockPos) instanceof DialogueBlockEntity dialogueBlockEntity) {
+		if (dialogueAnswer != null && server != null && player.getWorld().getBlockEntity(dialogueBlockPos) instanceof DialogueBlockEntity dialogueBlockEntity) {
 
-            List<ItemUtils.VirtualItemStack> virtualItemStacks = dialogueAnswer.getItemCost();
-            if (virtualItemStacks != null) {
+			List<ItemUtils.VirtualItemStack> virtualItemStacks = dialogueAnswer.getItemCost();
+			if (virtualItemStacks != null) {
 
-                int playerInventorySize = player.getInventory().size();
-                Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
-                ItemStack itemStack;
+				int playerInventorySize = player.getInventory().size();
+				Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
+				ItemStack itemStack;
 
-                for (int k = 0; k < playerInventorySize; k++) {
-                    playerInventoryCopy.setStack(k, player.getInventory().getStack(k).copy());
-                }
+				for (int k = 0; k < playerInventorySize; k++) {
+					playerInventoryCopy.setStack(k, player.getInventory().getStack(k).copy());
+				}
 
-                for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
-                    Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
-                    int ingredientCount = ingredient.getCount();
+				for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
+					Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
+					int ingredientCount = ingredient.getCount();
 
-                    for (int j = 0; j < playerInventorySize; j++) {
-                        if (playerInventoryCopy.getStack(j).isOf(virtualItem)) {
-                            itemStack = playerInventoryCopy.getStack(j).copy();
-                            int stackCount = itemStack.getCount();
-                            if (stackCount >= ingredientCount) {
-                                itemStack.setCount(stackCount - ingredientCount);
-                                playerInventoryCopy.setStack(j, itemStack);
-                                ingredientCount = 0;
-                                break;
-                            } else {
-                                playerInventoryCopy.setStack(j, ItemStack.EMPTY);
-                                ingredientCount = ingredientCount - stackCount;
-                            }
-                        }
-                    }
-                    if (ingredientCount > 0) {
-                        player.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
-                        return;
-                    }
-                }
+					for (int j = 0; j < playerInventorySize; j++) {
+						if (playerInventoryCopy.getStack(j).isOf(virtualItem)) {
+							itemStack = playerInventoryCopy.getStack(j).copy();
+							int stackCount = itemStack.getCount();
+							if (stackCount >= ingredientCount) {
+								itemStack.setCount(stackCount - ingredientCount);
+								playerInventoryCopy.setStack(j, itemStack);
+								ingredientCount = 0;
+								break;
+							} else {
+								playerInventoryCopy.setStack(j, ItemStack.EMPTY);
+								ingredientCount = ingredientCount - stackCount;
+							}
+						}
+					}
+					if (ingredientCount > 0) {
+						player.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
+						return;
+					}
+				}
 
-                for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
-                    Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
-                    int ingredientCount = ingredient.getCount();
+				for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
+					Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
+					int ingredientCount = ingredient.getCount();
 
-                    for (int j = 0; j < playerInventorySize; j++) {
-                        if (player.getInventory().getStack(j).isOf(virtualItem)) {
-                            itemStack = player.getInventory().getStack(j).copy();
-                            int stackCount = itemStack.getCount();
-                            if (stackCount >= ingredientCount) {
-                                itemStack.setCount(stackCount - ingredientCount);
-                                player.getInventory().setStack(j, itemStack);
-                                ingredientCount = 0;
-                                break;
-                            } else {
-                                player.getInventory().setStack(j, ItemStack.EMPTY);
-                                ingredientCount = ingredientCount - stackCount;
-                            }
-                        }
-                    }
-                    if (ingredientCount > 0) {
-                        return;
-                    }
-                }
-            }
+					for (int j = 0; j < playerInventorySize; j++) {
+						if (player.getInventory().getStack(j).isOf(virtualItem)) {
+							itemStack = player.getInventory().getStack(j).copy();
+							int stackCount = itemStack.getCount();
+							if (stackCount >= ingredientCount) {
+								itemStack.setCount(stackCount - ingredientCount);
+								player.getInventory().setStack(j, itemStack);
+								ingredientCount = 0;
+								break;
+							} else {
+								player.getInventory().setStack(j, ItemStack.EMPTY);
+								ingredientCount = ingredientCount - stackCount;
+							}
+						}
+					}
+					if (ingredientCount > 0) {
+						return;
+					}
+				}
+			}
 
-            // loot_table
-            Identifier lootTableIdentifier = dialogueAnswer.getLootTable();
-            if (lootTableIdentifier != null) {
-                LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(player.getServerWorld()).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
-                boolean bl = false;
-                for (ItemStack itemStack : server.getLootManager().getLootTable(lootTableIdentifier).generateLoot(lootContextParameterSet)) {
-                    if (player.giveItemStack(itemStack)) {
-                        player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2f, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
-                        bl = true;
-                        continue;
-                    }
-                    ItemEntity itemEntity = player.dropItem(itemStack, false);
-                    if (itemEntity == null) continue;
-                    itemEntity.resetPickupDelay();
-                    itemEntity.setOwner(player.getUuid());
-                }
-                if (bl) {
-                    player.currentScreenHandler.sendContentUpdates();
-                }
-            }
+			// loot_table
+			Identifier lootTableIdentifier = dialogueAnswer.getLootTable();
+			if (lootTableIdentifier != null) {
+				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(player.getServerWorld()).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
+				boolean bl = false;
+				for (ItemStack itemStack : server.getLootManager().getLootTable(lootTableIdentifier).generateLoot(lootContextParameterSet)) {
+					if (player.giveItemStack(itemStack)) {
+						player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2f, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
+						bl = true;
+						continue;
+					}
+					ItemEntity itemEntity = player.dropItem(itemStack, false);
+					if (itemEntity == null) continue;
+					itemEntity.resetPickupDelay();
+					itemEntity.setOwner(player.getUuid());
+				}
+				if (bl) {
+					player.currentScreenHandler.sendContentUpdates();
+				}
+			}
 
-            // advancement
-            Identifier advancementIdentifier = dialogueAnswer.getGrantedAdvancement();
-            String criterionName = dialogueAnswer.getCriterionName();
-            if (advancementIdentifier != null && criterionName != null) {
+			// advancement
+			Identifier advancementIdentifier = dialogueAnswer.getGrantedAdvancement();
+			String criterionName = dialogueAnswer.getCriterionName();
+			if (advancementIdentifier != null && criterionName != null) {
 //                AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
-                Advancement advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
-                if (advancementEntry != null) {
-                    player.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
-                }
-            }
+				Advancement advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
+				if (advancementEntry != null) {
+					player.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
+				}
+			}
 
-            // overlay message
-            String overlayMessage = dialogueAnswer.getOverlayMessage();
-            if (overlayMessage != null) {
-                player.sendMessageToClient(Text.translatable(overlayMessage), true);
-            }
+			// overlay message
+			String overlayMessage = dialogueAnswer.getOverlayMessage();
+			if (overlayMessage != null) {
+				player.sendMessageToClient(Text.translatable(overlayMessage), true);
+			}
 
-            String responseDialogueIdentifierString = dialogueAnswer.getResponseDialogue();
-            if (responseDialogueIdentifierString.isEmpty()) {
-                player.closeHandledScreen();
-            } else {
-                ServerPlayNetworking.send(player, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
-            }
-
-
-            // trigger block
-            String triggeredBlock = dialogueAnswer.getTriggeredBlock();
-            if (triggeredBlock != null) {
-                List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
-                List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueTriggeredBlocks().keySet());
-                for (String key : keyList) {
-                    dialogueTriggeredBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueTriggeredBlocks().get(key)));
-                }
-                for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocksList) {
-                    if (entry.getLeft().equals(triggeredBlock)) {
+			String responseDialogueIdentifierString = dialogueAnswer.getResponseDialogue();
+			if (responseDialogueIdentifierString.isEmpty()) {
+				player.closeHandledScreen();
+			} else {
+				ServerPlayNetworking.send(player, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
+			}
 
 
-                        BlockEntity blockEntity = player.getWorld().getBlockEntity(entry.getRight().getLeft().add(dialogueBlockPos));
+			// trigger block
+			String triggeredBlock = dialogueAnswer.getTriggeredBlock();
+			if (triggeredBlock != null) {
+				List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
+				List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueTriggeredBlocks().keySet());
+				for (String key : keyList) {
+					dialogueTriggeredBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueTriggeredBlocks().get(key)));
+				}
+				for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocksList) {
+					if (entry.getLeft().equals(triggeredBlock)) {
 
-                        if (blockEntity != dialogueBlockEntity) {
-                            boolean triggeredBlockResets = entry.getRight().getRight();
-                            if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
-                                resetable.reset();
-                            } else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
-                                triggerable.trigger();
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
 
-            // use block
-            String usedBlock = dialogueAnswer.getUsedBlock();
-            if (usedBlock != null) {
-                List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
-                List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueUsedBlocks().keySet());
-                for (String key : keyList) {
-                    dialogueUsedBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueUsedBlocks().get(key)));
-                }
-                for (MutablePair<String, BlockPos> entry : dialogueUsedBlocksList) {
-                    if (entry.getLeft().equals(usedBlock)) {
-                        BlockHitResult blockHitResult = new BlockHitResult(player.getPos(), Direction.UP, entry.getRight().add(dialogueBlockPos), false);
-                        World world = player.getWorld();
-                        Hand hand = player.getActiveHand();
-                        ItemStack itemStack = player.getStackInHand(hand);
+						BlockEntity blockEntity = player.getWorld().getBlockEntity(entry.getRight().getLeft().add(dialogueBlockPos));
 
-                        player.interactionManager.interactBlock(player, world, itemStack, hand, blockHitResult);
-                    }
-                }
-            }
-        }
-    }
+						if (blockEntity != dialogueBlockEntity) {
+							boolean triggeredBlockResets = entry.getRight().getRight();
+							if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+								resetable.reset();
+							} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+								triggerable.trigger();
+							}
+						}
+						break;
+					}
+				}
+			}
+
+			// use block
+			String usedBlock = dialogueAnswer.getUsedBlock();
+			if (usedBlock != null) {
+				List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
+				List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueUsedBlocks().keySet());
+				for (String key : keyList) {
+					dialogueUsedBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueUsedBlocks().get(key)));
+				}
+				for (MutablePair<String, BlockPos> entry : dialogueUsedBlocksList) {
+					if (entry.getLeft().equals(usedBlock)) {
+						BlockHitResult blockHitResult = new BlockHitResult(player.getPos(), Direction.UP, entry.getRight().add(dialogueBlockPos), false);
+						World world = player.getWorld();
+						Hand hand = player.getActiveHand();
+						ItemStack itemStack = player.getStackInHand(hand);
+
+						player.interactionManager.interactBlock(player, world, itemStack, hand, blockHitResult);
+					}
+				}
+			}
+		}
+	}
 }

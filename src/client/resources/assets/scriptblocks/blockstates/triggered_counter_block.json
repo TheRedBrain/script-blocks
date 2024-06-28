@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "": {
-      "model": "scriptblocks:block/triggered_counter_block"
-    }
-  }
+	"variants": {
+		"": {
+			"model": "scriptblocks:block/triggered_counter_block"
+		}
+	}
 }

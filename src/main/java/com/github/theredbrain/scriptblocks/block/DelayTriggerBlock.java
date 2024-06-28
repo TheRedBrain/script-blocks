@@ -19,40 +19,40 @@ import org.jetbrains.annotations.Nullable;
 
 public class DelayTriggerBlock extends RotatedBlockWithEntity {
 
-    public DelayTriggerBlock(Settings settings) {
-        super(settings);
-    }
+	public DelayTriggerBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<DelayTriggerBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<DelayTriggerBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new DelayTriggerBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new DelayTriggerBlockEntity(pos, state);
+	}
 
-    @Override
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+	@Override
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
-        return checkType(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
-    }
+		return checkType(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openDelayTriggerBlockScreen(delayTriggerBlockEntity);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openDelayTriggerBlockScreen(delayTriggerBlockEntity);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }

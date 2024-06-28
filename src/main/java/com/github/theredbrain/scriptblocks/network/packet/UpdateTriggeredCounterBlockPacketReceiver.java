@@ -17,38 +17,38 @@ import java.util.List;
 
 public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTriggeredCounterBlockPacket> {
 
-    @Override
-    public void receive(UpdateTriggeredCounterBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateTriggeredCounterBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos triggeredCounterBlockPosition = packet.triggeredCounterBlockPosition;
+		BlockPos triggeredCounterBlockPosition = packet.triggeredCounterBlockPosition;
 
-        List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = packet.triggeredBlocksList;
-        HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
-        for (MutablePair<Integer, MutablePair<BlockPos, Boolean>> usedBlock : triggeredBlocksList) {
-            triggeredBlocks.put(usedBlock.getLeft(), usedBlock.getRight());
-        }
+		List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = packet.triggeredBlocksList;
+		HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
+		for (MutablePair<Integer, MutablePair<BlockPos, Boolean>> usedBlock : triggeredBlocksList) {
+			triggeredBlocks.put(usedBlock.getLeft(), usedBlock.getRight());
+		}
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        boolean updateSuccessful = true;
+		boolean updateSuccessful = true;
 
-        BlockEntity blockEntity = world.getBlockEntity(triggeredCounterBlockPosition);
-        BlockState blockState = world.getBlockState(triggeredCounterBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(triggeredCounterBlockPosition);
+		BlockState blockState = world.getBlockState(triggeredCounterBlockPosition);
 
-        if (blockEntity instanceof TriggeredCounterBlockEntity triggeredCounterBlockEntity) {
-            if (!triggeredCounterBlockEntity.setTriggeredBlocks(triggeredBlocks)) {
-                player.sendMessage(Text.translatable("triggered_block.triggeredBlocks.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (updateSuccessful) {
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            }
-            triggeredCounterBlockEntity.markDirty();
-            world.updateListeners(triggeredCounterBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof TriggeredCounterBlockEntity triggeredCounterBlockEntity) {
+			if (!triggeredCounterBlockEntity.setTriggeredBlocks(triggeredBlocks)) {
+				player.sendMessage(Text.translatable("triggered_block.triggeredBlocks.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (updateSuccessful) {
+				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
+			triggeredCounterBlockEntity.markDirty();
+			world.updateListeners(triggeredCounterBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

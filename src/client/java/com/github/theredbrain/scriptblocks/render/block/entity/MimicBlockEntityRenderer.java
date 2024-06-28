@@ -15,27 +15,27 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.random.Random;
 
-@Environment(value=EnvType.CLIENT)
+@Environment(value = EnvType.CLIENT)
 public class MimicBlockEntityRenderer
-implements BlockEntityRenderer<MimicBlockEntity> {
-    public MimicBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
-    }
+		implements BlockEntityRenderer<MimicBlockEntity> {
+	public MimicBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
+	}
 
-    @Override
-    public void render(MimicBlockEntity mimicBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
-        BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(mimicBlockEntity.getCurrentMimicBlockState()));
-        boolean debugRender = mimicBlockEntity.isDebugModeActive();
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player != null) {
-            debugRender = debugRender || (player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(BlockRegistry.MIMIC_BLOCK.asItem()));
-        }
-        blockRenderManager.renderBlock(debugRender ? BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState() : mimicBlockEntity.getCurrentMimicBlockState(), mimicBlockEntity.getPos(), mimicBlockEntity.getWorld(), matrixStack, vertexConsumer, true, Random.create());
-    }
+	@Override
+	public void render(MimicBlockEntity mimicBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
+		BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
+		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(mimicBlockEntity.getCurrentMimicBlockState()));
+		boolean debugRender = mimicBlockEntity.isDebugModeActive();
+		ClientPlayerEntity player = MinecraftClient.getInstance().player;
+		if (player != null) {
+			debugRender = debugRender || (player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(BlockRegistry.MIMIC_BLOCK.asItem()));
+		}
+		blockRenderManager.renderBlock(debugRender ? BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState() : mimicBlockEntity.getCurrentMimicBlockState(), mimicBlockEntity.getPos(), mimicBlockEntity.getWorld(), matrixStack, vertexConsumer, true, Random.create());
+	}
 
-    @Override
-    public int getRenderDistance() {
-        return 96;
-    }
+	@Override
+	public int getRenderDistance() {
+		return 96;
+	}
 }
 

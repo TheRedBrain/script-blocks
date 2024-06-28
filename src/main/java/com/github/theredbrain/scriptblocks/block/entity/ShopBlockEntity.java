@@ -23,79 +23,80 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory {
-    private String shopIdentifier = "";
+	private String shopIdentifier = "";
 
-    private List<Integer> stockCountList = new ArrayList<>();
-    public ShopBlockEntity(BlockPos pos, BlockState state) {
-        super(EntityRegistry.SHOP_BLOCK_ENTITY, pos, state);
-    }
+	private List<Integer> stockCountList = new ArrayList<>();
 
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
+	public ShopBlockEntity(BlockPos pos, BlockState state) {
+		super(EntityRegistry.SHOP_BLOCK_ENTITY, pos, state);
+	}
 
-        if (!this.shopIdentifier.equals("")) {
-            nbt.putString("shopName", this.shopIdentifier);
-        }
+	@Override
+	protected void writeNbt(NbtCompound nbt) {
 
-        super.writeNbt(nbt);
-    }
+		if (!this.shopIdentifier.equals("")) {
+			nbt.putString("shopName", this.shopIdentifier);
+		}
 
-    @Override
-    public void readNbt(NbtCompound nbt) {
+		super.writeNbt(nbt);
+	}
 
-        if (nbt.contains("shopName")) {
-            this.shopIdentifier = nbt.getString("shopName");
-        }
+	@Override
+	public void readNbt(NbtCompound nbt) {
 
-        super.readNbt(nbt);
-    }
+		if (nbt.contains("shopName")) {
+			this.shopIdentifier = nbt.getString("shopName");
+		}
 
-    public BlockEntityUpdateS2CPacket toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
+		super.readNbt(nbt);
+	}
 
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
-    }
+	public BlockEntityUpdateS2CPacket toUpdatePacket() {
+		return BlockEntityUpdateS2CPacket.create(this);
+	}
 
-    public String getShopIdentifier() {
-        return shopIdentifier;
-    }
+	@Override
+	public NbtCompound toInitialChunkDataNbt() {
+		return this.createNbt();
+	}
 
-    public boolean setShopIdentifier(String newShopIdentifier) {
-        Shop shop = null;
-        if (Identifier.isValid(newShopIdentifier)) {
-            shop = ShopsRegistry.getShop(new Identifier(newShopIdentifier));
-        }
-        if (newShopIdentifier.equals("") || shop != null) {
-            this.shopIdentifier = newShopIdentifier;
-            this.stockCountList.clear();
+	public String getShopIdentifier() {
+		return shopIdentifier;
+	}
 
-            if (shop != null) {
-                List<Shop.Deal> dealList = shop.getDealList();
-                for (int i = 0; i < dealList.size(); i++) {
-                    this.stockCountList.add(dealList.get(i).getMaxStockCount());
-                }
-            }
-            return true;
-        }
-        return false;
-    }
+	public boolean setShopIdentifier(String newShopIdentifier) {
+		Shop shop = null;
+		if (Identifier.isValid(newShopIdentifier)) {
+			shop = ShopsRegistry.getShop(new Identifier(newShopIdentifier));
+		}
+		if (newShopIdentifier.equals("") || shop != null) {
+			this.shopIdentifier = newShopIdentifier;
+			this.stockCountList.clear();
 
-    @Override
-    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-        buf.writeBlockPos(pos);
-    }
+			if (shop != null) {
+				List<Shop.Deal> dealList = shop.getDealList();
+				for (int i = 0; i < dealList.size(); i++) {
+					this.stockCountList.add(dealList.get(i).getMaxStockCount());
+				}
+			}
+			return true;
+		}
+		return false;
+	}
 
-    @Nullable
-    @Override
-    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-        return new ShopBlockScreenHandler(syncId, playerInventory, this.pos, player.isCreativeLevelTwoOp());
-    }
+	@Override
+	public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+		buf.writeBlockPos(pos);
+	}
 
-    @Override
-    public Text getDisplayName() {
-        return Text.empty();
-    }
+	@Nullable
+	@Override
+	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+		return new ShopBlockScreenHandler(syncId, playerInventory, this.pos, player.isCreativeLevelTwoOp());
+	}
+
+	@Override
+	public Text getDisplayName() {
+		return Text.empty();
+	}
 }

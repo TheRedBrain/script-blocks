@@ -2,13 +2,12 @@ package com.github.theredbrain.scriptblocks.config;
 
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(
-        name = "client"
+		name = "client"
 )
 public class ClientConfig implements ConfigData {
-    public ClientConfig() {
+	public ClientConfig() {
 
-    }
+	}
 }

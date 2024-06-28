@@ -12,39 +12,39 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class UpdateMimicBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateMimicBlockPacket> {
-    @Override
-    public void receive(UpdateMimicBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateMimicBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos mimicBlockPosition = packet.mimicBlockPosition;
+		BlockPos mimicBlockPosition = packet.mimicBlockPosition;
 
-        BlockPos activeMimicBlockPositionOffset = packet.activeMimicBlockPositionOffset;
-        BlockPos inactiveMimicBlockPositionOffset = packet.inactiveMimicBlockPositionOffset;
+		BlockPos activeMimicBlockPositionOffset = packet.activeMimicBlockPositionOffset;
+		BlockPos inactiveMimicBlockPositionOffset = packet.inactiveMimicBlockPositionOffset;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        boolean updateSuccessful = true;
+		boolean updateSuccessful = true;
 
-        BlockEntity blockEntity = world.getBlockEntity(mimicBlockPosition);
-        BlockState blockState = world.getBlockState(mimicBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(mimicBlockPosition);
+		BlockState blockState = world.getBlockState(mimicBlockPosition);
 
-        if (blockEntity instanceof MimicBlockEntity mimicBlockEntity) {
-            if (!mimicBlockEntity.setActiveMimicBlockPositionOffset(activeMimicBlockPositionOffset)) {
-                player.sendMessage(Text.translatable("mimic_block.activeMimicBlockPositionOffset.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (!mimicBlockEntity.setInactiveMimicBlockPositionOffset(inactiveMimicBlockPositionOffset)) {
-                player.sendMessage(Text.translatable("mimic_block.inactiveMimicBlockPositionOffset.invalid"), false);
-                updateSuccessful = false;
-            }
-            if (updateSuccessful) {
-                player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            }
-            mimicBlockEntity.markDirty();
-            world.updateListeners(mimicBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof MimicBlockEntity mimicBlockEntity) {
+			if (!mimicBlockEntity.setActiveMimicBlockPositionOffset(activeMimicBlockPositionOffset)) {
+				player.sendMessage(Text.translatable("mimic_block.activeMimicBlockPositionOffset.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (!mimicBlockEntity.setInactiveMimicBlockPositionOffset(inactiveMimicBlockPositionOffset)) {
+				player.sendMessage(Text.translatable("mimic_block.inactiveMimicBlockPositionOffset.invalid"), false);
+				updateSuccessful = false;
+			}
+			if (updateSuccessful) {
+				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
+			mimicBlockEntity.markDirty();
+			world.updateListeners(mimicBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

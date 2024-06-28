@@ -13,29 +13,29 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateRedstoneTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateRedstoneTriggerBlockPacket> {
-    @Override
-    public void receive(UpdateRedstoneTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateRedstoneTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos redstoneTriggerBlockPosition = packet.redstoneTriggerBlockPosition;
+		BlockPos redstoneTriggerBlockPosition = packet.redstoneTriggerBlockPosition;
 
-        BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
+		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
 
-        boolean triggeredBlockResets = packet.triggeredBlockResets;
+		boolean triggeredBlockResets = packet.triggeredBlockResets;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        BlockEntity blockEntity = world.getBlockEntity(redstoneTriggerBlockPosition);
-        BlockState blockState = world.getBlockState(redstoneTriggerBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(redstoneTriggerBlockPosition);
+		BlockState blockState = world.getBlockState(redstoneTriggerBlockPosition);
 
-        if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
-            redstoneTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-            player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-            redstoneTriggerBlockEntity.markDirty();
-            world.updateListeners(redstoneTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
+			redstoneTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			redstoneTriggerBlockEntity.markDirty();
+			world.updateListeners(redstoneTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

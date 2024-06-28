@@ -19,41 +19,41 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class HousingBlock extends RotatedBlockWithEntity {
-    public HousingBlock(Settings settings) {
-        super(settings);
-    }
+	public HousingBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    public MapCodec<HousingBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	public MapCodec<HousingBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new HousingBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new HousingBlockEntity(pos, state);
+	}
 
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.HOUSING_BLOCK_ENTITY, HousingBlockEntity::tick);
-        return checkType(type, EntityRegistry.HOUSING_BLOCK_ENTITY, HousingBlockEntity::tick);
-    }
+		return checkType(type, EntityRegistry.HOUSING_BLOCK_ENTITY, HousingBlockEntity::tick);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof HousingBlockEntity housingBlockEntity && player.isCreativeLevelTwoOp()) {
-            ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).setValue(housingBlockEntity.getPos());
-            ((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof HousingBlockEntity housingBlockEntity && player.isCreativeLevelTwoOp()) {
+			ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).setValue(housingBlockEntity.getPos());
+			((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }

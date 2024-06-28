@@ -21,64 +21,65 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
-    public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
-    public RedstoneTriggerBlock(Settings settings) {
-        super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
-    }
+	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
 
-    // TODO Block Codecs
-    public MapCodec<RedstoneTriggerBlock> getCodec() {
-        return null;
-    }
+	public RedstoneTriggerBlock(Settings settings) {
+		super(settings);
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
+	}
 
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        super.appendProperties(builder);
-        builder.add(TRIGGERED);
-    }
+	// TODO Block Codecs
+	public MapCodec<RedstoneTriggerBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new RedstoneTriggerBlockEntity(pos, state);
-    }
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		super.appendProperties(builder);
+		builder.add(TRIGGERED);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new RedstoneTriggerBlockEntity(pos, state);
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openRedstoneTriggerBlockScreen(redstoneTriggerBlockEntity);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-        boolean bl = world.isReceivingRedstonePower(pos) || world.isReceivingRedstonePower(pos.up());
-        boolean bl2 = state.get(TRIGGERED);
-        if (bl && !bl2) {
-            world.scheduleBlockTick(pos, this, 4);
-            world.setBlockState(pos, (BlockState)state.with(TRIGGERED, true), Block.NO_REDRAW);
-        } else if (!bl && bl2) {
-            world.setBlockState(pos, (BlockState)state.with(TRIGGERED, false), Block.NO_REDRAW);
-        }
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openRedstoneTriggerBlockScreen(redstoneTriggerBlockEntity);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 
-    @Override
-    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        this.trigger(world, pos);
-    }
+	@Override
+	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
+		boolean bl = world.isReceivingRedstonePower(pos) || world.isReceivingRedstonePower(pos.up());
+		boolean bl2 = state.get(TRIGGERED);
+		if (bl && !bl2) {
+			world.scheduleBlockTick(pos, this, 4);
+			world.setBlockState(pos, (BlockState) state.with(TRIGGERED, true), Block.NO_REDRAW);
+		} else if (!bl && bl2) {
+			world.setBlockState(pos, (BlockState) state.with(TRIGGERED, false), Block.NO_REDRAW);
+		}
+	}
 
-    private void trigger(ServerWorld world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
-            redstoneTriggerBlockEntity.trigger();
-        }
-    }
+	@Override
+	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+		this.trigger(world, pos);
+	}
+
+	private void trigger(ServerWorld world, BlockPos pos) {
+		if (world.getBlockEntity(pos) instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
+			redstoneTriggerBlockEntity.trigger();
+		}
+	}
 }

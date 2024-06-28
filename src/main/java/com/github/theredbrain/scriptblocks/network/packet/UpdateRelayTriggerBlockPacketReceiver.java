@@ -17,44 +17,44 @@ import java.util.List;
 
 public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateRelayTriggerBlockPacket> {
 
-    @Override
-    public void receive(UpdateRelayTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	@Override
+	public void receive(UpdateRelayTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
 
-        if (!player.isCreativeLevelTwoOp()) {
-            return;
-        }
+		if (!player.isCreativeLevelTwoOp()) {
+			return;
+		}
 
-        BlockPos relayTriggerBlockPos = packet.relayTriggerBlockPosition;
+		BlockPos relayTriggerBlockPos = packet.relayTriggerBlockPosition;
 
-        RelayTriggerBlockEntity.SelectionMode selectionMode = packet.selectionMode;
+		RelayTriggerBlockEntity.SelectionMode selectionMode = packet.selectionMode;
 
-        boolean showArea = packet.showArea;
-        boolean resetsArea = packet.resetsArea;
-        Vec3i areaDimensions = packet.areaDimensions;
-        BlockPos areaPositionOffset = packet.areaPositionOffset;
+		boolean showArea = packet.showArea;
+		boolean resetsArea = packet.resetsArea;
+		Vec3i areaDimensions = packet.areaDimensions;
+		BlockPos areaPositionOffset = packet.areaPositionOffset;
 
-        List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = packet.triggeredBlocks;
-        RelayTriggerBlockEntity.TriggerMode triggerMode = packet.triggerMode;
-        int triggerAmount = packet.triggerAmount;
+		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = packet.triggeredBlocks;
+		RelayTriggerBlockEntity.TriggerMode triggerMode = packet.triggerMode;
+		int triggerAmount = packet.triggerAmount;
 
-        World world = player.getWorld();
+		World world = player.getWorld();
 
-        BlockEntity blockEntity = world.getBlockEntity(relayTriggerBlockPos);
-        BlockState blockState = world.getBlockState(relayTriggerBlockPos);
+		BlockEntity blockEntity = world.getBlockEntity(relayTriggerBlockPos);
+		BlockState blockState = world.getBlockState(relayTriggerBlockPos);
 
-        if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity) {
-            relayTriggerBlockEntity.setSelectionMode(selectionMode);
-            relayTriggerBlockEntity.setShowArea(showArea);
-            relayTriggerBlockEntity.setResetsArea(resetsArea);
-            relayTriggerBlockEntity.setAreaDimensions(areaDimensions);
-            relayTriggerBlockEntity.setAreaPositionOffset(areaPositionOffset);
-            relayTriggerBlockEntity.setTriggeredBlocks(triggeredBlocks);
-            relayTriggerBlockEntity.setTriggerMode(triggerMode);
-            relayTriggerBlockEntity.setTriggerAmount(triggerAmount);
-            player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+		if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity) {
+			relayTriggerBlockEntity.setSelectionMode(selectionMode);
+			relayTriggerBlockEntity.setShowArea(showArea);
+			relayTriggerBlockEntity.setResetsArea(resetsArea);
+			relayTriggerBlockEntity.setAreaDimensions(areaDimensions);
+			relayTriggerBlockEntity.setAreaPositionOffset(areaPositionOffset);
+			relayTriggerBlockEntity.setTriggeredBlocks(triggeredBlocks);
+			relayTriggerBlockEntity.setTriggerMode(triggerMode);
+			relayTriggerBlockEntity.setTriggerAmount(triggerAmount);
+			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 
-            relayTriggerBlockEntity.markDirty();
-            world.updateListeners(relayTriggerBlockPos, blockState, blockState, Block.NOTIFY_ALL);
-        }
-    }
+			relayTriggerBlockEntity.markDirty();
+			world.updateListeners(relayTriggerBlockPos, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
 }

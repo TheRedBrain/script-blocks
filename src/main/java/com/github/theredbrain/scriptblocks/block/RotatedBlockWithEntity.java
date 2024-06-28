@@ -1,51 +1,45 @@
 package com.github.theredbrain.scriptblocks.block;
 
-import com.github.theredbrain.scriptblocks.registry.GameRulesRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 public abstract class RotatedBlockWithEntity extends BlockWithEntity {
-    public static final IntProperty ROTATED = IntProperty.of("rotated", 0, 3);
-    public static final BooleanProperty X_MIRRORED = BooleanProperty.of("x_mirrored");
-    public static final BooleanProperty Z_MIRRORED = BooleanProperty.of("z_mirrored");
-    public RotatedBlockWithEntity(Settings settings) {
-        super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false));
-    }
+	public static final IntProperty ROTATED = IntProperty.of("rotated", 0, 3);
+	public static final BooleanProperty X_MIRRORED = BooleanProperty.of("x_mirrored");
+	public static final BooleanProperty Z_MIRRORED = BooleanProperty.of("z_mirrored");
 
-    protected abstract MapCodec<? extends RotatedBlockWithEntity> getCodec();
+	public RotatedBlockWithEntity(Settings settings) {
+		super(settings);
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false));
+	}
 
-    @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(ROTATED, X_MIRRORED, Z_MIRRORED);
-    }
+	protected abstract MapCodec<? extends RotatedBlockWithEntity> getCodec();
 
-    @Override
-    public BlockState rotate(BlockState state, BlockRotation rotation) {
-        return state.with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation));
-    }
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		builder.add(ROTATED, X_MIRRORED, Z_MIRRORED);
+	}
 
-    @Override
-    public BlockState mirror(BlockState state, BlockMirror mirror) {
-        if (mirror == BlockMirror.FRONT_BACK) {
-            return state.with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
-        } else if (mirror == BlockMirror.LEFT_RIGHT) {
-            return state.with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
-        }
-        return state;
-    }
+	@Override
+	public BlockState rotate(BlockState state, BlockRotation rotation) {
+		return state.with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation));
+	}
+
+	@Override
+	public BlockState mirror(BlockState state, BlockMirror mirror) {
+		if (mirror == BlockMirror.FRONT_BACK) {
+			return state.with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
+		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+			return state.with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
+		}
+		return state;
+	}
 }

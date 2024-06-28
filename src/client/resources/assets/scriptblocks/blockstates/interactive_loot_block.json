@@ -1,7 +1,7 @@
 {
-  "variants": {
-    "": {
-      "model": "scriptblocks:block/interactive_loot_block"
-    }
-  }
+	"variants": {
+		"": {
+			"model": "scriptblocks:block/interactive_loot_block"
+		}
+	}
 }

@@ -18,41 +18,41 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class BossControllerBlock extends RotatedBlockWithEntity {
-    public BossControllerBlock(Settings settings) {
-        super(settings);
-    }
+	public BossControllerBlock(Settings settings) {
+		super(settings);
+	}
 
-    // TODO Block Codecs
-    @Override
-    protected MapCodec<BossControllerBlock> getCodec() {
-        return null;
-    }
+	// TODO Block Codecs
+	@Override
+	protected MapCodec<BossControllerBlock> getCodec() {
+		return null;
+	}
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new BossControllerBlockEntity(pos, state);
-    }
+	@Nullable
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new BossControllerBlockEntity(pos, state);
+	}
 
-    @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
-    }
+	@Override
+	public BlockRenderType getRenderType(BlockState state) {
+		return BlockRenderType.MODEL;
+	}
 
-    @Override
-    @Nullable
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+	@Override
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
-        return checkType(type, EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
-    }
+		return checkType(type, EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
+	}
 
-    @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof BossControllerBlockEntity bossControllerBlock && player.isCreativeLevelTwoOp()) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openBossControllerBlockScreen(bossControllerBlock);
-            return ActionResult.success(world.isClient);
-        }
-        return ActionResult.PASS;
-    }
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof BossControllerBlockEntity bossControllerBlock && player.isCreativeLevelTwoOp()) {
+			((DuckPlayerEntityMixin) player).scriptblocks$openBossControllerBlockScreen(bossControllerBlock);
+			return ActionResult.success(world.isClient);
+		}
+		return ActionResult.PASS;
+	}
 }
