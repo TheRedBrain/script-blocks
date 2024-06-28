@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksModClient;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.registry.RegistryKey;
@@ -34,10 +33,10 @@ public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPa
 
             serverPlayerEntity.fallDistance = 0;
             serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
-            if (ScriptBlocksModClient.clientConfig.show_debug_messages) {
+            if (ScriptBlocksMod.serverConfig.show_debug_messages) {
                 serverPlayerEntity.sendMessage(Text.of("Teleport to your team in world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch));
             }
-            ClientPlayNetworking.send(new CloseHandledScreenPacket());
+            serverPlayerEntity.closeHandledScreen();
 
         }
     }

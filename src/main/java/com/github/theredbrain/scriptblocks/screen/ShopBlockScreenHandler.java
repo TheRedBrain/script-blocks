@@ -2,16 +2,14 @@ package com.github.theredbrain.scriptblocks.screen;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
-import com.github.theredbrain.scriptblocks.client.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
 import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.network.ClientAdvancementManager;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -20,6 +18,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -202,8 +202,8 @@ public class ShopBlockScreenHandler extends ScreenHandler {
     public boolean onButtonClick(PlayerEntity player, int id) {
         if (id < this.stockedDealsList.size()) {
             Shop.Deal currentDeal = this.stockedDealsList.get(id);
-            if (currentDeal != null) {
-                ClientPlayNetworking.send(
+            if (currentDeal != null && player instanceof  ServerPlayerEntity serverPlayerEntity) {
+                ServerPlayNetworking.send(serverPlayerEntity,
                         new TradeWithShopPacket(
                                 this.shopBlockEntity.getShopIdentifier(),
                                 id
@@ -226,20 +226,30 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 
         ScriptBlocksMod.info("calculateUnlockedAndStockedDeals");
 
-        ClientAdvancementManager advancementHandler = null;
+//        ClientAdvancementManager advancementHandler = null;
+        PlayerAdvancementTracker playerAdvancementTracker = null;
+        ServerAdvancementLoader serverAdvancementLoader = null;
+
+        if (this.playerInventory.player instanceof ServerPlayerEntity serverPlayerEntity) {
+            playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
+            MinecraftServer minecraftServer = serverPlayerEntity.getServer();
+            if (minecraftServer != null) {
+                serverAdvancementLoader = minecraftServer.getAdvancementLoader();
+            }
+        }
         String lockAdvancementIdentifier;
         String unlockAdvancementIdentifier;
 
-        if (this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity) {
+//        if (this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity) {
+//
+//            ScriptBlocksMod.info("this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity");
+//
+//            advancementHandler = clientPlayerEntity.networkHandler.getAdvancementHandler();
+//        }
 
-            ScriptBlocksMod.info("this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity");
-
-            advancementHandler = clientPlayerEntity.networkHandler.getAdvancementHandler();
+        if (playerAdvancementTracker != null && serverAdvancementLoader != null) {
             this.unlockedDealsList.clear();
             this.unlockedDealsCounter = 0;
-        }
-
-        if (advancementHandler != null) {
 
             ScriptBlocksMod.info("advancementHandler != null");
 
@@ -253,16 +263,16 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 
 //                AdvancementEntry lockAdvancementEntry = null;
                 Advancement lockAdvancement = null;
-                if (!lockAdvancementIdentifier.equals("")) {
-                    lockAdvancement = advancementHandler.getManager().get(Identifier.tryParse(lockAdvancementIdentifier));
+                if (!lockAdvancementIdentifier.isEmpty()) {
+                    lockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementIdentifier));
                 }
 //                AdvancementEntry unlockAdvancementEntry = null;
                 Advancement unlockAdvancement = null;
-                if (!unlockAdvancementIdentifier.equals("")) {
-                    unlockAdvancement = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier));
+                if (!unlockAdvancementIdentifier.isEmpty()) {
+                    unlockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementIdentifier));
                 }
-                if ((lockAdvancementIdentifier.equals("") || (lockAdvancement != null && !((DuckClientAdvancementManagerMixin) advancementHandler.getManager()).scriptblocks$getAdvancementProgress(lockAdvancement).isDone())) &&
-                        (unlockAdvancementIdentifier.equals("") || (unlockAdvancement != null && ((DuckClientAdvancementManagerMixin) advancementHandler.getManager()).scriptblocks$getAdvancementProgress(unlockAdvancement).isDone()))) {
+                if ((lockAdvancementIdentifier.isEmpty() || (lockAdvancement != null && !playerAdvancementTracker.getProgress(lockAdvancement).isDone())) &&
+                        (unlockAdvancementIdentifier.isEmpty() || (unlockAdvancement != null && playerAdvancementTracker.getProgress(unlockAdvancement).isDone()))) {
                     this.unlockedDealsList.add(deal);
                     this.unlockedDealsCounter++;
                 } else {

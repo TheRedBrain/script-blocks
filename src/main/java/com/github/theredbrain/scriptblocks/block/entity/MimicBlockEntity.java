@@ -7,11 +7,10 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.GameRulesRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -19,6 +18,7 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
     private BlockPos activeMimicBlockPositionOffset = new BlockPos(0, 1, 0);
@@ -162,9 +162,10 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 
     public boolean isDebugModeActive() {
         boolean debugRender = false;
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        if (player != null) {
-            debugRender = player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(BlockRegistry.MIMIC_BLOCK.asItem());
+
+        World world = this.getWorld();
+        if (world != null) {
+            world.getGameRules().getBoolean(GameRulesRegistry.MIMIC_DEBUG_MODE);
         }
         return debugRender;
     }

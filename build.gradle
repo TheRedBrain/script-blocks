@@ -46,6 +46,51 @@ repositories {
 
 }
 
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"scriptblocks" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+sourceSets {
+	testmod {
+		compileClasspath += sourceSets.main.compileClasspath
+		runtimeClasspath += sourceSets.main.runtimeClasspath
+	}
+
+	testmodClient {
+		compileClasspath += sourceSets.main.compileClasspath
+		runtimeClasspath += sourceSets.main.runtimeClasspath
+		compileClasspath += sourceSets.client.compileClasspath
+		runtimeClasspath += sourceSets.client.runtimeClasspath
+
+		compileClasspath += sourceSets.testmod.compileClasspath
+		runtimeClasspath += sourceSets.testmod.runtimeClasspath
+	}
+}
+
+loom {
+	runs {
+		testmodClient {
+			client()
+			ideConfigGenerated project.rootProject == project
+			name = "Testmod Client"
+			source sourceSets.testmodClient
+		}
+		testmodServer {
+			server()
+			ideConfigGenerated project.rootProject == project
+			name = "Testmod Server"
+			source sourceSets.testmod
+		}
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -74,6 +119,11 @@ dependencies {
 	// Slot Customization API
 	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
 
+	// Test mod
+	testmodImplementation sourceSets.main.output
+	testmodClientImplementation sourceSets.main.output
+	testmodClientImplementation sourceSets.client.output
+	testmodClientImplementation sourceSets.testmod.output
 }
 
 processResources {

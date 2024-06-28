@@ -24,7 +24,7 @@
 			"com.github.theredbrain.scriptblocks.registry.ComponentsRegistry"
 		],
 		"modmenu": [
-			"com.github.theredbrain.scriptblocks.client.compatibility.ModMenuCompatibility"
+			"com.github.theredbrain.scriptblocks.compatibility.ModMenuCompatibility"
 		]
 	},
 	"custom": {
@@ -34,7 +34,11 @@
 		]
 	},
 	"mixins": [
-		"scriptblocks.mixins.json"
+		"scriptblocks.mixins.json",
+		{
+			"config": "scriptblocks.client.mixins.json",
+			"environment": "client"
+		}
 	],
 	"depends": {
 		"fabricloader": ">=0.14.20",

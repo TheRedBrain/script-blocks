@@ -13,11 +13,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "client": [
-    "client.network.ClientAdvancementManagerMixin",
-    "client.network.ClientPlayerEntityMixin",
-    "client.network.ClientPlayerInteractionManagerMixin",
-    "client.network.message.MessageHandlerMixin"
-  ]
+  }
 }

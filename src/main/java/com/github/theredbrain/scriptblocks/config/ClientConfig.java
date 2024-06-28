@@ -8,8 +8,6 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
         name = "client"
 )
 public class ClientConfig implements ConfigData {
-    @Comment("Additional debug messages are shown in-game.")
-    public boolean show_debug_messages = false;
     public ClientConfig() {
 
     }

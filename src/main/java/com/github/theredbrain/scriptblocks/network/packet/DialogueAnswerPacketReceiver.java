@@ -151,9 +151,9 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
             String responseDialogueIdentifierString = dialogueAnswer.getResponseDialogue();
             if (responseDialogueIdentifierString.isEmpty()) {
-                ServerPlayNetworking.send(player, new CloseHandledScreenPacket());
+                player.closeHandledScreen();
             } else {
-                ClientPlayNetworking.send(new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
+                ServerPlayNetworking.send(player, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
             }
 
 

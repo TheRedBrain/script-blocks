@@ -1,18 +1,21 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.client.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientAdvancementManager;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerAdvancementLoader;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
@@ -118,13 +121,18 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
     }
 
     public static String getStartingDialogue(PlayerEntity player, DialogueBlockEntity dialogueBlockEntity) {
-        if (dialogueBlockEntity.startingDialogueList.size() < 1) {
+        if (dialogueBlockEntity.startingDialogueList.isEmpty()) {
             return "";
         }
-        ClientAdvancementManager advancementHandler = null;
+        PlayerAdvancementTracker playerAdvancementTracker = null;
+        ServerAdvancementLoader serverAdvancementLoader = null;
 
-        if (player instanceof ClientPlayerEntity clientPlayerEntity) {
-            advancementHandler = clientPlayerEntity.networkHandler.getAdvancementHandler();
+        if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+            playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
+            MinecraftServer minecraftServer = serverPlayerEntity.getServer();
+            if (minecraftServer != null) {
+                serverAdvancementLoader = minecraftServer.getAdvancementLoader();
+            }
         }
         String lockAdvancementString;
         String unlockAdvancementString;
@@ -133,31 +141,37 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
             lockAdvancementString = dialogueEntry.getRight().getLeft();
             unlockAdvancementString = dialogueEntry.getRight().getRight();
 
-            if (advancementHandler != null) {
-//                AdvancementEntry lockAdvancementEntry = null;
-                Advancement lockAdvancement = null;
-                if (!lockAdvancementString.equals("")) {
-                    lockAdvancement = advancementHandler.getManager().get(Identifier.tryParse(lockAdvancementString));
+//            AdvancementEntry lockAdvancementEntry = null;
+            Advancement lockAdvancement = null;
+//            AdvancementEntry unlockAdvancementEntry = null;
+            Advancement unlockAdvancement = null;
+            if (serverAdvancementLoader != null) {
+                if (!lockAdvancementString.isEmpty()) {
+                    lockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementString));
                 }
-//                AdvancementEntry unlockAdvancementEntry = null;
-                Advancement unlockAdvancement = null;
-                if (!unlockAdvancementString.equals("")) {
-                    unlockAdvancement = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementString));
+                if (!unlockAdvancementString.isEmpty()) {
+                    unlockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementString));
                 }
-                if ((lockAdvancementString.equals("") || (lockAdvancement != null && !((DuckClientAdvancementManagerMixin) advancementHandler.getManager()).scriptblocks$getAdvancementProgress(lockAdvancement).isDone())) && (unlockAdvancementString.equals("") || (unlockAdvancement != null && ((DuckClientAdvancementManagerMixin) advancementHandler.getManager()).scriptblocks$getAdvancementProgress(unlockAdvancement).isDone()))) {
-                    String string = dialogueEntry.getLeft();
-                    return string;
+            }
+            if (playerAdvancementTracker != null) {
+                if (lockAdvancementString.isEmpty() || (lockAdvancement != null && !playerAdvancementTracker.getProgress(lockAdvancement).isDone()) && (unlockAdvancementString.isEmpty() || (unlockAdvancement != null && playerAdvancementTracker.getProgress(unlockAdvancement).isDone()))) {
+                    return dialogueEntry.getLeft();
                 }
             }
         }
         return "";
     }
 
-    public void answer(Identifier answerIdentifier) {
-        ClientPlayNetworking.send(new DialogueAnswerPacket(
-                this.pos,
-                answerIdentifier
-        ));
+    public static void answer(PlayerEntity playerEntity, Identifier answerIdentifier, DialogueBlockEntity dialogueBlockEntity) {
+        if (dialogueBlockEntity.getWorld() instanceof ServerWorld serverWorld) {
+            ScriptBlocksMod.info("answer on server side");
+            ServerPlayNetworking.send(new ServerPlayerEntity(serverWorld.getServer(), serverWorld, playerEntity.getGameProfile()), new DialogueAnswerPacket(
+                    dialogueBlockEntity.getPos(),
+                    answerIdentifier
+            ));
+        } else {
+            ScriptBlocksMod.info("answer on client side");
+        }
     }
 
     public HashMap<String, BlockPos> getDialogueUsedBlocks() {
