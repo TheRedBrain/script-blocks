@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.Resetable;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -71,16 +70,6 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 
     public void setLootTableIdentifierString(String lootTableIdentifierString) {
         this.lootTableIdentifierString = lootTableIdentifierString;
-    }
-
-    public boolean openScreen(PlayerEntity player) {
-        if (!player.isCreativeLevelTwoOp()) {
-            return false;
-        }
-        if (player.getEntityWorld().isClient) {
-            ((DuckPlayerEntityMixin)player).scriptblocks$openInteractiveLootBlockScreen(this);
-        }
-        return true;
     }
 
     public boolean isPlayerInSet(PlayerEntity playerEntity) {

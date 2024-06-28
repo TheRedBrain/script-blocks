@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -95,7 +96,8 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof UseRelayChestBlockEntity useRelayChestBlockEntity) {
             if (player.isCreativeLevelTwoOp()) {
-                return ((UseRelayChestBlockEntity) blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+                ((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayChestBlockEntity);
+                return ActionResult.success(world.isClient);
             } else {
                 if (!state.get(OPEN)) {
                     ItemStack mainHandStack = player.getMainHandStack();

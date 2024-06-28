@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -40,7 +41,8 @@ public class UseRelayBlock extends RotatedBlockWithEntity {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
             if (player.isCreativeLevelTwoOp()) {
-                return ((UseRelayBlockEntity) blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+                ((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
+                return ActionResult.success(world.isClient);
             } else {
                 BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
                 BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());

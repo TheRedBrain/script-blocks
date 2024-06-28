@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -38,8 +39,9 @@ public class TriggeredCounterBlock extends RotatedBlockWithEntity {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof TriggeredCounterBlockEntity) {
-            return ((TriggeredCounterBlockEntity)blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+        if (blockEntity instanceof TriggeredCounterBlockEntity triggeredCounterBlockEntity && player.isCreativeLevelTwoOp()) {
+            ((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredCounterBlockScreen(triggeredCounterBlockEntity);
+            return ActionResult.success(world.isClient);
         }
         return ActionResult.PASS;
     }

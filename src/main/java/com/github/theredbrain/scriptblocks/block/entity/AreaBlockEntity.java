@@ -349,16 +349,6 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
         return this.createNbt();
     }
 
-    public boolean openScreen(PlayerEntity player) {
-        if (!player.isCreativeLevelTwoOp()) {
-            return false;
-        }
-        if (player.getEntityWorld().isClient) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openAreaBlockScreen(this);
-        }
-        return true;
-    }
-
     public static void tick(World world, BlockPos pos, BlockState state, AreaBlockEntity areaBlockEntity) {
         if (!world.isClient && world.getTime() % 20L == 0L && areaBlockEntity.wasTriggered) {
             if (areaBlockEntity.calculateAreaBox || areaBlockEntity.area == null) {

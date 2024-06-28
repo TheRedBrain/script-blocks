@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.GameRulesRegistry;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
@@ -56,7 +57,8 @@ public class InteractiveLootBlock extends BlockWithEntity {
             if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
 
                 if (player.isCreativeLevelTwoOp()) {
-                    return interactiveLootBlockEntity.openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+                    ((DuckPlayerEntityMixin)player).scriptblocks$openInteractiveLootBlockScreen(interactiveLootBlockEntity);
+                    return ActionResult.success(world.isClient);
                 } else if (world instanceof ServerWorld serverWorld && !serverWorld.isClient()) {
                     if (interactiveLootBlockEntity.addPlayerToSet(player)) {
                         List<ItemStack> lootStacks = getLootItems(serverWorld, pos, player, interactiveLootBlockEntity);

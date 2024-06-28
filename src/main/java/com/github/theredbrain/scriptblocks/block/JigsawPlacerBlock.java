@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -57,8 +58,9 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof JigsawPlacerBlockEntity) {
-            return ((JigsawPlacerBlockEntity)blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+        if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity && player.isCreativeLevelTwoOp()) {
+            ((DuckPlayerEntityMixin) player).scriptblocks$openJigsawPlacerBlockScreen(jigsawPlacerBlockEntity);
+            return ActionResult.success(world.isClient);
         }
         return ActionResult.PASS;
     }

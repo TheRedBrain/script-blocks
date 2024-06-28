@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
@@ -48,8 +49,9 @@ public class BossControllerBlock extends RotatedBlockWithEntity {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof BossControllerBlockEntity bossControllerBlock) {
-            return bossControllerBlock.openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+        if (blockEntity instanceof BossControllerBlockEntity bossControllerBlock && player.isCreativeLevelTwoOp()) {
+            ((DuckPlayerEntityMixin) player).scriptblocks$openBossControllerBlockScreen(bossControllerBlock);
+            return ActionResult.success(world.isClient);
         }
         return ActionResult.PASS;
     }

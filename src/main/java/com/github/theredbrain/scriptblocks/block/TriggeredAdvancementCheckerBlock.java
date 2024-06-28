@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -37,8 +38,9 @@ public class TriggeredAdvancementCheckerBlock extends RotatedBlockWithEntity {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity) {
-            return ((TriggeredAdvancementCheckerBlockEntity)blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+        if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity && player.isCreativeLevelTwoOp()) {
+            ((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlockEntity);
+            return ActionResult.success(world.isClient);
         }
         return ActionResult.PASS;
     }

@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
@@ -56,8 +57,9 @@ public class MimicBlock extends RotatedBlockWithEntity {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof MimicBlockEntity) {
-            return ((MimicBlockEntity)blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+        if (blockEntity instanceof MimicBlockEntity mimicBlockEntity && player.isCreativeLevelTwoOp()) {
+            ((DuckPlayerEntityMixin) player).scriptblocks$openMimicBlockScreen(mimicBlockEntity);
+            return ActionResult.success(world.isClient);
         }
         return ActionResult.PASS;
     }

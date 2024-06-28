@@ -3,7 +3,6 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
@@ -11,7 +10,6 @@ import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.server.MinecraftServer;
@@ -26,6 +24,8 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.util.UUID;
 
 public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity implements Triggerable {
+    // TODO rework
+    //  contains a list of triggered blocks with corresponding advancements
     private MutablePair<BlockPos, Boolean> firstTriggeredBlock = new MutablePair<>(new BlockPos(0, 1, 0), false);
     private MutablePair<BlockPos, Boolean> secondTriggeredBlock = new MutablePair<>(new BlockPos(0, -1, 0), false);
     private String checkedAdvancementIdentifier = "";
@@ -77,16 +77,6 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
     @Override
     public NbtCompound toInitialChunkDataNbt() {
         return this.createNbt();
-    }
-
-    public boolean openScreen(PlayerEntity player) {
-        if (!player.isCreativeLevelTwoOp()) {
-            return false;
-        }
-        if (player.getEntityWorld().isClient) {
-            ((DuckPlayerEntityMixin)player).scriptblocks$openTriggeredAdvancementCheckerBlockScreen(this);
-        }
-        return true;
     }
 
     public MutablePair<BlockPos, Boolean> getFirstTriggeredBlock() {

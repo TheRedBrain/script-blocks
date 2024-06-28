@@ -49,12 +49,10 @@ public class HousingBlock extends RotatedBlockWithEntity {
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof HousingBlockEntity housingBlockEntity && player.isCreative()) {
+        if (blockEntity instanceof HousingBlockEntity housingBlockEntity && player.isCreativeLevelTwoOp()) {
             ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).setValue(housingBlockEntity.getPos());
-            if (world.isClient) {
-                ((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
-            }
-            return ActionResult.SUCCESS;
+            ((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
+            return ActionResult.success(world.isClient);
         }
         return ActionResult.PASS;
     }

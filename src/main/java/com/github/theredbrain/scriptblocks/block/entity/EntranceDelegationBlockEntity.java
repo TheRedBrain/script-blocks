@@ -1,11 +1,9 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.BlockMirror;
@@ -54,16 +52,6 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
     @Override
     public NbtCompound toInitialChunkDataNbt() {
         return this.createNbt();
-    }
-
-    public boolean openScreen(PlayerEntity player) {
-        if (!player.isCreativeLevelTwoOp()) {
-            return false;
-        }
-        if (player.getEntityWorld().isClient) {
-            ((DuckPlayerEntityMixin)player).scriptblocks$openEntranceDelegationBlockScreen(this);
-        }
-        return true;
     }
 
     public MutablePair<BlockPos, MutablePair<Double, Double>> getDelegatedEntrance() {

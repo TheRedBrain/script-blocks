@@ -6,7 +6,6 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -21,7 +20,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -273,16 +271,6 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
         if (nbt.containsUuid("bossEntityUuid")) {
             this.bossEntityUuid = nbt.getUuid("bossEntityUuid");
         }
-    }
-
-    public boolean openScreen(PlayerEntity player) {
-        if (!player.isCreativeLevelTwoOp()) {
-            return false;
-        }
-        if (player.getEntityWorld().isClient) {
-            ((DuckPlayerEntityMixin) player).scriptblocks$openBossControllerBlockScreen(this);
-        }
-        return true;
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, BossControllerBlockEntity bC) {

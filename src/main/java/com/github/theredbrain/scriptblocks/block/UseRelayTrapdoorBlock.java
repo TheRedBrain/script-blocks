@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
@@ -125,7 +126,8 @@ protected static final VoxelShape EAST_SHAPE = Block.createCuboidShape(0.0, 0.0,
                     }
                     return ActionResult.success(world.isClient);
                 }
-                return ((UseRelayBlockEntity) blockEntity).openScreen(player) ? ActionResult.success(world.isClient) : ActionResult.PASS;
+                ((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
+                return ActionResult.success(world.isClient);
             } else {
                 BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
                 BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
