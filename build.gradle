@@ -89,6 +89,13 @@ loom {
 			source sourceSets.testmod
 		}
 	}
+
+	mods {
+		"scriptblocks_test" {
+			sourceSet sourceSets.testmod
+			sourceSet sourceSets.testmodClient
+		}
+	}
 }
 
 dependencies {

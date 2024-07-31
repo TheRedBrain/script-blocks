@@ -11,6 +11,7 @@
 		"sources": "https://github.com/TheRedBrain/script-blocks"
 	},
 	"license": "MIT",
+	"icon": "assets/scriptblocks/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
