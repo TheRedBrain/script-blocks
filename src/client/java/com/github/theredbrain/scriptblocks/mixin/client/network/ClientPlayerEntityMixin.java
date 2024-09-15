@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
+//import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
@@ -18,6 +19,7 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
+//import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataAccessBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.EntranceDelegationBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.HousingScreen;
@@ -167,4 +169,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	public void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity) {
 		this.client.setScreen(new InteractiveLootBlockScreen(interactiveLootBlockEntity));
 	}
+
+//	@Override
+//	public void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
+//		this.client.setScreen(new DataAccessBlockScreen(dataAccessBlockEntity));
+//	}
 }
