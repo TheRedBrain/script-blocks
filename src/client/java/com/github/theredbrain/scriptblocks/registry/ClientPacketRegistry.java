@@ -27,7 +27,7 @@ public class ClientPacketRegistry {
 		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.SYNC_SHOPS, (client, handler, buffer, responseSender) -> { // TODO convert to packet
 			ShopsRegistry.decodeRegistry(buffer);
 		});
-		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.SYNC_SHOPS, (client, handler, buffer, responseSender) -> { // TODO convert to packet
+		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.SYNC_BOSSES, (client, handler, buffer, responseSender) -> { // TODO convert to packet
 			BossesRegistry.decodeRegistry(buffer);
 		});
 		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.ServerConfigSync.ID, (client, handler, buf, responseSender) -> {
