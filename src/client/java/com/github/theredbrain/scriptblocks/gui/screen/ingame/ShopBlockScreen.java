@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacket;
@@ -35,11 +35,11 @@ import java.util.List;
 @Environment(value = EnvType.CLIENT)
 public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 	private static final Text TRADE_BUTTON_LABEL_TEXT = Text.translatable("gui.shop_block.trade_button_label");
-	public static final Identifier SHOP_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/shop_background.png");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_68_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_68");
+	public static final Identifier SHOP_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/shop_background.png");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_68_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_68");
 	private static final Identifier OUT_OF_STOCK_TEXTURE = new Identifier("container/villager/out_of_stock");
-	private static final Identifier HAS_STOCK_TEXTURE = ScriptBlocksMod.identifier("container/shop_screen/has_stock");
-	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	private static final Identifier HAS_STOCK_TEXTURE = ScriptBlocks.identifier("container/shop_screen/has_stock");
+	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private ShopBlockEntity shopBlockEntity;
 	private ButtonWidget tradeButton0;
 	private ButtonWidget tradeButton1;

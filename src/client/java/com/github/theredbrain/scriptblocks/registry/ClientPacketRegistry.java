@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import net.fabricmc.api.EnvType;
@@ -31,7 +31,7 @@ public class ClientPacketRegistry {
 			BossesRegistry.decodeRegistry(buffer);
 		});
 		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.ServerConfigSync.ID, (client, handler, buf, responseSender) -> {
-			ScriptBlocksMod.serverConfig = ServerPacketRegistry.ServerConfigSync.read(buf);
+			ScriptBlocks.serverConfig = ServerPacketRegistry.ServerConfigSync.read(buf);
 		});
 	}
 }

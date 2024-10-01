@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
@@ -8,7 +8,7 @@ import net.minecraft.util.Identifier;
 
 public class AddStatusEffectPacket implements FabricPacket {
 	public static final PacketType<AddStatusEffectPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("add_status_effect"),
+			ScriptBlocks.identifier("add_status_effect"),
 			AddStatusEffectPacket::new
 	);
 

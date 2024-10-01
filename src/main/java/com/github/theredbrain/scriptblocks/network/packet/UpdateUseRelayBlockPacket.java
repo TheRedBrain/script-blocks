@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class UpdateUseRelayBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateUseRelayBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_use_relay_block"),
+			ScriptBlocks.identifier("update_use_relay_block"),
 			UpdateUseRelayBlockPacket::new
 	);
 

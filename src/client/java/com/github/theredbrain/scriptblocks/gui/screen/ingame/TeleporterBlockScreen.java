@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.data.Location;
@@ -79,13 +79,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private static final Text LOCATION_IS_PUBLIC_TEXT = Text.translatable("gui.teleporter_block.location_is_public");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_70");
-	private static final Identifier CREATIVE_HOUSING_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_95");
-	private static final Identifier SCROLLER_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
-	public static final Identifier ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/teleporter_block/adventure_teleporter_screen.png");
-	public static final Identifier ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/teleporter_block/adventure_teleporter_locations_screen.png");
-	public static final Identifier CREATIVE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/creative_teleporter_screen.png");
-	public static final Identifier TELEPORTER_SCREEN_UTILITY_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/teleporter_screen_util.png");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
+	private static final Identifier CREATIVE_HOUSING_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_95");
+	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
+	public static final Identifier ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/teleporter_block/adventure_teleporter_screen.png");
+	public static final Identifier ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/teleporter_block/adventure_teleporter_locations_screen.png");
+	public static final Identifier CREATIVE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/creative_teleporter_screen.png");
+	public static final Identifier TELEPORTER_SCREEN_UTILITY_TEXTURE = ScriptBlocks.identifier("textures/gui/container/teleporter_screen_util.png");
 	private final TeleporterBlockScreenHandler handler;
 	private TeleporterBlockEntity teleporterBlock;
 
@@ -317,7 +317,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	private void addLocationToList(String identifier, String entrance) {
-		ScriptBlocksMod.LOGGER.info(identifier);
+		ScriptBlocks.LOGGER.info(identifier);
 		Text message = Text.literal("");
 		if (Identifier.isValid(identifier)) {
 			Location location = LocationsRegistry.getLocation(Identifier.tryParse(identifier));

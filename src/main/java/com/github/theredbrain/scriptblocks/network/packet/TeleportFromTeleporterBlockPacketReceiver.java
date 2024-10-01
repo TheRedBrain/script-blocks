@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
@@ -218,7 +218,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			serverPlayerEntity.fallDistance = 0;
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
-			if (ScriptBlocksMod.serverConfig.show_debug_messages) {
+			if (ScriptBlocks.serverConfig.show_debug_messages) {
 				serverPlayerEntity.sendMessage(Text.of("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch));
 				if (targetWorld != server.getOverworld()) {
 					serverPlayerEntity.sendMessage(Text.of("World owned by: " + targetDimensionOwnerName));
@@ -236,7 +236,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 							teamServerPlayerEntity.fallDistance = 0;
 							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
-							if (ScriptBlocksMod.serverConfig.show_debug_messages) {
+							if (ScriptBlocks.serverConfig.show_debug_messages) {
 								teamServerPlayerEntity.sendMessage(Text.of("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch));
 								if (targetWorld != server.getOverworld()) {
 									teamServerPlayerEntity.sendMessage(Text.of("World owned by: " + targetDimensionOwnerName));
@@ -249,7 +249,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				}
 			}
 		} else {
-			if (ScriptBlocksMod.serverConfig.show_debug_log) {
+			if (ScriptBlocks.serverConfig.show_debug_log) {
 				serverPlayerEntity.sendMessage(Text.of("Teleport failed"));
 				if (targetWorld == null) {
 					serverPlayerEntity.sendMessage(Text.of("targetWorld == null"));

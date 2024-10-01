@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
@@ -34,8 +34,8 @@ public class TriggeredCounterBlockScreen extends Screen {
 	private static final Text NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder");
 	private static final Text REMOVE_BUTTON_LABEL_TEXT = Text.translatable("gui.remove");
 	private static final Text ADD_BUTTON_LABEL_TEXT = Text.translatable("gui.add");
-	private static final Identifier TRIGGERED_BLOCKS_LIST_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_116");
-	private static final Identifier SCROLLER_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	private static final Identifier TRIGGERED_BLOCKS_LIST_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_116");
+	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final TriggeredCounterBlockEntity triggeredCounterBlock;
 	private ButtonWidget removeListEntryButton0;
 	private ButtonWidget removeListEntryButton1;

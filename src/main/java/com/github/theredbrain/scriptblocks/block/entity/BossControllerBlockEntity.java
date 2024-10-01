@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -298,18 +298,18 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	//region Boss Battle Logic
 	private static void startBattle(BossControllerBlockEntity bC) {
 
-		ScriptBlocksMod.info("startBattle");
+		ScriptBlocks.info("startBattle");
 		if (Identifier.isValid(bC.bossIdentifier)) {
 			bC.boss = BossesRegistry.getBoss(new Identifier(bC.bossIdentifier));
 		}
 
 		if (bC.boss != null) {
-			ScriptBlocksMod.info("bC.boss != null");
+			ScriptBlocks.info("bC.boss != null");
 			if (bC.setEntityType(bC.boss.bossEntityTypeId())) {
 				bC.currentPhaseId = 0;
 				bC.currentPhase = bC.boss.phases()[0];
 				if (spawnBossEntity(bC)) {
-					ScriptBlocksMod.info("boss spawned");
+					ScriptBlocks.info("boss spawned");
 					startPhase(bC);
 				}
 			}
@@ -317,7 +317,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	private static void advancePhase(BossControllerBlockEntity bC) {
-		ScriptBlocksMod.info("advancePhase");
+		ScriptBlocks.info("advancePhase");
 		if ((bC.currentPhaseId + 1) < bC.boss.phases().length) {
 			bC.phaseTimer = 0;
 			endPhase(bC);
@@ -344,7 +344,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static void startPhase(BossControllerBlockEntity bC) {
 		Boss.Phase phase = bC.currentPhase;
 
-		ScriptBlocksMod.info("startPhase");
+		ScriptBlocks.info("startPhase");
 		bC.entityAttributeModifiers = getEntityAttributeModifiers(bC.currentPhase);
 
 		// trigger block
@@ -402,7 +402,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static void endPhase(BossControllerBlockEntity bC) {
 		Boss.Phase phase = bC.currentPhase;
 
-		ScriptBlocksMod.info("endPhase");
+		ScriptBlocks.info("endPhase");
 		// trigger block
 		String triggeredBlock = phase.triggeredBlockAtEnd();
 		if (triggeredBlock != null) {
@@ -470,14 +470,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		if (bC.world instanceof ServerWorld serverWorld) {
 			Optional<EntityType<?>> optional = EntityType.fromNbt(bC.entityTypeCompound);
 			if (optional.isEmpty()) {
-				ScriptBlocksMod.info("optional.isEmpty()");
+				ScriptBlocks.info("optional.isEmpty()");
 				return false;
 			}
 			double d = (double) bC.pos.getX() + bC.bossSpawnPositionOffset.getX() + 0.5;
 			double e = (double) bC.pos.getY() + bC.bossSpawnPositionOffset.getY();
 			double f = (double) bC.pos.getZ() + bC.bossSpawnPositionOffset.getZ() + 0.5;
 			if (!serverWorld.isSpaceEmpty(optional.get().createSimpleBoundingBox(d, e, f))) {
-				ScriptBlocksMod.info("not enough space for spawning");
+				ScriptBlocks.info("not enough space for spawning");
 				return false;
 			}
 			BlockPos blockPos = BlockPos.ofFloored(d, e, f);
@@ -486,7 +486,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				return entity;
 			});
 			if (entity2 == null) {
-				ScriptBlocksMod.info("entity2 == null");
+				ScriptBlocks.info("entity2 == null");
 				return false;
 			}
 			entity2.setBodyYaw((float) bC.bossSpawnOrientationYaw);
@@ -499,7 +499,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				}
 			}
 			if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
-				ScriptBlocksMod.info("spawnNewEntityAndPassengers not successful");
+				ScriptBlocks.info("spawnNewEntityAndPassengers not successful");
 				return false;
 			}
 			serverWorld.syncWorldEvent(WorldEvents.SPAWNER_SPAWNS_MOB, bC.pos, 0);

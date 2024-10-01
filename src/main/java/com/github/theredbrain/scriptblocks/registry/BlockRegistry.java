@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.AreaBlock;
 import com.github.theredbrain.scriptblocks.block.BossControllerBlock;
 //import com.github.theredbrain.scriptblocks.block.DataAccessBlock;
@@ -80,7 +80,7 @@ public class BlockRegistry {
 	public static final Block JIGSAW_PLACER_BLOCK = registerBlock("jigsaw_placer_block", new JigsawPlacerBlock(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block LOCATION_CONTROL_BLOCK = registerBlock("location_control_block", new LocationControlBlock(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block MIMIC_BLOCK = registerBlock("mimic_block", new MimicBlock(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
-	public static final Block MIMIC_FALLBACK_BLOCK = Registry.register(Registries.BLOCK, ScriptBlocksMod.identifier("mimic_fallback_block"), new Block(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
+	public static final Block MIMIC_FALLBACK_BLOCK = Registry.register(Registries.BLOCK, ScriptBlocks.identifier("mimic_fallback_block"), new Block(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
 	public static final Block REDSTONE_TRIGGER_BLOCK = registerBlock("redstone_trigger_block", new RedstoneTriggerBlock(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block RELAY_TRIGGER_BLOCK = registerBlock("relay_trigger_block", new RelayTriggerBlock(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block SHOP_BLOCK = registerBlock("shop_block", new ShopBlock(FabricBlockSettings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
@@ -92,9 +92,9 @@ public class BlockRegistry {
 	//endregion Script Blocks
 
 	private static Block registerBlock(String name, Block block, RegistryKey<ItemGroup> itemGroup) {
-		Registry.register(Registries.ITEM, ScriptBlocksMod.identifier(name), new BlockItem(block, new FabricItemSettings()));
+		Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), new BlockItem(block, new FabricItemSettings()));
 		ItemGroupEvents.modifyEntriesEvent(itemGroup).register(content -> content.add(block));
-		return Registry.register(Registries.BLOCK, ScriptBlocksMod.identifier(name), block);
+		return Registry.register(Registries.BLOCK, ScriptBlocks.identifier(name), block);
 	}
 
 	public static void init() {

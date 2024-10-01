@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class TeleportFromTeleporterBlockPacket implements FabricPacket {
 	public static final PacketType<TeleportFromTeleporterBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("teleport_from_teleporter_block"),
+			ScriptBlocks.identifier("teleport_from_teleporter_block"),
 			TeleportFromTeleporterBlockPacket::new
 	);
 

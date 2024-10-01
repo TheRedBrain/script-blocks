@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.mixin.structure.pool;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.google.common.collect.Lists;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
@@ -76,12 +76,12 @@ public abstract class StructurePoolBasedGeneratorMixin {
 		StructureTemplateManager structureTemplateManager = context.structureTemplateManager();
 		HeightLimitView heightLimitView = context.world();
 		ChunkRandom chunkRandom = context.random(); // generates always same jigsaw combination in the same chunk/position
-		if (!ScriptBlocksMod.serverConfig.shouldJigSawGenerationBeDeterministic) {
+		if (!ScriptBlocks.serverConfig.shouldJigSawGenerationBeDeterministic) {
 			chunkRandom.setSeed(Random.create().nextLong()); // this randomizes the jigsaw generation even in the same chunk/position
 		}
 		Registry<StructurePool> registry = dynamicRegistryManager.get(RegistryKeys.TEMPLATE_POOL);
 		BlockRotation blockRotation = BlockRotation.random(chunkRandom); // this randomizes the initial rotation of every jigsaw structure
-		if (!ScriptBlocksMod.serverConfig.shouldJigSawStructuresBeRandomlyRotated) {
+		if (!ScriptBlocks.serverConfig.shouldJigSawStructuresBeRandomlyRotated) {
 			blockRotation = BlockRotation.NONE; // this sets the initial rotation to always be the same
 		}
 		StructurePool structurePool2 = structurePool.value();

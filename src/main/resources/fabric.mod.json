@@ -15,10 +15,10 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.github.theredbrain.scriptblocks.ScriptBlocksMod"
+			"com.github.theredbrain.scriptblocks.ScriptBlocks"
 		],
 		"client": [
-			"com.github.theredbrain.scriptblocks.ScriptBlocksModClient"
+			"com.github.theredbrain.scriptblocks.ScriptBlocksClient"
 		],
 		"cardinal-components-entity": [
 			"com.github.theredbrain.scriptblocks.registry.ComponentsRegistry"

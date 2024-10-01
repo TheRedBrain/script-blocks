@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class UpdateTriggeredSpawnerBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateTriggeredSpawnerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_triggered_spawner_block"),
+			ScriptBlocks.identifier("update_triggered_spawner_block"),
 			UpdateTriggeredSpawnerBlockPacket::new
 	);
 

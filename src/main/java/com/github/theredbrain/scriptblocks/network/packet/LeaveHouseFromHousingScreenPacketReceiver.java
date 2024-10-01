@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.registry.ComponentsRegistry;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -35,10 +35,10 @@ public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetw
 		if (targetWorld != null && targetPos != null) {
 
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.5), (targetPos.getZ() + 0.5), (float) 0.0, (float) 0.0);
-			if (ScriptBlocksMod.serverConfig.show_debug_messages) {
+			if (ScriptBlocks.serverConfig.show_debug_messages) {
 				serverPlayerEntity.sendMessage(Text.of("Teleport to world: " + targetWorld + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.5) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + 0.0 + " and pitch: " + 0.0));
 			}
-		} else if (ScriptBlocksMod.serverConfig.show_debug_messages) {
+		} else if (ScriptBlocks.serverConfig.show_debug_messages) {
 			serverPlayerEntity.sendMessage(Text.of("Teleport failed"));
 			if (targetWorld == null) {
 				serverPlayerEntity.sendMessage(Text.of("targetWorld == null"));

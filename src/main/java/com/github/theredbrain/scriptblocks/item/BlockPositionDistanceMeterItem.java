@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.item;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -98,10 +98,10 @@ public class BlockPositionDistanceMeterItem extends Item {
 		if (user.isSneaking()) {
 			boolean bl = true;
 			if (!itemStackNbt.contains("isRootMode", NbtElement.BYTE_TYPE)) {
-				ScriptBlocksMod.info("!itemStackNbt.contains isRootMode");
+				ScriptBlocks.info("!itemStackNbt.contains isRootMode");
 				itemStackNbt.putBoolean("isRootMode", true);
 			} else {
-				ScriptBlocksMod.info("itemStackNbt.contains isRootMode");
+				ScriptBlocks.info("itemStackNbt.contains isRootMode");
 				bl = itemStackNbt.getBoolean("isRootMode");
 				itemStackNbt.putBoolean("isRootMode", !bl);
 			}

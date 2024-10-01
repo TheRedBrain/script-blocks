@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -10,7 +10,7 @@ import net.minecraft.util.math.Vec3i;
 
 public class UpdateHousingBlockCreativePacket implements FabricPacket {
 	public static final PacketType<UpdateHousingBlockCreativePacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_housing_block_creative"),
+			ScriptBlocks.identifier("update_housing_block_creative"),
 			UpdateHousingBlockCreativePacket::new
 	);
 

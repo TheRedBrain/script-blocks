@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class UpdateTriggeredCounterBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateTriggeredCounterBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_triggered_counter_block"),
+			ScriptBlocks.identifier("update_triggered_counter_block"),
 			UpdateTriggeredCounterBlockPacket::new
 	);
 

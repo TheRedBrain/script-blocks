@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
@@ -42,8 +42,8 @@ public class BossControllerBlockScreen extends Screen {
 	private static final Text ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_pitch_label");
 	private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_yaw_label");
 
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_96");
-	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_96");
+	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 
 	private final BossControllerBlockEntity bossControllerBlock;
 

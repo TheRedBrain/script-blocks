@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.data.ShopHelper;
 import com.google.common.reflect.TypeToken;
@@ -69,8 +69,8 @@ public class ShopsRegistry {
 		PacketByteBuf buffer = PacketByteBufs.create();
 		var gson = new Gson();
 		var json = gson.toJson(registeredShops);
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Shops registry loaded: " + json);
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Shops registry loaded: " + json);
 		}
 
 		List<String> chunks = new ArrayList<>();
@@ -84,8 +84,8 @@ public class ShopsRegistry {
 			buffer.writeString(chunk);
 		}
 
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Encoded Shops registry size (with package overhead): " + buffer.readableBytes()
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Encoded Shops registry size (with package overhead): " + buffer.readableBytes()
 					+ " bytes (in " + chunks.size() + " string chunks with the size of " + chunkSize + ")");
 		}
 		encodedRegisteredShops = buffer;
@@ -97,9 +97,9 @@ public class ShopsRegistry {
 		for (int i = 0; i < chunkCount; ++i) {
 			json = json.concat(buffer.readString());
 		}
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Decoded Shops registry in " + chunkCount + " string chunks");
-			ScriptBlocksMod.LOGGER.info("Shops registry received: " + json);
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Decoded Shops registry in " + chunkCount + " string chunks");
+			ScriptBlocks.LOGGER.info("Shops registry received: " + json);
 		}
 		var gson = new Gson();
 		Type mapType = new TypeToken<Map<String, Shop>>() {

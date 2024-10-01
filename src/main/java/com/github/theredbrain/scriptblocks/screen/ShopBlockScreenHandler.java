@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.screen;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
@@ -224,7 +224,7 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 
 	public void calculateUnlockedAndStockedDeals() {
 
-		ScriptBlocksMod.info("calculateUnlockedAndStockedDeals");
+		ScriptBlocks.info("calculateUnlockedAndStockedDeals");
 
 //        ClientAdvancementManager advancementHandler = null;
 		PlayerAdvancementTracker playerAdvancementTracker = null;
@@ -251,9 +251,9 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 			this.unlockedDealsList.clear();
 			this.unlockedDealsCounter = 0;
 
-			ScriptBlocksMod.info("advancementHandler != null");
+			ScriptBlocks.info("advancementHandler != null");
 
-			ScriptBlocksMod.info("this.dealsList.size(): " + this.dealsList.size());
+			ScriptBlocks.info("this.dealsList.size(): " + this.dealsList.size());
 
 			for (int i = 0; i < this.dealsList.size(); i++) {
 

@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -489,7 +489,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	private void triggerBlock() {
-		ScriptBlocksMod.info("triggerBlock");
+		ScriptBlocks.info("triggerBlock");
 		int x = this.triggeredBlock.getLeft().getX();
 		int y = this.triggeredBlock.getLeft().getY();
 		int z = this.triggeredBlock.getLeft().getZ();
@@ -508,7 +508,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 	private void sendMessage(String message) {
 		if (this.world instanceof ServerWorld) {
-			ScriptBlocksMod.info("sendMessage");
+			ScriptBlocks.info("sendMessage");
 			if (this.calculateAreaBox || this.area == null) {
 				BlockPos messageAreaPositionOffset = this.areaPositionOffset;
 				Vec3i messageAreaDimensions = this.areaDimensions;

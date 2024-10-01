@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class UpdateLocationControlBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateLocationControlBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_location_control_block"),
+			ScriptBlocks.identifier("update_location_control_block"),
 			UpdateLocationControlBlockPacket::new
 	);
 

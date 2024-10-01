@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.block.entity.JigsawBlockEntity;
@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class UpdateJigsawPlacerBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateJigsawPlacerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_jigsaw_placer_block"),
+			ScriptBlocks.identifier("update_jigsaw_placer_block"),
 			UpdateJigsawPlacerBlockPacket::new
 	);
 

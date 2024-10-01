@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class DialogueAnswerPacket implements FabricPacket {
 	public static final PacketType<DialogueAnswerPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("dialogue_answer"),
+			ScriptBlocks.identifier("dialogue_answer"),
 			DialogueAnswerPacket::new
 	);
 

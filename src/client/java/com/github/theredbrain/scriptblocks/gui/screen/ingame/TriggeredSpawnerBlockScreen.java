@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
@@ -49,8 +49,8 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	private static final Text USE_RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.useRelayBlockPositionOffset");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
 
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_92");
-	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
+	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 
 	private final TriggeredSpawnerBlockEntity triggeredSpawnerBlock;
 

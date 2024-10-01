@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
@@ -166,7 +166,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 
 	public static void answer(PlayerEntity playerEntity, Identifier answerIdentifier, DialogueBlockEntity dialogueBlockEntity) {
 		if (dialogueBlockEntity.getWorld() instanceof ServerWorld serverWorld) {
-			ScriptBlocksMod.info("answer on server side");
+			ScriptBlocks.info("answer on server side");
 			ServerPlayerEntity serverPlayerEntity = serverWorld.getServer().getPlayerManager().getPlayer(playerEntity.getGameProfile().getId());
 			if (serverPlayerEntity != null) {
 				ServerPlayNetworking.send(serverPlayerEntity, new DialogueAnswerPacket(
@@ -175,7 +175,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 				));
 			}
 		} else {
-			ScriptBlocksMod.info("answer on client side");
+			ScriptBlocks.info("answer on client side");
 		}
 	}
 

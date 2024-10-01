@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.world.gen.chunk.placement.FixedStructurePlacement;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -12,6 +12,6 @@ public class StructurePlacementTypesRegistry {
 	};
 
 	public static void register() {
-		Registry.register(Registries.STRUCTURE_PLACEMENT, ScriptBlocksMod.identifier("fixed"), FIXED);
+		Registry.register(Registries.STRUCTURE_PLACEMENT, ScriptBlocks.identifier("fixed"), FIXED);
 	}
 }

@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class UpdateBossControllerBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateBossControllerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_boss_controller_block"),
+			ScriptBlocks.identifier("update_boss_controller_block"),
 			UpdateBossControllerBlockPacket::new
 	);
 

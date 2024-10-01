@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.mixin.world;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
@@ -30,10 +30,10 @@ public abstract class WorldMixin implements WorldAccess {
 	 */
 	@Overwrite
 	public BlockPos getSpawnPos() {
-		if (ScriptBlocksMod.serverConfig.use_predefined_position_for_world_spawn) {
-			List<Integer> worldSpawnXList = ScriptBlocksMod.serverConfig.worldSpawnXList;
-			List<Integer> worldSpawnYList = ScriptBlocksMod.serverConfig.worldSpawnYList;
-			List<Integer> worldSpawnZList = ScriptBlocksMod.serverConfig.worldSpawnZList;
+		if (ScriptBlocks.serverConfig.use_predefined_position_for_world_spawn) {
+			List<Integer> worldSpawnXList = ScriptBlocks.serverConfig.worldSpawnXList;
+			List<Integer> worldSpawnYList = ScriptBlocks.serverConfig.worldSpawnYList;
+			List<Integer> worldSpawnZList = ScriptBlocks.serverConfig.worldSpawnZList;
 			int listSize = worldSpawnXList.size();
 			if (listSize > 0) {
 				int spawnPointIndex = this.random.nextBetweenExclusive(0, listSize);

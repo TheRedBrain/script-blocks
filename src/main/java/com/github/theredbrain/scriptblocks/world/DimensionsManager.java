@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.world;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -35,7 +35,7 @@ public class DimensionsManager {
 
 		Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = manager.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
 
-		RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocksMod.identifier("player_locations_dimension")));
+		RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("player_locations_dimension")));
 
 		FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
 // add the dimension

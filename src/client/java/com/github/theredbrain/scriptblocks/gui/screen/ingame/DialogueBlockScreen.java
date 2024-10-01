@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
@@ -47,12 +47,12 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 	private static final Text ADD_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Text REMOVE_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
 	private static final Text ENTRY_ALREADY_IN_LIST_TEXT = Text.translatable("gui.dialogue_block.entry_already_in_list");
-	public static final Identifier BACKGROUND_218_197_TEXTURE = ScriptBlocksMod.identifier("textures/gui/container/generic_218_197_background.png");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_35_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_35");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_87_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_87");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_92");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_96");
-	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	public static final Identifier BACKGROUND_218_197_TEXTURE = ScriptBlocks.identifier("textures/gui/container/generic_218_197_background.png");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_35_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_35");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_87_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_87");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_96");
+	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private DialogueBlockEntity dialogueBlockEntity;
 
 	//region adventure widgets

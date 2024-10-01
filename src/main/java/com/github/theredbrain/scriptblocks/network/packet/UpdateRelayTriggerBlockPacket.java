@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class UpdateRelayTriggerBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateRelayTriggerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_relay_trigger_block"),
+			ScriptBlocks.identifier("update_relay_trigger_block"),
 			UpdateRelayTriggerBlockPacket::new
 	);
 

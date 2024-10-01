@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.data.LocationHelper;
 import com.google.common.reflect.TypeToken;
@@ -68,8 +68,8 @@ public class LocationsRegistry {
 		PacketByteBuf buffer = PacketByteBufs.create();
 		var gson = new Gson();
 		var json = gson.toJson(registeredLocations);
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Locations registry loaded: " + json);
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Locations registry loaded: " + json);
 		}
 
 		List<String> chunks = new ArrayList<>();
@@ -83,8 +83,8 @@ public class LocationsRegistry {
 			buffer.writeString(chunk);
 		}
 
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Encoded Locations registry size (with package overhead): " + buffer.readableBytes()
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Encoded Locations registry size (with package overhead): " + buffer.readableBytes()
 					+ " bytes (in " + chunks.size() + " string chunks with the size of " + chunkSize + ")");
 		}
 		encodedRegisteredLocations = buffer;
@@ -96,9 +96,9 @@ public class LocationsRegistry {
 		for (int i = 0; i < chunkCount; ++i) {
 			json = json.concat(buffer.readString());
 		}
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.info("Decoded Locations registry in " + chunkCount + " string chunks");
-			ScriptBlocksMod.info("Locations registry received: " + json);
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.info("Decoded Locations registry in " + chunkCount + " string chunks");
+			ScriptBlocks.info("Locations registry received: " + json);
 		}
 		var gson = new Gson();
 		Type mapType = new TypeToken<Map<String, Location>>() {

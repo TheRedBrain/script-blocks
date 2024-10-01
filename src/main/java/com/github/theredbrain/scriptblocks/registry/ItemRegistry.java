@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.item.BlockPositionDistanceMeterItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -22,7 +22,7 @@ public class ItemRegistry {
 				content.add(item);
 			});
 		}
-		return Registry.register(Registries.ITEM, ScriptBlocksMod.identifier(name), item);
+		return Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), item);
 	}
 
 	public static void init() {

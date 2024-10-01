@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswerHelper;
 import com.google.common.reflect.TypeToken;
@@ -68,8 +68,8 @@ public class DialogueAnswersRegistry {
 		PacketByteBuf buffer = PacketByteBufs.create();
 		var gson = new Gson();
 		var json = gson.toJson(registeredDialogueAnswers);
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Dialogue Answers registry loaded: " + json);
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Dialogue Answers registry loaded: " + json);
 		}
 
 		List<String> chunks = new ArrayList<>();
@@ -83,8 +83,8 @@ public class DialogueAnswersRegistry {
 			buffer.writeString(chunk);
 		}
 
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Encoded Dialogue Answers registry size (with package overhead): " + buffer.readableBytes()
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Encoded Dialogue Answers registry size (with package overhead): " + buffer.readableBytes()
 					+ " bytes (in " + chunks.size() + " string chunks with the size of " + chunkSize + ")");
 		}
 		encodedRegisteredDialogueAnswers = buffer;
@@ -96,9 +96,9 @@ public class DialogueAnswersRegistry {
 		for (int i = 0; i < chunkCount; ++i) {
 			json = json.concat(buffer.readString());
 		}
-		if (ScriptBlocksMod.serverConfig.show_debug_log) {
-			ScriptBlocksMod.LOGGER.info("Decoded Dialogue Answers registry in " + chunkCount + " string chunks");
-			ScriptBlocksMod.LOGGER.info("Dialogue Answers registry received: " + json);
+		if (ScriptBlocks.serverConfig.show_debug_log) {
+			ScriptBlocks.LOGGER.info("Decoded Dialogue Answers registry in " + chunkCount + " string chunks");
+			ScriptBlocks.LOGGER.info("Dialogue Answers registry received: " + json);
 		}
 		var gson = new Gson();
 		Type mapType = new TypeToken<Map<String, DialogueAnswer>>() {

@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacketReceiver;
@@ -75,11 +75,11 @@ public class ServerPacketRegistry {
 //
 ////    public static final Identifier SYNC_PLAYER_HOUSES = BetterAdventureModeCore.identifier("sync_player_houses");
 //    public static final Identifier SYNC_CRAFTING_RECIPES = ScriptBlocksMod.identifier("sync_crafting_recipes");
-	public static final Identifier SYNC_DIALOGUES = ScriptBlocksMod.identifier("sync_dialogues");
-	public static final Identifier SYNC_DIALOGUE_ANSWERS = ScriptBlocksMod.identifier("sync_dialogue_answers");
-	public static final Identifier SYNC_LOCATIONS = ScriptBlocksMod.identifier("sync_locations");
-	public static final Identifier SYNC_SHOPS = ScriptBlocksMod.identifier("sync_shops");
-	public static final Identifier SYNC_BOSSES = ScriptBlocksMod.identifier("sync_bosses");
+	public static final Identifier SYNC_DIALOGUES = ScriptBlocks.identifier("sync_dialogues");
+	public static final Identifier SYNC_DIALOGUE_ANSWERS = ScriptBlocks.identifier("sync_dialogue_answers");
+	public static final Identifier SYNC_LOCATIONS = ScriptBlocks.identifier("sync_locations");
+	public static final Identifier SYNC_SHOPS = ScriptBlocks.identifier("sync_shops");
+	public static final Identifier SYNC_BOSSES = ScriptBlocks.identifier("sync_bosses");
 //    public static final Identifier SYNC_WEAPON_POSES = ScriptBlocksMod.identifier("sync_weapon_poses");
 
 	public static void init() {
@@ -180,7 +180,7 @@ public class ServerPacketRegistry {
 	}
 
 	public static class ServerConfigSync {
-		public static Identifier ID = ScriptBlocksMod.identifier("server_config_sync");
+		public static Identifier ID = ScriptBlocks.identifier("server_config_sync");
 
 		public static PacketByteBuf write(ServerConfig serverConfig) {
 			var gson = new Gson();

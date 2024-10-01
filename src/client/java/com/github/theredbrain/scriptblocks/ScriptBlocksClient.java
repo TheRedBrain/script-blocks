@@ -27,7 +27,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 
 @Environment(value = EnvType.CLIENT)
-public class ScriptBlocksModClient implements ClientModInitializer {
+public class ScriptBlocksClient implements ClientModInitializer {
 	public static ClientConfig clientConfig;
 
 	@Override

@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class UpdateTeleporterBlockPacket implements FabricPacket {
 	public static final PacketType<UpdateTeleporterBlockPacket> TYPE = PacketType.create(
-			ScriptBlocksMod.identifier("update_teleporter_block"),
+			ScriptBlocks.identifier("update_teleporter_block"),
 			UpdateTeleporterBlockPacket::new
 	);
 

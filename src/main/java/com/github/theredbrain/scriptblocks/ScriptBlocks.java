@@ -26,7 +26,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ScriptBlocksMod implements ModInitializer {
+public class ScriptBlocks implements ModInitializer {
 	public static final String MOD_ID = "scriptblocks";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ServerConfig serverConfig;
@@ -61,7 +61,7 @@ public class ScriptBlocksMod implements ModInitializer {
 	}
 
 	public static Identifier identifier(String path) {
-		return new Identifier(MOD_ID, path);
+		return Identifier.of(MOD_ID, path);
 	}
 
 	public static void info(String message) {

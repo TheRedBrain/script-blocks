@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateRelayTriggerBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
@@ -41,8 +41,8 @@ public class RelayTriggerBlockScreen extends Screen {
 	private static final Text NEW_POSITION_CHANCE_FIELD_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.newTriggeredBlockChanceLabel");
 	private static final Text REMOVE_BUTTON_LABEL_TEXT = Text.translatable("gui.remove");
 	private static final Text ADD_BUTTON_LABEL_TEXT = Text.translatable("gui.add");
-	private static final Identifier TRIGGERED_BLOCKS_LIST_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_92");
-	private static final Identifier SCROLLER_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	private static final Identifier TRIGGERED_BLOCKS_LIST_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
+	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final RelayTriggerBlockEntity relayTriggerBlock;
 
 	private RelayTriggerBlockEntity.SelectionMode selectionMode;

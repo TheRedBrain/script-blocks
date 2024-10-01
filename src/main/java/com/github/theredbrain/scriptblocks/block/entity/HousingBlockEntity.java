@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -153,7 +153,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 			if (blockEntity.hasWorld() && !blockEntity.isOwnerSet && blockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
 				blockEntity.ownerUuid = initOwner(blockEntity.world);
 				if (UUIDUtilities.isStringValidUUID(blockEntity.ownerUuid)) {
-					ScriptBlocksMod.info(blockEntity.ownerUuid);
+					ScriptBlocks.info(blockEntity.ownerUuid);
 					blockEntity.isOwnerSet = true;
 				}
 			}

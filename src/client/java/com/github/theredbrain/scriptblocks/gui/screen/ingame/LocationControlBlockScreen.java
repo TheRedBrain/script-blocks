@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
@@ -37,8 +37,8 @@ public class LocationControlBlockScreen extends Screen {
 	private static final Text NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.name");
 	private static final Text NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.orientation");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroll_bar_background_8_70");
-	private static final Identifier SCROLLER_TEXTURE = ScriptBlocksMod.identifier("scroll_bar/scroller_vertical_6_7");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
+	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final LocationControlBlockEntity locationControlBlock;
 	private CyclingButtonWidget<ScreenPage> creativeScreenPageButton;
 	private TextFieldWidget mainEntrancePositionOffsetXField;

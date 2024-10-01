@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -226,9 +226,9 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 						}
 					}
 				} else if (this.triggerMode == TriggerMode.BINOMIAL_URN) { // TODO
-					ScriptBlocksMod.info("this mode is WIP");
+					ScriptBlocks.info("this mode is WIP");
 				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC_URN) { // TODO
-					ScriptBlocksMod.info("this mode is WIP");
+					ScriptBlocks.info("this mode is WIP");
 				}
 			} else if (this.selectionMode == SelectionMode.AREA) {
 				Vec3i activationAreaDimensions = this.getAreaDimensions();
