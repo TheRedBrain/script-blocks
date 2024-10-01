@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ScriptBlocksTest implements ModInitializer {
-	public static final String MOD_ID = "scriptblocks";
+	public static final String MOD_ID = "scriptblocks_test";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override

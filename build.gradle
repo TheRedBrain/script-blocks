@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.7-SNAPSHOT'
 	id "com.matthewprenger.cursegradle" version "1.4.0"
 	id "com.github.breadmoirai.github-release" version "2.4.1"
 	id "com.modrinth.minotaur" version "2.+"
@@ -31,7 +31,7 @@ repositories {
 		url = 'https://maven.ladysnake.org/releases'
 	}
 
-	// Immersive Portals
+	// DimLib
 	maven {
 		url 'https://jitpack.io'
 	}
@@ -109,13 +109,12 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	// Cloth Config
-	modImplementation ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config}")
+	modImplementation ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}")
 
-	// Immersive Portals Core
-	modImplementation "com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:${project.q_misc_util_version}"
-
-	// Miscellaneous Utility Library
-	modImplementation "com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:${project.q_misc_util_version}"
+	// DimLib
+	modApi("com.github.iPortalTeam:DimLib:${dimlib_version}") {
+		exclude(group: "net.fabricmc.fabric-api")
+	}
 
 	// Cardinal Components
 	modImplementation ("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
@@ -136,14 +135,15 @@ dependencies {
 
 processResources {
 	inputs.property "version", project.version
+	filteringCharset "UTF-8"
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand(project.properties)
 	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 17
+	it.options.release = 21
 }
 
 java {
@@ -152,8 +152,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
@@ -187,7 +187,6 @@ if (project.hasProperty('release_type')) {
 			relations {
 				requiredDependency 'cloth-config'
 				requiredDependency 'fabric-api'
-				requiredDependency 'immersive-portals-mod'
 				requiredDependency 'cardinal-components-api'
 				requiredDependency 'slot-customization-api'
 			}
@@ -220,7 +219,7 @@ if (project.hasProperty('release_type')) {
 			// The type can either be `project` or `version`
 			required.project 'cloth-config'
 			required.project 'fabric-api'
-			required.project 'immersiveportals'
+			embedded.project 'dimlib'
 			required.project 'cardinal-components-api'
 			required.project 'slot-customization-api'
 		}
