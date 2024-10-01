@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocksMod;
+import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DialogueBlockEntity extends RotatedBlockEntity {
+public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueAnchor {
 
 	private HashMap<String, BlockPos> dialogueUsedBlocks = new HashMap<>();
 	private HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocks = new HashMap<>();
@@ -166,15 +167,19 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
 	public static void answer(PlayerEntity playerEntity, Identifier answerIdentifier, DialogueBlockEntity dialogueBlockEntity) {
 		if (dialogueBlockEntity.getWorld() instanceof ServerWorld serverWorld) {
 			ScriptBlocksMod.info("answer on server side");
-			ServerPlayNetworking.send(new ServerPlayerEntity(serverWorld.getServer(), serverWorld, playerEntity.getGameProfile()), new DialogueAnswerPacket(
-					dialogueBlockEntity.getPos(),
-					answerIdentifier
-			));
+			ServerPlayerEntity serverPlayerEntity = serverWorld.getServer().getPlayerManager().getPlayer(playerEntity.getGameProfile().getId());
+			if (serverPlayerEntity != null) {
+				ServerPlayNetworking.send(serverPlayerEntity, new DialogueAnswerPacket(
+						dialogueBlockEntity.getPos(),
+						answerIdentifier
+				));
+			}
 		} else {
 			ScriptBlocksMod.info("answer on client side");
 		}
 	}
 
+	@Override
 	public HashMap<String, BlockPos> getDialogueUsedBlocks() {
 		return this.dialogueUsedBlocks;
 	}
@@ -184,6 +189,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity {
 		return true;
 	}
 
+	@Override
 	public HashMap<String, MutablePair<BlockPos, Boolean>> getDialogueTriggeredBlocks() {
 		return this.dialogueTriggeredBlocks;
 	}
