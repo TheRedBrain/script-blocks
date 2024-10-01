@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -32,23 +33,23 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		if (!this.shopIdentifier.equals("")) {
 			nbt.putString("shopName", this.shopIdentifier);
 		}
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		if (nbt.contains("shopName")) {
 			this.shopIdentifier = nbt.getString("shopName");
 		}
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -56,8 +57,8 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public String getShopIdentifier() {
@@ -66,10 +67,11 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 
 	public boolean setShopIdentifier(String newShopIdentifier) {
 		Shop shop = null;
-		if (Identifier.isValid(newShopIdentifier)) {
-			shop = ShopsRegistry.getShop(new Identifier(newShopIdentifier));
+		Identifier identifier = Identifier.tryParse(newShopIdentifier);
+		if (identifier != null) {
+			shop = ShopsRegistry.getShop(identifier);
 		}
-		if (newShopIdentifier.equals("") || shop != null) {
+		if (newShopIdentifier.isEmpty() || shop != null) {
 			this.shopIdentifier = newShopIdentifier;
 			this.stockCountList.clear();
 

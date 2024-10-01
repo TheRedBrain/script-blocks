@@ -9,6 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -29,7 +30,7 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
 		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
@@ -38,11 +39,11 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 		nbt.putInt("triggerDelay", this.triggerDelay);
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
 		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
@@ -51,7 +52,7 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 		this.triggerDelay = nbt.getInt("triggerDelay");
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -59,8 +60,8 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, DelayTriggerBlockEntity blockEntity) {

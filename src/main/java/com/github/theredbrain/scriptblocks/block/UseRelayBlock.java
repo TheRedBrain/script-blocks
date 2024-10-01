@@ -37,7 +37,7 @@ public class UseRelayBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			if (player.isCreativeLevelTwoOp()) {
@@ -47,7 +47,7 @@ public class UseRelayBlock extends RotatedBlockWithEntity {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
 				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
 				BlockState relayBlockState = world.getBlockState(relayBlockPos);
-				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hand, hit);
+				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
 		return ActionResult.PASS;

@@ -38,7 +38,7 @@ public class DelayTriggerBlock extends RotatedBlockWithEntity {
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
-		return checkType(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
+		return validateTicker(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class DelayTriggerBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openDelayTriggerBlockScreen(delayTriggerBlockEntity);

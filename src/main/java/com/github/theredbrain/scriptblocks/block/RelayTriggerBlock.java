@@ -37,7 +37,7 @@ public class RelayTriggerBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openRelayTriggerBlockScreen(relayTriggerBlockEntity);

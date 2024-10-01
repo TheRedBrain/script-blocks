@@ -7,6 +7,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashSet;
@@ -23,7 +24,7 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		List<UUID> list = this.playerSet.stream().toList();
 		int listSize = list.size();
@@ -36,11 +37,11 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			nbt.putString("lootTableIdentifierString", this.lootTableIdentifierString);
 		}
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		this.playerSet.clear();
 		int listSize = nbt.getInt("listSize");
@@ -52,7 +53,7 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 
 		this.lootTableIdentifierString = nbt.getString("lootTableIdentifierString");
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -60,8 +61,8 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public String getLootTableIdentifierString() {

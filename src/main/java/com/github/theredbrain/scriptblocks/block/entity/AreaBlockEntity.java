@@ -16,6 +16,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
@@ -73,7 +75,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		if (this.showArea) {
 			nbt.putBoolean("showArea", true);
@@ -265,12 +267,12 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			nbt.putInt("timer_" + i, this.playerMap.get(key));
 		}
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		this.showArea = nbt.getBoolean("showArea");
 
@@ -347,7 +349,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			this.playerMap.put(key, timer);
 		}
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -355,8 +357,8 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, AreaBlockEntity areaBlockEntity) {
@@ -372,7 +374,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 			boolean shouldTriggerBlock = false;
 
-			StatusEffect statusEffect = Registries.STATUS_EFFECT.get(Identifier.tryParse(areaBlockEntity.appliedStatusEffectIdentifier));
+			Optional<RegistryEntry.Reference<StatusEffect>> statusEffect = Registries.STATUS_EFFECT.getEntry(Identifier.tryParse(areaBlockEntity.appliedStatusEffectIdentifier));
 
 			List<PlayerEntity> newPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, areaBlockEntity.area);
 			List<UUID> newPLayerUuidList = new ArrayList<>();
@@ -394,10 +396,10 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 					if (newPLayerUuidList.contains(uuid)) {
 						tempList.add(uuid);
 						newPLayerUuidList.remove(uuid);
-						if (statusEffect != null && areaBlockEntity.wasTriggered) {
+						if (statusEffect.isPresent() && areaBlockEntity.wasTriggered) {
 							playerEntity.addStatusEffect(
 									new StatusEffectInstance(
-											statusEffect,
+											statusEffect.get(),
 											100,
 											areaBlockEntity.appliedStatusEffectAmplifier,
 											areaBlockEntity.appliedStatusEffectAmbient,
@@ -411,7 +413,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 							areaBlockEntity.playerList2.clear();
 						}
 						if (!areaBlockEntity.playerList2.contains(uuid)) {
-							if (!areaBlockEntity.leaveMessage.equals("")) {
+							if (!areaBlockEntity.leaveMessage.isEmpty()) {
 								if (areaBlockEntity.messageMode == MessageMode.ANNOUNCEMENT) {
 									((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.leaveMessage));
 								} else {
@@ -448,10 +450,10 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 				if (playerEntity != null) {
 					tempList.add(uuid2);
-					if (statusEffect != null) {
+					if (statusEffect.isPresent()) {
 						playerEntity.addStatusEffect(
 								new StatusEffectInstance(
-										statusEffect,
+										statusEffect.get(),
 										100,
 										areaBlockEntity.appliedStatusEffectAmplifier,
 										areaBlockEntity.appliedStatusEffectAmbient,
@@ -463,7 +465,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 					if (areaBlockEntity.triggerMode != TriggerMode.ALWAYS && areaBlockEntity.playerMap.containsKey(playerEntity.getUuid())) {
 						continue;
 					}
-					if (!areaBlockEntity.joinMessage.equals("")) {
+					if (!areaBlockEntity.joinMessage.isEmpty()) {
 						if (areaBlockEntity.messageMode == MessageMode.ANNOUNCEMENT) {
 							((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.joinMessage));
 						} else {

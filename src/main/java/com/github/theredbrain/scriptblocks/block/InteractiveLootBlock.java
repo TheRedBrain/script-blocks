@@ -13,6 +13,8 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -50,7 +52,7 @@ public class InteractiveLootBlock extends BlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		if (state.isOf(this)) {
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
@@ -78,7 +80,7 @@ public class InteractiveLootBlock extends BlockWithEntity {
 		List<ItemStack> list = new ArrayList<>();
 		Identifier lootTableIdentifier = Identifier.tryParse(interactiveLootBlockEntity.getLootTableIdentifierString());
 		if (lootTableIdentifier != null) {
-			LootTable lootTable = serverWorld.getServer().getLootManager().getLootTable(lootTableIdentifier);
+			LootTable lootTable = serverWorld.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableIdentifier));
 			list = lootTable.generateLoot(new LootContextParameterSet.Builder(serverWorld).add(LootContextParameters.ORIGIN, new Vec3d(pos.getX(), pos.getY(), pos.getZ())).add(LootContextParameters.THIS_ENTITY, player).build(LootContextTypes.CHEST)); // TODO when changed to LootContextTypes.BLOCK, can do stuff depending on held item
 		}
 		return list;

@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.TallPlantBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.DoorHinge;
 import net.minecraft.block.enums.DoubleBlockHalf;
@@ -112,16 +113,16 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		if (!world.isClient && player.isCreative()) {
+	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+		if (!world.isClient && (player.isCreative() || !player.canHarvest(state))) {
 			onBreakInCreative(world, pos, state, player);
 		}
-//        return super.onBreak(world, pos, state, player);
-		super.onBreak(world, pos, state, player);
+
+		return super.onBreak(world, pos, state, player);
 	}
 
 	@Override
-	public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+	protected boolean canPathfindThrough(BlockState state, NavigationType type) {
 		switch (type) {
 			case LAND, AIR -> {
 				return state.get(OPEN);
@@ -184,7 +185,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			boolean bl = player.isCreativeLevelTwoOp();

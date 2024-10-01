@@ -51,7 +51,7 @@ public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity && player.isCreativeLevelTwoOp()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openRedstoneTriggerBlockScreen(redstoneTriggerBlockEntity);

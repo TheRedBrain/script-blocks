@@ -12,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -27,7 +28,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		nbt.putInt("activeMimicBlockPositionOffsetX", this.activeMimicBlockPositionOffset.getX());
 		nbt.putInt("activeMimicBlockPositionOffsetY", this.activeMimicBlockPositionOffset.getY());
@@ -37,11 +38,11 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		nbt.putInt("inactiveMimicBlockPositionOffsetY", this.inactiveMimicBlockPositionOffset.getY());
 		nbt.putInt("inactiveMimicBlockPositionOffsetZ", this.inactiveMimicBlockPositionOffset.getZ());
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		int x = MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetX"), -48, 48);
 		int y = MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetY"), -48, 48);
@@ -53,7 +54,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		z = MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetZ"), -48, 48);
 		this.inactiveMimicBlockPositionOffset = new BlockPos(x, y, z);
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -61,8 +62,8 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public BlockPos getActiveMimicBlockPositionOffset() {

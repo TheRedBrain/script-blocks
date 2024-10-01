@@ -96,7 +96,7 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+	protected boolean canPathfindThrough(BlockState state, NavigationType type) {
 		switch (type) {
 			case LAND, AIR -> {
 				return state.get(OPEN);
@@ -118,7 +118,7 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			if (player.isCreativeLevelTwoOp()) {

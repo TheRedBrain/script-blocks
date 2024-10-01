@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -24,31 +25,26 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		nbt.putInt("relayBlockPositionOffsetX", this.relayBlockPositionOffset.getX());
 		nbt.putInt("relayBlockPositionOffsetY", this.relayBlockPositionOffset.getY());
 		nbt.putInt("relayBlockPositionOffsetZ", this.relayBlockPositionOffset.getZ());
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		int l = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetX"), -48, 48);
 		int m = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetY"), -48, 48);
 		int n = MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetZ"), -48, 48);
 		this.relayBlockPositionOffset = new BlockPos(l, m, n);
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
 		return BlockEntityUpdateS2CPacket.create(this);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
 	}
 
 	public BlockPos getRelayBlockPositionOffset() {

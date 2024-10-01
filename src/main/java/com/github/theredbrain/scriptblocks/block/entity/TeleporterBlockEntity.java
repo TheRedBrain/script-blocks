@@ -8,12 +8,16 @@ import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -75,7 +79,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		nbt.putString("teleporterName", this.teleporterName);
 
 		nbt.putBoolean("showAdventureScreen", this.showAdventureScreen);
@@ -132,11 +136,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			nbt.putDouble("activationAreaMaxZ", this.activationArea.maxZ);
 		}
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		this.teleporterName = nbt.getString("teleporterName");
 
 		this.showAdventureScreen = nbt.getBoolean("showAdventureScreen");
@@ -193,7 +197,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			this.calculateActivationBox = true;
 		}
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -201,8 +205,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TeleporterBlockEntity blockEntity) {
@@ -224,13 +228,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			}
 			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, teleporterBlockEntity.activationArea);
 			String worldName = world.getRegistryKey().getValue().getPath();
+			RegistryEntry<StatusEffect> portal_resistance_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT);
 			for (PlayerEntity playerEntity : list) {
-				if (!playerEntity.hasStatusEffect(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT) && !playerEntity.isCreative()) {
+				if (!playerEntity.hasStatusEffect(portal_resistance_status_effect) && !playerEntity.isCreative()) {
 					if (!teleporterBlockEntity.onlyTeleportDimensionOwner || playerEntity.getUuid().toString().equals(worldName)) {
 						// prevents continuous opening of a screen
 						playerEntity.setStatusEffect(
 								new StatusEffectInstance(
-										StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT,
+										portal_resistance_status_effect,
 										-1,
 										0,
 										false,
@@ -375,7 +380,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.spawnPointType = spawnPointType;
 	}
 
-	public List<Pair<String, String>> getLocationsList() {
+	public List<MutablePair<String, String>> getLocationsList() {
 		return this.locationsList;
 	}
 
@@ -427,8 +432,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	//endregion
 
 	@Override
-	public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-		buf.writeBlockPos(pos);
+	public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayerEntity player) {
+		return new TeleporterBlockScreenHandler.TeleporterBlockData(this.pos);
 	}
 
 	@Nullable

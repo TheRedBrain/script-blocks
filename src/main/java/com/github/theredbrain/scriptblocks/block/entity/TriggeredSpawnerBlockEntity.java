@@ -25,6 +25,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
@@ -71,9 +72,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 
 		BlockPos entitySpawnPositionOffset = this.entitySpawnPositionOffset;
 		if (!entitySpawnPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
@@ -157,9 +158,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 
 		if (nbt.contains("entitySpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
 			this.entitySpawnPositionOffset = new BlockPos(
@@ -232,8 +233,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	//region getter/setter

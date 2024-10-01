@@ -42,6 +42,7 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -170,7 +171,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 	private TeleporterBlockEntity.SpawnPointType spawnPointType;
 
-	List<Pair<String, String>> locationsList = new ArrayList<>();
+	List<MutablePair<String, String>> locationsList = new ArrayList<>();
 	List<Pair<String, String>> visibleLocationsList = new ArrayList<>();
 	List<Pair<String, String>> unlockedLocationsList = new ArrayList<>();
 	List<PlayerListEntry> partyMemberList = new ArrayList<>();

@@ -9,6 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +29,7 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		List<Integer> triggeredBlocksKeys = new ArrayList<>(this.triggeredBlocks.keySet());
 		nbt.putInt("triggeredBlocksKeysSize", triggeredBlocksKeys.size());
 		for (int i = 0; i < triggeredBlocksKeys.size(); i++) {
@@ -42,11 +43,11 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 
 		nbt.putInt("counter", this.counter);
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		this.triggeredBlocks.clear();
 		int triggeredBlocksKeysSize = nbt.getInt("triggeredBlocksKeysSize");
 		for (int i = 0; i < triggeredBlocksKeysSize; i++) {
@@ -60,7 +61,7 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 
 		this.counter = nbt.getInt("counter");
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -68,8 +69,8 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public HashMap<Integer, MutablePair<BlockPos, Boolean>> getTriggeredBlocks() {

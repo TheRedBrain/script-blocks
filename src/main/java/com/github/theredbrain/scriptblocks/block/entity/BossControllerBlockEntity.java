@@ -27,6 +27,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -79,7 +81,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private double bossSpawnOrientationPitch = 0.0;
 	private double bossSpawnOrientationYaw = 0.0;
 
-	Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 	private HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks = new HashMap<>();
 
@@ -96,14 +98,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 
 		if (this.showArea) {
 			nbt.putBoolean("showArea", true);
@@ -211,9 +213,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 
 		if (nbt.contains("showArea", NbtElement.BYTE_TYPE)) {
 			this.showArea = nbt.getBoolean("showArea");
@@ -299,8 +301,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static void startBattle(BossControllerBlockEntity bC) {
 
 		ScriptBlocks.info("startBattle");
-		if (Identifier.isValid(bC.bossIdentifier)) {
-			bC.boss = BossesRegistry.getBoss(new Identifier(bC.bossIdentifier));
+		Identifier identifier = Identifier.tryParse(bC.bossIdentifier);
+		if (identifier != null) {
+			bC.boss = BossesRegistry.getBoss(identifier);
 		}
 
 		if (bC.boss != null) {
@@ -386,7 +389,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				if (!bC.entityAttributeModifiers.isEmpty()) {
 					AttributeContainer attributeContainer = mobEntity.getAttributes();
 					bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
-						EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
+						EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance(attribute);
 						if (entityAttributeInstance != null) {
 							entityAttributeInstance.addPersistentModifier((EntityAttributeModifier) attributeModifier);
 						}
@@ -439,9 +442,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
 				AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
 				bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
-					EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
+					EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance(attribute);
 					if (entityAttributeInstance != null) {
-						entityAttributeInstance.removeModifier(attributeModifier.getId());
+						entityAttributeInstance.removeModifier(attributeModifier);
 					}
 				});
 			}
@@ -452,15 +455,15 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		advancePhase(bC);
 	}
 
-	private static Multimap<EntityAttribute, EntityAttributeModifier> getEntityAttributeModifiers(Boss.Phase phase) {
-		Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	private static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getEntityAttributeModifiers(Boss.Phase phase) {
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 		for (Boss.Phase.EntityAttributeModifier entityAttributeModifier : phase.entityAttributeModifiers()) {
 			Optional<EntityAttribute> optional = Registries.ATTRIBUTE
 					.getOrEmpty(Identifier.tryParse(entityAttributeModifier.identifier()));
 			if (optional.isPresent()) {
 				EntityAttribute key = optional.get();
-				entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.name(), entityAttributeModifier.value(), EntityAttributeModifier.Operation.fromId(entityAttributeModifier.operation())));
+				entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.name(), entityAttributeModifier.value(), EntityAttributeModifier.Operation.valueOf(entityAttributeModifier.operation())));
 			}
 		}
 		return entityAttributeModifiers;
@@ -690,8 +693,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	public boolean setBossIdentifier(String newBossIdentifier) {
 		Boss boss = null;
-		if (Identifier.isValid(newBossIdentifier)) {
-			boss = BossesRegistry.getBoss(new Identifier(newBossIdentifier));
+		Identifier identifier = Identifier.tryParse(newBossIdentifier);
+		if (identifier != null) {
+			boss = BossesRegistry.getBoss(identifier);
 		}
 		if (newBossIdentifier.isEmpty() || boss != null) {
 			this.bossIdentifier = newBossIdentifier;

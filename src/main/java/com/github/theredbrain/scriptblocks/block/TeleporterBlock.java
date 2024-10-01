@@ -36,12 +36,11 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorB
 	@Override
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-//        return validateTicker(type, EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
-		return checkType(type, EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
+		return validateTicker(type, EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		if (world.isClient) {
 			return ActionResult.SUCCESS;
 		}

@@ -10,6 +10,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -34,7 +35,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private int initialResetTimer = -1;
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		nbt.putInt("mainEntrance_X", this.mainEntrance.getLeft().getX());
 		nbt.putInt("mainEntrance_Y", this.mainEntrance.getLeft().getY());
@@ -66,11 +67,11 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 		nbt.putInt("initialResetTimer", this.initialResetTimer);
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		int mainEntrance_X = nbt.getInt("mainEntrance_X");
 		int mainEntrance_Y = nbt.getInt("mainEntrance_Y");
@@ -103,7 +104,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 		this.initialResetTimer = nbt.contains("initialResetTimer", NbtElement.INT_TYPE) ? nbt.getInt("initialResetTimer") : -1;
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -111,8 +112,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getMainEntrance() {

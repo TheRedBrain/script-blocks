@@ -7,11 +7,13 @@ import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.BlockMirror;
@@ -35,7 +37,7 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		nbt.putInt("firstTriggeredBlockPositionOffsetX", this.firstTriggeredBlock.getLeft().getX());
 		nbt.putInt("firstTriggeredBlockPositionOffsetY", this.firstTriggeredBlock.getLeft().getY());
@@ -49,11 +51,11 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 
 		nbt.putString("checkedAdvancementIdentifier", this.checkedAdvancementIdentifier);
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		int x = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetX"), -48, 48);
 		int y = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetY"), -48, 48);
@@ -67,7 +69,7 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 
 		this.checkedAdvancementIdentifier = nbt.getString("checkedAdvancementIdentifier");
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -75,8 +77,8 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public MutablePair<BlockPos, Boolean> getFirstTriggeredBlock() {
@@ -116,7 +118,7 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 				if (serverPlayerEntity != null) {
 					PlayerAdvancementTracker advancementTracker = server.getPlayerManager().getAdvancementTracker(serverPlayerEntity);
 					if (advancementTracker != null) {
-						Advancement checkedAdvancementEntry = server.getAdvancementLoader().get(Identifier.tryParse(this.checkedAdvancementIdentifier));
+						AdvancementEntry checkedAdvancementEntry = server.getAdvancementLoader().get(Identifier.tryParse(this.checkedAdvancementIdentifier));
 						if (checkedAdvancementEntry != null && advancementTracker.getProgress(checkedAdvancementEntry).isDone()) {
 							triggeredBlockPos = new BlockPos(this.pos.getX() + this.firstTriggeredBlock.getLeft().getX(), this.pos.getY() + this.firstTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.firstTriggeredBlock.getLeft().getZ());
 							triggeredBlockResets = this.firstTriggeredBlock.getRight();

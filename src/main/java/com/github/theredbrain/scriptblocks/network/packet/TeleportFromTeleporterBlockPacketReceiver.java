@@ -210,7 +210,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							targetPitch = delegatedEntrance.getRight().getRight();
 						}
 
-						if (setAccessPosition && Identifier.isValid(accessPositionDimension)) {
+						if (setAccessPosition && Identifier.tryParse(accessPositionDimension) != null) {
 							ComponentsRegistry.PLAYER_LOCATION_ACCESS_POS.get(serverPlayerEntity).setValue(new Pair<>(new Pair<>(accessPositionDimension, teleportBlockPosition.add(accessPositionOffset.getX(), accessPositionOffset.getY(), accessPositionOffset.getZ())), true));
 						}
 					}

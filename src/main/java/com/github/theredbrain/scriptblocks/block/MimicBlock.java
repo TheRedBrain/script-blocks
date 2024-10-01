@@ -55,7 +55,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof MimicBlockEntity mimicBlockEntity && player.isCreativeLevelTwoOp()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openMimicBlockScreen(mimicBlockEntity);
@@ -113,7 +113,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+	protected boolean canPathfindThrough(BlockState state, NavigationType type) {
 		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
 		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
 		boolean debugMode = false;
@@ -133,7 +133,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 		if (!blockState.isOf(this) && !debugMode) {
 			mimicBlockState = blockState;
 		}
-		return mimicBlockState.getBlock().canPathfindThrough(mimicBlockState, world, mimicBlockPos, type);
+		return mimicBlockState.getBlock().canPathfindThrough(mimicBlockState, type);
 	}
 
 	@Override

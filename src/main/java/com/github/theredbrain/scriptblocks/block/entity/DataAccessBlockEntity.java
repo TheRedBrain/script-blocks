@@ -36,7 +36,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //	}
 //
 //	@Override
-//	protected void writeNbt(NbtCompound nbt) {
+//	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 //
 //		nbt.putInt("firstTriggeredBlockPositionOffsetX", this.firstTriggeredBlock.getLeft().getX());
 //		nbt.putInt("firstTriggeredBlockPositionOffsetY", this.firstTriggeredBlock.getLeft().getY());
@@ -52,11 +52,11 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //
 //		nbt.putInt("dataValueThreshold", this.dataValueThreshold);
 //
-//		super.writeNbt(nbt);
+//		super.writeNbt(nbt, registryLookup);
 //	}
 //
 //	@Override
-//	public void readNbt(NbtCompound nbt) {
+//	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 //
 //		int x = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetX"), -48, 48);
 //		int y = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetY"), -48, 48);
@@ -72,7 +72,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //
 //		this.dataValueThreshold = nbt.getInt("dataValueThreshold");
 //
-//		super.readNbt(nbt);
+//		super.readNbt(nbt, registryLookup);
 //	}
 //
 //	public BlockEntityUpdateS2CPacket toUpdatePacket() {

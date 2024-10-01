@@ -7,6 +7,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -148,4 +150,19 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 			}
 		}
 	}
+	public record TeleporterBlockData(
+			BlockPos blockPos
+	) {
+
+		public static final PacketCodec<RegistryByteBuf, TeleporterBlockData> PACKET_CODEC = PacketCodec.of(TeleporterBlockData::write, TeleporterBlockData::new);
+
+		public TeleporterBlockData(RegistryByteBuf registryByteBuf) {
+			this(registryByteBuf.readBlockPos());
+		}
+
+		private void write(RegistryByteBuf registryByteBuf) {
+			registryByteBuf.writeBlockPos(blockPos);
+		}
+	}
+
 }

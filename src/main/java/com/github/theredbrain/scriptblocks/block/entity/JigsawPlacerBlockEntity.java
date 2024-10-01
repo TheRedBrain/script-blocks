@@ -15,6 +15,7 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.pool.StructurePool;
@@ -30,8 +31,8 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	public static final String TARGET_KEY = "target";
 	public static final String POOL_KEY = "pool";
 	public static final String JOINT_KEY = "joint";
-	private Identifier target = new Identifier("empty");
-	private RegistryKey<StructurePool> pool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, new Identifier("empty"));
+	private Identifier target = Identifier.of("empty");
+	private RegistryKey<StructurePool> pool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
 	private JigsawBlockEntity.Joint joint = JigsawBlockEntity.Joint.ROLLABLE;
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 
@@ -40,7 +41,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		nbt.putString(TARGET_KEY, this.target.toString());
 		nbt.putString(POOL_KEY, this.pool.getValue().toString());
 		nbt.putString(JOINT_KEY, this.joint.asString());
@@ -50,13 +51,13 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
-		this.target = new Identifier(nbt.getString(TARGET_KEY));
-		this.pool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, new Identifier(nbt.getString(POOL_KEY)));
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+		this.target = Identifier.of(nbt.getString(TARGET_KEY));
+		this.pool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of(nbt.getString(POOL_KEY)));
 		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString(JOINT_KEY)).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
 
 		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
@@ -64,7 +65,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
 		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -72,8 +73,8 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public Identifier getTarget() {
@@ -81,8 +82,9 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public boolean setTarget(String target) {
-		if (Identifier.isValid(target)) {
-			this.target = new Identifier(target);
+		Identifier identifier = Identifier.tryParse(target);
+		if (identifier != null) {
+			this.target = identifier;
 			return true;
 		}
 		return false;
@@ -93,8 +95,9 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public boolean setPool(String pool) {
-		if (Identifier.isValid(pool)) {
-			this.pool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, new Identifier(pool));
+		Identifier identifier = Identifier.tryParse(pool);
+		if (identifier != null) {
+			this.pool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, identifier);
 			return true;
 		}
 		return false;

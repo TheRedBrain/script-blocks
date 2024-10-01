@@ -8,11 +8,13 @@ import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -41,7 +43,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		List<String> dialogueUsedBlocksKeys = new ArrayList<>(this.dialogueUsedBlocks.keySet());
 		nbt.putInt("dialogueUsedBlocksKeysSize", dialogueUsedBlocksKeys.size());
 		for (int i = 0; i < dialogueUsedBlocksKeys.size(); i++) {
@@ -70,11 +72,11 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 			nbt.putString("startingDialogueList_unlockAdvancement_" + i, this.startingDialogueList.get(i).getRight().getRight());
 		}
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		this.dialogueUsedBlocks.clear();
 		int dialogueUsedBlocksKeysSize = nbt.getInt("dialogueUsedBlocksKeysSize");
 		for (int i = 0; i < dialogueUsedBlocksKeysSize; i++) {
@@ -110,7 +112,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 			);
 		}
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -118,8 +120,8 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public static String getStartingDialogue(PlayerEntity player, DialogueBlockEntity dialogueBlockEntity) {
@@ -143,20 +145,18 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 			lockAdvancementString = dialogueEntry.getRight().getLeft();
 			unlockAdvancementString = dialogueEntry.getRight().getRight();
 
-//            AdvancementEntry lockAdvancementEntry = null;
-			Advancement lockAdvancement = null;
-//            AdvancementEntry unlockAdvancementEntry = null;
-			Advancement unlockAdvancement = null;
+            AdvancementEntry lockAdvancementEntry = null;
+            AdvancementEntry unlockAdvancementEntry = null;
 			if (serverAdvancementLoader != null) {
 				if (!lockAdvancementString.isEmpty()) {
-					lockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementString));
+					lockAdvancementEntry = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementString));
 				}
 				if (!unlockAdvancementString.isEmpty()) {
-					unlockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementString));
+					unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementString));
 				}
 			}
 			if (playerAdvancementTracker != null) {
-				if (lockAdvancementString.isEmpty() || (lockAdvancement != null && !playerAdvancementTracker.getProgress(lockAdvancement).isDone()) && (unlockAdvancementString.isEmpty() || (unlockAdvancement != null && playerAdvancementTracker.getProgress(unlockAdvancement).isDone()))) {
+				if (lockAdvancementString.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) && (unlockAdvancementString.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
 					return dialogueEntry.getLeft();
 				}
 			}

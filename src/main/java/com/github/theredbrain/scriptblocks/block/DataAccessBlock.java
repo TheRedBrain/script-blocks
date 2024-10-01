@@ -52,7 +52,7 @@ package com.github.theredbrain.scriptblocks.block;
 //	}
 //
 //	@Override
-//	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+//	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 //		BlockEntity blockEntity = world.getBlockEntity(pos);
 //		if (blockEntity instanceof DataAccessBlockEntity dataAccessBlockEntity && player.isCreativeLevelTwoOp()) {
 //			((DuckPlayerEntityMixin) player).scriptblocks$openDataAccessBlockScreen(dataAccessBlockEntity);

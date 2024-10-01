@@ -21,7 +21,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //	}
 //
 //	@Override
-//	protected void writeNbt(NbtCompound nbt) {
+//	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 //
 //		List<String> keyList = this.data.keySet().stream().toList();
 //		int dataSize = this.data.keySet().size();
@@ -32,11 +32,11 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //			nbt.putInt("value_" + i, this.data.get(key));
 //		}
 //
-//		super.writeNbt(nbt);
+//		super.writeNbt(nbt, registryLookup);
 //	}
 //
 //	@Override
-//	public void readNbt(NbtCompound nbt) {
+//	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 //
 //		int dataSize = nbt.getInt("dataSize");
 //		this.data.clear();
@@ -48,7 +48,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //			}
 //		}
 //
-//		super.readNbt(nbt);
+//		super.readNbt(nbt, registryLookup);
 //	}
 //
 //	public BlockEntityUpdateS2CPacket toUpdatePacket() {

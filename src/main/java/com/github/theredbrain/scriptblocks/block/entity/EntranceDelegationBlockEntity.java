@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -19,7 +20,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		nbt.putInt("delegatedEntrance_X", this.delegatedEntrance.getLeft().getX());
 		nbt.putInt("delegatedEntrance_Y", this.delegatedEntrance.getLeft().getY());
@@ -27,12 +28,12 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		nbt.putDouble("delegatedEntrance_Yaw", this.delegatedEntrance.getRight().getLeft());
 		nbt.putDouble("delegatedEntrance_Pitch", this.delegatedEntrance.getRight().getRight());
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		int delegatedEntrance_X = nbt.getInt("delegatedEntrance_X");
 		int delegatedEntrance_Y = nbt.getInt("delegatedEntrance_Y");
@@ -42,7 +43,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		double delegatedEntrance_Pitch = nbt.getDouble("delegatedEntrance_Pitch");
 		this.delegatedEntrance.setRight(new MutablePair<>(delegatedEntrance_Yaw, delegatedEntrance_Pitch));
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -50,8 +51,8 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getDelegatedEntrance() {

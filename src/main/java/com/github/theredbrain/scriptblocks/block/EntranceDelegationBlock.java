@@ -36,7 +36,7 @@ public class EntranceDelegationBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity && player.isCreativeLevelTwoOp()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openEntranceDelegationBlockScreen(entranceDelegationBlockEntity);

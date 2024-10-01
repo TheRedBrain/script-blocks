@@ -8,6 +8,7 @@ import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -75,8 +76,8 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 			this.shopBlockEntity = (ShopBlockEntity) blockEntity;
 			Shop shop = null;
 			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
-			if (!shopIdentifier.equals("")) {
-				shop = ShopsRegistry.getShop(new Identifier(shopIdentifier));
+			if (!shopIdentifier.isEmpty()) {
+				shop = ShopsRegistry.getShop(Identifier.of(shopIdentifier));
 			}
 			this.shop = shop;
 			if (shop != null) {
@@ -261,18 +262,18 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 				lockAdvancementIdentifier = deal.getLockAdvancement();
 				unlockAdvancementIdentifier = deal.getUnlockAdvancement();
 
-//                AdvancementEntry lockAdvancementEntry = null;
-				Advancement lockAdvancement = null;
+                AdvancementEntry lockAdvancementEntry = null;
+//				Advancement lockAdvancement = null;
 				if (!lockAdvancementIdentifier.isEmpty()) {
-					lockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementIdentifier));
+					lockAdvancementEntry = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementIdentifier));
 				}
-//                AdvancementEntry unlockAdvancementEntry = null;
-				Advancement unlockAdvancement = null;
+                AdvancementEntry unlockAdvancementEntry = null;
+//				Advancement unlockAdvancement = null;
 				if (!unlockAdvancementIdentifier.isEmpty()) {
-					unlockAdvancement = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementIdentifier));
+					unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementIdentifier));
 				}
-				if ((lockAdvancementIdentifier.isEmpty() || (lockAdvancement != null && !playerAdvancementTracker.getProgress(lockAdvancement).isDone())) &&
-						(unlockAdvancementIdentifier.isEmpty() || (unlockAdvancement != null && playerAdvancementTracker.getProgress(unlockAdvancement).isDone()))) {
+				if ((lockAdvancementIdentifier.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) &&
+						(unlockAdvancementIdentifier.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
 					this.unlockedDealsList.add(deal);
 					this.unlockedDealsCounter++;
 				} else {

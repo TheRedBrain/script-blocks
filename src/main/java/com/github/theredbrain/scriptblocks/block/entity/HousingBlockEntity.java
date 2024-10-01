@@ -11,13 +11,12 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -54,7 +53,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		nbt.putString("ownerUuid", this.ownerUuid);
 		nbt.putBoolean("isOwnerSet", isOwnerSet);
 
@@ -93,11 +92,11 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		this.ownerUuid = nbt.getString("ownerUuid");
 		this.isOwnerSet = nbt.getBoolean("isOwnerSet");
 
@@ -139,7 +138,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
 		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -147,8 +146,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity blockEntity) {
@@ -199,7 +198,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	public boolean setOwnerUuid(String ownerUuid) {
-		if (ownerUuid.equals("")) {
+		if (ownerUuid.isEmpty()) {
 			this.ownerUuid = ownerUuid;
 			return true;
 		}

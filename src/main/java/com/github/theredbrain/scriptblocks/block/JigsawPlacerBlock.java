@@ -8,7 +8,7 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.OperatorBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.JigsawOrientation;
+import net.minecraft.block.enums.Orientation;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
@@ -17,19 +17,17 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class JigsawPlacerBlock extends RotatedBlockWithEntity implements OperatorBlock {
-	//    public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
-	public static final EnumProperty<JigsawOrientation> ORIENTATION = Properties.ORIENTATION;
+	    public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
 
 	public JigsawPlacerBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(ORIENTATION, JigsawOrientation.NORTH_UP));
+		this.setDefaultState((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(ORIENTATION, Orientation.NORTH_UP));
 	}
 
 	// TODO Block Codecs
@@ -47,8 +45,7 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
 		Direction direction = ctx.getSide();
 		Direction direction2 = direction.getAxis() == Direction.Axis.Y ? ctx.getHorizontalPlayerFacing().getOpposite() : Direction.UP;
-//        return (BlockState)this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
-		return (BlockState) this.getDefaultState().with(ORIENTATION, JigsawOrientation.byDirections(direction, direction2));
+        return (BlockState)this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
 	}
 
 	@Override
@@ -57,7 +54,7 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity && player.isCreativeLevelTwoOp()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openJigsawPlacerBlockScreen(jigsawPlacerBlockEntity);

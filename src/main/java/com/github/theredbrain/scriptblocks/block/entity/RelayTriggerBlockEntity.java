@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -40,7 +41,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt) {
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		nbt.putString("selectionMode", this.selectionMode.asString());
 
@@ -70,11 +71,11 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 		nbt.putInt("triggerAmount", this.triggerAmount);
 
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt) {
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		this.selectionMode = SelectionMode.byName(nbt.getString("selectionMode")).orElseGet(() -> SelectionMode.LIST);
 
@@ -107,7 +108,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 		this.triggerAmount = nbt.getInt("triggerAmount");
 
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -115,8 +116,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt() {
-		return this.createNbt();
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
 	}
 
 	public SelectionMode getSelectionMode() {
