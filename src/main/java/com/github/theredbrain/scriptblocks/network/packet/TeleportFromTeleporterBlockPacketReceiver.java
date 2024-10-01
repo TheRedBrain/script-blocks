@@ -12,10 +12,13 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -226,7 +229,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				}
 			}
 			serverPlayerEntity.closeHandledScreen();
-			serverPlayerEntity.removeStatusEffect(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT);
+			RegistryEntry<StatusEffect> portal_resistance_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT);
+			serverPlayerEntity.removeStatusEffect(portal_resistance_status_effect);
 
 			if (teleportTeam) {
 				Team team = serverPlayerEntity.getScoreboardTeam();
@@ -243,7 +247,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 								}
 							}
 							serverPlayerEntity.closeHandledScreen();
-							teamServerPlayerEntity.removeStatusEffect(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT);
+							teamServerPlayerEntity.removeStatusEffect(portal_resistance_status_effect);
 						}
 					}
 				}

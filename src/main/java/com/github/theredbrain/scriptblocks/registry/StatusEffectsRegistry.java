@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.effect.NeutralStatusEffect;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.entry.RegistryEntry;
 
 public class StatusEffectsRegistry {
 
@@ -22,14 +23,14 @@ public class StatusEffectsRegistry {
 
 	public static void registerEffects() {
 		// housing effects
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_owner_effect"), HOUSING_OWNER_EFFECT);
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_co_owner_effect"), HOUSING_CO_OWNER_EFFECT);
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_trusted_effect"), HOUSING_TRUSTED_EFFECT);
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_guest_effect"), HOUSING_GUEST_EFFECT);
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_stranger_effect"), HOUSING_STRANGER_EFFECT);
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("edit_housing_resistance_effect"), EDIT_HOUSING_RESISTANCE_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_owner_effect"), HOUSING_OWNER_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_co_owner_effect"), HOUSING_CO_OWNER_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_trusted_effect"), HOUSING_TRUSTED_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_guest_effect"), HOUSING_GUEST_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("housing_stranger_effect"), HOUSING_STRANGER_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("edit_housing_resistance_effect"), EDIT_HOUSING_RESISTANCE_EFFECT);
 		// utility effects
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("building_mode"), BUILDING_MODE);
-		Registry.register(Registries.STATUS_EFFECT, ScriptBlocks.identifier("portal_resistance_effect"), PORTAL_RESISTANCE_EFFECT);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("building_mode"), BUILDING_MODE);
+		Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier("portal_resistance_effect"), PORTAL_RESISTANCE_EFFECT);
 	}
 }
