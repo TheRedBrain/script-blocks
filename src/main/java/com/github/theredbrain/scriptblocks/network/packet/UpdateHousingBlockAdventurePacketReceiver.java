@@ -13,21 +13,23 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public class UpdateHousingBlockAdventurePacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateHousingBlockAdventurePacket> {
+public class UpdateHousingBlockAdventurePacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateHousingBlockAdventurePacket> {
 	@Override
-	public void receive(UpdateHousingBlockAdventurePacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateHousingBlockAdventurePacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos housingBlockPosition = packet.housingBlockPosition;
+		BlockPos housingBlockPosition = payload.housingBlockPosition();
 
-		List<String> coOwnerList = packet.coOwnerList;
-		List<String> trustedList = packet.trustedList;
-		List<String> guestList = packet.guestList;
+		List<String> coOwnerList = payload.coOwnerList();
+		List<String> trustedList = payload.trustedList();
+		List<String> guestList = payload.guestList();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -37,19 +39,19 @@ public class UpdateHousingBlockAdventurePacketReceiver implements ServerPlayNetw
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 
 			if (!housingBlockEntity.setCoOwnerList(coOwnerList)) {
-				player.sendMessage(Text.translatable("housing_block.coOwnerList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.coOwnerList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!housingBlockEntity.setTrustedList(trustedList)) {
-				player.sendMessage(Text.translatable("housing_block.trustedList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.trustedList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!housingBlockEntity.setGuestList(guestList)) {
-				player.sendMessage(Text.translatable("housing_block.guestList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.guestList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			housingBlockEntity.markDirty();
 			world.updateListeners(housingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

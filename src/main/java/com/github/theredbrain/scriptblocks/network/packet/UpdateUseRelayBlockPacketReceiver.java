@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -11,19 +10,21 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class UpdateUseRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateUseRelayBlockPacket> {
+public class UpdateUseRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateUseRelayBlockPacket> {
 	@Override
-	public void receive(UpdateUseRelayBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateUseRelayBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos useRelayBlockPosition = packet.useRelayBlockPosition;
+		BlockPos useRelayBlockPosition = payload.useRelayBlockPosition();
 
-		BlockPos relayBlockPositionOffset = packet.relayBlockPositionOffset;
+		BlockPos relayBlockPositionOffset = payload.relayBlockPositionOffset();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -32,11 +33,11 @@ public class UpdateUseRelayBlockPacketReceiver implements ServerPlayNetworking.P
 
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			if (!useRelayBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset)) {
-				player.sendMessage(Text.translatable("use_relay_block.relayBlockPositionOffset.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("use_relay_block.relayBlockPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			useRelayBlockEntity.markDirty();
 			world.updateListeners(useRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

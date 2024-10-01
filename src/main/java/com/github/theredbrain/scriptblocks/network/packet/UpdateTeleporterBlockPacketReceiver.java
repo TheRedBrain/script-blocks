@@ -1,58 +1,59 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTeleporterBlockPacket> {
+public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTeleporterBlockPacket> {
 	@Override
-	public void receive(UpdateTeleporterBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateTeleporterBlockPacket payload, ServerPlayNetworking.Context context) {
+
+		ServerPlayerEntity player = context.player();
 
 		if (!player.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos teleportBlockPosition = packet.teleportBlockPosition;
+		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
-		boolean showActivationArea = packet.showActivationArea;
-		boolean showAdventureScreen = packet.showAdventureScreen;
+		boolean showActivationArea = payload.showActivationArea();
+		boolean showAdventureScreen = payload.showAdventureScreen();
 
-		Vec3i activationAreaDimensions = packet.activationAreaDimensions;
-		BlockPos activationAreaPositionOffset = packet.activationAreaPositionOffset;
+		Vec3i activationAreaDimensions = payload.activationAreaDimensions();
+		BlockPos activationAreaPositionOffset = payload.activationAreaPositionOffset();
 
-		BlockPos accessPositionOffset = packet.accessPositionOffset;
-		boolean setAccessPosition = packet.setAccessPosition;
+		BlockPos accessPositionOffset = payload.accessPositionOffset();
+		boolean setAccessPosition = payload.setAccessPosition();
 
-		boolean onlyTeleportDimensionOwner = packet.onlyTeleportDimensionOwner;
-		boolean teleportTeam = packet.teleportTeam;
+		boolean onlyTeleportDimensionOwner = payload.onlyTeleportDimensionOwner();
+		boolean teleportTeam = payload.teleportTeam();
 
-		TeleporterBlockEntity.TeleportationMode teleportationMode = packet.teleportationMode;
+		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.valueOf(payload.teleportationMode());
 
-		BlockPos directTeleportPositionOffset = packet.directTeleportPositionOffset;
-		double directTeleportOrientationYaw = packet.directTeleportOrientationYaw;
-		double directTeleportOrientationPitch = packet.directTeleportOrientationPitch;
+		BlockPos directTeleportPositionOffset = payload.directTeleportPositionOffset();
+		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
+		double directTeleportOrientationPitch = payload.directTeleportOrientationPitch();
 
-		TeleporterBlockEntity.SpawnPointType spawnPointType = packet.spawnPointType;
+		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.valueOf(payload.spawnPointType());
 
-		List<Pair<String, String>> locationsList = packet.locationsList;
+		List<MutablePair<String, String>> locationsList = payload.locationsList();
 
-		String teleporterName = packet.teleporterName;
-		String currentTargetIdentifierLabel = packet.currentTargetIdentifierLabel;
-		String currentTargetOwnerLabel = packet.currentTargetOwnerLabel;
-		boolean showRegenerateButton = packet.showRegenerateButton;
-		String teleportButtonLabel = packet.teleportButtonLabel;
-		String cancelTeleportButtonLabel = packet.cancelTeleportButtonLabel;
+		String teleporterName = payload.teleporterName();
+		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();
+		String currentTargetOwnerLabel = payload.currentTargetOwnerLabel();
+		boolean showRegenerateButton = payload.showRegenerateButton();
+		String teleportButtonLabel = payload.teleportButtonLabel();
+		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
 
 		World world = player.getWorld();
 
@@ -82,7 +83,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 					updateSuccessful = false;
 				}
 			} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
-				teleporterBlockEntity.setLocationType(spawnPointType);
+				teleporterBlockEntity.setSpawnPointType(spawnPointType);
 			} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 				if (!teleporterBlockEntity.setLocationsList(locationsList)) {
 					player.sendMessage(Text.translatable("teleporter_block.locationsList.invalid"), false);

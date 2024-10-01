@@ -1,44 +1,30 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateEntranceDelegationBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateEntranceDelegationBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_entrance_delegation_block"),
-			UpdateEntranceDelegationBlockPacket::new
-	);
+public record UpdateEntranceDelegationBlockPacket(BlockPos entranceDelegationBlockPosition,
+												  BlockPos delegatedEntrancePositionOffset, double delegatedEntranceYaw,
+												  double delegatedEntrancePitch) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateEntranceDelegationBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_entrance_delegation_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateEntranceDelegationBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateEntranceDelegationBlockPacket::write, UpdateEntranceDelegationBlockPacket::new);
 
-	public final BlockPos entranceDelegationBlockPosition;
-	public final BlockPos delegatedEntrancePositionOffset;
-	public final double delegatedEntranceYaw;
-	public final double delegatedEntrancePitch;
-
-	public UpdateEntranceDelegationBlockPacket(BlockPos entranceDelegationBlockPosition, BlockPos delegatedEntrancePositionOffset, double delegatedEntranceYaw, double delegatedEntrancePitch) {
-		this.entranceDelegationBlockPosition = entranceDelegationBlockPosition;
-		this.delegatedEntrancePositionOffset = delegatedEntrancePositionOffset;
-		this.delegatedEntranceYaw = delegatedEntranceYaw;
-		this.delegatedEntrancePitch = delegatedEntrancePitch;
+	public UpdateEntranceDelegationBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readBlockPos(), registryByteBuf.readDouble(), registryByteBuf.readDouble());
 	}
 
-	public UpdateEntranceDelegationBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readBlockPos(), buf.readDouble(), buf.readDouble());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.entranceDelegationBlockPosition);
+		registryByteBuf.writeBlockPos(this.delegatedEntrancePositionOffset);
+		registryByteBuf.writeDouble(this.delegatedEntranceYaw);
+		registryByteBuf.writeDouble(this.delegatedEntrancePitch);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.entranceDelegationBlockPosition);
-		buf.writeBlockPos(this.delegatedEntrancePositionOffset);
-		buf.writeDouble(this.delegatedEntranceYaw);
-		buf.writeDouble(this.delegatedEntrancePitch);
-	}
-
 }

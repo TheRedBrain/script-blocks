@@ -13,26 +13,28 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateHousingBlockCreativePacket> {
+public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateHousingBlockCreativePacket> {
 	@Override
-	public void receive(UpdateHousingBlockCreativePacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateHousingBlockCreativePacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos housingBlockPosition = packet.housingBlockPosition;
+		BlockPos housingBlockPosition = payload.housingBlockPosition();
 
-		boolean showRestrictBlockBreakingArea = packet.showRestrictBlockBreakingArea;
+		boolean showRestrictBlockBreakingArea = payload.showRestrictBlockBreakingArea();
 
-		Vec3i restrictBlockBreakingAreaDimensions = packet.restrictBlockBreakingAreaDimensions;
-		BlockPos restrictBlockBreakingAreaPositionOffset = packet.restrictBlockBreakingAreaPositionOffset;
-		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
-		boolean triggeredBlockResets = packet.triggeredBlockResets;
+		Vec3i restrictBlockBreakingAreaDimensions = payload.restrictBlockBreakingAreaDimensions();
+		BlockPos restrictBlockBreakingAreaPositionOffset = payload.restrictBlockBreakingAreaPositionOffset();
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		HousingBlockEntity.OwnerMode ownerMode = packet.ownerMode;
+		HousingBlockEntity.OwnerMode ownerMode = HousingBlockEntity.OwnerMode.valueOf(payload.ownerMode());
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -42,24 +44,24 @@ public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetwo
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 
 			if (!housingBlockEntity.setShowInfluenceArea(showRestrictBlockBreakingArea)) {
-				player.sendMessage(Text.translatable("housing_block.showRestrictBlockBreakingArea.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.showRestrictBlockBreakingArea.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!housingBlockEntity.setInfluenceAreaDimensions(restrictBlockBreakingAreaDimensions)) {
-				player.sendMessage(Text.translatable("housing_block.restrictBlockBreakingAreaDimensions.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.restrictBlockBreakingAreaDimensions.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!housingBlockEntity.setRestrictBlockBreakingAreaPositionOffset(restrictBlockBreakingAreaPositionOffset)) {
-				player.sendMessage(Text.translatable("housing_block.restrictBlockBreakingAreaPositionOffset.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.restrictBlockBreakingAreaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			housingBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			if (!housingBlockEntity.setOwnerMode(ownerMode)) {
-				player.sendMessage(Text.translatable("housing_block.ownerMode.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.ownerMode.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			housingBlockEntity.markDirty();
 			world.updateListeners(housingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

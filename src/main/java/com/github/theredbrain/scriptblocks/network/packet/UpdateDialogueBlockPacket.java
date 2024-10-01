@@ -1,56 +1,40 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateDialogueBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateDialogueBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_dialogue_block"),
-			UpdateDialogueBlockPacket::new
-	);
+public record UpdateDialogueBlockPacket(BlockPos dialogueBlockPosition,
+										List<MutablePair<String, BlockPos>> dialogueUsedBlocksList,
+										List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList,
+										List<MutablePair<String, MutablePair<String, String>>> startingDialogueList) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateDialogueBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_dialogue_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateDialogueBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDialogueBlockPacket::write, UpdateDialogueBlockPacket::new);
 
-	public final BlockPos dialogueBlockPosition;
-
-	public final List<MutablePair<String, BlockPos>> dialogueUsedBlocksList;
-
-	public final List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList;
-
-	public final List<MutablePair<String, MutablePair<String, String>>> startingDialogueList;
-
-	public UpdateDialogueBlockPacket(BlockPos dialogueBlockPosition, List<MutablePair<String, BlockPos>> dialogueUsedBlocksList, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList, List<MutablePair<String, MutablePair<String, String>>> startingDialogueList) {
-		this.dialogueBlockPosition = dialogueBlockPosition;
-		this.dialogueUsedBlocksList = dialogueUsedBlocksList;
-		this.dialogueTriggeredBlocksList = dialogueTriggeredBlocksList;
-		this.startingDialogueList = startingDialogueList;
-	}
-
-	public UpdateDialogueBlockPacket(PacketByteBuf buf) {
+	public UpdateDialogueBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
-				buf.readBlockPos(),
-				buf.readList(new PacketByteBufUtils.MutablePairStringBlockPosReader()),
-				buf.readList(new PacketByteBufUtils.MutablePairStringMutablePairBlockPosBooleanReader()),
-				buf.readList(new PacketByteBufUtils.MutablePairStringMutablePairStringStringReader())
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_STRING_STRING)
 		);
 	}
 
-	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.dialogueBlockPosition);
+		registryByteBuf.writeCollection(this.dialogueUsedBlocksList, CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS);
+		registryByteBuf.writeCollection(this.dialogueTriggeredBlocksList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN);
+		registryByteBuf.writeCollection(this.startingDialogueList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_STRING_STRING);
 	}
 
 	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.dialogueBlockPosition);
-		buf.writeCollection(this.dialogueUsedBlocksList, new PacketByteBufUtils.MutablePairStringBlockPosWriter());
-		buf.writeCollection(this.dialogueTriggeredBlocksList, new PacketByteBufUtils.MutablePairStringMutablePairBlockPosBooleanWriter());
-		buf.writeCollection(this.startingDialogueList, new PacketByteBufUtils.MutablePairStringMutablePairStringStringWriter());
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
 }

@@ -16,32 +16,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateDialogueBlockPacket> {
+public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateDialogueBlockPacket> {
 
 	@Override
-	public void receive(UpdateDialogueBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateDialogueBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos dialogueBlockPosition = packet.dialogueBlockPosition;
+		BlockPos dialogueBlockPosition = payload.dialogueBlockPosition();
 
-		List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = packet.dialogueUsedBlocksList;
+		List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = payload.dialogueUsedBlocksList();
 		HashMap<String, BlockPos> dialogueUsedBlocksMap = new HashMap<>();
 		for (MutablePair<String, BlockPos> usedBlock : dialogueUsedBlocksList) {
 			dialogueUsedBlocksMap.put(usedBlock.getLeft(), usedBlock.getRight());
 		}
 
-		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = packet.dialogueTriggeredBlocksList;
+		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = payload.dialogueTriggeredBlocksList();
 		HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocksMap = new HashMap<>();
 		for (MutablePair<String, MutablePair<BlockPos, Boolean>> triggeredBlock : dialogueTriggeredBlocksList) {
 			dialogueTriggeredBlocksMap.put(triggeredBlock.getLeft(), triggeredBlock.getRight());
 		}
 
-		List<MutablePair<String, MutablePair<String, String>>> startingDialogueList = new ArrayList<>(packet.startingDialogueList);
+		List<MutablePair<String, MutablePair<String, String>>> startingDialogueList = new ArrayList<>(payload.startingDialogueList());
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -51,19 +53,19 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
 
 			if (!dialogueBlockEntity.setDialogueUsedBlocks(dialogueUsedBlocksMap)) {
-				player.sendMessage(Text.translatable("dialogue_block.dialogueUsedBlocksList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.dialogueUsedBlocksList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!dialogueBlockEntity.setDialogueTriggeredBlocks(dialogueTriggeredBlocksMap)) {
-				player.sendMessage(Text.translatable("dialogue_block.dialogueTriggeredBlocksList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.dialogueTriggeredBlocksList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!dialogueBlockEntity.setStartingDialogueList(startingDialogueList)) {
-				player.sendMessage(Text.translatable("dialogue_block.startingDialogueList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.startingDialogueList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			dialogueBlockEntity.markDirty();
 			world.updateListeners(dialogueBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

@@ -1,35 +1,25 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class ResetHouseHousingBlockPacket implements FabricPacket {
-	public static final PacketType<ResetHouseHousingBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("reset_house_housing_block"),
-			ResetHouseHousingBlockPacket::new
-	);
+public record ResetHouseHousingBlockPacket(BlockPos housingBlockPosition) implements CustomPayload {
+	public static final CustomPayload.Id<ResetHouseHousingBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("reset_house_housing_block"));
+	public static final PacketCodec<RegistryByteBuf, ResetHouseHousingBlockPacket> PACKET_CODEC = PacketCodec.of(ResetHouseHousingBlockPacket::write, ResetHouseHousingBlockPacket::new);
 
-	public final BlockPos housingBlockPosition;
-
-	public ResetHouseHousingBlockPacket(BlockPos housingBlockPosition) {
-		this.housingBlockPosition = housingBlockPosition;
+	public ResetHouseHousingBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos());
 	}
 
-	public ResetHouseHousingBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.housingBlockPosition);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.housingBlockPosition);
-	}
-
 }

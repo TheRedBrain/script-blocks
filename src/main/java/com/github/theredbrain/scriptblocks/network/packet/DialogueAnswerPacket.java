@@ -1,38 +1,27 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
-public class DialogueAnswerPacket implements FabricPacket {
-	public static final PacketType<DialogueAnswerPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("dialogue_answer"),
-			DialogueAnswerPacket::new
-	);
+public record DialogueAnswerPacket(BlockPos dialogueBlockPos, Identifier answerIdentifier) implements CustomPayload {
+	public static final CustomPayload.Id<DialogueAnswerPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("dialogue_answer"));
+	public static final PacketCodec<RegistryByteBuf, DialogueAnswerPacket> PACKET_CODEC = PacketCodec.of(DialogueAnswerPacket::write, DialogueAnswerPacket::new);
 
-	public final BlockPos dialogueBlockPos;
-	public final Identifier answerIdentifier;
-
-	public DialogueAnswerPacket(BlockPos dialogueBlockPos, Identifier answerIdentifier) {
-		this.dialogueBlockPos = dialogueBlockPos;
-		this.answerIdentifier = answerIdentifier;
+	public DialogueAnswerPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readIdentifier());
 	}
 
-	public DialogueAnswerPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readIdentifier());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.dialogueBlockPos);
+		registryByteBuf.writeIdentifier(this.answerIdentifier);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
-	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.dialogueBlockPos);
-		buf.writeIdentifier(this.answerIdentifier);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

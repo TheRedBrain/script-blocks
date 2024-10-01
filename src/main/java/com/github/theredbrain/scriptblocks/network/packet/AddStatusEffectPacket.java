@@ -1,52 +1,32 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
-public class AddStatusEffectPacket implements FabricPacket {
-	public static final PacketType<AddStatusEffectPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("add_status_effect"),
-			AddStatusEffectPacket::new
-	);
+public record AddStatusEffectPacket(Identifier effectId, int duration, int amplifier, boolean ambient,
+									boolean showParticles, boolean showIcon, boolean toggle) implements CustomPayload {
+	public static final CustomPayload.Id<AddStatusEffectPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("add_status_effect"));
+	public static final PacketCodec<RegistryByteBuf, AddStatusEffectPacket> PACKET_CODEC = PacketCodec.of(AddStatusEffectPacket::write, AddStatusEffectPacket::new);
 
-	public final Identifier effectId;
-	public final int duration;
-	public final int amplifier;
-	public final boolean ambient;
-	public final boolean showParticles;
-	public final boolean showIcon;
-	public final boolean toggle;
-
-	public AddStatusEffectPacket(Identifier effectId, int duration, int amplifier, boolean ambient, boolean showParticles, boolean showIcon, boolean toggle) {
-		this.effectId = effectId;
-		this.duration = duration;
-		this.amplifier = amplifier;
-		this.ambient = ambient;
-		this.showParticles = showParticles;
-		this.showIcon = showIcon;
-		this.toggle = toggle;
+	public AddStatusEffectPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readIdentifier(), registryByteBuf.readInt(), registryByteBuf.readInt(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean());
 	}
 
-	public AddStatusEffectPacket(PacketByteBuf buf) {
-		this(buf.readIdentifier(), buf.readInt(), buf.readInt(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeIdentifier(this.effectId);
+		registryByteBuf.writeInt(this.duration);
+		registryByteBuf.writeInt(this.amplifier);
+		registryByteBuf.writeBoolean(this.ambient);
+		registryByteBuf.writeBoolean(this.showParticles);
+		registryByteBuf.writeBoolean(this.showIcon);
+		registryByteBuf.writeBoolean(this.toggle);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
-	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeIdentifier(this.effectId);
-		buf.writeInt(this.duration);
-		buf.writeInt(this.amplifier);
-		buf.writeBoolean(this.ambient);
-		buf.writeBoolean(this.showParticles);
-		buf.writeBoolean(this.showIcon);
-		buf.writeBoolean(this.toggle);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

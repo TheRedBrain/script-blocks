@@ -12,28 +12,30 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UpdateRedstoneTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateRedstoneTriggerBlockPacket> {
+public class UpdateRedstoneTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateRedstoneTriggerBlockPacket> {
 	@Override
-	public void receive(UpdateRedstoneTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateRedstoneTriggerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos redstoneTriggerBlockPosition = packet.redstoneTriggerBlockPosition;
+		BlockPos redstoneTriggerBlockPosition = payload.redstoneTriggerBlockPosition();
 
-		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 
-		boolean triggeredBlockResets = packet.triggeredBlockResets;
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(redstoneTriggerBlockPosition);
 		BlockState blockState = world.getBlockState(redstoneTriggerBlockPosition);
 
 		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
 			redstoneTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			redstoneTriggerBlockEntity.markDirty();
 			world.updateListeners(redstoneTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

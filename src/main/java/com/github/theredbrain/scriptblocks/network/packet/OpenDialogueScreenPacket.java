@@ -1,37 +1,27 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class OpenDialogueScreenPacket implements FabricPacket {
-	public static final PacketType<OpenDialogueScreenPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("open_dialogue_screen"),
-			OpenDialogueScreenPacket::new
-	);
+public record OpenDialogueScreenPacket(BlockPos dialogueBlockPos,
+									   String responseDialogueIdentifier) implements CustomPayload {
+	public static final CustomPayload.Id<OpenDialogueScreenPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("open_dialogue_screen"));
+	public static final PacketCodec<RegistryByteBuf, OpenDialogueScreenPacket> PACKET_CODEC = PacketCodec.of(OpenDialogueScreenPacket::write, OpenDialogueScreenPacket::new);
 
-	public final BlockPos dialogueBlockPos;
-	public final String responseDialogueIdentifier;
-
-	public OpenDialogueScreenPacket(BlockPos dialogueBlockPos, String responseDialogueIdentifier) {
-		this.dialogueBlockPos = dialogueBlockPos;
-		this.responseDialogueIdentifier = responseDialogueIdentifier;
+	public OpenDialogueScreenPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readString());
 	}
 
-	public OpenDialogueScreenPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readString());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.dialogueBlockPos);
+		registryByteBuf.writeString(this.responseDialogueIdentifier);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
-	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.dialogueBlockPos);
-		buf.writeString(this.responseDialogueIdentifier);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

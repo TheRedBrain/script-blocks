@@ -15,24 +15,26 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.util.HashMap;
 import java.util.List;
 
-public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTriggeredCounterBlockPacket> {
+public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredCounterBlockPacket> {
 
 	@Override
-	public void receive(UpdateTriggeredCounterBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateTriggeredCounterBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos triggeredCounterBlockPosition = packet.triggeredCounterBlockPosition;
+		BlockPos triggeredCounterBlockPosition = payload.triggeredCounterBlockPosition();
 
-		List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = packet.triggeredBlocksList;
+		List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = payload.triggeredBlocksList();
 		HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
 		for (MutablePair<Integer, MutablePair<BlockPos, Boolean>> usedBlock : triggeredBlocksList) {
 			triggeredBlocks.put(usedBlock.getLeft(), usedBlock.getRight());
 		}
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -41,11 +43,11 @@ public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetw
 
 		if (blockEntity instanceof TriggeredCounterBlockEntity triggeredCounterBlockEntity) {
 			if (!triggeredCounterBlockEntity.setTriggeredBlocks(triggeredBlocks)) {
-				player.sendMessage(Text.translatable("triggered_block.triggeredBlocks.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_block.triggeredBlocks.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			triggeredCounterBlockEntity.markDirty();
 			world.updateListeners(triggeredCounterBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

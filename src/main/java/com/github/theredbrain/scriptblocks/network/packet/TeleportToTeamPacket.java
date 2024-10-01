@@ -1,46 +1,31 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
-public class TeleportToTeamPacket implements FabricPacket {
-	public static final PacketType<TeleportToTeamPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("teleport_to_team"),
-			TeleportToTeamPacket::new
-	);
+public record TeleportToTeamPacket(Identifier targetWorldIdentifier, BlockPos targetPosition, double targetYaw,
+								   double targetPitch) implements CustomPayload {
+	public static final CustomPayload.Id<TeleportToTeamPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("teleport_to_team"));
+	public static final PacketCodec<RegistryByteBuf, TeleportToTeamPacket> PACKET_CODEC = PacketCodec.of(TeleportToTeamPacket::write, TeleportToTeamPacket::new);
 
-	public final Identifier targetWorldIdentifier;
-
-	public final BlockPos targetPosition;
-
-	public final double targetYaw;
-	public final double targetPitch;
-
-	public TeleportToTeamPacket(Identifier targetWorldIdentifier, BlockPos targetPosition, double targetYaw, double targetPitch) {
-		this.targetWorldIdentifier = targetWorldIdentifier;
-		this.targetPosition = targetPosition;
-		this.targetYaw = targetYaw;
-		this.targetPitch = targetPitch;
+	public TeleportToTeamPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readIdentifier(), registryByteBuf.readBlockPos(), registryByteBuf.readDouble(), registryByteBuf.readDouble());
 	}
 
-	public TeleportToTeamPacket(PacketByteBuf buf) {
-		this(buf.readIdentifier(), buf.readBlockPos(), buf.readDouble(), buf.readDouble());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeIdentifier(this.targetWorldIdentifier);
+		registryByteBuf.writeBlockPos(this.targetPosition);
+		registryByteBuf.writeDouble(this.targetYaw);
+		registryByteBuf.writeDouble(this.targetPitch);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
-	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeIdentifier(this.targetWorldIdentifier);
-		buf.writeBlockPos(this.targetPosition);
-		buf.writeDouble(this.targetYaw);
-		buf.writeDouble(this.targetPitch);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

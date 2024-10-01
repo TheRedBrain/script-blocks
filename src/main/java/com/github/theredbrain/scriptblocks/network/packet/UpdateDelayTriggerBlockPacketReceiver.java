@@ -12,23 +12,25 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UpdateDelayTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateDelayTriggerBlockPacket> {
+public class UpdateDelayTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateDelayTriggerBlockPacket> {
 	@Override
-	public void receive(UpdateDelayTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateDelayTriggerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos delayTriggerBlockPosition = packet.delayTriggerBlockPosition;
+		BlockPos delayTriggerBlockPosition = payload.delayTriggerBlockPosition();
 
-		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 
-		boolean triggeredBlockResets = packet.triggeredBlockResets;
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		int triggerDelay = packet.triggerDelay;
+		int triggerDelay = payload.triggerDelay();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -38,11 +40,11 @@ public class UpdateDelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 		if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity) {
 			delayTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			if (!delayTriggerBlockEntity.setTriggerDelay(triggerDelay)) {
-				player.sendMessage(Text.translatable("delay_trigger_block.triggerDelay.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("delay_trigger_block.triggerDelay.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			delayTriggerBlockEntity.markDirty();
 			world.updateListeners(delayTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

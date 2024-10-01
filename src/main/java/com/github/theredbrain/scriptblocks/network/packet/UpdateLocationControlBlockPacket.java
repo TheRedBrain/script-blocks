@@ -1,68 +1,50 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateLocationControlBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateLocationControlBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_location_control_block"),
-			UpdateLocationControlBlockPacket::new
-	);
+public record UpdateLocationControlBlockPacket(BlockPos locationControlBlockPosition,
+											   BlockPos mainEntrancePositionOffset, double mainEntranceYaw,
+											   double mainEntrancePitch,
+											   List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList,
+											   BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets,
+											   boolean shouldAlwaysReset) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_location_control_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateLocationControlBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateLocationControlBlockPacket::write, UpdateLocationControlBlockPacket::new);
 
-	public final BlockPos locationControlBlockPosition;
-	public final BlockPos mainEntrancePositionOffset;
-	public final double mainEntranceYaw;
-	public final double mainEntrancePitch;
-	public final List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList;
-	public final BlockPos triggeredBlockPositionOffset;
-	public final boolean triggeredBlockResets;
-	public final boolean shouldAlwaysReset;
-
-	public UpdateLocationControlBlockPacket(BlockPos locationControlBlockPosition, BlockPos mainEntrancePositionOffset, double mainEntranceYaw, double mainEntrancePitch, List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets, boolean shouldAlwaysReset) {
-		this.locationControlBlockPosition = locationControlBlockPosition;
-		this.mainEntrancePositionOffset = mainEntrancePositionOffset;
-		this.mainEntranceYaw = mainEntranceYaw;
-		this.mainEntrancePitch = mainEntrancePitch;
-		this.sideEntrancesList = sideEntrancesList;
-		this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
-		this.triggeredBlockResets = triggeredBlockResets;
-		this.shouldAlwaysReset = shouldAlwaysReset;
-	}
-
-	public UpdateLocationControlBlockPacket(PacketByteBuf buf) {
+	public UpdateLocationControlBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
-				buf.readBlockPos(),
-				buf.readBlockPos(),
-				buf.readDouble(),
-				buf.readDouble(),
-				buf.readList(new PacketByteBufUtils.MutablePairStringMutablePairBlockPosMutablePairDoubleDoubleReader()),
-				buf.readBlockPos(),
-				buf.readBoolean(),
-				buf.readBoolean()
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readDouble(),
+				registryByteBuf.readDouble(),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readBoolean()
 		);
 	}
 
-	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.locationControlBlockPosition);
+		registryByteBuf.writeBlockPos(this.mainEntrancePositionOffset);
+		registryByteBuf.writeDouble(this.mainEntranceYaw);
+		registryByteBuf.writeDouble(this.mainEntrancePitch);
+		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE);
+		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.triggeredBlockResets);
+		registryByteBuf.writeBoolean(this.shouldAlwaysReset);
 	}
 
 	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.locationControlBlockPosition);
-		buf.writeBlockPos(this.mainEntrancePositionOffset);
-		buf.writeDouble(this.mainEntranceYaw);
-		buf.writeDouble(this.mainEntrancePitch);
-		buf.writeCollection(this.sideEntrancesList, new PacketByteBufUtils.MutablePairStringMutablePairBlockPosMutablePairDoubleDoubleWriter());
-		buf.writeBlockPos(this.triggeredBlockPositionOffset);
-		buf.writeBoolean(this.triggeredBlockResets);
-		buf.writeBoolean(this.shouldAlwaysReset);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

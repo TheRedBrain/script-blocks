@@ -8,17 +8,19 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class ResetHouseHousingBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<ResetHouseHousingBlockPacket> {
+public class ResetHouseHousingBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<ResetHouseHousingBlockPacket> {
 	@Override
-	public void receive(ResetHouseHousingBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(ResetHouseHousingBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		BlockPos housingBlockPosition = packet.housingBlockPosition;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		World world = player.getWorld();
+		BlockPos housingBlockPosition = payload.housingBlockPosition();
+
+		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(housingBlockPosition);
 
-		// TODO teleport all players inside to their spawn?
+		// TODO teleport all serverPlayerEntitys inside to their spawn?
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 			housingBlockEntity.trigger();
 		}

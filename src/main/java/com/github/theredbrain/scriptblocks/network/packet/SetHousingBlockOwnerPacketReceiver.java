@@ -14,15 +14,17 @@ import net.minecraft.world.World;
 
 import java.util.Objects;
 
-public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<SetHousingBlockOwnerPacket> {
+public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<SetHousingBlockOwnerPacket> {
 	@Override
-	public void receive(SetHousingBlockOwnerPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(SetHousingBlockOwnerPacket payload, ServerPlayNetworking.Context context) {
 
-		BlockPos housingBlockPosition = packet.housingBlockPosition;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		String owner = packet.owner;
+		BlockPos housingBlockPosition = payload.housingBlockPosition();
 
-		World world = player.getWorld();
+		String owner = payload.owner();
+
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -32,18 +34,18 @@ public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 
 			if (!housingBlockEntity.setOwnerUuid(owner)) {
-				player.sendMessage(Text.translatable("housing_block.owner.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("housing_block.owner.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
 				if (Objects.equals(owner, "")) {
 					housingBlockEntity.setIsOwnerSet(false);
-					player.sendMessage(Text.translatable("housing_block.unclaimed_successful"), true);
-					player.removeStatusEffect(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
-					player.removeStatusEffect(StatusEffectsRegistry.BUILDING_MODE);
+					serverPlayerEntity.sendMessage(Text.translatable("housing_block.unclaimed_successful"), true);
+					serverPlayerEntity.removeStatusEffect(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
+					serverPlayerEntity.removeStatusEffect(StatusEffectsRegistry.BUILDING_MODE);
 				} else {
 					housingBlockEntity.setIsOwnerSet(true);
-					player.sendMessage(Text.translatable("housing_block.claimed_successful"), true);
+					serverPlayerEntity.sendMessage(Text.translatable("housing_block.claimed_successful"), true);
 				}
 			}
 			housingBlockEntity.markDirty();

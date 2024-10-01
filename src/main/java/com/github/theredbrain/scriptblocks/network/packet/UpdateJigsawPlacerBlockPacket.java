@@ -1,51 +1,33 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.block.entity.JigsawBlockEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateJigsawPlacerBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateJigsawPlacerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_jigsaw_placer_block"),
-			UpdateJigsawPlacerBlockPacket::new
-	);
+public record UpdateJigsawPlacerBlockPacket(BlockPos jigsawPlacerBlockPosition, String target, String pool,
+											JigsawBlockEntity.Joint joint, BlockPos triggeredBlockPositionOffset,
+											boolean triggeredBlockResets) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateJigsawPlacerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_jigsaw_placer_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateJigsawPlacerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateJigsawPlacerBlockPacket::write, UpdateJigsawPlacerBlockPacket::new);
 
-	public final BlockPos jigsawPlacerBlockPosition;
-	public final String target;
-	public final String pool;
-	public final JigsawBlockEntity.Joint joint;
-	public final BlockPos triggeredBlockPositionOffset;
-	public final boolean triggeredBlockResets;
-
-	public UpdateJigsawPlacerBlockPacket(BlockPos jigsawPlacerBlockPosition, String target, String pool, JigsawBlockEntity.Joint joint, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets) {
-		this.jigsawPlacerBlockPosition = jigsawPlacerBlockPosition;
-		this.target = target;
-		this.pool = pool;
-		this.joint = joint;
-		this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
-		this.triggeredBlockResets = triggeredBlockResets;
+	public UpdateJigsawPlacerBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readString(), registryByteBuf.readString(), JigsawBlockEntity.Joint.byName(registryByteBuf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED), registryByteBuf.readBlockPos(), registryByteBuf.readBoolean());
 	}
 
-	public UpdateJigsawPlacerBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readString(), buf.readString(), JigsawBlockEntity.Joint.byName(buf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED), buf.readBlockPos(), buf.readBoolean());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.jigsawPlacerBlockPosition);
+		registryByteBuf.writeString(this.target);
+		registryByteBuf.writeString(this.pool);
+		registryByteBuf.writeString(this.joint.asString());
+		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.jigsawPlacerBlockPosition);
-		buf.writeString(this.target);
-		buf.writeString(this.pool);
-		buf.writeString(this.joint.asString());
-		buf.writeBlockPos(this.triggeredBlockPositionOffset);
-		buf.writeBoolean(this.triggeredBlockResets);
-	}
-
 }

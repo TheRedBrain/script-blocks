@@ -1,88 +1,61 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateBossControllerBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateBossControllerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_boss_controller_block"),
-			UpdateBossControllerBlockPacket::new
-	);
+public record UpdateBossControllerBlockPacket(BlockPos bossControllerBlockPosition, boolean showArea,
+											  Vec3i applicationAreaDimensions, BlockPos applicationAreaPositionOffset,
+											  String bossIdentifier, BlockPos entitySpawnPositionOffset,
+											  double entitySpawnOrientationPitch, double entitySpawnOrientationYaw,
+											  List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateBossControllerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_boss_controller_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateBossControllerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateBossControllerBlockPacket::write, UpdateBossControllerBlockPacket::new);
 
-	public final BlockPos bossControllerBlockPosition;
-
-	public final boolean showArea;
-	public final Vec3i applicationAreaDimensions;
-	public final BlockPos applicationAreaPositionOffset;
-
-	public final String bossIdentifier;
-	public final BlockPos entitySpawnPositionOffset;
-	public final double entitySpawnOrientationPitch;
-	public final double entitySpawnOrientationYaw;
-
-	public final List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList;
-
-	public UpdateBossControllerBlockPacket(BlockPos bossControllerBlockPosition, boolean showArea, Vec3i applicationAreaDimensions, BlockPos applicationAreaPositionOffset, String bossIdentifier, BlockPos entitySpawnPositionOffset, double entitySpawnOrientationPitch, double entitySpawnOrientationYaw, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList) {
-		this.bossControllerBlockPosition = bossControllerBlockPosition;
-		this.showArea = showArea;
-		this.applicationAreaDimensions = applicationAreaDimensions;
-		this.applicationAreaPositionOffset = applicationAreaPositionOffset;
-
-		this.bossIdentifier = bossIdentifier;
-		this.entitySpawnPositionOffset = entitySpawnPositionOffset;
-		this.entitySpawnOrientationPitch = entitySpawnOrientationPitch;
-		this.entitySpawnOrientationYaw = entitySpawnOrientationYaw;
-
-		this.bossTriggeredBlocksList = bossTriggeredBlocksList;
-	}
-
-	public UpdateBossControllerBlockPacket(PacketByteBuf buf) {
+	public UpdateBossControllerBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
-				buf.readBlockPos(),
-				buf.readBoolean(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
 				new Vec3i(
-						buf.readInt(),
-						buf.readInt(),
-						buf.readInt()
+						registryByteBuf.readInt(),
+						registryByteBuf.readInt(),
+						registryByteBuf.readInt()
 				),
-				buf.readBlockPos(),
-				buf.readString(),
-				buf.readBlockPos(),
-				buf.readDouble(),
-				buf.readDouble(),
-				buf.readList(new PacketByteBufUtils.MutablePairStringMutablePairBlockPosBooleanReader())
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readDouble(),
+				registryByteBuf.readDouble(),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN)
 		);
 	}
 
-	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.bossControllerBlockPosition);
+
+		registryByteBuf.writeBoolean(this.showArea);
+		registryByteBuf.writeInt(this.applicationAreaDimensions.getX());
+		registryByteBuf.writeInt(this.applicationAreaDimensions.getY());
+		registryByteBuf.writeInt(this.applicationAreaDimensions.getZ());
+		registryByteBuf.writeBlockPos(this.applicationAreaPositionOffset);
+
+		registryByteBuf.writeString(this.bossIdentifier);
+		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
+		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
+		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
+
+		registryByteBuf.writeCollection(this.bossTriggeredBlocksList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN);
 	}
 
 	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.bossControllerBlockPosition);
-
-		buf.writeBoolean(this.showArea);
-		buf.writeInt(this.applicationAreaDimensions.getX());
-		buf.writeInt(this.applicationAreaDimensions.getY());
-		buf.writeInt(this.applicationAreaDimensions.getZ());
-		buf.writeBlockPos(this.applicationAreaPositionOffset);
-
-		buf.writeString(this.bossIdentifier);
-		buf.writeBlockPos(this.entitySpawnPositionOffset);
-		buf.writeDouble(this.entitySpawnOrientationPitch);
-		buf.writeDouble(this.entitySpawnOrientationYaw);
-
-		buf.writeCollection(this.bossTriggeredBlocksList, new PacketByteBufUtils.MutablePairStringMutablePairBlockPosBooleanWriter());
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
 }

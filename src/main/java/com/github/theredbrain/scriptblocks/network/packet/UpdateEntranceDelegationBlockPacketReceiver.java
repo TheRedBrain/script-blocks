@@ -12,21 +12,23 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UpdateEntranceDelegationBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateEntranceDelegationBlockPacket> {
+public class UpdateEntranceDelegationBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateEntranceDelegationBlockPacket> {
 	@Override
-	public void receive(UpdateEntranceDelegationBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateEntranceDelegationBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos entranceDelegationBlockPosition = packet.entranceDelegationBlockPosition;
+		BlockPos entranceDelegationBlockPosition = payload.entranceDelegationBlockPosition();
 
-		BlockPos delegatedEntrancePositionOffset = packet.delegatedEntrancePositionOffset;
-		double delegatedEntranceYaw = packet.delegatedEntranceYaw;
-		double delegatedEntrancePitch = packet.delegatedEntrancePitch;
+		BlockPos delegatedEntrancePositionOffset = payload.delegatedEntrancePositionOffset();
+		double delegatedEntranceYaw = payload.delegatedEntranceYaw();
+		double delegatedEntrancePitch = payload.delegatedEntrancePitch();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -35,11 +37,11 @@ public class UpdateEntranceDelegationBlockPacketReceiver implements ServerPlayNe
 
 		if (blockEntity instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
 			if (!entranceDelegationBlockEntity.setDelegatedEntrance(new MutablePair<>(delegatedEntrancePositionOffset, new MutablePair<>(delegatedEntranceYaw, delegatedEntrancePitch)))) {
-				player.sendMessage(Text.translatable("entrance_delegation_block.delegatedEntrance.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("entrance_delegation_block.delegatedEntrance.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			entranceDelegationBlockEntity.markDirty();
 			world.updateListeners(entranceDelegationBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

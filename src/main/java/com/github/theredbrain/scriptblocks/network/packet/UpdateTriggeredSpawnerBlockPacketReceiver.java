@@ -23,37 +23,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTriggeredSpawnerBlockPacket> {
+public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredSpawnerBlockPacket> {
 	@Override
-	public void receive(UpdateTriggeredSpawnerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateTriggeredSpawnerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos triggeredSpawnerBlockPosition = packet.triggeredSpawnerBlockPosition;
+		BlockPos triggeredSpawnerBlockPosition = payload.triggeredSpawnerBlockPosition();
 
-		BlockPos entitySpawnPositionOffset = packet.entitySpawnPositionOffset;
-		double entitySpawnOrientationPitch = packet.entitySpawnOrientationPitch;
-		double entitySpawnOrientationYaw = packet.entitySpawnOrientationYaw;
+		BlockPos entitySpawnPositionOffset = payload.entitySpawnPositionOffset();
+		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
+		double entitySpawnOrientationYaw = payload.entitySpawnOrientationYaw();
 
-		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = packet.spawningMode;
+		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.valueOf(payload.spawningMode());
 
-		String entityTypeId = packet.entityTypeId;
+		String entityTypeId = payload.entityTypeId();
 
-		List<MutablePair<String, EntityAttributeModifier>> entityAttributeModifiersList = packet.entityAttributeModifiersList;
+		List<MutablePair<String, EntityAttributeModifier>> entityAttributeModifiersList = payload.entityAttributeModifiersList();
 		Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 		for (MutablePair<String, EntityAttributeModifier> entityAttributeModifiersListEntry : entityAttributeModifiersList) {
 			Optional<EntityAttribute> optional = Registries.ATTRIBUTE.getOrEmpty(Identifier.tryParse(entityAttributeModifiersListEntry.getLeft()));
 			optional.ifPresent(entityAttribute -> entityAttributeModifiers.put(entityAttribute, entityAttributeModifiersListEntry.getRight()));
 		}
 
-		BlockPos useRelayBlockPositionOffset = packet.useRelayBlockPositionOffset;
+		BlockPos useRelayBlockPositionOffset = payload.useRelayBlockPositionOffset();
 
-		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
-		boolean triggeredBlockResets = packet.triggeredBlockResets;
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -63,33 +65,33 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 		if (blockEntity instanceof TriggeredSpawnerBlockEntity triggeredSpawnerBlockEntity) {
 			triggeredSpawnerBlockEntity.reset();
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionPitch(entitySpawnOrientationPitch)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionYaw(entitySpawnOrientationYaw)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setSpawningMode(spawningMode)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.spawningMode.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.spawningMode.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setEntityType(entityTypeId)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entityTypeId.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entityTypeId.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setEntityAttributeModifiers(entityAttributeModifiers)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entityAttributeModifiers.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entityAttributeModifiers.invalid"), false);
 				updateSuccessful = false;
 			}
 			triggeredSpawnerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			triggeredSpawnerBlockEntity.setUseRelayBlockPositionOffset(useRelayBlockPositionOffset);
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			triggeredSpawnerBlockEntity.markDirty();
 			world.updateListeners(triggeredSpawnerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

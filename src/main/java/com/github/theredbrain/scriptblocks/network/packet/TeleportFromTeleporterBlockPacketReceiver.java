@@ -10,7 +10,6 @@ import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -28,29 +27,31 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<TeleportFromTeleporterBlockPacket> {
+public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportFromTeleporterBlockPacket> {
 	@Override
-	public void receive(TeleportFromTeleporterBlockPacket packet, ServerPlayerEntity serverPlayerEntity, PacketSender responseSender) {
+	public void receive(TeleportFromTeleporterBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		BlockPos teleportBlockPosition = packet.teleportBlockPosition;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		String accessPositionDimension = packet.accessPositionDimension;
-		BlockPos accessPositionOffset = packet.accessPositionOffset;
-		boolean setAccessPosition = packet.setAccessPosition;
+		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
-		boolean teleportTeam = packet.teleportTeam;
+		String accessPositionDimension = payload.accessPositionDimension();
+		BlockPos accessPositionOffset = payload.accessPositionOffset();
+		boolean setAccessPosition = payload.setAccessPosition();
 
-		TeleporterBlockEntity.TeleportationMode teleportationMode = packet.teleportationMode;
+		boolean teleportTeam = payload.teleportTeam();
 
-		BlockPos directTeleportPositionOffset = packet.directTeleportPositionOffset;
-		double directTeleportOrientationYaw = packet.directTeleportOrientationYaw;
-		double directTeleportOrientationPitch = packet.directTeleportOrientationPitch;
+		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.valueOf(payload.teleportationMode());
 
-		TeleporterBlockEntity.SpawnPointType spawnPointType = packet.spawnPointType;
+		BlockPos directTeleportPositionOffset = payload.directTeleportPositionOffset();
+		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
+		double directTeleportOrientationPitch = payload.directTeleportOrientationPitch();
 
-		String targetDimensionOwnerName = packet.targetDimensionOwnerName;
-		String targetLocation = packet.targetLocation;
-		String targetLocationEntrance = packet.targetLocationEntrance;
+		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.valueOf(payload.spawnPointType());
+
+		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
+		String targetLocation = payload.targetLocation();
+		String targetLocationEntrance = payload.targetLocationEntrance();
 
 		ServerWorld serverWorld = serverPlayerEntity.getServerWorld();
 		MinecraftServer server = serverPlayerEntity.server;
@@ -72,7 +73,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
 			Pair<Pair<String, BlockPos>, Boolean> housing_access_pos = ComponentsRegistry.PLAYER_LOCATION_ACCESS_POS.get(serverPlayerEntity).getValue();
 			if (spawnPointType == TeleporterBlockEntity.SpawnPointType.LOCATION_ACCESS_POSITION && housing_access_pos.getRight()) {
-				targetWorld = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, new Identifier(housing_access_pos.getLeft().getLeft())));
+				targetWorld = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(housing_access_pos.getLeft().getLeft())));
 				targetPos = housing_access_pos.getLeft().getRight();
 				if (targetWorld != null && targetPos != null) {
 					ComponentsRegistry.PLAYER_LOCATION_ACCESS_POS.get(serverPlayerEntity).deactivate();
@@ -178,7 +179,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							for (int i = 0; i < playerInventory.size(); i++) {
 								ItemStack currentItemStack = playerInventory.getStack(i);
-								if (ItemStack.canCombine(keyItemStack, currentItemStack)) {
+								if (ItemStack.areItemsAndComponentsEqual(keyItemStack, currentItemStack)) {
 									ItemStack currentItemStackCopy = currentItemStack.copy();
 									int currentItemStackCount = currentItemStackCopy.getCount();
 									if (currentItemStackCount >= keyCount) {
@@ -228,8 +229,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			serverPlayerEntity.removeStatusEffect(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT);
 
 			if (teleportTeam) {
-//                Team team = serverPlayerEntity.getScoreboardTeam();
-				Team team = serverPlayerEntity.getScoreboard().getPlayerTeam(serverPlayerEntity.getEntityName())/*.getScoreboardTeam()*/;
+				Team team = serverPlayerEntity.getScoreboardTeam();
 				if (team != null) {
 					for (String playerString : team.getPlayerList()) {
 						ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);

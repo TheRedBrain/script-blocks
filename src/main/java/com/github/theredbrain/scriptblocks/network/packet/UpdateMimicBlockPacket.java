@@ -1,42 +1,28 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateMimicBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateMimicBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_mimic_block"),
-			UpdateMimicBlockPacket::new
-	);
+public record UpdateMimicBlockPacket(BlockPos mimicBlockPosition, BlockPos activeMimicBlockPositionOffset,
+									 BlockPos inactiveMimicBlockPositionOffset) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateMimicBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_mimic_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateMimicBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateMimicBlockPacket::write, UpdateMimicBlockPacket::new);
 
-	public final BlockPos mimicBlockPosition;
-
-	public final BlockPos activeMimicBlockPositionOffset;
-	public final BlockPos inactiveMimicBlockPositionOffset;
-
-	public UpdateMimicBlockPacket(BlockPos mimicBlockPosition, BlockPos activeMimicBlockPositionOffset, BlockPos inactiveMimicBlockPositionOffset) {
-		this.mimicBlockPosition = mimicBlockPosition;
-		this.activeMimicBlockPositionOffset = activeMimicBlockPositionOffset;
-		this.inactiveMimicBlockPositionOffset = inactiveMimicBlockPositionOffset;
+	public UpdateMimicBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readBlockPos(), registryByteBuf.readBlockPos());
 	}
 
-	public UpdateMimicBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readBlockPos(), buf.readBlockPos());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.mimicBlockPosition);
+		registryByteBuf.writeBlockPos(this.activeMimicBlockPositionOffset);
+		registryByteBuf.writeBlockPos(this.inactiveMimicBlockPositionOffset);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.mimicBlockPosition);
-		buf.writeBlockPos(this.activeMimicBlockPositionOffset);
-		buf.writeBlockPos(this.inactiveMimicBlockPositionOffset);
-	}
-
 }

@@ -1,43 +1,31 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateTriggeredCounterBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateTriggeredCounterBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_triggered_counter_block"),
-			UpdateTriggeredCounterBlockPacket::new
-	);
+public record UpdateTriggeredCounterBlockPacket(BlockPos triggeredCounterBlockPosition,
+												List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateTriggeredCounterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_triggered_counter_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredCounterBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredCounterBlockPacket::write, UpdateTriggeredCounterBlockPacket::new);
 
-	public final BlockPos triggeredCounterBlockPosition;
-
-	public final List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList;
-
-	public UpdateTriggeredCounterBlockPacket(BlockPos triggeredCounterBlockPosition, List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList) {
-		this.triggeredCounterBlockPosition = triggeredCounterBlockPosition;
-		this.triggeredBlocksList = triggeredBlocksList;
+	public UpdateTriggeredCounterBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_INTEGER_MUTABLE_PAIR_BLOCK_POS_BOOLEAN));
 	}
 
-	public UpdateTriggeredCounterBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readList(new PacketByteBufUtils.MutablePairIntegerMutablePairBlockPosBooleanReader()));
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.triggeredCounterBlockPosition);
+		registryByteBuf.writeCollection(this.triggeredBlocksList, CustomPacketCodecs.MUTABLE_PAIR_INTEGER_MUTABLE_PAIR_BLOCK_POS_BOOLEAN);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.triggeredCounterBlockPosition);
-		buf.writeCollection(this.triggeredBlocksList, new PacketByteBufUtils.MutablePairIntegerMutablePairBlockPosBooleanWriter());
-	}
-
 }

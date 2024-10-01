@@ -11,19 +11,21 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class UpdateShopBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateShopBlockPacket> {
+public class UpdateShopBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateShopBlockPacket> {
 
 	@Override
-	public void receive(UpdateShopBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateShopBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos shopBlockPosition = packet.shopBlockPosition;
-		String shopIdentifier = packet.shopIdentifier;
+		BlockPos shopBlockPosition = payload.shopBlockPosition();
+		String shopIdentifier = payload.shopIdentifier();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -33,11 +35,11 @@ public class UpdateShopBlockPacketReceiver implements ServerPlayNetworking.PlayP
 		if (blockEntity instanceof ShopBlockEntity shopBlockEntity) {
 
 			if (!shopBlockEntity.setShopIdentifier(shopIdentifier)) {
-				player.sendMessage(Text.translatable("shop_block.shopIdentifier.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("shop_block.shopIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			shopBlockEntity.markDirty();
 			world.updateListeners(shopBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

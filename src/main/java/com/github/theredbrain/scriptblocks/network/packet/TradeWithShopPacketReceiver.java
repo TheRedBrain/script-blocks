@@ -15,18 +15,20 @@ import net.minecraft.util.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<TradeWithShopPacket> {
+public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TradeWithShopPacket> {
 	@Override
-	public void receive(TradeWithShopPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(TradeWithShopPacket payload, ServerPlayNetworking.Context context) {
 
-		String shopIdentifier = packet.shopIdentifier;
-		int id = packet.id;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		ScreenHandler screenHandler = player.currentScreenHandler;
+		String shopIdentifier = payload.shopIdentifier();
+		int id = payload.id();
+
+		ScreenHandler screenHandler = serverPlayerEntity.currentScreenHandler;
 		List<Shop.Deal> dealsList = new ArrayList<>(List.of());
 		Shop shop = null;
 		if (!shopIdentifier.equals("")) {
-			shop = ShopsRegistry.getShop(new Identifier(shopIdentifier));
+			shop = ShopsRegistry.getShop(Identifier.of(shopIdentifier));
 		}
 		if (shop != null) {
 			dealsList = shop.getDealList();
@@ -58,7 +60,7 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPac
 				}
 			}
 			if (bl) {
-				player.getInventory().offerOrDrop(ItemUtils.getItemStackFromVirtualItemStack(currentDeal.getOffer()));
+				serverPlayerEntity.getInventory().offerOrDrop(ItemUtils.getItemStackFromVirtualItemStack(currentDeal.getOffer()));
 			}
 		}
 	}

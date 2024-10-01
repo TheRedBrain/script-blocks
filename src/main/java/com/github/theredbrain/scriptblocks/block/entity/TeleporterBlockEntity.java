@@ -61,7 +61,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private SpawnPointType spawnPointType = SpawnPointType.WORLD_SPAWN;
 
 	// dungeon mode
-	private List<Pair<String, String>> locationsList = new ArrayList<>(List.of());
+	private List<MutablePair<String, String>> locationsList = new ArrayList<>(List.of());
 
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
@@ -108,7 +108,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putDouble("directTeleportPositionOffsetYaw", this.directTeleportOrientationYaw);
 		nbt.putDouble("directTeleportPositionOffsetPitch", this.directTeleportOrientationPitch);
 
-		nbt.putString("locationType", this.spawnPointType.asString());
+		nbt.putString("spawnPointType", this.spawnPointType.asString());
 
 		nbt.putInt("locationsListSize", this.locationsList.size());
 
@@ -174,12 +174,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.directTeleportOrientationYaw = nbt.getDouble("directTeleportPositionOffsetYaw");
 		this.directTeleportOrientationPitch = nbt.getDouble("directTeleportPositionOffsetPitch");
 
-		this.spawnPointType = SpawnPointType.byName(nbt.getString("locationType")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
+		this.spawnPointType = SpawnPointType.byName(nbt.getString("spawnPointType")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
 
 		int locationsListSize = nbt.getInt("locationsListSize");
 		this.locationsList.clear();
 		for (int p = 0; p < locationsListSize; p++) {
-			this.locationsList.add(new Pair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)));
+			this.locationsList.add(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)));
 		}
 
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
@@ -367,11 +367,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		return true;
 	}
 
-	public SpawnPointType getLocationType() {
+	public SpawnPointType getSpawnPointType() {
 		return spawnPointType;
 	}
 
-	public void setLocationType(SpawnPointType spawnPointType) {
+	public void setSpawnPointType(SpawnPointType spawnPointType) {
 		this.spawnPointType = spawnPointType;
 	}
 
@@ -380,7 +380,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	// TODO check if input is valid
-	public boolean setLocationsList(List<Pair<String, String>> dungeonLocationsList) {
+	public boolean setLocationsList(List<MutablePair<String, String>> dungeonLocationsList) {
 		this.locationsList = dungeonLocationsList;
 		return true;
 	}

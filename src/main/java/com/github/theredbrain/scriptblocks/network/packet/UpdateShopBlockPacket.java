@@ -1,42 +1,29 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateShopBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateShopBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_shop_block"),
-			UpdateShopBlockPacket::new
-	);
+public record UpdateShopBlockPacket(BlockPos shopBlockPosition, String shopIdentifier) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateShopBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_shop_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateShopBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateShopBlockPacket::write, UpdateShopBlockPacket::new);
 
-	public final BlockPos shopBlockPosition;
-
-	public final String shopIdentifier;
-
-	public UpdateShopBlockPacket(BlockPos shopBlockPosition, String shopIdentifier) {
-		this.shopBlockPosition = shopBlockPosition;
-		this.shopIdentifier = shopIdentifier;
-	}
-
-	public UpdateShopBlockPacket(PacketByteBuf buf) {
+	public UpdateShopBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
-				buf.readBlockPos(),
-				buf.readString()
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString()
 		);
 	}
 
-	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.shopBlockPosition);
+		registryByteBuf.writeString(this.shopIdentifier);
 	}
 
 	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.shopBlockPosition);
-		buf.writeString(this.shopIdentifier);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
 }

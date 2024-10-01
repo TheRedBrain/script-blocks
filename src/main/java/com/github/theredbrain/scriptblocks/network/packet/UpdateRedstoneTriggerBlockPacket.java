@@ -1,43 +1,29 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateRedstoneTriggerBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateRedstoneTriggerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_redstone_trigger_block"),
-			UpdateRedstoneTriggerBlockPacket::new
-	);
+public record UpdateRedstoneTriggerBlockPacket(BlockPos redstoneTriggerBlockPosition,
+											   BlockPos triggeredBlockPositionOffset,
+											   boolean triggeredBlockResets) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateRedstoneTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_redstone_trigger_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateRedstoneTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateRedstoneTriggerBlockPacket::write, UpdateRedstoneTriggerBlockPacket::new);
 
-	public final BlockPos redstoneTriggerBlockPosition;
-
-	public final BlockPos triggeredBlockPositionOffset;
-
-	public final boolean triggeredBlockResets;
-
-	public UpdateRedstoneTriggerBlockPacket(BlockPos redstoneTriggerBlockPosition, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets) {
-		this.redstoneTriggerBlockPosition = redstoneTriggerBlockPosition;
-		this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
-		this.triggeredBlockResets = triggeredBlockResets;
+	public UpdateRedstoneTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readBlockPos(), registryByteBuf.readBoolean());
 	}
 
-	public UpdateRedstoneTriggerBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readBlockPos(), buf.readBoolean());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.redstoneTriggerBlockPosition);
+		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.redstoneTriggerBlockPosition);
-		buf.writeBlockPos(this.triggeredBlockPositionOffset);
-		buf.writeBoolean(this.triggeredBlockResets);
-	}
-
 }

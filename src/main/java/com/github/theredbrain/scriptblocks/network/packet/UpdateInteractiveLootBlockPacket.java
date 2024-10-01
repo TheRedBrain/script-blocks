@@ -1,39 +1,27 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateInteractiveLootBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateInteractiveLootBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_interactive_loot_block"),
-			UpdateInteractiveLootBlockPacket::new
-	);
+public record UpdateInteractiveLootBlockPacket(BlockPos interactiveLootBlockPosition,
+											   String lootTableIdentifierString) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateInteractiveLootBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_interactive_loot_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateInteractiveLootBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateInteractiveLootBlockPacket::write, UpdateInteractiveLootBlockPacket::new);
 
-	public final BlockPos interactiveLootBlockPosition;
-
-	public final String lootTableIdentifierString;
-
-	public UpdateInteractiveLootBlockPacket(BlockPos interactiveLootBlockPosition, String lootTableIdentifierString) {
-		this.interactiveLootBlockPosition = interactiveLootBlockPosition;
-		this.lootTableIdentifierString = lootTableIdentifierString;
+	public UpdateInteractiveLootBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readString());
 	}
 
-	public UpdateInteractiveLootBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readString());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.interactiveLootBlockPosition);
+		registryByteBuf.writeString(this.lootTableIdentifierString);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.interactiveLootBlockPosition);
-		buf.writeString(this.lootTableIdentifierString);
-	}
-
 }

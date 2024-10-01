@@ -12,27 +12,29 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateTriggeredAdvancementCheckerBlockPacket> {
+public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredAdvancementCheckerBlockPacket> {
 	@Override
-	public void receive(UpdateTriggeredAdvancementCheckerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateTriggeredAdvancementCheckerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos triggeredAdvancementCheckerBlockPosition = packet.triggeredAdvancementCheckerBlockPosition;
+		BlockPos triggeredAdvancementCheckerBlockPosition = payload.triggeredAdvancementCheckerBlockPosition();
 
-		BlockPos firstTriggeredBlockPositionOffset = packet.firstTriggeredBlockPositionOffset;
+		BlockPos firstTriggeredBlockPositionOffset = payload.firstTriggeredBlockPositionOffset();
 
-		boolean firstTriggeredBlockResets = packet.firstTriggeredBlockResets;
+		boolean firstTriggeredBlockResets = payload.firstTriggeredBlockResets();
 
-		BlockPos secondTriggeredBlockPositionOffset = packet.secondTriggeredBlockPositionOffset;
+		BlockPos secondTriggeredBlockPositionOffset = payload.secondTriggeredBlockPositionOffset();
 
-		boolean secondTriggeredBlockResets = packet.secondTriggeredBlockResets;
+		boolean secondTriggeredBlockResets = payload.secondTriggeredBlockResets();
 
-		String checkedAdvancementIdentifier = packet.checkedAdvancementIdentifier;
+		String checkedAdvancementIdentifier = payload.checkedAdvancementIdentifier();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -43,11 +45,11 @@ public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements Ser
 			triggeredAdvancementCheckerBlockEntity.setFirstTriggeredBlock(new MutablePair<>(firstTriggeredBlockPositionOffset, firstTriggeredBlockResets));
 			triggeredAdvancementCheckerBlockEntity.setSecondTriggeredBlock(new MutablePair<>(secondTriggeredBlockPositionOffset, secondTriggeredBlockResets));
 			if (!triggeredAdvancementCheckerBlockEntity.setCheckedAdvancementIdentifier(checkedAdvancementIdentifier)) {
-				player.sendMessage(Text.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			triggeredAdvancementCheckerBlockEntity.markDirty();
 			world.updateListeners(triggeredAdvancementCheckerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

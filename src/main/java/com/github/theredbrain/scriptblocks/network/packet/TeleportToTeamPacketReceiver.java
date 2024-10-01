@@ -13,16 +13,18 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<TeleportToTeamPacket> {
+public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportToTeamPacket> {
 	@Override
-	public void receive(TeleportToTeamPacket packet, ServerPlayerEntity serverPlayerEntity, PacketSender responseSender) {
+	public void receive(TeleportToTeamPacket payload, ServerPlayNetworking.Context context) {
 
-		Identifier targetWorldIdentifier = packet.targetWorldIdentifier;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		BlockPos targetPos = packet.targetPosition;
+		Identifier targetWorldIdentifier = payload.targetWorldIdentifier();
 
-		double targetYaw = packet.targetYaw;
-		double targetPitch = packet.targetPitch;
+		BlockPos targetPos = payload.targetPosition();
+
+		double targetYaw = payload.targetYaw();
+		double targetPitch = payload.targetPitch();
 
 		MinecraftServer server = serverPlayerEntity.server;
 

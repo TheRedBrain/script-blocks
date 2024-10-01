@@ -1,38 +1,27 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateUseRelayBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateUseRelayBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_use_relay_block"),
-			UpdateUseRelayBlockPacket::new
-	);
+public record UpdateUseRelayBlockPacket(BlockPos useRelayBlockPosition,
+										BlockPos relayBlockPositionOffset) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateUseRelayBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_use_relay_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateUseRelayBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateUseRelayBlockPacket::write, UpdateUseRelayBlockPacket::new);
 
-	public final BlockPos useRelayBlockPosition;
-	public final BlockPos relayBlockPositionOffset;
-
-	public UpdateUseRelayBlockPacket(BlockPos useRelayBlockPosition, BlockPos relayBlockPositionOffset) {
-		this.useRelayBlockPosition = useRelayBlockPosition;
-		this.relayBlockPositionOffset = relayBlockPositionOffset;
+	public UpdateUseRelayBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readBlockPos());
 	}
 
-	public UpdateUseRelayBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readBlockPos());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.useRelayBlockPosition);
+		registryByteBuf.writeBlockPos(this.relayBlockPositionOffset);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.useRelayBlockPosition);
-		buf.writeBlockPos(this.relayBlockPositionOffset);
-	}
-
 }

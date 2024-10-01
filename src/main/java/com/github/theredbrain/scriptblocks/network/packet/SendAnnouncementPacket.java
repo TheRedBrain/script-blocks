@@ -1,34 +1,26 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 
-public class SendAnnouncementPacket implements FabricPacket {
-	public static final PacketType<SendAnnouncementPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("send_announcement"),
-			SendAnnouncementPacket::new
-	);
+public record SendAnnouncementPacket(Text announcement) implements CustomPayload {
+	public static final CustomPayload.Id<SendAnnouncementPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("send_announcement"));
+	public static final PacketCodec<RegistryByteBuf, SendAnnouncementPacket> PACKET_CODEC = PacketCodec.of(SendAnnouncementPacket::write, SendAnnouncementPacket::new);
 
-	public final Text announcement;
-
-	public SendAnnouncementPacket(Text announcement) {
-		this.announcement = announcement;
+	public SendAnnouncementPacket(RegistryByteBuf registryByteBuf) {
+		this(TextCodecs.PACKET_CODEC.decode(registryByteBuf));
 	}
 
-	public SendAnnouncementPacket(PacketByteBuf buf) {
-		this(buf.readText());
+	private void write(RegistryByteBuf registryByteBuf) {
+		TextCodecs.PACKET_CODEC.encode(registryByteBuf, this.announcement);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
-	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeText(this.announcement);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

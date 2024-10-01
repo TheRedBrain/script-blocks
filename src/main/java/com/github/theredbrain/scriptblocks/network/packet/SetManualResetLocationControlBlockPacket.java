@@ -1,39 +1,28 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class SetManualResetLocationControlBlockPacket implements FabricPacket {
-	public static final PacketType<SetManualResetLocationControlBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("set_manual_reset_location_control_block"),
-			SetManualResetLocationControlBlockPacket::new
-	);
+public record SetManualResetLocationControlBlockPacket(BlockPos locationControlBlockPosition,
+													   boolean manualReset) implements CustomPayload {
+	public static final CustomPayload.Id<SetManualResetLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("set_manual_reset_location_control_block"));
+	public static final PacketCodec<RegistryByteBuf, SetManualResetLocationControlBlockPacket> PACKET_CODEC = PacketCodec.of(SetManualResetLocationControlBlockPacket::write, SetManualResetLocationControlBlockPacket::new);
 
-	public final BlockPos locationControlBlockPosition;
-
-	public final boolean manualReset;
-
-	public SetManualResetLocationControlBlockPacket(BlockPos locationControlBlockPosition, boolean manualReset) {
-		this.locationControlBlockPosition = locationControlBlockPosition;
-		this.manualReset = manualReset;
+	public SetManualResetLocationControlBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readBoolean());
 	}
 
-	public SetManualResetLocationControlBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readBoolean());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.locationControlBlockPosition);
+		registryByteBuf.writeBoolean(this.manualReset);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.locationControlBlockPosition);
-		buf.writeBoolean(this.manualReset);
-	}
-
 }

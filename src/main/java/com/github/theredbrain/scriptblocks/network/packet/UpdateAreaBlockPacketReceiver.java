@@ -13,41 +13,43 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateAreaBlockPacket> {
+public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateAreaBlockPacket> {
 	@Override
-	public void receive(UpdateAreaBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateAreaBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos areaBlockPosition = packet.areaBlockPosition;
+		BlockPos areaBlockPosition = payload.areaBlockPosition();
 
-		boolean showArea = packet.showArea;
-		Vec3i areaDimensions = packet.applicationAreaDimensions;
-		BlockPos areaPositionOffset = packet.applicationAreaPositionOffset;
+		boolean showArea = payload.showArea();
+		Vec3i areaDimensions = payload.applicationAreaDimensions();
+		BlockPos areaPositionOffset = payload.applicationAreaPositionOffset();
 
-		String appliedStatusEffectIdentifier = packet.appliedStatusEffectIdentifier;
-		int appliedStatusEffectAmplifier = packet.appliedStatusEffectAmplifier;
-		boolean appliedStatusEffectAmbient = packet.appliedStatusEffectAmbient;
-		boolean appliedStatusEffectShowParticles = packet.appliedStatusEffectShowParticles;
-		boolean appliedStatusEffectShowIcon = packet.appliedStatusEffectShowIcon;
+		String appliedStatusEffectIdentifier = payload.appliedStatusEffectIdentifier();
+		int appliedStatusEffectAmplifier = payload.appliedStatusEffectAmplifier();
+		boolean appliedStatusEffectAmbient = payload.appliedStatusEffectAmbient();
+		boolean appliedStatusEffectShowParticles = payload.appliedStatusEffectShowParticles();
+		boolean appliedStatusEffectShowIcon = payload.appliedStatusEffectShowIcon();
 
 
-		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
-		boolean triggeredBlockResets = packet.triggeredBlockResets;
-		boolean wasTriggered = packet.wasTriggered;
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
+		boolean wasTriggered = payload.wasTriggered();
 
-		String joinMessage = packet.joinMessage;
-		String leaveMessage = packet.leaveMessage;
-		String triggeredMessage = packet.triggeredMessage;
+		String joinMessage = payload.joinMessage();
+		String leaveMessage = payload.leaveMessage();
+		String triggeredMessage = payload.triggeredMessage();
 
-		AreaBlockEntity.MessageMode messageMode = packet.messageMode;
-		AreaBlockEntity.TriggerMode triggerMode = packet.triggerMode;
-		AreaBlockEntity.TriggeredMode triggeredMode = packet.triggeredMode;
-		int timer = packet.timer;
+		AreaBlockEntity.MessageMode messageMode = AreaBlockEntity.MessageMode.valueOf(payload.messageMode());
+		AreaBlockEntity.TriggerMode triggerMode = AreaBlockEntity.TriggerMode.valueOf(payload.triggerMode());
+		AreaBlockEntity.TriggeredMode triggeredMode = AreaBlockEntity.TriggeredMode.valueOf(payload.triggeredMode());
+		int timer = payload.timer();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -58,19 +60,19 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 			areaBlockEntity.reset();
 			areaBlockEntity.setShowArea(showArea);
 			if (!areaBlockEntity.setAreaDimensions(areaDimensions)) {
-				player.sendMessage(Text.translatable("area_block.areaDimensions.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaDimensions.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				player.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAppliedStatusEffectIdentifier(appliedStatusEffectIdentifier)) {
-				player.sendMessage(Text.translatable("area_block.appliedStatusEffectIdentifier.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("area_block.appliedStatusEffectIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAppliedStatusEffectAmplifier(appliedStatusEffectAmplifier)) {
-				player.sendMessage(Text.translatable("area_block.appliedStatusEffectAmplifier.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("area_block.appliedStatusEffectAmplifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			areaBlockEntity.setAppliedStatusEffectAmbient(appliedStatusEffectAmbient);
@@ -90,7 +92,7 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 			areaBlockEntity.setMaxTimer(timer);
 
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			areaBlockEntity.markDirty();
 			world.updateListeners(areaBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

@@ -15,32 +15,34 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateLocationControlBlockPacket> {
+public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateLocationControlBlockPacket> {
 	@Override
-	public void receive(UpdateLocationControlBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateLocationControlBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos locationControlBlockPosition = packet.locationControlBlockPosition;
+		BlockPos locationControlBlockPosition = payload.locationControlBlockPosition();
 
-		BlockPos mainEntrancePositionOffset = packet.mainEntrancePositionOffset;
-		double mainEntranceYaw = packet.mainEntranceYaw;
-		double mainEntrancePitch = packet.mainEntrancePitch;
+		BlockPos mainEntrancePositionOffset = payload.mainEntrancePositionOffset();
+		double mainEntranceYaw = payload.mainEntranceYaw();
+		double mainEntrancePitch = payload.mainEntrancePitch();
 
 		HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
 
-		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrance : packet.sideEntrancesList) {
+		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrance : payload.sideEntrancesList()) {
 			sideEntrances.put(sideEntrance.getLeft(), sideEntrance.getRight());
 		}
 
-		BlockPos triggeredBlockPositionOffset = packet.triggeredBlockPositionOffset;
-		boolean triggeredBlockResets = packet.triggeredBlockResets;
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		boolean shouldAlwaysReset = packet.shouldAlwaysReset;
+		boolean shouldAlwaysReset = payload.shouldAlwaysReset();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
 		BlockState blockState = world.getBlockState(locationControlBlockPosition);
@@ -52,7 +54,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			locationControlBlockEntity.setShouldAlwaysReset(shouldAlwaysReset);
 
-			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			locationControlBlockEntity.markDirty();
 			world.updateListeners(locationControlBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

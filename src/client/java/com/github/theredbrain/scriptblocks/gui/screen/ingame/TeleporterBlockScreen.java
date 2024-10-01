@@ -305,7 +305,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
 		this.teleporterBlock.setShowRegenerateButton(this.showRegenerateButton);
 		this.teleporterBlock.setTeleportationMode(this.teleportationMode);
-		this.teleporterBlock.setLocationType(this.spawnPointType);
+		this.teleporterBlock.setSpawnPointType(this.spawnPointType);
 //        this.teleporterBlock.setConsumeKeyItemStack(this.consumeKeyItemStack);
 		this.close();
 	}
@@ -536,7 +536,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 		// teleportation mode: spawn_points
 
-		this.spawnPointType = this.teleporterBlock.getLocationType();
+		this.spawnPointType = this.teleporterBlock.getSpawnPointType();
 		i = this.textRenderer.getWidth(SPAWN_POINT_TYPE_LABEL_TEXT) + 10;
 		this.spawnPointTypeButton = this.addDrawableChild(CyclingButtonWidget.builder(TeleporterBlockEntity.SpawnPointType::asText).values((TeleporterBlockEntity.SpawnPointType[]) TeleporterBlockEntity.SpawnPointType.values()).initially(this.spawnPointType).omitKeyText().build(this.width / 2 - 152 + i, 70, 300 - i, 20, SPAWN_POINT_TYPE_LABEL_TEXT, (button, locationType) -> {
 			this.spawnPointType = locationType;
@@ -1382,7 +1382,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				this.teleporterBlock.getDirectTeleportPositionOffset(),
 				this.teleporterBlock.getDirectTeleportOrientationYaw(),
 				this.teleporterBlock.getDirectTeleportOrientationPitch(),
-				this.teleporterBlock.getLocationType().asString(),
+				this.teleporterBlock.getSpawnPointType().asString(),
 				currentTargetOwnerName,
 				this.currentTargetIdentifier,
 				this.currentTargetEntrance)

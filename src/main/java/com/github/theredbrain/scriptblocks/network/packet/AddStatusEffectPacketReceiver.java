@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -8,35 +7,37 @@ import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
-public class AddStatusEffectPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<AddStatusEffectPacket> {
+public class AddStatusEffectPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<AddStatusEffectPacket> {
 
 	@Override
-	public void receive(AddStatusEffectPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(AddStatusEffectPacket payload, ServerPlayNetworking.Context context) {
 
-		Identifier effectId = packet.effectId;
-		int duration = packet.duration;
-		int amplifier = packet.amplifier;
-		boolean ambient = packet.ambient;
-		boolean showParticles = packet.showParticles;
-		boolean showIcon = packet.showIcon;
-		boolean toggle = packet.toggle;
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		Identifier effectId = payload.effectId();
+		int duration = payload.duration();
+		int amplifier = payload.amplifier();
+		boolean ambient = payload.ambient();
+		boolean showParticles = payload.showParticles();
+		boolean showIcon = payload.showIcon();
+		boolean toggle = payload.toggle();
 
 		StatusEffect statusEffect = Registries.STATUS_EFFECT.get(effectId);
 
 		if (statusEffect != null) {
-//            if (player.hasStatusEffect(statusEffect)) {
-//                player.removeStatusEffect(statusEffect);
+//            if (serverPlayerEntity.hasStatusEffect(statusEffect)) {
+//                serverPlayerEntity.removeStatusEffect(statusEffect);
 //            }
 //            if (!toggle) {
-//                player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
+//                serverPlayerEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
 //            }
-			if (toggle && player.hasStatusEffect(statusEffect)) {
-				player.removeStatusEffect(statusEffect);
-			} else if (player.hasStatusEffect(statusEffect)) {
-				player.removeStatusEffect(statusEffect);
-				player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
+			if (toggle && serverPlayerEntity.hasStatusEffect(statusEffect)) {
+				serverPlayerEntity.removeStatusEffect(statusEffect);
+			} else if (serverPlayerEntity.hasStatusEffect(statusEffect)) {
+				serverPlayerEntity.removeStatusEffect(statusEffect);
+				serverPlayerEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
 			} else {
-				player.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
+				serverPlayerEntity.addStatusEffect(new StatusEffectInstance(statusEffect, duration, amplifier, ambient, showParticles, showIcon));
 			}
 		}
 	}

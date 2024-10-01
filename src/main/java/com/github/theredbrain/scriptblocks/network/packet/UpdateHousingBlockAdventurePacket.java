@@ -1,47 +1,33 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 
-public class UpdateHousingBlockAdventurePacket implements FabricPacket {
-	public static final PacketType<UpdateHousingBlockAdventurePacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_housing_block_adventure"),
-			UpdateHousingBlockAdventurePacket::new
-	);
+public record UpdateHousingBlockAdventurePacket(BlockPos housingBlockPosition, List<String> coOwnerList,
+												List<String> trustedList,
+												List<String> guestList) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateHousingBlockAdventurePacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_housing_block_adventure"));
+	public static final PacketCodec<RegistryByteBuf, UpdateHousingBlockAdventurePacket> PACKET_CODEC = PacketCodec.of(UpdateHousingBlockAdventurePacket::write, UpdateHousingBlockAdventurePacket::new);
 
-	public final BlockPos housingBlockPosition;
-	public final List<String> coOwnerList;
-	public final List<String> trustedList;
-	public final List<String> guestList;
-
-	public UpdateHousingBlockAdventurePacket(BlockPos housingBlockPosition, List<String> coOwnerList, List<String> trustedList, List<String> guestList) {
-		this.housingBlockPosition = housingBlockPosition;
-		this.coOwnerList = coOwnerList;
-		this.trustedList = trustedList;
-		this.guestList = guestList;
+	public UpdateHousingBlockAdventurePacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readList(PacketCodecs.STRING), registryByteBuf.readList(PacketCodecs.STRING), registryByteBuf.readList(PacketCodecs.STRING));
 	}
 
-	public UpdateHousingBlockAdventurePacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readList(new PacketByteBufUtils.StringReader()), buf.readList(new PacketByteBufUtils.StringReader()), buf.readList(new PacketByteBufUtils.StringReader()));
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.housingBlockPosition);
+		registryByteBuf.writeCollection(this.coOwnerList, PacketCodecs.STRING);
+		registryByteBuf.writeCollection(this.trustedList, PacketCodecs.STRING);
+		registryByteBuf.writeCollection(this.guestList, PacketCodecs.STRING);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.housingBlockPosition);
-		buf.writeCollection(this.coOwnerList, new PacketByteBufUtils.StringWriter());
-		buf.writeCollection(this.trustedList, new PacketByteBufUtils.StringWriter());
-		buf.writeCollection(this.guestList, new PacketByteBufUtils.StringWriter());
-	}
-
 }

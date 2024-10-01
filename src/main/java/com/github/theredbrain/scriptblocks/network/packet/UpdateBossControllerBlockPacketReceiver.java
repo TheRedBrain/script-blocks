@@ -16,33 +16,35 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.util.HashMap;
 import java.util.List;
 
-public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateBossControllerBlockPacket> {
+public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateBossControllerBlockPacket> {
 
 	@Override
-	public void receive(UpdateBossControllerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateBossControllerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos bossControllerBlockPosition = packet.bossControllerBlockPosition;
+		BlockPos bossControllerBlockPosition = payload.bossControllerBlockPosition();
 
-		boolean showArea = packet.showArea;
-		Vec3i areaDimensions = packet.applicationAreaDimensions;
-		BlockPos areaPositionOffset = packet.applicationAreaPositionOffset;
+		boolean showArea = payload.showArea();
+		Vec3i areaDimensions = payload.applicationAreaDimensions();
+		BlockPos areaPositionOffset = payload.applicationAreaPositionOffset();
 
-		String bossIdentifier = packet.bossIdentifier;
-		BlockPos entitySpawnPositionOffset = packet.entitySpawnPositionOffset;
-		double entitySpawnOrientationPitch = packet.entitySpawnOrientationPitch;
-		double entitySpawnOrientationYaw = packet.entitySpawnOrientationYaw;
+		String bossIdentifier = payload.bossIdentifier();
+		BlockPos entitySpawnPositionOffset = payload.entitySpawnPositionOffset();
+		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
+		double entitySpawnOrientationYaw = payload.entitySpawnOrientationYaw();
 
-		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList = packet.bossTriggeredBlocksList;
+		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList = payload.bossTriggeredBlocksList();
 		HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocksMap = new HashMap<>();
 		for (MutablePair<String, MutablePair<BlockPos, Boolean>> triggeredBlock : bossTriggeredBlocksList) {
 			bossTriggeredBlocksMap.put(triggeredBlock.getLeft(), triggeredBlock.getRight());
 		}
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -53,35 +55,35 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 			bossControllerBlockEntity.reset();
 			bossControllerBlockEntity.setShowArea(showArea);
 			if (!bossControllerBlockEntity.setAreaDimensions(areaDimensions)) {
-				player.sendMessage(Text.translatable("area_block.areaDimensions.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaDimensions.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!bossControllerBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				player.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!bossControllerBlockEntity.setBossIdentifier(bossIdentifier)) {
-				player.sendMessage(Text.translatable("shop_block.bossIdentifier.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("shop_block.bossIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!bossControllerBlockEntity.setBossSpawnPositionOffset(entitySpawnPositionOffset)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!bossControllerBlockEntity.setBossSpawnPositionPitch(entitySpawnOrientationPitch)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!bossControllerBlockEntity.setBossSpawnPositionYaw(entitySpawnOrientationYaw)) {
-				player.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!bossControllerBlockEntity.setBossTriggeredBlocks(bossTriggeredBlocksMap)) {
-				player.sendMessage(Text.translatable("dialogue_block.bossTriggeredBlocksList.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.bossTriggeredBlocksList.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			bossControllerBlockEntity.markDirty();
 			world.updateListeners(bossControllerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

@@ -1,47 +1,29 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public class UpdateDelayTriggerBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateDelayTriggerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_delay_trigger_block"),
-			UpdateDelayTriggerBlockPacket::new
-	);
+public record UpdateDelayTriggerBlockPacket(BlockPos delayTriggerBlockPosition, BlockPos triggeredBlockPositionOffset,
+											boolean triggeredBlockResets, int triggerDelay) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateDelayTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_delay_trigger_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateDelayTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDelayTriggerBlockPacket::write, UpdateDelayTriggerBlockPacket::new);
 
-	public final BlockPos delayTriggerBlockPosition;
-
-	public final BlockPos triggeredBlockPositionOffset;
-
-	public final boolean triggeredBlockResets;
-
-	public final int triggerDelay;
-
-	public UpdateDelayTriggerBlockPacket(BlockPos delayTriggerBlockPosition, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets, int triggerDelay) {
-		this.delayTriggerBlockPosition = delayTriggerBlockPosition;
-		this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
-		this.triggeredBlockResets = triggeredBlockResets;
-		this.triggerDelay = triggerDelay;
+	public UpdateDelayTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readBlockPos(), registryByteBuf.readBoolean(), registryByteBuf.readInt());
 	}
 
-	public UpdateDelayTriggerBlockPacket(PacketByteBuf buf) {
-		this(buf.readBlockPos(), buf.readBlockPos(), buf.readBoolean(), buf.readInt());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.delayTriggerBlockPosition);
+		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.triggeredBlockResets);
+		registryByteBuf.writeInt(this.triggerDelay);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.delayTriggerBlockPosition);
-		buf.writeBlockPos(this.triggeredBlockPositionOffset);
-		buf.writeBoolean(this.triggeredBlockResets);
-		buf.writeInt(this.triggerDelay);
-	}
-
 }

@@ -1,36 +1,26 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.packet.CustomPayload;
 
-public class TradeWithShopPacket implements FabricPacket {
-	public static final PacketType<TradeWithShopPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("trade_with_shop"),
-			TradeWithShopPacket::new
-	);
+public record TradeWithShopPacket(String shopIdentifier, int id) implements CustomPayload {
+	public static final CustomPayload.Id<TradeWithShopPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("trade_with_shop"));
+	public static final PacketCodec<RegistryByteBuf, TradeWithShopPacket> PACKET_CODEC = PacketCodec.of(TradeWithShopPacket::write, TradeWithShopPacket::new);
 
-	public final String shopIdentifier;
-	public final int id;
-
-	public TradeWithShopPacket(String shopIdentifier, int id) {
-		this.shopIdentifier = shopIdentifier;
-		this.id = id;
+	public TradeWithShopPacket(RegistryByteBuf registryByteBuf) {
+		this(registryByteBuf.readString(), registryByteBuf.readInt());
 	}
 
-	public TradeWithShopPacket(PacketByteBuf buf) {
-		this(buf.readString(), buf.readInt());
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeString(this.shopIdentifier);
+		registryByteBuf.writeInt(this.id);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
-	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeString(this.shopIdentifier);
-		buf.writeInt(this.id);
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
 }

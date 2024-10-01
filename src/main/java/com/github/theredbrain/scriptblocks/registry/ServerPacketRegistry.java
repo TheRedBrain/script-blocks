@@ -62,6 +62,7 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPac
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacketReceiver;
 import com.google.gson.Gson;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
@@ -83,117 +84,98 @@ public class ServerPacketRegistry {
 //    public static final Identifier SYNC_WEAPON_POSES = ScriptBlocksMod.identifier("sync_weapon_poses");
 
 	public static void init() {
-//        ServerPlayNetworking.registerGlobalReceiver(SwapHandItemsPacket.TYPE, new SwapHandItemsPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(SheatheWeaponsPacket.TYPE, new SheatheWeaponsPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(TwoHandMainWeaponPacket.TYPE, new TwoHandMainWeaponPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(ToggleNecklaceAbilityPacket.TYPE, new ToggleNecklaceAbilityPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(OpenBackpackScreenPacket.TYPE, new OpenBackpackScreenPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(AttackStaminaCostPacket.TYPE, new AttackStaminaCostPacketReceiver());
-//
-		ServerPlayNetworking.registerGlobalReceiver(AddStatusEffectPacket.TYPE, new AddStatusEffectPacketReceiver());
 
+		PayloadTypeRegistry.playC2S().register(AddStatusEffectPacket.PACKET_ID, AddStatusEffectPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(AddStatusEffectPacket.PACKET_ID, new AddStatusEffectPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateHousingBlockAdventurePacket.TYPE, new UpdateHousingBlockAdventurePacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateHousingBlockAdventurePacket.PACKET_ID, UpdateHousingBlockAdventurePacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateHousingBlockAdventurePacket.PACKET_ID, new UpdateHousingBlockAdventurePacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateHousingBlockCreativePacket.TYPE, new UpdateHousingBlockCreativePacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateHousingBlockCreativePacket.PACKET_ID, UpdateHousingBlockCreativePacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateHousingBlockCreativePacket.PACKET_ID, new UpdateHousingBlockCreativePacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(SetHousingBlockOwnerPacket.TYPE, new SetHousingBlockOwnerPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(SetHousingBlockOwnerPacket.PACKET_ID, SetHousingBlockOwnerPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(SetHousingBlockOwnerPacket.PACKET_ID, new SetHousingBlockOwnerPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(ResetHouseHousingBlockPacket.TYPE, new ResetHouseHousingBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(ResetHouseHousingBlockPacket.PACKET_ID, ResetHouseHousingBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ResetHouseHousingBlockPacket.PACKET_ID, new ResetHouseHousingBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateJigsawPlacerBlockPacket.TYPE, new UpdateJigsawPlacerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateJigsawPlacerBlockPacket.PACKET_ID, UpdateJigsawPlacerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateJigsawPlacerBlockPacket.PACKET_ID, new UpdateJigsawPlacerBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateRedstoneTriggerBlockPacket.TYPE, new UpdateRedstoneTriggerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateRedstoneTriggerBlockPacket.PACKET_ID, UpdateRedstoneTriggerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateRedstoneTriggerBlockPacket.PACKET_ID, new UpdateRedstoneTriggerBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateRelayTriggerBlockPacket.TYPE, new UpdateRelayTriggerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateRelayTriggerBlockPacket.PACKET_ID, UpdateRelayTriggerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateRelayTriggerBlockPacket.PACKET_ID, new UpdateRelayTriggerBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredCounterBlockPacket.TYPE, new UpdateTriggeredCounterBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredCounterBlockPacket.PACKET_ID, UpdateTriggeredCounterBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredCounterBlockPacket.PACKET_ID, new UpdateTriggeredCounterBlockPacketReceiver());
 
-//        ServerPlayNetworking.registerGlobalReceiver(UpdateResetTriggerBlockPacket.TYPE, new UpdateResetTriggerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateDelayTriggerBlockPacket.PACKET_ID, UpdateDelayTriggerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateDelayTriggerBlockPacket.PACKET_ID, new UpdateDelayTriggerBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateDelayTriggerBlockPacket.TYPE, new UpdateDelayTriggerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateInteractiveLootBlockPacket.PACKET_ID, UpdateInteractiveLootBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveLootBlockPacket.PACKET_ID, new UpdateInteractiveLootBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveLootBlockPacket.TYPE, new UpdateInteractiveLootBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateUseRelayBlockPacket.PACKET_ID, UpdateUseRelayBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayBlockPacket.PACKET_ID, new UpdateUseRelayBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayBlockPacket.TYPE, new UpdateUseRelayBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(LeaveHouseFromHousingScreenPacket.PACKET_ID, LeaveHouseFromHousingScreenPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(LeaveHouseFromHousingScreenPacket.PACKET_ID, new LeaveHouseFromHousingScreenPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(LeaveHouseFromHousingScreenPacket.TYPE, new LeaveHouseFromHousingScreenPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateMimicBlockPacket.PACKET_ID, UpdateMimicBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateMimicBlockPacket.PACKET_ID, new UpdateMimicBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateMimicBlockPacket.TYPE, new UpdateMimicBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateBossControllerBlockPacket.PACKET_ID, UpdateBossControllerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateBossControllerBlockPacket.PACKET_ID, new UpdateBossControllerBlockPacketReceiver());
 
-//        ServerPlayNetworking.registerGlobalReceiver(RemoveMannequinPacket.TYPE, new RemoveMannequinPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(UpdateMannequinSettingsPacket.TYPE, new UpdateMannequinSettingsPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(UpdateMannequinEquipmentPacket.TYPE, new UpdateMannequinEquipmentPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(UpdateMannequinModelPartsPacket.TYPE, new UpdateMannequinModelPartsPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(ExportImportMannequinEquipmentPacket.TYPE, new ExportImportMannequinEquipmentPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, UpdateTriggeredSpawnerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, new UpdateTriggeredSpawnerBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateBossControllerBlockPacket.TYPE, new UpdateBossControllerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateLocationControlBlockPacket.PACKET_ID, UpdateLocationControlBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateLocationControlBlockPacket.PACKET_ID, new UpdateLocationControlBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredSpawnerBlockPacket.TYPE, new UpdateTriggeredSpawnerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateEntranceDelegationBlockPacket.PACKET_ID, UpdateEntranceDelegationBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateEntranceDelegationBlockPacket.PACKET_ID, new UpdateEntranceDelegationBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateLocationControlBlockPacket.TYPE, new UpdateLocationControlBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateAreaBlockPacket.PACKET_ID, UpdateAreaBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaBlockPacket.PACKET_ID, new UpdateAreaBlockPacketReceiver());
 
-//        ServerPlayNetworking.registerGlobalReceiver(CraftFromCraftingBenchPacket.TYPE, new CraftFromCraftingBenchPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(ToggleUseStashForCraftingPacket.TYPE, new ToggleUseStashForCraftingPacketReceiver());
-//
-//        ServerPlayNetworking.registerGlobalReceiver(UpdateCraftingBenchScreenHandlerPropertyPacket.TYPE, new UpdateCraftingBenchScreenHandlerPropertyPacketReceiver());
-
-		ServerPlayNetworking.registerGlobalReceiver(UpdateEntranceDelegationBlockPacket.TYPE, new UpdateEntranceDelegationBlockPacketReceiver());
-
-		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaBlockPacket.TYPE, new UpdateAreaBlockPacketReceiver());
-
-		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredAdvancementCheckerBlockPacket.TYPE, new UpdateTriggeredAdvancementCheckerBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, new UpdateTriggeredAdvancementCheckerBlockPacketReceiver());
 
 		// --- teleporter packets
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateTeleporterBlockPacket.TYPE, new UpdateTeleporterBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateTeleporterBlockPacket.PACKET_ID, UpdateTeleporterBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTeleporterBlockPacket.PACKET_ID, new UpdateTeleporterBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(SetManualResetLocationControlBlockPacket.TYPE, new SetManualResetLocationControlBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(SetManualResetLocationControlBlockPacket.PACKET_ID, SetManualResetLocationControlBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(SetManualResetLocationControlBlockPacket.PACKET_ID, new SetManualResetLocationControlBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(TeleportFromTeleporterBlockPacket.TYPE, new TeleportFromTeleporterBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(TeleportFromTeleporterBlockPacket.PACKET_ID, TeleportFromTeleporterBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(TeleportFromTeleporterBlockPacket.PACKET_ID, new TeleportFromTeleporterBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(TeleportToTeamPacket.TYPE, new TeleportToTeamPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(TeleportToTeamPacket.PACKET_ID, TeleportToTeamPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(TeleportToTeamPacket.PACKET_ID, new TeleportToTeamPacketReceiver());
 
 		// --- shop packets
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateShopBlockPacket.TYPE, new UpdateShopBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateShopBlockPacket.PACKET_ID, UpdateShopBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateShopBlockPacket.PACKET_ID, new UpdateShopBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(TradeWithShopPacket.TYPE, new TradeWithShopPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(TradeWithShopPacket.PACKET_ID, TradeWithShopPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(TradeWithShopPacket.PACKET_ID, new TradeWithShopPacketReceiver());
 
 		// --- dialogue packets
 
-		ServerPlayNetworking.registerGlobalReceiver(UpdateDialogueBlockPacket.TYPE, new UpdateDialogueBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateDialogueBlockPacket.PACKET_ID, UpdateDialogueBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateDialogueBlockPacket.PACKET_ID, new UpdateDialogueBlockPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(DialogueAnswerPacket.TYPE, new DialogueAnswerPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(DialogueAnswerPacket.PACKET_ID, DialogueAnswerPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(DialogueAnswerPacket.PACKET_ID, new DialogueAnswerPacketReceiver());
 
-		ServerPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.TYPE, new OpenDialogueScreenPacketReceiver());
-	}
-
-	public static class ServerConfigSync {
-		public static Identifier ID = ScriptBlocks.identifier("server_config_sync");
-
-		public static PacketByteBuf write(ServerConfig serverConfig) {
-			var gson = new Gson();
-			var json = gson.toJson(serverConfig);
-			var buffer = PacketByteBufs.create();
-			buffer.writeString(json);
-			return buffer;
-		}
-
-		public static ServerConfig read(PacketByteBuf buffer) {
-			var gson = new Gson();
-			var json = buffer.readString();
-			return gson.fromJson(json, ServerConfig.class);
-		}
+		PayloadTypeRegistry.playC2S().register(OpenDialogueScreenPacket.PACKET_ID, OpenDialogueScreenPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, new OpenDialogueScreenPacketReceiver());
 	}
 }

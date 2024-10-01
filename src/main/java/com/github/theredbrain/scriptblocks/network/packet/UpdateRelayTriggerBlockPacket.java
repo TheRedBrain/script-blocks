@@ -1,85 +1,58 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
-import com.github.theredbrain.scriptblocks.util.PacketByteBufUtils;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateRelayTriggerBlockPacket implements FabricPacket {
-	public static final PacketType<UpdateRelayTriggerBlockPacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_relay_trigger_block"),
-			UpdateRelayTriggerBlockPacket::new
-	);
+public record UpdateRelayTriggerBlockPacket(BlockPos relayTriggerBlockPosition, String selectionMode, boolean showArea,
+											boolean resetsArea, Vec3i areaDimensions, BlockPos areaPositionOffset,
+											List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks,
+											String triggerMode, int triggerAmount) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateRelayTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_relay_trigger_block"));
+	public static final PacketCodec<RegistryByteBuf, UpdateRelayTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateRelayTriggerBlockPacket::write, UpdateRelayTriggerBlockPacket::new);
 
-	public final BlockPos relayTriggerBlockPosition;
-	public final RelayTriggerBlockEntity.SelectionMode selectionMode;
-	public final boolean showArea;
-	public final boolean resetsArea;
-	public final Vec3i areaDimensions;
-	public final BlockPos areaPositionOffset;
-
-	public final List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks;
-
-	public final RelayTriggerBlockEntity.TriggerMode triggerMode;
-
-	public final int triggerAmount;
-
-	public UpdateRelayTriggerBlockPacket(BlockPos relayTriggerBlockPosition, String selectionMode, boolean showArea, boolean resetsArea, Vec3i areaDimensions, BlockPos areaPositionOffset, List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks, String triggerMode, int triggerAmount) {
-		this.relayTriggerBlockPosition = relayTriggerBlockPosition;
-		this.selectionMode = RelayTriggerBlockEntity.SelectionMode.byName(selectionMode).orElseGet(() -> RelayTriggerBlockEntity.SelectionMode.LIST);
-		this.showArea = showArea;
-		this.resetsArea = resetsArea;
-		this.areaDimensions = areaDimensions;
-		this.areaPositionOffset = areaPositionOffset;
-		this.triggeredBlocks = triggeredBlocks;
-		this.triggerMode = RelayTriggerBlockEntity.TriggerMode.byName(triggerMode).orElseGet(() -> RelayTriggerBlockEntity.TriggerMode.NORMAL);
-		this.triggerAmount = triggerAmount;
-	}
-
-	public UpdateRelayTriggerBlockPacket(PacketByteBuf buf) {
+	public UpdateRelayTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
-				buf.readBlockPos(),
-				buf.readString(),
-				buf.readBoolean(),
-				buf.readBoolean(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readBoolean(),
 				new Vec3i(
-						buf.readInt(),
-						buf.readInt(),
-						buf.readInt()
+						registryByteBuf.readInt(),
+						registryByteBuf.readInt(),
+						registryByteBuf.readInt()
 				),
-				buf.readBlockPos(),
-				buf.readList(new PacketByteBufUtils.MutablePairMutablePairBlockPosBooleanIntegerReader()),
-				buf.readString(),
-				buf.readInt());
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER),
+				registryByteBuf.readString(),
+				registryByteBuf.readInt());
+	}
+
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.relayTriggerBlockPosition);
+		registryByteBuf.writeString(this.selectionMode);
+		registryByteBuf.writeBoolean(this.showArea);
+		registryByteBuf.writeBoolean(this.resetsArea);
+
+		registryByteBuf.writeInt(this.areaDimensions.getX());
+		registryByteBuf.writeInt(this.areaDimensions.getY());
+		registryByteBuf.writeInt(this.areaDimensions.getZ());
+		registryByteBuf.writeBlockPos(this.areaPositionOffset);
+
+		registryByteBuf.writeCollection(this.triggeredBlocks, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER);
+		registryByteBuf.writeString(this.triggerMode);
+		registryByteBuf.writeInt(this.triggerAmount);
 	}
 
 	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
-	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.relayTriggerBlockPosition);
-		buf.writeString(this.selectionMode.asString());
-		buf.writeBoolean(this.showArea);
-		buf.writeBoolean(this.resetsArea);
-
-		buf.writeInt(this.areaDimensions.getX());
-		buf.writeInt(this.areaDimensions.getY());
-		buf.writeInt(this.areaDimensions.getZ());
-		buf.writeBlockPos(this.areaPositionOffset);
-
-		buf.writeCollection(this.triggeredBlocks, new PacketByteBufUtils.MutablePairMutablePairBlockPosBooleanIntegerWriter());
-		buf.writeString(this.triggerMode.asString());
-		buf.writeInt(this.triggerAmount);
-	}
-
 }

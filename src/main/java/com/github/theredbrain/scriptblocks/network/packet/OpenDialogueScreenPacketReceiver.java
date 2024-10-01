@@ -8,19 +8,21 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 
-public class OpenDialogueScreenPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<OpenDialogueScreenPacket> {
+public class OpenDialogueScreenPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<OpenDialogueScreenPacket> {
 
 	@Override
-	public void receive(OpenDialogueScreenPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(OpenDialogueScreenPacket payload, ServerPlayNetworking.Context context) {
 
-		String responseDialogueIdentifier = packet.responseDialogueIdentifier;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		World world = player.getWorld();
+		String responseDialogueIdentifier = payload.responseDialogueIdentifier();
 
-		BlockEntity blockEntity = world.getBlockEntity(packet.dialogueBlockPos);
+		World world = serverPlayerEntity.getWorld();
+
+		BlockEntity blockEntity = world.getBlockEntity(payload.dialogueBlockPos());
 
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
-			player.openHandledScreen(DialogueBlock.createDialogueBlockScreenHandlerFactory(dialogueBlockEntity.getCachedState(), world, dialogueBlockEntity.getPos(), responseDialogueIdentifier));
+			serverPlayerEntity.openHandledScreen(DialogueBlock.createDialogueBlockScreenHandlerFactory(dialogueBlockEntity.getCachedState(), world, dialogueBlockEntity.getPos(), responseDialogueIdentifier));
 		}
 	}
 }

@@ -6,9 +6,9 @@ import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventory;
@@ -34,30 +34,32 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<DialogueAnswerPacket> {
+public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<DialogueAnswerPacket> {
 
 	@Override
-	public void receive(DialogueAnswerPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(DialogueAnswerPacket payload, ServerPlayNetworking.Context context) {
 
-		BlockPos dialogueBlockPos = packet.dialogueBlockPos;
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		Identifier answerIdentifier = packet.answerIdentifier;
+		BlockPos dialogueBlockPos = payload.dialogueBlockPos();
+
+		Identifier answerIdentifier = payload.answerIdentifier();
 
 		DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.getDialogueAnswer(answerIdentifier);
 
-		MinecraftServer server = player.getServer();
+		MinecraftServer server = serverPlayerEntity.getServer();
 
-		if (dialogueAnswer != null && server != null && player.getWorld().getBlockEntity(dialogueBlockPos) instanceof DialogueBlockEntity dialogueBlockEntity) {
+		if (dialogueAnswer != null && server != null && serverPlayerEntity.getWorld().getBlockEntity(dialogueBlockPos) instanceof DialogueBlockEntity dialogueBlockEntity) {
 
 			List<ItemUtils.VirtualItemStack> virtualItemStacks = dialogueAnswer.getItemCost();
 			if (virtualItemStacks != null) {
 
-				int playerInventorySize = player.getInventory().size();
+				int playerInventorySize = serverPlayerEntity.getInventory().size();
 				Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
 				ItemStack itemStack;
 
 				for (int k = 0; k < playerInventorySize; k++) {
-					playerInventoryCopy.setStack(k, player.getInventory().getStack(k).copy());
+					playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
 				}
 
 				for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
@@ -80,7 +82,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 						}
 					}
 					if (ingredientCount > 0) {
-						player.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
+						serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
 						return;
 					}
 				}
@@ -90,16 +92,16 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 					int ingredientCount = ingredient.getCount();
 
 					for (int j = 0; j < playerInventorySize; j++) {
-						if (player.getInventory().getStack(j).isOf(virtualItem)) {
-							itemStack = player.getInventory().getStack(j).copy();
+						if (serverPlayerEntity.getInventory().getStack(j).isOf(virtualItem)) {
+							itemStack = serverPlayerEntity.getInventory().getStack(j).copy();
 							int stackCount = itemStack.getCount();
 							if (stackCount >= ingredientCount) {
 								itemStack.setCount(stackCount - ingredientCount);
-								player.getInventory().setStack(j, itemStack);
+								serverPlayerEntity.getInventory().setStack(j, itemStack);
 								ingredientCount = 0;
 								break;
 							} else {
-								player.getInventory().setStack(j, ItemStack.EMPTY);
+								serverPlayerEntity.getInventory().setStack(j, ItemStack.EMPTY);
 								ingredientCount = ingredientCount - stackCount;
 							}
 						}
@@ -113,21 +115,21 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			// loot_table
 			Identifier lootTableIdentifier = dialogueAnswer.getLootTable();
 			if (lootTableIdentifier != null) {
-				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(player.getServerWorld()).add(LootContextParameters.THIS_ENTITY, player).add(LootContextParameters.ORIGIN, player.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
+				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParameters.THIS_ENTITY, serverPlayerEntity).add(LootContextParameters.ORIGIN, serverPlayerEntity.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
 				boolean bl = false;
 				for (ItemStack itemStack : server.getLootManager().getLootTable(lootTableIdentifier).generateLoot(lootContextParameterSet)) {
-					if (player.giveItemStack(itemStack)) {
-						player.getWorld().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2f, ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
+					if (serverPlayerEntity.giveItemStack(itemStack)) {
+						serverPlayerEntity.getWorld().playSound(null, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
 						bl = true;
 						continue;
 					}
-					ItemEntity itemEntity = player.dropItem(itemStack, false);
+					ItemEntity itemEntity = serverPlayerEntity.dropItem(itemStack, false);
 					if (itemEntity == null) continue;
 					itemEntity.resetPickupDelay();
-					itemEntity.setOwner(player.getUuid());
+					itemEntity.setOwner(serverPlayerEntity.getUuid());
 				}
 				if (bl) {
-					player.currentScreenHandler.sendContentUpdates();
+					serverPlayerEntity.currentScreenHandler.sendContentUpdates();
 				}
 			}
 
@@ -135,24 +137,23 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			Identifier advancementIdentifier = dialogueAnswer.getGrantedAdvancement();
 			String criterionName = dialogueAnswer.getCriterionName();
 			if (advancementIdentifier != null && criterionName != null) {
-//                AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
-				Advancement advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
+                AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
 				if (advancementEntry != null) {
-					player.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
+					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
 				}
 			}
 
 			// overlay message
 			String overlayMessage = dialogueAnswer.getOverlayMessage();
 			if (overlayMessage != null) {
-				player.sendMessageToClient(Text.translatable(overlayMessage), true);
+				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
 			}
 
 			String responseDialogueIdentifierString = dialogueAnswer.getResponseDialogue();
 			if (responseDialogueIdentifierString.isEmpty()) {
-				player.closeHandledScreen();
+				serverPlayerEntity.closeHandledScreen();
 			} else {
-				ServerPlayNetworking.send(player, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
+				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
 			}
 
 
@@ -168,7 +169,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 					if (entry.getLeft().equals(triggeredBlock)) {
 
 
-						BlockEntity blockEntity = player.getWorld().getBlockEntity(entry.getRight().getLeft().add(dialogueBlockPos));
+						BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(entry.getRight().getLeft().add(dialogueBlockPos));
 
 						if (blockEntity != dialogueBlockEntity) {
 							boolean triggeredBlockResets = entry.getRight().getRight();
@@ -193,12 +194,12 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				}
 				for (MutablePair<String, BlockPos> entry : dialogueUsedBlocksList) {
 					if (entry.getLeft().equals(usedBlock)) {
-						BlockHitResult blockHitResult = new BlockHitResult(player.getPos(), Direction.UP, entry.getRight().add(dialogueBlockPos), false);
-						World world = player.getWorld();
-						Hand hand = player.getActiveHand();
-						ItemStack itemStack = player.getStackInHand(hand);
+						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.getPos(), Direction.UP, entry.getRight().add(dialogueBlockPos), false);
+						World world = serverPlayerEntity.getWorld();
+						Hand hand = serverPlayerEntity.getActiveHand();
+						ItemStack itemStack = serverPlayerEntity.getStackInHand(hand);
 
-						player.interactionManager.interactBlock(player, world, itemStack, hand, blockHitResult);
+						serverPlayerEntity.interactionManager.interactBlock(serverPlayerEntity, world, itemStack, hand, blockHitResult);
 					}
 				}
 			}

@@ -11,26 +11,28 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateInteractiveLootBlockPacket> {
+public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateInteractiveLootBlockPacket> {
 	@Override
-	public void receive(UpdateInteractiveLootBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateInteractiveLootBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos interactiveLootBlockPosition = packet.interactiveLootBlockPosition;
+		BlockPos interactiveLootBlockPosition = payload.interactiveLootBlockPosition();
 
-		String lootTableIdentifierString = packet.lootTableIdentifierString;
+		String lootTableIdentifierString = payload.lootTableIdentifierString();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(interactiveLootBlockPosition);
 		BlockState blockState = world.getBlockState(interactiveLootBlockPosition);
 
 		if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
 			interactiveLootBlockEntity.setLootTableIdentifierString(lootTableIdentifierString);
-			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			interactiveLootBlockEntity.markDirty();
 			world.updateListeners(interactiveLootBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

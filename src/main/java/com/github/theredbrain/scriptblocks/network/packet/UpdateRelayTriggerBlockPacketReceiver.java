@@ -15,29 +15,31 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<UpdateRelayTriggerBlockPacket> {
+public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateRelayTriggerBlockPacket> {
 
 	@Override
-	public void receive(UpdateRelayTriggerBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(UpdateRelayTriggerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos relayTriggerBlockPos = packet.relayTriggerBlockPosition;
+		BlockPos relayTriggerBlockPos = payload.relayTriggerBlockPosition();
 
-		RelayTriggerBlockEntity.SelectionMode selectionMode = packet.selectionMode;
+		RelayTriggerBlockEntity.SelectionMode selectionMode = RelayTriggerBlockEntity.SelectionMode.valueOf(payload.selectionMode());
 
-		boolean showArea = packet.showArea;
-		boolean resetsArea = packet.resetsArea;
-		Vec3i areaDimensions = packet.areaDimensions;
-		BlockPos areaPositionOffset = packet.areaPositionOffset;
+		boolean showArea = payload.showArea();
+		boolean resetsArea = payload.resetsArea();
+		Vec3i areaDimensions = payload.areaDimensions();
+		BlockPos areaPositionOffset = payload.areaPositionOffset();
 
-		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = packet.triggeredBlocks;
-		RelayTriggerBlockEntity.TriggerMode triggerMode = packet.triggerMode;
-		int triggerAmount = packet.triggerAmount;
+		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = payload.triggeredBlocks();
+		RelayTriggerBlockEntity.TriggerMode triggerMode = RelayTriggerBlockEntity.TriggerMode.valueOf(payload.triggerMode());
+		int triggerAmount = payload.triggerAmount();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(relayTriggerBlockPos);
 		BlockState blockState = world.getBlockState(relayTriggerBlockPos);
@@ -51,7 +53,7 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 			relayTriggerBlockEntity.setTriggeredBlocks(triggeredBlocks);
 			relayTriggerBlockEntity.setTriggerMode(triggerMode);
 			relayTriggerBlockEntity.setTriggerAmount(triggerAmount);
-			player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 
 			relayTriggerBlockEntity.markDirty();
 			world.updateListeners(relayTriggerBlockPos, blockState, blockState, Block.NOTIFY_ALL);

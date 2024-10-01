@@ -1,69 +1,50 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
-public class UpdateHousingBlockCreativePacket implements FabricPacket {
-	public static final PacketType<UpdateHousingBlockCreativePacket> TYPE = PacketType.create(
-			ScriptBlocks.identifier("update_housing_block_creative"),
-			UpdateHousingBlockCreativePacket::new
-	);
+public record UpdateHousingBlockCreativePacket(BlockPos housingBlockPosition, boolean showRestrictBlockBreakingArea,
+											   Vec3i restrictBlockBreakingAreaDimensions,
+											   BlockPos restrictBlockBreakingAreaPositionOffset,
+											   BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets,
+											   String ownerMode) implements CustomPayload {
+	public static final CustomPayload.Id<UpdateHousingBlockCreativePacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_housing_block_creative"));
+	public static final PacketCodec<RegistryByteBuf, UpdateHousingBlockCreativePacket> PACKET_CODEC = PacketCodec.of(UpdateHousingBlockCreativePacket::write, UpdateHousingBlockCreativePacket::new);
 
-	public final BlockPos housingBlockPosition;
-	public final boolean showRestrictBlockBreakingArea;
-	public final Vec3i restrictBlockBreakingAreaDimensions;
-	public final BlockPos restrictBlockBreakingAreaPositionOffset;
-	public final BlockPos triggeredBlockPositionOffset;
-	public final boolean triggeredBlockResets;
-	public final HousingBlockEntity.OwnerMode ownerMode;
-
-	public UpdateHousingBlockCreativePacket(BlockPos housingBlockPosition, boolean showRestrictBlockBreakingArea, Vec3i restrictBlockBreakingAreaDimensions, BlockPos restrictBlockBreakingAreaPositionOffset, BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets, String ownerMode) {
-		this.housingBlockPosition = housingBlockPosition;
-		this.showRestrictBlockBreakingArea = showRestrictBlockBreakingArea;
-		this.restrictBlockBreakingAreaDimensions = restrictBlockBreakingAreaDimensions;
-		this.restrictBlockBreakingAreaPositionOffset = restrictBlockBreakingAreaPositionOffset;
-		this.triggeredBlockPositionOffset = triggeredBlockPositionOffset;
-		this.triggeredBlockResets = triggeredBlockResets;
-		this.ownerMode = HousingBlockEntity.OwnerMode.byName(ownerMode).orElseGet(() -> HousingBlockEntity.OwnerMode.DIMENSION_OWNER);
-	}
-
-	public UpdateHousingBlockCreativePacket(PacketByteBuf buf) {
+	public UpdateHousingBlockCreativePacket(RegistryByteBuf registryByteBuf) {
 		this(
-				buf.readBlockPos(),
-				buf.readBoolean(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
 				new Vec3i(
-						buf.readInt(),
-						buf.readInt(),
-						buf.readInt()
+						registryByteBuf.readInt(),
+						registryByteBuf.readInt(),
+						registryByteBuf.readInt()
 				),
-				buf.readBlockPos(),
-				buf.readBlockPos(),
-				buf.readBoolean(),
-				buf.readString()
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readString()
 		);
 	}
 
-	@Override
-	public PacketType<?> getType() {
-		return TYPE;
+	private void write(RegistryByteBuf registryByteBuf) {
+		registryByteBuf.writeBlockPos(this.housingBlockPosition);
+		registryByteBuf.writeBoolean(this.showRestrictBlockBreakingArea);
+		registryByteBuf.writeInt(this.restrictBlockBreakingAreaDimensions.getX());
+		registryByteBuf.writeInt(this.restrictBlockBreakingAreaDimensions.getY());
+		registryByteBuf.writeInt(this.restrictBlockBreakingAreaDimensions.getZ());
+		registryByteBuf.writeBlockPos(this.restrictBlockBreakingAreaPositionOffset);
+		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.triggeredBlockResets);
+		registryByteBuf.writeString(this.ownerMode);
 	}
 
 	@Override
-	public void write(PacketByteBuf buf) {
-		buf.writeBlockPos(this.housingBlockPosition);
-		buf.writeBoolean(this.showRestrictBlockBreakingArea);
-		buf.writeInt(this.restrictBlockBreakingAreaDimensions.getX());
-		buf.writeInt(this.restrictBlockBreakingAreaDimensions.getY());
-		buf.writeInt(this.restrictBlockBreakingAreaDimensions.getZ());
-		buf.writeBlockPos(this.restrictBlockBreakingAreaPositionOffset);
-		buf.writeBlockPos(this.triggeredBlockPositionOffset);
-		buf.writeBoolean(this.triggeredBlockResets);
-		buf.writeString(this.ownerMode.asString());
+	public CustomPayload.Id<? extends CustomPayload> getId() {
+		return PACKET_ID;
 	}
-
 }

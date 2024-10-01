@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.registry;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
+import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -12,8 +13,8 @@ public class ClientPacketRegistry {
 
 	public static void init() {
 
-		ClientPlayNetworking.registerGlobalReceiver(SendAnnouncementPacket.TYPE, (packet, player, responseSender) -> {
-			((DuckPlayerEntityMixin) player).scriptblocks$sendAnnouncement(packet.announcement);
+		ClientPlayNetworking.registerGlobalReceiver(SendAnnouncementPacket.PACKET_ID, (payload, context) -> {
+			((DuckPlayerEntityMixin) context.player()).scriptblocks$sendAnnouncement(payload.announcement());
 		});
 		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.SYNC_DIALOGUES, (client, handler, buffer, responseSender) -> { // TODO convert to packet
 			DialoguesRegistry.decodeRegistry(buffer);
@@ -30,8 +31,8 @@ public class ClientPacketRegistry {
 		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.SYNC_BOSSES, (client, handler, buffer, responseSender) -> { // TODO convert to packet
 			BossesRegistry.decodeRegistry(buffer);
 		});
-		ClientPlayNetworking.registerGlobalReceiver(ServerPacketRegistry.ServerConfigSync.ID, (client, handler, buf, responseSender) -> {
-			ScriptBlocks.serverConfig = ServerPacketRegistry.ServerConfigSync.read(buf);
+		ClientPlayNetworking.registerGlobalReceiver(ServerConfigSyncPacket.PACKET_ID, (payload, context) -> {
+			ScriptBlocks.serverConfig = payload.serverConfig();
 		});
 	}
 }

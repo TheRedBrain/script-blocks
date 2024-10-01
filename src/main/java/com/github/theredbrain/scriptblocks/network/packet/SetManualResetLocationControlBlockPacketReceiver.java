@@ -10,19 +10,21 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class SetManualResetLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPacketHandler<SetManualResetLocationControlBlockPacket> {
+public class SetManualResetLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<SetManualResetLocationControlBlockPacket> {
 	@Override
-	public void receive(SetManualResetLocationControlBlockPacket packet, ServerPlayerEntity player, PacketSender responseSender) {
+	public void receive(SetManualResetLocationControlBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		if (!player.isCreativeLevelTwoOp()) {
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
 			return;
 		}
 
-		BlockPos locationControlBlockPosition = packet.locationControlBlockPosition;
+		BlockPos locationControlBlockPosition = payload.locationControlBlockPosition();
 
-		boolean manualReset = packet.manualReset;
+		boolean manualReset = payload.manualReset();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
 		BlockState blockState = world.getBlockState(locationControlBlockPosition);
