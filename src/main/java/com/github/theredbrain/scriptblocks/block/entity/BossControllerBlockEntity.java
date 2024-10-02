@@ -479,7 +479,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			double d = (double) bC.pos.getX() + bC.bossSpawnPositionOffset.getX() + 0.5;
 			double e = (double) bC.pos.getY() + bC.bossSpawnPositionOffset.getY();
 			double f = (double) bC.pos.getZ() + bC.bossSpawnPositionOffset.getZ() + 0.5;
-			if (!serverWorld.isSpaceEmpty(optional.get().createSimpleBoundingBox(d, e, f))) {
+			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) {
 				ScriptBlocks.info("not enough space for spawning");
 				return false;
 			}
@@ -497,8 +497,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) bC.bossSpawnOrientationYaw, (float) bC.bossSpawnOrientationPitch);
 			if (entity2 instanceof MobEntity) {
 				if (bC.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
-					NbtCompound entityNbt = new NbtCompound();
-					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, entityNbt);
+					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);
 				}
 			}
 			if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {

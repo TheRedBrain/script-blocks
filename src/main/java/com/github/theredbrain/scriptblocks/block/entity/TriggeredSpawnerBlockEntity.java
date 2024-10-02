@@ -26,6 +26,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
@@ -59,7 +60,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 	private SpawningMode spawningMode = SpawningMode.ONCE;
 
-	private Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	private Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(POSITION_OFFSET_DEFAULT, false);
 	private BlockPos useRelayBlockPositionOffset = POSITION_OFFSET_DEFAULT;
@@ -124,12 +125,12 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		}
 
 		// TODO convert to an nbt element
-		List<EntityAttribute> entityAttributeModifiersKeys = new ArrayList<>(this.entityAttributeModifiers.keySet());
+		List<RegistryEntry<EntityAttribute>> entityAttributeModifiersKeys = new ArrayList<>(this.entityAttributeModifiers.keySet());
 		nbt.putInt("entityAttributeModifiersKeysSize", entityAttributeModifiersKeys.size());
 		for (int i = 0; i < entityAttributeModifiersKeys.size(); i++) {
-			EntityAttribute key = entityAttributeModifiersKeys.get(i);
+			RegistryEntry<EntityAttribute> key = entityAttributeModifiersKeys.get(i);
 			Collection<EntityAttributeModifier> modifierCollection = this.entityAttributeModifiers.get(key);
-			nbt.putString("entityAttributeModifiers_key" + i, String.valueOf(Registries.ATTRIBUTE.getId(key)));
+			nbt.putString("entityAttributeModifiers_key" + i, String.valueOf(Registries.ATTRIBUTE.getId(key.value())));
 			List<EntityAttributeModifier> modifierList = modifierCollection.stream().toList();
 			nbt.putInt("entityAttributeModifiers_modifierListSize_" + i, modifierList.size());
 			for (int j = 0; j < modifierList.size(); j++) {
@@ -268,11 +269,11 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		return true;
 	}
 
-	public Multimap<EntityAttribute, EntityAttributeModifier> getEntityAttributeModifiers() {
+	public Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getEntityAttributeModifiers() {
 		return this.entityAttributeModifiers;
 	}
 
-	public boolean setEntityAttributeModifiers(Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers) {
+	public boolean setEntityAttributeModifiers(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers) {
 		this.entityAttributeModifiers = entityAttributeModifiers;
 		return true;
 	}
@@ -406,7 +407,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			double d = (double) this.pos.getX() + this.entitySpawnPositionOffset.getX() + 0.5;
 			double e = (double) this.pos.getY() + this.entitySpawnPositionOffset.getY();
 			double f = (double) this.pos.getZ() + this.entitySpawnPositionOffset.getZ() + 0.5;
-			if (!serverWorld.isSpaceEmpty(optional.get().createSimpleBoundingBox(d, e, f))) return false;
+			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) return false;
 			BlockPos blockPos = BlockPos.ofFloored(d, e, f);
 			Entity entity2 = EntityType.loadEntityWithPassengers(this.entityTypeCompound, world, entity -> {
 				entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
@@ -420,7 +421,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) this.entitySpawnOrientationYaw, (float) this.entitySpawnOrientationPitch);
 			if (entity2 instanceof MobEntity) {
 				if (this.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
-					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null, null);
+					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);
 				}
 			}
 			if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
@@ -435,10 +436,10 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 				if (!this.entityAttributeModifiers.isEmpty()) {
 					AttributeContainer attributeContainer = ((LivingEntity) entity2).getAttributes();
 					this.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
-						EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance((EntityAttribute) attribute);
+						EntityAttributeInstance entityAttributeInstance = attributeContainer.getCustomInstance(attribute);
 						if (entityAttributeInstance != null) {
-							entityAttributeInstance.removeModifier(attributeModifier.getId());
-							entityAttributeInstance.addPersistentModifier((EntityAttributeModifier) attributeModifier);
+							entityAttributeInstance.removeModifier(attributeModifier);
+							entityAttributeInstance.addPersistentModifier(attributeModifier);
 						}
 						if (attribute == EntityAttributes.GENERIC_MAX_HEALTH) {
 							((LivingEntity) entity2).setHealth((float) ((LivingEntity) entity2).getAttributes().getValue(EntityAttributes.GENERIC_MAX_HEALTH));
