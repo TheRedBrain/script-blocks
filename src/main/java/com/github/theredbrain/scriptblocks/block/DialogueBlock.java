@@ -60,7 +60,7 @@ public class DialogueBlock extends RotatedBlockWithEntity {
 
 			@Override
 			public Object getScreenOpeningData(ServerPlayerEntity player) {
-				return new DialogueBlockScreenHandler.DialogueBlockData(pos);
+				return new DialogueBlockScreenHandler.DialogueBlockData(pos, dialogueIdentifierString);
 			}
 
 			@Override

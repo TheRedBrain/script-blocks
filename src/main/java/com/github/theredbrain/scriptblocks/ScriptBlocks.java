@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.config.ServerConfigWrapper;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
+import com.github.theredbrain.scriptblocks.registry.ComponentRegistry;
 import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
 import com.github.theredbrain.scriptblocks.registry.DialoguesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -43,6 +43,7 @@ public class ScriptBlocks implements ModInitializer {
 		ServerPacketRegistry.init();
 
 		// Registry
+		ComponentRegistry.init();
 		BlockRegistry.init();
 		EntityRegistry.init();
 		DimensionsManager.init();
@@ -50,7 +51,7 @@ public class ScriptBlocks implements ModInitializer {
 		DialoguesRegistry.init();
 		DialogueAnswersRegistry.init();
 		ShopsRegistry.init();
-		BossesRegistry.init();
+//		BossesRegistry.init();
 		LocationsRegistry.init();
 		ItemRegistry.init();
 		ItemGroupRegistry.init();

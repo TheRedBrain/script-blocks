@@ -8,6 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -33,7 +34,7 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 		Vec3i areaDimensions = payload.applicationAreaDimensions();
 		BlockPos areaPositionOffset = payload.applicationAreaPositionOffset();
 
-		String bossIdentifier = payload.bossIdentifier();
+		Identifier bossIdentifier = payload.bossIdentifier();
 		BlockPos entitySpawnPositionOffset = payload.entitySpawnPositionOffset();
 		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
 		double entitySpawnOrientationYaw = payload.entitySpawnOrientationYaw();

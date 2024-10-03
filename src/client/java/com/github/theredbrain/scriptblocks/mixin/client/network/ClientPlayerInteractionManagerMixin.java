@@ -14,6 +14,7 @@ import net.minecraft.client.network.SequencedPacketCreator;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -54,7 +55,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$breakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
 			ClientWorld world = this.client.world;
 			BlockState blockState = world.getBlockState(pos);
 			Block block = blockState.getBlock();
@@ -71,7 +72,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
 			BlockPos housingBlockPos = ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(this.client.player).getValue();
 			boolean bl = false;
 			if (!Objects.equals(housingBlockPos, new BlockPos(0, 0, 0)) && this.client.world != null && this.client.world.getBlockEntity(housingBlockPos) instanceof HousingBlockEntity housingBlockEntity) {
@@ -93,7 +94,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
 			this.syncSelectedSlot();
 			BlockPos housingBlockPos = ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).getValue();
 			boolean bl = false;

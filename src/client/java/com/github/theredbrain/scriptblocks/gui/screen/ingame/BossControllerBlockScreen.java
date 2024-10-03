@@ -195,7 +195,7 @@ public class BossControllerBlockScreen extends Screen {
 
 		this.bossIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
 		this.bossIdentifierField.setMaxLength(128);
-		this.bossIdentifierField.setText(this.bossControllerBlock.getBossIdentifier());
+		this.bossIdentifierField.setText(this.bossControllerBlock.getBossIdentifier().toString());
 		this.addSelectableChild(this.bossIdentifierField);
 
 		this.entitySpawnPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 100, 20, Text.empty());
@@ -500,7 +500,7 @@ public class BossControllerBlockScreen extends Screen {
 						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
 						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
 				),
-				this.bossIdentifierField.getText(),
+				Identifier.of(this.bossIdentifierField.getText()),
 				new BlockPos(
 						ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getText()),
 						ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getText()),

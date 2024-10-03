@@ -88,7 +88,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	private ButtonWidget doneButton;
 	private ButtonWidget cancelButton;
 
-	List<MutablePair<String, EntityAttributeModifier>> entityAttributeModifiersList = new ArrayList<>();
+	List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList = new ArrayList<>();
 	private CreativeScreenPage creativeScreenPage;
 	private EntityAttributeModifier.Operation newEntityAttributeModifierOperation;
 	private int scrollPosition = 0;
@@ -112,7 +112,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	private void addNewEntityAttributeModifier() {
 		// TODO check for existing entries and validate fields
 		this.entityAttributeModifiersList.add(new MutablePair<>(
-				this.newEntityAttributeModifierIdentifierField.getText(),
+				Identifier.of(this.newEntityAttributeModifierIdentifierField.getText()),
 				new EntityAttributeModifier(
 						Identifier.of(this.newEntityAttributeModifierNameField.getText()),
 						ItemUtils.parseDouble(this.newEntityAttributeModifierValueField.getText()),
@@ -155,7 +155,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 			Collection<EntityAttributeModifier> modifierCollection = entityAttributeModifiers.get(key);
 			List<EntityAttributeModifier> modifierList = modifierCollection.stream().toList();
 			for (EntityAttributeModifier entityAttributeModifier : modifierList) {
-				this.entityAttributeModifiersList.add(new MutablePair<>(String.valueOf(Registries.ATTRIBUTE.getId(key.value())), entityAttributeModifier));
+				this.entityAttributeModifiersList.add(new MutablePair<>(Registries.ATTRIBUTE.getId(key.value()), entityAttributeModifier));
 			}
 		}
 
@@ -338,7 +338,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		// TODO
-		List<MutablePair<String, EntityAttributeModifier>> list = this.entityAttributeModifiersList;
+		List<MutablePair<Identifier, EntityAttributeModifier>> list = this.entityAttributeModifiersList;
 		String string = this.entitySpawnPositionOffsetXField.getText();
 		String string1 = this.entitySpawnPositionOffsetYField.getText();
 		String string2 = this.entitySpawnPositionOffsetZField.getText();

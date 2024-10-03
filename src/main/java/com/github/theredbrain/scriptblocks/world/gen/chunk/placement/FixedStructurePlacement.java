@@ -1,7 +1,8 @@
 package com.github.theredbrain.scriptblocks.world.gen.chunk.placement;
 
 import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegistry;
-import com.mojang.serialization.Codec;
+import com.mojang.datafixers.Products;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -11,23 +12,42 @@ import net.minecraft.world.gen.chunk.placement.StructurePlacementCalculator;
 import net.minecraft.world.gen.chunk.placement.StructurePlacementType;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 public class FixedStructurePlacement extends StructurePlacement {
-	public static final Codec<FixedStructurePlacement> CODEC = RecordCodecBuilder.create((instance) -> {
-		return instance.group(BlockPos.CODEC.listOf().fieldOf("positions").forGetter((placement) -> {
-			return placement.positions;
-		})).and(buildCodec(instance)).apply(instance, FixedStructurePlacement::new);
-	});
+	public static final MapCodec<FixedStructurePlacement> CODEC = RecordCodecBuilder.mapCodec(
+			instance -> buildFixedStructuresCodec(instance).apply(instance, FixedStructurePlacement::new)
+	);
+
 	private final List<BlockPos> positions;
 	private final List<BlockPos> blacklist;
 
-	public FixedStructurePlacement(List<BlockPos> positions, Vec3i locateOffset, FrequencyReductionMethod frequencyReductionMethod, float frequency, int salt, Optional<ExclusionZone> exclusionZone) {
-		super(locateOffset, FrequencyReductionMethod.DEFAULT, 1.0F, 0, Optional.empty());
+	private static Products.P7<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>, List<BlockPos>, List<BlockPos>> buildFixedStructuresCodec(
+			RecordCodecBuilder.Instance<FixedStructurePlacement> instance
+	) {
+		Products.P5<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>> p5 = buildCodec(
+				instance
+		);
+		Products.P2<RecordCodecBuilder.Mu<FixedStructurePlacement>, List<BlockPos>, List<BlockPos>> p2 = instance.group(
+				BlockPos.CODEC.listOf().fieldOf("positions").forGetter(FixedStructurePlacement::getPositions),
+				BlockPos.CODEC.listOf().fieldOf("blacklist").forGetter(FixedStructurePlacement::getBlacklist)
+		);
+		return new Products.P7<>(p5.t1(), p5.t2(), p5.t3(), p5.t4(), p5.t5(), p2.t1(), p2.t2());
+	}
+
+	public FixedStructurePlacement(
+			Vec3i locateOffset,
+			StructurePlacement.FrequencyReductionMethod generationPredicateType,
+			float frequency,
+			int salt,
+			Optional<StructurePlacement.ExclusionZone> exclusionZone,
+			List<BlockPos> positions,
+			List<BlockPos> blacklist
+	) {
+		super(locateOffset, generationPredicateType, frequency, salt, exclusionZone);
 		this.positions = positions;
-		this.blacklist = new LinkedList();
+		this.blacklist = blacklist;
 	}
 
 	public List<BlockPos> getPositions() {

@@ -122,7 +122,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	protected boolean canPathfindThrough(BlockState state, NavigationType type) {
+	public boolean canPathfindThrough(BlockState state, NavigationType type) {
 		switch (type) {
 			case LAND, AIR -> {
 				return state.get(OPEN);
@@ -200,7 +200,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 				if (stateDown.get(HALF) == DoubleBlockHalf.UPPER) {
 					return ActionResult.PASS;
 				}
-				return stateDown.getBlock().onUse(stateDown, world, posDown, player, hand, hit);
+				return stateDown.getBlock().onUse(stateDown, world, posDown, player, hit);
 			}
 			if (bl) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
@@ -212,7 +212,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 				if (relayBlockState.isOf(this)) {
 					return ActionResult.PASS;
 				}
-				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hand, hit);
+				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
 		return ActionResult.PASS;

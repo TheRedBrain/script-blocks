@@ -43,6 +43,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -81,15 +84,21 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 			housingBlockEntity = housingBlockEntity1;
 		}
 		int currentPermissionLevel;
-		if (this.hasStatusEffect(StatusEffectsRegistry.HOUSING_OWNER_EFFECT) && housingBlockEntity != null) {
+
+		RegistryEntry<StatusEffect> housingOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
+		RegistryEntry<StatusEffect> housingCoOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT);
+		RegistryEntry<StatusEffect> housingTrustedStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT);
+		RegistryEntry<StatusEffect> housingGuestStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_GUEST_EFFECT);
+		RegistryEntry<StatusEffect> housingStrangerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT);
+		if (this.hasStatusEffect(housingOwnerStatusEffect) && housingBlockEntity != null) {
 			currentPermissionLevel = 0;
-		} else if (this.hasStatusEffect(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT) && housingBlockEntity != null) {
+		} else if (this.hasStatusEffect(housingCoOwnerStatusEffect) && housingBlockEntity != null) {
 			currentPermissionLevel = 1;
-		} else if (this.hasStatusEffect(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT) && housingBlockEntity != null) {
+		} else if (this.hasStatusEffect(housingTrustedStatusEffect) && housingBlockEntity != null) {
 			currentPermissionLevel = 2;
-		} else if (this.hasStatusEffect(StatusEffectsRegistry.HOUSING_GUEST_EFFECT) && housingBlockEntity != null) {
+		} else if (this.hasStatusEffect(housingGuestStatusEffect) && housingBlockEntity != null) {
 			currentPermissionLevel = 3;
-		} else if (this.hasStatusEffect(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT) && housingBlockEntity != null) {
+		} else if (this.hasStatusEffect(housingStrangerStatusEffect) && housingBlockEntity != null) {
 			currentPermissionLevel = 4;
 		} else if (this.isCreative()) {
 			currentPermissionLevel = 5;

@@ -48,6 +48,8 @@ repositories {
 }
 
 loom {
+	accessWidenerPath = file("src/main/resources/scriptblocks.accesswidener")
+
 	splitEnvironmentSourceSets()
 
 	mods {

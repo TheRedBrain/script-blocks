@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public record UpdateBossControllerBlockPacket(BlockPos bossControllerBlockPosition, boolean showArea,
 											  Vec3i applicationAreaDimensions, BlockPos applicationAreaPositionOffset,
-											  String bossIdentifier, BlockPos entitySpawnPositionOffset,
+											  Identifier bossIdentifier, BlockPos entitySpawnPositionOffset,
 											  double entitySpawnOrientationPitch, double entitySpawnOrientationYaw,
 											  List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateBossControllerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_boss_controller_block"));
@@ -29,7 +30,7 @@ public record UpdateBossControllerBlockPacket(BlockPos bossControllerBlockPositi
 						registryByteBuf.readInt()
 				),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readIdentifier(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
@@ -46,7 +47,7 @@ public record UpdateBossControllerBlockPacket(BlockPos bossControllerBlockPositi
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.applicationAreaPositionOffset);
 
-		registryByteBuf.writeString(this.bossIdentifier);
+		registryByteBuf.writeIdentifier(this.bossIdentifier);
 		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);

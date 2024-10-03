@@ -13,6 +13,7 @@
 	"license": "MIT",
 	"icon": "assets/scriptblocks/icon.png",
 	"environment": "*",
+	"accessWidener": "scriptblocks.accesswidener",
 	"entrypoints": {
 		"main": [
 			"com.github.theredbrain.scriptblocks.ScriptBlocks"

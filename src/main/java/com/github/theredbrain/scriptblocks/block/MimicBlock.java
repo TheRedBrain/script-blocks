@@ -112,29 +112,29 @@ public class MimicBlock extends RotatedBlockWithEntity {
 		return mimicBlockState.getBlock().getCollisionShape(mimicBlockState, world, mimicBlockPos, context);
 	}
 
-	@Override
-	protected boolean canPathfindThrough(BlockState state, NavigationType type) {
-		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
-		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
-		boolean debugMode = false;
-		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
-			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
-			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
-			debugMode = mimicBlockEntity.isDebugModeActive();
-		}
-		BlockState mimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
-		BlockPos mimicBlockPos;
-		if (state.get(TRIGGERED)) {
-			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
-		} else {
-			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
-		}
-		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !debugMode) {
-			mimicBlockState = blockState;
-		}
-		return mimicBlockState.getBlock().canPathfindThrough(mimicBlockState, type);
-	}
+//	@Override
+//	public boolean canPathfindThrough(BlockState state, NavigationType type) {
+//		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
+//		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
+//		boolean debugMode = false;
+//		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
+//			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
+//			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
+//			debugMode = mimicBlockEntity.isDebugModeActive();
+//		}
+//		BlockState mimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
+//		BlockPos mimicBlockPos;
+//		if (state.get(TRIGGERED)) {
+//			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
+//		} else {
+//			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
+//		}
+//		BlockState blockState = world.getBlockState(mimicBlockPos);
+//		if (!blockState.isOf(this) && !debugMode) {
+//			mimicBlockState = blockState;
+//		}
+//		return mimicBlockState.getBlock().canPathfindThrough(mimicBlockState, type);
+//	}
 
 	@Override
 	public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {

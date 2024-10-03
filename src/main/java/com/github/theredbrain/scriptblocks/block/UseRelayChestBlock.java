@@ -84,7 +84,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	protected boolean canPathfindThrough(BlockState state, NavigationType type) {
+	public boolean canPathfindThrough(BlockState state, NavigationType type) {
 		return false;
 	}
 
@@ -119,7 +119,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 					if (relayBlockState.isOf(this)) {
 						return ActionResult.PASS;
 					}
-					return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hand, hit);
+					return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
 				}
 			}
 		}

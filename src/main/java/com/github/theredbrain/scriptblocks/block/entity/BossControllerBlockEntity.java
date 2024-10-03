@@ -74,7 +74,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = POSITION_OFFSET_DEFAULT;
 
-	private String bossIdentifier = "";
+	private Identifier bossIdentifier = null;
 
 	private BlockPos bossSpawnPositionOffset = POSITION_OFFSET_DEFAULT;
 	private double bossSpawnOrientationPitch = 0.0;
@@ -157,8 +157,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaPositionOffsetZ");
 		}
 
-		if (!this.bossIdentifier.isEmpty()) {
-			nbt.putString("bossIdentifier", this.bossIdentifier);
+		if (this.bossIdentifier != null) {
+			nbt.putString("bossIdentifier", this.bossIdentifier.toString());
 		} else {
 			nbt.remove("bossIdentifier");
 		}
@@ -242,7 +242,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 
 		if (nbt.contains("bossIdentifier", NbtElement.STRING_TYPE)) {
-			this.bossIdentifier = nbt.getString("bossIdentifier");
+			this.bossIdentifier = Identifier.of(nbt.getString("bossIdentifier"));
 		}
 
 		if (nbt.contains("bossSpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("bossSpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("bossSpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
@@ -300,9 +300,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static void startBattle(BossControllerBlockEntity bC) {
 
 		ScriptBlocks.info("startBattle");
-		Identifier identifier = Identifier.tryParse(bC.bossIdentifier);
+		Identifier identifier = bC.bossIdentifier;
 		if (identifier != null) {
-			bC.boss = BossesRegistry.registeredBosses.get(identifier);
+			bC.boss = null;//BossesRegistry.registeredBosses.get(identifier);
 		}
 
 		if (bC.boss != null) {
@@ -685,17 +685,13 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 
-	public String getBossIdentifier() {
+	public Identifier getBossIdentifier() {
 		return this.bossIdentifier;
 	}
 
-	public boolean setBossIdentifier(String newBossIdentifier) {
-		Boss boss = null;
-		Identifier identifier = Identifier.tryParse(newBossIdentifier);
-		if (identifier != null) {
-			boss = BossesRegistry.registeredBosses.get(identifier);
-		}
-		if (newBossIdentifier.isEmpty() || boss != null) {
+	public boolean setBossIdentifier(Identifier newBossIdentifier) {
+			boss = null;//BossesRegistry.registeredBosses.get(newBossIdentifier);
+		if (boss != null) {
 			this.bossIdentifier = newBossIdentifier;
 			return true;
 		}
