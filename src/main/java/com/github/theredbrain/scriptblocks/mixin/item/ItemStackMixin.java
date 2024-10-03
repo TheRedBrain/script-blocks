@@ -3,12 +3,15 @@ package com.github.theredbrain.scriptblocks.mixin.item;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -30,8 +33,7 @@ public abstract class ItemStackMixin {
 		throw new AssertionError();
 	}
 
-	@Shadow
-	public abstract boolean canPlaceOn(Registry<Block> blockRegistry, CachedBlockPosition pos);
+	@Shadow public abstract boolean canPlaceOn(CachedBlockPosition pos);
 
 	/**
 	 * @author TheRedBrain
@@ -43,7 +45,8 @@ public abstract class ItemStackMixin {
 		BlockPos blockPos = context.getBlockPos();
 
 		CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(context.getWorld(), blockPos, false);
-		if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)/* && !bl*/ && !this.canPlaceOn(context.getWorld().getRegistryManager().get(RegistryKeys.BLOCK), cachedBlockPosition)) {
+		RegistryEntry<StatusEffect> building_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE);
+		if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(building_status_effect)/* && !bl*/ && !this.canPlaceOn(cachedBlockPosition)) {
 			return ActionResult.PASS;
 		}
 		Item item = this.getItem();

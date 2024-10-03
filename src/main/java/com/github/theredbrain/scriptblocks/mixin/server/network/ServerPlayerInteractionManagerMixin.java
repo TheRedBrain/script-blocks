@@ -5,8 +5,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.OperatorBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
@@ -40,7 +43,8 @@ public abstract class ServerPlayerInteractionManagerMixin {
 	@Inject(method = "processBlockBreakingAction", at = @At("HEAD"), cancellable = true)
 	public void processBlockBreakingAction(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
 		if (action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
-			if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+			RegistryEntry<StatusEffect> building_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE);
+			if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(building_status_effect)) {
 				this.finishMining(pos, sequence, "creative destroy");
 				ci.cancel();
 			}
@@ -50,7 +54,8 @@ public abstract class ServerPlayerInteractionManagerMixin {
 
 	@Inject(method = "tryBreakBlock", at = @At("HEAD"), cancellable = true)
 	public void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(StatusEffectsRegistry.BUILDING_MODE)) {
+		RegistryEntry<StatusEffect> building_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE);
+		if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(building_status_effect)) {
 			BlockState blockState = this.world.getBlockState(pos);
 			BlockEntity blockEntity = this.world.getBlockEntity(pos);
 			Block block = blockState.getBlock();

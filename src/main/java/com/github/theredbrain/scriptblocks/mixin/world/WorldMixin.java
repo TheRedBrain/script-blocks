@@ -45,7 +45,7 @@ public abstract class WorldMixin implements WorldAccess {
 				}
 			}
 		}
-		BlockPos blockPos = new BlockPos(this.properties.getSpawnX(), this.properties.getSpawnY(), this.properties.getSpawnZ());
+		BlockPos blockPos = new BlockPos(this.properties.getSpawnPos().getX(), this.properties.getSpawnPos().getY(), this.properties.getSpawnPos().getZ());
 		if (!this.getWorldBorder().contains(blockPos)) {
 			blockPos = this.getTopPosition(Heightmap.Type.MOTION_BLOCKING, BlockPos.ofFloored(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
 		}

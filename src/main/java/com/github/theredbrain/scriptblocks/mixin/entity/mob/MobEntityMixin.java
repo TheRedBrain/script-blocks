@@ -63,11 +63,11 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	}
 
 	@Inject(method = "initDataTracker", at = @At("RETURN"))
-	protected void overhauleddamage$initDataTracker(CallbackInfo ci) {
-		this.dataTracker.startTracking(BOSS_HEALTH_THRESHOLD, BOSS_HEALTH_THRESHOLD_DEFAULT);
-		this.dataTracker.startTracking(BOSS_PHASE, BOSS_PHASE_DEFAULT);
-		this.dataTracker.startTracking(CONTROLLER_BLOCK_POS, CONTROLLER_BLOCK_POS_DEFAULT);
-		this.dataTracker.startTracking(USE_RELAY_BLOCK_POS, USE_RELAY_BLOCK_POS_DEFAULT);
+	protected void overhauleddamage$initDataTracker(DataTracker.Builder builder, CallbackInfo ci) {
+		builder.add(BOSS_HEALTH_THRESHOLD, BOSS_HEALTH_THRESHOLD_DEFAULT);
+		builder.add(BOSS_PHASE, BOSS_PHASE_DEFAULT);
+		builder.add(CONTROLLER_BLOCK_POS, CONTROLLER_BLOCK_POS_DEFAULT);
+		builder.add(USE_RELAY_BLOCK_POS, USE_RELAY_BLOCK_POS_DEFAULT);
 
 	}
 
