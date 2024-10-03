@@ -1,20 +1,18 @@
 package com.github.theredbrain.scriptblocks.item;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.client.item.TooltipContext;
+import com.github.theredbrain.scriptblocks.component.type.BlockPositionDistanceMeterComponent;
+import com.github.theredbrain.scriptblocks.registry.ComponentRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -27,65 +25,49 @@ public class BlockPositionDistanceMeterItem extends Item {
 	@Override
 	public ActionResult useOnBlock(ItemUsageContext context) {
 		ItemStack itemStack = context.getStack();
+		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
 		PlayerEntity playerEntity = context.getPlayer();
 		BlockPos pos = context.getBlockPos();
-		if (playerEntity != null) {
-			NbtCompound itemStackNbt = itemStack.getOrCreateNbt();
-			if (!itemStackNbt.contains("isRootMode", NbtElement.BYTE_TYPE)) {
-				itemStackNbt.putBoolean("isRootMode", true);
-			}
-			NbtCompound nbt = new NbtCompound();
+		if (playerEntity != null && blockPositionDistanceMeterComponent != null) {
+			boolean isRootMode = blockPositionDistanceMeterComponent.is_root_mode();
+			BlockPos offset;
 			if (playerEntity.isSneaking()) {
-				boolean isRootMode = itemStackNbt.getBoolean("isRootMode");
-				nbt.putInt("x", pos.getX());
-				nbt.putInt("y", pos.getY());
-				nbt.putInt("z", pos.getZ());
+				BlockPos root_pos;
+				BlockPos offset_pos;
 				if (isRootMode) {
-					itemStackNbt.put("root_block_pos", nbt);
+					root_pos = pos;
+					offset_pos = blockPositionDistanceMeterComponent.offset_pos();
 					if (playerEntity.getEntityWorld().isClient()) {
 						playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_block", pos.getX(), pos.getY(), pos.getZ()));
 					}
 				} else {
-					itemStackNbt.put("offset_block_pos", nbt);
+					root_pos = blockPositionDistanceMeterComponent.root_pos();
+					offset_pos = pos;
 					if (playerEntity.getEntityWorld().isClient()) {
 						playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.set_offset_block", pos.getX(), pos.getY(), pos.getZ()));
 					}
 				}
-			} else {
-				if (itemStackNbt.contains("isRootMode", NbtElement.BYTE_TYPE)) {
-					boolean bl = itemStackNbt.getBoolean("isRootMode");
-					if (playerEntity.getEntityWorld().isClient()) {
-						playerEntity.sendMessage(bl ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
-					}
-				}
-				int root_pos_x = 0;
-				int root_pos_y = -70;
-				int root_pos_z = 0;
-				int offset_pos_x = 0;
-				int offset_pos_y = -70;
-				int offset_pos_z = 0;
-				if (itemStackNbt.contains("root_block_pos", NbtElement.COMPOUND_TYPE)) {
-					NbtCompound nbtCompound = itemStackNbt.getCompound("root_block_pos");
-					root_pos_x = nbtCompound.getInt("x");
-					root_pos_y = nbtCompound.getInt("y");
-					root_pos_z = nbtCompound.getInt("z");
-				}
-				if (itemStackNbt.contains("offset_block_pos", NbtElement.COMPOUND_TYPE)) {
-					NbtCompound nbtCompound = itemStackNbt.getCompound("offset_block_pos");
-					offset_pos_x = nbtCompound.getInt("x");
-					offset_pos_y = nbtCompound.getInt("y");
-					offset_pos_z = nbtCompound.getInt("z");
-				}
-				if (root_pos_y > -64 && offset_pos_y > -64) {
-					int offset_x = offset_pos_x - root_pos_x;
-					int offset_y = offset_pos_y - root_pos_y;
-					int offset_z = offset_pos_z - root_pos_z;
+				if (root_pos.getY() > -64 && offset_pos.getY() > -64) {
+					int offset_x = offset_pos.getX() - root_pos.getX();
+					int offset_y = offset_pos.getY() - root_pos.getY();
+					int offset_z = offset_pos.getZ() - root_pos.getZ();
+					offset = new BlockPos(offset_pos.getX() - root_pos.getX(), offset_pos.getY() - root_pos.getY(), offset_pos.getZ() - root_pos.getZ());
 					if (playerEntity.getEntityWorld().isClient()) {
 						playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset_x, offset_y, offset_z));
 					}
+				} else {
+					offset = BlockPos.ORIGIN;
+				}
+				itemStack.set(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(isRootMode, root_pos, offset_pos, offset));
+
+			} else if (playerEntity.getEntityWorld().isClient()) {
+				playerEntity.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
+
+				offset = blockPositionDistanceMeterComponent.offset();
+				if (offset.getX() != 0 || offset.getY() != 0 || offset.getZ() != 0) {
+					playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()));
 				}
 			}
-			itemStack.setNbt(itemStackNbt);
 			return ActionResult.SUCCESS;
 		}
 		return ActionResult.PASS;
@@ -94,53 +76,22 @@ public class BlockPositionDistanceMeterItem extends Item {
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		ItemStack itemStack = user.getStackInHand(hand);
-		NbtCompound itemStackNbt = itemStack.getOrCreateNbt();
-		if (user.isSneaking()) {
-			boolean bl = true;
-			if (!itemStackNbt.contains("isRootMode", NbtElement.BYTE_TYPE)) {
-				ScriptBlocks.info("!itemStackNbt.contains isRootMode");
-				itemStackNbt.putBoolean("isRootMode", true);
-			} else {
-				ScriptBlocks.info("itemStackNbt.contains isRootMode");
-				bl = itemStackNbt.getBoolean("isRootMode");
-				itemStackNbt.putBoolean("isRootMode", !bl);
-			}
-			itemStack.setNbt(itemStackNbt);
-			if (world.isClient()) {
-				user.sendMessage(bl ? Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"));
-			}
-			return TypedActionResult.consume(itemStack);
-		}
-		if (itemStackNbt.contains("isRootMode", NbtElement.BYTE_TYPE)) {
-			boolean bl = itemStackNbt.getBoolean("isRootMode");
-			if (user.getEntityWorld().isClient()) {
-				user.sendMessage(bl ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
-			}
-		}
-		int root_pos_x = 0;
-		int root_pos_y = -70;
-		int root_pos_z = 0;
-		int offset_pos_x = 0;
-		int offset_pos_y = -70;
-		int offset_pos_z = 0;
-		if (itemStackNbt.contains("root_block_pos", NbtElement.COMPOUND_TYPE)) {
-			NbtCompound nbtCompound = itemStackNbt.getCompound("root_block_pos");
-			root_pos_x = nbtCompound.getInt("x");
-			root_pos_y = nbtCompound.getInt("y");
-			root_pos_z = nbtCompound.getInt("z");
-		}
-		if (itemStackNbt.contains("offset_block_pos", NbtElement.COMPOUND_TYPE)) {
-			NbtCompound nbtCompound = itemStackNbt.getCompound("offset_block_pos");
-			offset_pos_x = nbtCompound.getInt("x");
-			offset_pos_y = nbtCompound.getInt("y");
-			offset_pos_z = nbtCompound.getInt("z");
-		}
-		if (root_pos_y > -64 && offset_pos_y > -64) {
-			int offset_x = offset_pos_x - root_pos_x;
-			int offset_y = offset_pos_y - root_pos_y;
-			int offset_z = offset_pos_z - root_pos_z;
-			if (world.isClient()) {
-				user.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset_x, offset_y, offset_z));
+		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
+		if (blockPositionDistanceMeterComponent != null) {
+			boolean isRootMode = blockPositionDistanceMeterComponent.is_root_mode();
+			if (user.isSneaking()) {
+
+				itemStack.set(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(!isRootMode, blockPositionDistanceMeterComponent.root_pos(), blockPositionDistanceMeterComponent.offset_pos(), blockPositionDistanceMeterComponent.offset()));
+				if (world.isClient()) {
+					user.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"));
+				}
+			} else if (user.getEntityWorld().isClient()) {
+				user.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
+
+				BlockPos offset = blockPositionDistanceMeterComponent.offset();
+				if (offset.getX() != 0 || offset.getY() != 0 || offset.getZ() != 0) {
+					user.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()));
+				}
 			}
 			return TypedActionResult.consume(itemStack);
 		}
@@ -148,49 +99,10 @@ public class BlockPositionDistanceMeterItem extends Item {
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-		NbtCompound itemStackNbt = stack.getNbt();
-		int root_pos_x = 0;
-		int root_pos_y = -70;
-		int root_pos_z = 0;
-		int offset_pos_x = 0;
-		int offset_pos_y = -70;
-		int offset_pos_z = 0;
-		int offset_x = 0;
-		int offset_y = 0;
-		int offset_z = 0;
-		if (itemStackNbt != null) {
-			if (itemStackNbt.contains("isRootMode", NbtElement.BYTE_TYPE)) {
-				boolean bl = itemStackNbt.getBoolean("isRootMode");
-				tooltip.add(bl ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
-			}
-			if (itemStackNbt.contains("root_block_pos", NbtElement.COMPOUND_TYPE)) {
-				NbtCompound nbtCompound = itemStackNbt.getCompound("root_block_pos");
-				root_pos_x = nbtCompound.getInt("x");
-				root_pos_y = nbtCompound.getInt("y");
-				root_pos_z = nbtCompound.getInt("z");
-			}
-			if (itemStackNbt.contains("offset_block_pos", NbtElement.COMPOUND_TYPE)) {
-				NbtCompound nbtCompound = itemStackNbt.getCompound("offset_block_pos");
-				offset_pos_x = nbtCompound.getInt("x");
-				offset_pos_y = nbtCompound.getInt("y");
-				offset_pos_z = nbtCompound.getInt("z");
-			}
-		}
-		if (root_pos_y > -64 && offset_pos_y > -64) {
-			offset_x = offset_pos_x - root_pos_x;
-			offset_y = offset_pos_y - root_pos_y;
-			offset_z = offset_pos_z - root_pos_z;
-		}
-
-		if (root_pos_y > -64) {
-			tooltip.add(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.root_pos", root_pos_x, root_pos_y, root_pos_z));
-		}
-		if (offset_pos_y > -64) {
-			tooltip.add(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.offset_pos", offset_pos_x, offset_pos_y, offset_pos_z));
-		}
-		if (offset_x != 0 || offset_y != 0 || offset_z != 0) {
-			tooltip.add(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.offset", offset_x, offset_y, offset_z));
+	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
+		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = stack.get(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
+		if (blockPositionDistanceMeterComponent != null) {
+			blockPositionDistanceMeterComponent.appendTooltip(context, tooltip::add, type);
 		}
 	}
 }
