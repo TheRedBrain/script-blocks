@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.network.packet.BossesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswersSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialoguesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LocationsSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ShopsSyncPacket;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -16,7 +17,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 public class EventsRegistry {
 	public static void initializeEvents() {
+		PayloadTypeRegistry.playS2C().register(SendAnnouncementPacket.PACKET_ID, SendAnnouncementPacket.PACKET_CODEC);
+
+		PayloadTypeRegistry.playS2C().register(ServerConfigSyncPacket.PACKET_ID, ServerConfigSyncPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(BossesSyncPacket.PACKET_ID, BossesSyncPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(DialoguesSyncPacket.PACKET_ID, DialoguesSyncPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(DialogueAnswersSyncPacket.PACKET_ID, DialogueAnswersSyncPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(LocationsSyncPacket.PACKET_ID, LocationsSyncPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(ShopsSyncPacket.PACKET_ID, ShopsSyncPacket.PACKET_CODEC);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayNetworking.send(handler.player, new ServerConfigSyncPacket(ScriptBlocks.serverConfig));
 			ServerPlayNetworking.send(handler.player, new BossesSyncPacket(BossesRegistry.registeredBosses));

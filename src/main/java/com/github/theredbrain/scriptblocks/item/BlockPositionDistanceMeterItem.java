@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.item;
 
 import com.github.theredbrain.scriptblocks.component.type.BlockPositionDistanceMeterComponent;
-import com.github.theredbrain.scriptblocks.registry.ComponentRegistry;
+import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -25,7 +25,7 @@ public class BlockPositionDistanceMeterItem extends Item {
 	@Override
 	public ActionResult useOnBlock(ItemUsageContext context) {
 		ItemStack itemStack = context.getStack();
-		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
+		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ItemComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
 		PlayerEntity playerEntity = context.getPlayer();
 		BlockPos pos = context.getBlockPos();
 		if (playerEntity != null && blockPositionDistanceMeterComponent != null) {
@@ -58,7 +58,7 @@ public class BlockPositionDistanceMeterItem extends Item {
 				} else {
 					offset = BlockPos.ORIGIN;
 				}
-				itemStack.set(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(isRootMode, root_pos, offset_pos, offset));
+				itemStack.set(ItemComponentRegistry.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(isRootMode, root_pos, offset_pos, offset));
 
 			} else if (playerEntity.getEntityWorld().isClient()) {
 				playerEntity.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
@@ -76,12 +76,12 @@ public class BlockPositionDistanceMeterItem extends Item {
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
 		ItemStack itemStack = user.getStackInHand(hand);
-		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
+		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ItemComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
 		if (blockPositionDistanceMeterComponent != null) {
 			boolean isRootMode = blockPositionDistanceMeterComponent.is_root_mode();
 			if (user.isSneaking()) {
 
-				itemStack.set(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(!isRootMode, blockPositionDistanceMeterComponent.root_pos(), blockPositionDistanceMeterComponent.offset_pos(), blockPositionDistanceMeterComponent.offset()));
+				itemStack.set(ItemComponentRegistry.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(!isRootMode, blockPositionDistanceMeterComponent.root_pos(), blockPositionDistanceMeterComponent.offset_pos(), blockPositionDistanceMeterComponent.offset()));
 				if (world.isClient()) {
 					user.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"));
 				}
@@ -100,7 +100,7 @@ public class BlockPositionDistanceMeterItem extends Item {
 
 	@Override
 	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
-		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = stack.get(ComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
+		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = stack.get(ItemComponentRegistry.BLOCK_POSITION_DISTANCE_METER);
 		if (blockPositionDistanceMeterComponent != null) {
 			blockPositionDistanceMeterComponent.appendTooltip(context, tooltip::add, type);
 		}

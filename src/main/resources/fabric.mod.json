@@ -42,13 +42,12 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.14.20",
-		"minecraft": "1.20.1",
-		"java": ">=17",
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "${minecraft_version}",
 		"fabric-api": "*",
-		"cloth-config": ">=11.1.106",
-		"q_misc_util": ">=3.3.7",
-		"cardinal-components-base": ">=5.2.2",
-		"cardinal-components-entity": ">=5.2.2"
+		"cloth-config": ">=${cloth_config_version}",
+		"slotcustomizationapi": ">=${slot_customization_api_version}",
+		"cardinal-components-base": ">=${cca_version}",
+		"cardinal-components-entity": ">=${cca_version}"
 	}
 }
