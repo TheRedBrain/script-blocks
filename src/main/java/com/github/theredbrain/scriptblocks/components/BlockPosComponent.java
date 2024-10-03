@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.components;
 
-import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 
-public class BlockPosComponent implements IBlockPosComponent, PlayerComponent {
+public class BlockPosComponent implements IBlockPosComponent {
 	private BlockPos value = new BlockPos(0, 0, 0);
 
 	@Override
@@ -18,7 +18,7 @@ public class BlockPosComponent implements IBlockPosComponent, PlayerComponent {
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag) {
+	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		int x = 0;
 		int y = 0;
 		int z = 0;
@@ -35,7 +35,7 @@ public class BlockPosComponent implements IBlockPosComponent, PlayerComponent {
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag) {
+	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		tag.putInt("x", this.value.getX());
 		tag.putInt("y", this.value.getY());
 		tag.putInt("z", this.value.getZ());

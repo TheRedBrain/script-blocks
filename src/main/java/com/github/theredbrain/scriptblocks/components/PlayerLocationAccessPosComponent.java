@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.components;
 
-import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 
-public class PlayerLocationAccessPosComponent implements IPlayerLocationAccessPosComponent, PlayerComponent {
+public class PlayerLocationAccessPosComponent implements IPlayerLocationAccessPosComponent {
 	private Pair<Pair<String, BlockPos>, Boolean> value = new Pair<>(new Pair<>("", new BlockPos(0, 0, 0)), false);
 
 	@Override
@@ -24,7 +24,7 @@ public class PlayerLocationAccessPosComponent implements IPlayerLocationAccessPo
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag) {
+	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		String dimension = "";
 		int x = 0;
 		int y = 0;
@@ -49,7 +49,7 @@ public class PlayerLocationAccessPosComponent implements IPlayerLocationAccessPo
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag) {
+	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
 		tag.putString("dimension", this.value.getLeft().getLeft());
 		BlockPos blockPos = this.value.getLeft().getRight();
 		tag.putInt("x", blockPos.getX());
