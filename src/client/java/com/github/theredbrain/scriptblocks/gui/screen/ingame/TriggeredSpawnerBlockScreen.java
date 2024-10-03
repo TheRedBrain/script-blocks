@@ -20,6 +20,7 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -147,14 +148,14 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	@Override
 	protected void init() {
 		this.entityAttributeModifiersList.clear();
-		Multimap<EntityAttribute, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 		entityAttributeModifiers.putAll(this.triggeredSpawnerBlock.getEntityAttributeModifiers());
-		List<EntityAttribute> entityAttributeModifiersKeys = new ArrayList<>(entityAttributeModifiers.keySet());
-		for (EntityAttribute key : entityAttributeModifiersKeys) {
+		List<RegistryEntry<EntityAttribute>> entityAttributeModifiersKeys = new ArrayList<>(entityAttributeModifiers.keySet());
+		for (RegistryEntry<EntityAttribute> key : entityAttributeModifiersKeys) {
 			Collection<EntityAttributeModifier> modifierCollection = entityAttributeModifiers.get(key);
 			List<EntityAttributeModifier> modifierList = modifierCollection.stream().toList();
 			for (EntityAttributeModifier entityAttributeModifier : modifierList) {
-				this.entityAttributeModifiersList.add(new MutablePair<>(String.valueOf(Registries.ATTRIBUTE.getId(key)), entityAttributeModifier));
+				this.entityAttributeModifiersList.add(new MutablePair<>(String.valueOf(Registries.ATTRIBUTE.getId(key.value())), entityAttributeModifier));
 			}
 		}
 
@@ -473,7 +474,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 				EntityAttributeModifier entityAttributeModifier = this.entityAttributeModifiersList.get(i).getRight();
 
 				context.drawTextWithShadow(this.textRenderer, this.entityAttributeModifiersList.get(i).getLeft() + ": ", this.width / 2 - 141, 46 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
-				context.drawTextWithShadow(this.textRenderer, entityAttributeModifier.getValue() + ", " + entityAttributeModifier.getOperation(), this.width / 2 - 141, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+				context.drawTextWithShadow(this.textRenderer, entityAttributeModifier.value() + ", " + entityAttributeModifier.operation(), this.width / 2 - 141, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
 			}
 			if (this.entityAttributeModifiersList.size() > 3) {
 //                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);

@@ -201,10 +201,10 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		this.entityAttributeModifiers.clear();
 		int entityAttributeModifiersKeysSize = nbt.getInt("entityAttributeModifiersKeysSize");
 		for (int i = 0; i < entityAttributeModifiersKeysSize; i++) {
-			Optional<EntityAttribute> optional = Registries.ATTRIBUTE
-					.getOrEmpty(Identifier.tryParse(nbt.getString("entityAttributeModifiers_key" + i)));
+			Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE
+					.getEntry(Identifier.tryParse(nbt.getString("entityAttributeModifiers_key" + i)));
 			if (optional.isPresent()) {
-				EntityAttribute key = optional.get();
+				RegistryEntry.Reference<EntityAttribute> key = optional.get();
 				int modifierListSize = nbt.getInt("entityAttributeModifiers_modifierListSize_" + i);
 				for (int j = 0; j < modifierListSize; j++) {
 					this.entityAttributeModifiers.put(key, EntityAttributeModifier.fromNbt(nbt.getCompound("entityAttributeModifiers_" + i + "_" + j)));
