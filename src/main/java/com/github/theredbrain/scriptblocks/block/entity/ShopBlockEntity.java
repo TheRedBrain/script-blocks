@@ -86,11 +86,6 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 		return false;
 	}
 
-	@Override
-	public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-		buf.writeBlockPos(pos);
-	}
-
 	@Nullable
 	@Override
 	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
@@ -100,5 +95,10 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	@Override
 	public Text getDisplayName() {
 		return Text.empty();
+	}
+
+	@Override
+	public Object getScreenOpeningData(ServerPlayerEntity player) {
+		return new ShopBlockScreenHandler.ShopBlockData(this.pos);
 	}
 }

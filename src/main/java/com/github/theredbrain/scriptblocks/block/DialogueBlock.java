@@ -57,10 +57,10 @@ public class DialogueBlock extends RotatedBlockWithEntity {
 
 	public static NamedScreenHandlerFactory createDialogueBlockScreenHandlerFactory(BlockState state, World world, BlockPos pos, String dialogueIdentifierString) {
 		return new ExtendedScreenHandlerFactory() {
+
 			@Override
-			public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-				buf.writeBlockPos(pos);
-				buf.writeString(dialogueIdentifierString);
+			public Object getScreenOpeningData(ServerPlayerEntity player) {
+				return new DialogueBlockScreenHandler.DialogueBlockData(pos);
 			}
 
 			@Override

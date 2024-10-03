@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
@@ -17,6 +18,17 @@ public class CustomPacketCodecs {
 		public void encode(ByteBuf byteBuf, MutablePair<String, EntityAttributeModifier> pairStringEntityAttributeModifier) {
 			PacketCodecs.STRING.encode(byteBuf, pairStringEntityAttributeModifier.getLeft());
 			PacketCodecs.NBT_COMPOUND.encode(byteBuf, pairStringEntityAttributeModifier.getRight().toNbt());
+		}
+	};
+
+	public static final PacketCodec<ByteBuf, MutablePair<Identifier, EntityAttributeModifier>> MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER = new PacketCodec<>() {
+		public MutablePair<Identifier, EntityAttributeModifier> decode(ByteBuf byteBuf) {
+			return new MutablePair<>(Identifier.PACKET_CODEC.decode(byteBuf), EntityAttributeModifier.fromNbt(PacketCodecs.NBT_COMPOUND.decode(byteBuf)));
+		}
+
+		public void encode(ByteBuf byteBuf, MutablePair<Identifier, EntityAttributeModifier> pairIdentifierEntityAttributeModifier) {
+			Identifier.PACKET_CODEC.encode(byteBuf, pairIdentifierEntityAttributeModifier.getLeft());
+			PacketCodecs.NBT_COMPOUND.encode(byteBuf, pairIdentifierEntityAttributeModifier.getRight().toNbt());
 		}
 	};
 

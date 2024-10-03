@@ -461,8 +461,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			Optional<EntityAttribute> optional = Registries.ATTRIBUTE
 					.getOrEmpty(entityAttributeModifier.id());
 			if (optional.isPresent()) {
-				EntityAttribute key = optional.get();
-				entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.name(), entityAttributeModifier.value(), EntityAttributeModifier.Operation.valueOf(entityAttributeModifier.operation())));
+				RegistryEntry<EntityAttribute> key = Registries.ATTRIBUTE.getEntry(optional.get());
+				entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.id(), entityAttributeModifier.value(), entityAttributeModifier.operation()));
 			}
 		}
 		return entityAttributeModifiers;
@@ -693,7 +693,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		Boss boss = null;
 		Identifier identifier = Identifier.tryParse(newBossIdentifier);
 		if (identifier != null) {
-			boss = BossesRegistry.getBoss(identifier);
+			boss = BossesRegistry.registeredBosses.get(identifier);
 		}
 		if (newBossIdentifier.isEmpty() || boss != null) {
 			this.bossIdentifier = newBossIdentifier;

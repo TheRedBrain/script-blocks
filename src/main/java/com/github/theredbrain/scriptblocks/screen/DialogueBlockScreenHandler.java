@@ -4,7 +4,8 @@ import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.math.BlockPos;
 
@@ -14,8 +15,8 @@ public class DialogueBlockScreenHandler extends ScreenHandler {
 	private final PlayerInventory playerInventory;
 	private final boolean showCreativeTab;
 
-	public DialogueBlockScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-		this(syncId, playerInventory, playerInventory.player.isCreativeLevelTwoOp(), buf.readBlockPos(), buf.readString());
+	public DialogueBlockScreenHandler(int syncId, PlayerInventory playerInventory, DialogueBlockData data) {
+		this(syncId, playerInventory, playerInventory.player.isCreativeLevelTwoOp(), data.blockPos(), data.string());
 	}
 
 	public DialogueBlockScreenHandler(int syncId, PlayerInventory playerInventory, boolean showCreativeTab, BlockPos blockPos, String dialogueIdentifierString) {
@@ -50,5 +51,22 @@ public class DialogueBlockScreenHandler extends ScreenHandler {
 	@Override
 	public boolean canUse(PlayerEntity player) {
 		return true;
+	}
+
+	public record DialogueBlockData(
+			BlockPos blockPos,
+			String string
+	) {
+
+		public static final PacketCodec<RegistryByteBuf, DialogueBlockData> PACKET_CODEC = PacketCodec.of(DialogueBlockData::write, DialogueBlockData::new);
+
+		public DialogueBlockData(RegistryByteBuf registryByteBuf) {
+			this(registryByteBuf.readBlockPos(), registryByteBuf.readString());
+		}
+
+		private void write(RegistryByteBuf registryByteBuf) {
+			registryByteBuf.writeBlockPos(blockPos);
+			registryByteBuf.writeString(string);
+		}
 	}
 }

@@ -6,7 +6,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.screen.ScreenHandler;
@@ -38,9 +37,9 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 	private final int requiredKeyItemStackSlotX = 66;
 	private final int requiredKeyItemStackSlotY = 148;
 
-	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
+	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, TeleporterBlockData data) {
 		this(syncId, playerInventory, playerInventory.player.isCreativeLevelTwoOp());
-		this.blockPos = buf.readBlockPos();
+		this.blockPos = data.blockPos();
 	}
 
 	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, boolean showCreativeTab) {

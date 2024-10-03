@@ -7,12 +7,16 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<SetHousingBlockOwnerPacket> {
 	@Override
@@ -41,8 +45,11 @@ public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.
 				if (Objects.equals(owner, "")) {
 					housingBlockEntity.setIsOwnerSet(false);
 					serverPlayerEntity.sendMessage(Text.translatable("housing_block.unclaimed_successful"), true);
-					serverPlayerEntity.removeStatusEffect(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
-					serverPlayerEntity.removeStatusEffect(StatusEffectsRegistry.BUILDING_MODE);
+					RegistryEntry<StatusEffect> housing_owner_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
+					serverPlayerEntity.removeStatusEffect(housing_owner_status_effect);
+
+					RegistryEntry<StatusEffect> building_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE);
+					serverPlayerEntity.removeStatusEffect(building_status_effect);
 				} else {
 					housingBlockEntity.setIsOwnerSet(true);
 					serverPlayerEntity.sendMessage(Text.translatable("housing_block.claimed_successful"), true);

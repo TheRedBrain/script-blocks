@@ -15,7 +15,8 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.MinecraftServer;
@@ -60,8 +61,8 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 
 	private boolean showCreativeTab;
 
-	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-		this(syncId, playerInventory, buf.readBlockPos(), playerInventory.player.isCreativeLevelTwoOp());
+	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, ShopBlockData data) {
+		this(syncId, playerInventory, data.blockPos(), playerInventory.player.isCreativeLevelTwoOp());
 	}
 
 	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, BlockPos blockPos, boolean showCreativeTab) {
@@ -76,7 +77,7 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 			Shop shop = null;
 			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
 			if (!shopIdentifier.isEmpty()) {
-				shop = ShopsRegistry.getShop(Identifier.of(shopIdentifier));
+				shop = ShopsRegistry.registeredShops.get(Identifier.of(shopIdentifier));
 			}
 			this.shop = shop;
 			if (shop != null) {
@@ -237,8 +238,8 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
 			}
 		}
-		String lockAdvancementIdentifier;
-		String unlockAdvancementIdentifier;
+		Identifier lockAdvancementIdentifier;
+		Identifier unlockAdvancementIdentifier;
 
 //        if (this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity) {
 //
@@ -262,17 +263,13 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 				unlockAdvancementIdentifier = deal.unlockAdvancement();
 
                 AdvancementEntry lockAdvancementEntry = null;
-//				Advancement lockAdvancement = null;
-				if (!lockAdvancementIdentifier.isEmpty()) {
-					lockAdvancementEntry = serverAdvancementLoader.get(Identifier.tryParse(lockAdvancementIdentifier));
-				}
+					lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancementIdentifier);
+
                 AdvancementEntry unlockAdvancementEntry = null;
-//				Advancement unlockAdvancement = null;
-				if (!unlockAdvancementIdentifier.isEmpty()) {
-					unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.tryParse(unlockAdvancementIdentifier));
-				}
-				if ((lockAdvancementIdentifier.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) &&
-						(unlockAdvancementIdentifier.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
+					unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancementIdentifier);
+
+				if ((lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) &&
+						(unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone())) {
 					this.unlockedDealsList.add(deal);
 					this.unlockedDealsCounter++;
 				} else {
@@ -295,6 +292,21 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 			} else {
 				this.stockedDealsList.add(null);
 			}
+		}
+	}
+
+	public record ShopBlockData(
+			BlockPos blockPos
+	) {
+
+		public static final PacketCodec<RegistryByteBuf, ShopBlockData> PACKET_CODEC = PacketCodec.of(ShopBlockData::write, ShopBlockData::new);
+
+		public ShopBlockData(RegistryByteBuf registryByteBuf) {
+			this(registryByteBuf.readBlockPos());
+		}
+
+		private void write(RegistryByteBuf registryByteBuf) {
+			registryByteBuf.writeBlockPos(blockPos);
 		}
 	}
 }

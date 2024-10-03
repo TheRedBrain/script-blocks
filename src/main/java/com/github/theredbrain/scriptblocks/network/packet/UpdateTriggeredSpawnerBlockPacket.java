@@ -6,6 +6,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
@@ -15,7 +16,7 @@ public record UpdateTriggeredSpawnerBlockPacket(BlockPos triggeredSpawnerBlockPo
 												BlockPos entitySpawnPositionOffset, double entitySpawnOrientationPitch,
 												double entitySpawnOrientationYaw, String spawningMode,
 												String entityTypeId,
-												List<MutablePair<String, EntityAttributeModifier>> entityAttributeModifiersList,
+												List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
 												BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets,
 												BlockPos useRelayBlockPositionOffset) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateTriggeredSpawnerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_triggered_spawner_block"));
@@ -29,7 +30,7 @@ public record UpdateTriggeredSpawnerBlockPacket(BlockPos triggeredSpawnerBlockPo
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
-				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_ENTITY_ATTRIBUTE_MODIFIER),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos()
@@ -47,7 +48,7 @@ public record UpdateTriggeredSpawnerBlockPacket(BlockPos triggeredSpawnerBlockPo
 
 		registryByteBuf.writeString(this.entityTypeId);
 
-		registryByteBuf.writeCollection(this.entityAttributeModifiersList, CustomPacketCodecs.MUTABLE_PAIR_STRING_ENTITY_ATTRIBUTE_MODIFIER);
+		registryByteBuf.writeCollection(this.entityAttributeModifiersList, CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER);
 
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);

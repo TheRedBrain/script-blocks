@@ -10,9 +10,9 @@ import net.minecraft.registry.Registry;
 import net.minecraft.screen.ScreenHandlerType;
 
 public class ScreenHandlerTypesRegistry {
-	public static final ScreenHandlerType<DialogueBlockScreenHandler> DIALOGUE_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(DialogueBlockScreenHandler::new);
-	public static final ScreenHandlerType<ShopBlockScreenHandler> SHOP_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(ShopBlockScreenHandler::new);
-	public static final ScreenHandlerType<TeleporterBlockScreenHandler> TELEPORTER_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(TeleporterBlockScreenHandler::new);
+	public static final ScreenHandlerType<DialogueBlockScreenHandler> DIALOGUE_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(DialogueBlockScreenHandler::new, DialogueBlockScreenHandler.DialogueBlockData.PACKET_CODEC);
+	public static final ScreenHandlerType<ShopBlockScreenHandler> SHOP_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(ShopBlockScreenHandler::new, ShopBlockScreenHandler.ShopBlockData.PACKET_CODEC);
+	public static final ScreenHandlerType<TeleporterBlockScreenHandler> TELEPORTER_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(TeleporterBlockScreenHandler::new, TeleporterBlockScreenHandler.TeleporterBlockData.PACKET_CODEC);
 
 	public static void registerAll() {
 		Registry.register(Registries.SCREEN_HANDLER, ScriptBlocks.identifier("dialogue"), DIALOGUE_BLOCK_SCREEN_HANDLER);
