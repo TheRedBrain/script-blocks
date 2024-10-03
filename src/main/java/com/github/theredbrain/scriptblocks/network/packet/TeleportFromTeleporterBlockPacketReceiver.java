@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.registry.ComponentsRegistry;
 import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
@@ -92,7 +93,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			}
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 
-			Location location = LocationsRegistry.getLocation(Identifier.tryParse(targetLocation));
+			Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(targetLocation));
 
 			ServerPlayerEntity targetDimensionOwner = server.getPlayerManager().getPlayer(targetDimensionOwnerName);
 
@@ -138,7 +139,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 //                        server.getCommandManager().executeWithPrefix(server.getCommandSource(), "forceload query");
 
-						String placeStructureCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run place structure " + location.getStructureIdentifier() + " " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
+						String placeStructureCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run place structure " + location.structureIdentifier() + " " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), placeStructureCommand);
 
 						String forceLoadRemoveAllCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload remove " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
@@ -173,16 +174,15 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						targetYaw = entrance.getRight().getLeft();
 						targetPitch = entrance.getRight().getRight();
 
-						boolean consumeKey = location.consumeKeyAtEntrance(targetLocationEntrance);
-						ItemUtils.VirtualItemStack virtualKey = location.getKeyForEntrance(targetLocationEntrance);
+						boolean consumeKey = LocationUtils.consumeKeyAtEntrance(location, targetLocationEntrance);
+						ItemStack virtualKey = LocationUtils.getKeyForEntrance(location, targetLocationEntrance);
 						if (virtualKey != null) {
-							ItemStack keyItemStack = ItemUtils.getItemStackFromVirtualItemStack(virtualKey);
-							int keyCount = keyItemStack.getCount();
+							int keyCount = virtualKey.getCount();
 							PlayerInventory playerInventory = serverPlayerEntity.getInventory();
 
 							for (int i = 0; i < playerInventory.size(); i++) {
 								ItemStack currentItemStack = playerInventory.getStack(i);
-								if (ItemStack.areItemsAndComponentsEqual(keyItemStack, currentItemStack)) {
+								if (ItemStack.areItemsAndComponentsEqual(virtualKey, currentItemStack)) {
 									ItemStack currentItemStackCopy = currentItemStack.copy();
 									int currentItemStackCount = currentItemStackCopy.getCount();
 									if (currentItemStackCount >= keyCount) {

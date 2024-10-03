@@ -4,7 +4,6 @@ import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import com.github.theredbrain.scriptblocks.screen.ShopBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,17 +27,17 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		List<Shop.Deal> dealsList = new ArrayList<>(List.of());
 		Shop shop = null;
 		if (!shopIdentifier.equals("")) {
-			shop = ShopsRegistry.getShop(Identifier.of(shopIdentifier));
+			shop = ShopsRegistry.registeredShops.get(Identifier.of(shopIdentifier));
 		}
 		if (shop != null) {
-			dealsList = shop.getDealList();
+			dealsList = shop.dealList();
 		}
 
 		Shop.Deal currentDeal = dealsList.get(id);
 		if (currentDeal != null && screenHandler instanceof ShopBlockScreenHandler shopBlockScreenHandler) {
 			boolean bl = true;
-			for (ItemUtils.VirtualItemStack price : currentDeal.getPriceList()) {
-				Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(price).getItem();
+			for (ItemStack price : currentDeal.price()) {
+				Item virtualItem = price.getItem();
 				int priceCount = price.getCount();
 				for (int j = 0; j < shopBlockScreenHandler.inventory.size(); j++) {
 					if (shopBlockScreenHandler.inventory.getStack(j).isOf(virtualItem)) {
@@ -60,7 +59,7 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 				}
 			}
 			if (bl) {
-				serverPlayerEntity.getInventory().offerOrDrop(ItemUtils.getItemStackFromVirtualItemStack(currentDeal.getOffer()));
+				serverPlayerEntity.getInventory().offerOrDrop(currentDeal.offer());
 			}
 		}
 	}

@@ -7,7 +7,6 @@ import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
@@ -15,7 +14,6 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -48,13 +46,13 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
 		Identifier answerIdentifier = payload.answerIdentifier();
 
-		DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.getDialogueAnswer(answerIdentifier);
+		DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();
 
 		if (dialogueAnswer != null && server != null && serverPlayerEntity.getWorld().getBlockEntity(dialogueBlockPos) instanceof DialogueBlockEntity dialogueBlockEntity) {
 
-			List<ItemUtils.VirtualItemStack> virtualItemStacks = dialogueAnswer.getItemCost();
+			List<ItemStack> virtualItemStacks = dialogueAnswer.itemCost();
 			if (virtualItemStacks != null) {
 
 				int playerInventorySize = serverPlayerEntity.getInventory().size();
@@ -65,8 +63,8 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 					playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
 				}
 
-				for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
-					Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
+				for (ItemStack ingredient : virtualItemStacks) {
+					Item virtualItem = ingredient.getItem();
 					int ingredientCount = ingredient.getCount();
 
 					for (int j = 0; j < playerInventorySize; j++) {
@@ -90,8 +88,8 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 					}
 				}
 
-				for (ItemUtils.VirtualItemStack ingredient : virtualItemStacks) {
-					Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
+				for (ItemStack ingredient : virtualItemStacks) {
+					Item virtualItem = ingredient.getItem();
 					int ingredientCount = ingredient.getCount();
 
 					for (int j = 0; j < playerInventorySize; j++) {
@@ -116,7 +114,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// loot_table
-			Identifier lootTableIdentifier = dialogueAnswer.getLootTable();
+			Identifier lootTableIdentifier = dialogueAnswer.lootTable();
 			if (lootTableIdentifier != null) {
 				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParameters.THIS_ENTITY, serverPlayerEntity).add(LootContextParameters.ORIGIN, serverPlayerEntity.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
 				boolean bl = false;
@@ -137,31 +135,31 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// advancement
-			Identifier advancementIdentifier = dialogueAnswer.getGrantedAdvancement();
-			String criterionName = dialogueAnswer.getCriterionName();
+			Identifier advancementIdentifier = dialogueAnswer.grantedAdvancement();
+			Identifier criterionName = dialogueAnswer.criterionName();
 			if (advancementIdentifier != null && criterionName != null) {
                 AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
 				if (advancementEntry != null) {
-					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
+					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName.toString());
 				}
 			}
 
 			// overlay message
-			String overlayMessage = dialogueAnswer.getOverlayMessage();
+			String overlayMessage = dialogueAnswer.overlayMessage();
 			if (overlayMessage != null) {
 				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
 			}
 
-			String responseDialogueIdentifierString = dialogueAnswer.getResponseDialogue();
-			if (responseDialogueIdentifierString.isEmpty()) {
+			Identifier responseDialogueIdentifierString = dialogueAnswer.responseDialogue();
+			if (responseDialogueIdentifierString == null) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {
-				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString));
+				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString.toString())); // TODO
 			}
 
 
 			// trigger block
-			String triggeredBlock = dialogueAnswer.getTriggeredBlock();
+			String triggeredBlock = dialogueAnswer.triggeredBlock();
 			if (triggeredBlock != null) {
 				List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
 				List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueTriggeredBlocks().keySet());
@@ -188,7 +186,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// use block
-			String usedBlock = dialogueAnswer.getUsedBlock();
+			String usedBlock = dialogueAnswer.usedBlock();
 			if (usedBlock != null) {
 				List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
 				List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueUsedBlocks().keySet());

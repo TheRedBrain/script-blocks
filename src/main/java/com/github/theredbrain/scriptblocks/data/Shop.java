@@ -1,82 +1,56 @@
 package com.github.theredbrain.scriptblocks.data;
 
-import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.SortedSet;
 
-public final class Shop {
-
-	private final List<Deal> dealList;
+public record Shop(List<Deal> dealList) {
 
 	public Shop(List<Deal> dealList) {
-		this.dealList = dealList;
+		this.dealList = dealList != null ? dealList : List.of();
 	}
 
-	public List<Deal> getDealList() {
-		return this.dealList;
-	}
+	public static final Codec<Shop> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Deal.CODEC.listOf().optionalFieldOf("dealList", List.of()).forGetter(x -> x.dealList)
+	).apply(instance, Shop::new));
 
-	public final class Deal {
+	public record Deal(
+			ItemStack offer,
+			List<ItemStack> price,
+			int maxStockCount,
+			@Nullable Identifier lockAdvancement,
+			@Nullable Identifier unlockAdvancement,
+			boolean showLockedDeal
+	) {
 
-		//        private final List<ItemUtils.VirtualItemStack> offer;
-		private final ItemUtils.VirtualItemStack offer;
+		public static final Codec<Deal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				ItemStack.CODEC.optionalFieldOf("offer", ItemStack.EMPTY).forGetter(x -> x.offer),
+				ItemStack.CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
+				Codec.INT.optionalFieldOf("maxStockCount", 1).forGetter(x -> x.maxStockCount),
+				Identifier.CODEC.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
+				Identifier.CODEC.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
+				Codec.BOOL.optionalFieldOf("showLockedDeal", true).forGetter(x -> x.showLockedDeal)
+		).apply(instance, Deal::new));
 
-		private final SortedSet<ItemUtils.VirtualItemStack> price;
-
-		private final int maxStockCount;
-
-		private final String lockAdvancement;
-
-		private final String unlockAdvancement;
-
-		private final boolean showLockedDeal;
-
-		public Deal(/*List<ItemUtils.VirtualItemStack> offer, */ItemUtils.VirtualItemStack offer, SortedSet<ItemUtils.VirtualItemStack> price, int maxStockCount, String lockAdvancement, String unlockAdvancement, boolean showLockedDeal) {
+		public Deal(
+				ItemStack offer,
+				List<ItemStack> price,
+				int maxStockCount,
+				@Nullable Identifier lockAdvancement,
+				@Nullable Identifier unlockAdvancement,
+				boolean showLockedDeal
+		) {
+			this.price = price != null ? price : List.of();
 			this.offer = offer;
-			this.price = price;
 			this.maxStockCount = maxStockCount;
 			this.lockAdvancement = lockAdvancement;
 			this.unlockAdvancement = unlockAdvancement;
 			this.showLockedDeal = showLockedDeal;
 		}
 
-		//        public List<ItemUtils.VirtualItemStack> getOffer() {
-//            return this.offer;
-//        }
-		public ItemUtils.VirtualItemStack getOffer() {
-			return this.offer;
-		}
-
-		public SortedSet<ItemUtils.VirtualItemStack> getPrice() {
-			return this.price;
-		}
-
-		public List<ItemUtils.VirtualItemStack> getPriceList() {
-			return this.price.stream().toList();
-		}
-
-		public int getMaxStockCount() {
-			return this.maxStockCount;
-		}
-
-		public String getUnlockAdvancement() {
-			if (Identifier.isValid(this.unlockAdvancement)) {
-				return this.unlockAdvancement;
-			}
-			return "";
-		}
-
-		public String getLockAdvancement() {
-			if (Identifier.isValid(this.lockAdvancement)) {
-				return this.lockAdvancement;
-			}
-			return "";
-		}
-
-		public boolean showLockedDeal() {
-			return this.showLockedDeal;
-		}
 	}
 }

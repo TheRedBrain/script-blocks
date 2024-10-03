@@ -303,7 +303,7 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 				}
 				Shop.Deal deal = this.handler.getUnlockedDealsList().get(i);
 				if (deal != null) {
-					ItemStack offerItemStack = ItemUtils.getItemStackFromVirtualItemStack(deal.getOffer());
+					ItemStack offerItemStack = ItemUtils.getItemStackFromVirtualItemStack(deal.offer());
 					x = this.x + 85;
 					y = this.y + 18 + (index * 24);
 					k = x + y * this.backgroundWidth;

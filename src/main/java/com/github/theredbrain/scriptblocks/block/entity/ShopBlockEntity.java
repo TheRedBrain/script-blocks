@@ -69,16 +69,16 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 		Shop shop = null;
 		Identifier identifier = Identifier.tryParse(newShopIdentifier);
 		if (identifier != null) {
-			shop = ShopsRegistry.getShop(identifier);
+			shop = ShopsRegistry.registeredShops.get(identifier);
 		}
 		if (newShopIdentifier.isEmpty() || shop != null) {
 			this.shopIdentifier = newShopIdentifier;
 			this.stockCountList.clear();
 
 			if (shop != null) {
-				List<Shop.Deal> dealList = shop.getDealList();
+				List<Shop.Deal> dealList = shop.dealList();
 				for (int i = 0; i < dealList.size(); i++) {
-					this.stockCountList.add(dealList.get(i).getMaxStockCount());
+					this.stockCountList.add(dealList.get(i).maxStockCount());
 				}
 			}
 			return true;

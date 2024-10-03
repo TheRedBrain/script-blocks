@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -134,8 +135,8 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 
 	private void calculateUnlockedAndVisibleAnswers(List<Identifier> answerIdentifiersList) {
 		ClientAdvancementManager advancementHandler = null;
-		String lockAdvancementIdentifier;
-		String unlockAdvancementIdentifier;
+		Identifier lockAdvancementIdentifier;
+		Identifier unlockAdvancementIdentifier;
 		boolean showLockedAnswer;
 		boolean showUnaffordableAnswer;
 
@@ -145,13 +146,13 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 
 		for (Identifier answerIdentifier : answerIdentifiersList) {
 
-			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.getDialogueAnswer(answerIdentifier);
+			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(answerIdentifier);
 			if (dialogueAnswer == null) {
 				continue;
 			}
 
 			boolean isItemCostPayable = true;
-			List<ItemUtils.VirtualItemStack> virtualItemCost = dialogueAnswer.getItemCost();
+			List<ItemStack> virtualItemCost = dialogueAnswer.itemCost();
 			if (virtualItemCost != null && this.client != null && this.client.player != null) {
 				int inventorySize = this.client.player.getInventory().size();
 				Inventory inventory = new SimpleInventory(inventorySize);
@@ -161,8 +162,8 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 				}
 
 				boolean bl = true;
-				for (ItemUtils.VirtualItemStack ingredient : virtualItemCost) {
-					Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(ingredient).getItem();
+				for (ItemStack ingredient : virtualItemCost) {
+					Item virtualItem = ingredient.getItem();
 					int ingredientCount = ingredient.getCount();
 
 					for (int j = 0; j < inventorySize; j++) {
@@ -189,24 +190,22 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 				}
 			}
 
-			lockAdvancementIdentifier = dialogueAnswer.getLockAdvancement();
-			unlockAdvancementIdentifier = dialogueAnswer.getUnlockAdvancement();
+			lockAdvancementIdentifier = dialogueAnswer.lockAdvancement();
+			unlockAdvancementIdentifier = dialogueAnswer.unlockAdvancement();
 			showLockedAnswer = dialogueAnswer.showLockedAnswer();
 			showUnaffordableAnswer = dialogueAnswer.showUnaffordableAnswer();
 
 			if (advancementHandler != null) {
-//                AdvancementEntry lockAdvancementEntry = null;
-				Advancement lockAdvancementEntry = null;
+                AdvancementEntry lockAdvancementEntry = null;
 				if (!lockAdvancementIdentifier.equals("")) {
-					lockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(lockAdvancementIdentifier));
+					lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
 				}
-//                AdvancementEntry unlockAdvancementEntry = null;
-				Advancement unlockAdvancementEntry = null;
+                AdvancementEntry unlockAdvancementEntry = null;
 				if (!unlockAdvancementIdentifier.equals("")) {
-					unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier));
+					unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
 				}
-				if ((lockAdvancementIdentifier.equals("") || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler/*.getManager()*/).scriptblocks$getAdvancementProgress(lockAdvancementEntry).isDone())) &&
-						(unlockAdvancementIdentifier.equals("") || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler/*.getManager()*/).scriptblocks$getAdvancementProgress(unlockAdvancementEntry).isDone()))) {
+				if ((lockAdvancementIdentifier.equals("") || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) &&
+						(unlockAdvancementIdentifier.equals("") || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 					if (isItemCostPayable) {
 						this.unlockedAnswersList.add(answerIdentifier);
 						this.visibleAnswersList.add(answerIdentifier);
@@ -301,7 +300,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 	private void addStartingDialogueEntry() {
 		String message = "";
 		String newStartingDialogueIdentifier = this.newStartingDialogueIdentifierField.getText();
-		if (DialoguesRegistry.getDialogue(Identifier.tryParse(newStartingDialogueIdentifier)) == null) {
+		if (DialoguesRegistry.registeredDialogues.get(Identifier.tryParse(newStartingDialogueIdentifier)) == null) {
 			message = "gui.dialogue_block.invalid_dialogue_identifier";
 		}
 		if (message.equals("")) {
@@ -322,13 +321,13 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 			Identifier newStartingDialogueUnlockAdvancementIdentifier = Identifier.tryParse(this.newStartingDialogueUnlockAdvancementIdentifierField.getText());
 			if (advancementHandler != null) {
 				if (newStartingDialogueLockAdvancementIdentifier != null) {
-					Advancement advancementEntry = advancementHandler.getManager().get(newStartingDialogueLockAdvancementIdentifier);
+					AdvancementEntry advancementEntry = advancementHandler.get(newStartingDialogueLockAdvancementIdentifier);
 					if (advancementEntry == null && !this.newStartingDialogueLockAdvancementIdentifierField.getText().equals("")) {
 						message = "gui.dialogue_block.newStartingDialogueLockAdvancementIdentifier_invalid";
 					}
 				}
 				if (newStartingDialogueUnlockAdvancementIdentifier != null) {
-					Advancement advancementEntry = advancementHandler.getManager().get(newStartingDialogueUnlockAdvancementIdentifier);
+					AdvancementEntry advancementEntry = advancementHandler.get(newStartingDialogueUnlockAdvancementIdentifier);
 					if (advancementEntry == null && !this.newStartingDialogueUnlockAdvancementIdentifierField.getText().equals("")) {
 						message = "gui.dialogue_block.newStartingDialogueUnlockAdvancementIdentifier_invalid";
 					}
@@ -373,7 +372,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 				if (string.equals("") && this.client.player != null) {
 					string = DialogueBlockEntity.getStartingDialogue(this.client.player, this.dialogueBlockEntity);
 				}
-				this.dialogue = DialoguesRegistry.getDialogue(Identifier.tryParse(string));
+				this.dialogue = DialoguesRegistry.registeredDialogues.get(Identifier.tryParse(string));
 			}
 		}
 		if (!this.showCreativeScreen && this.dialogue == null && this.client != null) {
@@ -396,8 +395,8 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 		}
 		this.startingDialogueList.addAll(this.dialogueBlockEntity.getStartingDialogueList());
 		if (this.dialogue != null) {
-			this.calculateUnlockedAndVisibleAnswers(this.dialogue.getAnswerList());
-			this.dialogueTextList = this.dialogue.getDialogueTextList();
+			this.calculateUnlockedAndVisibleAnswers(this.dialogue.answerList());
+			this.dialogueTextList = this.dialogue.dialogueTextList();
 		}
 		this.backgroundWidth = 218;
 		this.backgroundHeight = 197;
@@ -807,7 +806,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY/*, double horizontalAmount*/, double verticalAmount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (!this.showCreativeScreen
 				&& this.dialogueTextList.size() > 7
 				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
@@ -856,7 +855,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY/*, horizontalAmount*/, verticalAmount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
@@ -871,7 +870,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		if (this.showCreativeScreen) {
 			if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
@@ -939,8 +938,8 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 			}
 			int index = 0;
 			for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + 4, this.visibleAnswersList.size()); i++) {
-				DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.getDialogueAnswer(this.visibleAnswersList.get(i));
-				String text = dialogueAnswer.getAnswerText();
+				DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(this.visibleAnswersList.get(i));
+				String text = dialogueAnswer.answerText();
 				if (index == 0) {
 					this.answerButton0.setMessage(Text.translatable(text));
 				} else if (index == 1) {
@@ -975,7 +974,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return (this.dialogue != null && this.dialogue.isCancellable()) || this.showCreativeScreen || this.dialogue == null;
+		return (this.dialogue != null && this.dialogue.cancellable()) || this.showCreativeScreen || this.dialogue == null;
 	}
 
 	private boolean updateDialogueBlockCreative() {

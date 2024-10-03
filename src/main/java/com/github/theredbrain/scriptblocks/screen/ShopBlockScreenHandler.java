@@ -7,7 +7,6 @@ import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
 import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.entity.BlockEntity;
@@ -81,7 +80,7 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 			}
 			this.shop = shop;
 			if (shop != null) {
-				this.dealsList = shop.getDealList();
+				this.dealsList = shop.dealList();
 			}
 		}
 		int i;
@@ -259,8 +258,8 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 			for (int i = 0; i < this.dealsList.size(); i++) {
 
 				Shop.Deal deal = this.dealsList.get(i);
-				lockAdvancementIdentifier = deal.getLockAdvancement();
-				unlockAdvancementIdentifier = deal.getUnlockAdvancement();
+				lockAdvancementIdentifier = deal.lockAdvancement();
+				unlockAdvancementIdentifier = deal.unlockAdvancement();
 
                 AdvancementEntry lockAdvancementEntry = null;
 //				Advancement lockAdvancement = null;

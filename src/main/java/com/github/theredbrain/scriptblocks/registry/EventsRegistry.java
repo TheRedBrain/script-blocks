@@ -1,52 +1,38 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import com.github.theredbrain.scriptblocks.network.packet.BossesSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswersSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.DialoguesSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.LocationsSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.ShopsSyncPacket;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.network.PacketByteBuf;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class EventsRegistry {
-	private static PacketByteBuf serverConfigSerialized = PacketByteBufs.create();
-
 	public static void initializeEvents() {
-		serverConfigSerialized = ServerPacketRegistry.ServerConfigSync.write(ScriptBlocks.serverConfig);
-
+		PayloadTypeRegistry.playS2C().register(BossesSyncPacket.PACKET_ID, BossesSyncPacket.PACKET_CODEC);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			sender.sendPacket(ServerPacketRegistry.ServerConfigSync.ID, serverConfigSerialized); // TODO convert to packet
-			sender.sendPacket(ServerPacketRegistry.SYNC_DIALOGUES, DialoguesRegistry.getEncodedRegistry()); // TODO convert to packet
-			sender.sendPacket(ServerPacketRegistry.SYNC_DIALOGUE_ANSWERS, DialogueAnswersRegistry.getEncodedRegistry()); // TODO convert to packet
-			sender.sendPacket(ServerPacketRegistry.SYNC_LOCATIONS, LocationsRegistry.getEncodedRegistry()); // TODO convert to packet
-			sender.sendPacket(ServerPacketRegistry.SYNC_SHOPS, ShopsRegistry.getEncodedRegistry()); // TODO convert to packet
-			sender.sendPacket(ServerPacketRegistry.SYNC_BOSSES, BossesRegistry.getEncodedRegistry()); // TODO convert to packet
+			ServerPlayNetworking.send(handler.player, new ServerConfigSyncPacket(ScriptBlocks.serverConfig));
+			ServerPlayNetworking.send(handler.player, new BossesSyncPacket(BossesRegistry.registeredBosses));
+			ServerPlayNetworking.send(handler.player, new DialoguesSyncPacket(DialoguesRegistry.registeredDialogues));
+			ServerPlayNetworking.send(handler.player, new DialogueAnswersSyncPacket(DialogueAnswersRegistry.registeredDialogueAnswers));
+			ServerPlayNetworking.send(handler.player, new LocationsSyncPacket(LocationsRegistry.registeredLocations));
+			ServerPlayNetworking.send(handler.player, new ShopsSyncPacket(ShopsRegistry.registeredShops));
+		});
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
+			for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+				ServerPlayNetworking.send(player, new BossesSyncPacket(BossesRegistry.registeredBosses));
+				ServerPlayNetworking.send(player, new DialoguesSyncPacket(DialoguesRegistry.registeredDialogues));
+				ServerPlayNetworking.send(player, new DialogueAnswersSyncPacket(DialogueAnswersRegistry.registeredDialogueAnswers));
+				ServerPlayNetworking.send(player, new LocationsSyncPacket(LocationsRegistry.registeredLocations));
+				ServerPlayNetworking.send(player, new ShopsSyncPacket(ShopsRegistry.registeredShops));
+			}
 		});
 	}
-
-//	@Environment(EnvType.CLIENT)
-//	public static void initializeClientEvents() {
-////        ClientTickEvents.START_CLIENT_TICK.register(client -> {
-////            boolean bl = client.options.leftKey.isPressed() || client.options.backKey.isPressed() || client.options.rightKey.isPressed();
-////            boolean arePlayerYawChangesDisabledByAttacking = ScriptBlocksMod.serverConfig.disable_player_yaw_changes_during_attacks && ((MinecraftClient_BetterCombat) client).isWeaponSwingInProgress();
-////            if (client.options.attackKey.isPressed() && !bl &&
-////                    client.player != null && client.options.getPerspective() != Perspective.FIRST_PERSON) {
-////                if (!arePlayerYawChangesDisabledByAttacking) {
-////                    client.player.setYaw(BetterAdventureModeClient.INSTANCE.cameraYaw);
-////                }
-////            }
-////            if (client.options.pickItemKey.isPressed() && !bl &&
-////                    client.player != null && client.options.getPerspective() != Perspective.FIRST_PERSON) {
-////                if (!arePlayerYawChangesDisabledByAttacking) {
-////                    client.player.setYaw(BetterAdventureModeClient.INSTANCE.cameraYaw);
-////                }
-////            }
-////            if (client.options.useKey.isPressed() && !bl &&
-////                    client.player != null && client.options.getPerspective() != Perspective.FIRST_PERSON) {
-////                if (!arePlayerYawChangesDisabledByAttacking) {
-////                    client.player.setYaw(BetterAdventureModeClient.INSTANCE.cameraYaw);
-////                }
-////            }
-////        });
-//		ClientPlayNetworking.registerGlobalReceiver(SendAnnouncementPacket.TYPE, (packet, player, responseSender) -> {
-//			((DuckPlayerEntityMixin) player).scriptblocks$sendAnnouncement(packet.announcement);
-//		});
-//	}
 }

@@ -2,116 +2,54 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
-import com.github.theredbrain.scriptblocks.data.DialogueHelper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DialoguesRegistry {
 
-	static Map<Identifier, Dialogue> registeredDialogues = new HashMap<>();
-
-	public static void register(Identifier itemId, Dialogue dialogue) {
-		registeredDialogues.put(itemId, dialogue);
-	}
-
-	public static Dialogue getDialogue(Identifier dialogueId) {
-		return registeredDialogues.get(dialogueId);
-	}
+	public static Map<Identifier, Dialogue> registeredDialogues = new HashMap<>();
+	private static final Type registeredDialoguesFileFormat = new TypeToken<Dialogue>() {
+	}.getType();
 
 	public static void init() {
-		ServerLifecycleEvents.SERVER_STARTED.register((minecraftServer) -> {
-			loadDialogues(minecraftServer.getResourceManager());
-			encodeRegistry();
-		});
-	}
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(
+				new SimpleSynchronousResourceReloadListener() {
+					@Override
+					public Identifier getFabricId() {
+						return ScriptBlocks.identifier("dialogues");
+					}
 
-	private static void loadDialogues(ResourceManager resourceManager) {
-		var gson = new Gson();
-		Map<Identifier, Dialogue> registeredDialogues = new HashMap();
-		// Reading all attribute files
-		for (var entry : resourceManager.findResources("dialogues", fileName -> fileName.getPath().endsWith(".json")).entrySet()) {
-			var identifier = entry.getKey();
-			var resource = entry.getValue();
-			try {
-				JsonReader reader = new JsonReader(new InputStreamReader(resource.getInputStream()));
-				Dialogue dialogue = DialogueHelper.decode(reader);
-				var id = identifier
-						.toString().replace("dialogues/", "");
-				id = id.substring(0, id.lastIndexOf('.'));
-				registeredDialogues.put(new Identifier(id), dialogue);
-			} catch (Exception e) {
-				System.err.println("Failed to parse: " + identifier);
-				e.printStackTrace();
-			}
-		}
-		DialoguesRegistry.registeredDialogues = registeredDialogues;
-	}
-
-	// NETWORK SYNC
-
-	private static PacketByteBuf encodedRegisteredDialogues = PacketByteBufs.create();
-
-	public static void encodeRegistry() {
-		PacketByteBuf buffer = PacketByteBufs.create();
-		var gson = new Gson();
-		var json = gson.toJson(registeredDialogues);
-		if (ScriptBlocks.serverConfig.show_debug_log) {
-			ScriptBlocks.LOGGER.info("Dialogues registry loaded: " + json);
-		}
-
-		List<String> chunks = new ArrayList<>();
-		var chunkSize = 10000;
-		for (int i = 0; i < json.length(); i += chunkSize) {
-			chunks.add(json.substring(i, Math.min(json.length(), i + chunkSize)));
-		}
-
-		buffer.writeInt(chunks.size());
-		for (var chunk : chunks) {
-			buffer.writeString(chunk);
-		}
-
-		if (ScriptBlocks.serverConfig.show_debug_log) {
-			ScriptBlocks.LOGGER.info("Encoded Dialogues registry size (with package overhead): " + buffer.readableBytes()
-					+ " bytes (in " + chunks.size() + " string chunks with the size of " + chunkSize + ")");
-		}
-		encodedRegisteredDialogues = buffer;
-	}
-
-	public static void decodeRegistry(PacketByteBuf buffer) {
-		var chunkCount = buffer.readInt();
-		String json = "";
-		for (int i = 0; i < chunkCount; ++i) {
-			json = json.concat(buffer.readString());
-		}
-		if (ScriptBlocks.serverConfig.show_debug_log) {
-			ScriptBlocks.LOGGER.info("Decoded Dialogues registry in " + chunkCount + " string chunks");
-			ScriptBlocks.LOGGER.info("Dialogues registry received: " + json);
-		}
-		var gson = new Gson();
-		Type mapType = new TypeToken<Map<String, Dialogue>>() {
-		}.getType();
-		Map<String, Dialogue> readRegisteredDialogues = gson.fromJson(json, mapType);
-		Map<Identifier, Dialogue> newRegisteredDialogues = new HashMap();
-		readRegisteredDialogues.forEach((key, value) -> {
-			newRegisteredDialogues.put(new Identifier(key), value);
-		});
-		registeredDialogues = newRegisteredDialogues;
-	}
-
-	public static PacketByteBuf getEncodedRegistry() {
-		return encodedRegisteredDialogues;
+					@Override
+					public void reload(ResourceManager resourceManager) {
+						registeredDialogues = new HashMap<>();
+						for (var entry : resourceManager.findResources("dialogues", fileName -> fileName.getPath().endsWith(".json")).entrySet()) {
+							var identifier = entry.getKey();
+							var resource = entry.getValue();
+							try {
+								JsonReader reader = new JsonReader(new InputStreamReader(resource.getInputStream()));
+								Dialogue dialogue = new Gson().fromJson(reader, registeredDialoguesFileFormat);
+								var id = identifier
+										.toString().replace("dialogues/", "");
+								id = id.substring(0, id.lastIndexOf('.'));
+								registeredDialogues.put(Identifier.of(id), dialogue);
+							} catch (Exception e) {
+								System.err.println("Failed to parse: " + identifier);
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+		);
 	}
 }

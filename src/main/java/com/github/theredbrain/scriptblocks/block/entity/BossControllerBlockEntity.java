@@ -6,7 +6,6 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.google.common.collect.Maps;
@@ -303,14 +302,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		ScriptBlocks.info("startBattle");
 		Identifier identifier = Identifier.tryParse(bC.bossIdentifier);
 		if (identifier != null) {
-			bC.boss = BossesRegistry.getBoss(identifier);
+			bC.boss = BossesRegistry.registeredBosses.get(identifier);
 		}
 
 		if (bC.boss != null) {
 			ScriptBlocks.info("bC.boss != null");
 			if (bC.setEntityType(bC.boss.bossEntityTypeId())) {
 				bC.currentPhaseId = 0;
-				bC.currentPhase = bC.boss.phases()[0];
+				bC.currentPhase = bC.boss.phases().getFirst();
 				if (spawnBossEntity(bC)) {
 					ScriptBlocks.info("boss spawned");
 					startPhase(bC);
@@ -321,11 +320,11 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	private static void advancePhase(BossControllerBlockEntity bC) {
 		ScriptBlocks.info("advancePhase");
-		if ((bC.currentPhaseId + 1) < bC.boss.phases().length) {
+		if ((bC.currentPhaseId + 1) < bC.boss.phases().size()) {
 			bC.phaseTimer = 0;
 			endPhase(bC);
 			bC.currentPhaseId++;
-			bC.currentPhase = bC.boss.phases()[bC.currentPhaseId];
+			bC.currentPhase = bC.boss.phases().get(bC.currentPhaseId);
 			startPhase(bC);
 		} else {
 			endBattle(bC);
@@ -458,9 +457,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getEntityAttributeModifiers(Boss.Phase phase) {
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
-		for (Boss.Phase.EntityAttributeModifier entityAttributeModifier : phase.entityAttributeModifiers()) {
+		for (EntityAttributeModifier entityAttributeModifier : phase.entityAttributeModifiers()) {
 			Optional<EntityAttribute> optional = Registries.ATTRIBUTE
-					.getOrEmpty(Identifier.tryParse(entityAttributeModifier.identifier()));
+					.getOrEmpty(entityAttributeModifier.id());
 			if (optional.isPresent()) {
 				EntityAttribute key = optional.get();
 				entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.name(), entityAttributeModifier.value(), EntityAttributeModifier.Operation.valueOf(entityAttributeModifier.operation())));

@@ -1,54 +1,39 @@
 package com.github.theredbrain.scriptblocks.data;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public final class Dialogue {
-	private final List<String> dialogueTextList;
-	private final List<String> answerList;
-	private final String unlockAdvancement;
-	private final String lockAdvancement;
-	private final boolean cancellable;
+public record Dialogue(
+		List<String> dialogueTextList,
+		List<Identifier> answerList,
+		String unlockAdvancement,
+		String lockAdvancement,
+		boolean cancellable
+) {
 
-	public Dialogue(List<String> dialogueTextList, List<String> answerList, String unlockAdvancement, String lockAdvancement, boolean cancellable) {
-		this.dialogueTextList = dialogueTextList;
-		this.answerList = answerList;
-		this.unlockAdvancement = unlockAdvancement;
-		this.lockAdvancement = lockAdvancement;
+	public static final Codec<Dialogue> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.STRING.listOf().optionalFieldOf("dialogueTextList", List.of()).forGetter(x -> x.dialogueTextList),
+			Identifier.CODEC.listOf().optionalFieldOf("answerList", List.of()).forGetter(x -> x.answerList),
+			Codec.STRING.optionalFieldOf("unlockAdvancement", "").forGetter(x -> x.unlockAdvancement),
+			Codec.STRING.optionalFieldOf("lockAdvancement", "").forGetter(x -> x.lockAdvancement),
+			Codec.BOOL.optionalFieldOf("cancellable", true).forGetter(x -> x.cancellable)
+			).apply(instance, Dialogue::new));
+
+	public Dialogue(
+			List<String> dialogueTextList,
+			List<Identifier> answerList,
+			String unlockAdvancement,
+			String lockAdvancement,
+			boolean cancellable
+	) {
+		this.dialogueTextList = dialogueTextList != null ? dialogueTextList : List.of();
+		this.answerList = answerList != null ? answerList : List.of();
+		this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
+		this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
 		this.cancellable = cancellable;
 	}
 
-	public List<String> getDialogueTextList() {
-		return this.dialogueTextList;
-	}
-
-	public List<Identifier> getAnswerList() {
-		List<Identifier> answerIdentifiersList = new ArrayList<>();
-		for (String answer : this.answerList) {
-			if (Identifier.isValid(answer)) {
-				answerIdentifiersList.add(new Identifier(answer));
-			}
-		}
-		return answerIdentifiersList;
-	}
-
-	public String getUnlockAdvancement() {
-		if (Identifier.isValid(this.unlockAdvancement)) {
-			return this.unlockAdvancement;
-		}
-		return "";
-	}
-
-	public String getLockAdvancement() {
-		if (Identifier.isValid(this.lockAdvancement)) {
-			return this.lockAdvancement;
-		}
-		return "";
-	}
-
-	public boolean isCancellable() {
-		return this.cancellable;
-	}
 }

@@ -12,11 +12,13 @@ import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -172,8 +174,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private TeleporterBlockEntity.SpawnPointType spawnPointType;
 
 	List<MutablePair<String, String>> locationsList = new ArrayList<>();
-	List<Pair<String, String>> visibleLocationsList = new ArrayList<>();
-	List<Pair<String, String>> unlockedLocationsList = new ArrayList<>();
+	List<MutablePair<String, String>> visibleLocationsList = new ArrayList<>();
+	List<MutablePair<String, String>> unlockedLocationsList = new ArrayList<>();
 	List<PlayerListEntry> partyMemberList = new ArrayList<>();
 	private int creativeLocationsListScrollPosition = 0;
 	private int teamListScrollPosition = 0;
@@ -197,7 +199,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private boolean showCurrentLocationName;
 	private boolean showCurrentLocationOwner;
 	private boolean consumeKeyItem = false;
-	private ItemUtils.VirtualItemStack currentKeyVirtualItemStack;
+	private ItemStack currentKeyVirtualItemStack;
 
 	public TeleporterBlockScreen(TeleporterBlockScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
@@ -218,8 +220,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void openChooseCurrentTargetOwnerScreen() {
 		this.partyMemberList.clear();
 		if (this.client != null && this.client.player != null) {
-//            Team team = this.client.player.getScoreboardTeam();
-			Team team = this.client.player.getScoreboard().getPlayerTeam(String.valueOf(this.client.player.getName()));
+            Team team = this.client.player.getScoreboardTeam();
+//			Team team = this.client.player.getScoreboard().getPlayerTeam(String.valueOf(this.client.player.getName()));
 			if (team != null) {
 				for (String name : team.getPlayerList()) {
 					if (!this.client.player.getName().getString().equals(name)) {
@@ -320,14 +322,14 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void addLocationToList(String identifier, String entrance) {
 		ScriptBlocks.LOGGER.info(identifier);
 		Text message = Text.literal("");
-		if (Identifier.isValid(identifier)) {
-			Location location = LocationsRegistry.getLocation(Identifier.tryParse(identifier));
+//		if (Identifier.isValid(identifier)) {
+			Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(identifier));
 			if (location != null) {
-				if (!location.hasEntrance(entrance)) {
+				if (!LocationUtils.hasEntrance(location, entrance)) {
 					entrance = "";
 				}
 				boolean bl = false;
-				for (Pair<String, String> locationsListEntry : this.locationsList) {
+				for (MutablePair<String, String> locationsListEntry : this.locationsList) {
 					if (locationsListEntry.getLeft().equals(identifier) && locationsListEntry.getRight().equals(entrance)) {
 						bl = true;
 						break;
@@ -336,14 +338,14 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				if (bl) {
 					message = Text.translatable("gui.teleporter_block.location_already_in_list");
 				} else {
-					this.locationsList.add(new Pair<>(identifier, entrance));
+					this.locationsList.add(new MutablePair<>(identifier, entrance));
 				}
 			} else {
 				message = Text.translatable("gui.teleporter_block.location_not_found");
 			}
-		} else {
-			message = Text.translatable("gui.invalid_identifier");
-		}
+//		} else {
+//			message = Text.translatable("gui.invalid_identifier");
+//		}
 		if (this.client != null && this.client.player != null && !message.getString().equals("")) {
 			this.client.player.sendMessage(message);
 		}
@@ -846,8 +848,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void calculateUnlockedAndVisibleLocations(boolean shouldInit) {
 
 		ClientAdvancementManager advancementHandler = null;
-		String lockAdvancementIdentifier;
-		String unlockAdvancementIdentifier;
+		Identifier lockAdvancementIdentifier;
+		Identifier unlockAdvancementIdentifier;
 		boolean showLockedLocation;
 
 		if (this.client != null && this.client.player != null) {
@@ -858,26 +860,26 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 				this.unlockedLocationsList.clear();
 				this.visibleLocationsList.clear();
-				for (Pair<String, String> stringStringPair : this.locationsList) {
-					Location location = LocationsRegistry.getLocation(new Identifier(stringStringPair.getLeft()));
-					lockAdvancementIdentifier = location.lockAdvancementForEntrance(stringStringPair.getRight());
-					unlockAdvancementIdentifier = location.unlockAdvancementForEntrance(stringStringPair.getRight());
-					showLockedLocation = location.showLockedLocationForEntrance(stringStringPair.getRight());
+				for (MutablePair<String, String> stringStringPair : this.locationsList) {
+					Location location = LocationsRegistry.registeredLocations.get(Identifier.of(stringStringPair.getLeft()));
+					lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, stringStringPair.getRight());
+					unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, stringStringPair.getRight());
+					showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, stringStringPair.getRight());
 
 					if (advancementHandler != null) {
-//                        AdvancementEntry lockAdvancementEntry = null;
-						Advancement lockAdvancementEntry = null;
+                        AdvancementEntry lockAdvancementEntry = null;
+//						Advancement lockAdvancementEntry = null;
 						if (!lockAdvancementIdentifier.equals("")) {
-//                            lockAdvancementEntry = advancementHandler.get(Identifier.tryParse(lockAdvancementIdentifier));
-							lockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(lockAdvancementIdentifier));
+                            lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+//							lockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(lockAdvancementIdentifier));
 						}
-//                        AdvancementEntry unlockAdvancementEntry = null;
-						Advancement unlockAdvancementEntry = null;
+                        AdvancementEntry unlockAdvancementEntry = null;
+//						Advancement unlockAdvancementEntry = null;
 						if (!unlockAdvancementIdentifier.equals("")) {
-//                            unlockAdvancementEntry = advancementHandler.get(Identifier.tryParse(unlockAdvancementIdentifier));
-							unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier));
+                            unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+//							unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier));
 						}
-						if ((lockAdvancementIdentifier.equals("") || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry).isDone())) && (unlockAdvancementIdentifier.equals("") || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry).isDone()))) {
+						if ((lockAdvancementIdentifier.equals("") || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier.equals("") || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 							this.unlockedLocationsList.add(stringStringPair);
 							this.visibleLocationsList.add(stringStringPair);
 						} else if (showLockedLocation) {
@@ -892,47 +894,47 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			}
 		}
 
-		for (Pair<String, String> dungeonLocation : this.unlockedLocationsList) {
+		for (MutablePair<String, String> dungeonLocation : this.unlockedLocationsList) {
 			if (Objects.equals(dungeonLocation.getLeft(), this.currentTargetIdentifier)) {
 				this.isCurrentLocationUnlocked = true;
 			}
 		}
 
-		Location location = LocationsRegistry.getLocation(Identifier.tryParse(this.currentTargetIdentifier));
+		Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(this.currentTargetIdentifier));
 		if (location != null) {
-			lockAdvancementIdentifier = location.lockAdvancementForEntrance(this.currentTargetEntrance);
-			unlockAdvancementIdentifier = location.unlockAdvancementForEntrance(this.currentTargetEntrance);
-			this.showCurrentLockAdvancement = location.showLockAdvancementForEntrance(this.currentTargetEntrance);
-			this.showCurrentUnlockAdvancement = location.showUnlockAdvancementForEntrance(this.currentTargetEntrance);
-			this.currentTargetDisplayName = location.getDisplayName();
-			this.currentTargetEntranceDisplayName = location.getEntranceDisplayName(this.currentTargetEntrance);
+			lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, this.currentTargetEntrance);
+			unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, this.currentTargetEntrance);
+			this.showCurrentLockAdvancement = LocationUtils.showLockAdvancementForEntrance(location, this.currentTargetEntrance);
+			this.showCurrentUnlockAdvancement = LocationUtils.showUnlockAdvancementForEntrance(location, this.currentTargetEntrance);
+			this.currentTargetDisplayName = location.displayName();
+			this.currentTargetEntranceDisplayName = LocationUtils.getEntranceDisplayName(location, this.currentTargetEntrance);
 			this.isCurrentLocationPublic = location.isPublic();
-			this.consumeKeyItem = location.consumeKeyAtEntrance(this.currentTargetEntrance);
-			this.currentKeyVirtualItemStack = location.getKeyForEntrance(this.currentTargetEntrance);
+			this.consumeKeyItem = LocationUtils.consumeKeyAtEntrance(location, this.currentTargetEntrance);
+			this.currentKeyVirtualItemStack = LocationUtils.getKeyForEntrance(location, this.currentTargetEntrance);
 			this.canOwnerBeChosen = location.canOwnerBeChosen();
 
-			this.showCurrentLocationName = location.showLocationNameForEntrance(this.currentTargetEntrance);
-			this.showCurrentLocationOwner = location.showLocationOwnerForEntrance(this.currentTargetEntrance);
+			this.showCurrentLocationName = LocationUtils.showLocationNameForEntrance(location, this.currentTargetEntrance);
+			this.showCurrentLocationOwner = LocationUtils.showLocationOwnerForEntrance(location, this.currentTargetEntrance);
 			if (advancementHandler != null) {
-//                AdvancementEntry lockAdvancementEntry = null;
-				Advancement lockAdvancementEntry = null;
+                AdvancementEntry lockAdvancementEntry = null;
+//				Advancement lockAdvancementEntry = null;
 				if (!lockAdvancementIdentifier.equals("")) {
-//                    lockAdvancementEntry = advancementHandler.get(Identifier.tryParse(lockAdvancementIdentifier));
-					lockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(lockAdvancementIdentifier));
+                    lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+//					lockAdvancementEntry = advancementHandler.getManager().get(lockAdvancementIdentifier);
 				}
-//                AdvancementEntry unlockAdvancementEntry = null;
-				Advancement unlockAdvancementEntry = null;
+                AdvancementEntry unlockAdvancementEntry = null;
+//				Advancement unlockAdvancementEntry = null;
 				if (!unlockAdvancementIdentifier.equals("")) {
-//                    unlockAdvancementEntry = advancementHandler.get(Identifier.tryParse(unlockAdvancementIdentifier));
-					unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier));
+                    unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+//					unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier);
 				}
 				if (lockAdvancementEntry != null) {
-//                    this.currentLockAdvancement = lockAdvancementEntry.value();
-					this.currentLockAdvancement = lockAdvancementEntry;
+                    this.currentLockAdvancement = lockAdvancementEntry.value();
+//					this.currentLockAdvancement = lockAdvancementEntry;
 				}
 				if (unlockAdvancementEntry != null) {
-//                    this.currentUnlockAdvancement = unlockAdvancementEntry.value();
-					this.currentUnlockAdvancement = unlockAdvancementEntry;
+                    this.currentUnlockAdvancement = unlockAdvancementEntry.value();
+//					this.currentUnlockAdvancement = unlockAdvancementEntry;
 				}
 
 				Inventory inventory = new SimpleInventory(36);
@@ -942,11 +944,11 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				}
 				boolean bl = true;
 				if (this.currentKeyVirtualItemStack != null) {
-					ItemStack currentKeyItemStack = ItemUtils.getItemStackFromVirtualItemStack(this.currentKeyVirtualItemStack);
+					ItemStack currentKeyItemStack = this.currentKeyVirtualItemStack;
 					int keyCount = currentKeyItemStack.getCount();
 					for (int j = 0; j < inventory.size(); j++) {
 						ItemStack itemStack = inventory.getStack(j);
-						if (ItemStack.canCombine(currentKeyItemStack, itemStack)) {
+						if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
 							int stackCount = inventory.getStack(j).getCount();
 							if (stackCount >= keyCount) {
 								inventory.removeStack(j, keyCount);
@@ -1055,7 +1057,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY/*, double horizontalAmount*/, double verticalAmount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		// TODO
 		if (this.showCreativeTab
 				&& this.creativeScreenPage == CreativeScreenPage.TELEPORTATION_MODE
@@ -1079,7 +1081,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			this.visibleLocationsListScrollAmount = MathHelper.clamp(this.visibleLocationsListScrollAmount - f, 0.0f, 1.0f);
 			this.visibleLocationsListScrollPosition = (int) ((double) (this.visibleLocationsListScrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY/*, horizontalAmount*/, verticalAmount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
@@ -1094,7 +1096,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		if (this.showCreativeTab) {
 			if (this.creativeScreenPage == CreativeScreenPage.ACTIVATION) {
@@ -1212,12 +1214,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), this.x + 8, this.y + 58, 0x404040, false);
 
 //                        context.drawTexture(currentTargetOwner.getSkinTextures().texture(), this.x + 7, this.y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
-						context.drawTexture(currentTargetOwner.getSkinTexture(), this.x + 7, this.y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
+						context.drawTexture(currentTargetOwner.getSkinTextures().texture(), this.x + 7, this.y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
 						context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), this.x + 19, this.y + 77, 0x404040, false);
 					}
 
 					if (this.currentKeyVirtualItemStack != null) {
-						ItemStack currentKey = ItemUtils.getItemStackFromVirtualItemStack(this.currentKeyVirtualItemStack);
+						ItemStack currentKey = this.currentKeyVirtualItemStack;
 //                            ScriptBlocksMod.info("should draw item: " + currentKey.toString());
 						int x = this.x + 8;
 						int y = this.y + 95;
@@ -1305,7 +1307,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			spawnPointType = TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN;
 		}
 
-		List<Pair<String, String>> locationsList = new ArrayList<Pair<String, String>>();
+		List<MutablePair<String, String>> locationsList = new ArrayList<>();
 		if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 			locationsList = this.locationsList;
 		}
@@ -1349,7 +1351,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private boolean tryDungeonRegeneration() {
 		if (this.canLocationBeRegenerated) {
-			Location location = LocationsRegistry.getLocation(Identifier.tryParse(this.currentTargetIdentifier));
+			Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(this.currentTargetIdentifier));
 			if (location != null) {
 				ClientPlayNetworking.send(new SetManualResetLocationControlBlockPacket(
 						location.controlBlockPos(),
