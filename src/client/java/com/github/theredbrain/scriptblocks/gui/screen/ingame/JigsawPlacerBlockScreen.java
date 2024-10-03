@@ -99,7 +99,9 @@ public class JigsawPlacerBlockScreen extends Screen {
 	}
 
 	private void updateDoneButtonState() {
-		this.doneButton.active = Identifier.isValid(this.targetField.getText()) && Identifier.isValid(this.poolField.getText());
+		Identifier id1 = Identifier.tryParse(this.targetField.getText());
+		Identifier id2 = Identifier.tryParse(this.poolField.getText());
+		this.doneButton.active = id1 != null && id2 != null;
 	}
 
 	@Override
@@ -153,7 +155,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		context.drawTextWithShadow(this.textRenderer, POOL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 		this.poolField.render(context, mouseX, mouseY, delta);

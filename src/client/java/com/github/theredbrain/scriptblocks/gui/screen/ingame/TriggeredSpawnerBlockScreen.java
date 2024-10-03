@@ -98,7 +98,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 		super(NarratorManager.EMPTY);
 		this.triggeredSpawnerBlock = triggeredSpawnerBlock;
 		this.creativeScreenPage = CreativeScreenPage.MISC;
-		this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADDITION;
+		this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADD_VALUE;
 	}
 
 	private void deleteListEntry(int index) {
@@ -113,7 +113,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 		this.entityAttributeModifiersList.add(new MutablePair<>(
 				this.newEntityAttributeModifierIdentifierField.getText(),
 				new EntityAttributeModifier(
-						this.newEntityAttributeModifierNameField.getText(),
+						Identifier.of(this.newEntityAttributeModifierNameField.getText()),
 						ItemUtils.parseDouble(this.newEntityAttributeModifierValueField.getText()),
 						this.newEntityAttributeModifierOperation
 				)
@@ -124,12 +124,12 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	}
 
 	private void cycleNewEntityAttributeModifierOperationButton() {
-		if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.ADDITION) {
-			this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.MULTIPLY_BASE;
-		} else if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.MULTIPLY_BASE) {
-			this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.MULTIPLY_TOTAL;
-		} else if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.MULTIPLY_TOTAL) {
-			this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADDITION;
+		if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.ADD_VALUE) {
+			this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE;
+		} else if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE) {
+			this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
+		} else if (this.newEntityAttributeModifierOperation == EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
+			this.newEntityAttributeModifierOperation = EntityAttributeModifier.Operation.ADD_VALUE;
 		}
 		this.newEntityAttributeModifierOperationButton.setMessage(Text.translatable("gui.entity_attribute_modifier.operation." + this.newEntityAttributeModifierOperation.getId()));
 		updateWidgets();
@@ -394,7 +394,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY/*, double horizontalAmount*/, double verticalAmount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (this.creativeScreenPage == CreativeScreenPage.ENTITY_ATTRIBUTE_MODIFIER
 				&& this.entityAttributeModifiersList.size() > 3
 				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 50)
@@ -404,7 +404,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY/*, horizontalAmount*/, verticalAmount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
@@ -449,7 +449,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		if (this.creativeScreenPage == CreativeScreenPage.MISC) {
 			context.drawTextWithShadow(this.textRenderer, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 50, 0xA0A0A0);

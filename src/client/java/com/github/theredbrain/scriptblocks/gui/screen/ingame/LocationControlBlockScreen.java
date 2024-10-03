@@ -391,7 +391,7 @@ public class LocationControlBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY/*, double horizontalAmount*/, double verticalAmount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (this.screenPage == ScreenPage.SIDE_ENTRANCES
 				&& this.sideEntranceList.size() > 3
 				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 100)
@@ -401,7 +401,7 @@ public class LocationControlBlockScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY/*, horizontalAmount*/, verticalAmount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
@@ -416,7 +416,7 @@ public class LocationControlBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		if (this.screenPage == ScreenPage.MAIN_ENTRANCE) {
 			context.drawTextWithShadow(this.textRenderer, MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
@@ -466,12 +466,12 @@ public class LocationControlBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context/*, int mouseX, int mouseY, float delta*/) {
-		super.renderBackground(context/*, mouseX, mouseY, delta*/);
-		this.drawBackground(context/*, delta, mouseX, mouseY*/);
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		super.renderBackground(context, mouseX, mouseY, delta);
+		this.drawBackground(context, delta, mouseX, mouseY);
 	}
 
-	public void drawBackground(DrawContext context/*, float delta, int mouseX, int mouseY*/) {
+	public void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
 	}
 
 	private boolean updateLocationControlBlock() {

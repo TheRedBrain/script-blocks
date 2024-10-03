@@ -23,8 +23,8 @@ public class ItemButtonWidget extends ButtonWidget {
 		return new Builder(itemStack, onPress);
 	}
 
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		super.render(context, mouseX, mouseY, delta);
+	public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+		super.renderWidget(context, mouseX, mouseY, delta);
 		if (this.visible) {
 			int i = this.getX() + this.getWidth() / 2 - 8;
 			int j = this.getY() + this.getHeight() / 2 - 8;

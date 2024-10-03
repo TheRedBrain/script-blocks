@@ -73,7 +73,7 @@ public class InteractiveLootBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		context.drawTextWithShadow(this.textRenderer, LOOT_TABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 		this.lootTableIdentifierStringField.render(context, mouseX, mouseY, delta);

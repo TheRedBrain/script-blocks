@@ -725,7 +725,7 @@ public class HousingScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY/*, double horizontalAmount*/, double verticalAmount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (!this.showCreativeTab
 				&& this.showCoOwnerListScreen
 				&& this.coOwnerList.size() > 5
@@ -756,7 +756,7 @@ public class HousingScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY/*, horizontalAmount*/, verticalAmount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
@@ -771,7 +771,7 @@ public class HousingScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		if (this.showCreativeTab) {
 			if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
@@ -860,12 +860,12 @@ public class HousingScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context/*, int mouseX, int mouseY, float delta*/) {
-		super.renderBackground(context/*, mouseX, mouseY, delta*/);
-		this.drawBackground(context/*, delta, mouseX, mouseY*/);
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		super.renderBackground(context, mouseX, mouseY, delta);
+		this.drawBackground(context, mouseX, mouseY, delta);
 	}
 
-	public void drawBackground(DrawContext context/*, float delta, int mouseX, int mouseY*/) {
+	public void drawBackground(DrawContext context, int mouseX, int mouseY, float delta) {
 		if (!this.showCreativeTab) {
 			int i = this.x;
 			int j = this.y;

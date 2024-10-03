@@ -37,7 +37,7 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 	private static final Text TRADE_BUTTON_LABEL_TEXT = Text.translatable("gui.shop_block.trade_button_label");
 	public static final Identifier SHOP_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/shop_background.png");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_68_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_68");
-	private static final Identifier OUT_OF_STOCK_TEXTURE = new Identifier("container/villager/out_of_stock");
+	private static final Identifier OUT_OF_STOCK_TEXTURE = Identifier.ofVanilla("container/villager/out_of_stock");
 	private static final Identifier HAS_STOCK_TEXTURE = ScriptBlocks.identifier("container/shop_screen/has_stock");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private ShopBlockEntity shopBlockEntity;
@@ -95,9 +95,9 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 						inventory.setStack(k, itemStack.copy());
 					}
 					boolean bl = true;
-					List<ItemUtils.VirtualItemStack> priceList = deal.getPriceList();
-					for (ItemUtils.VirtualItemStack price : priceList) {
-						Item virtualItem = ItemUtils.getItemStackFromVirtualItemStack(price).getItem();
+					List<ItemStack> priceList = deal.price();
+					for (ItemStack price : priceList) {
+						Item virtualItem = price.getItem();
 						int priceCount = price.getCount();
 						for (int j = 0; j < inventory.size(); j++) {
 							if (inventory.getStack(j).isOf(virtualItem)) {
@@ -263,7 +263,7 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY/*, double horizontalAmount*/, double verticalAmount) {
+	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (!this.showCreativeScreen
 				&& this.handler.getUnlockedDealsCounter() > 3
 				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
@@ -273,7 +273,7 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY/*, horizontalAmount*/, verticalAmount);
+		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
@@ -288,7 +288,7 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 
 		if (this.showCreativeScreen) {
 			this.shopIdentifierField.render(context, mouseX, mouseY, delta);
@@ -303,14 +303,14 @@ public class ShopBlockScreen extends HandledScreen<ShopBlockScreenHandler> {
 				}
 				Shop.Deal deal = this.handler.getUnlockedDealsList().get(i);
 				if (deal != null) {
-					ItemStack offerItemStack = ItemUtils.getItemStackFromVirtualItemStack(deal.offer());
+					ItemStack offerItemStack = deal.offer();
 					x = this.x + 85;
 					y = this.y + 18 + (index * 24);
 					k = x + y * this.backgroundWidth;
 					context.drawItemWithoutEntity(offerItemStack, x, y/*, k*/);
 					context.drawItemInSlot(this.textRenderer, offerItemStack, x, y);
-					for (int j = 0; j < deal.getPriceList().size(); j++) {
-						ItemStack priceItemStack = ItemUtils.getItemStackFromVirtualItemStack(deal.getPriceList().get(j));
+					for (int j = 0; j < deal.price().size(); j++) {
+						ItemStack priceItemStack = deal.price().get(j);
 						x = this.x + 8 + (j * 18);
 						y = this.y + 18 + (index * 24);
 						k = x + y * this.backgroundWidth;
