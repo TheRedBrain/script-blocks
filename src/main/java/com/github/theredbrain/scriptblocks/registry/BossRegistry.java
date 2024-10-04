@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BossesRegistry {
+public class BossRegistry {
 
 	public static Map<Identifier, Boss> registeredBosses = new HashMap<>();
 	private static final Type registeredBossesFileFormat = new TypeToken<Boss>() {

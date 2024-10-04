@@ -19,7 +19,7 @@ public class ClientPacketRegistry {
 	public static void init() {
 
 		ClientPlayNetworking.registerGlobalReceiver(BossesSyncPacket.PACKET_ID, (payload, context) -> {
-			BossesRegistry.registeredBosses = payload.registeredBosses();
+			BossRegistry.registeredBosses = payload.registeredBosses();
 		});
 		ClientPlayNetworking.registerGlobalReceiver(DialoguesSyncPacket.PACKET_ID, (payload, context) -> {
 			DialoguesRegistry.registeredDialogues = payload.registeredDialogues();

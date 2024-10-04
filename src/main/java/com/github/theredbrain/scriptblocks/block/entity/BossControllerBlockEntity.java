@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
+import com.github.theredbrain.scriptblocks.registry.BossRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.google.common.collect.Maps;
@@ -302,7 +303,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		ScriptBlocks.info("startBattle");
 		Identifier identifier = bC.bossIdentifier;
 		if (identifier != null) {
-			bC.boss = null;//BossesRegistry.registeredBosses.get(identifier);
+			bC.boss = BossRegistry.registeredBosses.get(identifier);
 		}
 
 		if (bC.boss != null) {
@@ -690,7 +691,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public boolean setBossIdentifier(Identifier newBossIdentifier) {
-			boss = null;//BossesRegistry.registeredBosses.get(newBossIdentifier);
+			boss = BossRegistry.registeredBosses.get(newBossIdentifier);
 		if (boss != null) {
 			this.bossIdentifier = newBossIdentifier;
 			return true;

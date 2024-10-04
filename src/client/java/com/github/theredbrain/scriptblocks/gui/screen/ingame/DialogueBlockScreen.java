@@ -870,7 +870,7 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context, mouseX, mouseY, delta);
+		super.render(context, mouseX, mouseY, delta);
 
 		if (this.showCreativeScreen) {
 			if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
@@ -959,8 +959,6 @@ public class DialogueBlockScreen extends HandledScreen<DialogueBlockScreenHandle
 				context.drawTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, this.y + 98 + 1 + k, 0, 0, 6, 7);
 			}
 		}
-
-		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override

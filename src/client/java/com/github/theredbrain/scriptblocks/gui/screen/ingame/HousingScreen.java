@@ -771,7 +771,7 @@ public class HousingScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context, mouseX, mouseY, delta);
+		super.render(context, mouseX, mouseY, delta);
 
 		if (this.showCreativeTab) {
 			if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
@@ -850,8 +850,6 @@ public class HousingScreen extends Screen {
 				}
 			}
 		}
-
-		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override
