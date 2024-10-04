@@ -450,7 +450,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context, mouseX, mouseY, delta);
+		super.render(context, mouseX, mouseY, delta);
 
 		if (this.creativeScreenPage == CreativeScreenPage.MISC) {
 			context.drawTextWithShadow(this.textRenderer, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 50, 0xA0A0A0);
@@ -499,9 +499,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 		}
-//        }
-
-		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override

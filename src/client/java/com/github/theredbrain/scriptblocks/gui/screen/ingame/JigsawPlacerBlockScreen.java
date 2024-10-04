@@ -155,7 +155,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context, mouseX, mouseY, delta);
+		super.render(context, mouseX, mouseY, delta);
 
 		context.drawTextWithShadow(this.textRenderer, POOL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 		this.poolField.render(context, mouseX, mouseY, delta);
@@ -168,8 +168,6 @@ public class JigsawPlacerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-
-		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override

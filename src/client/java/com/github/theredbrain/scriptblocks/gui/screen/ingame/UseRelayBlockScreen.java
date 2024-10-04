@@ -94,14 +94,12 @@ public class UseRelayBlockScreen extends Screen {
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
-		this.renderBackground(context, mouseX, mouseY, delta);
+		super.render(context, mouseX, mouseY, delta);
 
 		context.drawTextWithShadow(this.textRenderer, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 		this.relayBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.relayBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.relayBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-
-		super.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override
