@@ -43,6 +43,19 @@ public class CustomPacketCodecs {
 		}
 	};
 
+	public static final PacketCodec<ByteBuf, MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_INTEGER = new PacketCodec<>() {
+		public MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> decode(ByteBuf byteBuf) {
+			return new MutablePair<>(new MutablePair<>(PacketCodecs.STRING.decode(byteBuf), PacketCodecs.STRING.decode(byteBuf)), new MutablePair<>(PacketCodecs.STRING.decode(byteBuf), PacketCodecs.INTEGER.decode(byteBuf)));
+		}
+
+		public void encode(ByteBuf byteBuf, MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> pairStringString) {
+			PacketCodecs.STRING.encode(byteBuf, pairStringString.getLeft().getLeft());
+			PacketCodecs.STRING.encode(byteBuf, pairStringString.getLeft().getRight());
+			PacketCodecs.STRING.encode(byteBuf, pairStringString.getRight().getLeft());
+			PacketCodecs.INTEGER.encode(byteBuf, pairStringString.getRight().getRight());
+		}
+	};
+
 	public static final PacketCodec<ByteBuf, MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE = new PacketCodec<>() {
 		public MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> decode(ByteBuf byteBuf) {
 			return new MutablePair<>(PacketCodecs.STRING.decode(byteBuf), new MutablePair<>(BlockPos.PACKET_CODEC.decode(byteBuf), new MutablePair<>(PacketCodecs.DOUBLE.decode(byteBuf), PacketCodecs.DOUBLE.decode(byteBuf))));

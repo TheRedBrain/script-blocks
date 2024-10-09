@@ -6,19 +6,28 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public record TeleportFromTeleporterBlockPacket(BlockPos teleportBlockPosition, String accessPositionDimension,
-												BlockPos accessPositionOffset, boolean setAccessPosition,
-												boolean teleportTeam, String teleportationMode,
-												BlockPos directTeleportPositionOffset,
-												double directTeleportOrientationYaw,
-												double directTeleportOrientationPitch, String spawnPointType,
-												String targetDimensionOwnerName, String targetLocation,
-												String targetLocationEntrance) implements CustomPayload {
+public record TeleportFromTeleporterBlockPacket(
+		BlockPos teleportBlockPosition,
+		String accessPositionDimension,
+		BlockPos accessPositionOffset,
+		boolean setAccessPosition,
+		boolean teleportTeam,
+		String teleportationMode,
+		BlockPos directTeleportPositionOffset,
+		double directTeleportOrientationYaw,
+		double directTeleportOrientationPitch,
+		String spawnPointType,
+		String targetDimensionOwnerName,
+		String targetLocation,
+		String targetLocationEntrance,
+		String dataId,
+		int data
+) implements CustomPayload {
 	public static final CustomPayload.Id<TeleportFromTeleporterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("teleport_from_teleporter_block"));
 	public static final PacketCodec<RegistryByteBuf, TeleportFromTeleporterBlockPacket> PACKET_CODEC = PacketCodec.of(TeleportFromTeleporterBlockPacket::write, TeleportFromTeleporterBlockPacket::new);
 
 	public TeleportFromTeleporterBlockPacket(RegistryByteBuf registryByteBuf) {
-		this(registryByteBuf.readBlockPos(), registryByteBuf.readString(), registryByteBuf.readBlockPos(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean(), registryByteBuf.readString(), registryByteBuf.readBlockPos(), registryByteBuf.readDouble(), registryByteBuf.readDouble(), registryByteBuf.readString(), registryByteBuf.readString(), registryByteBuf.readString(), registryByteBuf.readString());
+		this(registryByteBuf.readBlockPos(), registryByteBuf.readString(), registryByteBuf.readBlockPos(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean(), registryByteBuf.readString(), registryByteBuf.readBlockPos(), registryByteBuf.readDouble(), registryByteBuf.readDouble(), registryByteBuf.readString(), registryByteBuf.readString(), registryByteBuf.readString(), registryByteBuf.readString(), registryByteBuf.readString(), registryByteBuf.readInt());
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {
@@ -35,6 +44,8 @@ public record TeleportFromTeleporterBlockPacket(BlockPos teleportBlockPosition, 
 		registryByteBuf.writeString(this.targetDimensionOwnerName);
 		registryByteBuf.writeString(this.targetLocation);
 		registryByteBuf.writeString(this.targetLocationEntrance);
+		registryByteBuf.writeString(this.dataId);
+		registryByteBuf.writeInt(this.data);
 	}
 
 	@Override

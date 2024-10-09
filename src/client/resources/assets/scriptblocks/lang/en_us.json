@@ -211,6 +211,8 @@
 	"gui.teleporter_block.target_identifier_field.place_holder": "Target Identifier Label",
 	"gui.teleporter_block.target_entrance_field.label": "Target Entrance",
 	"gui.teleporter_block.target_entrance_field.place_holder": "Target Entrance Label",
+	"gui.teleporter_block.new_data_id_field.place_holder": "Data ID",
+	"gui.teleporter_block.new_data_field.place_holder": "Data",
 	"gui.teleporter_block.teleport_button.label": "Teleport",
 	"gui.teleporter_block.teleport_button.place_holder": "Teleport Button Label",
 	"gui.teleporter_block.cancel_teleport_button.label": "Cancel Teleport",

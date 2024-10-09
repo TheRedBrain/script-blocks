@@ -55,6 +55,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
 		String targetLocation = payload.targetLocation();
 		String targetLocationEntrance = payload.targetLocationEntrance();
+		String dataId = payload.dataId();
+		int data = payload.data();
 
 		ServerWorld serverWorld = serverPlayerEntity.getServerWorld();
 		MinecraftServer server = serverPlayerEntity.server;
@@ -128,6 +130,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					BlockPos blockPos = location.controlBlockPos();
 					BlockEntity blockEntity = targetWorld.getBlockEntity(blockPos);
+					boolean initialise = false;
 
 					if (!(blockEntity instanceof LocationControlBlockEntity)) {
 
@@ -145,16 +148,29 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadRemoveAllCommand);
 
 						blockEntity = targetWorld.getBlockEntity(blockPos);
+						initialise = true;
 					}
 
 //                    ScriptBlocksMod.info("controlBlockPos: " + blockPos);
 //                    ScriptBlocksMod.info("block at controlBlockPos: " + targetWorld.getBlockState(blockPos).getBlock());
 
 					if (blockEntity instanceof LocationControlBlockEntity locationControlBlock) {
-						if (locationControlBlock.shouldReset()) {
+						if (locationControlBlock.shouldReset() || initialise) {
 
 							String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
+
+							// TODO dataSavingBlock
+//							if (!dataId.isEmpty()) {
+//								BlockPos dataBlockPos = locationControlBlock.getDataSavingBlockPosOffset();
+//								if (dataBlockPos != BlockPos.ORIGIN) {
+//									BlockEntity blockEntity1 = targetWorld.getBlockEntity(locationControlBlock.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
+//									if (blockEntity1 instanceof DataSavingBlockEntity dataSavingBlockEntity) {
+//										dataSavingBlockEntity.reset();
+//										dataSavingBlockEntity.setData(dataId, data);
+//									}
+//								}
+//							}
 
 							locationControlBlock.trigger();
 

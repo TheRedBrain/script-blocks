@@ -25,6 +25,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
 	private HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private BlockPos dataSavingBlockPosOffset = new BlockPos(0, 0, 0);
 
 	public LocationControlBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.LOCATION_CONTROL_BLOCK_ENTITY, pos, state);
@@ -61,6 +62,16 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
+		if (this.dataSavingBlockPosOffset != BlockPos.ORIGIN) {
+			nbt.putInt("dataSavingBlockPosOffsetX", this.dataSavingBlockPosOffset.getX());
+			nbt.putInt("dataSavingBlockPosOffsetY", this.dataSavingBlockPosOffset.getY());
+			nbt.putInt("dataSavingBlockPosOffsetZ", this.dataSavingBlockPosOffset.getZ());
+		} else {
+			nbt.remove("dataSavingBlockPosOffsetX");
+			nbt.remove("dataSavingBlockPosOffsetY");
+			nbt.remove("dataSavingBlockPosOffsetZ");
+		}
+
 		nbt.putBoolean("manualReset", this.manualReset);
 
 		nbt.putBoolean("shouldAlwaysReset", this.shouldAlwaysReset);
@@ -93,10 +104,24 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 			this.sideEntrances.put(key, new MutablePair<>(new BlockPos(sideEntranceX, sideEntranceY, sideEntranceZ), new MutablePair<>(sideEntranceYaw, sideEntrancePitch)));
 		}
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("dataSavingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataSavingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataSavingBlockPosOffsetZ", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockResets")
+			);
+		}
+
+		if (nbt.contains("dataSavingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataSavingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataSavingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+			this.dataSavingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("dataSavingBlockPosOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataSavingBlockPosOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataSavingBlockPosOffsetZ"), -48, 48)
+			);
+		}
 
 		this.manualReset = nbt.getBoolean("manualReset");
 
@@ -150,6 +175,14 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
 		this.triggeredBlock = triggeredBlock;
+	}
+
+	public BlockPos getDataSavingBlockPosOffset() {
+		return dataSavingBlockPosOffset;
+	}
+
+	public void setDataSavingBlockPosOffset(BlockPos dataSavingBlockPosOffset) {
+		this.dataSavingBlockPosOffset = dataSavingBlockPosOffset;
 	}
 
 	public void trigger() {

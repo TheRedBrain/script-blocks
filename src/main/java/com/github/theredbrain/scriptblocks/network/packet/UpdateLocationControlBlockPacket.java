@@ -10,12 +10,17 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateLocationControlBlockPacket(BlockPos locationControlBlockPosition,
-											   BlockPos mainEntrancePositionOffset, double mainEntranceYaw,
-											   double mainEntrancePitch,
-											   List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList,
-											   BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets,
-											   boolean shouldAlwaysReset) implements CustomPayload {
+public record UpdateLocationControlBlockPacket(
+		BlockPos locationControlBlockPosition,
+		BlockPos mainEntrancePositionOffset,
+		double mainEntranceYaw,
+		double mainEntrancePitch,
+		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList,
+		BlockPos triggeredBlockPositionOffset,
+		boolean triggeredBlockResets,
+		BlockPos dataSavingBlockPosOffset,
+		boolean shouldAlwaysReset
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_location_control_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateLocationControlBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateLocationControlBlockPacket::write, UpdateLocationControlBlockPacket::new);
 
@@ -28,6 +33,7 @@ public record UpdateLocationControlBlockPacket(BlockPos locationControlBlockPosi
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean()
 		);
 	}
@@ -40,6 +46,7 @@ public record UpdateLocationControlBlockPacket(BlockPos locationControlBlockPosi
 		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
+		registryByteBuf.writeBlockPos(this.dataSavingBlockPosOffset);
 		registryByteBuf.writeBoolean(this.shouldAlwaysReset);
 	}
 

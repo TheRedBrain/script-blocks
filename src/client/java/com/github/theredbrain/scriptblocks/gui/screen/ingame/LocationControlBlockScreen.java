@@ -37,6 +37,7 @@ public class LocationControlBlockScreen extends Screen {
 	private static final Text NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.name");
 	private static final Text NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.orientation");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+	private static final Text DATA_SAVING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block .dataSavingBlockPositionOffset");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final LocationControlBlockEntity locationControlBlock;
@@ -62,6 +63,9 @@ public class LocationControlBlockScreen extends Screen {
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
 	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
+	private TextFieldWidget dataSavingBlockPosOffsetXField;
+	private TextFieldWidget dataSavingBlockPosOffsetYField;
+	private TextFieldWidget dataSavingBlockPosOffsetZField;
 	private ButtonWidget saveButton;
 	private ButtonWidget cancelButton;
 	private ScreenPage screenPage;
@@ -229,6 +233,21 @@ public class LocationControlBlockScreen extends Screen {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
+		this.dataSavingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 115, 50, 20, Text.empty());
+		this.dataSavingBlockPosOffsetXField.setMaxLength(128);
+		this.dataSavingBlockPosOffsetXField.setText(Integer.toString(this.locationControlBlock.getDataSavingBlockPosOffset().getX()));
+		this.addSelectableChild(this.dataSavingBlockPosOffsetXField);
+
+		this.dataSavingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 115, 50, 20, Text.empty());
+		this.dataSavingBlockPosOffsetYField.setMaxLength(128);
+		this.dataSavingBlockPosOffsetYField.setText(Integer.toString(this.locationControlBlock.getDataSavingBlockPosOffset().getY()));
+		this.addSelectableChild(this.dataSavingBlockPosOffsetYField);
+
+		this.dataSavingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 115, 50, 20, Text.empty());
+		this.dataSavingBlockPosOffsetZField.setMaxLength(128);
+		this.dataSavingBlockPosOffsetZField.setText(Integer.toString(this.locationControlBlock.getDataSavingBlockPosOffset().getZ()));
+		this.addSelectableChild(this.dataSavingBlockPosOffsetZField);
+
 
 		this.saveButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
@@ -264,6 +283,10 @@ public class LocationControlBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetYField.setVisible(false);
 		this.triggeredBlockPositionOffsetZField.setVisible(false);
 		this.toggleTriggeredBlockResetsButton.visible = false;
+
+		this.dataSavingBlockPosOffsetXField.setVisible(false);
+		this.dataSavingBlockPosOffsetYField.setVisible(false);
+		this.dataSavingBlockPosOffsetZField.setVisible(false);
 
 		this.saveButton.visible = false;
 		this.cancelButton.visible = false;
@@ -309,6 +332,10 @@ public class LocationControlBlockScreen extends Screen {
 			this.triggeredBlockPositionOffsetZField.setVisible(true);
 			this.toggleTriggeredBlockResetsButton.visible = true;
 
+			this.dataSavingBlockPosOffsetXField.setVisible(true);
+			this.dataSavingBlockPosOffsetYField.setVisible(true);
+			this.dataSavingBlockPosOffsetZField.setVisible(true);
+
 		}
 
 		this.saveButton.visible = true;
@@ -337,6 +364,9 @@ public class LocationControlBlockScreen extends Screen {
 		String string11 = this.triggeredBlockPositionOffsetXField.getText();
 		String string12 = this.triggeredBlockPositionOffsetYField.getText();
 		String string13 = this.triggeredBlockPositionOffsetZField.getText();
+		String string14 = this.dataSavingBlockPosOffsetXField.getText();
+		String string15 = this.dataSavingBlockPosOffsetYField.getText();
+		String string16 = this.dataSavingBlockPosOffsetZField.getText();
 		boolean bl2 = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.sideEntranceList.clear();
@@ -359,6 +389,9 @@ public class LocationControlBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.setText(string11);
 		this.triggeredBlockPositionOffsetYField.setText(string12);
 		this.triggeredBlockPositionOffsetZField.setText(string13);
+		this.dataSavingBlockPosOffsetXField.setText(string14);
+		this.dataSavingBlockPosOffsetYField.setText(string15);
+		this.dataSavingBlockPosOffsetZField.setText(string16);
 		this.triggeredBlockResets = bl2;
 		this.updateWidgets();
 	}
@@ -455,6 +488,10 @@ public class LocationControlBlockScreen extends Screen {
 			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, DATA_SAVING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.dataSavingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
+			this.dataSavingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
+			this.dataSavingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
 		}
 	}
 
@@ -489,6 +526,11 @@ public class LocationControlBlockScreen extends Screen {
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
 				),
 				this.triggeredBlockResets,
+				new BlockPos(
+						ItemUtils.parseInt(this.dataSavingBlockPosOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataSavingBlockPosOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataSavingBlockPosOffsetZField.getText())
+				),
 				this.shouldAlwaysReset
 		));
 		return true;

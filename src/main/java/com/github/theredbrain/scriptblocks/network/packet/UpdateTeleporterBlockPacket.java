@@ -11,17 +11,29 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateTeleporterBlockPacket(BlockPos teleportBlockPosition, boolean showActivationArea,
-										  boolean showAdventureScreen, Vec3i activationAreaDimensions,
-										  BlockPos activationAreaPositionOffset, BlockPos accessPositionOffset,
-										  boolean setAccessPosition, boolean onlyTeleportDimensionOwner,
-										  boolean teleportTeam, String teleportationMode,
-										  BlockPos directTeleportPositionOffset, double directTeleportOrientationYaw,
-										  double directTeleportOrientationPitch, String spawnPointType,
-										  List<MutablePair<String, String>> locationsList, String teleporterName,
-										  String currentTargetIdentifierLabel, String currentTargetOwnerLabel,
-										  boolean showRegenerateButton, String teleportButtonLabel,
-										  String cancelTeleportButtonLabel) implements CustomPayload {
+public record UpdateTeleporterBlockPacket(
+		BlockPos teleportBlockPosition,
+		boolean showActivationArea,
+		boolean showAdventureScreen,
+		Vec3i activationAreaDimensions,
+		BlockPos activationAreaPositionOffset,
+		BlockPos accessPositionOffset,
+		boolean setAccessPosition,
+		boolean onlyTeleportDimensionOwner,
+		boolean teleportTeam,
+		String teleportationMode,
+		BlockPos directTeleportPositionOffset,
+		double directTeleportOrientationYaw,
+		double directTeleportOrientationPitch,
+		String spawnPointType,
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList,
+		String teleporterName,
+		String currentTargetIdentifierLabel,
+		String currentTargetOwnerLabel,
+		boolean showRegenerateButton,
+		String teleportButtonLabel,
+		String cancelTeleportButtonLabel
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateTeleporterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_teleporter_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateTeleporterBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTeleporterBlockPacket::write, UpdateTeleporterBlockPacket::new);
 
@@ -45,7 +57,7 @@ public record UpdateTeleporterBlockPacket(BlockPos teleportBlockPosition, boolea
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
-				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_STRING),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_INTEGER),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -81,7 +93,7 @@ public record UpdateTeleporterBlockPacket(BlockPos teleportBlockPosition, boolea
 
 		registryByteBuf.writeString(this.spawnPointType);
 
-		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_STRING_STRING);
+		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_INTEGER);
 
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);

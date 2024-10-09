@@ -40,6 +40,8 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
+		BlockPos dataSavingBlockPosOffset = payload.dataSavingBlockPosOffset();
+
 		boolean shouldAlwaysReset = payload.shouldAlwaysReset();
 
 		World world = serverPlayerEntity.getWorld();
@@ -52,6 +54,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 			locationControlBlockEntity.setMainEntrance(new MutablePair<>(mainEntrancePositionOffset, new MutablePair<>(mainEntranceYaw, mainEntrancePitch)));
 			locationControlBlockEntity.setSideEntrances(sideEntrances);
 			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			locationControlBlockEntity.setDataSavingBlockPosOffset(dataSavingBlockPosOffset);
 			locationControlBlockEntity.setShouldAlwaysReset(shouldAlwaysReset);
 
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);

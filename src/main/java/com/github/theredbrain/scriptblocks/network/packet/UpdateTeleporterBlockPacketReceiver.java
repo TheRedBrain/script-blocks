@@ -38,7 +38,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		boolean onlyTeleportDimensionOwner = payload.onlyTeleportDimensionOwner();
 		boolean teleportTeam = payload.teleportTeam();
 
-		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.valueOf(payload.teleportationMode());
+		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.byName(payload.teleportationMode()).orElse(TeleporterBlockEntity.TeleportationMode.DIRECT);
 
 		BlockPos directTeleportPositionOffset = payload.directTeleportPositionOffset();
 		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
@@ -46,7 +46,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.valueOf(payload.spawnPointType());
 
-		List<MutablePair<String, String>> locationsList = payload.locationsList();
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = payload.locationsList();
 
 		String teleporterName = payload.teleporterName();
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();

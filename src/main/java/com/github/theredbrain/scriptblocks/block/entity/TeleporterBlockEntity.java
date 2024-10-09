@@ -13,7 +13,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
@@ -23,7 +22,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Pair;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -64,8 +62,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	// specific location mode
 	private SpawnPointType spawnPointType = SpawnPointType.WORLD_SPAWN;
 
-	// dungeon mode
-	private List<MutablePair<String, String>> locationsList = new ArrayList<>(List.of());
+	// location mode
+	private List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = new ArrayList<>(List.of());
 
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
@@ -117,8 +115,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putInt("locationsListSize", this.locationsList.size());
 
 		for (int i = 0; i < this.locationsList.size(); i++) {
-			nbt.putString("locationsListIdentifier_" + i, this.locationsList.get(i).getLeft());
-			nbt.putString("locationsListEntrance_" + i, this.locationsList.get(i).getRight());
+			nbt.putString("locationsListIdentifier_" + i, this.locationsList.get(i).getLeft().getLeft());
+			nbt.putString("locationsListEntrance_" + i, this.locationsList.get(i).getLeft().getRight());
+			nbt.putString("locationsListDataId_" + i, this.locationsList.get(i).getRight().getLeft());
+			nbt.putInt("locationsListData_" + i, this.locationsList.get(i).getRight().getRight());
 		}
 
 		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
@@ -183,7 +183,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		int locationsListSize = nbt.getInt("locationsListSize");
 		this.locationsList.clear();
 		for (int p = 0; p < locationsListSize; p++) {
-			this.locationsList.add(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)));
+			this.locationsList.add(new MutablePair<>(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)), new MutablePair<>(nbt.getString("locationsListDataId_" + p), nbt.getInt("locationsListData_" + p))));
 		}
 
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
@@ -380,13 +380,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.spawnPointType = spawnPointType;
 	}
 
-	public List<MutablePair<String, String>> getLocationsList() {
+	public List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> getLocationsList() {
 		return this.locationsList;
 	}
 
 	// TODO check if input is valid
-	public boolean setLocationsList(List<MutablePair<String, String>> dungeonLocationsList) {
-		this.locationsList = dungeonLocationsList;
+	public boolean setLocationsList(List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList) {
+		this.locationsList = locationsList;
 		return true;
 	}
 
