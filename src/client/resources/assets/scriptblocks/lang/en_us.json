@@ -221,6 +221,7 @@
 	"gui.teleporter_block.target_entrance_field.place_holder": "Target Entrance Label",
 	"gui.teleporter_block.new_data_id_field.place_holder": "Data ID",
 	"gui.teleporter_block.new_data_field.place_holder": "Data",
+	"gui.teleporter_block.new_status_effect_field.place_holder": "Status Effect Identifier",
 	"gui.teleporter_block.teleport_button.label": "Teleport",
 	"gui.teleporter_block.teleport_button.place_holder": "Teleport Button Label",
 	"gui.teleporter_block.cancel_teleport_button.label": "Cancel Teleport",
@@ -239,6 +240,7 @@
 
 	"gui.teleporter_block.creativeScreenPage.activation": "Activation Settings",
 	"gui.teleporter_block.creativeScreenPage.teleportation_mode": "Teleportation Settings",
+	"gui.teleporter_block.creativeScreenPage.status_effect_to_decrement": "Status Effects To Decrement",
 	"gui.teleporter_block.creativeScreenPage.adventure_screen_customization": "Adventure Screen Settings",
 
 	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
@@ -275,6 +277,8 @@
 	"gui.teleporter_block.locationType.dimension_access_position": "Dimension Access Position",
 	"gui.teleporter_block.add_new_location_button_label": "Add new entry",
 	"gui.teleporter_block.remove_location_button_label": "Remove entry",
+	"gui.teleporter_block.add_new_status_effect_button_label": "Add new entry",
+	"gui.teleporter_block.remove_status_effect_button_label": "Remove entry",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 
 	"gui.teleporter_block.requiredItemStackSlot.tooltip": "Item required for Teleportation",

@@ -53,7 +53,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
+// TODO split into 2 screens
 public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHandler> {
+	private static final int VISIBLE_STATUS_EFFECT_LIST_ENTRIES = 5;
 	private static final Text HIDE_ADVENTURE_SCREEN_LABEL_TEXT = Text.translatable("gui.teleporter_block.hide_adventure_screen_label");
 	private static final Text SHOW_ADVENTURE_SCREEN_LABEL_TEXT = Text.translatable("gui.teleporter_block.show_adventure_screen_label");
 	private static final Text HIDE_ACTIVATION_AREA_LABEL_TEXT = Text.translatable("gui.teleporter_block.hide_activation_area_label");
@@ -73,6 +75,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private static final Text SPAWN_POINT_TYPE_LABEL_TEXT = Text.translatable("gui.teleporter_block.spawn_point_type_label");
 	private static final Text ADD_NEW_LOCATION_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_location_button_label");
 	private static final Text REMOVE_LOCATION_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.remove_location_button_label");
+	private static final Text ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_status_effect_button_label");
+	private static final Text REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.remove_status_effect_button_label");
 	private static final Text EDIT_BUTTON_LABEL_TEXT = Text.translatable("gui.edit");
 	private static final Text CANCEL_BUTTON_LABEL_TEXT = Text.translatable("gui.cancel");
 	private static final Text CHOOSE_BUTTON_LABEL_TEXT = Text.translatable("gui.choose");
@@ -82,6 +86,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
+	private static final Identifier SCROLL_BAR_BACKGROUND_8_112_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_112");
 	private static final Identifier CREATIVE_HOUSING_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_95");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	public static final Identifier ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/teleporter_block/adventure_teleporter_screen.png");
@@ -105,6 +110,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private TextFieldWidget accessPositionOffsetYField;
 	private TextFieldWidget accessPositionOffsetZField;
 	private List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
+	private ButtonWidget removeStatusEffectButton0;
+	private ButtonWidget removeStatusEffectButton1;
+	private ButtonWidget removeStatusEffectButton2;
+	private ButtonWidget removeStatusEffectButton3;
+	private ButtonWidget removeStatusEffectButton4;
+	private TextFieldWidget newStatusEffectField;
+	private ButtonWidget addNewStatusEffectButton;
 	private CyclingButtonWidget<Boolean> toggleSetAccessPositionButton;
 	private CyclingButtonWidget<Boolean> toggleOnlyTeleportDimensionOwnerButton;
 	private CyclingButtonWidget<Boolean> toggleTeleportTeamButton;
@@ -184,12 +196,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private int creativeLocationsListScrollPosition = 0;
 	private int teamListScrollPosition = 0;
 	private int visibleLocationsListScrollPosition = 0;
+	private int statusEffectListScrollPosition = 0;
 	private float creativeLocationsListScrollAmount = 0.0f;
 	private float teamListScrollAmount = 0.0f;
 	private float visibleLocationsListScrollAmount = 0.0f;
+	private float statusEffectListScrollAmount = 0.0f;
 	private boolean creativeLocationsListMouseClicked = false;
 	private boolean teamListMouseClicked = false;
 	private boolean visibleLocationsListMouseClicked = false;
+	private boolean statusEffectListMouseClicked = false;
 
 	private boolean isTeleportButtonActive = true;
 	private boolean canLocationBeRegenerated = false;
@@ -363,6 +378,18 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void removeLocationFromLocationList(int index) {
 		if (index + this.visibleLocationsListScrollPosition < this.locationsList.size()) {
 			this.locationsList.remove(index + this.visibleLocationsListScrollPosition);
+		}
+		this.updateWidgets();
+	}
+
+	private void addStatusEffectToList(String identifier) {
+		this.statusEffectsToDecrementLevelOnTeleport.add(identifier);
+		this.updateWidgets();
+	}
+
+	private void removeStatusEffectFromStatusEffectList(int index) {
+		if (index + this.statusEffectListScrollPosition < this.statusEffectsToDecrementLevelOnTeleport.size()) {
+			this.statusEffectsToDecrementLevelOnTeleport.remove(index + this.statusEffectListScrollPosition);
 		}
 		this.updateWidgets();
 	}
@@ -584,6 +611,21 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 		this.addNewLocationButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_LOCATION_BUTTON_LABEL_TEXT, button -> this.addLocationToList(this.newLocationIdentifierField.getText(), this.newLocationEntranceField.getText(), this.newDataIdField.getText(), this.newDataField.getText())).dimensions(this.width / 2 - 154, 185, 100, 20).build());
 
+		// --- status effect page ---
+
+		this.removeStatusEffectButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(0)).dimensions(this.width / 2 + 54, 44, 100, 20).build());
+		this.removeStatusEffectButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(1)).dimensions(this.width / 2 + 54, 68, 100, 20).build());
+		this.removeStatusEffectButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(2)).dimensions(this.width / 2 + 54, 92, 100, 20).build());
+		this.removeStatusEffectButton3 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(3)).dimensions(this.width / 2 + 54, 116, 100, 20).build());
+		this.removeStatusEffectButton4 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(4)).dimensions(this.width / 2 + 54, 140, 100, 20).build());
+
+		this.newStatusEffectField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
+		this.newStatusEffectField.setMaxLength(128);
+		this.newStatusEffectField.setPlaceholder(Text.translatable("gui.teleporter_block.new_status_effect_field.place_holder"));
+		this.addSelectableChild(this.newStatusEffectField);
+
+		this.addNewStatusEffectButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.addStatusEffectToList(this.newStatusEffectField.getText())).dimensions(this.width / 2 - 154, 185, 300, 20).build());
+
 		// --- adventure screen customization page ---
 
 		this.teleporterNameField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 44, 300, 20, Text.empty());
@@ -707,6 +749,14 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.newLocationEntranceField.setVisible(false);
 		this.addNewLocationButton.visible = false;
 
+		this.removeStatusEffectButton0.visible = false;
+		this.removeStatusEffectButton1.visible = false;
+		this.removeStatusEffectButton2.visible = false;
+		this.removeStatusEffectButton3.visible = false;
+		this.removeStatusEffectButton4.visible = false;
+		this.newStatusEffectField.setVisible(false);
+		this.addNewStatusEffectButton.visible = false;
+		
 		this.teleporterNameField.setVisible(false);
 		this.currentTargetIdentifierLabelField.setVisible(false);
 		this.currentTargetOwnerLabelField.setVisible(false);
@@ -776,6 +826,16 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					this.addNewLocationButton.visible = true;
 
 				}
+			} else if (this.creativeScreenPage == CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
+
+				this.removeStatusEffectButton0.visible = true;
+				this.removeStatusEffectButton1.visible = true;
+				this.removeStatusEffectButton2.visible = true;
+				this.removeStatusEffectButton3.visible = true;
+				this.removeStatusEffectButton4.visible = true;
+				this.newStatusEffectField.setVisible(true);
+				this.addNewStatusEffectButton.visible = true;
+
 			} else if (this.creativeScreenPage == CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
 				this.teleporterNameField.setVisible(true);
@@ -1040,6 +1100,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				this.creativeLocationsListMouseClicked = true;
 			}
 		}
+		if (this.showCreativeTab
+				&& this.creativeScreenPage == CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT
+				&& this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES) {
+			i = this.width / 2 - 152;
+			j = 44;
+			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 112)) {
+				this.statusEffectListMouseClicked = true;
+			}
+		}
 		// TODO team list
 		if (this.showChooseTargetOwnerScreen) {
 			i = this.x - 13;
@@ -1073,6 +1142,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			this.creativeLocationsListScrollAmount = MathHelper.clamp(this.creativeLocationsListScrollAmount + f, 0.0f, 1.0f);
 			this.creativeLocationsListScrollPosition = (int) ((double) (this.creativeLocationsListScrollAmount * (float) i));
 		}
+		if (this.showCreativeTab
+				&& this.creativeScreenPage == CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT
+				&& this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES
+				&& this.statusEffectListMouseClicked) {
+			int i = this.statusEffectsToDecrementLevelOnTeleport.size() - VISIBLE_STATUS_EFFECT_LIST_ENTRIES;
+			float f = (float) deltaY / (float) i;
+			this.statusEffectListScrollAmount = MathHelper.clamp(this.statusEffectListScrollAmount + f, 0.0f, 1.0f);
+			this.statusEffectListScrollPosition = (int) ((double) (this.statusEffectListScrollAmount * (float) i));
+		}
 		// TODO team list
 		if (!this.showCreativeTab
 				&& this.showChooseTargetIdentifierScreen
@@ -1100,6 +1178,16 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			float f = (float) verticalAmount / (float) i;
 			this.creativeLocationsListScrollAmount = MathHelper.clamp(this.creativeLocationsListScrollAmount - f, 0.0f, 1.0f);
 			this.creativeLocationsListScrollPosition = (int) ((double) (this.creativeLocationsListScrollAmount * (float) i));
+		}
+		if (this.showCreativeTab
+				&& this.creativeScreenPage == CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT
+				&& this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES
+				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 50)
+				&& mouseY >= 44 && mouseY <= 112) {
+			int i = this.statusEffectsToDecrementLevelOnTeleport.size() - VISIBLE_STATUS_EFFECT_LIST_ENTRIES;
+			float f = (float) verticalAmount / (float) i;
+			this.statusEffectListScrollAmount = MathHelper.clamp(this.statusEffectListScrollAmount - f, 0.0f, 1.0f);
+			this.statusEffectListScrollPosition = (int) ((double) (this.statusEffectListScrollAmount * (float) i));
 		}
 		// TODO team list
 		if (!this.showCreativeTab
@@ -1166,17 +1254,26 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), 0xA0A0A0);
 					}
 					if (this.locationsList.size() > 3) {
-//                        context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 70, 8, 70);
-						context.drawTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 70, 0, 0, 8, 70);
+                        context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 70, 8, 70);
 						int k = (int) (61.0f * this.creativeLocationsListScrollAmount);
-//                        context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 70 + 1 + k, 6, 7);
-						context.drawTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 70 + 1 + k, 0, 0, 6, 7);
+                        context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 70 + 1 + k, 6, 7);
 					}
 					this.newLocationIdentifierField.render(context, mouseX, mouseY, delta);
 					this.newLocationEntranceField.render(context, mouseX, mouseY, delta);
 					this.newDataIdField.render(context, mouseX, mouseY, delta);
 					this.newDataField.render(context, mouseX, mouseY, delta);
 				}
+			} else if (this.creativeScreenPage == CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
+				for (int i = this.statusEffectListScrollPosition; i < Math.min(this.statusEffectListScrollPosition + VISIBLE_STATUS_EFFECT_LIST_ENTRIES, this.statusEffectsToDecrementLevelOnTeleport.size()); i++) {
+					String text = this.statusEffectsToDecrementLevelOnTeleport.get(i);
+					context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 76 + ((i - this.statusEffectListScrollPosition) * 25), 0xA0A0A0);
+				}
+				if (this.locationsList.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES) {
+                        context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_112_TEXTURE, this.width / 2 - 153, 44, 8, 112);
+					int k = (int) (103.0f * this.statusEffectListScrollAmount);
+                        context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+				}
+				this.newStatusEffectField.render(context, mouseX, mouseY, delta);
 			} else if (this.creativeScreenPage == CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
 				this.teleporterNameField.render(context, mouseX, mouseY, delta);
