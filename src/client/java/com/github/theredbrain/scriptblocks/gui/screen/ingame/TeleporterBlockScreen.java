@@ -104,6 +104,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private TextFieldWidget accessPositionOffsetXField;
 	private TextFieldWidget accessPositionOffsetYField;
 	private TextFieldWidget accessPositionOffsetZField;
+	private List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
 	private CyclingButtonWidget<Boolean> toggleSetAccessPositionButton;
 	private CyclingButtonWidget<Boolean> toggleOnlyTeleportDimensionOwnerButton;
 	private CyclingButtonWidget<Boolean> toggleTeleportTeamButton;
@@ -379,6 +380,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			}
 		}
 		this.locationsList.clear();
+		this.statusEffectsToDecrementLevelOnTeleport.addAll(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
@@ -628,12 +630,21 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 //        }));
 		//endregion creative screen
 
+		this.updateWidgets();
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		if (!this.showCreativeTab) {
 			this.setInitialFocus(this.teleportButton);
 		} else {
 			this.setInitialFocus(this.creativeScreenPageButton);
 		}
-		this.updateWidgets();
+	}
+
+	@Override
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		this.renderInGameBackground(context);
 	}
 
 	private void updateWidgets() {
@@ -1352,6 +1363,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						ItemUtils.parseInt(this.accessPositionOffsetZField.getText())
 				),
 				this.setAccessPosition,
+				this.statusEffectsToDecrementLevelOnTeleport,
 				this.onlyTeleportDimensionOwner,
 				this.teleportTeam,
 				this.teleportationMode.asString(),
@@ -1409,6 +1421,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				currentTargetOwnerName,
 				this.currentTargetIdentifier,
 				this.currentTargetEntrance,
+				this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport(),
 				this.currentTargetEntranceDataId,
 				this.currentTargetEntranceData
 		));
@@ -1429,6 +1442,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	public static enum CreativeScreenPage implements StringIdentifiable {
 		ACTIVATION("activation"),
 		TELEPORTATION_MODE("teleportation_mode"),
+		STATUS_EFFECTS_TO_DECREMENT("status_effect_to_decrement"),
 		ADVENTURE_SCREEN_CUSTOMIZATION("adventure_screen_customization");
 
 		private final String name;

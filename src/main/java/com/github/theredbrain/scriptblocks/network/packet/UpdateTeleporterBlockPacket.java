@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -19,6 +20,7 @@ public record UpdateTeleporterBlockPacket(
 		BlockPos activationAreaPositionOffset,
 		BlockPos accessPositionOffset,
 		boolean setAccessPosition,
+		List<String> statusEffectsToDecrementLevelOnTeleport,
 		boolean onlyTeleportDimensionOwner,
 		boolean teleportTeam,
 		String teleportationMode,
@@ -50,6 +52,7 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readList(PacketCodecs.STRING),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
@@ -81,6 +84,8 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBlockPos(this.accessPositionOffset);
 		registryByteBuf.writeBoolean(this.setAccessPosition);
+
+		registryByteBuf.writeCollection(this.statusEffectsToDecrementLevelOnTeleport, PacketCodecs.STRING);
 
 		registryByteBuf.writeBoolean(this.onlyTeleportDimensionOwner);
 		registryByteBuf.writeBoolean(this.teleportTeam);
