@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -12,6 +11,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
+
+import java.util.List;
 
 public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateJigsawPlacerBlockPacket> {
 	@Override
@@ -26,13 +27,15 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 		BlockPos jigsawPlacerBlockPosition = payload.jigsawPlacerBlockPosition();
 
 		String target = payload.target();
-		String pool = payload.pool();
+		List<String> structurePoolList = payload.structurePoolList();
 
 		JigsawBlockEntity.Joint joint = payload.joint();
 
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
+
+		BlockPos dataSavingBlockPosOffset = payload.dataSavingBlockPosOffset();
 
 		World world = serverPlayerEntity.getWorld();
 
@@ -46,12 +49,10 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 				serverPlayerEntity.sendMessage(Text.translatable("jigsaw_placer_block.target.invalid"), false);
 				updateSuccessful = false;
 			}
-			if (!jigsawPlacerBlockEntity.setPool(pool)) {
-				serverPlayerEntity.sendMessage(Text.translatable("jigsaw_placer_block.pool.invalid"), false);
-				updateSuccessful = false;
-			}
+			jigsawPlacerBlockEntity.setStructurePoolList(structurePoolList);
 			jigsawPlacerBlockEntity.setJoint(joint);
 			jigsawPlacerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			jigsawPlacerBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);
 			if (updateSuccessful) {
 				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}

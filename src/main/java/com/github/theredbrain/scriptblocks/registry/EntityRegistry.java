@@ -3,8 +3,8 @@ package com.github.theredbrain.scriptblocks.registry;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
-//import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
-//import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
@@ -36,12 +36,15 @@ public class EntityRegistry {
 	public static final BlockEntityType<TriggeredCounterBlockEntity> TRIGGERED_COUNTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_counter_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredCounterBlockEntity::new, BlockRegistry.TRIGGERED_COUNTER_BLOCK).build());
-//	public static final BlockEntityType<DataSavingBlockEntity> DATA_SAVING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
-//			ScriptBlocksMod.identifier("data_saving_block"),
-//			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_SAVING_BLOCK).build());
-//	public static final BlockEntityType<DataAccessBlockEntity> DATA_ACCESS_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
-//			ScriptBlocksMod.identifier("data_access_block"),
-//			FabricBlockEntityTypeBuilder.create(DataAccessBlockEntity::new, BlockRegistry.DATA_ACCESS_BLOCK).build());
+	public static final BlockEntityType<DataSavingBlockEntity> DATA_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("data_relay_block"),
+			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_RELAY_BLOCK).build());
+	public static final BlockEntityType<DataSavingBlockEntity> DATA_SAVING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("data_saving_block"),
+			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_SAVING_BLOCK).build());
+	public static final BlockEntityType<DataAccessBlockEntity> DATA_ACCESS_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("data_access_block"),
+			FabricBlockEntityTypeBuilder.create(DataAccessBlockEntity::new, BlockRegistry.DATA_ACCESS_BLOCK).build());
 	public static final BlockEntityType<DialogueBlockEntity> DIALOGUE_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("dialogue_block"),
 			FabricBlockEntityTypeBuilder.create(DialogueBlockEntity::new, BlockRegistry.DIALOGUE_BLOCK).build());

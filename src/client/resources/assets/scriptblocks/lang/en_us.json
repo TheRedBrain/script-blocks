@@ -61,6 +61,9 @@
 	"gui.area_block.triggered_mode.once": "Gets triggered once.",
 
 
+	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Provider Block Position Offset",
+
+
 	"gui.dialogue_block.entry_already_in_list": "Entry already in list",
 
 
@@ -177,6 +180,11 @@
 	"gui.interactive_loot_block.loot_table_identifier_label": "Loot Table Identifier",
 
 
+	"gui.jigsaw_placer_block.remove_structure_pool_button_label": "Remove entry",
+	"gui.jigsaw_placer_block.new_structure_pool_field": "New Structure Pool",
+	"gui.jigsaw_placer_block.add_new_structure_pool_button_label": "Add new entry",
+
+
 	"gui.delay_trigger_block.triggeredBlockTriggerDelay": "Trigger Delay in ticks",
 
 
@@ -289,7 +297,7 @@
 
 	"gui.location_controller_block.screenPage.main_entrance": "Main Entrance",
 	"gui.location_controller_block.screenPage.side_entrances": "Side Entrances",
-	"gui.location_controller_block.screenPage.triggered_block": "Triggered Block",
+	"gui.location_controller_block.screenPage.interacted_blocks": "Interacted Blocks",
 
 
 	"gui.mimic_block.activeMimicBlockPositionOffset": "Active Mimic Block Position Offset",

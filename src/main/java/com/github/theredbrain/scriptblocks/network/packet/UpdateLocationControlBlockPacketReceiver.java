@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -54,7 +53,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 			locationControlBlockEntity.setMainEntrance(new MutablePair<>(mainEntrancePositionOffset, new MutablePair<>(mainEntranceYaw, mainEntrancePitch)));
 			locationControlBlockEntity.setSideEntrances(sideEntrances);
 			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			locationControlBlockEntity.setDataSavingBlockPosOffset(dataSavingBlockPosOffset);
+			locationControlBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);
 			locationControlBlockEntity.setShouldAlwaysReset(shouldAlwaysReset);
 
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);

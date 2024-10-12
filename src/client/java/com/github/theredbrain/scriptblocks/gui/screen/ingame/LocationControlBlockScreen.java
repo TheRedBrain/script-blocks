@@ -37,7 +37,7 @@ public class LocationControlBlockScreen extends Screen {
 	private static final Text NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.name");
 	private static final Text NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.orientation");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	private static final Text DATA_SAVING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block .dataSavingBlockPositionOffset");
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final LocationControlBlockEntity locationControlBlock;
@@ -63,9 +63,9 @@ public class LocationControlBlockScreen extends Screen {
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
 	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
-	private TextFieldWidget dataSavingBlockPosOffsetXField;
-	private TextFieldWidget dataSavingBlockPosOffsetYField;
-	private TextFieldWidget dataSavingBlockPosOffsetZField;
+	private TextFieldWidget dataProvidingBlockPosOffsetXField;
+	private TextFieldWidget dataProvidingBlockPosOffsetYField;
+	private TextFieldWidget dataProvidingBlockPosOffsetZField;
 	private ButtonWidget saveButton;
 	private ButtonWidget cancelButton;
 	private ScreenPage screenPage;
@@ -233,20 +233,20 @@ public class LocationControlBlockScreen extends Screen {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
-		this.dataSavingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 115, 50, 20, Text.empty());
-		this.dataSavingBlockPosOffsetXField.setMaxLength(128);
-		this.dataSavingBlockPosOffsetXField.setText(Integer.toString(this.locationControlBlock.getDataSavingBlockPosOffset().getX()));
-		this.addSelectableChild(this.dataSavingBlockPosOffsetXField);
+		this.dataProvidingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 115, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetXField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetXField.setText(Integer.toString(this.locationControlBlock.getDataProvidingBlockPosOffset().getX()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetXField);
 
-		this.dataSavingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 115, 50, 20, Text.empty());
-		this.dataSavingBlockPosOffsetYField.setMaxLength(128);
-		this.dataSavingBlockPosOffsetYField.setText(Integer.toString(this.locationControlBlock.getDataSavingBlockPosOffset().getY()));
-		this.addSelectableChild(this.dataSavingBlockPosOffsetYField);
+		this.dataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 115, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetYField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetYField.setText(Integer.toString(this.locationControlBlock.getDataProvidingBlockPosOffset().getY()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetYField);
 
-		this.dataSavingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 115, 50, 20, Text.empty());
-		this.dataSavingBlockPosOffsetZField.setMaxLength(128);
-		this.dataSavingBlockPosOffsetZField.setText(Integer.toString(this.locationControlBlock.getDataSavingBlockPosOffset().getZ()));
-		this.addSelectableChild(this.dataSavingBlockPosOffsetZField);
+		this.dataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 115, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetZField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetZField.setText(Integer.toString(this.locationControlBlock.getDataProvidingBlockPosOffset().getZ()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetZField);
 
 
 		this.saveButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
@@ -284,9 +284,9 @@ public class LocationControlBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetZField.setVisible(false);
 		this.toggleTriggeredBlockResetsButton.visible = false;
 
-		this.dataSavingBlockPosOffsetXField.setVisible(false);
-		this.dataSavingBlockPosOffsetYField.setVisible(false);
-		this.dataSavingBlockPosOffsetZField.setVisible(false);
+		this.dataProvidingBlockPosOffsetXField.setVisible(false);
+		this.dataProvidingBlockPosOffsetYField.setVisible(false);
+		this.dataProvidingBlockPosOffsetZField.setVisible(false);
 
 		this.saveButton.visible = false;
 		this.cancelButton.visible = false;
@@ -325,16 +325,16 @@ public class LocationControlBlockScreen extends Screen {
 			this.newSideEntranceNameField.setVisible(true);
 			this.addNewSideEntranceButton.visible = true;
 
-		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
+		} else if (this.screenPage == ScreenPage.INTERACTED_BLOCKS) {
 
 			this.triggeredBlockPositionOffsetXField.setVisible(true);
 			this.triggeredBlockPositionOffsetYField.setVisible(true);
 			this.triggeredBlockPositionOffsetZField.setVisible(true);
 			this.toggleTriggeredBlockResetsButton.visible = true;
 
-			this.dataSavingBlockPosOffsetXField.setVisible(true);
-			this.dataSavingBlockPosOffsetYField.setVisible(true);
-			this.dataSavingBlockPosOffsetZField.setVisible(true);
+			this.dataProvidingBlockPosOffsetXField.setVisible(true);
+			this.dataProvidingBlockPosOffsetYField.setVisible(true);
+			this.dataProvidingBlockPosOffsetZField.setVisible(true);
 
 		}
 
@@ -364,9 +364,9 @@ public class LocationControlBlockScreen extends Screen {
 		String string11 = this.triggeredBlockPositionOffsetXField.getText();
 		String string12 = this.triggeredBlockPositionOffsetYField.getText();
 		String string13 = this.triggeredBlockPositionOffsetZField.getText();
-		String string14 = this.dataSavingBlockPosOffsetXField.getText();
-		String string15 = this.dataSavingBlockPosOffsetYField.getText();
-		String string16 = this.dataSavingBlockPosOffsetZField.getText();
+		String string14 = this.dataProvidingBlockPosOffsetXField.getText();
+		String string15 = this.dataProvidingBlockPosOffsetYField.getText();
+		String string16 = this.dataProvidingBlockPosOffsetZField.getText();
 		boolean bl2 = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.sideEntranceList.clear();
@@ -389,9 +389,9 @@ public class LocationControlBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.setText(string11);
 		this.triggeredBlockPositionOffsetYField.setText(string12);
 		this.triggeredBlockPositionOffsetZField.setText(string13);
-		this.dataSavingBlockPosOffsetXField.setText(string14);
-		this.dataSavingBlockPosOffsetYField.setText(string15);
-		this.dataSavingBlockPosOffsetZField.setText(string16);
+		this.dataProvidingBlockPosOffsetXField.setText(string14);
+		this.dataProvidingBlockPosOffsetYField.setText(string15);
+		this.dataProvidingBlockPosOffsetZField.setText(string16);
 		this.triggeredBlockResets = bl2;
 		this.updateWidgets();
 	}
@@ -483,15 +483,15 @@ public class LocationControlBlockScreen extends Screen {
 			this.newSideEntranceOrientationYawField.render(context, mouseX, mouseY, delta);
 			this.newSideEntranceOrientationPitchField.render(context, mouseX, mouseY, delta);
 			this.newSideEntranceNameField.render(context, mouseX, mouseY, delta);
-		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
+		} else if (this.screenPage == ScreenPage.INTERACTED_BLOCKS) {
 			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, DATA_SAVING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-			this.dataSavingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
-			this.dataSavingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
-			this.dataSavingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
 		}
 	}
 
@@ -527,9 +527,9 @@ public class LocationControlBlockScreen extends Screen {
 				),
 				this.triggeredBlockResets,
 				new BlockPos(
-						ItemUtils.parseInt(this.dataSavingBlockPosOffsetXField.getText()),
-						ItemUtils.parseInt(this.dataSavingBlockPosOffsetYField.getText()),
-						ItemUtils.parseInt(this.dataSavingBlockPosOffsetZField.getText())
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
 				),
 				this.shouldAlwaysReset
 		));
@@ -539,7 +539,7 @@ public class LocationControlBlockScreen extends Screen {
 	public static enum ScreenPage implements StringIdentifiable {
 		MAIN_ENTRANCE("main_entrance"),
 		SIDE_ENTRANCES("side_entrances"),
-		TRIGGERED_BLOCK("triggered_block");
+		INTERACTED_BLOCKS("interacted_blocks");
 
 		private final String name;
 
