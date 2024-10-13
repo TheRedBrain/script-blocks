@@ -20,6 +20,7 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataAccessBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DelayTriggerBlockScreen;
@@ -79,35 +80,39 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	}
 
 	@Override
-	public void scriptblocks$openHousingScreen() {
-		HousingBlockEntity housingBlockEntity = null;
-		if (this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(this.scriptblocks$getCurrentHousingBlockPosition()) instanceof HousingBlockEntity housingBlockEntity1) {
-			housingBlockEntity = housingBlockEntity1;
-		}
-		int currentPermissionLevel;
+	public void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
+		this.client.setScreen(new CreativeHousingScreen(housingBlockEntity));
+	}
 
-		RegistryEntry<StatusEffect> housingOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
-		RegistryEntry<StatusEffect> housingCoOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT);
-		RegistryEntry<StatusEffect> housingTrustedStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT);
-		RegistryEntry<StatusEffect> housingGuestStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_GUEST_EFFECT);
-		RegistryEntry<StatusEffect> housingStrangerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT);
-		if (this.hasStatusEffect(housingOwnerStatusEffect) && housingBlockEntity != null) {
-			currentPermissionLevel = 0;
-		} else if (this.hasStatusEffect(housingCoOwnerStatusEffect) && housingBlockEntity != null) {
-			currentPermissionLevel = 1;
-		} else if (this.hasStatusEffect(housingTrustedStatusEffect) && housingBlockEntity != null) {
-			currentPermissionLevel = 2;
-		} else if (this.hasStatusEffect(housingGuestStatusEffect) && housingBlockEntity != null) {
-			currentPermissionLevel = 3;
-		} else if (this.hasStatusEffect(housingStrangerStatusEffect) && housingBlockEntity != null) {
-			currentPermissionLevel = 4;
-		} else if (this.isCreative()) {
-			currentPermissionLevel = 5;
+
+	@Override
+	public void scriptblocks$openHousingScreen() {
+		if (this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(this.scriptblocks$getCurrentHousingBlockPosition()) instanceof HousingBlockEntity housingBlockEntity) {
+			int currentPermissionLevel;
+
+			RegistryEntry<StatusEffect> housingOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
+			RegistryEntry<StatusEffect> housingCoOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT);
+			RegistryEntry<StatusEffect> housingTrustedStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT);
+			RegistryEntry<StatusEffect> housingGuestStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_GUEST_EFFECT);
+			RegistryEntry<StatusEffect> housingStrangerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT);
+			if (this.hasStatusEffect(housingOwnerStatusEffect)) {
+				currentPermissionLevel = 0;
+			} else if (this.hasStatusEffect(housingCoOwnerStatusEffect)) {
+				currentPermissionLevel = 1;
+			} else if (this.hasStatusEffect(housingTrustedStatusEffect)) {
+				currentPermissionLevel = 2;
+			} else if (this.hasStatusEffect(housingGuestStatusEffect)) {
+				currentPermissionLevel = 3;
+			} else if (this.hasStatusEffect(housingStrangerStatusEffect)) {
+				currentPermissionLevel = 4;
+			} else {
+				this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
+				return;
+			}
+			this.client.setScreen(new HousingScreen(housingBlockEntity, currentPermissionLevel));
 		} else {
 			this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
-			return;
-		}
-		this.client.setScreen(new HousingScreen(housingBlockEntity, currentPermissionLevel, this.isCreative()));
+		} 
 	}
 
 	@Override

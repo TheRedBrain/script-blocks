@@ -35,7 +35,6 @@ public class HousingBlock extends RotatedBlockWithEntity {
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-//        return validateTicker(type, EntityRegistry.HOUSING_BLOCK_ENTITY, HousingBlockEntity::tick);
 		return validateTicker(type, EntityRegistry.HOUSING_BLOCK_ENTITY, HousingBlockEntity::tick);
 	}
 
@@ -47,9 +46,13 @@ public class HousingBlock extends RotatedBlockWithEntity {
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof HousingBlockEntity housingBlockEntity && player.isCreativeLevelTwoOp()) {
-			((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(housingBlockEntity.getPos());
-			((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
+		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
+			if (player.isCreativeLevelTwoOp()) {
+				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeHousingScreen(housingBlockEntity);
+			} else {
+				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(housingBlockEntity.getPos());
+				((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
+			}
 			return ActionResult.success(world.isClient);
 		}
 		return ActionResult.PASS;

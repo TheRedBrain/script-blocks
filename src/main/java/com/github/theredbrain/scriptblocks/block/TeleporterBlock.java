@@ -42,12 +42,14 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorB
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity && player.isCreativeLevelTwoOp()) {
-			((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
-			return ActionResult.success(world.isClient);
-		} else if (!world.isClient) {
-			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-			return ActionResult.CONSUME;
+		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
+			if (player.isCreativeLevelTwoOp()) {
+				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
+				return ActionResult.success(world.isClient);
+			} else if (!world.isClient) {
+				player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+				return ActionResult.CONSUME;
+			}
 		}
 		return ActionResult.SUCCESS;
 	}

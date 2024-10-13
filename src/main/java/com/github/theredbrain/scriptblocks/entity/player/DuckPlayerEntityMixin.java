@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntit
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
@@ -32,6 +33,8 @@ public interface DuckPlayerEntityMixin {
     void scriptblocks$setLocationAccessPosition(@Nullable MutablePair<String, BlockPos> locationAccessPosition);
 
     void scriptblocks$sendAnnouncement(Text announcement);
+
+    void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity);
 
     void scriptblocks$openHousingScreen();
 

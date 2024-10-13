@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntit
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
@@ -160,6 +161,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, locationAccessPosition.right);
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_DIMENSION, locationAccessPosition.left);
 		}
+	}
+
+	@Override
+	public void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
 	}
 
 	@Override
