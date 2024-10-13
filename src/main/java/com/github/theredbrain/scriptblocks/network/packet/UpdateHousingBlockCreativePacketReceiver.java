@@ -32,7 +32,7 @@ public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetwo
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		HousingBlockEntity.OwnerMode ownerMode = HousingBlockEntity.OwnerMode.valueOf(payload.ownerMode());
+		HousingBlockEntity.OwnerMode ownerMode = HousingBlockEntity.OwnerMode.byName(payload.ownerMode()).orElse(HousingBlockEntity.OwnerMode.DIMENSION_OWNER);
 
 		World world = serverPlayerEntity.getWorld();
 

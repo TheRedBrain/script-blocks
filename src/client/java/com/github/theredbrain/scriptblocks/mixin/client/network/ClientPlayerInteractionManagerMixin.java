@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.mixin.client.network;
 
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.ComponentsRegistry;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -73,7 +73,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 	@Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
-			BlockPos housingBlockPos = ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(this.client.player).getValue();
+			BlockPos housingBlockPos = ((DuckPlayerEntityMixin) this.client.player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
 			if (!Objects.equals(housingBlockPos, new BlockPos(0, 0, 0)) && this.client.world != null && this.client.world.getBlockEntity(housingBlockPos) instanceof HousingBlockEntity housingBlockEntity) {
 				bl = housingBlockEntity.influenceAreaContains(pos);
@@ -96,7 +96,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 	public void scriptblocks$interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
 		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
 			this.syncSelectedSlot();
-			BlockPos housingBlockPos = ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).getValue();
+			BlockPos housingBlockPos = ((DuckPlayerEntityMixin) player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
 			if (!Objects.equals(housingBlockPos, new BlockPos(0, 0, 0)) && this.client.world != null && this.client.world.getBlockEntity(housingBlockPos) instanceof HousingBlockEntity housingBlockEntity) {
 				bl = housingBlockEntity.influenceAreaContains(hitResult.getBlockPos().offset(hitResult.getSide()));

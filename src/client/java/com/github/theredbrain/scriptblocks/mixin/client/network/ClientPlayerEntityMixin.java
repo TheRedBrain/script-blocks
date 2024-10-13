@@ -36,7 +36,6 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlo
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.network.message.DuckMessageHandlerMixin;
-import com.github.theredbrain.scriptblocks.registry.ComponentsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
@@ -82,7 +81,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openHousingScreen() {
 		HousingBlockEntity housingBlockEntity = null;
-		if (this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(this).getValue()) instanceof HousingBlockEntity housingBlockEntity1) {
+		if (this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(this.scriptblocks$getCurrentHousingBlockPosition()) instanceof HousingBlockEntity housingBlockEntity1) {
 			housingBlockEntity = housingBlockEntity1;
 		}
 		int currentPermissionLevel;

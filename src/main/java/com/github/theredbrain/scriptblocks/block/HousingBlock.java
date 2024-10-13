@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.ComponentsRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
@@ -12,7 +11,6 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -50,7 +48,7 @@ public class HousingBlock extends RotatedBlockWithEntity {
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity && player.isCreativeLevelTwoOp()) {
-			ComponentsRegistry.CURRENT_HOUSING_BLOCK_POS.get(player).setValue(housingBlockEntity.getPos());
+			((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(housingBlockEntity.getPos());
 			((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
 			return ActionResult.success(world.isClient);
 		}

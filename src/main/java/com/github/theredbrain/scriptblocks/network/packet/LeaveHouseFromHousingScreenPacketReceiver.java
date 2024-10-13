@@ -1,8 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.registry.ComponentsRegistry;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -11,8 +10,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<LeaveHouseFromHousingScreenPacket> {
 	@Override
@@ -23,12 +22,12 @@ public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetw
 		MinecraftServer server = serverPlayerEntity.server;
 		ServerWorld targetWorld = null;
 		BlockPos targetPos = null;
-		Pair<Pair<String, BlockPos>, Boolean> housing_access_pos = ComponentsRegistry.PLAYER_LOCATION_ACCESS_POS.get(serverPlayerEntity).getValue();
-		if (housing_access_pos.getRight()) {
-			targetWorld = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(housing_access_pos.getLeft().getLeft())));
-			targetPos = housing_access_pos.getLeft().getRight();
+		MutablePair<String, BlockPos> location_access_pos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getLocationAccessPosition();
+		if (location_access_pos != null) {
+			targetWorld = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(location_access_pos.getLeft())));
+			targetPos = location_access_pos.getRight();
 			if (targetWorld != null && targetPos != null) {
-				ComponentsRegistry.PLAYER_LOCATION_ACCESS_POS.get(serverPlayerEntity).deactivate();
+				((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$setLocationAccessPosition(null);
 			}
 		} else {
 			targetWorld = server.getWorld(serverPlayerEntity.getSpawnPointDimension());

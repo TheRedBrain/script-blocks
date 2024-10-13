@@ -17,8 +17,19 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEnt
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.Nullable;
 
 public interface DuckPlayerEntityMixin {
+
+    @Nullable BlockPos scriptblocks$getCurrentHousingBlockPosition();
+
+    void scriptblocks$setCurrentHousingBlockPosition(@Nullable BlockPos currentHousingBlockPosition);
+
+    @Nullable MutablePair<String, BlockPos> scriptblocks$getLocationAccessPosition();
+
+    void scriptblocks$setLocationAccessPosition(@Nullable MutablePair<String, BlockPos> locationAccessPosition);
 
     void scriptblocks$sendAnnouncement(Text announcement);
 

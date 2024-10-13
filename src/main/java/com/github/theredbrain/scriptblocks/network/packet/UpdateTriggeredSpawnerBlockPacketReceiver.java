@@ -40,7 +40,7 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
 		double entitySpawnOrientationYaw = payload.entitySpawnOrientationYaw();
 
-		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.valueOf(payload.spawningMode());
+		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.byName(payload.spawningMode()).orElse(TriggeredSpawnerBlockEntity.SpawningMode.BOUND);
 
 		String entityTypeId = payload.entityTypeId();
 

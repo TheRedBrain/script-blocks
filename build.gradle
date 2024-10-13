@@ -25,12 +25,6 @@ repositories {
 		url = "https://maven.terraformersmc.com/"
 	}
 
-	// Cardinal Components
-	maven {
-		name = "Ladysnake Libs"
-		url = 'https://maven.ladysnake.org/releases'
-	}
-
 	// DimLib
 	maven {
 		url 'https://jitpack.io'
@@ -118,10 +112,6 @@ dependencies {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 
-	// Cardinal Components
-	modImplementation ("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}")
-	modImplementation ("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
-
 	// Mod Menu
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
@@ -189,7 +179,6 @@ if (project.hasProperty('release_type')) {
 			relations {
 				requiredDependency 'cloth-config'
 				requiredDependency 'fabric-api'
-				requiredDependency 'cardinal-components-api'
 				requiredDependency 'slot-customization-api'
 			}
 
@@ -222,7 +211,6 @@ if (project.hasProperty('release_type')) {
 			required.project 'cloth-config'
 			required.project 'fabric-api'
 			embedded.project 'dimlib'
-			required.project 'cardinal-components-api'
 			required.project 'slot-customization-api'
 		}
 	}

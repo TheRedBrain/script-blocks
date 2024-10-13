@@ -44,9 +44,9 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 		String leaveMessage = payload.leaveMessage();
 		String triggeredMessage = payload.triggeredMessage();
 
-		AreaBlockEntity.MessageMode messageMode = AreaBlockEntity.MessageMode.valueOf(payload.messageMode());
-		AreaBlockEntity.TriggerMode triggerMode = AreaBlockEntity.TriggerMode.valueOf(payload.triggerMode());
-		AreaBlockEntity.TriggeredMode triggeredMode = AreaBlockEntity.TriggeredMode.valueOf(payload.triggeredMode());
+		AreaBlockEntity.MessageMode messageMode = AreaBlockEntity.MessageMode.byName(payload.messageMode()).orElse(AreaBlockEntity.MessageMode.OVERLAY);
+		AreaBlockEntity.TriggerMode triggerMode = AreaBlockEntity.TriggerMode.byName(payload.triggerMode()).orElse(AreaBlockEntity.TriggerMode.ALWAYS);
+		AreaBlockEntity.TriggeredMode triggeredMode = AreaBlockEntity.TriggeredMode.byName(payload.triggeredMode()).orElse(AreaBlockEntity.TriggeredMode.CONTINUOUS);
 		int timer = payload.timer();
 
 		World world = serverPlayerEntity.getWorld();
