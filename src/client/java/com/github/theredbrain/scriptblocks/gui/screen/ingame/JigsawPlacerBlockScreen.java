@@ -214,7 +214,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 		String string16 = this.dataProvidingBlockPosOffsetZField.getText();
 		JigsawBlockEntity.Joint joint = this.joint;
 		boolean bl = this.triggeredBlockResets;
-		List<String> list = this.structurePoolList;
+		List<String> list = new ArrayList<>(this.structurePoolList);
 		this.init(client, width, height);
 		this.targetField.setText(string);
 		this.triggeredBlockPositionOffsetXField.setText(string2);
@@ -226,7 +226,8 @@ public class JigsawPlacerBlockScreen extends Screen {
 		this.joint = joint;
 		this.jointRotationButton.setValue(joint);
 		this.triggeredBlockResets = bl;
-		this.structurePoolList = list;
+		this.structurePoolList.clear();
+		this.structurePoolList.addAll(list);
 	}
 
 	@Override

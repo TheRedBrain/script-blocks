@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
-//import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
@@ -13,6 +12,7 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
@@ -20,7 +20,7 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
-//import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataAccessBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataAccessBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.EntranceDelegationBlockScreen;
@@ -134,6 +134,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock) {
 		this.client.setScreen(new DelayTriggerBlockScreen(delayTriggerBlock));
+	}
+
+	@Override
+	public void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity) {
+		this.client.setScreen(new CreativeTeleporterBlockScreen(teleporterBlockEntity));
 	}
 
 	@Override

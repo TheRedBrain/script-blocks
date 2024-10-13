@@ -11,6 +11,7 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
@@ -61,6 +62,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@Override
 	public void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock) {
+	}
+
+	@Override
+	public void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity) {
 	}
 
 	@Override

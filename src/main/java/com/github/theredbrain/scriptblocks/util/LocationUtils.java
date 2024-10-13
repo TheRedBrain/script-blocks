@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 public class LocationUtils {
+	@Nullable
 	public static Identifier unlockAdvancementForEntrance(Location location, String entrance) {
 		Identifier unlockAdvancementIdentifier = null;
 		if (location.side_entrances() != null && !entrance.isEmpty()) {
@@ -20,6 +21,7 @@ public class LocationUtils {
 		return unlockAdvancementIdentifier;
 	}
 
+	@Nullable
 	public static Identifier lockAdvancementForEntrance(Location location, String entrance) {
 		Identifier lockAdvancementIdentifier = null;
 		if (location.side_entrances() != null && !entrance.isEmpty()) {

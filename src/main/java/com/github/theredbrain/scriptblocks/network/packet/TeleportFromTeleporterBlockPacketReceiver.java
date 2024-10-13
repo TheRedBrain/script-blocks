@@ -50,13 +50,13 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 		boolean teleportTeam = payload.teleportTeam();
 
-		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.valueOf(payload.teleportationMode());
+		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.byName(payload.teleportationMode()).orElse(TeleporterBlockEntity.TeleportationMode.DIRECT);
 
 		BlockPos directTeleportPositionOffset = payload.directTeleportPositionOffset();
 		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
 		double directTeleportOrientationPitch = payload.directTeleportOrientationPitch();
 
-		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.valueOf(payload.spawnPointType());
+		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.byName(payload.spawnPointType()).orElse(TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN);
 
 		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
 		String targetLocation = payload.targetLocation();

@@ -221,7 +221,6 @@
 	"gui.teleporter_block.target_entrance_field.place_holder": "Target Entrance Label",
 	"gui.teleporter_block.new_data_id_field.place_holder": "Data ID",
 	"gui.teleporter_block.new_data_field.place_holder": "Data",
-	"gui.teleporter_block.new_status_effect_field.place_holder": "Status Effect Identifier",
 	"gui.teleporter_block.teleport_button.label": "Teleport",
 	"gui.teleporter_block.teleport_button.place_holder": "Teleport Button Label",
 	"gui.teleporter_block.cancel_teleport_button.label": "Cancel Teleport",
@@ -238,10 +237,10 @@
 	"gui.teleporter_block.updateCurrentTeleportationTargetEntryButton": "Select new instance",
 	"gui.teleporter_block.currentTeleportationTargetEntry.label": "Owner of the dungeon instance",
 
-	"gui.teleporter_block.creativeScreenPage.activation": "Activation Settings",
-	"gui.teleporter_block.creativeScreenPage.teleportation_mode": "Teleportation Settings",
-	"gui.teleporter_block.creativeScreenPage.status_effect_to_decrement": "Status Effects To Decrement",
-	"gui.teleporter_block.creativeScreenPage.adventure_screen_customization": "Adventure Screen Settings",
+	"gui.teleporter_block.screenPage.activation": "Activation Settings",
+	"gui.teleporter_block.screenPage.teleportation_mode": "Teleportation Settings",
+	"gui.teleporter_block.screenPage.status_effect_to_decrement": "Status Effects To Decrement",
+	"gui.teleporter_block.screenPage.adventure_screen_customization": "Adventure Screen Settings",
 
 	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
 	"gui.teleporter_block.show_adventure_screen_label": "Show Adventure Screen",
@@ -258,6 +257,7 @@
 	"gui.teleporter_block.toggle_teleport_team_button_label.off": "Teleport Team: Off",
 	"gui.teleporter_block.toggle_show_regenerate_button_button_label.on": "Show Regenerate Button: On",
 	"gui.teleporter_block.toggle_show_regenerate_button_button_label.off": "Show Regenerate Button: Off",
+	"gui.teleporter_block.new_status_effect_field": "New Status Effect Identifier",
 
 	"gui.teleporter_block.teleportation_mode_label": "Teleportation Mode",
 	"gui.teleporter_block.teleportation_mode.direct": "Direct",

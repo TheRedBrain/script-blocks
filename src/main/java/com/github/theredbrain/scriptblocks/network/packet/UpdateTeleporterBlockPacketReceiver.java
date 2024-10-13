@@ -46,7 +46,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
 		double directTeleportOrientationPitch = payload.directTeleportOrientationPitch();
 
-		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.valueOf(payload.spawnPointType());
+		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.byName(payload.spawnPointType()).orElse(TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN);
 
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = payload.locationsList();
 

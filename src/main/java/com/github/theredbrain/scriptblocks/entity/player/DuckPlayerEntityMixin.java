@@ -11,6 +11,7 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
@@ -19,37 +20,39 @@ import net.minecraft.text.Text;
 
 public interface DuckPlayerEntityMixin {
 
-	void scriptblocks$sendAnnouncement(Text announcement);
+    void scriptblocks$sendAnnouncement(Text announcement);
 
-	void scriptblocks$openHousingScreen();
+    void scriptblocks$openHousingScreen();
 
-	void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock);
+    void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock);
 
-	void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock);
+    void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock);
 
-	void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock);
+    void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock);
 
-	void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock);
+    void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock);
 
-	void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock);
+    void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock);
 
-	void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock);
+    void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity);
 
-	void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
+    void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock);
 
-	void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
+    void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
 
-	void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
+    void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
 
-	void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
+    void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
 
-	void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity);
+    void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
 
-	void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity);
+    void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity);
 
-	void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock);
+    void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity);
 
-	void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity);
+    void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock);
 
-	void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity);
+    void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity);
+
+    void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity);
 }
