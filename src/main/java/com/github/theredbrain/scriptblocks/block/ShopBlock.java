@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -8,7 +9,6 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -38,10 +38,16 @@ public class ShopBlock extends BlockWithEntity {
 
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		if (world.isClient) {
-			return ActionResult.SUCCESS;
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof ShopBlockEntity shopBlockEntity) {
+			if (player.isCreativeLevelTwoOp()) {
+				((DuckPlayerEntityMixin) player).scriptblocks$openShopBlockScreen(shopBlockEntity);
+				return ActionResult.success(world.isClient);
+			} else if (!world.isClient) {
+				player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+				return ActionResult.CONSUME;
+			}
 		}
-		player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-		return ActionResult.CONSUME;
+		return ActionResult.PASS;
 	}
 }

@@ -1,15 +1,11 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingScreenPacketReceiver;
-import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
-import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
@@ -60,12 +56,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawner
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacketReceiver;
-import com.google.gson.Gson;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
 
 public class ServerPacketRegistry {
 
@@ -174,8 +166,5 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(DialogueAnswerPacket.PACKET_ID, DialogueAnswerPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(DialogueAnswerPacket.PACKET_ID, new DialogueAnswerPacketReceiver());
-
-		PayloadTypeRegistry.playC2S().register(OpenDialogueScreenPacket.PACKET_ID, OpenDialogueScreenPacket.PACKET_CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, new OpenDialogueScreenPacketReceiver());
 	}
 }

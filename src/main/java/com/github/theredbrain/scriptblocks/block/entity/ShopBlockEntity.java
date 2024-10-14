@@ -3,14 +3,13 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
-import com.github.theredbrain.scriptblocks.screen.ShopBlockScreenHandler;
+import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
@@ -89,7 +88,7 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	@Nullable
 	@Override
 	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-		return new ShopBlockScreenHandler(syncId, playerInventory, this.pos, player.isCreativeLevelTwoOp());
+		return new ShopScreenHandler(syncId, playerInventory, this.pos);
 	}
 
 	@Override
@@ -99,6 +98,6 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 
 	@Override
 	public Object getScreenOpeningData(ServerPlayerEntity player) {
-		return new ShopBlockScreenHandler.ShopBlockData(this.pos);
+		return new ShopScreenHandler.ShopBlockData(this.pos);
 	}
 }

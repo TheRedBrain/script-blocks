@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.network.packet.BossesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswersSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialoguesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LocationsSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ShopsSyncPacket;
@@ -17,6 +18,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 public class EventsRegistry {
 	public static void initializeEvents() {
+		PayloadTypeRegistry.playS2C().register(OpenDialogueScreenPacket.PACKET_ID, OpenDialogueScreenPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(SendAnnouncementPacket.PACKET_ID, SendAnnouncementPacket.PACKET_CODEC);
 
 		PayloadTypeRegistry.playS2C().register(ServerConfigSyncPacket.PACKET_ID, ServerConfigSyncPacket.PACKET_CODEC);

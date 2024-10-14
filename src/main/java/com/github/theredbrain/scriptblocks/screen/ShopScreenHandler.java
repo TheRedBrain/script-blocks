@@ -30,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShopBlockScreenHandler extends ScreenHandler {
+public class ShopScreenHandler extends ScreenHandler {
 
 	private PlayerInventory playerInventory;
 	private final World world;
@@ -52,25 +52,22 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 		@Override
 		public void markDirty() {
 			super.markDirty();
-			ShopBlockScreenHandler.this.onContentChanged(this);
-			ShopBlockScreenHandler.this.contentsChangedListener.run();
+			ShopScreenHandler.this.onContentChanged(this);
+			ShopScreenHandler.this.contentsChangedListener.run();
 		}
 	};
 
 	private BlockPos blockPos;
 
-	private boolean showCreativeTab;
-
-	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, ShopBlockData data) {
-		this(syncId, playerInventory, data.blockPos(), playerInventory.player.isCreativeLevelTwoOp());
+	public ShopScreenHandler(int syncId, PlayerInventory playerInventory, ShopBlockData data) {
+		this(syncId, playerInventory, data.blockPos());
 	}
 
-	public ShopBlockScreenHandler(int syncId, PlayerInventory playerInventory, BlockPos blockPos, boolean showCreativeTab) {
+	public ShopScreenHandler(int syncId, PlayerInventory playerInventory, BlockPos blockPos) {
 		super(ScreenHandlerTypesRegistry.SHOP_BLOCK_SCREEN_HANDLER, syncId);
 		this.playerInventory = playerInventory;
 		this.world = playerInventory.player.getWorld();
 		this.blockPos = blockPos;
-		this.showCreativeTab = showCreativeTab;
 		BlockEntity blockEntity = this.world.getBlockEntity(this.blockPos);
 		if (blockEntity instanceof ShopBlockEntity) {
 			this.shopBlockEntity = (ShopBlockEntity) blockEntity;
@@ -103,10 +100,6 @@ public class ShopBlockScreenHandler extends ScreenHandler {
 
 	public BlockPos getBlockPos() {
 		return this.blockPos;
-	}
-
-	public boolean getShowCreativeTab() {
-		return this.showCreativeTab;
 	}
 
 	public ShopBlockEntity getShopBlockEntity() {

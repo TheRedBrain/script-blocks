@@ -51,7 +51,7 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorB
 				return ActionResult.CONSUME;
 			}
 		}
-		return ActionResult.SUCCESS;
+		return ActionResult.PASS;
 	}
 
 	@Override

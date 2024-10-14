@@ -1,9 +1,12 @@
 package com.github.theredbrain.scriptblocks.entity.player;
 
+import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
+import com.github.theredbrain.scriptblocks.block.DialogueBlock;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
@@ -12,15 +15,19 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.data.Dialogue;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public interface DuckPlayerEntityMixin {
 
@@ -37,6 +44,12 @@ public interface DuckPlayerEntityMixin {
     void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity);
 
     void scriptblocks$openHousingScreen();
+
+    void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity);
+
+    void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity);
+
+    void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks);
 
     void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock);
 

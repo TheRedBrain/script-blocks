@@ -2,22 +2,28 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
 import com.github.theredbrain.scriptblocks.network.packet.BossesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswersSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialoguesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LocationsSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ShopsSyncPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.util.Identifier;
 
 @Environment(value = EnvType.CLIENT)
 public class ClientPacketRegistry {
 
 	public static void init() {
 
+		ClientPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, (payload, context) -> {
+			context.client().setScreen(new DialogueScreen(DialoguesRegistry.registeredDialogues.get(Identifier.of(payload.dialogueIdentifierString())), payload.dialogueUsedBlocks(), payload.dialogueTriggeredBlocks()));
+		});
 		ClientPlayNetworking.registerGlobalReceiver(BossesSyncPacket.PACKET_ID, (payload, context) -> {
 			BossesRegistry.registeredBosses = payload.registeredBosses();
 		});

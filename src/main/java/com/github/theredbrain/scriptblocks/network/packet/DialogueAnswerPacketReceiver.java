@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -16,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
@@ -31,7 +31,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<DialogueAnswerPacket> {
@@ -41,15 +40,15 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
 		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		BlockPos dialogueBlockPos = payload.dialogueBlockPos();
-
 		Identifier answerIdentifier = payload.answerIdentifier();
+		List<MutablePair<String, BlockPos>> dialogueUsedBlocks = payload.dialogueUsedBlocks();
+		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
 		DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();
 
-		if (dialogueAnswer != null && server != null && serverPlayerEntity.getWorld().getBlockEntity(dialogueBlockPos) instanceof DialogueBlockEntity dialogueBlockEntity) {
+		if (dialogueAnswer != null && server != null) {
 
 			List<ItemStack> virtualItemStacks = dialogueAnswer.itemCost();
 			if (virtualItemStacks != null) {
@@ -153,31 +152,21 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			if (responseDialogueIdentifierString == null) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {
-				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(dialogueBlockPos, responseDialogueIdentifierString.toString())); // TODO
+				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(responseDialogueIdentifierString.toString(), dialogueUsedBlocks, dialogueTriggeredBlocks)); // TODO
 			}
 
 
 			// trigger block
 			String triggeredBlock = dialogueAnswer.triggeredBlock();
 			if (triggeredBlock != null) {
-				List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
-				List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueTriggeredBlocks().keySet());
-				for (String key : keyList) {
-					dialogueTriggeredBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueTriggeredBlocks().get(key)));
-				}
-				for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocksList) {
+				for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocks) {
 					if (entry.getLeft().equals(triggeredBlock)) {
-
-
-						BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(entry.getRight().getLeft().add(dialogueBlockPos));
-
-						if (blockEntity != dialogueBlockEntity) {
-							boolean triggeredBlockResets = entry.getRight().getRight();
-							if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
-								resetable.reset();
-							} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
-								triggerable.trigger();
-							}
+						BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(entry.getRight().getLeft());
+						boolean triggeredBlockResets = entry.getRight().getRight();
+						if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+							resetable.reset();
+						} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+							triggerable.trigger();
 						}
 						break;
 					}
@@ -187,14 +176,9 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			// use block
 			String usedBlock = dialogueAnswer.usedBlock();
 			if (usedBlock != null) {
-				List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
-				List<String> keyList = new ArrayList<>(dialogueBlockEntity.getDialogueUsedBlocks().keySet());
-				for (String key : keyList) {
-					dialogueUsedBlocksList.add(new MutablePair<>(key, dialogueBlockEntity.getDialogueUsedBlocks().get(key)));
-				}
-				for (MutablePair<String, BlockPos> entry : dialogueUsedBlocksList) {
+				for (MutablePair<String, BlockPos> entry : dialogueUsedBlocks) {
 					if (entry.getLeft().equals(usedBlock)) {
-						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.getPos(), Direction.UP, entry.getRight().add(dialogueBlockPos), false);
+						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.getPos(), Direction.UP, entry.getRight(), false);
 						World world = serverPlayerEntity.getWorld();
 						Hand hand = serverPlayerEntity.getActiveHand();
 						ItemStack itemStack = serverPlayerEntity.getStackInHand(hand);

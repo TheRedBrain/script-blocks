@@ -1,7 +1,8 @@
 package com.github.theredbrain.scriptblocks;
 
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueBlockScreen;
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.config.ClientConfig;
 import com.github.theredbrain.scriptblocks.config.ClientConfigWrapper;
@@ -83,8 +84,8 @@ public class ScriptBlocksClient implements ClientModInitializer {
 	}
 
 	private void registerScreens() {
-		HandledScreens.register(ScreenHandlerTypesRegistry.DIALOGUE_BLOCK_SCREEN_HANDLER, DialogueBlockScreen::new);
-		HandledScreens.register(ScreenHandlerTypesRegistry.SHOP_BLOCK_SCREEN_HANDLER, ShopBlockScreen::new);
+//		HandledScreens.register(ScreenHandlerTypesRegistry.DIALOGUE_SCREEN_HANDLER, DialogueScreen::new);
+		HandledScreens.register(ScreenHandlerTypesRegistry.SHOP_BLOCK_SCREEN_HANDLER, ShopScreen::new);
 		HandledScreens.register(ScreenHandlerTypesRegistry.TELEPORTER_BLOCK_SCREEN_HANDLER, TeleporterBlockScreen::new);
 	}
 }

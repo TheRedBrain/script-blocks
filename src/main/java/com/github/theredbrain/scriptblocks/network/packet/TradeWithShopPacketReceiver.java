@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
-import com.github.theredbrain.scriptblocks.screen.ShopBlockScreenHandler;
+import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -33,22 +33,22 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		}
 
 		Shop.Deal currentDeal = dealsList.get(id);
-		if (currentDeal != null && screenHandler instanceof ShopBlockScreenHandler shopBlockScreenHandler) {
+		if (currentDeal != null && screenHandler instanceof ShopScreenHandler shopScreenHandler) {
 			boolean bl = true;
 			for (ItemStack price : currentDeal.price()) {
 				Item virtualItem = price.getItem();
 				int priceCount = price.getCount();
-				for (int j = 0; j < shopBlockScreenHandler.inventory.size(); j++) {
-					if (shopBlockScreenHandler.inventory.getStack(j).isOf(virtualItem)) {
-						ItemStack itemStack = shopBlockScreenHandler.slots.get(j + 36).getStack().copy();
+				for (int j = 0; j < shopScreenHandler.inventory.size(); j++) {
+					if (shopScreenHandler.inventory.getStack(j).isOf(virtualItem)) {
+						ItemStack itemStack = shopScreenHandler.slots.get(j + 36).getStack().copy();
 						int stackCount = itemStack.getCount();
 						if (stackCount >= priceCount) {
 							itemStack.setCount(stackCount - priceCount);
-							shopBlockScreenHandler.slots.get(j + 36).setStack(itemStack);
+							shopScreenHandler.slots.get(j + 36).setStack(itemStack);
 							priceCount = 0;
 							break;
 						} else {
-							shopBlockScreenHandler.slots.get(j + 36).setStack(ItemStack.EMPTY);
+							shopScreenHandler.slots.get(j + 36).setStack(ItemStack.EMPTY);
 							priceCount = priceCount - stackCount;
 						}
 					}

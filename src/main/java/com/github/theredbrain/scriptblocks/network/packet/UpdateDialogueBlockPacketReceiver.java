@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -41,32 +40,19 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 			dialogueTriggeredBlocksMap.put(triggeredBlock.getLeft(), triggeredBlock.getRight());
 		}
 
-		List<MutablePair<String, MutablePair<String, String>>> startingDialogueList = new ArrayList<>(payload.startingDialogueList());
+		List<String> startingDialogueList = new ArrayList<>(payload.startingDialogueList());
 
 		World world = serverPlayerEntity.getWorld();
-
-		boolean updateSuccessful = true;
 
 		BlockEntity blockEntity = world.getBlockEntity(dialogueBlockPosition);
 		BlockState blockState = world.getBlockState(dialogueBlockPosition);
 
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
 
-			if (!dialogueBlockEntity.setDialogueUsedBlocks(dialogueUsedBlocksMap)) {
-				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.dialogueUsedBlocksList.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!dialogueBlockEntity.setDialogueTriggeredBlocks(dialogueTriggeredBlocksMap)) {
-				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.dialogueTriggeredBlocksList.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!dialogueBlockEntity.setStartingDialogueList(startingDialogueList)) {
-				serverPlayerEntity.sendMessage(Text.translatable("dialogue_block.startingDialogueList.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			}
+			dialogueBlockEntity.setDialogueUsedBlocksMap(dialogueUsedBlocksMap);
+			dialogueBlockEntity.setDialogueTriggeredBlocksMap(dialogueTriggeredBlocksMap);
+			dialogueBlockEntity.setStartingDialogueList(startingDialogueList);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			dialogueBlockEntity.markDirty();
 			world.updateListeners(dialogueBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

@@ -1,9 +1,11 @@
 package com.github.theredbrain.scriptblocks.mixin.client.network;
 
+import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
@@ -12,11 +14,13 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
@@ -24,6 +28,8 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScre
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataAccessBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DelayTriggerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.EntranceDelegationBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.HousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.InteractiveLootBlockScreen;
@@ -32,6 +38,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.LocationControlBloc
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.MimicBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RedstoneTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RelayTriggerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancementCheckerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
@@ -49,9 +56,14 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ClientPlayerEntity.class)
@@ -113,6 +125,21 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		} else {
 			this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
 		} 
+	}
+
+	@Override
+	public void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity) {
+		this.client.setScreen(new ShopBlockScreen(shopBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity) {
+		this.client.setScreen(new DialogueBlockScreen(dialogueBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
+		this.client.setScreen(new DialogueScreen(dialogue, dialogueUsedBlocks, dialogueTriggeredBlocks));
 	}
 
 	@Override
