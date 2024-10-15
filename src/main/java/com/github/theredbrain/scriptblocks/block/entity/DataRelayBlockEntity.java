@@ -102,6 +102,14 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Resetabl
 		return this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ());
 	}
 
+	public BlockPos getDataProvidingBlockPosOffset() {
+		return dataProvidingBlockPosOffset;
+	}
+
+	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {
+		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
+	}
+
 	@Override
 	public void reset() {
 	}

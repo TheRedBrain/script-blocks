@@ -1,10 +1,9 @@
 package com.github.theredbrain.scriptblocks.entity.player;
 
-import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
-import com.github.theredbrain.scriptblocks.block.DialogueBlock;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
@@ -82,4 +81,6 @@ public interface DuckPlayerEntityMixin {
     void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity);
 
     void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity);
+
+    void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
 }
