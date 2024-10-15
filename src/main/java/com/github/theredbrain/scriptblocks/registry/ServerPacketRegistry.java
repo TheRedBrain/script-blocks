@@ -61,20 +61,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public class ServerPacketRegistry {
 
-	//    public static final Identifier SWAPPED_HAND_ITEMS_PACKET = ScriptBlocksMod.identifier("swapped_hand_items");
-//    public static final Identifier CANCEL_ATTACK_PACKET = ScriptBlocksMod.identifier("attack_stamina_cost");
-//    public static final Identifier ADD_STATUS_EFFECT_PACKET = ScriptBlocksMod.identifier("add_status_effect");
-//    public static final Identifier SHEATHED_WEAPONS_PACKET = ScriptBlocksMod.identifier("sheathed_weapons"); // TODO if weapon sheathing is not visible in multiplayer
-//
-////    public static final Identifier SYNC_PLAYER_HOUSES = BetterAdventureModeCore.identifier("sync_player_houses");
-//    public static final Identifier SYNC_CRAFTING_RECIPES = ScriptBlocksMod.identifier("sync_crafting_recipes");
-//	public static final Identifier SYNC_DIALOGUES = ScriptBlocks.identifier("sync_dialogues");
-//	public static final Identifier SYNC_DIALOGUE_ANSWERS = ScriptBlocks.identifier("sync_dialogue_answers");
-//	public static final Identifier SYNC_LOCATIONS = ScriptBlocks.identifier("sync_locations");
-//	public static final Identifier SYNC_SHOPS = ScriptBlocks.identifier("sync_shops");
-//	public static final Identifier SYNC_BOSSES = ScriptBlocks.identifier("sync_bosses");
-//    public static final Identifier SYNC_WEAPON_POSES = ScriptBlocksMod.identifier("sync_weapon_poses");
-
 	public static void init() {
 
 		PayloadTypeRegistry.playC2S().register(AddStatusEffectPacket.PACKET_ID, AddStatusEffectPacket.PACKET_CODEC);
