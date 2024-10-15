@@ -61,6 +61,20 @@
 	"gui.area_block.triggered_mode.once": "Gets triggered once.",
 
 
+	"gui.data_access_block.screenPage.block_offsets": "Block Offsets",
+	"gui.data_access_block.screenPage.interaction": "Data Interaction",
+
+	"gui.data_access_block.data_reading_mode.lesser": "Lesser Than:",
+	"gui.data_access_block.data_reading_mode.equal": "Equal To:",
+	"gui.data_access_block.data_reading_mode.greater": "Greater Than:",
+
+	"gui.data_access_block.toggle_is_adding_button_label.on": "Is Added",
+	"gui.data_access_block.toggle_is_adding_button_label.off": "Is Set",
+
+	"gui.data_access_block.toggle_is_writing_button_label.on": "Is Writing",
+	"gui.data_access_block.toggle_is_writing_button_label.off": "Is Reading",
+
+
 	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Provider Block Position Offset",
 
 

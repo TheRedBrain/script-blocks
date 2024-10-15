@@ -22,6 +22,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateDataAccessBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateDataAccessBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDelayTriggerBlockPacket;
@@ -64,6 +66,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 public class ServerPacketRegistry {
 
 	public static void init() {
+
+		PayloadTypeRegistry.playC2S().register(UpdateDataAccessBlockPacket.PACKET_ID, UpdateDataAccessBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateDataAccessBlockPacket.PACKET_ID, new UpdateDataAccessBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateDataRelayBlockPacket.PACKET_ID, UpdateDataRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataRelayBlockPacket.PACKET_ID, new UpdateDataRelayBlockPacketReceiver());

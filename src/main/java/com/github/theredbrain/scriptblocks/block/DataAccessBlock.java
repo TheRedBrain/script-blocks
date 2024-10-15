@@ -58,10 +58,4 @@ public class DataAccessBlock extends RotatedBlockWithEntity {
 		}
 		return ActionResult.PASS;
 	}
-
-	private void trigger(ServerWorld world, BlockPos pos) {
-		if (world.getBlockEntity(pos) instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
-			redstoneTriggerBlockEntity.trigger();
-		}
-	}
 }
