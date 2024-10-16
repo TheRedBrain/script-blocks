@@ -31,47 +31,12 @@ import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class CreativeHousingScreen extends Screen {
-	// adventure
-	private static final Text TITLE_OWNER_LABEL_TEXT = Text.translatable("gui.housing_screen.title.owner");
-	private static final Text TITLE_CO_OWNER_LABEL_TEXT = Text.translatable("gui.housing_screen.title.co_owner");
-	private static final Text TITLE_CO_OWNER_LIST_LABEL_TEXT = Text.translatable("gui.housing_screen.co_owner_list.title");
-	private static final Text TITLE_CO_OWNER_LIST_DESCRIPTION_LABEL_TEXT = Text.translatable("gui.housing_screen.co_owner_list.description");
-	private static final Text TITLE_TRUSTED_LABEL_TEXT = Text.translatable("gui.housing_screen.title.trusted");
-	private static final Text TITLE_TRUSTED_LIST_LABEL_TEXT = Text.translatable("gui.housing_screen.trusted_list.title");
-	private static final Text TITLE_TRUSTED_LIST_DESCRIPTION_LABEL_TEXT = Text.translatable("gui.housing_screen.trusted_list.description");
-	private static final Text TITLE_GUEST_LABEL_TEXT = Text.translatable("gui.housing_screen.title.guest");
-	private static final Text TITLE_GUEST_LIST_LABEL_TEXT = Text.translatable("gui.housing_screen.guest_list.title");
-	private static final Text TITLE_GUEST_LIST_DESCRIPTION_LABEL_TEXT = Text.translatable("gui.housing_screen.guest_list.description");
-	private static final Text TITLE_STRANGER_LABEL_TEXT = Text.translatable("gui.housing_screen.title.stranger");
-	private static final Text LEAVE_CURRENT_HOUSE_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.leave_current_house_button_label");
-	private static final Text OPEN_RESET_HOUSE_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_reset_house_screen_button_label");
-	private static final Text TOGGLE_ADVENTURE_BUILDING_OFF_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.toggle_adventure_building_off_button_label");
-	private static final Text TOGGLE_ADVENTURE_BUILDING_ON_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.toggle_adventure_building_on_button_label");
-	private static final Text UNCLAIM_HOUSE_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.unclaim_house_button_label");
-	private static final Text CLAIM_HOUSE_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.claim_house_button_label");
-	private static final Text OPEN_CO_OWNER_LIST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_co_owner_list_button_label");
-	private static final Text NEW_CO_OWNER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.housing_screen.new_co_owner_field.place_holder");
-	private static final Text ADD_NEW_CO_OWNER_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_co_owner_button_label");
-	private static final Text OPEN_TRUSTED_PERSONS_LIST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_trusted_list_button_label");
-	private static final Text NEW_TRUSTED_PERSON_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.housing_screen.new_trusted_person_field.place_holder");
-	private static final Text ADD_NEW_TRUSTED_PERSON_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_trusted_person_button_label");
-	private static final Text OPEN_GUEST_LIST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_guest_list_button_label");
-	private static final Text NEW_GUEST_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.housing_screen.new_guest_field.place_holder");
-	private static final Text ADD_NEW_GUEST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_guest_button_label");
-	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.remove_list_entry_button_label");
-
-	// creative
 	private static final Text HIDE_INFLUENCE_AREA_LABEL_TEXT = Text.translatable("gui.housing_screen.hide_influence_area_label");
 	private static final Text SHOW_INFLUENCE_AREA_LABEL_TEXT = Text.translatable("gui.housing_screen.show_influence_area_label");
 	private static final Text INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.housing_screen.influence_area_dimensions_label");
 	private static final Text INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.housing_screen.influence_area_position_offset_label");
 	private static final Text RESET_OWNER_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_block.reset_owner_button_label");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	public static final Identifier BACKGROUND_218_215_TEXTURE = ScriptBlocks.identifier("textures/gui/container/generic_218_215_background.png");
-	public static final Identifier BACKGROUND_218_95_TEXTURE = ScriptBlocks.identifier("textures/gui/container/generic_218_95_background.png");
-	public static final Identifier BACKGROUND_218_71_TEXTURE = ScriptBlocks.identifier("textures/gui/container/generic_218_71_background.png");
-	private static final Identifier PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocks.identifier("container/housing_screen/player_lists_scroller_background");
-	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("container/scroller");
 	@Nullable
 	private final HousingBlockEntity housingBlockEntity;
 
@@ -98,13 +63,6 @@ public class CreativeHousingScreen extends Screen {
 	private List<String> trustedPersonsList = new ArrayList<>(List.of());
 	private List<String> guestList = new ArrayList<>(List.of());
 	private boolean showInfluenceArea = false;
-	private int backgroundWidth;
-	private int backgroundHeight;
-	private int x;
-	private int y;
-	private int scrollPosition = 0;
-	private float scrollAmount = 0.0f;
-	private boolean mouseClicked = false;
 	private HousingBlockEntity.OwnerMode ownerMode = HousingBlockEntity.OwnerMode.DIMENSION_OWNER;
 
 	public CreativeHousingScreen(@Nullable HousingBlockEntity housingBlockEntity) {
@@ -135,11 +93,6 @@ public class CreativeHousingScreen extends Screen {
 			this.showInfluenceArea = housingBlockEntity.getShowInfluenceArea();
 			this.ownerMode = housingBlockEntity.getOwnerMode();
 		}
-		this.backgroundWidth = 218;
-		this.backgroundHeight = this.ownerMode == HousingBlockEntity.OwnerMode.INTERACTION ? 95 : 71;
-		this.x = (this.width - this.backgroundWidth) / 2;
-		this.y = (this.height - this.backgroundHeight) / 2;
-
 		super.init();
 
 		this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(CreativeScreenPage::asText).values((CreativeScreenPage[]) CreativeScreenPage.values()).initially(this.creativeScreenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, creativeScreenPage) -> {
@@ -273,13 +226,8 @@ public class CreativeHousingScreen extends Screen {
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
-		List<String> list = new ArrayList<>(this.coOwnerList);
-		List<String> list1 = new ArrayList<>(this.trustedPersonsList);
-		List<String> list2 = new ArrayList<>(this.guestList);
 		boolean bool = this.showInfluenceArea;
 		HousingBlockEntity.OwnerMode var = this.ownerMode;
-		int number = this.scrollPosition;
-		float number1 = this.scrollAmount;
 		String string3 = this.restrictBlockBreakingAreaDimensionsXField.getText();
 		String string4 = this.restrictBlockBreakingAreaDimensionsYField.getText();
 		String string5 = this.restrictBlockBreakingAreaDimensionsZField.getText();
@@ -291,16 +239,8 @@ public class CreativeHousingScreen extends Screen {
 		String string11 = this.triggeredBlockPositionOffsetZField.getText();
 		boolean boolean2 = this.triggeredBlockResets;
 		this.init(client, width, height);
-		this.coOwnerList.clear();
-		this.trustedPersonsList.clear();
-		this.guestList.clear();
-		this.coOwnerList.addAll(list);
-		this.trustedPersonsList.addAll(list1);
-		this.guestList.addAll(list2);
 		this.showInfluenceArea = bool;
 		this.ownerMode = var;
-		this.scrollPosition = number;
-		this.scrollAmount = number1;
 		this.restrictBlockBreakingAreaDimensionsXField.setText(string3);
 		this.restrictBlockBreakingAreaDimensionsYField.setText(string4);
 		this.restrictBlockBreakingAreaDimensionsZField.setText(string5);

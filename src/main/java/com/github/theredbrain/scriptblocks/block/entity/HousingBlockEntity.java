@@ -100,21 +100,20 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		this.ownerUuid = nbt.getString("ownerUuid");
 		this.isOwnerSet = nbt.getBoolean("isOwnerSet");
 
-		this.coOwnerList = new ArrayList<>(List.of());
-		this.trustedList = new ArrayList<>(List.of());
-		this.guestList = new ArrayList<>(List.of());
-
 		int coOwnerListSize = nbt.getInt("coOwnerListSize");
+		this.coOwnerList.clear();
 		for (int i = 0; i < coOwnerListSize; i++) {
 			this.coOwnerList.add(nbt.getString("coOwnerListEntry" + i));
 		}
 
 		int trustedListSize = nbt.getInt("trustedListSize");
+		this.trustedList.clear();
 		for (int i = 0; i < trustedListSize; i++) {
 			this.trustedList.add(nbt.getString("trustedListEntry" + i));
 		}
 
 		int guestListSize = nbt.getInt("guestListSize");
+		this.guestList.clear();
 		for (int i = 0; i < guestListSize; i++) {
 			this.guestList.add(nbt.getString("guestListEntry" + i));
 		}
@@ -213,27 +212,24 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		return this.coOwnerList;
 	}
 
-	public boolean setCoOwnerList(List<String> coOwnerList) {
+	public void setCoOwnerList(List<String> coOwnerList) {
 		this.coOwnerList = coOwnerList;
-		return true;
 	}
 
 	public List<String> getTrustedList() {
 		return this.trustedList;
 	}
 
-	public boolean setTrustedList(List<String> trustedList) {
+	public void setTrustedList(List<String> trustedList) {
 		this.trustedList = trustedList;
-		return true;
 	}
 
 	public List<String> getGuestList() {
 		return this.guestList;
 	}
 
-	public boolean setGuestList(List<String> guestList) {
+	public void setGuestList(List<String> guestList) {
 		this.guestList = guestList;
-		return true;
 	}
 
 	public boolean getShowInfluenceArea() {

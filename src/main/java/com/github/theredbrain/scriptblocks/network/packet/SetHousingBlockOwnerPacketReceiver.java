@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -36,13 +37,13 @@ public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 
 			if (!housingBlockEntity.setOwnerUuid(owner)) {
-				serverPlayerEntity.sendMessage(Text.translatable("housing_block.owner.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.housing_block.owner_uuid_invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
 				if (Objects.equals(owner, "")) {
 					housingBlockEntity.setIsOwnerSet(false);
-					serverPlayerEntity.sendMessage(Text.translatable("housing_block.unclaimed_successful"), true);
+					serverPlayerEntity.sendMessage(Text.translatable("hud.message.housing_block.unclaimed_successful"), true);
 					RegistryEntry<StatusEffect> housing_owner_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
 					serverPlayerEntity.removeStatusEffect(housing_owner_status_effect);
 
@@ -50,7 +51,9 @@ public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.
 					serverPlayerEntity.removeStatusEffect(building_status_effect);
 				} else {
 					housingBlockEntity.setIsOwnerSet(true);
-					serverPlayerEntity.sendMessage(Text.translatable("housing_block.claimed_successful"), true);
+					serverPlayerEntity.sendMessage(Text.translatable("hud.message.housing_block.claimed_successful"), true);
+					RegistryEntry<StatusEffect> housing_owner_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);
+					serverPlayerEntity.addStatusEffect(new StatusEffectInstance(housing_owner_status_effect, 100, 0, true, false, false));
 				}
 			}
 			housingBlockEntity.markDirty();

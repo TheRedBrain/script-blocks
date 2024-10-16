@@ -141,6 +141,7 @@
 	"gui.housing_screen.title.guest": "You are a guest in this house",
 	"gui.housing_screen.title.stranger": "You are a stranger in this house",
 	"gui.housing_screen.leave_current_house_button_label": "Leave house",
+	"gui.housing_screen.close_housing_screen_button_label": "Close screen",
 	"gui.housing_screen.open_reset_house_screen_button_label": "Reset buildable area",
 	"gui.housing_screen.toggle_adventure_building_off_button_label": "Stop building",
 	"gui.housing_screen.toggle_adventure_building_on_button_label": "Start building",
@@ -148,13 +149,16 @@
 	"gui.housing_screen.claim_house_button_label": "Claim this house",
 	"gui.housing_screen.open_co_owner_list_button_label": "Open Co-Owner List",
 	"gui.housing_screen.new_co_owner_field.place_holder": "New Co-Owner Name",
-	"gui.housing_screen.add_new_co_owner_button_label": "Add as Co-Owner",
+	"gui.housing_screen.add_new_co_owner_button.label": "Add",
+	"gui.housing_screen.add_new_co_owner_button.tooltip": "Add as Co-Owner",
 	"gui.housing_screen.open_trusted_list_button_label": "Open Trusted List",
 	"gui.housing_screen.new_trusted_person_field.place_holder": "New Trusted Name",
-	"gui.housing_screen.add_new_trusted_person_button_label": "Add as Trusted",
+	"gui.housing_screen.add_new_trusted_person_button.label": "Add",
+	"gui.housing_screen.add_new_trusted_person_button.tooltip": "Add as Trusted",
 	"gui.housing_screen.open_guest_list_button_label": "Open Guest List",
 	"gui.housing_screen.new_guest_field.place_holder": "New Guest Name",
-	"gui.housing_screen.add_new_guest_button_label": "Add as Guest",
+	"gui.housing_screen.add_new_guest_button.label": "Add",
+	"gui.housing_screen.add_new_guest_button.tooltip": "Add as Guest",
 	"gui.housing_screen.remove_list_entry_button_label": "Remove",
 
 	"gui.housing_screen.hide_influence_area_label": "Hide Influence Area",
@@ -441,6 +445,10 @@
 	"hud.message.onlyDimensionOwnerCanTeleport": "Only the dimension owner can teleport",
 	"hud.message.keyIsNeeded": "You need a key.",
 	"hud.message.script_block.update_successful": "Update successful",
+
+	"hud.message.housing_block.owner_uuid_invalid": "Invalid player UUID. This should not happen",
+	"hud.message.housing_block.unclaimed_successful": "House unclaimed successfully",
+	"hud.message.housing_block.claimed_successful": "House claimed successfully",
 
 
 	"item.scriptblocks.block_position_distance_meter": "Block Position Distance Meter",

@@ -9,14 +9,22 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 
-public record UpdateHousingBlockAdventurePacket(BlockPos housingBlockPosition, List<String> coOwnerList,
-												List<String> trustedList,
-												List<String> guestList) implements CustomPayload {
+public record UpdateHousingBlockAdventurePacket(
+		BlockPos housingBlockPosition,
+		List<String> coOwnerList,
+		List<String> trustedList,
+		List<String> guestList
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateHousingBlockAdventurePacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_housing_block_adventure"));
 	public static final PacketCodec<RegistryByteBuf, UpdateHousingBlockAdventurePacket> PACKET_CODEC = PacketCodec.of(UpdateHousingBlockAdventurePacket::write, UpdateHousingBlockAdventurePacket::new);
 
 	public UpdateHousingBlockAdventurePacket(RegistryByteBuf registryByteBuf) {
-		this(registryByteBuf.readBlockPos(), registryByteBuf.readList(PacketCodecs.STRING), registryByteBuf.readList(PacketCodecs.STRING), registryByteBuf.readList(PacketCodecs.STRING));
+		this(
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readList(PacketCodecs.STRING),
+				registryByteBuf.readList(PacketCodecs.STRING),
+				registryByteBuf.readList(PacketCodecs.STRING)
+		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {

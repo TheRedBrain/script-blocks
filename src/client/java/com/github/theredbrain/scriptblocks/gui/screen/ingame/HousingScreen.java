@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
@@ -42,6 +43,7 @@ public class HousingScreen extends Screen {
 	private static final Text TITLE_GUEST_LIST_DESCRIPTION_LABEL_TEXT = Text.translatable("gui.housing_screen.guest_list.description");
 	private static final Text TITLE_STRANGER_LABEL_TEXT = Text.translatable("gui.housing_screen.title.stranger");
 	private static final Text LEAVE_CURRENT_HOUSE_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.leave_current_house_button_label");
+	private static final Text CLOSE_HOUSING_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.close_housing_screen_button_label");
 	private static final Text OPEN_RESET_HOUSE_SCREEN_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_reset_house_screen_button_label");
 	private static final Text TOGGLE_ADVENTURE_BUILDING_OFF_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.toggle_adventure_building_off_button_label");
 	private static final Text TOGGLE_ADVENTURE_BUILDING_ON_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.toggle_adventure_building_on_button_label");
@@ -49,13 +51,16 @@ public class HousingScreen extends Screen {
 	private static final Text CLAIM_HOUSE_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.claim_house_button_label");
 	private static final Text OPEN_CO_OWNER_LIST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_co_owner_list_button_label");
 	private static final Text NEW_CO_OWNER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.housing_screen.new_co_owner_field.place_holder");
-	private static final Text ADD_NEW_CO_OWNER_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_co_owner_button_label");
+	private static final Text ADD_NEW_CO_OWNER_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_co_owner_button.label");
+	private static final Text ADD_NEW_CO_OWNER_BUTTON_TOOLTIP_TEXT = Text.translatable("gui.housing_screen.add_new_co_owner_button.tooltip");
 	private static final Text OPEN_TRUSTED_PERSONS_LIST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_trusted_list_button_label");
 	private static final Text NEW_TRUSTED_PERSON_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.housing_screen.new_trusted_person_field.place_holder");
-	private static final Text ADD_NEW_TRUSTED_PERSON_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_trusted_person_button_label");
+	private static final Text ADD_NEW_TRUSTED_PERSON_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_trusted_person_button.label");
+	private static final Text ADD_NEW_TRUSTED_PERSON_BUTTON_TOOLTIP_TEXT = Text.translatable("gui.housing_screen.add_new_trusted_person_button.tooltip");
 	private static final Text OPEN_GUEST_LIST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.open_guest_list_button_label");
 	private static final Text NEW_GUEST_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.housing_screen.new_guest_field.place_holder");
-	private static final Text ADD_NEW_GUEST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_guest_button_label");
+	private static final Text ADD_NEW_GUEST_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.add_new_guest_button.label");
+	private static final Text ADD_NEW_GUEST_BUTTON_TOOLTIP_TEXT = Text.translatable("gui.housing_screen.add_new_guest_button.tooltip");
 	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.remove_list_entry_button_label");
 
 	public static final Identifier BACKGROUND_218_215_TEXTURE = ScriptBlocks.identifier("textures/gui/container/generic_218_215_background.png");
@@ -111,7 +116,6 @@ public class HousingScreen extends Screen {
 	private List<String> coOwnerList = new ArrayList<>(List.of());
 	private List<String> trustedPersonsList = new ArrayList<>(List.of());
 	private List<String> guestList = new ArrayList<>(List.of());
-	private boolean showInfluenceArea = false;
 	private boolean showResetHouseScreen = false;
 	private boolean showCoOwnerListScreen = false;
 	private boolean showTrustedListScreen = false;
@@ -172,8 +176,6 @@ public class HousingScreen extends Screen {
 		} else if (listType == 2) {
 			this.guestList.add(newEntry);
 		}
-		this.scrollPosition = 0;
-		this.scrollAmount = 0.0f;
 		this.updateWidgets();
 	}
 
@@ -185,8 +187,6 @@ public class HousingScreen extends Screen {
 		} else if (listType == 2 && index + this.scrollPosition < this.guestList.size()) {
 			this.guestList.remove(index + this.scrollPosition);
 		}
-		this.scrollPosition = 0;
-		this.scrollAmount = 0.0f;
 		this.updateWidgets();
 	}
 
@@ -201,13 +201,9 @@ public class HousingScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.coOwnerList.clear();
-		this.trustedPersonsList.clear();
-		this.guestList.clear();
 		this.coOwnerList.addAll(this.housingBlockEntity.getCoOwnerList());
 		this.trustedPersonsList.addAll(this.housingBlockEntity.getTrustedList());
 		this.guestList.addAll(this.housingBlockEntity.getGuestList());
-		this.showInfluenceArea = housingBlockEntity.getShowInfluenceArea();
 		this.ownerMode = housingBlockEntity.getOwnerMode();
 		if (this.currentPermissionLevel == 0) {
 			this.backgroundWidth = 218;
@@ -244,7 +240,9 @@ public class HousingScreen extends Screen {
 		this.newCoOwnerField.setMaxLength(128);
 		this.newCoOwnerField.setPlaceholder(NEW_CO_OWNER_FIELD_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newCoOwnerField);
+
 		this.addNewCoOwnerButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_CO_OWNER_BUTTON_LABEL_TEXT, button -> this.addNewEntryToList(this.newCoOwnerField.getText(), 0)).dimensions(this.x + this.backgroundWidth - 57, this.y + this.backgroundHeight - 27 - 24, 50, 20).build());
+		this.addNewCoOwnerButton.setTooltip(Tooltip.of(ADD_NEW_CO_OWNER_BUTTON_TOOLTIP_TEXT));
 
 		this.removeTrustedPersonListEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeEntryFromList(0, 1)).dimensions(this.x + this.backgroundWidth - 57, this.y + 33, 50, 20).build());
 		this.removeTrustedPersonListEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeEntryFromList(1, 1)).dimensions(this.x + this.backgroundWidth - 57, this.y + 57, 50, 20).build());
@@ -255,7 +253,9 @@ public class HousingScreen extends Screen {
 		this.newTrustedPersonField.setMaxLength(128);
 		this.newTrustedPersonField.setPlaceholder(NEW_TRUSTED_PERSON_FIELD_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newTrustedPersonField);
+
 		this.addNewTrustedPersonButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_TRUSTED_PERSON_BUTTON_LABEL_TEXT, button -> this.addNewEntryToList(this.newTrustedPersonField.getText(), 1)).dimensions(this.x + this.backgroundWidth - 57, this.y + this.backgroundHeight - 27 - 24, 50, 20).build());
+		this.addNewTrustedPersonButton.setTooltip(Tooltip.of(ADD_NEW_TRUSTED_PERSON_BUTTON_TOOLTIP_TEXT));
 
 		this.removeGuestListEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeEntryFromList(0, 2)).dimensions(this.x + this.backgroundWidth - 57, this.y + 33, 50, 20).build());
 		this.removeGuestListEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeEntryFromList(1, 2)).dimensions(this.x + this.backgroundWidth - 57, this.y + 57, 50, 20).build());
@@ -266,7 +266,9 @@ public class HousingScreen extends Screen {
 		this.newGuestField.setMaxLength(128);
 		this.newGuestField.setPlaceholder(NEW_GUEST_FIELD_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newGuestField);
+
 		this.addNewGuestButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_GUEST_BUTTON_LABEL_TEXT, button -> this.addNewEntryToList(this.newGuestField.getText(), 2)).dimensions(this.x + this.backgroundWidth - 57, this.y + this.backgroundHeight - 27 - 24, 50, 20).build());
+		this.addNewGuestButton.setTooltip(Tooltip.of(ADD_NEW_GUEST_BUTTON_TOOLTIP_TEXT));
 
 		this.closeListEditScreensButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.closeListScreens()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
 
@@ -288,7 +290,7 @@ public class HousingScreen extends Screen {
 
 		this.leaveCurrentHouseButton = this.addDrawableChild(ButtonWidget.builder(LEAVE_CURRENT_HOUSE_BUTTON_LABEL_TEXT, button -> this.leaveCurrentHouse()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27 - 24, this.backgroundWidth - 14, 20).build());
 
-		this.closeAdventureScreenButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
+		this.closeAdventureScreenButton = this.addDrawableChild(ButtonWidget.builder(CLOSE_HOUSING_SCREEN_BUTTON_LABEL_TEXT, button -> this.cancel()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
 
 		this.updateWidgets();
 	}
@@ -364,7 +366,7 @@ public class HousingScreen extends Screen {
 			this.newTrustedPersonField.setVisible(true);
 			this.addNewTrustedPersonButton.visible = true;
 			int index = 0;
-			for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
+			for (int i = 0; i < Math.min(5, this.trustedPersonsList.size()); i++) {
 				if (index == 0) {
 					this.removeTrustedPersonListEntryButton0.visible = true;
 				} else if (index == 1) {
@@ -387,7 +389,7 @@ public class HousingScreen extends Screen {
 			this.addNewGuestButton.visible = true;
 
 			int index = 0;
-			for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
+			for (int i = 0; i < Math.min(5, this.guestList.size()); i++) {
 				if (index == 0) {
 					this.removeGuestListEntryButton0.visible = true;
 				} else if (index == 1) {
@@ -448,7 +450,6 @@ public class HousingScreen extends Screen {
 		List<String> list = new ArrayList<>(this.coOwnerList);
 		List<String> list1 = new ArrayList<>(this.trustedPersonsList);
 		List<String> list2 = new ArrayList<>(this.guestList);
-		boolean bool = this.showInfluenceArea;
 		HousingBlockEntity.OwnerMode var = this.ownerMode;
 		int number = this.scrollPosition;
 		float number1 = this.scrollAmount;
@@ -462,7 +463,6 @@ public class HousingScreen extends Screen {
 		this.coOwnerList.addAll(list);
 		this.trustedPersonsList.addAll(list1);
 		this.guestList.addAll(list2);
-		this.showInfluenceArea = bool;
 		this.ownerMode = var;
 		this.scrollPosition = number;
 		this.scrollAmount = number1;
@@ -562,11 +562,9 @@ public class HousingScreen extends Screen {
 				context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
 			}
 			if (this.coOwnerList.size() > 5) {
-//                    context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
-				context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
+				context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-//                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
-				context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
+				context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
 			}
 			this.newCoOwnerField.render(context, mouseX, mouseY, delta);
 		} else if (this.showTrustedListScreen) {
@@ -577,11 +575,9 @@ public class HousingScreen extends Screen {
 				context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
 			}
 			if (this.trustedPersonsList.size() > 5) {
-//                    context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
-				context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
+				context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-//                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
-				context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
+				context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
 			}
 			this.newTrustedPersonField.render(context, mouseX, mouseY, delta);
 		} else if (this.showGuestListScreen) {
@@ -592,11 +588,9 @@ public class HousingScreen extends Screen {
 				context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
 			}
 			if (this.guestList.size() > 5) {
-//                    context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
-				context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
+				context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-//                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
-				context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
+				context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
 			}
 			this.newGuestField.render(context, mouseX, mouseY, delta);
 		} else {
