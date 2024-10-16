@@ -8,13 +8,25 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public record Shop(List<Deal> dealList) {
+public record Shop(
+		String shopTitle,
+		String offersTitle,
+		List<Deal> dealList
+) {
 
-	public Shop(List<Deal> dealList) {
+	public Shop(
+			String shopTitle,
+			String offersTitle,
+			List<Deal> dealList
+	) {
+		this.shopTitle = shopTitle;
+		this.offersTitle = offersTitle;
 		this.dealList = dealList != null ? dealList : List.of();
 	}
 
 	public static final Codec<Shop> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.STRING.optionalFieldOf("shopTitle", "").forGetter(x -> x.shopTitle),
+			Codec.STRING.optionalFieldOf("offersTitle", "").forGetter(x -> x.offersTitle),
 			Deal.CODEC.listOf().optionalFieldOf("dealList", List.of()).forGetter(x -> x.dealList)
 	).apply(instance, Shop::new));
 

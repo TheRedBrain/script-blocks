@@ -96,12 +96,6 @@ public class AreaBlockScreen extends Screen {
 	}
 
 	private void cancel() {
-		// TODO
-		this.areaBlock.setShowArea(this.showArea);
-		this.areaBlock.setAppliedStatusEffectAmbient(this.appliedStatusEffectAmbient);
-		this.areaBlock.setAppliedStatusEffectShowParticles(this.appliedStatusEffectShowParticles);
-		this.areaBlock.setAppliedStatusEffectShowIcon(this.appliedStatusEffectShowIcon);
-		this.areaBlock.setWasTriggered(this.wasTriggered);
 		this.close();
 	}
 
@@ -314,7 +308,15 @@ public class AreaBlockScreen extends Screen {
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
-		// TODO
+		ScreenPage var = this.screenPage;
+		AreaBlockEntity.TriggerMode var1 = this.triggerMode;
+		AreaBlockEntity.TriggeredMode var2 = this.triggeredMode;
+		boolean bool = this.showArea;
+		boolean bool1 = this.appliedStatusEffectAmbient;
+		boolean bool2 = this.appliedStatusEffectShowParticles;
+		boolean bool3 = this.appliedStatusEffectShowIcon;
+		boolean bool4 = this.wasTriggered;
+		boolean bool5 = this.triggeredBlockResets;
 		String string = this.areaDimensionsXField.getText();
 		String string1 = this.areaDimensionsYField.getText();
 		String string2 = this.areaDimensionsZField.getText();
@@ -323,7 +325,23 @@ public class AreaBlockScreen extends Screen {
 		String string5 = this.areaPositionOffsetZField.getText();
 		String string6 = this.appliedStatusEffectIdentifierField.getText();
 		String string7 = this.appliedStatusEffectAmplifierField.getText();
+		String string8 = this.joinMessageField.getText();
+		String string9 = this.leaveMessageField.getText();
+		String string10 = this.triggeredMessageField.getText();
+		String string11 = this.triggeredBlockPositionOffsetXField.getText();
+		String string12 = this.triggeredBlockPositionOffsetYField.getText();
+		String string13 = this.triggeredBlockPositionOffsetZField.getText();
+		String string14 = this.timerField.getText();
 		this.init(client, width, height);
+		this.screenPage = var;
+		this.triggerMode = var1;
+		this.triggeredMode = var2;
+		this.showArea = bool;
+		this.appliedStatusEffectAmbient = bool1;
+		this.appliedStatusEffectShowParticles = bool2;
+		this.appliedStatusEffectShowIcon = bool3;
+		this.wasTriggered = bool4;
+		this.triggeredBlockResets = bool5;
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
@@ -332,6 +350,13 @@ public class AreaBlockScreen extends Screen {
 		this.areaPositionOffsetZField.setText(string5);
 		this.appliedStatusEffectIdentifierField.setText(string6);
 		this.appliedStatusEffectAmplifierField.setText(string7);
+		this.joinMessageField.setText(string8);
+		this.leaveMessageField.setText(string9);
+		this.triggeredMessageField.setText(string10);
+		this.triggeredBlockPositionOffsetXField.setText(string11);
+		this.triggeredBlockPositionOffsetYField.setText(string12);
+		this.triggeredBlockPositionOffsetZField.setText(string13);
+		this.timerField.setText(string14);
 	}
 
 	@Override

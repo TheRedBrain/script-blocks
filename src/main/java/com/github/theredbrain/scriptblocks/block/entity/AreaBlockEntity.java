@@ -136,7 +136,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 		}
 
 
-		if (!this.appliedStatusEffectIdentifier.equals("")) {
+		if (!this.appliedStatusEffectIdentifier.isEmpty()) {
 			nbt.putString("appliedStatusEffectIdentifier", this.appliedStatusEffectIdentifier);
 		} else {
 			nbt.remove("appliedStatusEffectIdentifier");
@@ -173,19 +173,19 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			nbt.remove("messageMode");
 		}
 
-		if (!this.joinMessage.equals("")) {
+		if (!this.joinMessage.isEmpty()) {
 			nbt.putString("joinMessage", this.joinMessage);
 		} else {
 			nbt.remove("joinMessage");
 		}
 
-		if (!this.leaveMessage.equals("")) {
+		if (!this.leaveMessage.isEmpty()) {
 			nbt.putString("leaveMessage", this.leaveMessage);
 		} else {
 			nbt.remove("leaveMessage");
 		}
 
-		if (!this.triggeredMessage.equals("")) {
+		if (!this.triggeredMessage.isEmpty()) {
 			nbt.putString("triggeredMessage", this.triggeredMessage);
 		} else {
 			nbt.remove("triggeredMessage");

@@ -114,7 +114,6 @@ public class RelayTriggerBlockScreen extends Screen {
 	}
 
 	private void cancel() {
-		// TODO
 		this.close();
 	}
 

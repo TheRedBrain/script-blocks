@@ -172,12 +172,12 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 		this.saveCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.saveCreative()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.cancelCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
-		if (this.handler.getShop() != null) {
+		Shop shop = this.handler.getShop();
+		if (shop != null) {
 			this.handler.calculateUnlockedAndStockedDeals();
 			this.calculateActiveDeals();
-			// TODO get titles from shop
-			this.shopTitle = Text.literal("Shop Name");
-			this.playerOffersTitle = Text.literal("Your Offers");
+			this.shopTitle = Text.translatable(shop.shopTitle());
+			this.playerOffersTitle = Text.translatable(shop.offersTitle());
 		} else {
 			this.updateWidgets();
 		}
@@ -284,16 +284,13 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 						context.drawItemWithoutEntity(priceItemStack, x, y/*, k*/);
 						context.drawItemInSlot(this.textRenderer, priceItemStack, x, y);
 					}
-//                    context.drawGuiTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 28, 21);
-					context.drawTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 0, 0, 28, 21);
+                    context.drawGuiTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 28, 21);
 					index++;
 				}
 			if (this.handler.getUnlockedDealsCounter() > 3) {
-//                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.x + 161, this.y + 16, 8, 68);
-				context.drawTexture(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.x + 161, this.y + 16, 0, 0, 8, 68);
+                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.x + 161, this.y + 16, 8, 68);
 				k = (int) (59.0f * this.scrollAmount);
-//                context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 6, 7);
-				context.drawTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 0, 0, 6, 7);
+                context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 6, 7);
 			}
 		}
 	}
@@ -304,12 +301,6 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 		context.drawText(this.textRenderer, this.playerOffersTitle, this.titleX, this.titleY + 80, 4210752, false);
 		context.drawText(this.textRenderer, this.playerInventoryTitle, this.playerInventoryTitleX, this.playerInventoryTitleY, 4210752, false);
 	}
-
-//    @Override
-//    public void renderBackground(DrawContext context/*, int mouseX, int mouseY, float delta*/) {
-//        super.renderBackground(context/*, mouseX, mouseY, delta*/);
-//        this.drawBackground(context/*, delta, mouseX, mouseY*/);
-//    }
 
 	@Override
 	public void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {

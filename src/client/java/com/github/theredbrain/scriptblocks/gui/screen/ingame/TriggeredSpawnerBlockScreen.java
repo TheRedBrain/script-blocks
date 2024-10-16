@@ -194,6 +194,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 		this.addSelectableChild(this.entityTypeIdField);
 
 		// --- entity attribute modifier page ---
+		
 		this.removeListEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(0)).dimensions(this.width / 2 + 54, 47, 100, 20).build());
 		this.removeListEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(1)).dimensions(this.width / 2 + 54, 81, 100, 20).build());
 		this.removeListEntryButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(2)).dimensions(this.width / 2 + 54, 115, 100, 20).build());
@@ -332,38 +333,50 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 		this.doneButton.visible = true;
 		this.cancelButton.visible = true;
 
-//        }
 	}
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
-		// TODO
+		CreativeScreenPage var = this.creativeScreenPage;
+		TriggeredSpawnerBlockEntity.SpawningMode var1 = this.spawningMode;
+		EntityAttributeModifier.Operation var2 = this.newEntityAttributeModifierOperation;
 		List<MutablePair<Identifier, EntityAttributeModifier>> list = this.entityAttributeModifiersList;
 		String string = this.entitySpawnPositionOffsetXField.getText();
 		String string1 = this.entitySpawnPositionOffsetYField.getText();
 		String string2 = this.entitySpawnPositionOffsetZField.getText();
-		String string3 = this.spawningMode.asString();
-		String string4 = this.entityTypeIdField.getText();
-		String string5 = this.useRelayBlockPositionOffsetXField.getText();
-		String string6 = this.useRelayBlockPositionOffsetYField.getText();
-		String string7 = this.useRelayBlockPositionOffsetZField.getText();
-		String string8 = this.triggeredBlockPositionOffsetXField.getText();
-		String string9 = this.triggeredBlockPositionOffsetYField.getText();
-		String string10 = this.triggeredBlockPositionOffsetZField.getText();
+		String string3 = this.entitySpawnOrientationPitchField.getText();
+		String string4 = this.entitySpawnOrientationYawField.getText();
+		String string5 = this.entityTypeIdField.getText();
+		String string6 = this.newEntityAttributeModifierIdentifierField.getText();
+		String string7 = this.newEntityAttributeModifierNameField.getText();
+		String string8 = this.newEntityAttributeModifierValueField.getText();
+		String string9 = this.useRelayBlockPositionOffsetXField.getText();
+		String string10 = this.useRelayBlockPositionOffsetYField.getText();
+		String string11 = this.useRelayBlockPositionOffsetZField.getText();
+		String string12 = this.triggeredBlockPositionOffsetXField.getText();
+		String string13 = this.triggeredBlockPositionOffsetYField.getText();
+		String string14 = this.triggeredBlockPositionOffsetZField.getText();
 		boolean bl = this.triggeredBlockResets;
 		this.init(client, width, height);
+		this.creativeScreenPage = var;
+		this.spawningMode = var1;
+		this.newEntityAttributeModifierOperation = var2;
 		this.entityAttributeModifiersList = list;
 		this.entitySpawnPositionOffsetXField.setText(string);
 		this.entitySpawnPositionOffsetYField.setText(string1);
 		this.entitySpawnPositionOffsetZField.setText(string2);
-		this.spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.byName(string3).orElseGet(() -> TriggeredSpawnerBlockEntity.SpawningMode.ONCE);
-		this.entityTypeIdField.setText(string4);
-		this.useRelayBlockPositionOffsetXField.setText(string5);
-		this.useRelayBlockPositionOffsetYField.setText(string6);
-		this.useRelayBlockPositionOffsetZField.setText(string7);
-		this.triggeredBlockPositionOffsetXField.setText(string8);
-		this.triggeredBlockPositionOffsetYField.setText(string9);
-		this.triggeredBlockPositionOffsetZField.setText(string10);
+		this.entitySpawnOrientationPitchField.setText(string3);
+		this.entitySpawnOrientationYawField.setText(string4);
+		this.entityTypeIdField.setText(string5);
+		this.newEntityAttributeModifierIdentifierField.setText(string6);
+		this.newEntityAttributeModifierNameField.setText(string7);
+		this.newEntityAttributeModifierValueField.setText(string8);
+		this.useRelayBlockPositionOffsetXField.setText(string9);
+		this.useRelayBlockPositionOffsetYField.setText(string10);
+		this.useRelayBlockPositionOffsetZField.setText(string11);
+		this.triggeredBlockPositionOffsetXField.setText(string12);
+		this.triggeredBlockPositionOffsetYField.setText(string13);
+		this.triggeredBlockPositionOffsetZField.setText(string14);
 		this.triggeredBlockResets = bl;
 	}
 
@@ -467,7 +480,6 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 
 			context.drawTextWithShadow(this.textRenderer, ENTITY_TYPE_LABEL_TEXT, this.width / 2 - 153, 155, 0xA0A0A0);
 			this.entityTypeIdField.render(context, mouseX, mouseY, delta);
-//                }
 		} else if (this.creativeScreenPage == CreativeScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.entityAttributeModifiersList.size()); i++) {
@@ -477,11 +489,9 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 				context.drawTextWithShadow(this.textRenderer, entityAttributeModifier.value() + ", " + entityAttributeModifier.operation(), this.width / 2 - 141, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
 			}
 			if (this.entityAttributeModifiersList.size() > 3) {
-//                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
-				context.drawTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 0, 0, 8, 92);
+                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
 				int k = (int) (83.0f * this.scrollAmount);
-//                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
-				context.drawTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 0, 0, 6, 7);
+                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
 			}
 
 			this.newEntityAttributeModifierIdentifierField.render(context, mouseX, mouseY, delta);

@@ -121,9 +121,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 	private TeleporterBlockEntity.SpawnPointType spawnPointType;
 
-	private List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
+	private final List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
 
-	private List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = new ArrayList<>();
+	private final List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = new ArrayList<>();
 
 	private int creativeLocationsListScrollPosition = 0;
 	private int statusEffectListScrollPosition = 0;
@@ -728,7 +728,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-		// TODO
 		if (this.screenPage == ScreenPage.TELEPORTATION_MODE
 				&& this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS
 				&& this.locationsList.size() > 3
@@ -775,11 +774,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			this.activationAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.activationAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
 			context.drawTextWithShadow(this.textRenderer, ACCESS_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
-//                context.drawTextWithShadow(this.textRenderer, ACCESS_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
 			this.accessPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.accessPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.accessPositionOffsetZField.render(context, mouseX, mouseY, delta);
-//                context.drawTextWithShadow(this.textRenderer, SET_ACCESS_POSITION_LABEL_TEXT, this.width / 2 + 59, 140, 0xA0A0A0);
 		} else if (this.screenPage == ScreenPage.TELEPORTATION_MODE) {
 			context.drawTextWithShadow(this.textRenderer, TELEPORTATION_MODE_LABEL_TEXT, this.width / 2 - 153, 51, 0xA0A0A0);
 			if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
@@ -914,7 +911,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		return false;
 	}
 
-	public static enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		ACTIVATION("activation"),
 		TELEPORTATION_MODE("teleportation_mode"),
 		STATUS_EFFECTS_TO_DECREMENT("status_effect_to_decrement"),
@@ -922,7 +919,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 

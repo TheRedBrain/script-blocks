@@ -302,6 +302,7 @@
 	"gui.teleporter_block.cancelTeleportButtonLabel.tooltip": "Label of right Button in Adventure GUI",
 
 	"gui.teleporter_block.location_already_in_list": "Location is already in the list",
+	"gui.teleporter_block.location_not_found": "No location with this identifier is registered",
 
 
 	"gui.location_controller_block.main_entrance.position_offset": "Main Entrance Position Offset",

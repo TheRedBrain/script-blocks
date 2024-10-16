@@ -152,7 +152,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			if (responseDialogueIdentifierString == null) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {
-				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(responseDialogueIdentifierString.toString(), dialogueUsedBlocks, dialogueTriggeredBlocks)); // TODO
+				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(responseDialogueIdentifierString.toString(), dialogueUsedBlocks, dialogueTriggeredBlocks));
 			}
 
 
