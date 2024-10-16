@@ -17,13 +17,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class AreaBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<AreaBlock> CODEC = createCodec(AreaBlock::new);
 	public AreaBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<AreaBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable
@@ -40,7 +40,6 @@ public class AreaBlock extends RotatedBlockWithEntity {
 	@Override
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-//        return validateTicker(type, EntityRegistry.AREA_BLOCK_ENTITY, AreaBlockEntity::tick);
 		return validateTicker(type, EntityRegistry.AREA_BLOCK_ENTITY, AreaBlockEntity::tick);
 	}
 

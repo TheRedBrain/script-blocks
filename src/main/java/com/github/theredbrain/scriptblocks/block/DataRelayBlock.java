@@ -14,15 +14,15 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class DataRelayBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<DataRelayBlock> CODEC = createCodec(DataRelayBlock::new);
 
 	public DataRelayBlock(Settings settings) {
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState());
 	}
 
-	// TODO Block Codecs
 	public MapCodec<DataRelayBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

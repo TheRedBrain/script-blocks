@@ -14,13 +14,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class TriggeredAdvancementCheckerBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<TriggeredAdvancementCheckerBlock> CODEC = createCodec(TriggeredAdvancementCheckerBlock::new);
 	public TriggeredAdvancementCheckerBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<TriggeredAdvancementCheckerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

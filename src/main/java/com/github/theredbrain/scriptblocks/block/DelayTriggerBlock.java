@@ -17,14 +17,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class DelayTriggerBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<DelayTriggerBlock> CODEC = createCodec(DelayTriggerBlock::new);
 
 	public DelayTriggerBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<DelayTriggerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

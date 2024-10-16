@@ -23,6 +23,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class JigsawPlacerBlock extends RotatedBlockWithEntity implements OperatorBlock {
+	public static final MapCodec<JigsawPlacerBlock> CODEC = createCodec(JigsawPlacerBlock::new);
 	public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
 
 	public JigsawPlacerBlock(Settings settings) {
@@ -30,9 +31,8 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 		this.setDefaultState((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(ORIENTATION, Orientation.NORTH_UP));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<JigsawPlacerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Override

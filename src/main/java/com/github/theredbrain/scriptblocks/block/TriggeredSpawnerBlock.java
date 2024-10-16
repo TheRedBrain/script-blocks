@@ -14,14 +14,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class TriggeredSpawnerBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<TriggeredSpawnerBlock> CODEC = createCodec(TriggeredSpawnerBlock::new);
 
 	public TriggeredSpawnerBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<TriggeredSpawnerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

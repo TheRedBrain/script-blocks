@@ -17,14 +17,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class BossControllerBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<BossControllerBlock> CODEC = createCodec(BossControllerBlock::new);
 	public BossControllerBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	@Override
 	protected MapCodec<BossControllerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

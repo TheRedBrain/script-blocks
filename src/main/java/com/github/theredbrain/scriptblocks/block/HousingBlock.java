@@ -17,13 +17,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class HousingBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<HousingBlock> CODEC = createCodec(HousingBlock::new);
 	public HousingBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<HousingBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

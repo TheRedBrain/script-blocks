@@ -20,6 +20,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<RedstoneTriggerBlock> CODEC = createCodec(RedstoneTriggerBlock::new);
 	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
 
 	public RedstoneTriggerBlock(Settings settings) {
@@ -27,9 +28,8 @@ public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
 		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<RedstoneTriggerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Override

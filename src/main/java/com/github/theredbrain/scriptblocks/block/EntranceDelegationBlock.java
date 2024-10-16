@@ -14,13 +14,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class EntranceDelegationBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<EntranceDelegationBlock> CODEC = createCodec(EntranceDelegationBlock::new);
 	public EntranceDelegationBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<EntranceDelegationBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

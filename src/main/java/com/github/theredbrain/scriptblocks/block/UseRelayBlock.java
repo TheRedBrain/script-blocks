@@ -14,14 +14,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<UseRelayBlock> CODEC = createCodec(UseRelayBlock::new);
 
 	public UseRelayBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<UseRelayBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

@@ -18,14 +18,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorBlock {
+	public static final MapCodec<TeleporterBlock> CODEC = createCodec(TeleporterBlock::new);
 
 	public TeleporterBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<TeleporterBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Override

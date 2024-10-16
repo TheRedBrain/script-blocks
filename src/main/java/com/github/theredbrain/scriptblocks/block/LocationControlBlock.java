@@ -14,13 +14,13 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class LocationControlBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<LocationControlBlock> CODEC = createCodec(LocationControlBlock::new);
 	public LocationControlBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<LocationControlBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

@@ -15,14 +15,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class ShopBlock extends BlockWithEntity {
+	public static final MapCodec<ShopBlock> CODEC = createCodec(ShopBlock::new);
 
 	public ShopBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<ShopBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

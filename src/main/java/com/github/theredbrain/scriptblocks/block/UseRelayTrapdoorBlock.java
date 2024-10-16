@@ -34,12 +34,11 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<UseRelayTrapdoorBlock> CODEC = createCodec(UseRelayTrapdoorBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty OPEN = Properties.OPEN;
 	public static final EnumProperty<BlockHalf> HALF = Properties.BLOCK_HALF;
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	//    public static final EnumProperty<DoorHinge> HINGE = Properties.DOOR_HINGE;
-//    public static final EnumProperty<DoubleBlockHalf> HALF = Properties.DOUBLE_BLOCK_HALF;
 	protected static final VoxelShape EAST_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
 	protected static final VoxelShape WEST_SHAPE = Block.createCuboidShape(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape SOUTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
@@ -52,9 +51,8 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 		this.setDefaultState((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH)).with(OPEN, false)).with(HALF, BlockHalf.BOTTOM))).with(WATERLOGGED, false));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<UseRelayTrapdoorBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

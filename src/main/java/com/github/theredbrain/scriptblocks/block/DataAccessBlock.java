@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class DataAccessBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<DataAccessBlock> CODEC = createCodec(DataAccessBlock::new);
 	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
 
 	public DataAccessBlock(Settings settings) {
@@ -25,9 +26,8 @@ public class DataAccessBlock extends RotatedBlockWithEntity {
 		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<DataAccessBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Override

@@ -14,14 +14,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class RelayTriggerBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<RelayTriggerBlock> CODEC = createCodec(RelayTriggerBlock::new);
 
 	public RelayTriggerBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<RelayTriggerBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

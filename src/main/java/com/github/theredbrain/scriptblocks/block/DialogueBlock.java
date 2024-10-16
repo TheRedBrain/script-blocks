@@ -16,14 +16,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class DialogueBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<DialogueBlock> CODEC = createCodec(DialogueBlock::new);
 
 	public DialogueBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<DialogueBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

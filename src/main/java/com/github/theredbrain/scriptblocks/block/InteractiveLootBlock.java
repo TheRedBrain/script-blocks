@@ -29,14 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InteractiveLootBlock extends BlockWithEntity {
+	public static final MapCodec<InteractiveLootBlock> CODEC = createCodec(InteractiveLootBlock::new);
 
 	public InteractiveLootBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<InteractiveLootBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

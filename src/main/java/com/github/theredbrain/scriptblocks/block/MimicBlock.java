@@ -22,6 +22,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class MimicBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<MimicBlock> CODEC = createCodec(MimicBlock::new);
 
 	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
 
@@ -30,9 +31,8 @@ public class MimicBlock extends RotatedBlockWithEntity {
 		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<MimicBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Override

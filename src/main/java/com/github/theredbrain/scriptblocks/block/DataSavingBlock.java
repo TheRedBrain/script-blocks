@@ -10,15 +10,15 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public class DataSavingBlock extends BlockWithEntity {
+	public static final MapCodec<DataSavingBlock> CODEC = createCodec(DataSavingBlock::new);
 
 	public DataSavingBlock(Settings settings) {
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState());
 	}
 
-	// TODO Block Codecs
 	public MapCodec<DataSavingBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

@@ -3,9 +3,12 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockSetType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.DoorBlock;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
@@ -16,6 +19,8 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -37,6 +42,10 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayChestBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<UseRelayChestBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
+			TagKey.codec(RegistryKeys.ITEM).fieldOf("requiredKeys").forGetter(config -> config.requiredKeys),
+			createSettingsCodec()
+	).apply(instance, UseRelayChestBlock::new));
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty OPEN = Properties.OPEN;
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
@@ -51,9 +60,8 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(WATERLOGGED, false));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<UseRelayChestBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

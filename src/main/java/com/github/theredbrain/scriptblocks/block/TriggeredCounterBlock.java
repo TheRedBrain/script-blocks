@@ -14,14 +14,14 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class TriggeredCounterBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<TriggeredCounterBlock> CODEC = createCodec(TriggeredCounterBlock::new);
 
 	public TriggeredCounterBlock(Settings settings) {
 		super(settings);
 	}
 
-	// TODO Block Codecs
 	public MapCodec<TriggeredCounterBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable

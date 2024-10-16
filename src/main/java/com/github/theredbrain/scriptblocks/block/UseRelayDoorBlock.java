@@ -39,6 +39,7 @@ import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayDoorBlock extends RotatedBlockWithEntity {
+	public static final MapCodec<UseRelayDoorBlock> CODEC = createCodec(UseRelayDoorBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty OPEN = Properties.OPEN;
 	public static final EnumProperty<DoorHinge> HINGE = Properties.DOOR_HINGE;
@@ -53,9 +54,8 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 		this.setDefaultState((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH)).with(OPEN, false)).with(HINGE, DoorHinge.LEFT))).with(HALF, DoubleBlockHalf.LOWER));
 	}
 
-	// TODO Block Codecs
 	public MapCodec<UseRelayDoorBlock> getCodec() {
-		return null;
+		return CODEC;
 	}
 
 	@Nullable
