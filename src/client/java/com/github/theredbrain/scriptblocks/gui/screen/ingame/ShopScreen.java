@@ -5,7 +5,6 @@ import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacket;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
-import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -22,12 +21,10 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
-import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 
@@ -194,17 +191,17 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 		this.saveCreativeButton.visible = false;
 		this.cancelCreativeButton.visible = false;
 
-			int index = 0;
-			for (int i = 0; i < Math.min(3, this.handler.getUnlockedDealsCounter()); i++) {
-				if (index == 0) {
-					this.tradeButton0.visible = true;
-				} else if (index == 1) {
-					this.tradeButton1.visible = true;
-				} else if (index == 2) {
-					this.tradeButton2.visible = true;
-				}
-				index++;
+		int index = 0;
+		for (int i = 0; i < Math.min(3, this.handler.getUnlockedDealsCounter()); i++) {
+			if (index == 0) {
+				this.tradeButton0.visible = true;
+			} else if (index == 1) {
+				this.tradeButton1.visible = true;
+			} else if (index == 2) {
+				this.tradeButton2.visible = true;
 			}
+			index++;
+		}
 		this.scrollPosition = 0;
 		this.scrollAmount = 0.0f;
 	}
@@ -260,37 +257,37 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 
 		super.render(context, mouseX, mouseY, delta);
 
-			int x;
-			int y;
-			int k;
-			int index = 0;
-			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.handler.getUnlockedDealsCounter()); i++) {
-				if (i > this.handler.getUnlockedDealsList().size()) {
-					break;
-				}
-				Shop.Deal deal = this.handler.getUnlockedDealsList().get(i);
-				if (deal != null) {
-					ItemStack offerItemStack = deal.offer();
-					x = this.x + 85;
+		int x;
+		int y;
+		int k;
+		int index = 0;
+		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.handler.getUnlockedDealsCounter()); i++) {
+			if (i > this.handler.getUnlockedDealsList().size()) {
+				break;
+			}
+			Shop.Deal deal = this.handler.getUnlockedDealsList().get(i);
+			if (deal != null) {
+				ItemStack offerItemStack = deal.offer();
+				x = this.x + 85;
+				y = this.y + 18 + (index * 24);
+				k = x + y * this.backgroundWidth;
+				context.drawItemWithoutEntity(offerItemStack, x, y/*, k*/);
+				context.drawItemInSlot(this.textRenderer, offerItemStack, x, y);
+				for (int j = 0; j < deal.price().size(); j++) {
+					ItemStack priceItemStack = deal.price().get(j);
+					x = this.x + 8 + (j * 18);
 					y = this.y + 18 + (index * 24);
 					k = x + y * this.backgroundWidth;
-					context.drawItemWithoutEntity(offerItemStack, x, y/*, k*/);
-					context.drawItemInSlot(this.textRenderer, offerItemStack, x, y);
-					for (int j = 0; j < deal.price().size(); j++) {
-						ItemStack priceItemStack = deal.price().get(j);
-						x = this.x + 8 + (j * 18);
-						y = this.y + 18 + (index * 24);
-						k = x + y * this.backgroundWidth;
-						context.drawItemWithoutEntity(priceItemStack, x, y/*, k*/);
-						context.drawItemInSlot(this.textRenderer, priceItemStack, x, y);
-					}
-                    context.drawGuiTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 28, 21);
-					index++;
+					context.drawItemWithoutEntity(priceItemStack, x, y/*, k*/);
+					context.drawItemInSlot(this.textRenderer, priceItemStack, x, y);
 				}
+				context.drawGuiTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 28, 21);
+				index++;
+			}
 			if (this.handler.getUnlockedDealsCounter() > 3) {
-                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.x + 161, this.y + 16, 8, 68);
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.x + 161, this.y + 16, 8, 68);
 				k = (int) (59.0f * this.scrollAmount);
-                context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 6, 7);
+				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 6, 7);
 			}
 		}
 	}
@@ -304,9 +301,9 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 
 	@Override
 	public void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-			int i = this.x;
-			int j = this.y;
-			context.drawTexture(SHOP_BACKGROUND_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+		int i = this.x;
+		int j = this.y;
+		context.drawTexture(SHOP_BACKGROUND_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 
 	}
 

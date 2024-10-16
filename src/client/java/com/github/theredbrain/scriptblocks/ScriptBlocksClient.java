@@ -1,11 +1,9 @@
 package com.github.theredbrain.scriptblocks;
 
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueBlockScreen;
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.config.ClientConfig;
 import com.github.theredbrain.scriptblocks.config.ClientConfigWrapper;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.ClientPacketRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;

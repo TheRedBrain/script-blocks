@@ -30,57 +30,57 @@ import java.util.List;
 
 public interface DuckPlayerEntityMixin {
 
-    @Nullable BlockPos scriptblocks$getCurrentHousingBlockPosition();
+	@Nullable BlockPos scriptblocks$getCurrentHousingBlockPosition();
 
-    void scriptblocks$setCurrentHousingBlockPosition(@Nullable BlockPos currentHousingBlockPosition);
+	void scriptblocks$setCurrentHousingBlockPosition(@Nullable BlockPos currentHousingBlockPosition);
 
-    @Nullable MutablePair<String, BlockPos> scriptblocks$getLocationAccessPosition();
+	@Nullable MutablePair<String, BlockPos> scriptblocks$getLocationAccessPosition();
 
-    void scriptblocks$setLocationAccessPosition(@Nullable MutablePair<String, BlockPos> locationAccessPosition);
+	void scriptblocks$setLocationAccessPosition(@Nullable MutablePair<String, BlockPos> locationAccessPosition);
 
-    void scriptblocks$sendAnnouncement(Text announcement);
+	void scriptblocks$sendAnnouncement(Text announcement);
 
-    void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity);
+	void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity);
 
-    void scriptblocks$openHousingScreen();
+	void scriptblocks$openHousingScreen();
 
-    void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity);
+	void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity);
 
-    void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity);
+	void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity);
 
-    void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks);
+	void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks);
 
-    void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock);
+	void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock);
 
-    void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock);
+	void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock);
 
-    void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock);
+	void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock);
 
-    void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock);
+	void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock);
 
-    void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock);
+	void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock);
 
-    void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity);
+	void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity);
 
-    void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock);
+	void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock);
 
-    void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
+	void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
 
-    void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
+	void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
 
-    void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
+	void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
 
-    void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
+	void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
 
-    void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity);
+	void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity);
 
-    void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity);
+	void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity);
 
-    void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock);
+	void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock);
 
-    void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity);
+	void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity);
 
-    void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity);
+	void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity);
 
-    void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
+	void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
 }

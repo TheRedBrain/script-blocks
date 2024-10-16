@@ -31,7 +31,7 @@ public record UpdateJigsawPlacerBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos()
-				);
+		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {

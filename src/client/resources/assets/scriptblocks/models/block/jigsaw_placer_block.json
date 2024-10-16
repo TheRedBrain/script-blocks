@@ -1,12 +1,12 @@
 {
-	"parent": "minecraft:block/cube_directional",
-	"textures": {
-		"down": "scriptblocks:block/jigsaw_placer_side",
-		"east": "scriptblocks:block/jigsaw_placer_side",
-		"north": "scriptblocks:block/jigsaw_placer_top",
-		"particle": "scriptblocks:block/jigsaw_placer_top",
-		"south": "scriptblocks:block/trigger_block",
-		"up": "scriptblocks:block/jigsaw_placer_lock",
-		"west": "scriptblocks:block/jigsaw_placer_side"
-	}
+  "parent": "minecraft:block/cube_directional",
+  "textures": {
+    "down": "scriptblocks:block/jigsaw_placer_side",
+    "east": "scriptblocks:block/jigsaw_placer_side",
+    "north": "scriptblocks:block/jigsaw_placer_top",
+    "particle": "scriptblocks:block/jigsaw_placer_top",
+    "south": "scriptblocks:block/trigger_block",
+    "up": "scriptblocks:block/jigsaw_placer_lock",
+    "west": "scriptblocks:block/jigsaw_placer_side"
+  }
 }

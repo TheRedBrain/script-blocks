@@ -11,7 +11,8 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record DialogueAnswerPacket(Identifier answerIdentifier, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) implements CustomPayload {
+public record DialogueAnswerPacket(Identifier answerIdentifier, List<MutablePair<String, BlockPos>> dialogueUsedBlocks,
+								   List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) implements CustomPayload {
 	public static final CustomPayload.Id<DialogueAnswerPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("dialogue_answer"));
 	public static final PacketCodec<RegistryByteBuf, DialogueAnswerPacket> PACKET_CODEC = PacketCodec.of(DialogueAnswerPacket::write, DialogueAnswerPacket::new);
 

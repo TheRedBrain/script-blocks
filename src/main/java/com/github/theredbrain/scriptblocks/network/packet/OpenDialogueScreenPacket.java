@@ -10,7 +10,9 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record OpenDialogueScreenPacket(String dialogueIdentifierString, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) implements CustomPayload {
+public record OpenDialogueScreenPacket(String dialogueIdentifierString,
+									   List<MutablePair<String, BlockPos>> dialogueUsedBlocks,
+									   List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) implements CustomPayload {
 	public static final CustomPayload.Id<OpenDialogueScreenPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("open_dialogue_screen"));
 	public static final PacketCodec<RegistryByteBuf, OpenDialogueScreenPacket> PACKET_CODEC = PacketCodec.of(OpenDialogueScreenPacket::write, OpenDialogueScreenPacket::new);
 

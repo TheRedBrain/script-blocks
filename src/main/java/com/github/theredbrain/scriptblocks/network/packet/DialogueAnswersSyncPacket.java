@@ -10,7 +10,8 @@ import net.minecraft.util.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
-public record DialogueAnswersSyncPacket(Map<Identifier, DialogueAnswer> registeredDialogueAnswers) implements CustomPayload {
+public record DialogueAnswersSyncPacket(
+		Map<Identifier, DialogueAnswer> registeredDialogueAnswers) implements CustomPayload {
 	public static final Id<DialogueAnswersSyncPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("dialogue_answers_sync"));
 	public static final PacketCodec<RegistryByteBuf, DialogueAnswersSyncPacket> PACKET_CODEC = PacketCodec.of(DialogueAnswersSyncPacket::write, DialogueAnswersSyncPacket::read);
 

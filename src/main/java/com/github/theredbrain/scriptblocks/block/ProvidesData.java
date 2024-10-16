@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
-public interface ProvidesData extends Resetable{
+public interface ProvidesData extends Resetable {
 
 	int getData(String id);
 

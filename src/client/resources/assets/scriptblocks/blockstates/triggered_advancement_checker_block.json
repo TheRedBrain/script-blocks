@@ -1,7 +1,7 @@
 {
-	"variants": {
-		"": {
-			"model": "scriptblocks:block/triggered_advancement_checker_block"
-		}
-	}
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/triggered_advancement_checker_block"
+    }
+  }
 }

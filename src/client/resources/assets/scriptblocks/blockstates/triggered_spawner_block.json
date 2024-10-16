@@ -1,7 +1,7 @@
 {
-	"variants": {
-		"": {
-			"model": "scriptblocks:block/triggered_spawner_block"
-		}
-	}
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/triggered_spawner_block"
+    }
+  }
 }

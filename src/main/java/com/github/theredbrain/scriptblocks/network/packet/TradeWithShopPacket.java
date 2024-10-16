@@ -4,7 +4,6 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.network.packet.CustomPayload;
 
 public record TradeWithShopPacket(String shopIdentifier, int id) implements CustomPayload {
 	public static final CustomPayload.Id<TradeWithShopPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("trade_with_shop"));

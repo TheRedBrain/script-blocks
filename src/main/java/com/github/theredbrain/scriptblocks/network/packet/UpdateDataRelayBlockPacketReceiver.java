@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -10,7 +9,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateDataRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateDataRelayBlockPacket> {
 	@Override

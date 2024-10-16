@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -16,7 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<SetHousingBlockOwnerPacket> {
 	@Override

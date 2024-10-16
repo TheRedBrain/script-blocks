@@ -149,6 +149,7 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 			}
 		}
 	}
+
 	public record TeleporterBlockData(
 			BlockPos blockPos
 	) {

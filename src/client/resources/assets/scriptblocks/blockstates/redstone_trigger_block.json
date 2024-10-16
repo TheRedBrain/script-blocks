@@ -1,10 +1,10 @@
 {
-	"variants": {
-		"triggered=false": {
-			"model": "scriptblocks:block/redstone_trigger_block"
-		},
-		"triggered=true": {
-			"model": "scriptblocks:block/redstone_trigger_block_triggered"
-		}
-	}
+  "variants": {
+    "triggered=false": {
+      "model": "scriptblocks:block/redstone_trigger_block"
+    },
+    "triggered=true": {
+      "model": "scriptblocks:block/redstone_trigger_block_triggered"
+    }
+  }
 }

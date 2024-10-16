@@ -2,13 +2,8 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
-import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
-import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingScreenPacket;
-import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockAdventurePacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockCreativePacket;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,15 +15,11 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -144,10 +135,10 @@ public class CreativeHousingScreen extends Screen {
 			this.showInfluenceArea = housingBlockEntity.getShowInfluenceArea();
 			this.ownerMode = housingBlockEntity.getOwnerMode();
 		}
-			this.backgroundWidth = 218;
-			this.backgroundHeight = this.ownerMode == HousingBlockEntity.OwnerMode.INTERACTION ? 95 : 71;
-			this.x = (this.width - this.backgroundWidth) / 2;
-			this.y = (this.height - this.backgroundHeight) / 2;
+		this.backgroundWidth = 218;
+		this.backgroundHeight = this.ownerMode == HousingBlockEntity.OwnerMode.INTERACTION ? 95 : 71;
+		this.x = (this.width - this.backgroundWidth) / 2;
+		this.y = (this.height - this.backgroundHeight) / 2;
 
 		super.init();
 
@@ -250,34 +241,34 @@ public class CreativeHousingScreen extends Screen {
 		this.saveCreativeButton.visible = false;
 		this.cancelCreativeButton.visible = false;
 
-			this.creativeScreenPageButton.visible = true;
+		this.creativeScreenPageButton.visible = true;
 
-			if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
+		if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
 
-				this.showRestrictBlockBreakingAreaButton.visible = true;
-				this.restrictBlockBreakingAreaDimensionsXField.setVisible(true);
-				this.restrictBlockBreakingAreaDimensionsYField.setVisible(true);
-				this.restrictBlockBreakingAreaDimensionsZField.setVisible(true);
-				this.restrictBlockBreakingAreaPositionOffsetXField.setVisible(true);
-				this.restrictBlockBreakingAreaPositionOffsetYField.setVisible(true);
-				this.restrictBlockBreakingAreaPositionOffsetZField.setVisible(true);
+			this.showRestrictBlockBreakingAreaButton.visible = true;
+			this.restrictBlockBreakingAreaDimensionsXField.setVisible(true);
+			this.restrictBlockBreakingAreaDimensionsYField.setVisible(true);
+			this.restrictBlockBreakingAreaDimensionsZField.setVisible(true);
+			this.restrictBlockBreakingAreaPositionOffsetXField.setVisible(true);
+			this.restrictBlockBreakingAreaPositionOffsetYField.setVisible(true);
+			this.restrictBlockBreakingAreaPositionOffsetZField.setVisible(true);
 
-			} else if (this.creativeScreenPage == CreativeScreenPage.TRIGGERED_BLOCK) {
+		} else if (this.creativeScreenPage == CreativeScreenPage.TRIGGERED_BLOCK) {
 
-				this.triggeredBlockPositionOffsetXField.setVisible(true);
-				this.triggeredBlockPositionOffsetYField.setVisible(true);
-				this.triggeredBlockPositionOffsetZField.setVisible(true);
-				this.toggleTriggeredBlockResetsButton.visible = true;
+			this.triggeredBlockPositionOffsetXField.setVisible(true);
+			this.triggeredBlockPositionOffsetYField.setVisible(true);
+			this.triggeredBlockPositionOffsetZField.setVisible(true);
+			this.toggleTriggeredBlockResetsButton.visible = true;
 
-			} else if (this.creativeScreenPage == CreativeScreenPage.OWNER) {
+		} else if (this.creativeScreenPage == CreativeScreenPage.OWNER) {
 
-				this.toggleOwnerModeButton.visible = true;
-				this.resetOwnerButton.visible = true;
+			this.toggleOwnerModeButton.visible = true;
+			this.resetOwnerButton.visible = true;
 
-			}
+		}
 
-			this.saveCreativeButton.visible = true;
-			this.cancelCreativeButton.visible = true;
+		this.saveCreativeButton.visible = true;
+		this.cancelCreativeButton.visible = true;
 	}
 
 	@Override
@@ -337,21 +328,21 @@ public class CreativeHousingScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-			if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
-				context.drawTextWithShadow(this.textRenderer, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-				this.restrictBlockBreakingAreaDimensionsXField.render(context, mouseX, mouseY, delta);
-				this.restrictBlockBreakingAreaDimensionsYField.render(context, mouseX, mouseY, delta);
-				this.restrictBlockBreakingAreaDimensionsZField.render(context, mouseX, mouseY, delta);
-				context.drawTextWithShadow(this.textRenderer, INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-				this.restrictBlockBreakingAreaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-				this.restrictBlockBreakingAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-				this.restrictBlockBreakingAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			} else if (this.creativeScreenPage == CreativeScreenPage.TRIGGERED_BLOCK) {
-				context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-				this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-				this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-				this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			}
+		if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
+			context.drawTextWithShadow(this.textRenderer, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.restrictBlockBreakingAreaDimensionsXField.render(context, mouseX, mouseY, delta);
+			this.restrictBlockBreakingAreaDimensionsYField.render(context, mouseX, mouseY, delta);
+			this.restrictBlockBreakingAreaDimensionsZField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.restrictBlockBreakingAreaPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.restrictBlockBreakingAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.restrictBlockBreakingAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		} else if (this.creativeScreenPage == CreativeScreenPage.TRIGGERED_BLOCK) {
+			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		}
 	}
 
 	@Override

@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
@@ -136,7 +135,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			Identifier advancementIdentifier = dialogueAnswer.grantedAdvancement();
 			Identifier criterionName = dialogueAnswer.criterionName();
 			if (advancementIdentifier != null && criterionName != null) {
-                AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
+				AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
 				if (advancementEntry != null) {
 					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName.toString());
 				}

@@ -1,21 +1,21 @@
 {
-	"schemaVersion": 1,
-	"id": "scriptblocks_test",
-	"version": "${version}",
-	"name": "Test Mod",
-	"description": "Test Mod for Script Blocks",
-	"authors": [],
-	"contact": {},
-	"license": "None",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"com.github.theredbrain.scriptblocks_test.ScriptBlocksTest"
-		],
-		"client": [
-			"com.github.theredbrain.scriptblocks_test.ScriptBlocksTestClient"
-		]
-	},
-	"mixins": [],
-	"depends": {}
+  "schemaVersion": 1,
+  "id": "scriptblocks_test",
+  "version": "${version}",
+  "name": "Test Mod",
+  "description": "Test Mod for Script Blocks",
+  "authors": [],
+  "contact": {},
+  "license": "None",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.github.theredbrain.scriptblocks_test.ScriptBlocksTest"
+    ],
+    "client": [
+      "com.github.theredbrain.scriptblocks_test.ScriptBlocksTestClient"
+    ]
+  },
+  "mixins": [],
+  "depends": {}
 }

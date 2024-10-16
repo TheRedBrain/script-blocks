@@ -1,7 +1,7 @@
 {
-	"variants": {
-		"": {
-			"model": "scriptblocks:block/mimic_fallback_block"
-		}
-	}
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/mimic_fallback_block"
+    }
+  }
 }

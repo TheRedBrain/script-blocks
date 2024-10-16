@@ -2,8 +2,8 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
-import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.data.Location;
+import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetManualResetLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.TeleportFromTeleporterBlockPacket;
@@ -111,8 +111,10 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private boolean showCurrentLockAdvancement;
 	private boolean showCurrentUnlockAdvancement;
 	private boolean isCurrentLocationUnlocked;
-	@Nullable private Advancement currentLockAdvancement;
-	@Nullable private Advancement currentUnlockAdvancement;
+	@Nullable
+	private Advancement currentLockAdvancement;
+	@Nullable
+	private Advancement currentUnlockAdvancement;
 	private boolean isCurrentLocationPublic;
 	private boolean showCurrentLocationName;
 	private boolean showCurrentLocationOwner;
@@ -131,7 +133,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void openChooseCurrentTargetOwnerScreen() {
 		this.partyMemberList.clear();
 		if (this.client != null && this.client.player != null) {
-            Team team = this.client.player.getScoreboardTeam();
+			Team team = this.client.player.getScoreboardTeam();
 			if (team != null) {
 				for (String name : team.getPlayerList()) {
 					if (!this.client.player.getName().getString().equals(name)) {
@@ -228,19 +230,19 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.currentTargetEntranceDisplayName = "";
 		this.currentTargetEntranceDataId = "";
 		this.currentTargetEntranceData = 0;
-			if ((this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT || this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) && !this.showAdventureScreen) {
+		if ((this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT || this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) && !this.showAdventureScreen) {
+			this.teleport();
+		}
+		this.backgroundWidth = 218;
+		if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+			this.backgroundHeight = 171;//147;
+			this.calculateUnlockedAndVisibleLocations(true);
+			if (!this.showAdventureScreen) {
 				this.teleport();
 			}
-			this.backgroundWidth = 218;
-			if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
-				this.backgroundHeight = 171;//147;
-				this.calculateUnlockedAndVisibleLocations(true);
-				if (!this.showAdventureScreen) {
-					this.teleport();
-				}
-			} else {
-				this.backgroundHeight = 47;
-			}
+		} else {
+			this.backgroundHeight = 47;
+		}
 		super.init();
 
 		this.openChooseTargetIdentifierScreenButton = this.addDrawableChild(ButtonWidget.builder(EDIT_BUTTON_LABEL_TEXT, button -> this.openChooseTargetIdentifierScreen()).dimensions(this.x + this.backgroundWidth - 57, this.y + 21, 50, 20).build());
@@ -271,7 +273,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	@Override
 	protected void setInitialFocus() {
-			this.setInitialFocus(this.teleportButton);
+		this.setInitialFocus(this.teleportButton);
 	}
 
 	@Override
@@ -308,82 +310,82 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			((SlotCustomization) slot).slotcustomizationapi$setDisabledOverride(true);
 		}
 
-			if (this.showChooseTargetIdentifierScreen) {
+		if (this.showChooseTargetIdentifierScreen) {
+
+			int index = 0;
+			for (int i = 0; i < Math.min(4, this.visibleLocationsList.size()); i++) {
+				if (index == 0) {
+					this.confirmChooseTargetIdentifier0Button.visible = true;
+				} else if (index == 1) {
+					this.confirmChooseTargetIdentifier1Button.visible = true;
+				} else if (index == 2) {
+					this.confirmChooseTargetIdentifier2Button.visible = true;
+				} else if (index == 3) {
+					this.confirmChooseTargetIdentifier3Button.visible = true;
+				}
+				index++;
+			}
+
+			this.cancelChooseTargetIdentifierButton.visible = true;
+
+		} else if (this.showChooseTargetOwnerScreen) {
+
+			if (this.isCurrentLocationPublic) {
+				this.confirmChooseCurrentPlayerButton.setY(this.y + 44);
+				this.confirmChooseTeamMember0Button.setY(this.y + 68);
+				this.confirmChooseTeamMember1Button.setY(this.y + 92);
+				this.confirmChooseTeamMember2Button.setY(this.y + 116);
+				this.confirmChooseTeamMember3Button.setY(this.y + 140);
+				this.confirmChoosePublicButton.visible = true;
+			} else {
+				this.confirmChooseCurrentPlayerButton.setY(this.y + 20);
+				this.confirmChooseTeamMember0Button.setY(this.y + 44);
+				this.confirmChooseTeamMember1Button.setY(this.y + 68);
+				this.confirmChooseTeamMember2Button.setY(this.y + 92);
+				this.confirmChooseTeamMember3Button.setY(this.y + 116);
+			}
+			if (!this.isCurrentLocationPublic) {
+				this.confirmChooseCurrentPlayerButton.visible = true;
 
 				int index = 0;
-				for (int i = 0; i < Math.min(4, this.visibleLocationsList.size()); i++) {
+				for (int i = 0; i < Math.min(4, this.partyMemberList.size()); i++) {
 					if (index == 0) {
-						this.confirmChooseTargetIdentifier0Button.visible = true;
+						this.confirmChooseTeamMember0Button.visible = true;
 					} else if (index == 1) {
-						this.confirmChooseTargetIdentifier1Button.visible = true;
+						this.confirmChooseTeamMember1Button.visible = true;
 					} else if (index == 2) {
-						this.confirmChooseTargetIdentifier2Button.visible = true;
+						this.confirmChooseTeamMember2Button.visible = true;
 					} else if (index == 3) {
-						this.confirmChooseTargetIdentifier3Button.visible = true;
+						this.confirmChooseTeamMember3Button.visible = true;
 					}
 					index++;
 				}
 
-				this.cancelChooseTargetIdentifierButton.visible = true;
-
-			} else if (this.showChooseTargetOwnerScreen) {
-
-				if (this.isCurrentLocationPublic) {
-					this.confirmChooseCurrentPlayerButton.setY(this.y + 44);
-					this.confirmChooseTeamMember0Button.setY(this.y + 68);
-					this.confirmChooseTeamMember1Button.setY(this.y + 92);
-					this.confirmChooseTeamMember2Button.setY(this.y + 116);
-					this.confirmChooseTeamMember3Button.setY(this.y + 140);
-					this.confirmChoosePublicButton.visible = true;
-				} else {
-					this.confirmChooseCurrentPlayerButton.setY(this.y + 20);
-					this.confirmChooseTeamMember0Button.setY(this.y + 44);
-					this.confirmChooseTeamMember1Button.setY(this.y + 68);
-					this.confirmChooseTeamMember2Button.setY(this.y + 92);
-					this.confirmChooseTeamMember3Button.setY(this.y + 116);
-				}
-				if (!this.isCurrentLocationPublic) {
-					this.confirmChooseCurrentPlayerButton.visible = true;
-
-					int index = 0;
-					for (int i = 0; i < Math.min(4, this.partyMemberList.size()); i++) {
-						if (index == 0) {
-							this.confirmChooseTeamMember0Button.visible = true;
-						} else if (index == 1) {
-							this.confirmChooseTeamMember1Button.visible = true;
-						} else if (index == 2) {
-							this.confirmChooseTeamMember2Button.visible = true;
-						} else if (index == 3) {
-							this.confirmChooseTeamMember3Button.visible = true;
-						}
-						index++;
-					}
-
-				}
-				this.cancelChooseTargetOwnerButton.visible = true;
-
-			} else if (this.showRegenerationConfirmScreen) {
-
-				this.confirmDungeonRegenerationButton.visible = true;
-				this.cancelDungeonRegenerationButton.visible = true;
-
-			} else if (this.showAdventureScreen) {
-
-				if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
-
-					this.openChooseTargetIdentifierScreenButton.visible = this.visibleLocationsList.size() > 1;
-
-					this.openChooseTargetOwnerScreenButton.visible = this.canOwnerBeChosen && !this.isCurrentLocationPublic;
-
-					this.openDungeonRegenerationScreenButton.visible = this.showRegenerateButton;
-					this.openDungeonRegenerationScreenButton.active = this.isRegenerateButtonActive;
-				}
-
-				this.teleportButton.visible = true;
-				this.cancelTeleportButton.visible = true;
-
-				this.teleportButton.active = this.isTeleportButtonActive;
 			}
+			this.cancelChooseTargetOwnerButton.visible = true;
+
+		} else if (this.showRegenerationConfirmScreen) {
+
+			this.confirmDungeonRegenerationButton.visible = true;
+			this.cancelDungeonRegenerationButton.visible = true;
+
+		} else if (this.showAdventureScreen) {
+
+			if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+
+				this.openChooseTargetIdentifierScreenButton.visible = this.visibleLocationsList.size() > 1;
+
+				this.openChooseTargetOwnerScreenButton.visible = this.canOwnerBeChosen && !this.isCurrentLocationPublic;
+
+				this.openDungeonRegenerationScreenButton.visible = this.showRegenerateButton;
+				this.openDungeonRegenerationScreenButton.active = this.isRegenerateButtonActive;
+			}
+
+			this.teleportButton.visible = true;
+			this.cancelTeleportButton.visible = true;
+
+			this.teleportButton.active = this.isTeleportButtonActive;
+		}
 	}
 
 	private void calculateUnlockedAndVisibleLocations(boolean shouldInit) {
@@ -409,13 +411,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
 
 					if (advancementHandler != null) {
-                        AdvancementEntry lockAdvancementEntry = null;
+						AdvancementEntry lockAdvancementEntry = null;
 						if (lockAdvancementIdentifier != null) {
-                            lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+							lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
 						}
-                        AdvancementEntry unlockAdvancementEntry = null;
+						AdvancementEntry unlockAdvancementEntry = null;
 						if (unlockAdvancementIdentifier != null) {
-                            unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+							unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
 						}
 						if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 							this.unlockedLocationsList.add(entry);
@@ -454,20 +456,20 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			this.showCurrentLocationName = LocationUtils.showLocationNameForEntrance(location, this.currentTargetEntrance);
 			this.showCurrentLocationOwner = LocationUtils.showLocationOwnerForEntrance(location, this.currentTargetEntrance);
 			if (advancementHandler != null) {
-                AdvancementEntry lockAdvancementEntry = null;
+				AdvancementEntry lockAdvancementEntry = null;
 				if (lockAdvancementIdentifier != null) {
-                    lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+					lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
 				}
-                AdvancementEntry unlockAdvancementEntry = null;
+				AdvancementEntry unlockAdvancementEntry = null;
 				if (unlockAdvancementIdentifier != null) {
-                    unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+					unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
 //					unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier);
 				}
 				if (lockAdvancementEntry != null) {
-                    this.currentLockAdvancement = lockAdvancementEntry.value();
+					this.currentLockAdvancement = lockAdvancementEntry.value();
 				}
 				if (unlockAdvancementEntry != null) {
-                    this.currentUnlockAdvancement = unlockAdvancementEntry.value();
+					this.currentUnlockAdvancement = unlockAdvancementEntry.value();
 				}
 
 				Inventory inventory = new SimpleInventory(36);
@@ -595,72 +597,72 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 		super.render(context, mouseX, mouseY, delta);
 
-			TeleporterBlockEntity.TeleportationMode mode = this.teleporterBlock.getTeleportationMode();
+		TeleporterBlockEntity.TeleportationMode mode = this.teleporterBlock.getTeleportationMode();
 
-			if (this.showChooseTargetIdentifierScreen) {
+		if (this.showChooseTargetIdentifierScreen) {
 
-				for (int i = this.visibleLocationsListScrollPosition; i < Math.min(this.visibleLocationsListScrollPosition + 4, this.visibleLocationsList.size()); i++) {
-					context.drawText(this.textRenderer, this.visibleLocationsList.get(i).getLeft().getLeft(), this.x + 19, this.y + 26 + ((i - this.visibleLocationsListScrollPosition) * 24), 0x404040, false);
-				}
-				if (this.visibleLocationsList.size() > 4) {
-                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, this.x + 7, this.y + 20, 8, 92);
-					int k = (int) (83.0f * this.visibleLocationsListScrollAmount);
-                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 20 + 1 + k, 6, 7);
-				}
+			for (int i = this.visibleLocationsListScrollPosition; i < Math.min(this.visibleLocationsListScrollPosition + 4, this.visibleLocationsList.size()); i++) {
+				context.drawText(this.textRenderer, this.visibleLocationsList.get(i).getLeft().getLeft(), this.x + 19, this.y + 26 + ((i - this.visibleLocationsListScrollPosition) * 24), 0x404040, false);
+			}
+			if (this.visibleLocationsList.size() > 4) {
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, this.x + 7, this.y + 20, 8, 92);
+				int k = (int) (83.0f * this.visibleLocationsListScrollAmount);
+				context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 20 + 1 + k, 6, 7);
+			}
 
-			} else if (this.showChooseTargetOwnerScreen) {
-				if (this.isCurrentLocationPublic) {
-					// TODO
-				} else {
-					// TODO
-				}
-			} else if (this.showRegenerationConfirmScreen) {
+		} else if (this.showChooseTargetOwnerScreen) {
+			if (this.isCurrentLocationPublic) {
 				// TODO
-			} else if (this.showAdventureScreen) {
+			} else {
+				// TODO
+			}
+		} else if (this.showRegenerationConfirmScreen) {
+			// TODO
+		} else if (this.showAdventureScreen) {
 
-				Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
-				int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
+			Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
+			int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
 //                if (this.currentTargetOwner != null) {
 
-				context.drawText(this.textRenderer, teleporterName, this.x + teleporterNameOffset, this.y + 7, 0x404040, false);
+			context.drawText(this.textRenderer, teleporterName, this.x + teleporterNameOffset, this.y + 7, 0x404040, false);
 
-				if (mode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+			if (mode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 
 //                        context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetIdentifierLabel()), this.x + 8, this.y + 20, 0x404040, false);
 
-					if (this.showCurrentLocationName || this.visibleLocationsList.size() > 1) {
-						if (!this.currentTargetEntrance.isEmpty() && !this.currentTargetEntranceDisplayName.isEmpty()) {
+				if (this.showCurrentLocationName || this.visibleLocationsList.size() > 1) {
+					if (!this.currentTargetEntrance.isEmpty() && !this.currentTargetEntranceDisplayName.isEmpty()) {
 
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), this.x + 8, this.y + 20, 0x404040, false);
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), this.x + 8, this.y + 33, 0x404040, false);
+						context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), this.x + 8, this.y + 20, 0x404040, false);
+						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), this.x + 8, this.y + 33, 0x404040, false);
 
-						} else {
+					} else {
 
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), this.x + 8, this.y + 27, 0x404040, false);
+						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), this.x + 8, this.y + 27, 0x404040, false);
 
-						}
-					}
-
-					if (this.isCurrentLocationPublic && this.showCurrentLocationOwner) {
-						context.drawText(this.textRenderer, LOCATION_IS_PUBLIC_TEXT, this.x + 19, this.y + 77, 0x404040, false);
-					} else if (this.currentTargetOwner != null && this.showCurrentLocationOwner) {
-						context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), this.x + 8, this.y + 58, 0x404040, false);
-
-						context.drawTexture(currentTargetOwner.getSkinTextures().texture(), this.x + 7, this.y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
-						context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), this.x + 19, this.y + 77, 0x404040, false);
-					}
-
-					if (this.currentKeyItemStack != null) {
-						ItemStack currentKey = this.currentKeyItemStack;
-//                            ScriptBlocksMod.info("should draw item: " + currentKey.toString());
-						int x = this.x + 8;
-						int y = this.y + 95;
-						int k = x + y * this.backgroundWidth;
-						context.drawItemWithoutEntity(currentKey, x, y/*, k*/);
-						context.drawItemInSlot(this.textRenderer, currentKey, x, y);
-						context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 18, y + 5, 0x404040, false);
 					}
 				}
+
+				if (this.isCurrentLocationPublic && this.showCurrentLocationOwner) {
+					context.drawText(this.textRenderer, LOCATION_IS_PUBLIC_TEXT, this.x + 19, this.y + 77, 0x404040, false);
+				} else if (this.currentTargetOwner != null && this.showCurrentLocationOwner) {
+					context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), this.x + 8, this.y + 58, 0x404040, false);
+
+					context.drawTexture(currentTargetOwner.getSkinTextures().texture(), this.x + 7, this.y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
+					context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), this.x + 19, this.y + 77, 0x404040, false);
+				}
+
+				if (this.currentKeyItemStack != null) {
+					ItemStack currentKey = this.currentKeyItemStack;
+//                            ScriptBlocksMod.info("should draw item: " + currentKey.toString());
+					int x = this.x + 8;
+					int y = this.y + 95;
+					int k = x + y * this.backgroundWidth;
+					context.drawItemWithoutEntity(currentKey, x, y/*, k*/);
+					context.drawItemInSlot(this.textRenderer, currentKey, x, y);
+					context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 18, y + 5, 0x404040, false);
+				}
+			}
 //                }
 
 		}

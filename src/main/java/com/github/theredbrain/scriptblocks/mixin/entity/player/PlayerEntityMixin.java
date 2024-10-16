@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.mixin.entity.player;
 
-import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
@@ -35,7 +34,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;

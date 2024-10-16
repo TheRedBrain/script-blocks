@@ -21,7 +21,7 @@ public record Dialogue(
 			Identifier.CODEC.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
 			Identifier.CODEC.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
 			Codec.BOOL.optionalFieldOf("cancellable", true).forGetter(x -> x.cancellable)
-			).apply(instance, Dialogue::new));
+	).apply(instance, Dialogue::new));
 
 	public Dialogue(
 			List<String> dialogueTextList,

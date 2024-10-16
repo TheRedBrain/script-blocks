@@ -255,11 +255,11 @@ public class ShopScreenHandler extends ScreenHandler {
 				lockAdvancementIdentifier = deal.lockAdvancement();
 				unlockAdvancementIdentifier = deal.unlockAdvancement();
 
-                AdvancementEntry lockAdvancementEntry = null;
-					lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancementIdentifier);
+				AdvancementEntry lockAdvancementEntry = null;
+				lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancementIdentifier);
 
-                AdvancementEntry unlockAdvancementEntry = null;
-					unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancementIdentifier);
+				AdvancementEntry unlockAdvancementEntry = null;
+				unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancementIdentifier);
 
 				if ((lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) &&
 						(unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone())) {

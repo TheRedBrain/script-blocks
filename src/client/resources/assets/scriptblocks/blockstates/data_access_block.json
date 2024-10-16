@@ -1,7 +1,7 @@
 {
-	"variants": {
-		"": {
-			"model": "scriptblocks:block/data_access_block"
-		}
-	}
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/data_access_block"
+    }
+  }
 }

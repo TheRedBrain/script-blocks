@@ -23,7 +23,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
 public class JigsawPlacerBlock extends RotatedBlockWithEntity implements OperatorBlock {
-	    public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
+	public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
 
 	public JigsawPlacerBlock(Settings settings) {
 		super(settings);
@@ -45,7 +45,7 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
 		Direction direction = ctx.getSide();
 		Direction direction2 = direction.getAxis() == Direction.Axis.Y ? ctx.getHorizontalPlayerFacing().getOpposite() : Direction.UP;
-        return (BlockState)this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
+		return (BlockState) this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
 	}
 
 	@Override

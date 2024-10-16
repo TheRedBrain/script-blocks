@@ -9,14 +9,12 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.network.ClientAdvancementManager;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
@@ -334,69 +332,69 @@ public class DialogueBlockScreen extends Screen {
 		this.saveCreativeButton.visible = false;
 		this.cancelCreativeButton.visible = false;
 
-			this.creativeScreenPageButton.visible = true;
+		this.creativeScreenPageButton.visible = true;
 
-			if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
+		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
 
-				int index = 0;
-				for (int i = 0; i < Math.min(4, this.dialogueUsedBlocksList.size()); i++) {
-					if (index == 0) {
-						this.removeDialogueUsedBlockEntryButton0.visible = true;
-					} else if (index == 1) {
-						this.removeDialogueUsedBlockEntryButton1.visible = true;
-					} else if (index == 2) {
-						this.removeDialogueUsedBlockEntryButton2.visible = true;
-					} else if (index == 3) {
-						this.removeDialogueUsedBlockEntryButton3.visible = true;
-					}
-					index++;
+			int index = 0;
+			for (int i = 0; i < Math.min(4, this.dialogueUsedBlocksList.size()); i++) {
+				if (index == 0) {
+					this.removeDialogueUsedBlockEntryButton0.visible = true;
+				} else if (index == 1) {
+					this.removeDialogueUsedBlockEntryButton1.visible = true;
+				} else if (index == 2) {
+					this.removeDialogueUsedBlockEntryButton2.visible = true;
+				} else if (index == 3) {
+					this.removeDialogueUsedBlockEntryButton3.visible = true;
 				}
-
-				this.newDialogueUsedBlockIdentifierField.setVisible(true);
-				this.newDialogueUsedBlockPositionOffsetXField.setVisible(true);
-				this.newDialogueUsedBlockPositionOffsetYField.setVisible(true);
-				this.newDialogueUsedBlockPositionOffsetZField.setVisible(true);
-
-				this.addDialogueUsedBlockButton.visible = true;
-
-			} else if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
-
-				int index = 0;
-				for (int i = 0; i < Math.min(4, this.dialogueTriggeredBlocksList.size()); i++) {
-					if (index == 0) {
-						this.removeDialogueTriggeredBlockEntryButton0.visible = true;
-					} else if (index == 1) {
-						this.removeDialogueTriggeredBlockEntryButton1.visible = true;
-					} else if (index == 2) {
-						this.removeDialogueTriggeredBlockEntryButton2.visible = true;
-					} else if (index == 3) {
-						this.removeDialogueTriggeredBlockEntryButton3.visible = true;
-					}
-					index++;
-				}
-
-				this.newDialogueTriggeredBlockIdentifierField.setVisible(true);
-				this.newDialogueTriggeredBlockPositionOffsetXField.setVisible(true);
-				this.newDialogueTriggeredBlockPositionOffsetYField.setVisible(true);
-				this.newDialogueTriggeredBlockPositionOffsetZField.setVisible(true);
-				this.toggleNewDialogueTriggeredBlockResetsButton.visible = true;
-
-				this.addDialogueTriggeredBlockButton.visible = true;
-
-			} else if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES) {
-
-				if (!this.startingDialogueList.isEmpty()) {
-					this.removeStartingDialogueEntryButton.visible = true; // TODO add more visible entries
-				}
-
-				this.newStartingDialogueIdentifierField.setVisible(true);
-
-				this.addStartingDialogueButton.visible = true;
-
+				index++;
 			}
 
-			this.saveCreativeButton.visible = true;
-			this.cancelCreativeButton.visible = true;
+			this.newDialogueUsedBlockIdentifierField.setVisible(true);
+			this.newDialogueUsedBlockPositionOffsetXField.setVisible(true);
+			this.newDialogueUsedBlockPositionOffsetYField.setVisible(true);
+			this.newDialogueUsedBlockPositionOffsetZField.setVisible(true);
+
+			this.addDialogueUsedBlockButton.visible = true;
+
+		} else if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
+
+			int index = 0;
+			for (int i = 0; i < Math.min(4, this.dialogueTriggeredBlocksList.size()); i++) {
+				if (index == 0) {
+					this.removeDialogueTriggeredBlockEntryButton0.visible = true;
+				} else if (index == 1) {
+					this.removeDialogueTriggeredBlockEntryButton1.visible = true;
+				} else if (index == 2) {
+					this.removeDialogueTriggeredBlockEntryButton2.visible = true;
+				} else if (index == 3) {
+					this.removeDialogueTriggeredBlockEntryButton3.visible = true;
+				}
+				index++;
+			}
+
+			this.newDialogueTriggeredBlockIdentifierField.setVisible(true);
+			this.newDialogueTriggeredBlockPositionOffsetXField.setVisible(true);
+			this.newDialogueTriggeredBlockPositionOffsetYField.setVisible(true);
+			this.newDialogueTriggeredBlockPositionOffsetZField.setVisible(true);
+			this.toggleNewDialogueTriggeredBlockResetsButton.visible = true;
+
+			this.addDialogueTriggeredBlockButton.visible = true;
+
+		} else if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES) {
+
+			if (!this.startingDialogueList.isEmpty()) {
+				this.removeStartingDialogueEntryButton.visible = true; // TODO add more visible entries
+			}
+
+			this.newStartingDialogueIdentifierField.setVisible(true);
+
+			this.addStartingDialogueButton.visible = true;
+
+		}
+
+		this.saveCreativeButton.visible = true;
+		this.cancelCreativeButton.visible = true;
 
 		this.scrollPosition = 0;
 		this.scrollAmount = 0.0f;
@@ -546,47 +544,47 @@ public class DialogueBlockScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-			if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
-				int x = this.dialogueUsedBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
-				for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.dialogueUsedBlocksList.size()); i++) {
-					context.drawTextWithShadow(this.textRenderer, this.dialogueUsedBlocksList.get(i).getLeft() + ": " + this.dialogueUsedBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-				}
-				if (this.dialogueUsedBlocksList.size() > 4) {
-                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 8, 96);
-					int k = (int) (85.0f * this.scrollAmount);
-                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 42 + 1 + k, 6, 7);
-				}
-				this.newDialogueUsedBlockIdentifierField.render(context, mouseX, mouseY, delta);
-				this.newDialogueUsedBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-				this.newDialogueUsedBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-				this.newDialogueUsedBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			} else if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
-				int x = this.dialogueTriggeredBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
-				for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.dialogueTriggeredBlocksList.size()); i++) {
-					context.drawTextWithShadow(this.textRenderer, this.dialogueTriggeredBlocksList.get(i).getLeft() + ": " + this.dialogueTriggeredBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-				}
-				if (this.dialogueTriggeredBlocksList.size() > 4) {
-                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 8, 96);
-					int k = (int) (85.0f * this.scrollAmount);
-                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 42 + 1 + k, 6, 7);
-				}
-				this.newDialogueTriggeredBlockIdentifierField.render(context, mouseX, mouseY, delta);
-				this.newDialogueTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-				this.newDialogueTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-				this.newDialogueTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			} else if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES) {
-				int x = this.startingDialogueList.size() > 1 ? this.width / 2 - 142 : this.width / 2 - 153;
-				for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 1, this.startingDialogueList.size()); i++) {
-					context.drawTextWithShadow(this.textRenderer, Text.translatable(this.startingDialogueList.get(i)), x, 71, 0xA0A0A0);
-				}
-				if (this.startingDialogueList.size() > 1) {
-                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_35_TEXTURE, this.width / 2 - 154, 71, 8, 35);
-					int k = (int) (26.0f * this.scrollAmount);
-					// TODO add label
-                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 71 + 1 + k, 6, 7);
-				}
-				this.newStartingDialogueIdentifierField.render(context, mouseX, mouseY, delta);
+		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
+			int x = this.dialogueUsedBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.dialogueUsedBlocksList.size()); i++) {
+				context.drawTextWithShadow(this.textRenderer, this.dialogueUsedBlocksList.get(i).getLeft() + ": " + this.dialogueUsedBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
+			if (this.dialogueUsedBlocksList.size() > 4) {
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 8, 96);
+				int k = (int) (85.0f * this.scrollAmount);
+				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 42 + 1 + k, 6, 7);
+			}
+			this.newDialogueUsedBlockIdentifierField.render(context, mouseX, mouseY, delta);
+			this.newDialogueUsedBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.newDialogueUsedBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.newDialogueUsedBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		} else if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
+			int x = this.dialogueTriggeredBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.dialogueTriggeredBlocksList.size()); i++) {
+				context.drawTextWithShadow(this.textRenderer, this.dialogueTriggeredBlocksList.get(i).getLeft() + ": " + this.dialogueTriggeredBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			}
+			if (this.dialogueTriggeredBlocksList.size() > 4) {
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 8, 96);
+				int k = (int) (85.0f * this.scrollAmount);
+				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 42 + 1 + k, 6, 7);
+			}
+			this.newDialogueTriggeredBlockIdentifierField.render(context, mouseX, mouseY, delta);
+			this.newDialogueTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.newDialogueTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.newDialogueTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		} else if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES) {
+			int x = this.startingDialogueList.size() > 1 ? this.width / 2 - 142 : this.width / 2 - 153;
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 1, this.startingDialogueList.size()); i++) {
+				context.drawTextWithShadow(this.textRenderer, Text.translatable(this.startingDialogueList.get(i)), x, 71, 0xA0A0A0);
+			}
+			if (this.startingDialogueList.size() > 1) {
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_35_TEXTURE, this.width / 2 - 154, 71, 8, 35);
+				int k = (int) (26.0f * this.scrollAmount);
+				// TODO add label
+				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 71 + 1 + k, 6, 7);
+			}
+			this.newStartingDialogueIdentifierField.render(context, mouseX, mouseY, delta);
+		}
 	}
 
 	@Override

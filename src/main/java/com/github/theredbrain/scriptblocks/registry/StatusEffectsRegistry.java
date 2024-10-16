@@ -5,7 +5,6 @@ import com.github.theredbrain.scriptblocks.effect.NeutralStatusEffect;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
 
 public class StatusEffectsRegistry {
 

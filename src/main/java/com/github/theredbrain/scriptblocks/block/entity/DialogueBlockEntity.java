@@ -137,8 +137,8 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 				AdvancementEntry lockAdvancementEntry = null;
 				AdvancementEntry unlockAdvancementEntry = null;
 				if (serverAdvancementLoader != null) {
-						lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancement);
-						unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancement);
+					lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancement);
+					unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancement);
 				}
 				if (playerAdvancementTracker != null) {
 					if (lockAdvancement == null || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) && (unlockAdvancement == null || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {

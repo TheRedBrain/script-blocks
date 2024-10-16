@@ -19,7 +19,7 @@ public record UpdateDataAccessBlockPacket(
 		String dataReadingMode,
 		boolean isAdding,
 		int newDataValue
-		) implements CustomPayload {
+) implements CustomPayload {
 	public static final Id<UpdateDataAccessBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_data_access_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateDataAccessBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDataAccessBlockPacket::write, UpdateDataAccessBlockPacket::new);
 

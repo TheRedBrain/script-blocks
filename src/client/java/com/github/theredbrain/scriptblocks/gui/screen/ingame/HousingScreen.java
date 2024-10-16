@@ -7,9 +7,7 @@ import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingS
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockAdventurePacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockCreativePacket;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
-import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -17,7 +15,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.entity.effect.StatusEffect;
@@ -26,17 +23,10 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
-import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class HousingScreen extends Screen {
@@ -214,11 +204,11 @@ public class HousingScreen extends Screen {
 		this.coOwnerList.clear();
 		this.trustedPersonsList.clear();
 		this.guestList.clear();
-			this.coOwnerList.addAll(this.housingBlockEntity.getCoOwnerList());
-			this.trustedPersonsList.addAll(this.housingBlockEntity.getTrustedList());
-			this.guestList.addAll(this.housingBlockEntity.getGuestList());
-			this.showInfluenceArea = housingBlockEntity.getShowInfluenceArea();
-			this.ownerMode = housingBlockEntity.getOwnerMode();
+		this.coOwnerList.addAll(this.housingBlockEntity.getCoOwnerList());
+		this.trustedPersonsList.addAll(this.housingBlockEntity.getTrustedList());
+		this.guestList.addAll(this.housingBlockEntity.getGuestList());
+		this.showInfluenceArea = housingBlockEntity.getShowInfluenceArea();
+		this.ownerMode = housingBlockEntity.getOwnerMode();
 		if (this.currentPermissionLevel == 0) {
 			this.backgroundWidth = 218;
 			this.backgroundHeight = 215;
@@ -346,111 +336,111 @@ public class HousingScreen extends Screen {
 
 		this.closeAdventureScreenButton.visible = false;
 
-			if (this.showCoOwnerListScreen) {
+		if (this.showCoOwnerListScreen) {
 
-				this.newCoOwnerField.setVisible(true);
-				this.addNewCoOwnerButton.visible = true;
+			this.newCoOwnerField.setVisible(true);
+			this.addNewCoOwnerButton.visible = true;
 
-				int index = 0;
-				for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
-					if (index == 0) {
-						this.removeCoOwnerListEntryButton0.visible = true;
-					} else if (index == 1) {
-						this.removeCoOwnerListEntryButton1.visible = true;
-					} else if (index == 2) {
-						this.removeCoOwnerListEntryButton2.visible = true;
-					} else if (index == 3) {
-						this.removeCoOwnerListEntryButton3.visible = true;
-					} else if (index == 4) {
-						this.removeCoOwnerListEntryButton4.visible = true;
-					}
-					index++;
+			int index = 0;
+			for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
+				if (index == 0) {
+					this.removeCoOwnerListEntryButton0.visible = true;
+				} else if (index == 1) {
+					this.removeCoOwnerListEntryButton1.visible = true;
+				} else if (index == 2) {
+					this.removeCoOwnerListEntryButton2.visible = true;
+				} else if (index == 3) {
+					this.removeCoOwnerListEntryButton3.visible = true;
+				} else if (index == 4) {
+					this.removeCoOwnerListEntryButton4.visible = true;
 				}
-
-				this.closeListEditScreensButton.visible = true;
-
-			} else if (this.showTrustedListScreen) {
-
-				this.newTrustedPersonField.setVisible(true);
-				this.addNewTrustedPersonButton.visible = true;
-				int index = 0;
-				for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
-					if (index == 0) {
-						this.removeTrustedPersonListEntryButton0.visible = true;
-					} else if (index == 1) {
-						this.removeTrustedPersonListEntryButton1.visible = true;
-					} else if (index == 2) {
-						this.removeTrustedPersonListEntryButton2.visible = true;
-					} else if (index == 3) {
-						this.removeTrustedPersonListEntryButton3.visible = true;
-					} else if (index == 4) {
-						this.removeTrustedPersonListEntryButton4.visible = true;
-					}
-					index++;
-				}
-
-				this.closeListEditScreensButton.visible = true;
-
-			} else if (this.showGuestListScreen) {
-
-				this.newGuestField.setVisible(true);
-				this.addNewGuestButton.visible = true;
-
-				int index = 0;
-				for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
-					if (index == 0) {
-						this.removeGuestListEntryButton0.visible = true;
-					} else if (index == 1) {
-						this.removeGuestListEntryButton1.visible = true;
-					} else if (index == 2) {
-						this.removeGuestListEntryButton2.visible = true;
-					} else if (index == 3) {
-						this.removeGuestListEntryButton3.visible = true;
-					} else if (index == 4) {
-						this.removeGuestListEntryButton4.visible = true;
-					}
-					index++;
-				}
-
-				this.closeListEditScreensButton.visible = true;
-
-			} else if (this.showResetHouseScreen) {
-
-				this.resetHouseButton.visible = true;
-				this.closeResetHouseScreenButton.visible = true;
-
-			} else {
-
-				if (this.currentPermissionLevel == 0) {
-
-					this.toggleAdventureBuildingEffectButton.visible = true;
-
-					this.openCoOwnerListScreenButton.visible = true;
-					this.openTrustedPersonsListScreenButton.visible = true;
-					this.openGuestListScreenButton.visible = true;
-
-					this.openResetHouseScreenButton.visible = true;
-
-					if (this.housingBlockEntity != null && this.housingBlockEntity.getOwnerMode() == HousingBlockEntity.OwnerMode.INTERACTION) {
-						this.unclaimHouseButton.visible = true;
-					}
-
-				} else if (this.currentPermissionLevel == 1) {
-
-					this.toggleAdventureBuildingEffectButton.visible = true;
-
-				} else if (this.currentPermissionLevel == 4) {
-
-					if (this.housingBlockEntity != null && this.housingBlockEntity.getOwnerMode() == HousingBlockEntity.OwnerMode.INTERACTION && !this.housingBlockEntity.isOwnerSet()) {
-						this.claimHouseButton.visible = true;
-					}
-
-				}
-
-				this.leaveCurrentHouseButton.visible = true;
-
-				this.closeAdventureScreenButton.visible = true;
+				index++;
 			}
+
+			this.closeListEditScreensButton.visible = true;
+
+		} else if (this.showTrustedListScreen) {
+
+			this.newTrustedPersonField.setVisible(true);
+			this.addNewTrustedPersonButton.visible = true;
+			int index = 0;
+			for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
+				if (index == 0) {
+					this.removeTrustedPersonListEntryButton0.visible = true;
+				} else if (index == 1) {
+					this.removeTrustedPersonListEntryButton1.visible = true;
+				} else if (index == 2) {
+					this.removeTrustedPersonListEntryButton2.visible = true;
+				} else if (index == 3) {
+					this.removeTrustedPersonListEntryButton3.visible = true;
+				} else if (index == 4) {
+					this.removeTrustedPersonListEntryButton4.visible = true;
+				}
+				index++;
+			}
+
+			this.closeListEditScreensButton.visible = true;
+
+		} else if (this.showGuestListScreen) {
+
+			this.newGuestField.setVisible(true);
+			this.addNewGuestButton.visible = true;
+
+			int index = 0;
+			for (int i = 0; i < Math.min(5, this.coOwnerList.size()); i++) {
+				if (index == 0) {
+					this.removeGuestListEntryButton0.visible = true;
+				} else if (index == 1) {
+					this.removeGuestListEntryButton1.visible = true;
+				} else if (index == 2) {
+					this.removeGuestListEntryButton2.visible = true;
+				} else if (index == 3) {
+					this.removeGuestListEntryButton3.visible = true;
+				} else if (index == 4) {
+					this.removeGuestListEntryButton4.visible = true;
+				}
+				index++;
+			}
+
+			this.closeListEditScreensButton.visible = true;
+
+		} else if (this.showResetHouseScreen) {
+
+			this.resetHouseButton.visible = true;
+			this.closeResetHouseScreenButton.visible = true;
+
+		} else {
+
+			if (this.currentPermissionLevel == 0) {
+
+				this.toggleAdventureBuildingEffectButton.visible = true;
+
+				this.openCoOwnerListScreenButton.visible = true;
+				this.openTrustedPersonsListScreenButton.visible = true;
+				this.openGuestListScreenButton.visible = true;
+
+				this.openResetHouseScreenButton.visible = true;
+
+				if (this.housingBlockEntity != null && this.housingBlockEntity.getOwnerMode() == HousingBlockEntity.OwnerMode.INTERACTION) {
+					this.unclaimHouseButton.visible = true;
+				}
+
+			} else if (this.currentPermissionLevel == 1) {
+
+				this.toggleAdventureBuildingEffectButton.visible = true;
+
+			} else if (this.currentPermissionLevel == 4) {
+
+				if (this.housingBlockEntity != null && this.housingBlockEntity.getOwnerMode() == HousingBlockEntity.OwnerMode.INTERACTION && !this.housingBlockEntity.isOwnerSet()) {
+					this.claimHouseButton.visible = true;
+				}
+
+			}
+
+			this.leaveCurrentHouseButton.visible = true;
+
+			this.closeAdventureScreenButton.visible = true;
+		}
 	}
 
 	@Override
@@ -563,64 +553,64 @@ public class HousingScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-			if (this.showResetHouseScreen) {
-			} else if (this.showCoOwnerListScreen) {
-				context.drawText(this.textRenderer, TITLE_CO_OWNER_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				context.drawText(this.textRenderer, TITLE_CO_OWNER_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
-				for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.coOwnerList.size()); i++) {
-					String text = this.coOwnerList.get(i);
-					context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
-				}
-				if (this.coOwnerList.size() > 5) {
+		if (this.showResetHouseScreen) {
+		} else if (this.showCoOwnerListScreen) {
+			context.drawText(this.textRenderer, TITLE_CO_OWNER_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			context.drawText(this.textRenderer, TITLE_CO_OWNER_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.coOwnerList.size()); i++) {
+				String text = this.coOwnerList.get(i);
+				context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
+			}
+			if (this.coOwnerList.size() > 5) {
 //                    context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
-					context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
-					int k = (int) (107.0f * this.scrollAmount);
+				context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
+				int k = (int) (107.0f * this.scrollAmount);
 //                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
-					context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
-				}
-				this.newCoOwnerField.render(context, mouseX, mouseY, delta);
-			} else if (this.showTrustedListScreen) {
-				context.drawText(this.textRenderer, TITLE_TRUSTED_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				context.drawText(this.textRenderer, TITLE_TRUSTED_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
-				for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.trustedPersonsList.size()); i++) {
-					String text = this.trustedPersonsList.get(i);
-					context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
-				}
-				if (this.trustedPersonsList.size() > 5) {
+				context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
+			}
+			this.newCoOwnerField.render(context, mouseX, mouseY, delta);
+		} else if (this.showTrustedListScreen) {
+			context.drawText(this.textRenderer, TITLE_TRUSTED_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			context.drawText(this.textRenderer, TITLE_TRUSTED_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.trustedPersonsList.size()); i++) {
+				String text = this.trustedPersonsList.get(i);
+				context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
+			}
+			if (this.trustedPersonsList.size() > 5) {
 //                    context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
-					context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
-					int k = (int) (107.0f * this.scrollAmount);
+				context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
+				int k = (int) (107.0f * this.scrollAmount);
 //                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
-					context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
-				}
-				this.newTrustedPersonField.render(context, mouseX, mouseY, delta);
-			} else if (this.showGuestListScreen) {
-				context.drawText(this.textRenderer, TITLE_GUEST_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				context.drawText(this.textRenderer, TITLE_GUEST_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
-				for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.guestList.size()); i++) {
-					String text = this.guestList.get(i);
-					context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
-				}
-				if (this.guestList.size() > 5) {
+				context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
+			}
+			this.newTrustedPersonField.render(context, mouseX, mouseY, delta);
+		} else if (this.showGuestListScreen) {
+			context.drawText(this.textRenderer, TITLE_GUEST_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			context.drawText(this.textRenderer, TITLE_GUEST_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.guestList.size()); i++) {
+				String text = this.guestList.get(i);
+				context.drawText(this.textRenderer, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
+			}
+			if (this.guestList.size() > 5) {
 //                    context.drawGuiTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
-					context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
-					int k = (int) (107.0f * this.scrollAmount);
+				context.drawTexture(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 0, 0, 8, 116);
+				int k = (int) (107.0f * this.scrollAmount);
 //                    context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
-					context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
-				}
-				this.newGuestField.render(context, mouseX, mouseY, delta);
-			} else {
-				if (this.currentPermissionLevel == 0) {
-					context.drawText(this.textRenderer, TITLE_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				} else if (this.currentPermissionLevel == 1) {
-					context.drawText(this.textRenderer, TITLE_CO_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				} else if (this.currentPermissionLevel == 2) {
-					context.drawText(this.textRenderer, TITLE_TRUSTED_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				} else if (this.currentPermissionLevel == 3) {
-					context.drawText(this.textRenderer, TITLE_GUEST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				} else if (this.currentPermissionLevel == 4) {
-					context.drawText(this.textRenderer, TITLE_STRANGER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-				}
+				context.drawTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 0, 0, 6, 7);
+			}
+			this.newGuestField.render(context, mouseX, mouseY, delta);
+		} else {
+			if (this.currentPermissionLevel == 0) {
+				context.drawText(this.textRenderer, TITLE_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			} else if (this.currentPermissionLevel == 1) {
+				context.drawText(this.textRenderer, TITLE_CO_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			} else if (this.currentPermissionLevel == 2) {
+				context.drawText(this.textRenderer, TITLE_TRUSTED_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			} else if (this.currentPermissionLevel == 3) {
+				context.drawText(this.textRenderer, TITLE_GUEST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			} else if (this.currentPermissionLevel == 4) {
+				context.drawText(this.textRenderer, TITLE_STRANGER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			}
 
 		}
 	}
@@ -637,15 +627,15 @@ public class HousingScreen extends Screen {
 	}
 
 	public void drawBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-			int i = this.x;
-			int j = this.y;
-			if (this.currentPermissionLevel == 0) {
-				context.drawTexture(BACKGROUND_218_215_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
-			} else if (this.currentPermissionLevel == 1 || this.ownerMode == HousingBlockEntity.OwnerMode.INTERACTION) {
-				context.drawTexture(BACKGROUND_218_95_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
-			} else {
-				context.drawTexture(BACKGROUND_218_71_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
-			}
+		int i = this.x;
+		int j = this.y;
+		if (this.currentPermissionLevel == 0) {
+			context.drawTexture(BACKGROUND_218_215_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+		} else if (this.currentPermissionLevel == 1 || this.ownerMode == HousingBlockEntity.OwnerMode.INTERACTION) {
+			context.drawTexture(BACKGROUND_218_95_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+		} else {
+			context.drawTexture(BACKGROUND_218_71_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+		}
 	}
 
 	private void updateHousingBlockAdventure() {

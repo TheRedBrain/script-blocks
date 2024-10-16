@@ -1,3 +1,3 @@
 {
-	"parent": "scriptblocks:block/triggered_spawner_block"
+  "parent": "scriptblocks:block/triggered_spawner_block"
 }

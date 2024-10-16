@@ -1,3 +1,3 @@
 {
-	"parent": "scriptblocks:block/delay_trigger_block"
+  "parent": "scriptblocks:block/delay_trigger_block"
 }

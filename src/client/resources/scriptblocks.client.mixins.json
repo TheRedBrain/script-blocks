@@ -1,13 +1,13 @@
 {
-	"required": true,
-	"package": "com.github.theredbrain.scriptblocks.mixin.client",
-	"compatibilityLevel": "JAVA_21",
-	"client": [
-		"network.ClientPlayerEntityMixin",
-		"network.ClientPlayerInteractionManagerMixin",
-		"network.message.MessageHandlerMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "com.github.theredbrain.scriptblocks.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "network.ClientPlayerEntityMixin",
+    "network.ClientPlayerInteractionManagerMixin",
+    "network.message.MessageHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

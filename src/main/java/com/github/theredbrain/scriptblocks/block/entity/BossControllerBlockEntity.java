@@ -691,7 +691,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public boolean setBossIdentifier(Identifier newBossIdentifier) {
-			boss = BossesRegistry.registeredBosses.get(newBossIdentifier);
+		boss = BossesRegistry.registeredBosses.get(newBossIdentifier);
 		if (boss != null) {
 			this.bossIdentifier = newBossIdentifier;
 			return true;

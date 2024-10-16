@@ -141,11 +141,11 @@ public class DialogueScreen extends Screen {
 			showUnaffordableAnswer = dialogueAnswer.showUnaffordableAnswer();
 
 			if (advancementHandler != null) {
-                AdvancementEntry lockAdvancementEntry = null;
+				AdvancementEntry lockAdvancementEntry = null;
 				if (lockAdvancementIdentifier != null) {
 					lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
 				}
-                AdvancementEntry unlockAdvancementEntry = null;
+				AdvancementEntry unlockAdvancementEntry = null;
 				if (unlockAdvancementIdentifier != null) {
 					unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
 				}
@@ -209,19 +209,19 @@ public class DialogueScreen extends Screen {
 		this.answerButton2.visible = false;
 		this.answerButton3.visible = false;
 
-			int index = 0;
-			for (int i = 0; i < Math.min(4, this.visibleAnswersList.size()); i++) {
-				if (index == 0) {
-					this.answerButton0.visible = true;
-				} else if (index == 1) {
-					this.answerButton1.visible = true;
-				} else if (index == 2) {
-					this.answerButton2.visible = true;
-				} else if (index == 3) {
-					this.answerButton3.visible = true;
-				}
-				index++;
+		int index = 0;
+		for (int i = 0; i < Math.min(4, this.visibleAnswersList.size()); i++) {
+			if (index == 0) {
+				this.answerButton0.visible = true;
+			} else if (index == 1) {
+				this.answerButton1.visible = true;
+			} else if (index == 2) {
+				this.answerButton2.visible = true;
+			} else if (index == 3) {
+				this.answerButton3.visible = true;
 			}
+			index++;
+		}
 		this.dialogueTextScrollPosition = 0;
 		this.dialogueTextScrollAmount = 0.0f;
 		this.answersScrollPosition = 0;
@@ -332,41 +332,41 @@ public class DialogueScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-			for (int i = this.dialogueTextScrollPosition; i < Math.min(this.dialogueTextScrollPosition + 7, this.dialogueTextList.size()); i++) {
-				String text = this.dialogueTextList.get(i);
-				context.drawText(this.textRenderer, Text.translatable(text), this.x + 8, this.y + 7 + ((i - this.dialogueTextScrollPosition) * 13), 0x404040, false);
+		for (int i = this.dialogueTextScrollPosition; i < Math.min(this.dialogueTextScrollPosition + 7, this.dialogueTextList.size()); i++) {
+			String text = this.dialogueTextList.get(i);
+			context.drawText(this.textRenderer, Text.translatable(text), this.x + 8, this.y + 7 + ((i - this.dialogueTextScrollPosition) * 13), 0x404040, false);
+		}
+		if (this.dialogueTextList.size() > 7) {
+			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_87_TEXTURE, this.x + this.backgroundWidth - 15, this.y + 7, 8, 87);
+			int k = (int) (78.0f * this.dialogueTextScrollAmount);
+			context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, this.y + 7 + 1 + k, 6, 7);
+		}
+		int index = 0;
+		for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + 4, this.visibleAnswersList.size()); i++) {
+			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(this.visibleAnswersList.get(i));
+			String text = dialogueAnswer.answerText();
+			if (index == 0) {
+				this.answerButton0.setMessage(Text.translatable(text));
+			} else if (index == 1) {
+				this.answerButton1.setMessage(Text.translatable(text));
+			} else if (index == 2) {
+				this.answerButton2.setMessage(Text.translatable(text));
+			} else if (index == 3) {
+				this.answerButton3.setMessage(Text.translatable(text));
 			}
-			if (this.dialogueTextList.size() > 7) {
-                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_87_TEXTURE, this.x + this.backgroundWidth - 15, this.y + 7, 8, 87);
-				int k = (int) (78.0f * this.dialogueTextScrollAmount);
-                context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, this.y + 7 + 1 + k, 6, 7);
-			}
-			int index = 0;
-			for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + 4, this.visibleAnswersList.size()); i++) {
-				DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(this.visibleAnswersList.get(i));
-				String text = dialogueAnswer.answerText();
-				if (index == 0) {
-					this.answerButton0.setMessage(Text.translatable(text));
-				} else if (index == 1) {
-					this.answerButton1.setMessage(Text.translatable(text));
-				} else if (index == 2) {
-					this.answerButton2.setMessage(Text.translatable(text));
-				} else if (index == 3) {
-					this.answerButton3.setMessage(Text.translatable(text));
-				}
-				index++;
-			}
-			if (this.visibleAnswersList.size() > 4) {
-                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.x + this.backgroundWidth - 15, this.y + 98, 8, 92);
-				int k = (int) (83.0f * this.answersScrollAmount);
-                context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, this.y + 98 + 1 + k, 6, 7);
-			}
+			index++;
+		}
+		if (this.visibleAnswersList.size() > 4) {
+			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.x + this.backgroundWidth - 15, this.y + 98, 8, 92);
+			int k = (int) (83.0f * this.answersScrollAmount);
+			context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, this.y + 98 + 1 + k, 6, 7);
+		}
 	}
 
 	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-			int i = this.x;
-			int j = this.y;
-			context.drawTexture(BACKGROUND_218_197_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+		int i = this.x;
+		int j = this.y;
+		context.drawTexture(BACKGROUND_218_197_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 
 	}
 

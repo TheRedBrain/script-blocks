@@ -194,7 +194,7 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 		this.addSelectableChild(this.entityTypeIdField);
 
 		// --- entity attribute modifier page ---
-		
+
 		this.removeListEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(0)).dimensions(this.width / 2 + 54, 47, 100, 20).build());
 		this.removeListEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(1)).dimensions(this.width / 2 + 54, 81, 100, 20).build());
 		this.removeListEntryButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(2)).dimensions(this.width / 2 + 54, 115, 100, 20).build());
@@ -489,9 +489,9 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 				context.drawTextWithShadow(this.textRenderer, entityAttributeModifier.value() + ", " + entityAttributeModifier.operation(), this.width / 2 - 141, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
 			}
 			if (this.entityAttributeModifiersList.size() > 3) {
-                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
 				int k = (int) (83.0f * this.scrollAmount);
-                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
+				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
 			}
 
 			this.newEntityAttributeModifierIdentifierField.render(context, mouseX, mouseY, delta);

@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataAccessBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
@@ -77,7 +76,7 @@ public class DataAccessBlockScreen extends Screen {
 		}));
 
 		// --- block offsets ---
-		
+
 		this.dataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 50, 20, Text.empty());
 		this.dataProvidingBlockPositionOffsetXField.setMaxLength(128);
 		this.dataProvidingBlockPositionOffsetXField.setText(Integer.toString(this.dataAccessBlock.getDataProvidingBlockPosOffset().getX()));
@@ -90,7 +89,7 @@ public class DataAccessBlockScreen extends Screen {
 		this.dataProvidingBlockPositionOffsetZField.setMaxLength(128);
 		this.dataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.dataAccessBlock.getDataProvidingBlockPosOffset().getZ()));
 		this.addSelectableChild(this.dataProvidingBlockPositionOffsetZField);
-		
+
 		this.firstTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 50, 20, Text.empty());
 		this.firstTriggeredBlockPositionOffsetXField.setMaxLength(128);
 		this.firstTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.dataAccessBlock.getFirstTriggeredBlock().getLeft().getX()));
@@ -103,7 +102,7 @@ public class DataAccessBlockScreen extends Screen {
 		this.firstTriggeredBlockPositionOffsetZField.setMaxLength(128);
 		this.firstTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.dataAccessBlock.getFirstTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.firstTriggeredBlockPositionOffsetZField);
-		
+
 		this.firstTriggeredBlockResets = this.dataAccessBlock.getFirstTriggeredBlock().getRight();
 		this.toggleFirstTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.firstTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 90, 150, 20, Text.empty(), (button, firstTriggeredBlockResets) -> {
 			this.firstTriggeredBlockResets = firstTriggeredBlockResets;
@@ -121,14 +120,14 @@ public class DataAccessBlockScreen extends Screen {
 		this.secondTriggeredBlockPositionOffsetZField.setMaxLength(128);
 		this.secondTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.dataAccessBlock.getSecondTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.secondTriggeredBlockPositionOffsetZField);
-		
+
 		this.secondTriggeredBlockResets = this.dataAccessBlock.getSecondTriggeredBlock().getRight();
 		this.toggleSecondTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.secondTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 125, 150, 20, Text.empty(), (button, secondTriggeredBlockResets) -> {
 			this.secondTriggeredBlockResets = secondTriggeredBlockResets;
 		}));
 
 		// --- interaction ---
-		
+
 		this.isWriting = this.dataAccessBlock.isWriting();
 		this.toggleIsWritingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.data_access_block.toggle_is_writing_button_label.on"), Text.translatable("gui.data_access_block.toggle_is_writing_button_label.off")).initially(this.isWriting).omitKeyText().build(this.width / 2 - 154, 55, 300, 20, Text.empty(), (button, isWriting) -> {
 			this.isWriting = isWriting;
@@ -160,7 +159,7 @@ public class DataAccessBlockScreen extends Screen {
 		this.newDataValueField.setMaxLength(128);
 		this.newDataValueField.setText(Integer.toString(this.dataAccessBlock.getNewDataValue()));
 		this.addSelectableChild(this.newDataValueField);
-		
+
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
@@ -177,7 +176,7 @@ public class DataAccessBlockScreen extends Screen {
 		this.dataProvidingBlockPositionOffsetXField.setVisible(false);
 		this.dataProvidingBlockPositionOffsetYField.setVisible(false);
 		this.dataProvidingBlockPositionOffsetZField.setVisible(false);
-		
+
 		this.firstTriggeredBlockPositionOffsetXField.setVisible(false);
 		this.firstTriggeredBlockPositionOffsetYField.setVisible(false);
 		this.firstTriggeredBlockPositionOffsetZField.setVisible(false);
@@ -189,15 +188,15 @@ public class DataAccessBlockScreen extends Screen {
 		this.toggleSecondTriggeredBlockResetsButton.visible = false;
 
 		this.toggleIsWritingButton.visible = false;
-		
+
 		this.dataIdentifierField.setVisible(false);
 		this.comparedDataValueField.setVisible(false);
 		this.dataReadingModeButton.visible = false;
-		
+
 		this.toggleIsAddingButton.visible = false;
 
 		this.newDataValueField.setVisible(false);
-		
+
 		if (this.screenPage == ScreenPage.BLOCK_OFFSETS) {
 
 			this.dataProvidingBlockPositionOffsetXField.setVisible(true);

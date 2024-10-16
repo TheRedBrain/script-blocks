@@ -6,9 +6,6 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
-import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -16,11 +13,9 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -28,7 +23,6 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.UUID;
 
 public class DataAccessBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
@@ -76,10 +70,10 @@ public class DataAccessBlockEntity extends RotatedBlockEntity implements Trigger
 		}
 
 		if (this.secondTriggeredBlock.getLeft() != SECOND_TRIGGERED_BLOCK_POS_DEFAULT || this.secondTriggeredBlock.getRight()) {
-		nbt.putInt("secondTriggeredBlockPositionOffsetX", this.secondTriggeredBlock.getLeft().getX());
-		nbt.putInt("secondTriggeredBlockPositionOffsetY", this.secondTriggeredBlock.getLeft().getY());
-		nbt.putInt("secondTriggeredBlockPositionOffsetZ", this.secondTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("secondTriggeredBlockResets", this.secondTriggeredBlock.getRight());
+			nbt.putInt("secondTriggeredBlockPositionOffsetX", this.secondTriggeredBlock.getLeft().getX());
+			nbt.putInt("secondTriggeredBlockPositionOffsetY", this.secondTriggeredBlock.getLeft().getY());
+			nbt.putInt("secondTriggeredBlockPositionOffsetZ", this.secondTriggeredBlock.getLeft().getZ());
+			nbt.putBoolean("secondTriggeredBlockResets", this.secondTriggeredBlock.getRight());
 		} else {
 			nbt.remove("secondTriggeredBlockPositionOffsetX");
 			nbt.remove("secondTriggeredBlockPositionOffsetY");

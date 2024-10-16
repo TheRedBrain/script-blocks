@@ -1,3 +1,3 @@
 {
-	"parent": "scriptblocks:block/interactive_loot_block"
+  "parent": "scriptblocks:block/interactive_loot_block"
 }

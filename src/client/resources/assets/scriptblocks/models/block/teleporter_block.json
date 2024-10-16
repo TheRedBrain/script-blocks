@@ -1,7 +1,7 @@
 {
-	"parent": "minecraft:block/cube_column",
-	"textures": {
-		"end": "scriptblocks:block/trigger_block",
-		"side": "scriptblocks:block/teleporter_block_side"
-	}
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "scriptblocks:block/trigger_block",
+    "side": "scriptblocks:block/teleporter_block_side"
+  }
 }

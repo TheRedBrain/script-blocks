@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface DialogueAnchor {
 	List<MutablePair<String, BlockPos>> getDialogueUsedBlocks();
+
 	List<MutablePair<String, MutablePair<BlockPos, Boolean>>> getDialogueTriggeredBlocks();
 }
