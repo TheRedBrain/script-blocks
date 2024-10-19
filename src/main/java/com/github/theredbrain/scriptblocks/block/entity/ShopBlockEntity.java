@@ -25,6 +25,7 @@ import java.util.List;
 public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandlerFactory {
 	private String shopIdentifier = "";
 
+	// TODO ShopBlockEntity should implement ShopAnchor instead, which saves shopOffer uses, which are compared to maxOfferAmount
 	private List<Integer> stockCountList = new ArrayList<>();
 
 	public ShopBlockEntity(BlockPos pos, BlockState state) {

@@ -36,7 +36,6 @@ public class DelayTriggerBlock extends RotatedBlockWithEntity {
 	@Override
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-//        return validateTicker(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
 		return validateTicker(type, EntityRegistry.DELAY_TRIGGER_BLOCK_ENTITY, DelayTriggerBlockEntity::tick);
 	}
 

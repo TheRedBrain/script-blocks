@@ -151,11 +151,11 @@ public class DataAccessBlockScreen extends Screen {
 		}));
 
 		this.isAdding = this.dataAccessBlock.isAdding();
-		this.toggleIsAddingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.data_access_block.toggle_is_adding_button_label.on"), Text.translatable("gui.data_access_block.toggle_is_adding_button_label.off")).initially(this.isAdding).omitKeyText().build(this.width / 2 - 50, 90, 200, 20, Text.empty(), (button, isAdding) -> {
+		this.toggleIsAddingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.data_access_block.toggle_is_adding_button_label.on"), Text.translatable("gui.data_access_block.toggle_is_adding_button_label.off")).initially(this.isAdding).omitKeyText().build(this.width / 2 - 50, 125, 200, 20, Text.empty(), (button, isAdding) -> {
 			this.isAdding = isAdding;
 		}));
 
-		this.newDataValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 100, 20, Text.empty());
+		this.newDataValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
 		this.newDataValueField.setMaxLength(128);
 		this.newDataValueField.setText(Integer.toString(this.dataAccessBlock.getNewDataValue()));
 		this.addSelectableChild(this.newDataValueField);
