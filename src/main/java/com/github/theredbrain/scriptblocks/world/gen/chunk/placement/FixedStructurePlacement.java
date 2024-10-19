@@ -11,6 +11,7 @@ import net.minecraft.world.gen.chunk.placement.StructurePlacement;
 import net.minecraft.world.gen.chunk.placement.StructurePlacementCalculator;
 import net.minecraft.world.gen.chunk.placement.StructurePlacementType;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -23,17 +24,16 @@ public class FixedStructurePlacement extends StructurePlacement {
 	private final List<BlockPos> positions;
 	private final List<BlockPos> blacklist;
 
-	private static Products.P7<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>, List<BlockPos>, List<BlockPos>> buildFixedStructuresCodec(
+	private static Products.P6<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>, List<BlockPos>> buildFixedStructuresCodec(
 			RecordCodecBuilder.Instance<FixedStructurePlacement> instance
 	) {
 		Products.P5<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>> p5 = buildCodec(
 				instance
 		);
-		Products.P2<RecordCodecBuilder.Mu<FixedStructurePlacement>, List<BlockPos>, List<BlockPos>> p2 = instance.group(
-				BlockPos.CODEC.listOf().fieldOf("positions").forGetter(FixedStructurePlacement::getPositions),
-				BlockPos.CODEC.listOf().fieldOf("blacklist").forGetter(FixedStructurePlacement::getBlacklist)
+		Products.P1<RecordCodecBuilder.Mu<FixedStructurePlacement>, List<BlockPos>> p1 = instance.group(
+				BlockPos.CODEC.listOf().fieldOf("positions").forGetter(FixedStructurePlacement::getPositions)
 		);
-		return new Products.P7<>(p5.t1(), p5.t2(), p5.t3(), p5.t4(), p5.t5(), p2.t1(), p2.t2());
+		return new Products.P6<>(p5.t1(), p5.t2(), p5.t3(), p5.t4(), p5.t5(), p1.t1());
 	}
 
 	public FixedStructurePlacement(
@@ -42,20 +42,15 @@ public class FixedStructurePlacement extends StructurePlacement {
 			float frequency,
 			int salt,
 			Optional<StructurePlacement.ExclusionZone> exclusionZone,
-			List<BlockPos> positions,
-			List<BlockPos> blacklist
+			List<BlockPos> positions
 	) {
 		super(locateOffset, generationPredicateType, frequency, salt, exclusionZone);
 		this.positions = positions;
-		this.blacklist = blacklist;
+		this.blacklist = new ArrayList<>();
 	}
 
 	public List<BlockPos> getPositions() {
 		return this.positions;
-	}
-
-	public List<BlockPos> getBlacklist() {
-		return this.blacklist;
 	}
 
 	protected boolean isStartChunk(StructurePlacementCalculator calculator, int chunkX, int chunkZ) {
