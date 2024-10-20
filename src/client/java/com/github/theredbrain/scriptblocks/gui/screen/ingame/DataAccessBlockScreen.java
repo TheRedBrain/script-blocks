@@ -150,15 +150,15 @@ public class DataAccessBlockScreen extends Screen {
 			this.updateWidgets();
 		}));
 
-		this.isAdding = this.dataAccessBlock.isAdding();
-		this.toggleIsAddingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.data_access_block.toggle_is_adding_button_label.on"), Text.translatable("gui.data_access_block.toggle_is_adding_button_label.off")).initially(this.isAdding).omitKeyText().build(this.width / 2 - 50, 125, 200, 20, Text.empty(), (button, isAdding) -> {
-			this.isAdding = isAdding;
-		}));
-
 		this.newDataValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
 		this.newDataValueField.setMaxLength(128);
 		this.newDataValueField.setText(Integer.toString(this.dataAccessBlock.getNewDataValue()));
 		this.addSelectableChild(this.newDataValueField);
+
+		this.isAdding = this.dataAccessBlock.isAdding();
+		this.toggleIsAddingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.data_access_block.toggle_is_adding_button_label.on"), Text.translatable("gui.data_access_block.toggle_is_adding_button_label.off")).initially(this.isAdding).omitKeyText().build(this.width / 2 - 50, 125, 200, 20, Text.empty(), (button, isAdding) -> {
+			this.isAdding = isAdding;
+		}));
 
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
@@ -333,7 +333,7 @@ public class DataAccessBlockScreen extends Screen {
 				ItemUtils.parseInt(this.comparedDataValueField.getText()),
 				this.dataReadingMode.name(),
 				this.isAdding,
-				ItemUtils.parseInt(this.dataIdentifierField.getText())
+				ItemUtils.parseInt(this.newDataValueField.getText())
 		));
 		return true;
 	}
