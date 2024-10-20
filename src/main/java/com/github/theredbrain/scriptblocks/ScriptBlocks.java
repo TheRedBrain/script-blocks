@@ -19,18 +19,24 @@ import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegistry;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
+import eu.midnightdust.lib.config.MidnightConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qouteall.dimlib.DimLibEntry;
+import qouteall.dimlib.api.DimensionAPI;
 
 public class ScriptBlocks implements ModInitializer {
 	public static final String MOD_ID = "scriptblocks";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ServerConfig serverConfig;
+
+	public static final boolean isMidnightLibLoaded = FabricLoader.getInstance().isModLoaded("midnightlib");
 
 	@Override
 	public void onInitialize() {
@@ -39,6 +45,11 @@ public class ScriptBlocks implements ModInitializer {
 		// Config
 		AutoConfig.register(ServerConfigWrapper.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
 		serverConfig = ((ServerConfigWrapper) AutoConfig.getConfigHolder(ServerConfigWrapper.class).getConfig()).server;
+
+		if (isMidnightLibLoaded) {
+			DimensionAPI.suppressExperimentalWarning();
+			MidnightConfig.write(DimLibEntry.MODID);
+		}
 
 		// Packets
 		ServerPacketRegistry.init();

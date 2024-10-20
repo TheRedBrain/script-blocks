@@ -115,6 +115,9 @@ dependencies {
 	// Mod Menu
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
 
+	// Midnight Lib
+	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
+
 	// Slot Customization API
 	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
 
@@ -180,6 +183,7 @@ if (project.hasProperty('release_type')) {
 				requiredDependency 'cloth-config'
 				requiredDependency 'fabric-api'
 				requiredDependency 'slot-customization-api'
+				optionalDependency 'midnightlib'
 			}
 
 			mainArtifact(remapJar)
@@ -212,6 +216,7 @@ if (project.hasProperty('release_type')) {
 			required.project 'fabric-api'
 			embedded.project 'dimlib'
 			required.project 'slot-customization-api'
+			optional.project 'midnightlib'
 		}
 	}
 

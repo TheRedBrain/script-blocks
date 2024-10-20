@@ -18,7 +18,6 @@ import qouteall.dimlib.api.DimensionAPI;
 public class DimensionsManager {
 
 	public static void init() {
-		DimensionAPI.suppressExperimentalWarningForNamespace(ScriptBlocks.MOD_ID);
 		DimensionAPI.registerDimensionTemplate(
 				"player_locations", PLAYER_LOCATIONS_DIMENSION_TEMPLATE
 		);
