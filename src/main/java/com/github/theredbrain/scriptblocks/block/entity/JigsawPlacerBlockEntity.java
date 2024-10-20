@@ -35,7 +35,7 @@ import java.util.List;
 public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private static final RegistryKey<StructurePool> POOL_DEFAULT = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
-	private static final String CHECKED_DATA_ID_DEFAULT = "structure_pool";
+	private static final String CHECKED_DATA_ID_DEFAULT = "";
 	public static final String TARGET_KEY = "target";
 	public static final String JOINT_KEY = "joint";
 	public static final String CHECKED_DATA_ID_KEY = "checked_data_id";
@@ -109,6 +109,12 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
 			);
+		}
+
+		if (nbt.contains(CHECKED_DATA_ID_KEY)) {
+			this.checkedDataId = nbt.getString(CHECKED_DATA_ID_KEY);
+		} else {
+			this.checkedDataId = CHECKED_DATA_ID_DEFAULT;
 		}
 
 		super.readNbt(nbt, registryLookup);
