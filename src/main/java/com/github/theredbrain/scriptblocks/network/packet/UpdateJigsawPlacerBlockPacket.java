@@ -17,7 +17,8 @@ public record UpdateJigsawPlacerBlockPacket(
 		JigsawBlockEntity.Joint joint,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
-		BlockPos dataSavingBlockPosOffset
+		BlockPos dataSavingBlockPosOffset,
+		String checkedDataId
 ) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateJigsawPlacerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_jigsaw_placer_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateJigsawPlacerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateJigsawPlacerBlockPacket::write, UpdateJigsawPlacerBlockPacket::new);
@@ -30,7 +31,8 @@ public record UpdateJigsawPlacerBlockPacket(
 				JigsawBlockEntity.Joint.byName(registryByteBuf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readBlockPos()
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString()
 		);
 	}
 
@@ -42,6 +44,7 @@ public record UpdateJigsawPlacerBlockPacket(
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBlockPos(this.dataSavingBlockPosOffset);
+		registryByteBuf.writeString(this.checkedDataId);
 	}
 
 	@Override

@@ -35,15 +35,16 @@ import java.util.List;
 public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private static final RegistryKey<StructurePool> POOL_DEFAULT = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
-	private static final String CHECK_DATA_ID_DEFAULT = "structure_pool";
+	private static final String CHECKED_DATA_ID_DEFAULT = "structure_pool";
 	public static final String TARGET_KEY = "target";
 	public static final String JOINT_KEY = "joint";
+	public static final String CHECKED_DATA_ID_KEY = "checked_data_id";
 	private Identifier target = Identifier.of("empty");
 	private List<String> structurePoolList = new ArrayList<>();
 	private JigsawBlockEntity.Joint joint = JigsawBlockEntity.Joint.ROLLABLE;
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
-	private String checkDataId = CHECK_DATA_ID_DEFAULT;
+	private String checkedDataId = CHECKED_DATA_ID_DEFAULT;
 
 	public JigsawPlacerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.STRUCTURE_PLACER_BLOCK_ENTITY, pos, state);
@@ -74,6 +75,12 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 			nbt.remove("dataProvidingBlockPosOffsetX");
 			nbt.remove("dataProvidingBlockPosOffsetY");
 			nbt.remove("dataProvidingBlockPosOffsetZ");
+		}
+
+		if (this.checkedDataId.equals(CHECKED_DATA_ID_DEFAULT)) {
+			nbt.remove(CHECKED_DATA_ID_KEY);
+		} else {
+			nbt.putString(CHECKED_DATA_ID_KEY, this.checkedDataId);
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -161,6 +168,14 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
 	}
 
+	public String getCheckedDataId() {
+		return checkedDataId;
+	}
+
+	public void setCheckedDataId(String checkedDataId) {
+		this.checkedDataId = checkedDataId;
+	}
+
 	@Override
 	public void trigger() {
 		if (this.world != null) {
@@ -220,7 +235,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		if (dataBlockPos != BlockPos.ORIGIN) {
 			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
 			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				int data = providesDataBlockEntity.getData(this.checkDataId);
+				int data = providesDataBlockEntity.getData(this.checkedDataId);
 				if (data < this.structurePoolList.size() && data >= 0) {
 
 					currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePoolList.get(data)));

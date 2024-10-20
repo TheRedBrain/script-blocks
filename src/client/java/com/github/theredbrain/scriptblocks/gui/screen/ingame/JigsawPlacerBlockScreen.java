@@ -52,6 +52,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 	private TextFieldWidget dataProvidingBlockPosOffsetXField;
 	private TextFieldWidget dataProvidingBlockPosOffsetYField;
 	private TextFieldWidget dataProvidingBlockPosOffsetZField;
+	private TextFieldWidget checkedDataIdField;
 	private List<String> structurePoolList = new ArrayList<>();
 	private ButtonWidget doneButton;
 	private JigsawBlockEntity.Joint joint;
@@ -153,15 +154,20 @@ public class JigsawPlacerBlockScreen extends Screen {
 		this.dataProvidingBlockPosOffsetXField.setText(Integer.toString(this.jigsawPlacerBlock.getDataProvidingBlockPosOffset().getX()));
 		this.addSelectableChild(this.dataProvidingBlockPosOffsetXField);
 
-		this.dataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 186, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 104, 186, 50, 20, Text.empty());
 		this.dataProvidingBlockPosOffsetYField.setMaxLength(128);
 		this.dataProvidingBlockPosOffsetYField.setText(Integer.toString(this.jigsawPlacerBlock.getDataProvidingBlockPosOffset().getY()));
 		this.addSelectableChild(this.dataProvidingBlockPosOffsetYField);
 
-		this.dataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 186, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 186, 50, 20, Text.empty());
 		this.dataProvidingBlockPosOffsetZField.setMaxLength(128);
 		this.dataProvidingBlockPosOffsetZField.setText(Integer.toString(this.jigsawPlacerBlock.getDataProvidingBlockPosOffset().getZ()));
 		this.addSelectableChild(this.dataProvidingBlockPosOffsetZField);
+
+		this.checkedDataIdField = new TextFieldWidget(this.textRenderer, this.width / 2, 186, 150, 20, Text.empty());
+		this.checkedDataIdField.setMaxLength(128);
+		this.checkedDataIdField.setText(this.jigsawPlacerBlock.getCheckedDataId());
+		this.addSelectableChild(this.checkedDataIdField);
 
 		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
@@ -206,23 +212,25 @@ public class JigsawPlacerBlockScreen extends Screen {
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		String string = this.targetField.getText();
-		String string2 = this.triggeredBlockPositionOffsetXField.getText();
-		String string3 = this.triggeredBlockPositionOffsetYField.getText();
-		String string4 = this.triggeredBlockPositionOffsetZField.getText();
-		String string14 = this.dataProvidingBlockPosOffsetXField.getText();
-		String string15 = this.dataProvidingBlockPosOffsetYField.getText();
-		String string16 = this.dataProvidingBlockPosOffsetZField.getText();
+		String string1 = this.triggeredBlockPositionOffsetXField.getText();
+		String string2 = this.triggeredBlockPositionOffsetYField.getText();
+		String string3 = this.triggeredBlockPositionOffsetZField.getText();
+		String string4 = this.dataProvidingBlockPosOffsetXField.getText();
+		String string5 = this.dataProvidingBlockPosOffsetYField.getText();
+		String string6 = this.dataProvidingBlockPosOffsetZField.getText();
+		String string7 = this.checkedDataIdField.getText();
 		JigsawBlockEntity.Joint joint = this.joint;
 		boolean bl = this.triggeredBlockResets;
 		List<String> list = new ArrayList<>(this.structurePoolList);
 		this.init(client, width, height);
 		this.targetField.setText(string);
-		this.triggeredBlockPositionOffsetXField.setText(string2);
-		this.triggeredBlockPositionOffsetYField.setText(string3);
-		this.triggeredBlockPositionOffsetZField.setText(string4);
-		this.dataProvidingBlockPosOffsetXField.setText(string14);
-		this.dataProvidingBlockPosOffsetYField.setText(string15);
-		this.dataProvidingBlockPosOffsetZField.setText(string16);
+		this.triggeredBlockPositionOffsetXField.setText(string1);
+		this.triggeredBlockPositionOffsetYField.setText(string2);
+		this.triggeredBlockPositionOffsetZField.setText(string3);
+		this.dataProvidingBlockPosOffsetXField.setText(string4);
+		this.dataProvidingBlockPosOffsetYField.setText(string5);
+		this.dataProvidingBlockPosOffsetZField.setText(string6);
+		this.checkedDataIdField.setText(string7);
 		this.joint = joint;
 		this.jointRotationButton.setValue(joint);
 		this.triggeredBlockResets = bl;
@@ -297,7 +305,8 @@ public class JigsawPlacerBlockScreen extends Screen {
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
-				)
+				),
+				this.checkedDataIdField.getText()
 		));
 		return true;
 	}
@@ -331,6 +340,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 		this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
 		this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
 		this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+		this.checkedDataIdField.render(context, mouseX, mouseY, delta);
 	}
 
 	@Override

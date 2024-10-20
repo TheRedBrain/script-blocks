@@ -37,6 +37,8 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 
 		BlockPos dataSavingBlockPosOffset = payload.dataSavingBlockPosOffset();
 
+		String checkedDataId = payload.checkedDataId();
+
 		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
@@ -53,6 +55,7 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 			jigsawPlacerBlockEntity.setJoint(joint);
 			jigsawPlacerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			jigsawPlacerBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);
+			jigsawPlacerBlockEntity.setCheckedDataId(checkedDataId);
 			if (updateSuccessful) {
 				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
