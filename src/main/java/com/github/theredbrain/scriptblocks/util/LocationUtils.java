@@ -1,7 +1,10 @@
 package com.github.theredbrain.scriptblocks.util;
 
 import com.github.theredbrain.scriptblocks.data.Location;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,11 +15,11 @@ public class LocationUtils {
 		if (location.side_entrances() != null && !entrance.isEmpty()) {
 			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
 			if (sideEntrance != null) {
-				unlockAdvancementIdentifier = sideEntrance.unlockAdvancement();
+				unlockAdvancementIdentifier = Identifier.tryParse(sideEntrance.unlockAdvancement());
 			}
 		}
 		if (unlockAdvancementIdentifier == null) {
-			unlockAdvancementIdentifier = location.unlockAdvancement();
+			unlockAdvancementIdentifier = Identifier.tryParse(location.unlockAdvancement());
 		}
 		return unlockAdvancementIdentifier;
 	}
@@ -27,11 +30,11 @@ public class LocationUtils {
 		if (location.side_entrances() != null && !entrance.isEmpty()) {
 			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
 			if (sideEntrance != null) {
-				lockAdvancementIdentifier = sideEntrance.lockAdvancement();
+				lockAdvancementIdentifier = Identifier.tryParse(sideEntrance.lockAdvancement());
 			}
 		}
 		if (lockAdvancementIdentifier == null) {
-			lockAdvancementIdentifier = location.lockAdvancement();
+			lockAdvancementIdentifier = Identifier.tryParse(location.lockAdvancement());
 		}
 		return lockAdvancementIdentifier;
 	}
@@ -101,18 +104,24 @@ public class LocationUtils {
 		return false;
 	}
 
-	@Nullable
 	public static ItemStack getKeyForEntrance(Location location, String entrance) {
+		ItemStack itemStack = ItemStack.EMPTY;
 		if (entrance.isEmpty()) {
-			return location.key();
+			Item item = Registries.ITEM.get(Identifier.tryParse(location.keyItemIdentifier()));
+			if (item != Items.AIR) {
+				itemStack = new ItemStack(item, location.keyItemCount());
+			}
 		}
 		if (location.side_entrances() != null) {
 			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
 			if (sideEntrance != null) {
-				return sideEntrance.key();
+				Item item = Registries.ITEM.get(Identifier.tryParse(sideEntrance.keyItemIdentifier()));
+				if (item != Items.AIR) {
+					itemStack = new ItemStack(item, sideEntrance.keyItemCount());
+				}
 			}
 		}
-		return null;
+		return itemStack;
 	}
 
 	public static boolean consumeKeyAtEntrance(Location location, String entrance) {

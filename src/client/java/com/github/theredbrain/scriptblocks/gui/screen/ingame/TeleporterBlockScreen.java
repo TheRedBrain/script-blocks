@@ -478,7 +478,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					inventory.setStack(k, itemStack.copy());
 				}
 				boolean bl = true;
-				if (this.currentKeyItemStack != null) {
+				if (!this.currentKeyItemStack.isEmpty()) {
 					ItemStack currentKeyItemStack = this.currentKeyItemStack;
 					int keyCount = currentKeyItemStack.getCount();
 					for (int j = 0; j < inventory.size(); j++) {
@@ -652,7 +652,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), this.x + 19, this.y + 77, 0x404040, false);
 				}
 
-				if (this.currentKeyItemStack != null) {
+				if (!this.currentKeyItemStack.isEmpty()) {
 					ItemStack currentKey = this.currentKeyItemStack;
 //                            ScriptBlocksMod.info("should draw item: " + currentKey.toString());
 					int x = this.x + 8;

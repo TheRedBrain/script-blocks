@@ -195,14 +195,14 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						targetPitch = entrance.getRight().getRight();
 
 						boolean consumeKey = LocationUtils.consumeKeyAtEntrance(location, targetLocationEntrance);
-						ItemStack virtualKey = LocationUtils.getKeyForEntrance(location, targetLocationEntrance);
-						if (virtualKey != null) {
-							int keyCount = virtualKey.getCount();
+						ItemStack keyStack = LocationUtils.getKeyForEntrance(location, targetLocationEntrance);
+						if (!keyStack.isEmpty()) {
+							int keyCount = keyStack.getCount();
 							PlayerInventory playerInventory = serverPlayerEntity.getInventory();
 
 							for (int i = 0; i < playerInventory.size(); i++) {
 								ItemStack currentItemStack = playerInventory.getStack(i);
-								if (ItemStack.areItemsAndComponentsEqual(virtualKey, currentItemStack)) {
+								if (ItemStack.areItemsAndComponentsEqual(keyStack, currentItemStack)) {
 									ItemStack currentItemStackCopy = currentItemStack.copy();
 									int currentItemStackCount = currentItemStackCopy.getCount();
 									if (currentItemStackCount >= keyCount) {
