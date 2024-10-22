@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.util;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Location;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

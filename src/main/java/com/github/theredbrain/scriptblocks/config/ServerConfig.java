@@ -15,6 +15,7 @@ public class ServerConfig implements ConfigData {
 			World Spawn is chosen randomly from the following lists.
 			It is recommended to set the gamerule 'spawnRadius' to 0.
 			""")
+	// TODO define a location entrance, where the world spawn should be
 	public boolean use_predefined_position_for_world_spawn = false;
 	@Comment("""
 			A random value from worldSpawnXList is chosen.

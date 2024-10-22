@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
@@ -105,22 +104,22 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			ServerPlayerEntity targetDimensionOwner = server.getPlayerManager().getPlayer(targetDimensionOwnerName);
 
-//            ScriptBlocksMod.info("targetLocation: " + targetLocation);
+//            ScriptBlocks.info("targetLocation: " + targetLocation);
 
 			if (location != null) {
 
 				if (location.isPublic()) {
 					targetWorld = server.getOverworld();
 				} else if (targetDimensionOwner != null) {
-//                ScriptBlocksMod.info("targetDimensionOwner: " + targetDimensionOwner);
+//                ScriptBlocks.info("targetDimensionOwner: " + targetDimensionOwner);
 					Identifier targetDimensionId = Identifier.tryParse(targetDimensionOwner.getUuidAsString());
-//                ScriptBlocksMod.info("targetDimensionId: " + targetDimensionId);
+//                ScriptBlocks.info("targetDimensionId: " + targetDimensionId);
 					RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
 					targetWorld = server.getWorld(dimensionregistryKey);
 
 					if (targetWorld == null) {
 						if (targetDimensionOwner.getUuid() == serverPlayerEntity.getUuid()) {
-//                        ScriptBlocksMod.info("targetDimensionOwner.getUuid() == serverPlayerEntity.getUuid()");
+//                        ScriptBlocks.info("targetDimensionOwner.getUuid() == serverPlayerEntity.getUuid()");
 							DimensionsManager.addAndSaveDynamicDimension(targetDimensionId, server);
 							dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
 							targetWorld = server.getWorld(dimensionregistryKey);
@@ -130,10 +129,10 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					}
 				}
-//                ScriptBlocksMod.info("targetWorld: " + targetWorld);
+//                ScriptBlocks.info("targetWorld: " + targetWorld);
 
 				if (targetWorld != null) {
-//                    ScriptBlocksMod.info("targetWorld != null && location != null");
+//                    ScriptBlocks.info("targetWorld != null && location != null");
 
 					BlockPos blockPos = location.controlBlockPos();
 					BlockEntity blockEntity = targetWorld.getBlockEntity(blockPos);
@@ -141,7 +140,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					if (!(blockEntity instanceof LocationControlBlockEntity)) {
 
-//                        ScriptBlocksMod.info("!(blockEntity instanceof LocationControlBlockEntity)");
+//                        ScriptBlocks.info("!(blockEntity instanceof LocationControlBlockEntity)");
 
 						String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
@@ -158,8 +157,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						initialise = true;
 					}
 
-//                    ScriptBlocksMod.info("controlBlockPos: " + blockPos);
-//                    ScriptBlocksMod.info("block at controlBlockPos: " + targetWorld.getBlockState(blockPos).getBlock());
+//                    ScriptBlocks.info("controlBlockPos: " + blockPos);
+//                    ScriptBlocks.info("block at controlBlockPos: " + targetWorld.getBlockState(blockPos).getBlock());
 
 					if (blockEntity instanceof LocationControlBlockEntity locationControlBlock) {
 						if (locationControlBlock.shouldReset() || initialise) {
@@ -183,7 +182,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							String forceLoadRemoveAllCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload remove " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadRemoveAllCommand);
 
-//                            blockEntity = null;
 							locationWasReset = true;
 						}
 					}

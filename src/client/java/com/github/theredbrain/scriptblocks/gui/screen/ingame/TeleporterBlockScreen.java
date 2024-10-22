@@ -411,6 +411,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
 
 					if (advancementHandler != null) {
+						ScriptBlocks.info("advancementHandler != null");
 						AdvancementEntry lockAdvancementEntry = null;
 						if (lockAdvancementIdentifier != null) {
 							lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
@@ -420,9 +421,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 							unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
 						}
 						if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
+
+							ScriptBlocks.info("location unlocked: " + entry);
 							this.unlockedLocationsList.add(entry);
 							this.visibleLocationsList.add(entry);
 						} else if (showLockedLocation) {
+							ScriptBlocks.info("location locked but visible: " + entry);
 							this.visibleLocationsList.add(entry);
 						}
 					}
@@ -433,6 +437,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				}
 			}
 		}
+
+		ScriptBlocks.info("this.currentTargetIdentifier: " + this.currentTargetIdentifier);
 
 		for (MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> dungeonLocation : this.unlockedLocationsList) {
 			if (Objects.equals(dungeonLocation.getLeft().getLeft(), this.currentTargetIdentifier)) {
@@ -652,7 +658,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), this.x + 19, this.y + 77, 0x404040, false);
 				}
 
-				if (!this.currentKeyItemStack.isEmpty()) {
+				if (this.currentKeyItemStack != null && !this.currentKeyItemStack.isEmpty()) {
 					ItemStack currentKey = this.currentKeyItemStack;
 //                            ScriptBlocksMod.info("should draw item: " + currentKey.toString());
 					int x = this.x + 8;
@@ -737,6 +743,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		if (this.isCurrentLocationPublic) {
 			currentTargetOwnerName = "";
 		}
+		ScriptBlocks.info("TeleportBlockScreen.teleport, currentTargetIdentifier: " + this.currentTargetIdentifier);
 		ClientPlayNetworking.send(new TeleportFromTeleporterBlockPacket(
 				this.teleporterBlock.getPos(),
 				currentWorld,

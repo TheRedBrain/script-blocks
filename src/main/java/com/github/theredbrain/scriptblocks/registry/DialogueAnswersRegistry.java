@@ -27,20 +27,20 @@ public class DialogueAnswersRegistry {
 				new SimpleSynchronousResourceReloadListener() {
 					@Override
 					public Identifier getFabricId() {
-						return ScriptBlocks.identifier("dialogue_answer");
+						return ScriptBlocks.identifier("dialogue_answers");
 					}
 
 					@Override
 					public void reload(ResourceManager resourceManager) {
 						registeredDialogueAnswers = new HashMap<>();
-						for (var entry : resourceManager.findResources("dialogue_answer", fileName -> fileName.getPath().endsWith(".json")).entrySet()) {
+						for (var entry : resourceManager.findResources("dialogue_answers", fileName -> fileName.getPath().endsWith(".json")).entrySet()) {
 							var identifier = entry.getKey();
 							var resource = entry.getValue();
 							try {
 								JsonReader reader = new JsonReader(new InputStreamReader(resource.getInputStream()));
 								DialogueAnswer dialogueAnswer = new Gson().fromJson(reader, registeredDialogueAnswersFileFormat);
 								var id = identifier
-										.toString().replace("dialogue_answer/", "");
+										.toString().replace("dialogue_answers/", "");
 								id = id.substring(0, id.lastIndexOf('.'));
 								registeredDialogueAnswers.put(Identifier.of(id), dialogueAnswer);
 							} catch (Exception e) {
