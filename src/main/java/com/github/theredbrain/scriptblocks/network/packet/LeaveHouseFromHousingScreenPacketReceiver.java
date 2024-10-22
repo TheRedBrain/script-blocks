@@ -1,14 +1,13 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -36,16 +35,16 @@ public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetw
 		if (targetWorld != null && targetPos != null) {
 
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.5), (targetPos.getZ() + 0.5), (float) 0.0, (float) 0.0);
-			if (ScriptBlocks.serverConfig.show_debug_messages) {
-				serverPlayerEntity.sendMessage(Text.of("Teleport to world: " + targetWorld + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.5) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + 0.0 + " and pitch: " + 0.0));
+			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.5) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + 0.0 + " and pitch: " + 0.0, serverPlayerEntity);
 			}
-		} else if (ScriptBlocks.serverConfig.show_debug_messages) {
-			serverPlayerEntity.sendMessage(Text.of("Teleport failed"));
+		} else if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+			DebuggingHelper.sendDebuggingMessage("Teleport failed", serverPlayerEntity);
 			if (targetWorld == null) {
-				serverPlayerEntity.sendMessage(Text.of("targetWorld == null"));
+				DebuggingHelper.sendDebuggingMessage("targetWorld == null", serverPlayerEntity);
 			}
 			if (targetPos == null) {
-				serverPlayerEntity.sendMessage(Text.of("targetPos == null"));
+				DebuggingHelper.sendDebuggingMessage("targetPos == null", serverPlayerEntity);
 			}
 		}
 	}

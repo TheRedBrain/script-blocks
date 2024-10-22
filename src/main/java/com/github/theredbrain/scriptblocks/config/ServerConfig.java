@@ -29,10 +29,17 @@ public class ServerConfig implements ConfigData {
 	public boolean shouldJigSawGenerationBeDeterministic = true;
 	@Comment("Set to 'true' for the vanilla behaviour")
 	public boolean shouldJigSawStructuresBeRandomlyRotated = true;
-	@Comment("Additional debug log is shown in the console.")
-	public boolean show_debug_log = false;
-	@Comment("Additional debug messages are send in game.")
-	public boolean show_debug_messages = false;
+
+	@Comment("Globally enables/disables debug logging. When set to false, no debug logs are send.")
+	public boolean enable_debug_logging = false;
+
+	@Comment("Debug log is shown in the server console.")
+	public boolean enable_debug_console_logging = true;
+	@Comment("Debug messages are send in game.")
+	public boolean enable_debug_messages = true;
+
+	@Comment("Enables debug messages for the teleporter block and all corresponding mechanics.")
+	public boolean enable_teleporter_debugging = true;
 
 	public ServerConfig() {
 

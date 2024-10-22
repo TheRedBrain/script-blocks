@@ -1,13 +1,12 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -34,8 +33,8 @@ public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPa
 
 			serverPlayerEntity.fallDistance = 0;
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
-			if (ScriptBlocks.serverConfig.show_debug_messages) {
-				serverPlayerEntity.sendMessage(Text.of("Teleport to your team in world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch));
+			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+				DebuggingHelper.sendDebuggingMessage("Teleport to your team in world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
 			}
 			serverPlayerEntity.closeHandledScreen();
 

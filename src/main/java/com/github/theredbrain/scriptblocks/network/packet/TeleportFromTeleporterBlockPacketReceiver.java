@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -251,10 +252,11 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			statusEffectList.add(portal_resistance_status_effect);
 			serverPlayerEntity.fallDistance = 0;
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
-			if (ScriptBlocks.serverConfig.show_debug_messages) {
-				serverPlayerEntity.sendMessage(Text.of("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch));
+			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
 				if (targetWorld != server.getOverworld()) {
-					serverPlayerEntity.sendMessage(Text.of("World owned by: " + targetDimensionOwnerName));
+					DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
+
 				}
 			}
 			serverPlayerEntity.closeHandledScreen();
@@ -280,10 +282,11 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 							teamServerPlayerEntity.fallDistance = 0;
 							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
-							if (ScriptBlocks.serverConfig.show_debug_messages) {
-								teamServerPlayerEntity.sendMessage(Text.of("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch));
+							if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+								DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, teamServerPlayerEntity);
 								if (targetWorld != server.getOverworld()) {
-									teamServerPlayerEntity.sendMessage(Text.of("World owned by: " + targetDimensionOwnerName));
+									DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, teamServerPlayerEntity);
+
 								}
 							}
 							serverPlayerEntity.closeHandledScreen();
@@ -305,13 +308,13 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				}
 			}
 		} else {
-			if (ScriptBlocks.serverConfig.show_debug_log) {
-				serverPlayerEntity.sendMessage(Text.of("Teleport failed"));
+			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+				DebuggingHelper.sendDebuggingMessage("Teleport failed", serverPlayerEntity);
 				if (targetWorld == null) {
-					serverPlayerEntity.sendMessage(Text.of("targetWorld == null"));
+					DebuggingHelper.sendDebuggingMessage("targetWorld == null", serverPlayerEntity);
 				}
 				if (targetPos == null) {
-					serverPlayerEntity.sendMessage(Text.of("targetPos == null"));
+					DebuggingHelper.sendDebuggingMessage("targetPos == null", serverPlayerEntity);
 				}
 			}
 
