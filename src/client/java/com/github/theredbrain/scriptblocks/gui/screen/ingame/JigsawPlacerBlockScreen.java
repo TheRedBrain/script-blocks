@@ -11,10 +11,12 @@ import net.minecraft.block.JigsawBlock;
 import net.minecraft.block.entity.JigsawBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
@@ -33,11 +35,13 @@ public class JigsawPlacerBlockScreen extends Screen {
 	private static final Text TARGET_TEXT = Text.translatable("jigsaw_block.target");
 	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
 	private static final Text DATA_PROVIDING_BLOCK_POSITION_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
-	private static final Text REMOVE_STRUCTURE_POOL_BUTTON_LABEL_TEXT = Text.translatable("gui.jigsaw_placer_block.remove_structure_pool_button_label");
 	private static final Text NEW_STRUCTURE_POOL_FIELD_TEXT = Text.translatable("gui.jigsaw_placer_block.new_structure_pool_field");
 	private static final Text ADD_NEW_STRUCTURE_POOL_BUTTON_LABEL_TEXT = Text.translatable("gui.jigsaw_placer_block.add_new_structure_pool_button_label");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
+	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
+			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	);
 	private final JigsawPlacerBlockEntity jigsawPlacerBlock;
 	private ButtonWidget removeStructurePoolButton0;
 	private ButtonWidget removeStructurePoolButton1;
@@ -95,8 +99,8 @@ public class JigsawPlacerBlockScreen extends Screen {
 		boolean bl;
 		this.structurePoolList.addAll(this.jigsawPlacerBlock.getStructurePoolList());
 
-		this.removeStructurePoolButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STRUCTURE_POOL_BUTTON_LABEL_TEXT, button -> this.removeStructurePoolFromList(0)).dimensions(this.width / 2 + 54, 22, 100, 20).build());
-		this.removeStructurePoolButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STRUCTURE_POOL_BUTTON_LABEL_TEXT, button -> this.removeStructurePoolFromList(1)).dimensions(this.width / 2 + 54, 46, 100, 20).build());
+		this.removeStructurePoolButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 22, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStructurePoolFromList(0)));
+		this.removeStructurePoolButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 46, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStructurePoolFromList(1)));
 
 		this.newStructurePoolField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 81, 200, 20, Text.empty());
 		this.newStructurePoolField.setMaxLength(128);
@@ -317,7 +321,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 		super.render(context, mouseX, mouseY, delta);
 		for (int i = this.structurePoolListScrollPosition; i < Math.min(this.structurePoolListScrollPosition + VISIBLE_STRUCTURE_POOL_LIST_ENTRY, this.structurePoolList.size()); i++) {
 			String text = i + ": " + this.structurePoolList.get(i);
-			context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 28 + ((i - this.structurePoolListScrollPosition) * 25), 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 28 + ((i - this.structurePoolListScrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.structurePoolList.size() > VISIBLE_STRUCTURE_POOL_LIST_ENTRY) {
 			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 24, 8, 42);

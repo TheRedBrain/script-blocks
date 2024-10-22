@@ -198,7 +198,6 @@
 	"gui.interactive_loot_block.loot_table_identifier_label": "Loot Table Identifier",
 
 
-	"gui.jigsaw_placer_block.remove_structure_pool_button_label": "Remove entry",
 	"gui.jigsaw_placer_block.new_structure_pool_field": "New Structure Pool",
 	"gui.jigsaw_placer_block.add_new_structure_pool_button_label": "Add new entry",
 
@@ -294,9 +293,7 @@
 	"gui.teleporter_block.locationType.player_spawn": "Player Spawn",
 	"gui.teleporter_block.locationType.dimension_access_position": "Dimension Access Position",
 	"gui.teleporter_block.add_new_location_button_label": "Add new entry",
-	"gui.teleporter_block.remove_location_button_label": "Remove entry",
 	"gui.teleporter_block.add_new_status_effect_button_label": "Add new entry",
-	"gui.teleporter_block.remove_status_effect_button_label": "Remove entry",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 
 	"gui.teleporter_block.requiredItemStackSlot.tooltip": "Item required for Teleportation",

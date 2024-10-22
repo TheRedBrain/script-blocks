@@ -12,10 +12,12 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
@@ -53,15 +55,16 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text DIRECT_TELEPORT_ORIENTATION_LABEL_TEXT = Text.translatable("gui.teleporter_block.direct_teleport_orientation_label");
 	private static final Text SPAWN_POINT_TYPE_LABEL_TEXT = Text.translatable("gui.teleporter_block.spawn_point_type_label");
 	private static final Text ADD_NEW_LOCATION_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_location_button_label");
-	private static final Text REMOVE_LOCATION_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.remove_location_button_label");
 	private static final Text ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_status_effect_button_label");
-	private static final Text REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.remove_status_effect_button_label");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
 	private static final Text NEW_STATUS_EFFECT_FIELD_TEXT = Text.translatable("gui.teleporter_block.new_status_effect_field");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_88_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_88");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
+	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
+			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	);
 
 	private final TeleporterBlockEntity teleporterBlock;
 
@@ -351,9 +354,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		// teleportation mode: locations
 
-		this.removeLocationButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LOCATION_BUTTON_LABEL_TEXT, button -> this.removeLocationFromLocationList(0)).dimensions(this.width / 2 + 54, 70, 100, 20).build());
-		this.removeLocationButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LOCATION_BUTTON_LABEL_TEXT, button -> this.removeLocationFromLocationList(1)).dimensions(this.width / 2 + 54, 95, 100, 20).build());
-		this.removeLocationButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LOCATION_BUTTON_LABEL_TEXT, button -> this.removeLocationFromLocationList(2)).dimensions(this.width / 2 + 54, 120, 100, 20).build());
+		this.removeLocationButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 70, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(0)));
+		this.removeLocationButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 95, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(1)));
+		this.removeLocationButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 120, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(2)));
 
 		this.newLocationIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 4 - 150, 160, 150, 20, Text.empty());
 		this.newLocationIdentifierField.setMaxLength(128);
@@ -379,10 +382,10 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		// --- status effect page ---
 
-		this.removeStatusEffectButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(0)).dimensions(this.width / 2 + 54, 44, 100, 20).build());
-		this.removeStatusEffectButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(1)).dimensions(this.width / 2 + 54, 68, 100, 20).build());
-		this.removeStatusEffectButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(2)).dimensions(this.width / 2 + 54, 92, 100, 20).build());
-		this.removeStatusEffectButton3 = this.addDrawableChild(ButtonWidget.builder(REMOVE_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.removeStatusEffectFromStatusEffectList(3)).dimensions(this.width / 2 + 54, 116, 100, 20).build());
+		this.removeStatusEffectButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(0)));
+		this.removeStatusEffectButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(1)));
+		this.removeStatusEffectButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(2)));
+		this.removeStatusEffectButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(3)));
 
 		this.newStatusEffectField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
 		this.newStatusEffectField.setMaxLength(128);
@@ -793,9 +796,12 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				for (int i = this.creativeLocationsListScrollPosition; i < Math.min(this.creativeLocationsListScrollPosition + 3, this.locationsList.size()); i++) {
 					String text = this.locationsList.get(i).getLeft().getLeft();
 					if (!this.locationsList.get(i).getLeft().getRight().isEmpty()) {
-						text = this.locationsList.get(i).getLeft().getLeft() + ", " + this.locationsList.get(i).getLeft().getRight();
+						text = text + ", " + this.locationsList.get(i).getLeft().getRight();
 					}
-					context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), 0xA0A0A0);
+					if (!this.locationsList.get(i).getRight().getLeft().isEmpty()) {
+						text = text + ", " + this.locationsList.get(i).getRight().getLeft() + ", " + this.locationsList.get(i).getRight().getRight();
+					}
+					context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), 0xA0A0A0);
 				}
 				if (this.locationsList.size() > 3) {
 					context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 70, 8, 70);
@@ -810,7 +816,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		} else if (this.screenPage == ScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
 			for (int i = this.statusEffectListScrollPosition; i < Math.min(this.statusEffectListScrollPosition + VISIBLE_STATUS_EFFECT_LIST_ENTRIES, this.statusEffectsToDecrementLevelOnTeleport.size()); i++) {
 				String text = this.statusEffectsToDecrementLevelOnTeleport.get(i);
-				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 50 + ((i - this.statusEffectListScrollPosition) * 24), 0xA0A0A0);
+				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 50 + ((i - this.statusEffectListScrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES) {
 				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_88_TEXTURE, this.width / 2 - 153, 44, 8, 88);
