@@ -36,7 +36,8 @@ public class ScriptBlocks implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ServerConfig serverConfig;
 
-	public static final boolean isMidnightLibLoaded = FabricLoader.getInstance().isModLoaded("midnightlib");
+	// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
+//	public static final boolean isMidnightLibLoaded = FabricLoader.getInstance().isModLoaded("midnightlib");
 
 	@Override
 	public void onInitialize() {
@@ -46,10 +47,11 @@ public class ScriptBlocks implements ModInitializer {
 		AutoConfig.register(ServerConfigWrapper.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
 		serverConfig = ((ServerConfigWrapper) AutoConfig.getConfigHolder(ServerConfigWrapper.class).getConfig()).server;
 
-		if (isMidnightLibLoaded) {
-			DimensionAPI.suppressExperimentalWarning();
-			MidnightConfig.write(DimLibEntry.MODID);
-		}
+		// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
+//		if (isMidnightLibLoaded) {
+//			DimensionAPI.suppressExperimentalWarning();
+//			MidnightConfig.write(DimLibEntry.MODID);
+//		}
 
 		// Packets
 		ServerPacketRegistry.init();
