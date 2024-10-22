@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.util;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Location;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -14,11 +15,11 @@ public class LocationUtils {
 		Identifier unlockAdvancementIdentifier = null;
 		if (location.side_entrances() != null && !entrance.isEmpty()) {
 			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
-			if (sideEntrance != null) {
+			if (sideEntrance != null && !sideEntrance.unlockAdvancement().isEmpty()) {
 				unlockAdvancementIdentifier = Identifier.tryParse(sideEntrance.unlockAdvancement());
 			}
 		}
-		if (unlockAdvancementIdentifier == null) {
+		if (unlockAdvancementIdentifier == null && !location.unlockAdvancement().isEmpty()) {
 			unlockAdvancementIdentifier = Identifier.tryParse(location.unlockAdvancement());
 		}
 		return unlockAdvancementIdentifier;
@@ -29,11 +30,11 @@ public class LocationUtils {
 		Identifier lockAdvancementIdentifier = null;
 		if (location.side_entrances() != null && !entrance.isEmpty()) {
 			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
-			if (sideEntrance != null) {
+			if (sideEntrance != null && !sideEntrance.lockAdvancement().isEmpty()) {
 				lockAdvancementIdentifier = Identifier.tryParse(sideEntrance.lockAdvancement());
 			}
 		}
-		if (lockAdvancementIdentifier == null) {
+		if (lockAdvancementIdentifier == null && !location.lockAdvancement().isEmpty()) {
 			lockAdvancementIdentifier = Identifier.tryParse(location.lockAdvancement());
 		}
 		return lockAdvancementIdentifier;
