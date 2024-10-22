@@ -1,0 +1,25 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "minecraft:flat",
+        "settings": {
+          "biome": "scriptblocks:public_locations_biome",
+          "features": false,
+          "lakes": false,
+          "layers": [
+            {
+              "block": "minecraft:air",
+              "height": 1
+            }
+          ],
+          "structure_overrides": [
+            "scriptblocks_test:test_location_default",
+            "scriptblocks_test:test_location_public"
+          ]
+        }
+      }
+    }
+  }
+}

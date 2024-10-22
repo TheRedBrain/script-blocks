@@ -1,0 +1,22 @@
+{
+  "placement": {
+    "type": "scriptblocks:fixed",
+    "salt": 0,
+    "separation": 0,
+    "spacing": 0,
+    "positions": [
+      [
+        20,
+        0,
+        0
+      ]
+    ],
+    "blacklist": []
+  },
+  "structures": [
+    {
+      "structure": "scriptblocks_test:test_location_public",
+      "weight": 1
+    }
+  ]
+}
