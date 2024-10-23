@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -62,6 +63,20 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	public boolean setDelegatedEntrance(MutablePair<BlockPos, MutablePair<Double, Double>> delegatedEntrance) {
 		this.delegatedEntrance = delegatedEntrance;
 		return true;
+	}
+
+	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerWorld serverWorld) {
+		BlockPos targetPos;
+		MutablePair<Double, Double> targetOrientation;
+
+		targetPos = new BlockPos(this.delegatedEntrance.getLeft().getX() + this.getPos().getX(), this.delegatedEntrance.getLeft().getY() + this.getPos().getY(), this.delegatedEntrance.getLeft().getZ() + this.getPos().getZ());
+		targetOrientation = this.delegatedEntrance.getRight();
+
+		if (this.delegatedEntrance.getLeft() != BlockPos.ORIGIN && serverWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+			return entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+		}
+
+		return new MutablePair<>(targetPos, targetOrientation);
 	}
 
 	@Override

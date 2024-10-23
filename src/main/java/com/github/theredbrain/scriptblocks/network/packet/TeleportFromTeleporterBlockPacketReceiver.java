@@ -203,7 +203,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					if (blockEntity instanceof LocationControlBlockEntity locationControlBlock) {
 
-						MutablePair<BlockPos, MutablePair<Double, Double>> entrance = locationControlBlock.getTargetEntrance(targetLocationEntrance);
+						MutablePair<BlockPos, MutablePair<Double, Double>> entrance = locationControlBlock.getTargetEntrance(targetWorld, targetLocationEntrance);
 						targetPos = entrance.getLeft();
 						targetYaw = entrance.getRight().getLeft();
 						targetPitch = entrance.getRight().getRight();
@@ -235,13 +235,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 								}
 							}
 							playerHadKeyItem = keyCount <= 0;
-						}
-
-						if (targetWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
-							MutablePair<BlockPos, MutablePair<Double, Double>> delegatedEntrance = entranceDelegationBlockEntity.getDelegatedEntrance();
-							targetPos = new BlockPos(delegatedEntrance.getLeft().getX() + entranceDelegationBlockEntity.getPos().getX(), delegatedEntrance.getLeft().getY() + entranceDelegationBlockEntity.getPos().getY(), delegatedEntrance.getLeft().getZ() + entranceDelegationBlockEntity.getPos().getZ());
-							targetYaw = delegatedEntrance.getRight().getLeft();
-							targetPitch = delegatedEntrance.getRight().getRight();
 						}
 
 						if (setAccessPosition && Identifier.tryParse(accessPositionDimension) != null) {

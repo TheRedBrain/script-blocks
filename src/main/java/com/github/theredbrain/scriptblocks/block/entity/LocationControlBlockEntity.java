@@ -11,10 +11,12 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
@@ -158,15 +160,24 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		this.mainEntrance = mainEntrance;
 	}
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(String entrance) {
-		MutablePair<BlockPos, MutablePair<Double, Double>> targetEntrance;
-		if (!entrance.equals("") && sideEntrances.containsKey(entrance)) {
+	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerWorld serverWorld, String entrance) {
+		BlockPos targetPos;
+		MutablePair<Double, Double> targetOrientation;
+
+		if (!entrance.isEmpty() && sideEntrances.containsKey(entrance)) {
 			MutablePair<BlockPos, MutablePair<Double, Double>> targetEntranceOffset = this.sideEntrances.get(entrance);
-			targetEntrance = new MutablePair<>(new BlockPos(targetEntranceOffset.getLeft().getX() + this.getPos().getX(), targetEntranceOffset.getLeft().getY() + this.getPos().getY(), targetEntranceOffset.getLeft().getZ() + this.getPos().getZ()), targetEntranceOffset.getRight());
+			targetPos = new BlockPos(targetEntranceOffset.getLeft().getX() + this.getPos().getX(), targetEntranceOffset.getLeft().getY() + this.getPos().getY(), targetEntranceOffset.getLeft().getZ() + this.getPos().getZ());
+			targetOrientation = targetEntranceOffset.getRight();
 		} else {
-			targetEntrance = new MutablePair<>(new BlockPos(this.mainEntrance.getLeft().getX() + this.getPos().getX(), this.mainEntrance.getLeft().getY() + this.getPos().getY(), this.mainEntrance.getLeft().getZ() + this.getPos().getZ()), this.mainEntrance.getRight());
+			targetPos = new BlockPos(this.mainEntrance.getLeft().getX() + this.getPos().getX(), this.mainEntrance.getLeft().getY() + this.getPos().getY(), this.mainEntrance.getLeft().getZ() + this.getPos().getZ());
+			targetOrientation = this.mainEntrance.getRight();
 		}
-		return targetEntrance;
+
+		if (serverWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+			return entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+		}
+
+		return new MutablePair<>(targetPos, targetOrientation);
 	}
 
 	public HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> getSideEntrances() {
