@@ -1,9 +1,7 @@
 {
-  "controlBlockPos": {
-    "x": 32,
-    "y": -63,
-    "z": 0
-  },
+  "controlBlockPosX": 32,
+  "controlBlockPosY": -63,
+  "controlBlockPosZ": 0,
   "structureIdentifier": "scriptblocks_test:test_location_public",
   "displayName": "Test Location Public",
   "lockAdvancement": "",
@@ -11,10 +9,8 @@
   "showLockedLocation": true,
   "showUnlockAdvancement": true,
   "showLockAdvancement": true,
-  "showLocationName": true,
   "showLocationOwner": true,
   "isPublic": true,
-  "canOwnerBeChosen": false,
   "consumeKey": false,
   "keyItemIdentifier": "",
   "keyItemCount": 0,

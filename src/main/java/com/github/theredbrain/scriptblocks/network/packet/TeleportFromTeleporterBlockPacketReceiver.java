@@ -177,18 +177,18 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							BlockPos dataBlockPos = locationControlBlock.getDataProvidingBlockPosOffset();
 							if (dataBlockPos != BlockPos.ORIGIN) {
-								ScriptBlocks.info("dataBlockPos != BlockPos.ORIGIN");
+//								ScriptBlocks.info("dataBlockPos != BlockPos.ORIGIN");
 								BlockEntity blockEntity1 = targetWorld.getBlockEntity(locationControlBlock.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
 								if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-									ScriptBlocks.info("providesDataBlockEntity.getData before reset: " + providesDataBlockEntity.getData(dataId));
+//									ScriptBlocks.info("providesDataBlockEntity.getData before reset: " + providesDataBlockEntity.getData(dataId));
 									providesDataBlockEntity.reset();
-									ScriptBlocks.info("providesDataBlockEntity.getData after reset: " + providesDataBlockEntity.getData(dataId));
+//									ScriptBlocks.info("providesDataBlockEntity.getData after reset: " + providesDataBlockEntity.getData(dataId));
 									if (!dataId.isEmpty()) {
-										ScriptBlocks.info("!dataId.isEmpty()");
-										ScriptBlocks.info("dataId: " + dataId + ", data: " + data);
+//										ScriptBlocks.info("!dataId.isEmpty()");
+//										ScriptBlocks.info("dataId: " + dataId + ", data: " + data);
 										providesDataBlockEntity.setData(dataId, data);
 									}
-									ScriptBlocks.info("providesDataBlockEntity.getData after setData: " + providesDataBlockEntity.getData(dataId));
+//									ScriptBlocks.info("providesDataBlockEntity.getData after setData: " + providesDataBlockEntity.getData(dataId));
 								}
 							}
 

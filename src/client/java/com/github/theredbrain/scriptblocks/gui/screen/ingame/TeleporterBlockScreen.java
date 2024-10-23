@@ -278,11 +278,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.setInitialFocus(this.teleportButton);
 	}
 
-	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
 	private void updateWidgets() {
 
 		this.openChooseTargetIdentifierScreenButton.visible = false;
@@ -601,20 +596,30 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-
 		super.render(context, mouseX, mouseY, delta);
+		this.drawMouseoverTooltip(context, mouseX, mouseY);
+	}
 
+	@Override
+	protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+	}
+
+	@Override
+	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+
+		int x = this.x;
+		int y = this.y;
 		TeleporterBlockEntity.TeleportationMode mode = this.teleporterBlock.getTeleportationMode();
 
 		if (this.showChooseTargetIdentifierScreen) {
 
 			for (int i = this.visibleLocationsListScrollPosition; i < Math.min(this.visibleLocationsListScrollPosition + 4, this.visibleLocationsList.size()); i++) {
-				context.drawText(this.textRenderer, this.visibleLocationsList.get(i).getLeft().getLeft(), this.x + 19, this.y + 26 + ((i - this.visibleLocationsListScrollPosition) * 24), 0x404040, false);
+				context.drawText(this.textRenderer, this.visibleLocationsList.get(i).getLeft().getLeft(), x + 19, y + 26 + ((i - this.visibleLocationsListScrollPosition) * 24), 0x404040, false);
 			}
 			if (this.visibleLocationsList.size() > 4) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, this.x + 7, this.y + 20, 8, 92);
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 20, 8, 92);
 				int k = (int) (83.0f * this.visibleLocationsListScrollAmount);
-				context.drawGuiTexture(SCROLLER_TEXTURE, this.x + 8, this.y + 20 + 1 + k, 6, 7);
+				context.drawGuiTexture(SCROLLER_TEXTURE, x + 8, y + 20 + 1 + k, 6, 7);
 			}
 
 		} else if (this.showChooseTargetOwnerScreen) {
@@ -627,68 +632,53 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			// TODO
 		} else if (this.showAdventureScreen) {
 
-			Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
-			int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
+			if (mode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+				
+				context.drawTexture(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+
+				Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
+				int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
 //                if (this.currentTargetOwner != null) {
 
-			context.drawText(this.textRenderer, teleporterName, this.x + teleporterNameOffset, this.y + 7, 0x404040, false);
-
-			if (mode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
-
-//                        context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetIdentifierLabel()), this.x + 8, this.y + 20, 0x404040, false);
+				context.drawText(this.textRenderer, teleporterName, x + teleporterNameOffset, y + 7, 0x404040, false);
+//                        context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetIdentifierLabel()), x + 8, y + 20, 0x404040, false);
 
 				if (!this.currentTargetDisplayName.isEmpty() || this.visibleLocationsList.size() > 1) {
 					if (!this.currentTargetEntrance.isEmpty() && !this.currentTargetEntranceDisplayName.isEmpty()) {
 
-						context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), this.x + 8, this.y + 20, 0x404040, false);
-						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), this.x + 8, this.y + 33, 0x404040, false);
+						context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), x + 8, y + 20, 0x404040, false);
+						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 8, y + 33, 0x404040, false);
 
 					} else {
 
-						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), this.x + 8, this.y + 27, 0x404040, false);
+						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 8, y + 27, 0x404040, false);
 
 					}
 				}
 
 				if (this.isCurrentLocationPublic && this.showCurrentLocationOwner) {
-					context.drawText(this.textRenderer, LOCATION_IS_PUBLIC_TEXT, this.x + 19, this.y + 77, 0x404040, false);
+					context.drawText(this.textRenderer, LOCATION_IS_PUBLIC_TEXT, x + 19, y + 77, 0x404040, false);
 				} else if (this.currentTargetOwner != null && this.showCurrentLocationOwner) {
-					context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), this.x + 8, this.y + 58, 0x404040, false);
+					context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), x + 8, y + 58, 0x404040, false);
 
-					context.drawTexture(currentTargetOwner.getSkinTextures().texture(), this.x + 7, this.y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
-					context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), this.x + 19, this.y + 77, 0x404040, false);
+					context.drawTexture(currentTargetOwner.getSkinTextures().texture(), x + 7, y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
+					context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), x + 19, y + 77, 0x404040, false);
 				}
 
 				if (this.currentKeyItemStack != null && !this.currentKeyItemStack.isEmpty()) {
 					ItemStack currentKey = this.currentKeyItemStack;
-//                            ScriptBlocksMod.info("should draw item: " + currentKey.toString());
-					int x = this.x + 8;
-					int y = this.y + 95;
-					int k = x + y * this.backgroundWidth;
-					context.drawItemWithoutEntity(currentKey, x, y/*, k*/);
-					context.drawItemInSlot(this.textRenderer, currentKey, x, y);
-					context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 18, y + 5, 0x404040, false);
+					context.drawItemWithoutEntity(currentKey, x + 8, y + 95);
+					context.drawItemInSlot(this.textRenderer, currentKey, x + 8, y + 95);
+					context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 26, y + 100, 0x404040, false);
 				}
-			}
-//                }
-
-		}
-//        context.drawTextWithShadow(this.textRenderer, CONSUME_KEY_ITEMSTACK_LABEL_TEXT, this.width / 2 - 153, 221, 0x404040);
-	}
-
-	@Override
-	protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-	}
-
-	@Override
-	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-		if (this.showAdventureScreen) {
-			int i = this.x;
-			int j = this.y;
-			if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
-				context.drawTexture(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 			} else {
-				context.drawTexture(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+				context.drawTexture(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+
+				Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
+				int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
+//                if (this.currentTargetOwner != null) {
+
+				context.drawText(this.textRenderer, teleporterName, x + teleporterNameOffset, y + 7, 0x404040, false);
 			}
 		}
 	}
