@@ -6,9 +6,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 public class LocationUtils {
+	public static BlockPos getControlBlockPosForLocation(Location location) {
+		return new BlockPos(location.controlBlockPosX(), location.controlBlockPosY(), location.controlBlockPosZ());
+	}
+
 	@Nullable
 	public static Identifier unlockAdvancementForEntrance(Location location, String entrance) {
 		Identifier unlockAdvancementIdentifier = null;
@@ -73,19 +78,6 @@ public class LocationUtils {
 			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
 			if (sideEntrance != null) {
 				return sideEntrance.showLockAdvancement();
-			}
-		}
-		return false;
-	}
-
-	public static boolean showLocationNameForEntrance(Location location, String entrance) {
-		if (entrance.isEmpty()) {
-			return location.showLocationName();
-		}
-		if (location.side_entrances() != null) {
-			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
-			if (sideEntrance != null) {
-				return sideEntrance.showLocationName();
 			}
 		}
 		return false;

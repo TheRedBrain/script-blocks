@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
@@ -112,7 +113,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					targetWorld = server.getOverworld();
 				} else if (targetDimensionOwner != null) {
 //                ScriptBlocks.info("targetDimensionOwner: " + targetDimensionOwner);
-					Identifier targetDimensionId = Identifier.tryParse(targetDimensionOwner.getUuidAsString());
+					Identifier targetDimensionId = ScriptBlocks.identifier(targetDimensionOwner.getUuidAsString());
 //                ScriptBlocks.info("targetDimensionId: " + targetDimensionId);
 					RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
 					targetWorld = server.getWorld(dimensionregistryKey);
@@ -134,9 +135,17 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				if (targetWorld != null) {
 //                    ScriptBlocks.info("targetWorld != null && location != null");
 
-					BlockPos blockPos = location.controlBlockPos();
+					BlockPos blockPos = LocationUtils.getControlBlockPosForLocation(location);
 					BlockEntity blockEntity = targetWorld.getBlockEntity(blockPos);
 					boolean initialise = false;
+
+					if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+						DebuggingHelper.sendDebuggingMessage("targetLocation: " + targetLocation, serverPlayerEntity);
+						DebuggingHelper.sendDebuggingMessage("targetWorld: " + targetWorld.getRegistryKey().toString(), serverPlayerEntity);
+						DebuggingHelper.sendDebuggingMessage("location: " + location, serverPlayerEntity);
+						DebuggingHelper.sendDebuggingMessage("location.controlBlockPos: " + LocationUtils.getControlBlockPosForLocation(location), serverPlayerEntity);
+						DebuggingHelper.sendDebuggingMessage("block at controlBlockPos: " + targetWorld.getBlockState(blockPos).getBlock().getTranslationKey(), serverPlayerEntity);
+					}
 
 					if (!(blockEntity instanceof LocationControlBlockEntity)) {
 
@@ -168,12 +177,18 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							BlockPos dataBlockPos = locationControlBlock.getDataProvidingBlockPosOffset();
 							if (dataBlockPos != BlockPos.ORIGIN) {
+								ScriptBlocks.info("dataBlockPos != BlockPos.ORIGIN");
 								BlockEntity blockEntity1 = targetWorld.getBlockEntity(locationControlBlock.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
 								if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
+									ScriptBlocks.info("providesDataBlockEntity.getData before reset: " + providesDataBlockEntity.getData(dataId));
 									providesDataBlockEntity.reset();
+									ScriptBlocks.info("providesDataBlockEntity.getData after reset: " + providesDataBlockEntity.getData(dataId));
 									if (!dataId.isEmpty()) {
+										ScriptBlocks.info("!dataId.isEmpty()");
+										ScriptBlocks.info("dataId: " + dataId + ", data: " + data);
 										providesDataBlockEntity.setData(dataId, data);
 									}
+									ScriptBlocks.info("providesDataBlockEntity.getData after setData: " + providesDataBlockEntity.getData(dataId));
 								}
 							}
 
@@ -254,7 +269,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
 				if (targetWorld != server.getOverworld()) {
 					DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
-
 				}
 			}
 			serverPlayerEntity.closeHandledScreen();
@@ -284,7 +298,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 								DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, teamServerPlayerEntity);
 								if (targetWorld != server.getOverworld()) {
 									DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, teamServerPlayerEntity);
-
 								}
 							}
 							serverPlayerEntity.closeHandledScreen();

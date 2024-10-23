@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DataSavingBlockEntity extends BlockEntity implements Resetable, ProvidesData {
-	private HashMap<String, Integer> data = new HashMap<>(Map.of());
+	private final HashMap<String, Integer> data = new HashMap<>(Map.of());
 
 	public DataSavingBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.DATA_SAVING_BLOCK_ENTITY, pos, state);

@@ -116,7 +116,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	@Nullable
 	private Advancement currentUnlockAdvancement;
 	private boolean isCurrentLocationPublic;
-	private boolean showCurrentLocationName;
 	private boolean showCurrentLocationOwner;
 	private boolean consumeKeyItem = false;
 	private ItemStack currentKeyItemStack;
@@ -174,6 +173,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void chooseTargetIdentifier(int index) {
 		this.currentTargetIdentifier = this.visibleLocationsList.get(this.visibleLocationsListScrollPosition + index).getLeft().getLeft();
 		this.currentTargetEntrance = this.visibleLocationsList.get(this.visibleLocationsListScrollPosition + index).getLeft().getRight();
+		this.currentTargetEntranceDataId = this.visibleLocationsList.getFirst().getRight().getLeft();
+		this.currentTargetEntranceData = this.visibleLocationsList.getFirst().getRight().getRight();
 		this.showChooseTargetIdentifierScreen = false;
 		this.calculateUnlockedAndVisibleLocations(false);
 		this.updateWidgets();
@@ -221,6 +222,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		}
 		this.locationsList.clear();
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
+		this.canOwnerBeChosen = true;// TODO this.teleporterBlock.getCanOwnerBeChosen();
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
@@ -411,7 +413,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
 
 					if (advancementHandler != null) {
-						ScriptBlocks.info("advancementHandler != null");
+//						ScriptBlocks.info("advancementHandler != null");
 						AdvancementEntry lockAdvancementEntry = null;
 						if (lockAdvancementIdentifier != null) {
 							lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
@@ -422,11 +424,11 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						}
 						if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 
-							ScriptBlocks.info("location unlocked: " + entry);
+//							ScriptBlocks.info("location unlocked: " + entry);
 							this.unlockedLocationsList.add(entry);
 							this.visibleLocationsList.add(entry);
 						} else if (showLockedLocation) {
-							ScriptBlocks.info("location locked but visible: " + entry);
+//							ScriptBlocks.info("location locked but visible: " + entry);
 							this.visibleLocationsList.add(entry);
 						}
 					}
@@ -434,11 +436,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				if (!this.visibleLocationsList.isEmpty()) {
 					this.currentTargetIdentifier = this.visibleLocationsList.getFirst().getLeft().getLeft();
 					this.currentTargetEntrance = this.visibleLocationsList.getFirst().getLeft().getRight();
+					this.currentTargetEntranceDataId = this.visibleLocationsList.getFirst().getRight().getLeft();
+					this.currentTargetEntranceData = this.visibleLocationsList.getFirst().getRight().getRight();
 				}
 			}
 		}
 
-		ScriptBlocks.info("this.currentTargetIdentifier: " + this.currentTargetIdentifier);
+//		ScriptBlocks.info("this.currentTargetIdentifier: " + this.currentTargetIdentifier);
 
 		for (MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> dungeonLocation : this.unlockedLocationsList) {
 			if (Objects.equals(dungeonLocation.getLeft().getLeft(), this.currentTargetIdentifier)) {
@@ -457,9 +461,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			this.isCurrentLocationPublic = location.isPublic();
 			this.consumeKeyItem = LocationUtils.consumeKeyAtEntrance(location, this.currentTargetEntrance);
 			this.currentKeyItemStack = LocationUtils.getKeyForEntrance(location, this.currentTargetEntrance);
-			this.canOwnerBeChosen = location.canOwnerBeChosen();
 
-			this.showCurrentLocationName = LocationUtils.showLocationNameForEntrance(location, this.currentTargetEntrance);
 			this.showCurrentLocationOwner = LocationUtils.showLocationOwnerForEntrance(location, this.currentTargetEntrance);
 			if (advancementHandler != null) {
 				AdvancementEntry lockAdvancementEntry = null;
@@ -469,7 +471,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				AdvancementEntry unlockAdvancementEntry = null;
 				if (unlockAdvancementIdentifier != null) {
 					unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
-//					unlockAdvancementEntry = advancementHandler.getManager().get(Identifier.tryParse(unlockAdvancementIdentifier);
 				}
 				if (lockAdvancementEntry != null) {
 					this.currentLockAdvancement = lockAdvancementEntry.value();
@@ -636,7 +637,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 //                        context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetIdentifierLabel()), this.x + 8, this.y + 20, 0x404040, false);
 
-				if (this.showCurrentLocationName || this.visibleLocationsList.size() > 1) {
+				if (!this.currentTargetDisplayName.isEmpty() || this.visibleLocationsList.size() > 1) {
 					if (!this.currentTargetEntrance.isEmpty() && !this.currentTargetEntranceDisplayName.isEmpty()) {
 
 						context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), this.x + 8, this.y + 20, 0x404040, false);
@@ -722,7 +723,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(this.currentTargetIdentifier));
 			if (location != null) {
 				ClientPlayNetworking.send(new SetManualResetLocationControlBlockPacket(
-						location.controlBlockPos(),
+						LocationUtils.getControlBlockPosForLocation(location),
 						true
 				));
 				return true;
@@ -743,7 +744,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		if (this.isCurrentLocationPublic) {
 			currentTargetOwnerName = "";
 		}
-		ScriptBlocks.info("TeleportBlockScreen.teleport, currentTargetIdentifier: " + this.currentTargetIdentifier);
+//		ScriptBlocks.info("TeleportBlockScreen.teleport, currentTargetIdentifier: " + this.currentTargetIdentifier);
 		ClientPlayNetworking.send(new TeleportFromTeleporterBlockPacket(
 				this.teleporterBlock.getPos(),
 				currentWorld,

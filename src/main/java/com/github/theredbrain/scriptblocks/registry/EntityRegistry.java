@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
@@ -36,9 +37,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<TriggeredCounterBlockEntity> TRIGGERED_COUNTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_counter_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredCounterBlockEntity::new, BlockRegistry.TRIGGERED_COUNTER_BLOCK).build());
-	public static final BlockEntityType<DataSavingBlockEntity> DATA_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+	public static final BlockEntityType<DataRelayBlockEntity> DATA_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_relay_block"),
-			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_RELAY_BLOCK).build());
+			FabricBlockEntityTypeBuilder.create(DataRelayBlockEntity::new, BlockRegistry.DATA_RELAY_BLOCK).build());
 	public static final BlockEntityType<DataSavingBlockEntity> DATA_SAVING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_saving_block"),
 			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_SAVING_BLOCK).build());
