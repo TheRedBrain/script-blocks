@@ -18,11 +18,8 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
 	private int triggerDelay = 0;
-
-	private boolean ticking = false;
 	private int remainingTicks = 0;
 
 	public DelayTriggerBlockEntity(BlockPos pos, BlockState state) {
@@ -32,12 +29,29 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+		if (this.triggeredBlock.getLeft().getX() != 0 || this.triggeredBlock.getLeft().getY() != 0 || this.triggeredBlock.getLeft().getZ() != 0 || this.triggeredBlock.getRight()) {
+			nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
+			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
+			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
+			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+		} else {
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
+		}
 
-		nbt.putInt("triggerDelay", this.triggerDelay);
+		if (this.triggerDelay > 0) {
+			nbt.putInt("triggerDelay", this.triggerDelay);
+		} else {
+			nbt.remove("triggerDelay");
+		}
+
+		if (this.remainingTicks > 0) {
+			nbt.putInt("remainingTicks", this.remainingTicks);
+		} else {
+			nbt.remove("remainingTicks");
+		}
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -45,12 +59,26 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("triggeredBlockPositionOffsetX") && nbt.contains("triggeredBlockPositionOffsetY") && nbt.contains("triggeredBlockPositionOffsetZ") && nbt.contains("triggeredBlockResets")) {
+			int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
+			int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
+			int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
+			this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		} else {
+			this.triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+		}
 
-		this.triggerDelay = nbt.getInt("triggerDelay");
+		if (nbt.contains("triggerDelay")) {
+			this.triggerDelay = Math.max(0, nbt.getInt("triggerDelay"));
+		} else {
+			this.triggerDelay = 0;
+		}
+
+		if (nbt.contains("remainingTicks")) {
+			this.remainingTicks = Math.max(0, nbt.getInt("remainingTicks"));
+		} else {
+			this.remainingTicks = 0;
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -66,11 +94,9 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	public static void tick(World world, BlockPos pos, BlockState state, DelayTriggerBlockEntity blockEntity) {
 
-		if (!world.isClient && blockEntity.ticking) {
+		if (!world.isClient && blockEntity.remainingTicks > 0) {
 			blockEntity.remainingTicks--;
 			if (blockEntity.remainingTicks <= 0) {
-				blockEntity.ticking = false;
-				blockEntity.remainingTicks = 0;
 				blockEntity.triggerTriggeredBlock();
 			}
 		}
@@ -78,7 +104,6 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	public void trigger() {
 		if (this.world != null) {
-			this.ticking = true;
 			this.remainingTicks = this.triggerDelay;
 		}
 	}
@@ -109,10 +134,8 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		return triggerDelay;
 	}
 
-	// TODO check if input is valid
-	public boolean setTriggerDelay(int triggerDelay) {
-		this.triggerDelay = triggerDelay;
-		return true;
+	public void setTriggerDelay(int triggerDelay) {
+		this.triggerDelay = Math.max(0, triggerDelay);
 	}
 
 	@Override

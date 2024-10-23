@@ -31,20 +31,13 @@ public class UpdateDelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 
 		World world = serverPlayerEntity.getWorld();
 
-		boolean updateSuccessful = true;
-
 		BlockEntity blockEntity = world.getBlockEntity(delayTriggerBlockPosition);
 		BlockState blockState = world.getBlockState(delayTriggerBlockPosition);
 
 		if (blockEntity instanceof DelayTriggerBlockEntity delayTriggerBlockEntity) {
 			delayTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			if (!delayTriggerBlockEntity.setTriggerDelay(triggerDelay)) {
-				serverPlayerEntity.sendMessage(Text.translatable("delay_trigger_block.triggerDelay.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			}
+			delayTriggerBlockEntity.setTriggerDelay(triggerDelay);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			delayTriggerBlockEntity.markDirty();
 			world.updateListeners(delayTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}
