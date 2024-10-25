@@ -226,9 +226,36 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 							}
 						}
 					}
-				} else if (this.triggerMode == TriggerMode.BINOMIAL_URN) { // TODO
-					ScriptBlocks.info("this mode is WIP");
-				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC_URN) { // TODO
+				} else if (this.triggerMode == TriggerMode.BINOMIAL) {
+					int totalAmount = 0;
+					for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+						totalAmount += triggeredBlock.getRight();
+					}
+					if (totalAmount > 0) {
+						for (int i = 0; i < this.triggerAmount; i++) {
+							int pickedChoice = this.world.random.nextInt(totalAmount);
+							for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
+								pickedChoice -= triggeredBlock.getRight();
+								if (pickedChoice <= 0) {
+									BlockPos triggeredBlockPos = triggeredBlock.left.left;
+									blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlockPos.getX(), this.pos.getY() + triggeredBlockPos.getY(), this.pos.getZ() + triggeredBlockPos.getZ()));
+									if (blockEntity != this) {
+										if (triggeredBlock.getLeft().getRight()) {
+											if (blockEntity instanceof Resetable resetable) {
+												resetable.reset();
+											}
+										} else {
+											if (blockEntity instanceof Triggerable triggerable) {
+												triggerable.trigger();
+											}
+										}
+									}
+									break;
+								}
+							}
+						}
+					}
+				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC) { // TODO
 					ScriptBlocks.info("this mode is WIP");
 				}
 			} else if (this.selectionMode == SelectionMode.AREA) {
@@ -333,8 +360,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	public static enum TriggerMode implements StringIdentifiable {
 		NORMAL("normal"),
 		RANDOM("random"),
-		BINOMIAL_URN("binomial_urn"),
-		HYPER_GEOMETRIC_URN("hyper_geometric_urn");
+		BINOMIAL("binomial"),
+		HYPER_GEOMETRIC("hyper_geometric");
 
 		private final String name;
 

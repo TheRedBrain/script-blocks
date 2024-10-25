@@ -219,8 +219,8 @@
 
 	"gui.relay_trigger_block.triggerMode.normal": "Mode: Normal",
 	"gui.relay_trigger_block.triggerMode.random": "Mode: Random",
-	"gui.relay_trigger_block.triggerMode.binomial_urn": "Mode: Binomial Urn",
-	"gui.relay_trigger_block.triggerMode.hyper_geometric_urn": "Mode: Hyper Geometric Urn",
+	"gui.relay_trigger_block.triggerMode.binomial": "Mode: Binomial",
+	"gui.relay_trigger_block.triggerMode.hyper_geometric": "Mode: Hyper Geometric",
 
 
 	"gui.teleporter_block.regeneration_confirm_screen.title": "Do you want to regenerate this dungeon?",
