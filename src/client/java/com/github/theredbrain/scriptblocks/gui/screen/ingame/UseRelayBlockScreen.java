@@ -56,7 +56,16 @@ public class UseRelayBlockScreen extends Screen {
 		this.addSelectableChild(this.relayBlockPositionOffsetZField);
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 145, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 145, 150, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.relayBlockPositionOffsetXField);
+	}
+
+	@Override
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		this.renderInGameBackground(context);
 	}
 
 	@Override

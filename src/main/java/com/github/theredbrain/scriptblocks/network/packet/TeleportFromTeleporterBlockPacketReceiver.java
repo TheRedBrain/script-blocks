@@ -105,6 +105,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			ServerPlayerEntity targetDimensionOwner = server.getPlayerManager().getPlayer(targetDimensionOwnerName);
 
+//            ScriptBlocks.info("targetDimensionOwnerName: " + targetDimensionOwnerName);
 //            ScriptBlocks.info("targetLocation: " + targetLocation);
 
 			if (location != null) {

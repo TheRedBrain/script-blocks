@@ -5,12 +5,25 @@ import com.github.theredbrain.scriptblocks.block.UseRelayChestBlock;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 
 public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Resetable {
 
 	public UseRelayChestBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.USE_RELAY_CHEST_BLOCK_ENTITY, pos, state);
+	}
+
+	@Override
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+		super.writeNbt(nbt, registryLookup);
+	}
+
+	@Override
+	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+		super.readNbt(nbt, registryLookup);
 	}
 
 	@Override
