@@ -15,6 +15,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 		String displayModeString,
 		boolean isTriggered,
 		Vec3d displayOffset,
+		float displayYaw,
+		float displayPitch,
 		String displayTextString,
 		int lineWidth,
 		Byte textOpacity,
@@ -30,6 +32,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readVec3d(),
+				registryByteBuf.readFloat(),
+				registryByteBuf.readFloat(),
 				registryByteBuf.readString(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readByte(),
@@ -43,6 +47,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 		registryByteBuf.writeString(this.displayModeString);
 		registryByteBuf.writeBoolean(this.isTriggered);
 		registryByteBuf.writeVec3d(this.displayOffset);
+		registryByteBuf.writeFloat(this.displayYaw);
+		registryByteBuf.writeFloat(this.displayPitch);
 		registryByteBuf.writeString(this.displayTextString);
 		registryByteBuf.writeInt(this.lineWidth);
 		registryByteBuf.writeByte(this.textOpacity);

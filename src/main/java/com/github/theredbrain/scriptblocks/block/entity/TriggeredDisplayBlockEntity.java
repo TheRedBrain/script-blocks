@@ -65,6 +65,10 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	public static final String DISPLAY_OFFSET_X_NBT_KEY = "display_offset_x";
 	public static final String DISPLAY_OFFSET_Y_NBT_KEY = "display_offset_y";
 	public static final String DISPLAY_OFFSET_Z_NBT_KEY = "display_offset_z";
+	public static final String DISPLAY_YAW_NBT_KEY = "display_yaw";
+	public static final String DISPLAY_PITCH_NBT_KEY = "display_pitch";
+	public static final String DISPLAY_PREV_YAW_NBT_KEY = "display_prev_yaw";
+	public static final String DISPLAY_PREV_PITCH_NBT_KEY = "display_prev_pitch";
 //	// block mode
 //	public static final String BLOCK_STATE_NBT_KEY = "block_state";
 //
@@ -156,10 +160,10 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	// entity replacements
 	private long age;
-	private float displayYaw;
-	private float displayPitch;
-	private float displayPrevYaw;
-	private float displayPrevPitch;
+	private float displayYaw = 0.0F;
+	private float displayPitch = 0.0F;
+	private float displayPrevYaw = 0.0F;
+	private float displayPrevPitch = 0.0F;
 
 	public TriggeredDisplayBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.TRIGGERED_DISPLAY_BLOCK_ENTITY, pos, state);
@@ -373,6 +377,19 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 					nbt.getDouble(DISPLAY_OFFSET_Z_NBT_KEY)
 			));
 		}
+
+		if (nbt.contains(DISPLAY_YAW_NBT_KEY)) {
+			this.displayYaw = nbt.getFloat(DISPLAY_YAW_NBT_KEY);
+		}
+		if (nbt.contains(DISPLAY_PITCH_NBT_KEY)) {
+			this.displayPitch = nbt.getFloat(DISPLAY_PITCH_NBT_KEY);
+		}
+		if (nbt.contains(DISPLAY_PREV_YAW_NBT_KEY)) {
+			this.displayPrevYaw = nbt.getFloat(DISPLAY_PREV_YAW_NBT_KEY);
+		}
+		if (nbt.contains(DISPLAY_PREV_PITCH_NBT_KEY)) {
+			this.displayPrevPitch = nbt.getFloat(DISPLAY_PREV_PITCH_NBT_KEY);
+		}
 //		// item mode
 //		if (nbt.contains("item")) {
 //			this.setItemStack((ItemStack)ItemStack.fromNbt(registryLookup, nbt.getCompound("item")).orElse(ItemStack.EMPTY));
@@ -473,6 +490,11 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			nbt.putDouble(DISPLAY_OFFSET_Y_NBT_KEY, this.displayOffset.y);
 			nbt.putDouble(DISPLAY_OFFSET_Z_NBT_KEY, this.displayOffset.z);
 		}
+
+		nbt.putFloat(DISPLAY_YAW_NBT_KEY, this.displayYaw);
+		nbt.putFloat(DISPLAY_PITCH_NBT_KEY, this.displayPitch);
+		nbt.putFloat(DISPLAY_PREV_YAW_NBT_KEY, this.displayPrevYaw);
+		nbt.putFloat(DISPLAY_PREV_PITCH_NBT_KEY, this.displayPrevPitch);
 
 //		// item mode
 //		if (!this.getItemStack().isEmpty()) {
@@ -782,6 +804,8 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	public void setDisplayRotation(float yaw, float pitch) {
 		this.displayYaw = yaw;
 		this.displayPitch = pitch;
+		this.displayPrevYaw = yaw;
+		this.displayPrevPitch = pitch;
 	}
 
 	public DisplayMode getDisplayMode() {

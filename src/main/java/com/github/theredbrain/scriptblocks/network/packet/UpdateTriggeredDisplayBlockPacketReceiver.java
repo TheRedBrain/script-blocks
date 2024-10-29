@@ -29,6 +29,8 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		TriggeredDisplayBlockEntity.DisplayMode displayMode = TriggeredDisplayBlockEntity.DisplayMode.byName(payload.displayModeString()).orElse(TriggeredDisplayBlockEntity.DisplayMode.TEXT);
 		boolean isTriggered = payload.isTriggered();
 		Vec3d displayOffset = payload.displayOffset();
+		float displayYaw = payload.displayYaw();
+		float displayPitch = payload.displayPitch();
 		// text mode
 		String displayTextString = payload.displayTextString();
 		int lineWidth = payload.lineWidth();
@@ -45,6 +47,7 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 			triggeredDisplayBlockEntity.setDisplayMode(displayMode);
 			triggeredDisplayBlockEntity.setIsTriggered(isTriggered);
 			triggeredDisplayBlockEntity.setDisplayOffset(displayOffset);
+			triggeredDisplayBlockEntity.setDisplayRotation(displayYaw, displayPitch);
 			triggeredDisplayBlockEntity.setTextString(displayTextString);
 			triggeredDisplayBlockEntity.setLineWidth(lineWidth);
 			triggeredDisplayBlockEntity.setTextOpacity(textOpacity);

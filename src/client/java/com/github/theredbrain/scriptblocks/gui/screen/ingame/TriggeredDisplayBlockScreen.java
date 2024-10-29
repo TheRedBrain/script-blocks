@@ -36,6 +36,8 @@ public class TriggeredDisplayBlockScreen extends Screen {
 	private TextFieldWidget displayOffsetXField;
 	private TextFieldWidget displayOffsetYField;
 	private TextFieldWidget displayOffsetZField;
+	private TextFieldWidget displayYawField;
+	private TextFieldWidget displayPitchField;
 
 
 	// text mode
@@ -107,6 +109,16 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.displayOffsetZField.setText(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getZ()));
 		this.addSelectableChild(this.displayOffsetZField);
 
+		this.displayYawField = new TextFieldWidget(this.textRenderer, this.width / 2 + 8, 116, 50, 20, Text.empty());
+		this.displayYawField.setMaxLength(128);
+		this.displayYawField.setText(Float.toString(this.triggeredDisplayBlock.getDisplayYaw()));
+		this.addSelectableChild(this.displayYawField);
+
+		this.displayPitchField = new TextFieldWidget(this.textRenderer, this.width / 2 + 62, 116, 50, 20, Text.empty());
+		this.displayPitchField.setMaxLength(128);
+		this.displayPitchField.setText(Float.toString(this.triggeredDisplayBlock.getDisplayPitch()));
+		this.addSelectableChild(this.displayPitchField);
+
 		// --- text mode ---
 		this.displayTextField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 44, 300, 20, Text.empty());
 		this.displayTextField.setMaxLength(128);
@@ -152,6 +164,8 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.displayOffsetXField.setVisible(false);
 		this.displayOffsetYField.setVisible(false);
 		this.displayOffsetZField.setVisible(false);
+		this.displayYawField.setVisible(false);
+		this.displayPitchField.setVisible(false);
 
 		this.displayTextField.setVisible(false);
 		this.lineWidthField.setVisible(false);
@@ -166,6 +180,8 @@ public class TriggeredDisplayBlockScreen extends Screen {
 			this.displayOffsetXField.setVisible(true);
 			this.displayOffsetYField.setVisible(true);
 			this.displayOffsetZField.setVisible(true);
+			this.displayYawField.setVisible(true);
+			this.displayPitchField.setVisible(true);
 
 		} else if (this.screenPage == ScreenPage.TEXT_MODE) {
 
@@ -201,6 +217,8 @@ public class TriggeredDisplayBlockScreen extends Screen {
 			this.displayOffsetXField.render(context, mouseX, mouseY, delta);
 			this.displayOffsetYField.render(context, mouseX, mouseY, delta);
 			this.displayOffsetZField.render(context, mouseX, mouseY, delta);
+			this.displayYawField.render(context, mouseX, mouseY, delta);
+			this.displayPitchField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.screenPage == ScreenPage.TEXT_MODE) {
 
@@ -222,6 +240,8 @@ public class TriggeredDisplayBlockScreen extends Screen {
 						ItemUtils.parseDouble(this.displayOffsetYField.getText()),
 						ItemUtils.parseDouble(this.displayOffsetZField.getText())
 				),
+				ItemUtils.parseFloat(this.displayYawField.getText()),
+				ItemUtils.parseFloat(this.displayPitchField.getText()),
 				this.displayTextField.getText(),
 				ItemUtils.parseInt(this.lineWidthField.getText()),
 				ItemUtils.parseByte(this.textOpacityField.getText()),
