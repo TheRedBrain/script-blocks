@@ -56,6 +56,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredAdvance
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredAdvancementCheckerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacket;
@@ -102,6 +104,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateDelayTriggerBlockPacket.PACKET_ID, UpdateDelayTriggerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDelayTriggerBlockPacket.PACKET_ID, new UpdateDelayTriggerBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredDisplayBlockPacket.PACKET_ID, UpdateTriggeredDisplayBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredDisplayBlockPacket.PACKET_ID, new UpdateTriggeredDisplayBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateInteractiveLootBlockPacket.PACKET_ID, UpdateInteractiveLootBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveLootBlockPacket.PACKET_ID, new UpdateInteractiveLootBlockPacketReceiver());

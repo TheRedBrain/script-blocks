@@ -331,6 +331,24 @@
 	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",
 
 
+	"gui.triggered_display_block.toggle_is_triggered_button_label.on": "Is Triggered",
+	"gui.triggered_display_block.toggle_is_triggered_button_label.off": "Is Not Triggered",
+
+	"gui.triggered_display_block.display_mode.block": "Display Mode: Block",
+	"gui.triggered_display_block.display_mode.text": "Display Mode: Text",
+	"gui.triggered_display_block.display_mode.item": "Display Mode: Item",
+
+	"gui.triggered_display_block.billboard_mode.fixed": "Billboard: Fixed",
+	"gui.triggered_display_block.billboard_mode.vertical": "Billboard: Vertical",
+	"gui.triggered_display_block.billboard_mode.horizontal": "Billboard: Horizontal",
+	"gui.triggered_display_block.billboard_mode.center": "Billboard: Center",
+
+	"gui.triggered_display_block.screenPage.common": "Common",
+	"gui.triggered_display_block.screenPage.block_mode": "Block Mode",
+	"gui.triggered_display_block.screenPage.item_mode": "Item Mode",
+	"gui.triggered_display_block.screenPage.text_mode": "Text Mode",
+
+
 	"gui.triggered_spawner_block.spawner_bound_entity_name_field_label": "Name",
 	"gui.triggered_spawner_block.spawner_bound_entity_model_identifier_field_label": "Model Identifier",
 	"gui.triggered_spawner_block.spawner_bound_entity_texture_identifier_field_label": "Texture Identifier",
