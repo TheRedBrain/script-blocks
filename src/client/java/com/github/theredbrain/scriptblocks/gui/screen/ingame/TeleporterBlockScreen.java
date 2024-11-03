@@ -222,7 +222,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		}
 		this.locationsList.clear();
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
-		this.canOwnerBeChosen = true;// TODO this.teleporterBlock.getCanOwnerBeChosen();
+		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();

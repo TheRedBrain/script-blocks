@@ -67,10 +67,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	// location mode
 	private List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>(List.of());
 
+//	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = new MutablePair<>();
+
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
 	private String currentTargetIdentifierLabel = "gui.teleporter_block.target_identifier_field.label";
 	private boolean showRegenerateButton = true;
+	private boolean canOwnerBeChosen = true;
 	private String teleportButtonLabel = "gui.teleporter_block.teleport_button.label";
 	private String cancelTeleportButtonLabel = "gui.teleporter_block.cancel_teleport_button.label";
 
@@ -129,9 +132,15 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			nbt.putString("locationsListData_" + i, this.locationsList.get(i).getRight().getRight());
 		}
 
+//		nbt.putString("currentLocationIdentifier", this.currentLocation.getLeft().getLeft());
+//		nbt.putString("currentLocationEntrance", this.currentLocation.getLeft().getRight());
+//		nbt.putString("currentLocationDataId", this.currentLocation.getRight().getLeft());
+//		nbt.putString("currentLocationData", this.currentLocation.getRight().getRight());
+
 		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
 		nbt.putString("currentTargetOwnerLabel", this.currentTargetOwnerLabel);
 		nbt.putBoolean("showRegenerateButton", this.showRegenerateButton);
+		nbt.putBoolean("canOwnerBeChosen", this.canOwnerBeChosen);
 		nbt.putString("teleportButtonLabel", this.teleportButtonLabel);
 		nbt.putString("cancelTeleportButtonLabel", this.cancelTeleportButtonLabel);
 
@@ -203,9 +212,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			this.locationsList.add(new MutablePair<>(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)), new MutablePair<>(nbt.getString("locationsListDataId_" + p), nbt.getString("locationsListData_" + p))));
 		}
 
+//		this.currentLocation = new MutablePair<>(new MutablePair<>(nbt.getString("currentLocationIdentifier"), nbt.getString("currentLocationEntrance")), new MutablePair<>(nbt.getString("currentLocationDataId"), nbt.getString("currentLocationData")));
+
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
 		this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
 		this.showRegenerateButton = nbt.getBoolean("showRegenerateButton");
+		this.canOwnerBeChosen = nbt.getBoolean("canOwnerBeChosen");
 		this.teleportButtonLabel = nbt.getString("teleportButtonLabel");
 		this.cancelTeleportButtonLabel = nbt.getString("cancelTeleportButtonLabel");
 
@@ -409,11 +421,17 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		return this.locationsList;
 	}
 
-	// TODO check if input is valid
-	public boolean setLocationsList(List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList) {
+	public void setLocationsList(List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList) {
 		this.locationsList = locationsList;
-		return true;
 	}
+
+//	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getCurrentLocation() {
+//		return this.currentLocation;
+//	}
+//
+//	public void setCurrentLocation(MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation) {
+//		this.currentLocation = currentLocation;
+//	}
 
 	public String getCurrentTargetIdentifierLabel() {
 		return this.currentTargetIdentifierLabel;
@@ -437,6 +455,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 	public void setShowRegenerateButton(boolean showRegenerateButton) {
 		this.showRegenerateButton = showRegenerateButton;
+	}
+
+	public boolean canOwnerBeChosen() {
+		return this.canOwnerBeChosen;
+	}
+
+	public void setCanOwnerBeChosen(boolean canOwnerBeChosen) {
+		this.canOwnerBeChosen = canOwnerBeChosen;
 	}
 
 	public String getTeleportButtonLabel() {
@@ -518,7 +544,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	public static enum TeleportationMode implements StringIdentifiable {
 		DIRECT("direct"),
 		SPAWN_POINTS("spawn_points"),
-		LOCATIONS("locations");
+		LOCATIONS("locations")/*,
+		LOCATION("location")*/;
 
 		private final String name;
 

@@ -29,10 +29,12 @@ public record UpdateTeleporterBlockPacket(
 		double directTeleportOrientationPitch,
 		String spawnPointType,
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList,
+//		MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation,
 		String teleporterName,
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
 		boolean showRegenerateButton,
+		boolean canOwnerBeChosen,
 		String teleportButtonLabel,
 		String cancelTeleportButtonLabel
 ) implements CustomPayload {
@@ -61,9 +63,11 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
+//				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString()
@@ -100,10 +104,12 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING);
 
+//		CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.encode(registryByteBuf, this.currentLocation);
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);
 		registryByteBuf.writeString(this.currentTargetOwnerLabel);
 		registryByteBuf.writeBoolean(this.showRegenerateButton);
+		registryByteBuf.writeBoolean(this.canOwnerBeChosen);
 		registryByteBuf.writeString(this.teleportButtonLabel);
 		registryByteBuf.writeString(this.cancelTeleportButtonLabel);
 	}

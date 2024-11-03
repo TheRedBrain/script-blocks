@@ -50,10 +50,13 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = payload.locationsList();
 
+//		MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = payload.currentLocation();
+
 		String teleporterName = payload.teleporterName();
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();
 		String currentTargetOwnerLabel = payload.currentTargetOwnerLabel();
 		boolean showRegenerateButton = payload.showRegenerateButton();
+		boolean canOwnerBeChosen = payload.canOwnerBeChosen();
 		String teleportButtonLabel = payload.teleportButtonLabel();
 		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
 
@@ -75,28 +78,23 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setOnlyTeleportDimensionOwner(onlyTeleportDimensionOwner);
 			teleporterBlockEntity.setTeleportTeam(teleportTeam);
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);
-			if (teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
-				teleporterBlockEntity.setDirectTeleportPositionOffset(directTeleportPositionOffset);
-				if (!teleporterBlockEntity.setDirectTeleportOrientationYaw(directTeleportOrientationYaw)) {
-					player.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
-					updateSuccessful = false;
-				}
-				if (!teleporterBlockEntity.setDirectTeleportOrientationPitch(directTeleportOrientationPitch)) {
-					player.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
-					updateSuccessful = false;
-				}
-			} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
-				teleporterBlockEntity.setSpawnPointType(spawnPointType);
-			} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
-				if (!teleporterBlockEntity.setLocationsList(locationsList)) {
-					player.sendMessage(Text.translatable("teleporter_block.locationsList.invalid"), false);
-					updateSuccessful = false;
-				}
+			teleporterBlockEntity.setDirectTeleportPositionOffset(directTeleportPositionOffset);
+			if (!teleporterBlockEntity.setDirectTeleportOrientationYaw(directTeleportOrientationYaw)) {
+				player.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
+				updateSuccessful = false;
 			}
+			if (!teleporterBlockEntity.setDirectTeleportOrientationPitch(directTeleportOrientationPitch)) {
+				player.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
+				updateSuccessful = false;
+			}
+			teleporterBlockEntity.setSpawnPointType(spawnPointType);
+			teleporterBlockEntity.setLocationsList(locationsList);
+//			teleporterBlockEntity.setCurrentLocation(currentLocation);
 			teleporterBlockEntity.setTeleporterName(teleporterName);
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);
 			teleporterBlockEntity.setCurrentTargetOwnerLabel(currentTargetOwnerLabel);
 			teleporterBlockEntity.setShowRegenerateButton(showRegenerateButton);
+			teleporterBlockEntity.setCanOwnerBeChosen(canOwnerBeChosen);
 			teleporterBlockEntity.setTeleportButtonLabel(teleportButtonLabel);
 			teleporterBlockEntity.setCancelTeleportButtonLabel(cancelTeleportButtonLabel);
 

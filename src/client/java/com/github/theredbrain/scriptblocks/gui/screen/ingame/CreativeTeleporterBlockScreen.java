@@ -58,6 +58,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_status_effect_button_label");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
+	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on");
+	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.off");
 	private static final Text NEW_STATUS_EFFECT_FIELD_TEXT = Text.translatable("gui.teleporter_block.new_status_effect_field");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_88_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_88");
@@ -108,6 +110,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget currentTargetOwnerLabelField;
 	private TextFieldWidget currentTargetIdentifierLabelField;
 	private CyclingButtonWidget<Boolean> toggleShowRegenerateButtonButton;
+	private CyclingButtonWidget<Boolean> toggleCanOwnerBeChosenButton;
 	private TextFieldWidget teleportButtonLabelField;
 	private TextFieldWidget cancelTeleportButtonLabelField;
 	private ButtonWidget doneButton;
@@ -120,6 +123,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private boolean onlyTeleportDimensionOwner;
 	private boolean teleportTeam;
 	private boolean showRegenerateButton;
+	private boolean canOwnerBeChosen;
 
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 	private TeleporterBlockEntity.SpawnPointType spawnPointType;
@@ -155,6 +159,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
 		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
 		this.teleporterBlock.setShowRegenerateButton(this.showRegenerateButton);
+		this.teleporterBlock.setCanOwnerBeChosen(this.canOwnerBeChosen);
 		this.teleporterBlock.setTeleportationMode(this.teleportationMode);
 		this.teleporterBlock.setSpawnPointType(this.spawnPointType);
 		this.close();
@@ -224,6 +229,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
+		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
 
 		super.init();
 
@@ -354,24 +360,29 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.removeLocationButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 95, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(1)));
 		this.removeLocationButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 120, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(2)));
 
+//		MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = this.teleporterBlock.getCurrentLocation();
 		this.newLocationIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 4 - 150, 160, 150, 20, Text.empty());
 		this.newLocationIdentifierField.setMaxLength(128);
 		this.newLocationIdentifierField.setPlaceholder(Text.translatable("gui.teleporter_block.target_identifier_field.place_holder"));
+//		this.newLocationIdentifierField.setText(currentLocation.left.left);
 		this.addSelectableChild(this.newLocationIdentifierField);
 
 		this.newLocationEntranceField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 160, 150, 20, Text.empty());
 		this.newLocationEntranceField.setMaxLength(128);
 		this.newLocationEntranceField.setPlaceholder(Text.translatable("gui.teleporter_block.target_entrance_field.place_holder"));
+//		this.newLocationEntranceField.setText(currentLocation.left.right);
 		this.addSelectableChild(this.newLocationEntranceField);
 
 		this.newDataIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 185, 100, 20, Text.empty());
 		this.newDataIdField.setMaxLength(128);
 		this.newDataIdField.setPlaceholder(Text.translatable("gui.teleporter_block.new_data_id_field.place_holder"));
+		this.newDataIdField.setText(currentLocation.right.left);
 		this.addSelectableChild(this.newDataIdField);
 
 		this.newDataField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 185, 100, 20, Text.empty());
 		this.newDataField.setMaxLength(128);
 		this.newDataField.setPlaceholder(Text.translatable("gui.teleporter_block.new_data_field.place_holder"));
+//		this.newDataField.setText(currentLocation.right.right);
 		this.addSelectableChild(this.newDataField);
 
 		this.addNewLocationButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_LOCATION_BUTTON_LABEL_TEXT, button -> this.addLocationToList(this.newLocationIdentifierField.getText(), this.newLocationEntranceField.getText(), this.newDataIdField.getText(), this.newDataField.getText())).dimensions(this.width / 2 - 154, 185, 100, 20).build());
@@ -410,8 +421,12 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.currentTargetIdentifierLabelField.setText(this.teleporterBlock.getCurrentTargetIdentifierLabel());
 		this.addSelectableChild(this.currentTargetIdentifierLabelField);
 
-		this.toggleShowRegenerateButtonButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF).initially(this.showRegenerateButton).omitKeyText().build(this.width / 2 - 154, 116, 300, 20, Text.empty(), (button, showRegenerateButton) -> {
+		this.toggleShowRegenerateButtonButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF).initially(this.showRegenerateButton).omitKeyText().build(this.width / 2 - 154, 116, 150, 20, Text.empty(), (button, showRegenerateButton) -> {
 			this.showRegenerateButton = showRegenerateButton;
+		}));
+
+		this.toggleCanOwnerBeChosenButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON, TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF).initially(this.canOwnerBeChosen).omitKeyText().build(this.width / 2 + 4, 116, 150, 20, Text.empty(), (button, canOwnerBeChosen) -> {
+			this.canOwnerBeChosen = canOwnerBeChosen;
 		}));
 
 		this.teleportButtonLabelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 140, 300, 20, Text.empty());
@@ -492,6 +507,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.currentTargetIdentifierLabelField.setVisible(false);
 		this.currentTargetOwnerLabelField.setVisible(false);
 		this.toggleShowRegenerateButtonButton.visible = false;
+		this.toggleCanOwnerBeChosenButton.visible = false;
 		this.teleportButtonLabelField.setVisible(false);
 		this.cancelTeleportButtonLabelField.setVisible(false);
 
@@ -583,6 +599,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			}
 
 			this.toggleShowRegenerateButtonButton.visible = true;
+			this.toggleCanOwnerBeChosenButton.visible = true;
 			this.teleportButtonLabelField.setVisible(true);
 			this.cancelTeleportButtonLabelField.setVisible(true);
 
@@ -611,6 +628,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		boolean bool3 = this.onlyTeleportDimensionOwner;
 		boolean bool4 = this.teleportTeam;
 		boolean bool5 = this.showRegenerateButton;
+		boolean bool6 = this.canOwnerBeChosen;
 		String string0 = this.activationAreaDimensionsXField.getText();
 		String string1 = this.activationAreaDimensionsYField.getText();
 		String string2 = this.activationAreaDimensionsZField.getText();
@@ -647,6 +665,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.onlyTeleportDimensionOwner = bool3;
 		this.teleportTeam = bool4;
 		this.showRegenerateButton = bool5;
+		this.canOwnerBeChosen = bool6;
 		this.activationAreaDimensionsXField.setText(string0);
 		this.activationAreaDimensionsYField.setText(string1);
 		this.activationAreaDimensionsZField.setText(string2);
@@ -899,10 +918,12 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				directTeleportPositionOffsetPitch,
 				spawnPointType.asString(),
 				locationsList,
+//				new MutablePair<>(new MutablePair<>(this.newLocationIdentifierField.getText(), this.newLocationEntranceField.getText()), new MutablePair<>(this.newDataIdField.getText(), this.newDataField.getText())),
 				this.teleporterNameField.getText(),
 				this.currentTargetIdentifierLabelField.getText(),
 				this.currentTargetOwnerLabelField.getText(),
 				this.showRegenerateButton,
+				this.canOwnerBeChosen,
 				this.teleportButtonLabelField.getText(),
 				this.cancelTeleportButtonLabelField.getText()
 		));
