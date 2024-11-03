@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
+import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
@@ -11,17 +12,26 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.tuple.MutablePair;
 
-public class DataRelayBlockEntity extends RotatedBlockEntity implements Resetable, ProvidesData {
+import java.util.Arrays;
+import java.util.Optional;
+
+public class DataWritingBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private String dataIdentifier = "";
+	private String newDataValue = "";
 
-	public DataRelayBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.DATA_RELAY_BLOCK_ENTITY, pos, state);
+	public DataWritingBlockEntity(BlockPos pos, BlockState state) {
+		super(EntityRegistry.DATA_WRITING_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -37,6 +47,18 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Resetabl
 			nbt.remove("dataProvidingBlockPosOffsetZ");
 		}
 
+		if (!this.dataIdentifier.isEmpty()) {
+			nbt.putString("dataIdentifier", this.dataIdentifier);
+		} else {
+			nbt.remove("dataIdentifier");
+		}
+
+		if (!this.newDataValue.isEmpty()) {
+			nbt.putString("newDataValue", this.newDataValue);
+		} else {
+			nbt.remove("newDataValue");
+		}
+
 		super.writeNbt(nbt, registryLookup);
 	}
 
@@ -49,12 +71,25 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Resetabl
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
 			);
+		} else {
+			this.dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+		}
+
+		if (nbt.contains("dataIdentifier", NbtElement.STRING_TYPE)) {
+			this.dataIdentifier = nbt.getString("dataIdentifier");
+		} else {
+			this.dataIdentifier = "";
+		}
+
+		if (nbt.contains("newDataValue", NbtElement.STRING_TYPE)) {
+			this.newDataValue = nbt.getString("newDataValue");
+		} else {
+			this.newDataValue = "";
 		}
 
 		super.readNbt(nbt, registryLookup);
 	}
 
-	@Override
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
 		return BlockEntityUpdateS2CPacket.create(this);
 	}
@@ -62,33 +97,6 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Resetabl
 	@Override
 	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
 		return this.createComponentlessNbt(registryLookup);
-	}
-
-	@Override
-	public String getData(String id) {
-		BlockPos dataProvidingBlockPos = this.dataProvidingBlockPosOffset;
-		if (dataProvidingBlockPos != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity1 = this.world.getBlockEntity(this.getActualDataProvidingBlockPos());
-			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				return providesDataBlockEntity.getData(id);
-			}
-		}
-		return "";
-	}
-
-	@Override
-	public void setData(String id, String value) {
-		BlockPos dataProvidingBlockPos = this.dataProvidingBlockPosOffset;
-		if (dataProvidingBlockPos != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity1 = this.world.getBlockEntity(this.getActualDataProvidingBlockPos());
-			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				providesDataBlockEntity.setData(id, value);
-			}
-		}
-	}
-
-	private BlockPos getActualDataProvidingBlockPos() {
-		return this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ());
 	}
 
 	public BlockPos getDataProvidingBlockPosOffset() {
@@ -99,8 +107,34 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Resetabl
 		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
 	}
 
+	public String getDataIdentifier() {
+		return this.dataIdentifier;
+	}
+
+	public void setDataIdentifier(String dataIdentifier) {
+		this.dataIdentifier = dataIdentifier;
+	}
+
+	public String getNewDataValue() {
+		return this.newDataValue;
+	}
+
+	public void setNewDataValue(String newDataValue) {
+		this.newDataValue = newDataValue;
+	}
+
 	@Override
-	public void reset() {
+	public void trigger() {
+		if (this.world != null) {
+			String worldName = this.world.getRegistryKey().getValue().getPath();
+			MinecraftServer server = this.world.getServer();
+			BlockPos dataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
+
+			BlockEntity blockEntity = world.getBlockEntity(dataProviderBlockPos);
+			if (blockEntity instanceof ProvidesData providesDataEntity) {
+				providesDataEntity.setData(this.dataIdentifier, this.newDataValue);
+			}
+		}
 	}
 
 	@Override

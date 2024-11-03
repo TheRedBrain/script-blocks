@@ -25,7 +25,7 @@ public record TeleportFromTeleporterBlockPacket(
 		String targetLocationEntrance,
 		List<String> statusEffectsToDecrementLevelOnTeleport,
 		String dataId,
-		int data
+		String data
 ) implements CustomPayload {
 	public static final CustomPayload.Id<TeleportFromTeleporterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("teleport_from_teleporter_block"));
 	public static final PacketCodec<RegistryByteBuf, TeleportFromTeleporterBlockPacket> PACKET_CODEC = PacketCodec.of(TeleportFromTeleporterBlockPacket::write, TeleportFromTeleporterBlockPacket::new);
@@ -46,7 +46,7 @@ public record TeleportFromTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readList(PacketCodecs.STRING),
 				registryByteBuf.readString(),
-				registryByteBuf.readInt());
+				registryByteBuf.readString());
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {
@@ -65,7 +65,7 @@ public record TeleportFromTeleporterBlockPacket(
 		registryByteBuf.writeString(this.targetLocationEntrance);
 		registryByteBuf.writeCollection(this.statusEffectsToDecrementLevelOnTeleport, PacketCodecs.STRING);
 		registryByteBuf.writeString(this.dataId);
-		registryByteBuf.writeInt(this.data);
+		registryByteBuf.writeString(this.data);
 	}
 
 	@Override

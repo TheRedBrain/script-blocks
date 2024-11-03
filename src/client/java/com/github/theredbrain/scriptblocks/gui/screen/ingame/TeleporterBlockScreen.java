@@ -78,7 +78,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private String currentTargetEntrance;
 	private String currentTargetEntranceDisplayName;
 	private String currentTargetEntranceDataId;
-	private int currentTargetEntranceData;
+	private String currentTargetEntranceData;
 	private ButtonWidget teleportButton;
 	private ButtonWidget cancelTeleportButton;
 	private ButtonWidget openDungeonRegenerationScreenButton;
@@ -94,9 +94,9 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 
-	List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = new ArrayList<>();
-	List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> visibleLocationsList = new ArrayList<>();
-	List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> unlockedLocationsList = new ArrayList<>();
+	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
+	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> visibleLocationsList = new ArrayList<>();
+	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> unlockedLocationsList = new ArrayList<>();
 	List<PlayerListEntry> partyMemberList = new ArrayList<>();
 	private int teamListScrollPosition = 0;
 	private int visibleLocationsListScrollPosition = 0;
@@ -231,7 +231,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.currentTargetEntrance = "";
 		this.currentTargetEntranceDisplayName = "";
 		this.currentTargetEntranceDataId = "";
-		this.currentTargetEntranceData = 0;
+		this.currentTargetEntranceData = "";
 		if ((this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT || this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) && !this.showAdventureScreen) {
 			this.teleport();
 		}
@@ -400,7 +400,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 				this.unlockedLocationsList.clear();
 				this.visibleLocationsList.clear();
-				for (MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> entry : this.locationsList) {
+				for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : this.locationsList) {
 					Location location = LocationsRegistry.registeredLocations.get(Identifier.of(entry.getLeft().getLeft()));
 					String entrance = entry.getLeft().getRight();
 					lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, entrance);
@@ -439,7 +439,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 //		ScriptBlocks.info("this.currentTargetIdentifier: " + this.currentTargetIdentifier);
 
-		for (MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> dungeonLocation : this.unlockedLocationsList) {
+		for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> dungeonLocation : this.unlockedLocationsList) {
 			if (Objects.equals(dungeonLocation.getLeft().getLeft(), this.currentTargetIdentifier)) {
 				this.isCurrentLocationUnlocked = true;
 			}
@@ -516,10 +516,10 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		String string2 = this.currentTargetEntrance;
 		String string3 = this.currentTargetEntranceDisplayName;
 		String string4 = this.currentTargetEntranceDataId;
-		int number = this.currentTargetEntranceData = 0;
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> list = new ArrayList<>(this.locationsList);
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> list1 = new ArrayList<>(this.visibleLocationsList);
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> list2 = new ArrayList<>(this.unlockedLocationsList);
+		String string5 = this.currentTargetEntranceData;
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list = new ArrayList<>(this.locationsList);
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list1 = new ArrayList<>(this.visibleLocationsList);
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list2 = new ArrayList<>(this.unlockedLocationsList);
 		List<PlayerListEntry> list3 = new ArrayList<>(this.partyMemberList);
 		this.init(client, width, height);
 		this.currentTargetIdentifier = string;
@@ -527,7 +527,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.currentTargetEntrance = string2;
 		this.currentTargetEntranceDisplayName = string3;
 		this.currentTargetEntranceDataId = string4;
-		this.currentTargetEntranceData = number;
+		this.currentTargetEntranceData = string5;
 		this.locationsList.clear();
 		this.visibleLocationsList.clear();
 		this.unlockedLocationsList.clear();

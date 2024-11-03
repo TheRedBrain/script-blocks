@@ -27,7 +27,8 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 		BlockPos jigsawPlacerBlockPosition = payload.jigsawPlacerBlockPosition();
 
 		String target = payload.target();
-		List<String> structurePoolList = payload.structurePoolList();
+
+		String structurePool = payload.structurePool();
 
 		JigsawBlockEntity.Joint joint = payload.joint();
 
@@ -51,7 +52,7 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 				serverPlayerEntity.sendMessage(Text.translatable("jigsaw_placer_block.target.invalid"), false);
 				updateSuccessful = false;
 			}
-			jigsawPlacerBlockEntity.setStructurePoolList(structurePoolList);
+			jigsawPlacerBlockEntity.setStructurePool(structurePool);
 			jigsawPlacerBlockEntity.setJoint(joint);
 			jigsawPlacerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			jigsawPlacerBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);

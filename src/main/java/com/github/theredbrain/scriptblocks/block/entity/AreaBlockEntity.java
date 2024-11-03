@@ -741,7 +741,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	public static enum MessageMode implements StringIdentifiable {
-		ANNOUNCEMENT("announcement"),
+		ANNOUNCEMENT("announcement"), // TODO rename to title, when this mode is active, multiple new text field are visible which define the title that is shown to the player
 		CHAT("chat"),
 		OVERLAY("overlay");
 

@@ -65,9 +65,14 @@ public class InteractiveLootBlock extends BlockWithEntity {
 						for (ItemStack itemStack : lootStacks) {
 							player.getInventory().offerOrDrop(itemStack);
 						}
+						// TODO InteractiveLootBlockEntity should have list of sound events to play
+						// TODO InteractiveLootBlockEntity should have list of text messages
 						int i = world.getRandom().nextInt(5);
 						player.sendMessage(Text.translatable("gui.interactive_loot_block.loot_acquired_" + i), true);
 						return ActionResult.SUCCESS;
+					} else {
+						// TODO InteractiveLootBlockEntity should have list of sound events to play when already looted
+						// TODO InteractiveLootBlockEntity should have list of text messages when already looted
 					}
 				}
 			}

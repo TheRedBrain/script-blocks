@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class DataSavingBlockEntity extends BlockEntity implements Resetable, ProvidesData {
-	private final HashMap<String, Integer> data = new HashMap<>(Map.of());
+	private final HashMap<String, String> data = new HashMap<>(Map.of());
 
 	public DataSavingBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.DATA_SAVING_BLOCK_ENTITY, pos, state);
@@ -31,7 +31,7 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 		for (int i = 0; i < dataSize; i++) {
 			String key = keyList.get(i);
 			nbt.putString("key_" + i, key);
-			nbt.putInt("value_" + i, this.data.get(key));
+			nbt.putString("value_" + i, this.data.get(key));
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -43,9 +43,9 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 		int dataSize = nbt.getInt("dataSize");
 		this.data.clear();
 		for (int i = 0; i < dataSize; i++) {
-			if (nbt.contains("key_" + i, NbtElement.STRING_TYPE) && nbt.contains("value_" + i, NbtElement.INT_TYPE)) {
+			if (nbt.contains("key_" + i, NbtElement.STRING_TYPE) && nbt.contains("value_" + i, NbtElement.STRING_TYPE)) {
 				String key = nbt.getString("key_" + i);
-				int value = nbt.getInt("value_" + i);
+				String value = nbt.getString("value_" + i);
 				this.data.put(key, value);
 			}
 		}
@@ -64,18 +64,13 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	}
 
 	@Override
-	public int getData(String id) {
-		return this.data.getOrDefault(id, 0);
+	public String getData(String id) {
+		return this.data.getOrDefault(id, "");
 	}
 
 	@Override
-	public void setData(String id, int value) {
+	public void setData(String id, String value) {
 		this.data.put(id, value);
-	}
-
-	@Override
-	public void addData(String id, int value) {
-		this.setData(id, this.getData(id) + value);
 	}
 
 	@Override

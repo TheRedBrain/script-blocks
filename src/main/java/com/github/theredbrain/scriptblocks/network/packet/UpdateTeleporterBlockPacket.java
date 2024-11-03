@@ -28,7 +28,7 @@ public record UpdateTeleporterBlockPacket(
 		double directTeleportOrientationYaw,
 		double directTeleportOrientationPitch,
 		String spawnPointType,
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList,
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList,
 		String teleporterName,
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
@@ -60,7 +60,7 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
-				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_INTEGER),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -98,7 +98,7 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeString(this.spawnPointType);
 
-		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_INTEGER);
+		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING);
 
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);

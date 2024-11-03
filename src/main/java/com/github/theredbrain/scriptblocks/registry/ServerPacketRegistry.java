@@ -22,10 +22,10 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacketReceiver;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateDataAccessBlockPacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateDataAccessBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateDataWritingBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateDataWritingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDelayTriggerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDelayTriggerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDialogueBlockPacket;
@@ -69,8 +69,11 @@ public class ServerPacketRegistry {
 
 	public static void init() {
 
-		PayloadTypeRegistry.playC2S().register(UpdateDataAccessBlockPacket.PACKET_ID, UpdateDataAccessBlockPacket.PACKET_CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(UpdateDataAccessBlockPacket.PACKET_ID, new UpdateDataAccessBlockPacketReceiver());
+		PayloadTypeRegistry.playC2S().register(UpdateDataWritingBlockPacket.PACKET_ID, UpdateDataWritingBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateDataWritingBlockPacket.PACKET_ID, new UpdateDataWritingBlockPacketReceiver());
+
+//		PayloadTypeRegistry.playC2S().register(UpdateDataAccessBlockPacket.PACKET_ID, UpdateDataAccessBlockPacket.PACKET_CODEC);
+//		ServerPlayNetworking.registerGlobalReceiver(UpdateDataAccessBlockPacket.PACKET_ID, new UpdateDataAccessBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateDataRelayBlockPacket.PACKET_ID, UpdateDataRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataRelayBlockPacket.PACKET_ID, new UpdateDataRelayBlockPacketReceiver());

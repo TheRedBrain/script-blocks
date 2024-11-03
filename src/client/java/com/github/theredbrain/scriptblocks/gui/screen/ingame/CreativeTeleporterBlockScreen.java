@@ -126,7 +126,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	private final List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
 
-	private final List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = new ArrayList<>();
+	private final List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
 
 	private int creativeLocationsListScrollPosition = 0;
 	private int statusEffectListScrollPosition = 0;
@@ -160,7 +160,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.close();
 	}
 
-	private void addLocationToList(String identifier, String entrance, String dataId, String dataString) {
+	private void addLocationToList(String identifier, String entrance, String dataId, String data) {
 		ScriptBlocks.LOGGER.info("addLocationToList");
 		Text message = Text.literal("");
 //		if (Identifier.isValid(identifier)) {
@@ -170,11 +170,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				entrance = "";
 			}
 			boolean bl = false;
-			int data = 0;
-			if (!dataString.isEmpty()) {
-				data = Integer.parseInt(dataString);
-			}
-			for (MutablePair<MutablePair<String, String>, MutablePair<String, Integer>> locationsListEntry : this.locationsList) {
+			for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> locationsListEntry : this.locationsList) {
 				if (locationsListEntry.getLeft().getLeft().equals(identifier) && locationsListEntry.getLeft().getRight().equals(entrance) && locationsListEntry.getRight().getLeft().equals(dataId) && locationsListEntry.getRight().getRight().equals(data)) {
 					bl = true;
 					break;
@@ -640,7 +636,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string22 = this.teleportButtonLabelField.getText();
 		String string23 = this.cancelTeleportButtonLabelField.getText();
 		List<String> list = new ArrayList<>(this.statusEffectsToDecrementLevelOnTeleport);
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> list1 = new ArrayList<>(this.locationsList);
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list1 = new ArrayList<>(this.locationsList);
 		this.init(client, width, height);
 		this.screenPage = var;
 		this.teleportationMode = var1;
@@ -869,7 +865,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			spawnPointType = TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN;
 		}
 
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = new ArrayList<>();
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
 		if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 			locationsList = this.locationsList;
 		}

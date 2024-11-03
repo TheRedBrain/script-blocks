@@ -63,7 +63,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		String targetLocationEntrance = payload.targetLocationEntrance();
 		List<String> statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
 		String dataId = payload.dataId();
-		int data = payload.data();
+		String data = payload.data();
 
 		ServerWorld serverWorld = serverPlayerEntity.getServerWorld();
 		MinecraftServer server = serverPlayerEntity.server;

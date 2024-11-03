@@ -29,9 +29,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private static final RegistryKey<StructurePool> POOL_DEFAULT = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
@@ -40,7 +37,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	public static final String JOINT_KEY = "joint";
 	public static final String CHECKED_DATA_ID_KEY = "checked_data_id";
 	private Identifier target = Identifier.of("empty");
-	private List<String> structurePoolList = new ArrayList<>();
+	private String structurePool = "";
 	private JigsawBlockEntity.Joint joint = JigsawBlockEntity.Joint.ROLLABLE;
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
@@ -54,11 +51,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		nbt.putString(TARGET_KEY, this.target.toString());
 
-		nbt.putInt("structurePoolListSize", this.structurePoolList.size());
-
-		for (int i = 0; i < this.structurePoolList.size(); i++) {
-			nbt.putString("structurePoolList_" + i, this.structurePoolList.get(i));
-		}
+		nbt.putString("structurePool", this.structurePool);
 
 		nbt.putString(JOINT_KEY, this.joint.asString());
 
@@ -90,11 +83,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		this.target = Identifier.of(nbt.getString(TARGET_KEY));
 
-		int listSize = nbt.getInt("structurePoolListSize");
-		this.structurePoolList.clear();
-		for (int i = 0; i < listSize; i++) {
-			this.structurePoolList.add(nbt.getString("structurePoolList_" + i));
-		}
+		this.structurePool = nbt.getString("structurePool");
 
 		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString(JOINT_KEY)).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
 
@@ -142,12 +131,12 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		return false;
 	}
 
-	public List<String> getStructurePoolList() {
-		return structurePoolList;
+	public String getStructurePool() {
+		return this.structurePool;
 	}
 
-	public void setStructurePoolList(List<String> structurePoolList) {
-		this.structurePoolList = structurePoolList;
+	public void setStructurePool(String structurePool) {
+		this.structurePool = structurePool;
 	}
 
 	public JigsawBlockEntity.Joint getJoint() {
@@ -241,14 +230,11 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		if (dataBlockPos != BlockPos.ORIGIN) {
 			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
 			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				int data = providesDataBlockEntity.getData(this.checkedDataId);
-				if (data < this.structurePoolList.size() && data >= 0) {
-
-					currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePoolList.get(data)));
-				}
+				String data = providesDataBlockEntity.getData(this.checkedDataId);
+				currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePool + data));
 			}
-		} else if (!this.structurePoolList.isEmpty()) {
-			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePoolList.getFirst()));
+		} else {
+			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePool));
 		}
 		return currentPool;
 	}

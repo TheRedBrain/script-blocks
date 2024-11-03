@@ -48,7 +48,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.byName(payload.spawnPointType()).orElse(TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN);
 
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, Integer>>> locationsList = payload.locationsList();
+		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = payload.locationsList();
 
 		String teleporterName = payload.teleporterName();
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();

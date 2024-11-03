@@ -198,8 +198,7 @@
 	"gui.interactive_loot_block.loot_table_identifier_label": "Loot Table Identifier",
 
 
-	"gui.jigsaw_placer_block.new_structure_pool_field": "New Structure Pool",
-	"gui.jigsaw_placer_block.add_new_structure_pool_button_label": "Add new entry",
+	"gui.jigsaw_placer_block.structure_pool_field": "Structure Pool",
 
 
 	"gui.delay_trigger_block.triggeredBlockTriggerDelay": "Trigger Delay in ticks",

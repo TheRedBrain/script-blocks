@@ -2,8 +2,8 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.DataAccessBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
@@ -27,8 +27,8 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataAccessBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataRelayBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataWritingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
@@ -224,9 +224,14 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		this.client.setScreen(new InteractiveLootBlockScreen(interactiveLootBlockEntity));
 	}
 
+//	@Override
+//	public void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
+//		this.client.setScreen(new DataAccessBlockScreen(dataAccessBlockEntity));
+//	}
+
 	@Override
-	public void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
-		this.client.setScreen(new DataAccessBlockScreen(dataAccessBlockEntity));
+	public void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity) {
+		this.client.setScreen(new DataWritingBlockScreen(dataWritingBlockEntity));
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import java.util.List;
 public record UpdateJigsawPlacerBlockPacket(
 		BlockPos jigsawPlacerBlockPosition,
 		String target,
-		List<String> structurePoolList,
+		String structurePool,
 		JigsawBlockEntity.Joint joint,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
@@ -27,7 +27,7 @@ public record UpdateJigsawPlacerBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
-				registryByteBuf.readList(PacketCodecs.STRING),
+				registryByteBuf.readString(),
 				JigsawBlockEntity.Joint.byName(registryByteBuf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -39,7 +39,7 @@ public record UpdateJigsawPlacerBlockPacket(
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.jigsawPlacerBlockPosition);
 		registryByteBuf.writeString(this.target);
-		registryByteBuf.writeCollection(this.structurePoolList, PacketCodecs.STRING);
+		registryByteBuf.writeString(this.structurePool);
 		registryByteBuf.writeString(this.joint.asString());
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
