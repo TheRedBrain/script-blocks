@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -15,6 +16,7 @@ import java.util.List;
 public record UpdateTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
 		boolean showActivationArea,
+		String creativeScreenPage,
 		boolean showAdventureScreen,
 		Vec3i activationAreaDimensions,
 		BlockPos activationAreaPositionOffset,
@@ -29,7 +31,7 @@ public record UpdateTeleporterBlockPacket(
 		double directTeleportOrientationPitch,
 		String spawnPointType,
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList,
-//		MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation,
+		MutablePair<MutablePair<String, String>, MutablePair<String, String>> location,
 		String teleporterName,
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
@@ -45,6 +47,7 @@ public record UpdateTeleporterBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
 						registryByteBuf.readInt(),
@@ -63,7 +66,7 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
-//				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
+				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -78,6 +81,8 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
 
 		registryByteBuf.writeBoolean(this.showActivationArea);
+
+		registryByteBuf.writeString(this.creativeScreenPage);
 
 		registryByteBuf.writeBoolean(this.showAdventureScreen);
 
@@ -104,7 +109,7 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING);
 
-//		CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.encode(registryByteBuf, this.currentLocation);
+		CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.encode(registryByteBuf, this.location);
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);
 		registryByteBuf.writeString(this.currentTargetOwnerLabel);

@@ -54,6 +54,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private boolean onlyTeleportDimensionOwner = false;
 	private boolean teleportTeam = false;
 
+	private CreativeScreenPage creativeScreenPage = CreativeScreenPage.ACTIVATION;
 	private TeleportationMode teleportationMode = TeleportationMode.DIRECT;
 
 	// direct teleportation mode
@@ -61,11 +62,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private double directTeleportOrientationYaw = 0.0;
 	private double directTeleportOrientationPitch = 0.0;
 
-	// specific location mode
+	// spawn point mode
 	private SpawnPointType spawnPointType = SpawnPointType.WORLD_SPAWN;
 
-	// location mode
+	// locations mode
 	private List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>(List.of());
+
+	// location mode
+	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = new MutablePair<>(new MutablePair<>("", ""), new MutablePair<>("", ""));
 
 //	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = new MutablePair<>();
 
@@ -86,6 +90,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putString("teleporterName", this.teleporterName);
 
 		nbt.putBoolean("showAdventureScreen", this.showAdventureScreen);
+
+		nbt.putString("creativeScreenPage", this.creativeScreenPage.asString());
 
 		nbt.putBoolean("showActivationArea", this.showActivationArea);
 
@@ -132,10 +138,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			nbt.putString("locationsListData_" + i, this.locationsList.get(i).getRight().getRight());
 		}
 
-//		nbt.putString("currentLocationIdentifier", this.currentLocation.getLeft().getLeft());
-//		nbt.putString("currentLocationEntrance", this.currentLocation.getLeft().getRight());
-//		nbt.putString("currentLocationDataId", this.currentLocation.getRight().getLeft());
-//		nbt.putString("currentLocationData", this.currentLocation.getRight().getRight());
+		nbt.putString("locationIdentifier", this.location.getLeft().getLeft());
+		nbt.putString("locationEntrance", this.location.getLeft().getRight());
+		nbt.putString("locationDataId", this.location.getRight().getLeft());
+		nbt.putString("locationData", this.location.getRight().getRight());
 
 		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
 		nbt.putString("currentTargetOwnerLabel", this.currentTargetOwnerLabel);
@@ -161,6 +167,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.teleporterName = nbt.getString("teleporterName");
 
 		this.showAdventureScreen = nbt.getBoolean("showAdventureScreen");
+
+		this.creativeScreenPage = CreativeScreenPage.byName(nbt.getString("creativeScreenPage")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
 
 		this.showActivationArea = nbt.getBoolean("showActivationArea");
 
@@ -212,7 +220,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			this.locationsList.add(new MutablePair<>(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)), new MutablePair<>(nbt.getString("locationsListDataId_" + p), nbt.getString("locationsListData_" + p))));
 		}
 
-//		this.currentLocation = new MutablePair<>(new MutablePair<>(nbt.getString("currentLocationIdentifier"), nbt.getString("currentLocationEntrance")), new MutablePair<>(nbt.getString("currentLocationDataId"), nbt.getString("currentLocationData")));
+		this.location = new MutablePair<>(new MutablePair<>(nbt.getString("locationIdentifier"), nbt.getString("locationEntrance")), new MutablePair<>(nbt.getString("locationDataId"), nbt.getString("locationData")));
 
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
 		this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
@@ -301,6 +309,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 	public void setShowAdventureScreen(boolean showAdventureScreen) {
 		this.showAdventureScreen = showAdventureScreen;
+	}
+
+	public CreativeScreenPage getCreativeScreenPage() {
+		return this.creativeScreenPage;
+	}
+
+	public void setCreativeScreenPage(CreativeScreenPage creativeScreenPage) {
+		this.creativeScreenPage = creativeScreenPage;
 	}
 
 	public boolean getShowActivationArea() {
@@ -425,13 +441,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.locationsList = locationsList;
 	}
 
-//	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getCurrentLocation() {
-//		return this.currentLocation;
-//	}
-//
-//	public void setCurrentLocation(MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation) {
-//		this.currentLocation = currentLocation;
-//	}
+	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getLocation() {
+		return this.location;
+	}
+
+	public void setLocation(MutablePair<MutablePair<String, String>, MutablePair<String, String>> location) {
+		this.location = location;
+	}
 
 	public String getCurrentTargetIdentifierLabel() {
 		return this.currentTargetIdentifierLabel;
@@ -544,8 +560,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	public static enum TeleportationMode implements StringIdentifiable {
 		DIRECT("direct"),
 		SPAWN_POINTS("spawn_points"),
-		LOCATIONS("locations")/*,
-		LOCATION("location")*/;
+		LOCATIONS("locations"),
+		LOCATION("location");
 
 		private final String name;
 
@@ -589,6 +605,32 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 		public Text asText() {
 			return Text.translatable("gui.teleporter_block.spawn_point_type." + this.name);
+		}
+	}
+
+	public enum CreativeScreenPage implements StringIdentifiable {
+		ACTIVATION("activation"),
+		TELEPORTATION_MODE("teleportation_mode"),
+		STATUS_EFFECTS_TO_DECREMENT("status_effect_to_decrement"),
+		ADVENTURE_SCREEN_CUSTOMIZATION("adventure_screen_customization");
+
+		private final String name;
+
+		CreativeScreenPage(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String asString() {
+			return this.name;
+		}
+
+		public static Optional<CreativeScreenPage> byName(String name) {
+			return Arrays.stream(CreativeScreenPage.values()).filter(creativeScreenPage -> creativeScreenPage.asString().equals(name)).findFirst();
+		}
+
+		public Text asText() {
+			return Text.translatable("gui.teleporter_block.creativeScreenPage." + this.name);
 		}
 	}
 }

@@ -253,10 +253,10 @@
 	"gui.teleporter_block.updateCurrentTeleportationTargetEntryButton": "Select new instance",
 	"gui.teleporter_block.currentTeleportationTargetEntry.label": "Owner of the dungeon instance",
 
-	"gui.teleporter_block.screenPage.activation": "Activation Settings",
-	"gui.teleporter_block.screenPage.teleportation_mode": "Teleportation Settings",
-	"gui.teleporter_block.screenPage.status_effect_to_decrement": "Status Effects To Decrement",
-	"gui.teleporter_block.screenPage.adventure_screen_customization": "Adventure Screen Settings",
+	"gui.teleporter_block.creativeScreenPage.activation": "Activation Settings",
+	"gui.teleporter_block.creativeScreenPage.teleportation_mode": "Teleportation Settings",
+	"gui.teleporter_block.creativeScreenPage.status_effect_to_decrement": "Status Effects To Decrement",
+	"gui.teleporter_block.creativeScreenPage.adventure_screen_customization": "Adventure Screen Settings",
 
 	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
 	"gui.teleporter_block.show_adventure_screen_label": "Show Adventure Screen",
@@ -281,6 +281,7 @@
 	"gui.teleporter_block.teleportation_mode.direct": "Direct",
 	"gui.teleporter_block.teleportation_mode.spawn_points": "Spawn Points",
 	"gui.teleporter_block.teleportation_mode.locations": "Locations",
+	"gui.teleporter_block.teleportation_mode.location": "Location",
 
 	"gui.teleporter_block.spawn_point_type_label": "Spawn Point Type",
 	"gui.teleporter_block.spawn_point_type.world_spawn": "World Spawn",
@@ -294,6 +295,10 @@
 	"gui.teleporter_block.locationType.player_spawn": "Player Spawn",
 	"gui.teleporter_block.locationType.dimension_access_position": "Dimension Access Position",
 	"gui.teleporter_block.add_new_location_button_label": "Add new entry",
+	"gui.teleporter_block.location_identifier_label": "Location Identifier",
+	"gui.teleporter_block.location_entrance_label": "Location Entrance",
+	"gui.teleporter_block.location_data_identifier_label": "Location Data Identifier",
+	"gui.teleporter_block.location_data_label": "Location Data",
 	"gui.teleporter_block.add_new_status_effect_button_label": "Add new entry",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 

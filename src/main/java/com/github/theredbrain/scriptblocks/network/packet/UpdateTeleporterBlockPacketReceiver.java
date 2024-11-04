@@ -27,6 +27,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
 		boolean showActivationArea = payload.showActivationArea();
+		TeleporterBlockEntity.CreativeScreenPage creativeScreenPage = TeleporterBlockEntity.CreativeScreenPage.byName(payload.creativeScreenPage()).orElse(TeleporterBlockEntity.CreativeScreenPage.ACTIVATION);
 		boolean showAdventureScreen = payload.showAdventureScreen();
 
 		Vec3i activationAreaDimensions = payload.activationAreaDimensions();
@@ -50,7 +51,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = payload.locationsList();
 
-//		MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = payload.currentLocation();
+		MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = payload.location();
 
 		String teleporterName = payload.teleporterName();
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();
@@ -69,6 +70,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			teleporterBlockEntity.setShowAdventureScreen(showAdventureScreen);
+			teleporterBlockEntity.setCreativeScreenPage(creativeScreenPage);
 			teleporterBlockEntity.setShowActivationArea(showActivationArea);
 			teleporterBlockEntity.setActivationAreaDimensions(activationAreaDimensions);
 			teleporterBlockEntity.setActivationAreaPositionOffset(activationAreaPositionOffset);
@@ -89,7 +91,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			}
 			teleporterBlockEntity.setSpawnPointType(spawnPointType);
 			teleporterBlockEntity.setLocationsList(locationsList);
-//			teleporterBlockEntity.setCurrentLocation(currentLocation);
+			teleporterBlockEntity.setLocation(location);
 			teleporterBlockEntity.setTeleporterName(teleporterName);
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);
 			teleporterBlockEntity.setCurrentTargetOwnerLabel(currentTargetOwnerLabel);

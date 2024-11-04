@@ -97,6 +97,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
 	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> visibleLocationsList = new ArrayList<>();
 	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> unlockedLocationsList = new ArrayList<>();
+	MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = new MutablePair<>();
 	List<PlayerListEntry> partyMemberList = new ArrayList<>();
 	private int teamListScrollPosition = 0;
 	private int visibleLocationsListScrollPosition = 0;
@@ -222,6 +223,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		}
 		this.locationsList.clear();
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
+		this.location = this.teleporterBlock.getLocation();
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
@@ -236,7 +238,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			this.teleport();
 		}
 		this.backgroundWidth = 218;
-		if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+		if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS || this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 			this.backgroundHeight = 171;//147;
 			this.calculateUnlockedAndVisibleLocations(true);
 			if (!this.showAdventureScreen) {
@@ -397,12 +399,41 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		}
 
 		if (shouldInit) {
-			if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+			if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS || this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 				this.unlockedLocationsList.clear();
 				this.visibleLocationsList.clear();
-				for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : this.locationsList) {
-					Location location = LocationsRegistry.registeredLocations.get(Identifier.of(entry.getLeft().getLeft()));
-					String entrance = entry.getLeft().getRight();
+				if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+					for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : this.locationsList) {
+						Location location = LocationsRegistry.registeredLocations.get(Identifier.of(entry.getLeft().getLeft()));
+						String entrance = entry.getLeft().getRight();
+						lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, entrance);
+						unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, entrance);
+						showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
+
+						if (advancementHandler != null) {
+//						ScriptBlocks.info("advancementHandler != null");
+							AdvancementEntry lockAdvancementEntry = null;
+							if (lockAdvancementIdentifier != null) {
+								lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+							}
+							AdvancementEntry unlockAdvancementEntry = null;
+							if (unlockAdvancementIdentifier != null) {
+								unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+							}
+							if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
+
+//							ScriptBlocks.info("location unlocked: " + entry);
+								this.unlockedLocationsList.add(entry);
+								this.visibleLocationsList.add(entry);
+							} else if (showLockedLocation) {
+//							ScriptBlocks.info("location locked but visible: " + entry);
+								this.visibleLocationsList.add(entry);
+							}
+						}
+					}
+				} else if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+					Location location = LocationsRegistry.registeredLocations.get(Identifier.of(this.location.getLeft().getLeft()));
+					String entrance = this.location.getLeft().getRight();
 					lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, entrance);
 					unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, entrance);
 					showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
@@ -420,14 +451,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 
 //							ScriptBlocks.info("location unlocked: " + entry);
-							this.unlockedLocationsList.add(entry);
-							this.visibleLocationsList.add(entry);
+							this.unlockedLocationsList.add(this.location);
+							this.visibleLocationsList.add(this.location);
 						} else if (showLockedLocation) {
 //							ScriptBlocks.info("location locked but visible: " + entry);
-							this.visibleLocationsList.add(entry);
+							this.visibleLocationsList.add(this.location);
 						}
 					}
 				}
+
 				if (!this.visibleLocationsList.isEmpty()) {
 					this.currentTargetIdentifier = this.visibleLocationsList.getFirst().getLeft().getLeft();
 					this.currentTargetEntrance = this.visibleLocationsList.getFirst().getLeft().getRight();
