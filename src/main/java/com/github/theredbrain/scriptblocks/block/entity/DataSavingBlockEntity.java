@@ -10,7 +10,9 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.MutablePair;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +75,20 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 		this.data.put(id, value);
 	}
 
+	public List<MutablePair<String, String>> getDataList() {
+		List<MutablePair<String, String>> dataList = new ArrayList<>();
+		for (Map.Entry<String, String> entry : this.data.entrySet()) {
+			dataList.add(new MutablePair<>(entry.getKey(), entry.getValue()));
+		}
+		return dataList;
+	}
+
+	public void setDataList(List<MutablePair<String, String>> dataList) {
+		this.data.clear();
+		for (MutablePair<String, String> listEntry : dataList) {
+			this.data.put(listEntry.left, listEntry.right);
+		}
+	}
 	@Override
 	public void reset() {
 		this.data.clear();

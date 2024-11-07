@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.entity.player;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
@@ -88,4 +89,6 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity);
 
 	void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
+
+	void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity);
 }

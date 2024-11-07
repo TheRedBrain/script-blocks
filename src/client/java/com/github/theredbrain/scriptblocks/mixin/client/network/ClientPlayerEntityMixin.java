@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
@@ -28,6 +29,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlock
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataRelayBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataSavingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataWritingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueBlockScreen;
@@ -237,5 +239,10 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity) {
 		this.client.setScreen(new DataRelayBlockScreen(dataRelayBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity) {
+		this.client.setScreen(new DataSavingBlockScreen(dataSavingBlockEntity));
 	}
 }

@@ -24,6 +24,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBl
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateDataSavingBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateDataSavingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataWritingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataWritingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDelayTriggerBlockPacket;
@@ -77,6 +79,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateDataRelayBlockPacket.PACKET_ID, UpdateDataRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataRelayBlockPacket.PACKET_ID, new UpdateDataRelayBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateDataSavingBlockPacket.PACKET_ID, UpdateDataSavingBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateDataSavingBlockPacket.PACKET_ID, new UpdateDataSavingBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(AddStatusEffectPacket.PACKET_ID, AddStatusEffectPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(AddStatusEffectPacket.PACKET_ID, new AddStatusEffectPacketReceiver());

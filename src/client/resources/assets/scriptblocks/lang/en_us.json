@@ -80,6 +80,11 @@
 	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Provider Block Position Offset",
 
 
+	"gui.data_saving_block.new_data_identifier_placeholder": "New Data Identifier",
+	"gui.data_saving_block.new_data_value_placeholder": "New Data Value",
+	"gui.data_saving_block.add_new_data_button_label": "Add/Replace Data",
+
+
 	"gui.dialogue_block.entry_already_in_list": "Entry already in list",
 
 
