@@ -30,18 +30,22 @@ import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
+	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, 0, 0);
 	private static final RegistryKey<StructurePool> POOL_DEFAULT = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
 	private static final String CHECKED_DATA_ID_DEFAULT = "";
 	public static final String TARGET_KEY = "target";
 	public static final String JOINT_KEY = "joint";
-	public static final String CHECKED_DATA_ID_KEY = "checked_data_id";
+	public static final String FIRST_CHECKED_DATA_ID_KEY = "first_checked_data_id";
+	public static final String SECOND_CHECKED_DATA_ID_KEY = "second_checked_data_id";
 	private Identifier target = Identifier.of("empty");
-	private String structurePool = "";
+	private String firstStructurePoolString = "";
+	private String secondStructurePoolString = "";
 	private JigsawBlockEntity.Joint joint = JigsawBlockEntity.Joint.ROLLABLE;
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
-	private String checkedDataId = CHECKED_DATA_ID_DEFAULT;
+	private BlockPos firstDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private BlockPos secondDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private String firstCheckedDataId = CHECKED_DATA_ID_DEFAULT;
+	private String secondCheckedDataId = CHECKED_DATA_ID_DEFAULT;
 
 	public JigsawPlacerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.STRUCTURE_PLACER_BLOCK_ENTITY, pos, state);
@@ -51,7 +55,9 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		nbt.putString(TARGET_KEY, this.target.toString());
 
-		nbt.putString("structurePool", this.structurePool);
+		nbt.putString("firstStructurePoolString", this.firstStructurePoolString);
+		
+		nbt.putString("secondStructurePoolString", this.secondStructurePoolString);
 
 		nbt.putString(JOINT_KEY, this.joint.asString());
 
@@ -60,20 +66,36 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
-		if (this.dataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
-			nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
-			nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
+		if (this.firstDataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
+			nbt.putInt("firstDataProvidingBlockPosOffsetX", this.firstDataProvidingBlockPosOffset.getX());
+			nbt.putInt("firstDataProvidingBlockPosOffsetY", this.firstDataProvidingBlockPosOffset.getY());
+			nbt.putInt("firstDataProvidingBlockPosOffsetZ", this.firstDataProvidingBlockPosOffset.getZ());
 		} else {
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
+			nbt.remove("firstDataProvidingBlockPosOffsetX");
+			nbt.remove("firstDataProvidingBlockPosOffsetY");
+			nbt.remove("firstDataProvidingBlockPosOffsetZ");
 		}
 
-		if (this.checkedDataId.equals(CHECKED_DATA_ID_DEFAULT)) {
-			nbt.remove(CHECKED_DATA_ID_KEY);
+		if (this.secondDataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
+			nbt.putInt("secondDataProvidingBlockPosOffsetX", this.secondDataProvidingBlockPosOffset.getX());
+			nbt.putInt("secondDataProvidingBlockPosOffsetY", this.secondDataProvidingBlockPosOffset.getY());
+			nbt.putInt("secondDataProvidingBlockPosOffsetZ", this.secondDataProvidingBlockPosOffset.getZ());
 		} else {
-			nbt.putString(CHECKED_DATA_ID_KEY, this.checkedDataId);
+			nbt.remove("secondDataProvidingBlockPosOffsetX");
+			nbt.remove("secondDataProvidingBlockPosOffsetY");
+			nbt.remove("secondDataProvidingBlockPosOffsetZ");
+		}
+
+		if (this.firstCheckedDataId.equals(CHECKED_DATA_ID_DEFAULT)) {
+			nbt.remove(FIRST_CHECKED_DATA_ID_KEY);
+		} else {
+			nbt.putString(FIRST_CHECKED_DATA_ID_KEY, this.firstCheckedDataId);
+		}
+
+		if (this.secondCheckedDataId.equals(CHECKED_DATA_ID_DEFAULT)) {
+			nbt.remove(SECOND_CHECKED_DATA_ID_KEY);
+		} else {
+			nbt.putString(SECOND_CHECKED_DATA_ID_KEY, this.secondCheckedDataId);
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -83,7 +105,9 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		this.target = Identifier.of(nbt.getString(TARGET_KEY));
 
-		this.structurePool = nbt.getString("structurePool");
+		this.firstStructurePoolString = nbt.getString("firstStructurePoolString");
+		
+		this.secondStructurePoolString = nbt.getString("secondStructurePoolString");
 
 		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString(JOINT_KEY)).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
 
@@ -92,18 +116,32 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
 		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
-		if (nbt.contains("dataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
+		if (nbt.contains("firstDataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("firstDataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("firstDataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+			this.firstDataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetZ"), -48, 48)
 			);
 		}
 
-		if (nbt.contains(CHECKED_DATA_ID_KEY)) {
-			this.checkedDataId = nbt.getString(CHECKED_DATA_ID_KEY);
+		if (nbt.contains("secondDataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("secondDataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("secondDataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+			this.secondDataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetZ"), -48, 48)
+			);
+		}
+
+		if (nbt.contains(FIRST_CHECKED_DATA_ID_KEY)) {
+			this.firstCheckedDataId = nbt.getString(FIRST_CHECKED_DATA_ID_KEY);
 		} else {
-			this.checkedDataId = CHECKED_DATA_ID_DEFAULT;
+			this.firstCheckedDataId = CHECKED_DATA_ID_DEFAULT;
+		}
+
+		if (nbt.contains(SECOND_CHECKED_DATA_ID_KEY)) {
+			this.secondCheckedDataId = nbt.getString(SECOND_CHECKED_DATA_ID_KEY);
+		} else {
+			this.secondCheckedDataId = CHECKED_DATA_ID_DEFAULT;
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -131,12 +169,20 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		return false;
 	}
 
-	public String getStructurePool() {
-		return this.structurePool;
+	public String getFirstStructurePoolString() {
+		return this.firstStructurePoolString;
 	}
 
-	public void setStructurePool(String structurePool) {
-		this.structurePool = structurePool;
+	public void setFirstStructurePoolString(String firstStructurePoolString) {
+		this.firstStructurePoolString = firstStructurePoolString;
+	}
+
+	public String getSecondStructurePoolString() {
+		return this.secondStructurePoolString;
+	}
+
+	public void setSecondStructurePoolString(String secondStructurePoolString) {
+		this.secondStructurePoolString = secondStructurePoolString;
 	}
 
 	public JigsawBlockEntity.Joint getJoint() {
@@ -155,20 +201,36 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		this.triggeredBlock = triggeredBlock;
 	}
 
-	public BlockPos getDataProvidingBlockPosOffset() {
-		return dataProvidingBlockPosOffset;
+	public BlockPos getFirstDataProvidingBlockPosOffset() {
+		return this.firstDataProvidingBlockPosOffset;
 	}
 
-	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {
-		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
+	public void setFirstDataProvidingBlockPosOffset(BlockPos firstDataProvidingBlockPosOffset) {
+		this.firstDataProvidingBlockPosOffset = firstDataProvidingBlockPosOffset;
 	}
 
-	public String getCheckedDataId() {
-		return checkedDataId;
+	public BlockPos getSecondDataProvidingBlockPosOffset() {
+		return this.secondDataProvidingBlockPosOffset;
 	}
 
-	public void setCheckedDataId(String checkedDataId) {
-		this.checkedDataId = checkedDataId;
+	public void setSecondDataProvidingBlockPosOffset(BlockPos secondDataProvidingBlockPosOffset) {
+		this.secondDataProvidingBlockPosOffset = secondDataProvidingBlockPosOffset;
+	}
+
+	public String getFirstCheckedDataId() {
+		return this.firstCheckedDataId;
+	}
+
+	public void setFirstCheckedDataId(String firstCheckedDataId) {
+		this.firstCheckedDataId = firstCheckedDataId;
+	}
+
+	public String getSecondCheckedDataId() {
+		return this.secondCheckedDataId;
+	}
+
+	public void setSecondCheckedDataId(String secondCheckedDataId) {
+		this.secondCheckedDataId = secondCheckedDataId;
 	}
 
 	@Override
@@ -226,15 +288,26 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	private RegistryKey<StructurePool> getCurrentPool(ServerWorld serverWorld) {
 		RegistryKey<StructurePool> currentPool = POOL_DEFAULT;
 
-		BlockPos dataBlockPos = this.dataProvidingBlockPosOffset;
-		if (dataBlockPos != BlockPos.ORIGIN) {
-			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
+		BlockPos firstDataBlockPos = this.firstDataProvidingBlockPosOffset;
+		BlockPos secondDataBlockPos = this.secondDataProvidingBlockPosOffset;
+		String currentPoolIdentifierString = this.firstStructurePoolString;
+		if (firstDataBlockPos != BlockPos.ORIGIN) {
+			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(firstDataBlockPos.getX(), firstDataBlockPos.getY(), firstDataBlockPos.getZ()));
 			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				String data = providesDataBlockEntity.getData(this.checkedDataId);
-				currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePool + data));
+				currentPoolIdentifierString = currentPoolIdentifierString + providesDataBlockEntity.getData(this.firstCheckedDataId);
 			}
-		} else {
-			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(this.structurePool));
+		}
+		if (!this.secondStructurePoolString.isEmpty()) {
+			currentPoolIdentifierString = currentPoolIdentifierString + this.secondStructurePoolString;
+		}
+		if (secondDataBlockPos != BlockPos.ORIGIN) {
+			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(secondDataBlockPos.getX(), secondDataBlockPos.getY(), secondDataBlockPos.getZ()));
+			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
+				currentPoolIdentifierString = currentPoolIdentifierString + providesDataBlockEntity.getData(this.secondCheckedDataId);
+			}
+		}
+		if (!currentPoolIdentifierString.isEmpty()) {
+			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(currentPoolIdentifierString));
 		}
 		return currentPool;
 	}

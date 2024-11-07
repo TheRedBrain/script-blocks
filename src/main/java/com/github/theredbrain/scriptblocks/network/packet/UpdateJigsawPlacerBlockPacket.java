@@ -12,13 +12,16 @@ import java.util.List;
 
 public record UpdateJigsawPlacerBlockPacket(
 		BlockPos jigsawPlacerBlockPosition,
+		String firstStructurePoolString,
+		BlockPos firstDataSavingBlockPosOffset,
+		String firstCheckedDataId,
+		String secondStructurePoolString,
+		BlockPos secondDataSavingBlockPosOffset,
+		String secondCheckedDataId,
 		String target,
-		String structurePool,
 		JigsawBlockEntity.Joint joint,
 		BlockPos triggeredBlockPositionOffset,
-		boolean triggeredBlockResets,
-		BlockPos dataSavingBlockPosOffset,
-		String checkedDataId
+		boolean triggeredBlockResets
 ) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateJigsawPlacerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_jigsaw_placer_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateJigsawPlacerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateJigsawPlacerBlockPacket::write, UpdateJigsawPlacerBlockPacket::new);
@@ -27,24 +30,30 @@ public record UpdateJigsawPlacerBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				JigsawBlockEntity.Joint.byName(registryByteBuf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBoolean(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString()
+				registryByteBuf.readBoolean()
 		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.jigsawPlacerBlockPosition);
+		registryByteBuf.writeString(this.firstStructurePoolString);
+		registryByteBuf.writeBlockPos(this.firstDataSavingBlockPosOffset);
+		registryByteBuf.writeString(this.firstCheckedDataId);
+		registryByteBuf.writeString(this.secondStructurePoolString);
+		registryByteBuf.writeBlockPos(this.secondDataSavingBlockPosOffset);
+		registryByteBuf.writeString(this.secondCheckedDataId);
 		registryByteBuf.writeString(this.target);
-		registryByteBuf.writeString(this.structurePool);
 		registryByteBuf.writeString(this.joint.asString());
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
-		registryByteBuf.writeBlockPos(this.dataSavingBlockPosOffset);
-		registryByteBuf.writeString(this.checkedDataId);
 	}
 
 	@Override

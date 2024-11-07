@@ -12,8 +12,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.List;
-
 public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateJigsawPlacerBlockPacket> {
 	@Override
 	public void receive(UpdateJigsawPlacerBlockPacket payload, ServerPlayNetworking.Context context) {
@@ -26,19 +24,25 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 
 		BlockPos jigsawPlacerBlockPosition = payload.jigsawPlacerBlockPosition();
 
-		String target = payload.target();
+		String firstStructurePoolString = payload.firstStructurePoolString();
 
-		String structurePool = payload.structurePool();
+		BlockPos firstDataSavingBlockPosOffset = payload.firstDataSavingBlockPosOffset();
+
+		String firstCheckedDataId = payload.firstCheckedDataId();
+
+		String secondStructurePoolString = payload.secondStructurePoolString();
+
+		BlockPos secondDataSavingBlockPosOffset = payload.secondDataSavingBlockPosOffset();
+
+		String secondCheckedDataId = payload.secondCheckedDataId();
+
+		String target = payload.target();
 
 		JigsawBlockEntity.Joint joint = payload.joint();
 
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
-
-		BlockPos dataSavingBlockPosOffset = payload.dataSavingBlockPosOffset();
-
-		String checkedDataId = payload.checkedDataId();
 
 		World world = serverPlayerEntity.getWorld();
 
@@ -48,15 +52,18 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 		BlockState blockState = world.getBlockState(jigsawPlacerBlockPosition);
 
 		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity) {
+			jigsawPlacerBlockEntity.setFirstStructurePoolString(firstStructurePoolString);
+			jigsawPlacerBlockEntity.setFirstDataProvidingBlockPosOffset(firstDataSavingBlockPosOffset);
+			jigsawPlacerBlockEntity.setFirstCheckedDataId(firstCheckedDataId);
+			jigsawPlacerBlockEntity.setSecondStructurePoolString(secondStructurePoolString);
+			jigsawPlacerBlockEntity.setSecondDataProvidingBlockPosOffset(secondDataSavingBlockPosOffset);
+			jigsawPlacerBlockEntity.setSecondCheckedDataId(secondCheckedDataId);
 			if (!jigsawPlacerBlockEntity.setTarget(target)) {
 				serverPlayerEntity.sendMessage(Text.translatable("jigsaw_placer_block.target.invalid"), false);
 				updateSuccessful = false;
 			}
-			jigsawPlacerBlockEntity.setStructurePool(structurePool);
 			jigsawPlacerBlockEntity.setJoint(joint);
 			jigsawPlacerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			jigsawPlacerBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);
-			jigsawPlacerBlockEntity.setCheckedDataId(checkedDataId);
 			if (updateSuccessful) {
 				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}

@@ -76,6 +76,8 @@
 
 
 	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Provider Block Position Offset",
+	"gui.data_provider_block.firstDataProvidingBlockPositionOffset": "First Data Provider Block Position Offset",
+	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Provider Block Position Offset",
 
 
 	"gui.dialogue_block.entry_already_in_list": "Entry already in list",
@@ -198,7 +200,8 @@
 	"gui.interactive_loot_block.loot_table_identifier_label": "Loot Table Identifier",
 
 
-	"gui.jigsaw_placer_block.structure_pool_field": "Structure Pool",
+	"gui.jigsaw_placer_block.first_structure_pool_string_field": "First Structure Pool String",
+	"gui.jigsaw_placer_block.second_structure_pool_string_field": "Second Structure Pool String",
 
 
 	"gui.delay_trigger_block.triggeredBlockTriggerDelay": "Trigger Delay in ticks",
