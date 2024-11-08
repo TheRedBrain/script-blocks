@@ -12,9 +12,11 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
@@ -49,70 +51,68 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
 		if (dialogueAnswer != null && server != null) {
 
-			List<ItemStack> virtualItemStacks = dialogueAnswer.itemCost();
-			if (virtualItemStacks != null) {
+			String itemIdentifier = dialogueAnswer.itemIdentifier();
+			int itemCount = dialogueAnswer.itemCount();
+			if (!itemIdentifier.isEmpty() && itemCount > 0) {
+				Item item = Registries.ITEM.get(Identifier.tryParse(itemIdentifier));
+				if (item != Items.AIR) {
+					int playerInventorySize = serverPlayerEntity.getInventory().size();
+					Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
+					ItemStack itemStack;
 
-				int playerInventorySize = serverPlayerEntity.getInventory().size();
-				Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
-				ItemStack itemStack;
+					for (int k = 0; k < playerInventorySize; k++) {
+						playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
+					}
 
-				for (int k = 0; k < playerInventorySize; k++) {
-					playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
-				}
-
-				for (ItemStack ingredient : virtualItemStacks) {
-					Item virtualItem = ingredient.getItem();
-					int ingredientCount = ingredient.getCount();
-
-					for (int j = 0; j < playerInventorySize; j++) {
-						if (playerInventoryCopy.getStack(j).isOf(virtualItem)) {
-							itemStack = playerInventoryCopy.getStack(j).copy();
-							int stackCount = itemStack.getCount();
-							if (stackCount >= ingredientCount) {
-								itemStack.setCount(stackCount - ingredientCount);
-								playerInventoryCopy.setStack(j, itemStack);
-								ingredientCount = 0;
-								break;
-							} else {
-								playerInventoryCopy.setStack(j, ItemStack.EMPTY);
-								ingredientCount = ingredientCount - stackCount;
+						for (int j = 0; j < playerInventorySize; j++) {
+							if (playerInventoryCopy.getStack(j).isOf(item)) {
+								itemStack = playerInventoryCopy.getStack(j).copy();
+								int stackCount = itemStack.getCount();
+								if (stackCount >= itemCount) {
+									itemStack.setCount(stackCount - itemCount);
+									playerInventoryCopy.setStack(j, itemStack);
+									itemCount = 0;
+									break;
+								} else {
+									playerInventoryCopy.setStack(j, ItemStack.EMPTY);
+									itemCount = itemCount - stackCount;
+								}
 							}
 						}
-					}
-					if (ingredientCount > 0) {
-						serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
-						return;
-					}
-				}
+						if (itemCount > 0) {
+							serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
+							return;
+						}
 
-				for (ItemStack ingredient : virtualItemStacks) {
-					Item virtualItem = ingredient.getItem();
-					int ingredientCount = ingredient.getCount();
+					if(dialogueAnswer.consumeItem()) {
+						int ingredientCount = dialogueAnswer.itemCount();
 
-					for (int j = 0; j < playerInventorySize; j++) {
-						if (serverPlayerEntity.getInventory().getStack(j).isOf(virtualItem)) {
-							itemStack = serverPlayerEntity.getInventory().getStack(j).copy();
-							int stackCount = itemStack.getCount();
-							if (stackCount >= ingredientCount) {
-								itemStack.setCount(stackCount - ingredientCount);
-								serverPlayerEntity.getInventory().setStack(j, itemStack);
-								ingredientCount = 0;
-								break;
-							} else {
-								serverPlayerEntity.getInventory().setStack(j, ItemStack.EMPTY);
-								ingredientCount = ingredientCount - stackCount;
+						for (int j = 0; j < playerInventorySize; j++) {
+							if (serverPlayerEntity.getInventory().getStack(j).isOf(item)) {
+								itemStack = serverPlayerEntity.getInventory().getStack(j).copy();
+								int stackCount = itemStack.getCount();
+								if (stackCount >= ingredientCount) {
+									itemStack.setCount(stackCount - ingredientCount);
+									serverPlayerEntity.getInventory().setStack(j, itemStack);
+									ingredientCount = 0;
+									break;
+								} else {
+									serverPlayerEntity.getInventory().setStack(j, ItemStack.EMPTY);
+									ingredientCount = ingredientCount - stackCount;
+								}
 							}
 						}
-					}
-					if (ingredientCount > 0) {
-						return;
+						if (ingredientCount > 0) {
+							return;
+						}
 					}
 				}
 			}
 
 			// loot_table
-			Identifier lootTableIdentifier = dialogueAnswer.lootTable();
-			if (lootTableIdentifier != null) {
+			String lootTable = dialogueAnswer.lootTable();
+			if (!lootTable.isEmpty()) {
+				Identifier lootTableIdentifier = Identifier.of(lootTable);
 				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParameters.THIS_ENTITY, serverPlayerEntity).add(LootContextParameters.ORIGIN, serverPlayerEntity.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
 				boolean bl = false;
 				for (ItemStack itemStack : server.getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableIdentifier)).generateLoot(lootContextParameterSet)) {
@@ -132,12 +132,12 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// advancement
-			Identifier advancementIdentifier = dialogueAnswer.grantedAdvancement();
-			Identifier criterionName = dialogueAnswer.criterionName();
-			if (advancementIdentifier != null && criterionName != null) {
-				AdvancementEntry advancementEntry = server.getAdvancementLoader().get(advancementIdentifier);
+			String grantedAdvancement = dialogueAnswer.grantedAdvancement();
+			String criterionName = dialogueAnswer.criterionName();
+			if (!grantedAdvancement.isEmpty() && !criterionName.isEmpty()) {
+				AdvancementEntry advancementEntry = server.getAdvancementLoader().get(Identifier.of(grantedAdvancement));
 				if (advancementEntry != null) {
-					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName.toString());
+					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
 				}
 			}
 
@@ -147,11 +147,11 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
 			}
 
-			Identifier responseDialogueIdentifierString = dialogueAnswer.responseDialogue();
-			if (responseDialogueIdentifierString == null) {
+			String responseDialogue = dialogueAnswer.responseDialogue();
+			if (responseDialogue.isEmpty()) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {
-				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(responseDialogueIdentifierString.toString(), dialogueUsedBlocks, dialogueTriggeredBlocks));
+				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(responseDialogue, dialogueUsedBlocks, dialogueTriggeredBlocks));
 			}
 
 

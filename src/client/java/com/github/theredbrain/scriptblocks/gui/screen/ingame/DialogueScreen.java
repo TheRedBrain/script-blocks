@@ -20,6 +20,8 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -45,8 +47,8 @@ public class DialogueScreen extends Screen {
 	private List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
 	private List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
 	private List<MutablePair<String, MutablePair<String, String>>> startingDialogueList = new ArrayList<>(List.of());
-	private List<Identifier> unlockedAnswersList = new ArrayList<>(List.of());
-	private List<Identifier> visibleAnswersList = new ArrayList<>(List.of());
+	private List<String> unlockedAnswersList = new ArrayList<>(List.of());
+	private List<String> visibleAnswersList = new ArrayList<>(List.of());
 	private List<String> dialogueTextList = new ArrayList<>(List.of());
 	private int backgroundWidth;
 	private int backgroundHeight;
@@ -68,7 +70,7 @@ public class DialogueScreen extends Screen {
 
 	private void answer(int index) {
 		if (index + this.answersScrollPosition < this.visibleAnswersList.size()) {
-			Identifier currentAnswerIdentifier = this.visibleAnswersList.get(index + this.answersScrollPosition);
+			Identifier currentAnswerIdentifier = Identifier.of(this.visibleAnswersList.get(index + this.answersScrollPosition));
 
 			ClientPlayNetworking.send(new DialogueAnswerPacket(
 					currentAnswerIdentifier,
@@ -78,10 +80,10 @@ public class DialogueScreen extends Screen {
 		}
 	}
 
-	private void calculateUnlockedAndVisibleAnswers(List<Identifier> answerIdentifiersList) {
+	private void calculateUnlockedAndVisibleAnswers(List<String> answerIdentifiersList) {
 		ClientAdvancementManager advancementHandler = null;
-		Identifier lockAdvancementIdentifier;
-		Identifier unlockAdvancementIdentifier;
+		String lockAdvancement;
+		String unlockAdvancement;
 		boolean showLockedAnswer;
 		boolean showUnaffordableAnswer;
 
@@ -89,76 +91,74 @@ public class DialogueScreen extends Screen {
 			advancementHandler = this.client.player.networkHandler.getAdvancementHandler();
 		}
 
-		for (Identifier answerIdentifier : answerIdentifiersList) {
+		for (String answerIdentifierString : answerIdentifiersList) {
 
-			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(answerIdentifier);
+			if (answerIdentifierString.isEmpty()) {
+				continue;
+			}
+			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(Identifier.of(answerIdentifierString));
 			if (dialogueAnswer == null) {
 				continue;
 			}
 
 			boolean isItemCostPayable = true;
-			List<ItemStack> virtualItemCost = dialogueAnswer.itemCost();
-			if (virtualItemCost != null && this.client != null && this.client.player != null) {
-				int inventorySize = this.client.player.getInventory().size();
-				Inventory inventory = new SimpleInventory(inventorySize);
-				ItemStack itemStack;
-				for (int k = 0; k < inventorySize; k++) {
-					inventory.setStack(k, this.client.player.getInventory().getStack(k).copy());
-				}
-
-				boolean bl = true;
-				for (ItemStack ingredient : virtualItemCost) {
-					Item virtualItem = ingredient.getItem();
-					int ingredientCount = ingredient.getCount();
+			String itemIdentifier = dialogueAnswer.itemIdentifier();
+			int itemCount = dialogueAnswer.itemCount();
+			if (!itemIdentifier.isEmpty() && itemCount > 0 && this.client != null && this.client.player != null) {
+				Item item = Registries.ITEM.get(Identifier.tryParse(itemIdentifier));
+				if (item != Items.AIR) {
+					int inventorySize = this.client.player.getInventory().size();
+					Inventory inventory = new SimpleInventory(inventorySize);
+					ItemStack itemStack;
+					for (int k = 0; k < inventorySize; k++) {
+						inventory.setStack(k, this.client.player.getInventory().getStack(k).copy());
+					}
 
 					for (int j = 0; j < inventorySize; j++) {
-						if (inventory.getStack(j).isOf(virtualItem)) {
+						if (inventory.getStack(j).isOf(item)) {
 							itemStack = inventory.getStack(j).copy();
 							int stackCount = itemStack.getCount();
-							if (stackCount >= ingredientCount) {
-								itemStack.setCount(stackCount - ingredientCount);
+							if (stackCount >= itemCount) {
+								itemStack.setCount(stackCount - itemCount);
 								inventory.setStack(j, itemStack);
-								ingredientCount = 0;
+								itemCount = 0;
 								break;
 							} else {
 								inventory.setStack(j, ItemStack.EMPTY);
-								ingredientCount = ingredientCount - stackCount;
+								itemCount = itemCount - stackCount;
 							}
 						}
 					}
-					if (ingredientCount > 0) {
-						bl = false;
+					if (itemCount > 0) {
+						isItemCostPayable = false;
 					}
-				}
-				if (!bl) {
-					isItemCostPayable = false;
 				}
 			}
 
-			lockAdvancementIdentifier = dialogueAnswer.lockAdvancement();
-			unlockAdvancementIdentifier = dialogueAnswer.unlockAdvancement();
+			lockAdvancement = dialogueAnswer.lockAdvancement();
+			unlockAdvancement = dialogueAnswer.unlockAdvancement();
 			showLockedAnswer = dialogueAnswer.showLockedAnswer();
 			showUnaffordableAnswer = dialogueAnswer.showUnaffordableAnswer();
 
 			if (advancementHandler != null) {
 				AdvancementEntry lockAdvancementEntry = null;
-				if (lockAdvancementIdentifier != null) {
-					lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+				if (!lockAdvancement.isEmpty()) {
+					lockAdvancementEntry = advancementHandler.get(Identifier.of(lockAdvancement));
 				}
 				AdvancementEntry unlockAdvancementEntry = null;
-				if (unlockAdvancementIdentifier != null) {
-					unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+				if (!unlockAdvancement.isEmpty()) {
+					unlockAdvancementEntry = advancementHandler.get(Identifier.of(unlockAdvancement));
 				}
-				if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) &&
-						(unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
+				if ((lockAdvancement.isEmpty() || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) &&
+						(unlockAdvancement.isEmpty() || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 					if (isItemCostPayable) {
-						this.unlockedAnswersList.add(answerIdentifier);
-						this.visibleAnswersList.add(answerIdentifier);
+						this.unlockedAnswersList.add(answerIdentifierString);
+						this.visibleAnswersList.add(answerIdentifierString);
 					} else if (showUnaffordableAnswer) {
-						this.visibleAnswersList.add(answerIdentifier);
+						this.visibleAnswersList.add(answerIdentifierString);
 					}
 				} else if (showLockedAnswer) {
-					this.visibleAnswersList.add(answerIdentifier);
+					this.visibleAnswersList.add(answerIdentifierString);
 				}
 			}
 		}
@@ -233,8 +233,8 @@ public class DialogueScreen extends Screen {
 		List<MutablePair<String, BlockPos>> list = new ArrayList<>(this.dialogueUsedBlocksList);
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> list1 = new ArrayList<>(this.dialogueTriggeredBlocksList);
 		List<MutablePair<String, MutablePair<String, String>>> list2 = new ArrayList<>(this.startingDialogueList);
-		List<Identifier> list3 = new ArrayList<>(this.unlockedAnswersList);
-		List<Identifier> list4 = new ArrayList<>(this.visibleAnswersList);
+		List<String> list3 = new ArrayList<>(this.unlockedAnswersList);
+		List<String> list4 = new ArrayList<>(this.visibleAnswersList);
 		List<String> list5 = new ArrayList<>(this.dialogueTextList);
 		int number = this.dialogueTextScrollPosition;
 		float number1 = this.dialogueTextScrollAmount;

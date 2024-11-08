@@ -125,8 +125,8 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
 			}
 		}
-		Identifier lockAdvancement;
-		Identifier unlockAdvancement;
+		String lockAdvancement;
+		String unlockAdvancement;
 
 		for (String dialogueEntry : dialogueBlockEntity.startingDialogueList) {
 			Dialogue dialogue = DialoguesRegistry.registeredDialogues.get(Identifier.tryParse(dialogueEntry));
@@ -137,11 +137,16 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 				AdvancementEntry lockAdvancementEntry = null;
 				AdvancementEntry unlockAdvancementEntry = null;
 				if (serverAdvancementLoader != null) {
-					lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancement);
-					unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancement);
+					if (!lockAdvancement.isEmpty()) {
+						lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(lockAdvancement));
+					}
+					if (!unlockAdvancement.isEmpty()) {
+						unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(unlockAdvancement));
+					}
+
 				}
 				if (playerAdvancementTracker != null) {
-					if (lockAdvancement == null || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) && (unlockAdvancement == null || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
+					if ((lockAdvancement.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) && (unlockAdvancement.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
 						return dialogue;
 					}
 				}
