@@ -42,6 +42,9 @@ public class ServerConfig implements ConfigData {
 	@Comment("Enables debug messages for the teleporter block and all corresponding mechanics.")
 	public boolean enable_teleporter_debugging = true;
 
+	@Comment("Enables debug messages for the various registries.")
+	public boolean enable_registry_debugging = true;
+
 	public ServerConfig() {
 
 	}

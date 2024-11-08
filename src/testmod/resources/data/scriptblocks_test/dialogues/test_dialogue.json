@@ -1,0 +1,17 @@
+{
+    "dialogueTextList": [
+        "dialogues.test_dialogue.line_1",
+        "dialogues.test_dialogue.line_2"
+    ],
+    "answerList": [
+        "scriptblocks_test:test_dialogue/answer_1",
+        "scriptblocks_test:test_dialogue/answer_2",
+        "scriptblocks_test:test_dialogue/answer_3",
+        "scriptblocks_test:test_dialogue/answer_4",
+        "scriptblocks_test:test_dialogue/answer_5",
+        "scriptblocks_test:test_dialogue/answer_6"
+    ],
+    "unlockAdvancement": "",
+    "lockAdvancement": "",
+    "cancellable": true
+}

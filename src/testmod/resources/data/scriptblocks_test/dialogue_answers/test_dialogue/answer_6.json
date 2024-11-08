@@ -1,0 +1,17 @@
+{
+    "answerText": "dialogue_answers.test_dialogue.answer_6",
+    "responseDialogue": "",
+    "unlockAdvancement": "",
+    "lockAdvancement": "",
+    "showLockedAnswer": true,
+    "showUnaffordableAnswer": false,
+    "grantedAdvancement": "",
+    "criterionName": "",
+    "lootTable": "",
+    "usedBlock": "",
+    "triggeredBlock": "",
+    "overlayMessage": "",
+    "consumeItem": false,
+    "itemIdentifier": "",
+    "itemCount": 0
+}

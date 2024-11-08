@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -42,6 +43,9 @@ public class DialoguesRegistry {
 								var id = identifier
 										.toString().replace("dialogues/", "");
 								id = id.substring(0, id.lastIndexOf('.'));
+								if (DebuggingHelper.isRegistryLoggingEnabled()) {
+									DebuggingHelper.sendDebuggingMessage("Registered Dialogue: " + dialogue, null);
+								}
 								registeredDialogues.put(Identifier.of(id), dialogue);
 							} catch (Exception e) {
 								System.err.println("Failed to parse: " + identifier);

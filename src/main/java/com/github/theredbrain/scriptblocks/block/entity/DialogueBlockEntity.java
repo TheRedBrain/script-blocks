@@ -110,10 +110,9 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	@Nullable
-	public static Dialogue getDialogue(PlayerEntity player, DialogueBlockEntity dialogueBlockEntity) {
+	public static String getDialogue(PlayerEntity player, DialogueBlockEntity dialogueBlockEntity) {
 		if (dialogueBlockEntity.startingDialogueList.isEmpty()) {
-			return null;
+			return "";
 		}
 		PlayerAdvancementTracker playerAdvancementTracker = null;
 		ServerAdvancementLoader serverAdvancementLoader = null;
@@ -147,12 +146,12 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 				}
 				if (playerAdvancementTracker != null) {
 					if ((lockAdvancement.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) && (unlockAdvancement.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
-						return dialogue;
+						return dialogueEntry;
 					}
 				}
 			}
 		}
-		return null;
+		return "";
 	}
 
 	public HashMap<String, BlockPos> getDialogueUsedBlocksMap() {

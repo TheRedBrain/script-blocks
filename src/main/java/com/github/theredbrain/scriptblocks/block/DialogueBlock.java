@@ -1,9 +1,10 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
-import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
 import com.mojang.serialization.MapCodec;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -45,9 +46,9 @@ public class DialogueBlock extends RotatedBlockWithEntity {
 				((DuckPlayerEntityMixin) player).scriptblocks$openDialogueBlockScreen(dialogueBlockEntity);
 				return ActionResult.success(world.isClient);
 			} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-				Dialogue dialogue = DialogueBlockEntity.getDialogue(player, dialogueBlockEntity);
-				if (dialogue != null) {
-					((DuckPlayerEntityMixin) player).scriptblocks$openDialogueScreen(dialogue, dialogueBlockEntity.getDialogueUsedBlocks(), dialogueBlockEntity.getDialogueTriggeredBlocks());
+				String dialogue = DialogueBlockEntity.getDialogue(player, dialogueBlockEntity);
+				if (!dialogue.isEmpty()) {
+					ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(dialogue, dialogueBlockEntity.getDialogueUsedBlocks(), dialogueBlockEntity.getDialogueTriggeredBlocks()));
 					return ActionResult.CONSUME;
 				}
 			}

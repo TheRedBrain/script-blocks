@@ -11,6 +11,10 @@ public class DebuggingHelper {
 		return ScriptBlocks.serverConfig.enable_debug_logging && ScriptBlocks.serverConfig.enable_teleporter_debugging;
 	}
 
+	public static boolean isRegistryLoggingEnabled() {
+		return ScriptBlocks.serverConfig.enable_debug_logging && ScriptBlocks.serverConfig.enable_registry_debugging;
+	}
+
 	public static void sendDebuggingMessage(String message, @Nullable PlayerEntity playerEntity) {
 		if (ScriptBlocks.serverConfig.enable_debug_console_logging) {
 			ScriptBlocks.LOGGER.info("[" + ScriptBlocks.MOD_ID + "] [info]: " + message);

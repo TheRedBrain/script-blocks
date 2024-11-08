@@ -177,8 +177,8 @@ public class DialogueScreen extends Screen {
 		this.visibleAnswersList.clear();
 		this.dialogueTextList.clear();
 		if (this.dialogue != null) {
-			this.calculateUnlockedAndVisibleAnswers(this.dialogue.answerList());
-			this.dialogueTextList = this.dialogue.dialogueTextList();
+			this.calculateUnlockedAndVisibleAnswers(new ArrayList<>(this.dialogue.answerList()));
+			this.dialogueTextList.addAll(this.dialogue.dialogueTextList());
 		}
 		this.backgroundWidth = 218;
 		this.backgroundHeight = 197;
@@ -343,7 +343,7 @@ public class DialogueScreen extends Screen {
 		}
 		int index = 0;
 		for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + 4, this.visibleAnswersList.size()); i++) {
-			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(this.visibleAnswersList.get(i));
+			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(Identifier.of(this.visibleAnswersList.get(i)));
 			String text = dialogueAnswer.answerText();
 			if (index == 0) {
 				this.answerButton0.setMessage(Text.translatable(text));
@@ -373,5 +373,10 @@ public class DialogueScreen extends Screen {
 	@Override
 	public boolean shouldCloseOnEsc() {
 		return this.dialogue.cancellable();
+	}
+
+	@Override
+	public boolean shouldPause() {
+		return false;
 	}
 }
