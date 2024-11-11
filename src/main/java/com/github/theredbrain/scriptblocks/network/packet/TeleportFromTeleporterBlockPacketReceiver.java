@@ -99,7 +99,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				targetPos = server.getOverworld().getSpawnPos();
 				targetYaw = server.getOverworld().getSpawnAngle();
 			}
-		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS || teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 
 			Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(targetLocation));
 

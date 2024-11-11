@@ -12,13 +12,18 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateTriggeredSpawnerBlockPacket(BlockPos triggeredSpawnerBlockPosition,
-												BlockPos entitySpawnPositionOffset, double entitySpawnOrientationPitch,
-												double entitySpawnOrientationYaw, String spawningMode,
-												String entityTypeId,
-												List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
-												BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets,
-												BlockPos useRelayBlockPositionOffset) implements CustomPayload {
+public record UpdateTriggeredSpawnerBlockPacket(
+		BlockPos triggeredSpawnerBlockPosition,
+		BlockPos entitySpawnPositionOffset,
+		double entitySpawnOrientationPitch,
+		double entitySpawnOrientationYaw,
+		String spawningMode,
+		String entityTypeId,
+		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
+		BlockPos triggeredBlockPositionOffset,
+		boolean triggeredBlockResets,
+		BlockPos useRelayBlockPositionOffset
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateTriggeredSpawnerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_triggered_spawner_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredSpawnerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredSpawnerBlockPacket::write, UpdateTriggeredSpawnerBlockPacket::new);
 

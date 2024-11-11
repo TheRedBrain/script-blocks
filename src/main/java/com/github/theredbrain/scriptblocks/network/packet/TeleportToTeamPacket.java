@@ -7,13 +7,22 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
-public record TeleportToTeamPacket(Identifier targetWorldIdentifier, BlockPos targetPosition, double targetYaw,
-								   double targetPitch) implements CustomPayload {
+public record TeleportToTeamPacket(
+		Identifier targetWorldIdentifier,
+		BlockPos targetPosition,
+		double targetYaw,
+		double targetPitch
+) implements CustomPayload {
 	public static final CustomPayload.Id<TeleportToTeamPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("teleport_to_team"));
 	public static final PacketCodec<RegistryByteBuf, TeleportToTeamPacket> PACKET_CODEC = PacketCodec.of(TeleportToTeamPacket::write, TeleportToTeamPacket::new);
 
 	public TeleportToTeamPacket(RegistryByteBuf registryByteBuf) {
-		this(registryByteBuf.readIdentifier(), registryByteBuf.readBlockPos(), registryByteBuf.readDouble(), registryByteBuf.readDouble());
+		this(
+				registryByteBuf.readIdentifier(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readDouble(),
+				registryByteBuf.readDouble()
+		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {

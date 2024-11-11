@@ -31,7 +31,8 @@ public record TeleportFromTeleporterBlockPacket(
 	public static final PacketCodec<RegistryByteBuf, TeleportFromTeleporterBlockPacket> PACKET_CODEC = PacketCodec.of(TeleportFromTeleporterBlockPacket::write, TeleportFromTeleporterBlockPacket::new);
 
 	public TeleportFromTeleporterBlockPacket(RegistryByteBuf registryByteBuf) {
-		this(registryByteBuf.readBlockPos(),
+		this(
+				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -46,7 +47,8 @@ public record TeleportFromTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readList(PacketCodecs.STRING),
 				registryByteBuf.readString(),
-				registryByteBuf.readString());
+				registryByteBuf.readString()
+		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {

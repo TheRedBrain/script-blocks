@@ -12,11 +12,17 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateBossControllerBlockPacket(BlockPos bossControllerBlockPosition, boolean showArea,
-											  Vec3i applicationAreaDimensions, BlockPos applicationAreaPositionOffset,
-											  Identifier bossIdentifier, BlockPos entitySpawnPositionOffset,
-											  double entitySpawnOrientationPitch, double entitySpawnOrientationYaw,
-											  List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList) implements CustomPayload {
+public record UpdateBossControllerBlockPacket(
+		BlockPos bossControllerBlockPosition,
+		boolean showArea,
+		Vec3i applicationAreaDimensions,
+		BlockPos applicationAreaPositionOffset,
+		Identifier bossIdentifier,
+		BlockPos entitySpawnPositionOffset,
+		double entitySpawnOrientationPitch,
+		double entitySpawnOrientationYaw,
+		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateBossControllerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_boss_controller_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateBossControllerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateBossControllerBlockPacket::write, UpdateBossControllerBlockPacket::new);
 

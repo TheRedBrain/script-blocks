@@ -11,10 +11,12 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateDialogueBlockPacket(BlockPos dialogueBlockPosition,
-										List<MutablePair<String, BlockPos>> dialogueUsedBlocksList,
-										List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList,
-										List<String> startingDialogueList) implements CustomPayload {
+public record UpdateDialogueBlockPacket(
+		BlockPos dialogueBlockPosition,
+		List<MutablePair<String, BlockPos>> dialogueUsedBlocksList,
+		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList,
+		List<String> startingDialogueList
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateDialogueBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_dialogue_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateDialogueBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDialogueBlockPacket::write, UpdateDialogueBlockPacket::new);
 

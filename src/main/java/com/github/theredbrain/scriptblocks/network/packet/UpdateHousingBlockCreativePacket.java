@@ -7,11 +7,15 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
-public record UpdateHousingBlockCreativePacket(BlockPos housingBlockPosition, boolean showRestrictBlockBreakingArea,
-											   Vec3i restrictBlockBreakingAreaDimensions,
-											   BlockPos restrictBlockBreakingAreaPositionOffset,
-											   BlockPos triggeredBlockPositionOffset, boolean triggeredBlockResets,
-											   String ownerMode) implements CustomPayload {
+public record UpdateHousingBlockCreativePacket(
+		BlockPos housingBlockPosition,
+		boolean showRestrictBlockBreakingArea,
+		Vec3i restrictBlockBreakingAreaDimensions,
+		BlockPos restrictBlockBreakingAreaPositionOffset,
+		BlockPos triggeredBlockPositionOffset,
+		boolean triggeredBlockResets,
+		String ownerMode
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateHousingBlockCreativePacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_housing_block_creative"));
 	public static final PacketCodec<RegistryByteBuf, UpdateHousingBlockCreativePacket> PACKET_CODEC = PacketCodec.of(UpdateHousingBlockCreativePacket::write, UpdateHousingBlockCreativePacket::new);
 

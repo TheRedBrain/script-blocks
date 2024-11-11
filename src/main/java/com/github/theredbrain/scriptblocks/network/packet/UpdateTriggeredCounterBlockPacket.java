@@ -10,13 +10,18 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateTriggeredCounterBlockPacket(BlockPos triggeredCounterBlockPosition,
-												List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList) implements CustomPayload {
+public record UpdateTriggeredCounterBlockPacket(
+		BlockPos triggeredCounterBlockPosition,
+		List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateTriggeredCounterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_triggered_counter_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredCounterBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredCounterBlockPacket::write, UpdateTriggeredCounterBlockPacket::new);
 
 	public UpdateTriggeredCounterBlockPacket(RegistryByteBuf registryByteBuf) {
-		this(registryByteBuf.readBlockPos(), registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_INTEGER_MUTABLE_PAIR_BLOCK_POS_BOOLEAN));
+		this(
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_INTEGER_MUTABLE_PAIR_BLOCK_POS_BOOLEAN)
+		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {

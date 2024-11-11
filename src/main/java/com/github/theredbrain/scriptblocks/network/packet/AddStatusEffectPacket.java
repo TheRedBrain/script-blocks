@@ -6,8 +6,15 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
-public record AddStatusEffectPacket(Identifier effectId, int duration, int amplifier, boolean ambient,
-									boolean showParticles, boolean showIcon, boolean toggle) implements CustomPayload {
+public record AddStatusEffectPacket(
+		Identifier effectId,
+		int duration,
+		int amplifier,
+		boolean ambient,
+		boolean showParticles,
+		boolean showIcon,
+		boolean toggle
+) implements CustomPayload {
 	public static final CustomPayload.Id<AddStatusEffectPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("add_status_effect"));
 	public static final PacketCodec<RegistryByteBuf, AddStatusEffectPacket> PACKET_CODEC = PacketCodec.of(AddStatusEffectPacket::write, AddStatusEffectPacket::new);
 

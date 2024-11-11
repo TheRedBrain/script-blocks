@@ -6,7 +6,10 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
-public record UpdateShopBlockPacket(BlockPos shopBlockPosition, String shopIdentifier) implements CustomPayload {
+public record UpdateShopBlockPacket(
+		BlockPos shopBlockPosition,
+		String shopIdentifier
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateShopBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_shop_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateShopBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateShopBlockPacket::write, UpdateShopBlockPacket::new);
 

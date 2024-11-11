@@ -11,10 +11,17 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 
-public record UpdateRelayTriggerBlockPacket(BlockPos relayTriggerBlockPosition, String selectionMode, boolean showArea,
-											boolean resetsArea, Vec3i areaDimensions, BlockPos areaPositionOffset,
-											List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks,
-											String triggerMode, int triggerAmount) implements CustomPayload {
+public record UpdateRelayTriggerBlockPacket(
+		BlockPos relayTriggerBlockPosition,
+		String selectionMode,
+		boolean showArea,
+		boolean resetsArea,
+		Vec3i areaDimensions,
+		BlockPos areaPositionOffset,
+		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks,
+		String triggerMode,
+		int triggerAmount
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateRelayTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_relay_trigger_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateRelayTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateRelayTriggerBlockPacket::write, UpdateRelayTriggerBlockPacket::new);
 
