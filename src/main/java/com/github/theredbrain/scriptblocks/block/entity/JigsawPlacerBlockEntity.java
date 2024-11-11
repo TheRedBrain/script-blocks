@@ -254,7 +254,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 							registryEntry,
 							this.target,
 							20,
-							/*blockPos*/new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()), // offset y by 1 to fix vanilla bug
+							/*blockPos*/(facing == Direction.UP || facing == Direction.DOWN) ? new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()) : facing == Direction.SOUTH ? new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ() + 2) : facing == Direction.WEST ? new BlockPos(blockPos.getX() - 2, blockPos.getY() + 1, blockPos.getZ()) : facing == Direction.EAST ? new BlockPos(blockPos.getX() + 2, blockPos.getY() + 1, blockPos.getZ()) : new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ() - 2), // offsets to fix vanilla bug
 							false,
 							facing == Direction.EAST ? BlockRotation.CLOCKWISE_90 : facing == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : facing == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : facing == Direction.NORTH ? BlockRotation.NONE : rotation == Direction.EAST ? BlockRotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : BlockRotation.NONE
 					);
