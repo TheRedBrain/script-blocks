@@ -21,6 +21,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
@@ -35,6 +36,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<TriggeredDisplayBlockEntity> TRIGGERED_DISPLAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_display_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredDisplayBlockEntity::new, BlockRegistry.TRIGGERED_DISPLAY_BLOCK).build());
+	public static final BlockEntityType<TriggeredRNGBlockEntity> TRIGGERED_RNG_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggered_rng_block"),
+			FabricBlockEntityTypeBuilder.create(TriggeredRNGBlockEntity::new, BlockRegistry.TRIGGERED_RNG_BLOCK).build());
 	public static final BlockEntityType<InteractiveLootBlockEntity> INTERACTIVE_LOOT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("interactive_loot_block"),
 			FabricBlockEntityTypeBuilder.create(InteractiveLootBlockEntity::new, BlockRegistry.INTERACTIVE_LOOT_BLOCK).build());

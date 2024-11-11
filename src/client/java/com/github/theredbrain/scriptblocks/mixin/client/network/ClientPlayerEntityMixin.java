@@ -20,6 +20,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
@@ -46,6 +47,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancementCheckerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDisplayBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.network.message.DuckMessageHandlerMixin;
@@ -219,6 +221,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock) {
 		this.client.setScreen(new TriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlock));
+	}
+
+	@Override
+	public void scriptblocks$openTriggeredRNGBlockScreen(TriggeredRNGBlockEntity triggeredRNGBlockEntity) {
+		this.client.setScreen(new TriggeredRNGBlockScreen(triggeredRNGBlockEntity));
 	}
 
 	@Override
