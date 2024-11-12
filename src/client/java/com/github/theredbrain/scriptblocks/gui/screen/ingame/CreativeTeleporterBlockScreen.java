@@ -22,6 +22,7 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
@@ -55,8 +56,13 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	private static final Text LOCATION_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.teleporter_block.location_identifier_label");
 	private static final Text LOCATION_ENTRANCE_LABEL_TEXT = Text.translatable("gui.teleporter_block.location_entrance_label");
+	private static final Text LOCATION_DATA_ID_LABEL_TEXT = Text.translatable("gui.teleporter_block.location_data_id_label");
+	private static final Text LOCATION_ENTRANCE_DATA_ID_LABEL_TEXT = Text.translatable("gui.teleporter_block.location_entrance_data_id_label");
 	private static final Text LOCATION_DATA_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.teleporter_block.location_data_identifier_label");
 	private static final Text LOCATION_DATA_LABEL_TEXT = Text.translatable("gui.teleporter_block.location_data_label");
+	private static final Text SEND_DATA_ID_LABEL_TEXT = Text.translatable("gui.teleporter_block.send_data_id_label");
+	private static final Text SEND_DATA_VALUE_LABEL_TEXT = Text.translatable("gui.teleporter_block.send_data_value_label");
+	private static final Text DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.teleporter_block.data_providing_block_pos_offset_label");
 
 	private static final Text ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_status_effect_button_label");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
@@ -109,10 +115,18 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget newDataIdField;
 	private TextFieldWidget newDataField;
 	private ButtonWidget addNewLocationButton;
+	private CyclingButtonWidget<LocationModeScreenPage> locationModeScreenPageButton;
 	private TextFieldWidget locationIdentifierField;
 	private TextFieldWidget locationEntranceField;
 	private TextFieldWidget locationDataIdField;
 	private TextFieldWidget locationDataField;
+	private TextFieldWidget dataProvidingBlockPosOffsetXField;
+	private TextFieldWidget dataProvidingBlockPosOffsetYField;
+	private TextFieldWidget dataProvidingBlockPosOffsetZField;
+	private TextFieldWidget locationDataIdentifierField;
+	private TextFieldWidget entranceDataIdentifierField;
+	private TextFieldWidget sendDataIdentifierDataIdentifierField;
+	private TextFieldWidget sendDataValueDataIdentifierField;
 	private TextFieldWidget teleporterNameField;
 	private TextFieldWidget currentTargetOwnerLabelField;
 	private TextFieldWidget currentTargetIdentifierLabelField;
@@ -124,6 +138,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private ButtonWidget cancelButton;
 
 	private TeleporterBlockEntity.CreativeScreenPage creativeScreenPage;
+	private LocationModeScreenPage locationModeScreenPage;
 	private boolean showActivationArea;
 	private boolean showAdventureScreen;
 	private boolean setAccessPosition;
@@ -152,13 +167,11 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	private void done() {
-		ScriptBlocks.info("done");
 		this.updateTeleporterBlock();
 		this.close();
 	}
 
 	private void cancel() {
-		ScriptBlocks.info("cancel");
 		this.teleporterBlock.setShowActivationArea(this.showActivationArea);
 		this.teleporterBlock.setShowAdventureScreen(this.showAdventureScreen);
 		this.teleporterBlock.setSetAccessPosition(this.setAccessPosition);
@@ -172,7 +185,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	private void addLocationToList(String identifier, String entrance, String dataId, String data) {
-		ScriptBlocks.LOGGER.info("addLocationToList");
 		Text message = Text.literal("");
 //		if (Identifier.isValid(identifier)) {
 		Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(identifier));
@@ -205,7 +217,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	private void removeLocationFromLocationList(int index) {
-		ScriptBlocks.info("removeLocationFromLocationList");
 		if (index + this.creativeLocationsListScrollPosition < this.locationsList.size()) {
 			this.locationsList.remove(index + this.creativeLocationsListScrollPosition);
 		}
@@ -213,7 +224,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	private void addStatusEffectToList(String identifier) {
-		ScriptBlocks.info("addStatusEffectToList");
 		if (!identifier.isEmpty()) {
 			this.statusEffectsToDecrementLevelOnTeleport.add(identifier);
 		}
@@ -221,7 +231,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	private void removeStatusEffectFromStatusEffectList(int index) {
-		ScriptBlocks.info("removeStatusEffectFromStatusEffectList");
 		if (index + this.statusEffectListScrollPosition < this.statusEffectsToDecrementLevelOnTeleport.size()) {
 			this.statusEffectsToDecrementLevelOnTeleport.remove(index + this.statusEffectListScrollPosition);
 		}
@@ -237,6 +246,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
+		this.locationModeScreenPage = LocationModeScreenPage.PAGE_1;
 
 		super.init();
 
@@ -394,28 +404,72 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		this.addNewLocationButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_LOCATION_BUTTON_LABEL_TEXT, button -> this.addLocationToList(this.newLocationIdentifierField.getText(), this.newLocationEntranceField.getText(), this.newDataIdField.getText(), this.newDataField.getText())).dimensions(this.width / 2 - 154, 185, 100, 20).build());
 
-		// teleportation mode: locations
+		// teleportation mode: location
+
+		this.locationModeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(LocationModeScreenPage::asText).values((LocationModeScreenPage[]) LocationModeScreenPage.values()).initially(this.locationModeScreenPage).omitKeyText().build(this.width / 2 - 154, 69, 300, 20, Text.empty(), (button, locationModeScreenPage) -> {
+			this.locationModeScreenPage = locationModeScreenPage;
+			this.updateWidgets();
+		}));
+
+		this.dataProvidingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 104, 100, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetXField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetXField.setText(String.valueOf(this.teleporterBlock.getDataProvidingBlockPosOffset().getX()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetXField);
+
+		this.dataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 104, 100, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetYField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetYField.setText(String.valueOf(this.teleporterBlock.getDataProvidingBlockPosOffset().getY()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetYField);
+
+		this.dataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 46, 104, 100, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetZField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetZField.setText(String.valueOf(this.teleporterBlock.getDataProvidingBlockPosOffset().getZ()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetZField);
+
+		// page 1
 
 		MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = this.teleporterBlock.getLocation();
-		this.locationIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 300, 20, Text.empty());
+		this.locationIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 139, 150, 20, Text.empty());
 		this.locationIdentifierField.setMaxLength(128);
 		this.locationIdentifierField.setText(location.left.left);
 		this.addSelectableChild(this.locationIdentifierField);
 
-		this.locationEntranceField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 115, 300, 20, Text.empty());
+		this.locationEntranceField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 174, 150, 20, Text.empty());
 		this.locationEntranceField.setMaxLength(128);
 		this.locationEntranceField.setText(location.left.right);
 		this.addSelectableChild(this.locationEntranceField);
 
-		this.locationDataIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 150, 300, 20, Text.empty());
+		this.locationDataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 139, 150, 20, Text.empty());
+		this.locationDataIdentifierField.setMaxLength(128);
+		this.locationDataIdentifierField.setText(this.teleporterBlock.getLocationDataIdentifier());
+		this.addSelectableChild(this.locationDataIdentifierField);
+
+		this.entranceDataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 174, 150, 20, Text.empty());
+		this.entranceDataIdentifierField.setMaxLength(128);
+		this.entranceDataIdentifierField.setText(this.teleporterBlock.getEntranceDataIdentifier());
+		this.addSelectableChild(this.entranceDataIdentifierField);
+
+		// page 2
+
+		this.locationDataIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 139, 150, 20, Text.empty());
 		this.locationDataIdField.setMaxLength(128);
 		this.locationDataIdField.setText(location.right.left);
 		this.addSelectableChild(this.locationDataIdField);
 
-		this.locationDataField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 185, 300, 20, Text.empty());
+		this.locationDataField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 174, 150, 20, Text.empty());
 		this.locationDataField.setMaxLength(128);
 		this.locationDataField.setText(location.right.right);
 		this.addSelectableChild(this.locationDataField);
+
+		this.sendDataIdentifierDataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 139, 150, 20, Text.empty());
+		this.sendDataIdentifierDataIdentifierField.setMaxLength(128);
+		this.sendDataIdentifierDataIdentifierField.setText(this.teleporterBlock.getSendDataIdentifierDataIdentifier());
+		this.addSelectableChild(this.sendDataIdentifierDataIdentifierField);
+
+		this.sendDataValueDataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 174, 150, 20, Text.empty());
+		this.sendDataValueDataIdentifierField.setMaxLength(128);
+		this.sendDataValueDataIdentifierField.setText(this.teleporterBlock.getSendDataValueDataIdentifier());
+		this.addSelectableChild(this.sendDataValueDataIdentifierField);
 
 		// --- status effect page ---
 
@@ -526,10 +580,18 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.newDataField.setVisible(false);
 		this.addNewLocationButton.visible = false;
 
+		this.locationModeScreenPageButton.visible = false;
 		this.locationIdentifierField.setVisible(false);
 		this.locationEntranceField.setVisible(false);
 		this.locationDataIdField.setVisible(false);
 		this.locationDataField.setVisible(false);
+		this.dataProvidingBlockPosOffsetXField.setVisible(false);
+		this.dataProvidingBlockPosOffsetYField.setVisible(false);
+		this.dataProvidingBlockPosOffsetZField.setVisible(false);
+		this.locationDataIdentifierField.setVisible(false);
+		this.entranceDataIdentifierField.setVisible(false);
+		this.sendDataIdentifierDataIdentifierField.setVisible(false);
+		this.sendDataValueDataIdentifierField.setVisible(false);
 
 		this.removeStatusEffectButton0.visible = false;
 		this.removeStatusEffectButton1.visible = false;
@@ -606,11 +668,29 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 			} else if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 
-				this.locationIdentifierField.setVisible(true);
-				this.locationEntranceField.setVisible(true);
-				this.locationDataIdField.setVisible(true);
-				this.locationDataField.setVisible(true);
+				this.locationModeScreenPageButton.visible = true;
 
+				this.dataProvidingBlockPosOffsetXField.setVisible(true);
+				this.dataProvidingBlockPosOffsetYField.setVisible(true);
+				this.dataProvidingBlockPosOffsetZField.setVisible(true);
+
+				if (this.locationModeScreenPage == LocationModeScreenPage.PAGE_1) {
+
+					this.locationIdentifierField.setVisible(true);
+					this.locationEntranceField.setVisible(true);
+
+					this.locationDataIdentifierField.setVisible(true);
+					this.entranceDataIdentifierField.setVisible(true);
+
+				} else if (this.locationModeScreenPage == LocationModeScreenPage.PAGE_2) {
+
+					this.locationDataIdField.setVisible(true);
+					this.locationDataField.setVisible(true);
+
+					this.sendDataIdentifierDataIdentifierField.setVisible(true);
+					this.sendDataValueDataIdentifierField.setVisible(true);
+
+				}
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
 
@@ -878,14 +958,38 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				this.newDataIdField.render(context, mouseX, mouseY, delta);
 				this.newDataField.render(context, mouseX, mouseY, delta);
 			} else if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
-				context.drawTextWithShadow(this.textRenderer, LOCATION_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-				this.locationIdentifierField.render(context, mouseX, mouseY, delta);
-				context.drawTextWithShadow(this.textRenderer, LOCATION_ENTRANCE_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-				this.locationEntranceField.render(context, mouseX, mouseY, delta);
-				context.drawTextWithShadow(this.textRenderer, LOCATION_DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
-				this.locationDataIdField.render(context, mouseX, mouseY, delta);
-				context.drawTextWithShadow(this.textRenderer, LOCATION_DATA_LABEL_TEXT, this.width / 2 - 153, 175, 0xA0A0A0);
-				this.locationDataField.render(context, mouseX, mouseY, delta);
+
+				context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 94, 0xA0A0A0);
+				this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
+				this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
+				this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+
+				if (this.locationModeScreenPage == LocationModeScreenPage.PAGE_1) {
+
+					context.drawTextWithShadow(this.textRenderer, LOCATION_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 129, 0xA0A0A0);
+					this.locationIdentifierField.render(context, mouseX, mouseY, delta);
+					context.drawTextWithShadow(this.textRenderer, LOCATION_ENTRANCE_LABEL_TEXT, this.width / 2 - 153, 164, 0xA0A0A0);
+					this.locationEntranceField.render(context, mouseX, mouseY, delta);
+
+					context.drawTextWithShadow(this.textRenderer, LOCATION_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 129, 0xA0A0A0);
+					this.locationDataIdentifierField.render(context, mouseX, mouseY, delta);
+
+					context.drawTextWithShadow(this.textRenderer, LOCATION_ENTRANCE_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 164, 0xA0A0A0);
+					this.entranceDataIdentifierField.render(context, mouseX, mouseY, delta);
+
+				} else if (this.locationModeScreenPage == LocationModeScreenPage.PAGE_2) {
+
+					context.drawTextWithShadow(this.textRenderer, LOCATION_DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 129, 0xA0A0A0);
+					this.locationDataIdField.render(context, mouseX, mouseY, delta);
+					context.drawTextWithShadow(this.textRenderer, LOCATION_DATA_LABEL_TEXT, this.width / 2 - 153, 164, 0xA0A0A0);
+					this.locationDataField.render(context, mouseX, mouseY, delta);
+
+					context.drawTextWithShadow(this.textRenderer, SEND_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 129, 0xA0A0A0);
+					this.sendDataIdentifierDataIdentifierField.render(context, mouseX, mouseY, delta);
+					context.drawTextWithShadow(this.textRenderer, SEND_DATA_VALUE_LABEL_TEXT, this.width / 2 + 5, 164, 0xA0A0A0);
+					this.sendDataValueDataIdentifierField.render(context, mouseX, mouseY, delta);
+
+				}
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
 			for (int i = this.statusEffectListScrollPosition; i < Math.min(this.statusEffectListScrollPosition + VISIBLE_STATUS_EFFECT_LIST_ENTRIES, this.statusEffectsToDecrementLevelOnTeleport.size()); i++) {
@@ -979,6 +1083,15 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				spawnPointType.asString(),
 				locationsList,
 				new MutablePair<>(new MutablePair<>(this.locationIdentifierField.getText(), this.locationEntranceField.getText()), new MutablePair<>(this.locationDataIdField.getText(), this.locationDataField.getText())),
+				new BlockPos(
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
+				),
+				this.locationDataIdentifierField.getText(),
+				this.entranceDataIdentifierField.getText(),
+				this.sendDataIdentifierDataIdentifierField.getText(),
+				this.sendDataValueDataIdentifierField.getText(),
 				this.teleporterNameField.getText(),
 				this.currentTargetIdentifierLabelField.getText(),
 				this.currentTargetOwnerLabelField.getText(),
@@ -994,4 +1107,23 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		return false;
 	}
 
+	public enum LocationModeScreenPage implements StringIdentifiable {
+		PAGE_1("page_1"),
+		PAGE_2("page_2");
+
+		private final String name;
+
+		LocationModeScreenPage(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String asString() {
+			return this.name;
+		}
+
+		public Text asText() {
+			return Text.translatable("gui.teleporter_block.location_mode_screen_page." + this.name);
+		}
+	}
 }

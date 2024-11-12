@@ -297,6 +297,9 @@
 	"gui.teleporter_block.spawn_point_type.player_spawn": "Player Spawn",
 	"gui.teleporter_block.spawn_point_type.player_location_access_position": "Location Access Position",
 
+	"gui.teleporter_block.location_mode_screen_page.page_1": "Page 1",
+	"gui.teleporter_block.location_mode_screen_page.page_2": "Page 2",
+
 	"gui.teleporter_block.direct_teleport_position_offset_label": "Teleportation Target Position Offset",
 	"gui.teleporter_block.direct_teleport_orientation_label": "Teleportation Target Orientation",
 	"gui.teleporter_block.location_type_label": "Location Type",
@@ -306,8 +309,13 @@
 	"gui.teleporter_block.add_new_location_button_label": "Add new entry",
 	"gui.teleporter_block.location_identifier_label": "Location Identifier",
 	"gui.teleporter_block.location_entrance_label": "Location Entrance",
-	"gui.teleporter_block.location_data_identifier_label": "Location Data Identifier",
-	"gui.teleporter_block.location_data_label": "Location Data",
+	"gui.teleporter_block.location_data_id_label": "Location - Provided Data Id",
+	"gui.teleporter_block.location_entrance_data_id_label": "Entrance - Provided Data Id",
+	"gui.teleporter_block.location_data_identifier_label": "Data Identifier",
+	"gui.teleporter_block.location_data_label": "Data Value",
+	"gui.teleporter_block.send_data_id_label": "Data Id - Provided Data Id",
+	"gui.teleporter_block.send_data_value_label": "Data Value - Provided Data Id",
+	"gui.teleporter_block.data_providing_block_pos_offset_label": "Data Providing Block Pos Offset",
 	"gui.teleporter_block.add_new_status_effect_button_label": "Add new entry",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 

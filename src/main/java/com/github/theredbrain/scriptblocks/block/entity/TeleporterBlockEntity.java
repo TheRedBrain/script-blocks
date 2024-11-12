@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -8,6 +9,7 @@ import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
@@ -70,6 +72,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 	// location mode
 	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = new MutablePair<>(new MutablePair<>("", ""), new MutablePair<>("", ""));
+
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private String locationDataIdentifier = "";
+	private String entranceDataIdentifier = "";
+	private String sendDataIdentifierDataIdentifier = "";
+	private String sendDataValueDataIdentifier = "";
 
 //	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = new MutablePair<>();
 
@@ -142,6 +150,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putString("locationEntrance", this.location.getLeft().getRight());
 		nbt.putString("locationDataId", this.location.getRight().getLeft());
 		nbt.putString("locationData", this.location.getRight().getRight());
+		nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
+		nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
+		nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
+		nbt.putString("locationDataIdentifier", this.locationDataIdentifier);
+		nbt.putString("entranceDataIdentifier", this.entranceDataIdentifier);
+		nbt.putString("sendDataIdentifierDataIdentifier", this.sendDataIdentifierDataIdentifier);
+		nbt.putString("sendDataValueDataIdentifier", this.sendDataValueDataIdentifier);
 
 		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
 		nbt.putString("currentTargetOwnerLabel", this.currentTargetOwnerLabel);
@@ -221,6 +236,15 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 
 		this.location = new MutablePair<>(new MutablePair<>(nbt.getString("locationIdentifier"), nbt.getString("locationEntrance")), new MutablePair<>(nbt.getString("locationDataId"), nbt.getString("locationData")));
+		this.dataProvidingBlockPosOffset = new BlockPos(
+				nbt.getInt("dataProvidingBlockPosOffsetX"),
+				nbt.getInt("dataProvidingBlockPosOffsetY"),
+				nbt.getInt("dataProvidingBlockPosOffsetZ")
+		);
+		this.locationDataIdentifier = nbt.getString("locationDataIdentifier");
+		this.entranceDataIdentifier = nbt.getString("entranceDataIdentifier");
+		this.sendDataIdentifierDataIdentifier = nbt.getString("sendDataIdentifierDataIdentifier");
+		this.sendDataValueDataIdentifier = nbt.getString("sendDataValueDataIdentifier");
 
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
 		this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
@@ -441,12 +465,73 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.locationsList = locationsList;
 	}
 
+	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getDataDrivenLocation() {
+
+		String locationString = this.location.getLeft().getLeft();
+		String entranceString = this.location.getLeft().getRight();
+		String dataIdString = this.location.getRight().getLeft() + this.sendDataIdentifierDataIdentifier;
+		String dataValueString = this.location.getRight().getRight() + this.sendDataValueDataIdentifier;
+
+		BlockPos dataProvidingBlockPosOffset = this.dataProvidingBlockPosOffset;
+		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
+			BlockEntity blockEntity = this.world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
+			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
+				locationString = locationString + providesDataBlockEntity.getData(this.locationDataIdentifier);
+				entranceString = entranceString + providesDataBlockEntity.getData(this.entranceDataIdentifier);
+				dataIdString = dataIdString + providesDataBlockEntity.getData(this.sendDataIdentifierDataIdentifier);
+				dataValueString = dataValueString + providesDataBlockEntity.getData(this.sendDataValueDataIdentifier);
+			}
+		}
+
+		return new MutablePair<>(new MutablePair<>(locationString, entranceString), new MutablePair<>(dataIdString, dataValueString));
+	}
+
 	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getLocation() {
 		return this.location;
 	}
 
 	public void setLocation(MutablePair<MutablePair<String, String>, MutablePair<String, String>> location) {
 		this.location = location;
+	}
+
+	public BlockPos getDataProvidingBlockPosOffset() {
+		return this.dataProvidingBlockPosOffset;
+	}
+
+	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {
+		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
+	}
+
+	public String getLocationDataIdentifier() {
+		return this.locationDataIdentifier;
+	}
+
+	public void setLocationDataIdentifier(String locationDataIdentifier) {
+		this.locationDataIdentifier = locationDataIdentifier;
+	}
+
+	public String getEntranceDataIdentifier() {
+		return this.entranceDataIdentifier;
+	}
+
+	public void setEntranceDataIdentifier(String entranceDataIdentifier) {
+		this.entranceDataIdentifier = entranceDataIdentifier;
+	}
+
+	public String getSendDataIdentifierDataIdentifier() {
+		return this.sendDataIdentifierDataIdentifier;
+	}
+
+	public void setSendDataIdentifierDataIdentifier(String sendDataIdentifierDataIdentifier) {
+		this.sendDataIdentifierDataIdentifier = sendDataIdentifierDataIdentifier;
+	}
+
+	public String getSendDataValueDataIdentifier() {
+		return this.sendDataValueDataIdentifier;
+	}
+
+	public void setSendDataValueDataIdentifier(String sendDataValueDataIdentifier) {
+		this.sendDataValueDataIdentifier = sendDataValueDataIdentifier;
 	}
 
 	public String getCurrentTargetIdentifierLabel() {

@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -32,6 +31,11 @@ public record UpdateTeleporterBlockPacket(
 		String spawnPointType,
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList,
 		MutablePair<MutablePair<String, String>, MutablePair<String, String>> location,
+		BlockPos dataProvidingBlockPosOffset,
+		String locationDataIdentifier,
+		String entranceDataIdentifier,
+		String sendDataIdentifierDataIdentifier,
+		String sendDataValueDataIdentifier,
 		String teleporterName,
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
@@ -67,6 +71,11 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
 				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -110,6 +119,14 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING);
 
 		CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.encode(registryByteBuf, this.location);
+
+		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
+
+		registryByteBuf.writeString(this.locationDataIdentifier);
+		registryByteBuf.writeString(this.entranceDataIdentifier);
+		registryByteBuf.writeString(this.sendDataIdentifierDataIdentifier);
+		registryByteBuf.writeString(this.sendDataValueDataIdentifier);
+
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);
 		registryByteBuf.writeString(this.currentTargetOwnerLabel);
