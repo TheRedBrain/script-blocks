@@ -483,6 +483,11 @@
 	"block.scriptblocks.locked_use_relay_chest": "Locked Use Relay Chest",
 
 	"block.scriptblocks.area_block": "Area Block",
+	"block.scriptblocks.boss_controller_block": "Boss Controller Block",
+	"block.scriptblocks.data_access_block": "Data Access Block",
+	"block.scriptblocks.data_relay_block": "Data Relay Block",
+	"block.scriptblocks.data_saving_block": "Data Saving Block",
+	"block.scriptblocks.data_writing_block": "Data Writing Block",
 	"block.scriptblocks.delay_trigger_block": "Delay Trigger Block",
 	"block.scriptblocks.dialogue_block": "Dialogue Block",
 	"block.scriptblocks.entrance_delegation_block": "Entrance Delegation Block",
@@ -498,6 +503,8 @@
 	"block.scriptblocks.teleporter_block": "Teleporter Block",
 	"block.scriptblocks.triggered_advancement_checker_block": "Triggered Advancement Checker Block",
 	"block.scriptblocks.triggered_counter_block": "Triggered Counter Block",
+	"block.scriptblocks.triggered_display_block": "Triggered Display Block",
+	"block.scriptblocks.triggered_rng_block": "Triggered RNG Block",
 	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
 	"block.scriptblocks.use_relay_block": "Use Relay Block",
 
