@@ -18,6 +18,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 		float displayYaw,
 		float displayPitch,
 		String displayTextString,
+		BlockPos dataProvidingBlockPosOffset,
+		String dataIdentifierString,
 		int lineWidth,
 		Byte textOpacity,
 		int textBackground
@@ -35,6 +37,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 				registryByteBuf.readFloat(),
 				registryByteBuf.readFloat(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readByte(),
 				registryByteBuf.readInt()
@@ -50,6 +54,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 		registryByteBuf.writeFloat(this.displayYaw);
 		registryByteBuf.writeFloat(this.displayPitch);
 		registryByteBuf.writeString(this.displayTextString);
+		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
+		registryByteBuf.writeString(this.dataIdentifierString);
 		registryByteBuf.writeInt(this.lineWidth);
 		registryByteBuf.writeByte(this.textOpacity);
 		registryByteBuf.writeInt(this.textBackground);

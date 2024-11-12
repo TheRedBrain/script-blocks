@@ -33,6 +33,8 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		float displayPitch = payload.displayPitch();
 		// text mode
 		String displayTextString = payload.displayTextString();
+		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPosOffset();
+		String dataIdentifierString = payload.dataIdentifierString();
 		int lineWidth = payload.lineWidth();
 		Byte textOpacity = payload.textOpacity();
 		int textBackground = payload.textBackground();
@@ -49,6 +51,8 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 			triggeredDisplayBlockEntity.setDisplayOffset(displayOffset);
 			triggeredDisplayBlockEntity.setDisplayRotation(displayYaw, displayPitch);
 			triggeredDisplayBlockEntity.setTextString(displayTextString);
+			triggeredDisplayBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
+			triggeredDisplayBlockEntity.setDataIdentifierString(dataIdentifierString);
 			triggeredDisplayBlockEntity.setLineWidth(lineWidth);
 			triggeredDisplayBlockEntity.setTextOpacity(textOpacity);
 			triggeredDisplayBlockEntity.setBackground(textBackground);

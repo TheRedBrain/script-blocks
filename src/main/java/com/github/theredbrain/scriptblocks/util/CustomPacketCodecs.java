@@ -39,7 +39,7 @@ public class CustomPacketCodecs {
 
 		public void encode(ByteBuf byteBuf, MutablePair<String, String> pairStringString) {
 			PacketCodecs.STRING.encode(byteBuf, pairStringString.getLeft());
-			PacketCodecs.STRING.encode(byteBuf, pairStringString.getLeft());
+			PacketCodecs.STRING.encode(byteBuf, pairStringString.getRight());
 		}
 	};
 

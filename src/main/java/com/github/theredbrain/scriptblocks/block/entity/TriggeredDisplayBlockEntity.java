@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -9,16 +10,14 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.entity.data.DataTracker;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.decoration.Brightness;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
@@ -78,6 +77,10 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	// text mode
 	public static final String TEXT_STRING_NBT_KEY = "text_string";
+	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY = "data_provider_block_pos_offset_x";
+	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY = "data_provider_block_pos_offset_y";
+	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY = "data_provider_block_pos_offset_z";
+	public static final String DATA_IDENTIFIER_NBT_KEY = "data_identifier";
 	public static final String TEXT_NBT_KEY = "text";
 	private static final String LINE_WIDTH_NBT_KEY = "line_width";
 	private static final String TEXT_OPACITY_NBT_KEY = "text_opacity";
@@ -100,6 +103,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	private static final Vec3d DISPLAY_OFFSET_DEFAULT = new Vec3d(0, 0, 0);
 	// text mode
+	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private static final Text INITIAL_TEXT = Text.literal("Loooooooooooooooooong test text");//Text.empty();
 	private static final int INITIAL_LINE_WIDTH = 200;
 	private static final byte INITIAL_TEXT_OPACITY = -1;
@@ -111,7 +115,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	private int startInterpolation = 0;
 	private int interpolationDuration = 0;
 	private Vector3f translation = new Vector3f();
-	private Vector3f scale = new Vector3f(1,1,1);
+	private Vector3f scale = new Vector3f(1, 1, 1);
 	private Quaternionf leftRotation = new Quaternionf();
 	private Quaternionf rightRotation = new Quaternionf();
 	private Byte billboard = BillboardMode.FIXED.getIndex();
@@ -144,6 +148,8 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	// text mode
 	private String textString = "";
+	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private String dataIdentifierString = "";
 	private Text text = INITIAL_TEXT;
 	private int lineWidth = INITIAL_LINE_WIDTH;
 	private int background = INITIAL_BACKGROUND;
@@ -190,22 +196,22 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		return this.data;
 	}
 
-	public void refreshData(boolean shouldLerp, float lerpProgress) {
+	public void refreshData(boolean shouldLerp, float lerpProgress, World world) {
 //		this.data = new Data();
 		if (shouldLerp && this.data != null) {
-			this.data = this.getLerpedRenderData(this.data, lerpProgress);
+			this.data = this.getLerpedRenderData(this.data, lerpProgress, world);
 		} else {
-			this.data = this.copyData();
+			this.data = this.copyData(world);
 		}
 
 		this.textLines = null;
 	}
 
-	private Data getLerpedRenderData(Data data, float lerpProgress) {
+	private Data getLerpedRenderData(Data data, float lerpProgress, World world) {
 		int i = data.backgroundColor.lerp(lerpProgress);
 		int j = data.textOpacity.lerp(lerpProgress);
 		return new Data(
-				this.getTextString(),
+				this.getCompleteTextString(world),
 				this.getLineWidth(),
 				new IntLerperImpl(j, this.getTextOpacity()),
 				new ArgbLerper(i, this.getBackground()),
@@ -213,9 +219,9 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		);
 	}
 
-	private Data copyData() {
+	private Data copyData(World world) {
 		return new Data(
-				this.getTextString(),
+				this.getCompleteTextString(world),
 				this.getLineWidth(),
 				IntLerper.constant(this.getTextOpacity()),
 				IntLerper.constant(this.getBackground()),
@@ -251,7 +257,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			if (blockEntity.startInterpolationSet) {
 				blockEntity.startInterpolationSet = false;
 				int i = blockEntity.getStartInterpolation();
-				blockEntity.interpolationStart = (long)(blockEntity.age + i);
+				blockEntity.interpolationStart = (long) (blockEntity.age + i);
 			}
 
 			if (blockEntity.interpolationDurationSet) {
@@ -268,7 +274,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 					blockEntity.renderState = blockEntity.copyRenderState();
 				}
 
-				blockEntity.refreshData(bl, blockEntity.lerpProgress);
+				blockEntity.refreshData(bl, blockEntity.lerpProgress, world);
 			}
 
 			if (blockEntity.interpolationTarget != null) {
@@ -288,7 +294,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	private static byte readFlag(byte flags, NbtCompound nbt, String nbtKey, byte flag) {
-		return nbt.getBoolean(nbtKey) ? (byte)(flags | flag) : flags;
+		return nbt.getBoolean(nbtKey) ? (byte) (flags | flag) : flags;
 	}
 
 	@Override
@@ -301,7 +307,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			AffineTransformation.ANY_CODEC
 					.decode(NbtOps.INSTANCE, nbt.get("transformation"))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setTransformation((AffineTransformation)pair.getFirst()));
+					.ifPresent(pair -> this.setTransformation((AffineTransformation) pair.getFirst()));
 		}
 
 		if (nbt.contains("interpolation_duration", NbtElement.NUMBER_TYPE)) {
@@ -323,7 +329,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			BillboardMode.CODEC
 					.decode(NbtOps.INSTANCE, nbt.get("billboard"))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setBillboardMode((BillboardMode)pair.getFirst()));
+					.ifPresent(pair -> this.setBillboardMode((BillboardMode) pair.getFirst()));
 		}
 
 		if (nbt.contains("view_range", NbtElement.NUMBER_TYPE)) {
@@ -354,7 +360,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			Brightness.CODEC
 					.decode(NbtOps.INSTANCE, nbt.get("brightness"))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setBrightness((Brightness)pair.getFirst()));
+					.ifPresent(pair -> this.setBrightness((Brightness) pair.getFirst()));
 		} else {
 			this.setBrightness(null);
 		}
@@ -417,7 +423,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			this.setBackground(nbt.getInt(BACKGROUND_NBT_KEY));
 		}
 
-		byte b = readFlag((byte)0, nbt, SHADOW_NBT_KEY, SHADOW_FLAG);
+		byte b = readFlag((byte) 0, nbt, SHADOW_NBT_KEY, SHADOW_FLAG);
 		b = readFlag(b, nbt, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
 		b = readFlag(b, nbt, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
 		Optional<TextAlignment> optional = TextAlignment.CODEC
@@ -425,16 +431,24 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 				.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
 				.map(Pair::getFirst);
 		if (optional.isPresent()) {
-			b = switch ((TextAlignment)optional.get()) {
+			b = switch ((TextAlignment) optional.get()) {
 				case CENTER -> b;
-				case LEFT -> (byte)(b | LEFT_ALIGNMENT_FLAG);
-				case RIGHT -> (byte)(b | RIGHT_ALIGNMENT_FLAG);
+				case LEFT -> (byte) (b | LEFT_ALIGNMENT_FLAG);
+				case RIGHT -> (byte) (b | RIGHT_ALIGNMENT_FLAG);
 			};
 		}
 		this.setDisplayFlags(b);
 
 		if (nbt.contains(TEXT_STRING_NBT_KEY, NbtElement.STRING_TYPE)) {
 			this.setTextString(nbt.getString(TEXT_STRING_NBT_KEY));
+		}
+
+		if (nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, NbtElement.INT_TYPE) && nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, NbtElement.INT_TYPE) && nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, NbtElement.INT_TYPE)) {
+			this.setDataProvidingBlockPosOffset(new BlockPos(nbt.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY), nbt.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY), nbt.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY)));
+		}
+
+		if (nbt.contains(DATA_IDENTIFIER_NBT_KEY, NbtElement.STRING_TYPE)) {
+			this.setDataIdentifierString(nbt.getString(DATA_IDENTIFIER_NBT_KEY));
 		}
 
 		if (nbt.contains(TEXT_NBT_KEY, NbtElement.STRING_TYPE)) {
@@ -504,6 +518,10 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		// text mode
 		nbt.putString(TEXT_STRING_NBT_KEY, this.textString);
+		nbt.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, this.dataProvidingBlockPosOffset.getX());
+		nbt.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, this.dataProvidingBlockPosOffset.getY());
+		nbt.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, this.dataProvidingBlockPosOffset.getZ());
+		nbt.putString(DATA_IDENTIFIER_NBT_KEY, this.dataIdentifierString);
 		nbt.putString(TEXT_NBT_KEY, Text.Serialization.toJsonString(this.getText(), registryLookup));
 		nbt.putInt(LINE_WIDTH_NBT_KEY, this.getLineWidth());
 		nbt.putByte(TEXT_OPACITY_NBT_KEY, this.getTextOpacity());
@@ -541,11 +559,11 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	public float getLerpTargetPitch() {
-		return this.interpolationTarget != null ? (float)this.interpolationTarget.pitch : this.getDisplayPitch();
+		return this.interpolationTarget != null ? (float) this.interpolationTarget.pitch : this.getDisplayPitch();
 	}
 
 	public float getLerpTargetYaw() {
-		return this.interpolationTarget != null ? (float)this.interpolationTarget.yaw : this.getDisplayYaw();
+		return this.interpolationTarget != null ? (float) this.interpolationTarget.yaw : this.getDisplayYaw();
 	}
 
 	@Nullable
@@ -614,7 +632,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	public BillboardMode getBillboardMode() {
-		return (BillboardMode)BillboardMode.FROM_INDEX.apply(this.billboard);
+		return (BillboardMode) BillboardMode.FROM_INDEX.apply(this.billboard);
 	}
 
 	public void setBrightness(@Nullable Brightness brightness) {
@@ -680,21 +698,21 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		if (i <= 0) {
 			return 1.0F;
 		} else {
-			float f = (float)((long)this.age - this.interpolationStart);
+			float f = (float) ((long) this.age - this.interpolationStart);
 			float g = f + delta;
-			float h = MathHelper.clamp(MathHelper.getLerpProgress(g, 0.0F, (float)i), 0.0F, 1.0F);
+			float h = MathHelper.clamp(MathHelper.getLerpProgress(g, 0.0F, (float) i), 0.0F, 1.0F);
 			this.lerpProgress = h;
 			return h;
 		}
 	}
 
 	protected void lerpDisplayPosAndRotation(int step, double x, double y, double z, double yaw, double pitch) {
-		double d = 1.0 / (double)step;
+		double d = 1.0 / (double) step;
 		double e = MathHelper.lerp(d, this.getDisplayOffset().x, x);
 		double f = MathHelper.lerp(d, this.getDisplayOffset().y, y);
 		double g = MathHelper.lerp(d, this.getDisplayOffset().z, z);
-		float h = (float)MathHelper.lerpAngleDegrees(d, (double)this.getDisplayYaw(), yaw);
-		float i = (float)MathHelper.lerp(d, (double)this.getDisplayPitch(), pitch);
+		float h = (float) MathHelper.lerpAngleDegrees(d, (double) this.getDisplayYaw(), yaw);
+		float i = (float) MathHelper.lerp(d, (double) this.getDisplayPitch(), pitch);
 		this.setDisplayOffset(new Vec3d(e, f, g));
 		this.setDisplayRotation(h, i);
 	}
@@ -723,12 +741,43 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	// text mode
 
+	public String getCompleteTextString(World world) {
+		String completeString = this.getTextString();
+		ScriptBlocks.info("getCompleteTextString pre, completeString:" + completeString);
+			ScriptBlocks.info("getCompleteTextString, dataIdentifierString:" + this.getDataIdentifierString());
+			BlockPos dataProvidingBlockPosOffset = this.getDataProvidingBlockPosOffset();
+			if (dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
+				BlockEntity blockEntity = world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
+				if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
+					completeString = completeString + providesDataBlockEntity.getData(this.getDataIdentifierString());
+				}
+			}
+		ScriptBlocks.info("getCompleteTextString post, completeString:" + completeString);
+		return completeString;
+	}
+
 	public String getTextString() {
 		return this.textString;
 	}
 
 	public void setTextString(String textString) {
 		this.textString = textString;
+	}
+
+	public BlockPos getDataProvidingBlockPosOffset() {
+		return this.dataProvidingBlockPosOffset;
+	}
+
+	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {
+		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
+	}
+
+	public String getDataIdentifierString() {
+		return this.dataIdentifierString;
+	}
+
+	public void setDataIdentifierString(String dataIdentifierString) {
+		this.dataIdentifierString = dataIdentifierString;
 	}
 
 	public Text getText() {
@@ -860,12 +909,14 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	public void reset() {
 		if (this.isTriggered) {
 			this.isTriggered = false;
+			this.renderingDataSet = true;
 		}
 	}
 
 	@Override
 	public void trigger() {
 		this.isTriggered = true;
+		this.renderingDataSet = true;
 	}
 
 	private RenderState copyRenderState() {
@@ -905,7 +956,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	static record AffineTransformationInterpolator(AffineTransformation previous, AffineTransformation current)
 			implements AbstractInterpolator<AffineTransformation> {
 		public AffineTransformation interpolate(float f) {
-			return (double)f >= 1.0 ? this.current : this.previous.interpolate(this.current, f);
+			return (double) f >= 1.0 ? this.current : this.previous.interpolate(this.current, f);
 		}
 	}
 
@@ -963,6 +1014,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		public String asString() {
 			return this.name;
 		}
+
 		public static final Codec<DisplayMode> CODEC = StringIdentifiable.createCodec(DisplayMode::values);
 
 		public static Optional<TriggeredDisplayBlockEntity.DisplayMode> byName(String name) {
@@ -975,10 +1027,10 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	public static enum BillboardMode implements StringIdentifiable {
-		FIXED((byte)0, "fixed"),
-		VERTICAL((byte)1, "vertical"),
-		HORIZONTAL((byte)2, "horizontal"),
-		CENTER((byte)3, "center");
+		FIXED((byte) 0, "fixed"),
+		VERTICAL((byte) 1, "vertical"),
+		HORIZONTAL((byte) 2, "horizontal"),
+		CENTER((byte) 3, "center");
 
 		public static final Codec<BillboardMode> CODEC = StringIdentifiable.createCodec(BillboardMode::values);
 		public static final IntFunction<BillboardMode> FROM_INDEX = ValueLists.createIdToValueFunction(
@@ -1039,7 +1091,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		void apply(TriggeredDisplayBlockEntity entity) {
 			entity.setDisplayOffset(new Vec3d(this.x, this.y, this.z));
-			entity.setDisplayRotation((float)this.yaw, (float)this.pitch);
+			entity.setDisplayRotation((float) this.yaw, (float) this.pitch);
 		}
 
 		void applyInterpolated(TriggeredDisplayBlockEntity entity) {
@@ -1067,7 +1119,8 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		}
 	}
 
-	public static record Data(/*BlockState blockState, ItemStack itemStack, ModelTransformationMode itemTransform, */String textString, int lineWidth, IntLerper textOpacity, IntLerper backgroundColor, byte flags) {
+	public static record Data(/*BlockState blockState, ItemStack itemStack, ModelTransformationMode itemTransform, */
+			String textString, int lineWidth, IntLerper textOpacity, IntLerper backgroundColor, byte flags) {
 	}
 
 	@FunctionalInterface

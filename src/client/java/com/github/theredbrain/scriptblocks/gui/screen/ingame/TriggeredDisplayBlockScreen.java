@@ -16,6 +16,7 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -42,6 +43,10 @@ public class TriggeredDisplayBlockScreen extends Screen {
 
 	// text mode
 	private TextFieldWidget displayTextField;
+	private TextFieldWidget dataProvidingBlockPosOffsetXField;
+	private TextFieldWidget dataProvidingBlockPosOffsetYField;
+	private TextFieldWidget dataProvidingBlockPosOffsetZField;
+	private TextFieldWidget dataIdentifierTextField;
 	private TextFieldWidget lineWidthField;
 	private TextFieldWidget textOpacityField;
 	private TextFieldWidget textBackgroundField;
@@ -125,17 +130,37 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.displayTextField.setText(this.triggeredDisplayBlock.getTextString());
 		this.addSelectableChild(this.displayTextField);
 
-		this.lineWidthField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 68, 100, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 68, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetXField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetXField.setText(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getX()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetXField);
+
+		this.dataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 104, 68, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetYField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetYField.setText(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getY()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetYField);
+
+		this.dataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 68, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetZField.setMaxLength(128);
+		this.dataProvidingBlockPosOffsetZField.setText(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getZ()));
+		this.addSelectableChild(this.dataProvidingBlockPosOffsetZField);
+
+		this.dataIdentifierTextField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 68, 150, 20, Text.empty());
+		this.dataIdentifierTextField.setMaxLength(128);
+		this.dataIdentifierTextField.setText(this.triggeredDisplayBlock.getDataIdentifierString());
+		this.addSelectableChild(this.dataIdentifierTextField);
+
+		this.lineWidthField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 92, 100, 20, Text.empty());
 		this.lineWidthField.setMaxLength(128);
 		this.lineWidthField.setText(Integer.toString(this.triggeredDisplayBlock.getLineWidth()));
 		this.addSelectableChild(this.lineWidthField);
 
-		this.textOpacityField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 92, 100, 20, Text.empty());
+		this.textOpacityField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 92, 100, 20, Text.empty());
 		this.textOpacityField.setMaxLength(128);
 		this.textOpacityField.setText(Byte.toString(this.triggeredDisplayBlock.getTextOpacity()));
 		this.addSelectableChild(this.textOpacityField);
 
-		this.textBackgroundField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 116, 100, 20, Text.empty());
+		this.textBackgroundField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 92, 100, 20, Text.empty());
 		this.textBackgroundField.setMaxLength(128);
 		this.textBackgroundField.setText(Integer.toString(this.triggeredDisplayBlock.getBackground()));
 		this.addSelectableChild(this.textBackgroundField);
@@ -168,6 +193,10 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.displayPitchField.setVisible(false);
 
 		this.displayTextField.setVisible(false);
+		this.dataProvidingBlockPosOffsetXField.setVisible(false);
+		this.dataProvidingBlockPosOffsetYField.setVisible(false);
+		this.dataProvidingBlockPosOffsetZField.setVisible(false);
+		this.dataIdentifierTextField.setVisible(false);
 		this.lineWidthField.setVisible(false);
 		this.textOpacityField.setVisible(false);
 		this.textBackgroundField.setVisible(false);
@@ -186,6 +215,10 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		} else if (this.screenPage == ScreenPage.TEXT_MODE) {
 
 			this.displayTextField.setVisible(true);
+			this.dataProvidingBlockPosOffsetXField.setVisible(true);
+			this.dataProvidingBlockPosOffsetYField.setVisible(true);
+			this.dataProvidingBlockPosOffsetZField.setVisible(true);
+			this.dataIdentifierTextField.setVisible(true);
 			this.lineWidthField.setVisible(true);
 			this.textOpacityField.setVisible(true);
 			this.textBackgroundField.setVisible(true);
@@ -195,6 +228,7 @@ public class TriggeredDisplayBlockScreen extends Screen {
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
+		// TODO
 		this.init(client, width, height);
 	}
 
@@ -223,6 +257,10 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		} else if (this.screenPage == ScreenPage.TEXT_MODE) {
 
 			this.displayTextField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+			this.dataIdentifierTextField.render(context, mouseX, mouseY, delta);
 			this.lineWidthField.render(context, mouseX, mouseY, delta);
 			this.textOpacityField.render(context, mouseX, mouseY, delta);
 			this.textBackgroundField.render(context, mouseX, mouseY, delta);
@@ -243,6 +281,12 @@ public class TriggeredDisplayBlockScreen extends Screen {
 				ItemUtils.parseFloat(this.displayYawField.getText()),
 				ItemUtils.parseFloat(this.displayPitchField.getText()),
 				this.displayTextField.getText(),
+				new BlockPos(
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
+				),
+				this.dataIdentifierTextField.getText(),
 				ItemUtils.parseInt(this.lineWidthField.getText()),
 				ItemUtils.parseByte(this.textOpacityField.getText()),
 				ItemUtils.parseInt(this.textBackgroundField.getText())
