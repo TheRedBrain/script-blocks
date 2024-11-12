@@ -255,8 +255,37 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 							}
 						}
 					}
-				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC) { // TODO
-					ScriptBlocks.info("this mode is WIP");
+				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC) {
+					List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> list = new ArrayList<>(this.triggeredBlocks);
+					for (int i = 0; i < this.triggerAmount; i++) {
+						int totalAmount = 0;
+						for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : list) {
+							totalAmount += triggeredBlock.getRight();
+						}
+						if (totalAmount > 0) {
+							int pickedChoice = this.world.random.nextInt(totalAmount);
+							for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : list) {
+								pickedChoice -= triggeredBlock.getRight();
+								if (pickedChoice <= 0) {
+									BlockPos triggeredBlockPos = triggeredBlock.left.left;
+									blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + triggeredBlockPos.getX(), this.pos.getY() + triggeredBlockPos.getY(), this.pos.getZ() + triggeredBlockPos.getZ()));
+									if (blockEntity != this) {
+										if (triggeredBlock.getLeft().getRight()) {
+											if (blockEntity instanceof Resetable resetable) {
+												resetable.reset();
+											}
+										} else {
+											if (blockEntity instanceof Triggerable triggerable) {
+												triggerable.trigger();
+											}
+										}
+									}
+									list.remove(triggeredBlock);
+									break;
+								}
+							}
+						}
+					}
 				}
 			} else if (this.selectionMode == SelectionMode.AREA) {
 				Vec3i activationAreaDimensions = this.getAreaDimensions();
