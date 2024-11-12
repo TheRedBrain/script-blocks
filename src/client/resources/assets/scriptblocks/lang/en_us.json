@@ -75,6 +75,7 @@
 	"gui.data_access_block.toggle_is_writing_button_label.off": "Is Reading",
 
 
+	"gui.data_provider_block.newDataProvidingBlockPositionOffset": "New Data Provider Block Position Offset",
 	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Provider Block Position Offset",
 	"gui.data_provider_block.firstDataProvidingBlockPositionOffset": "First Data Provider Block Position Offset",
 	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Provider Block Position Offset",

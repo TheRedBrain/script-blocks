@@ -10,6 +10,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.List;
+
 public class UpdateDataRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateDataRelayBlockPacket> {
 	@Override
 	public void receive(UpdateDataRelayBlockPacket payload, ServerPlayNetworking.Context context) {
@@ -22,7 +24,7 @@ public class UpdateDataRelayBlockPacketReceiver implements ServerPlayNetworking.
 
 		BlockPos dataRelayBlockPosition = payload.dataRelayBlockPosition();
 
-		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPositionOffset();
+		List<BlockPos> dataProvidingBlockPosOffsetList = payload.dataProvidingBlockPosOffsetList();
 
 		World world = serverPlayerEntity.getWorld();
 
@@ -30,7 +32,8 @@ public class UpdateDataRelayBlockPacketReceiver implements ServerPlayNetworking.
 		BlockState blockState = world.getBlockState(dataRelayBlockPosition);
 
 		if (blockEntity instanceof DataRelayBlockEntity dataRelayBlockEntity) {
-			dataRelayBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
+			dataRelayBlockEntity.setDataProvidingBlockPosOffsetList(dataProvidingBlockPosOffsetList);
+			dataRelayBlockEntity.setIndex(0);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			dataRelayBlockEntity.markDirty();
 			world.updateListeners(dataRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
