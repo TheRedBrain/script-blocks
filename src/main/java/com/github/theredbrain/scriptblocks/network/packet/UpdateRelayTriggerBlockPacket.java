@@ -20,6 +20,9 @@ public record UpdateRelayTriggerBlockPacket(
 		BlockPos areaPositionOffset,
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks,
 		String triggerMode,
+		boolean isTriggerAmountDataDriven,
+		BlockPos dataProvidingBlockPosOffset,
+		String dataIdentifier,
 		int triggerAmount
 ) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateRelayTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_relay_trigger_block"));
@@ -39,6 +42,9 @@ public record UpdateRelayTriggerBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER),
 				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
 				registryByteBuf.readInt());
 	}
 
@@ -55,6 +61,9 @@ public record UpdateRelayTriggerBlockPacket(
 
 		registryByteBuf.writeCollection(this.triggeredBlocks, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER);
 		registryByteBuf.writeString(this.triggerMode);
+		registryByteBuf.writeBoolean(this.isTriggerAmountDataDriven);
+		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
+		registryByteBuf.writeString(this.dataIdentifier);
 		registryByteBuf.writeInt(this.triggerAmount);
 	}
 

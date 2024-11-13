@@ -1,14 +1,16 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
@@ -34,6 +36,9 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	private List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(List.of());
 	private TriggerMode triggerMode = TriggerMode.NORMAL;
+	private boolean isTriggerAmountDataDriven = true;
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private String dataIdentifier = "";
 	private int triggerAmount = 1;
 
 	public RelayTriggerBlockEntity(BlockPos pos, BlockState state) {
@@ -68,6 +73,20 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 
 		nbt.putString("triggerMode", this.triggerMode.asString());
+
+		nbt.putBoolean("isTriggerAmountDataDriven", this.isTriggerAmountDataDriven);
+
+		if (this.dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
+			nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
+			nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
+			nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
+		} else {
+			nbt.remove("dataProvidingBlockPosOffsetX");
+			nbt.remove("dataProvidingBlockPosOffsetY");
+			nbt.remove("dataProvidingBlockPosOffsetZ");
+		}
+
+		nbt.putString("dataIdentifier", this.dataIdentifier);
 
 		nbt.putInt("triggerAmount", this.triggerAmount);
 
@@ -106,6 +125,20 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 
 		this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElseGet(() -> TriggerMode.NORMAL);
 
+		this.isTriggerAmountDataDriven = nbt.getBoolean("isTriggerAmountDataDriven");
+
+		if (nbt.contains("dataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+			this.dataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
+			);
+		} else {
+			this.dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+		}
+
+		this.dataIdentifier = nbt.getString("dataIdentifier");
+
 		this.triggerAmount = nbt.getInt("triggerAmount");
 
 		super.readNbt(nbt, registryLookup);
@@ -129,7 +162,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public boolean getShowArea() {
-		return showArea;
+		return this.showArea;
 	}
 
 	public void setShowArea(boolean showArea) {
@@ -137,7 +170,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public boolean getResetsArea() {
-		return resetsArea;
+		return this.resetsArea;
 	}
 
 	public void setResetsArea(boolean resetsArea) {
@@ -145,7 +178,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public Vec3i getAreaDimensions() {
-		return areaDimensions;
+		return this.areaDimensions;
 	}
 
 	public void setAreaDimensions(Vec3i areaDimensions) {
@@ -153,7 +186,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public BlockPos getAreaPositionOffset() {
-		return areaPositionOffset;
+		return this.areaPositionOffset;
 	}
 
 	public void setAreaPositionOffset(BlockPos areaPositionOffset) {
@@ -161,7 +194,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> getTriggeredBlocks() {
-		return triggeredBlocks;
+		return this.triggeredBlocks;
 	}
 
 	public void setTriggeredBlocks(List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks) {
@@ -169,19 +202,55 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public TriggerMode getTriggerMode() {
-		return triggerMode;
+		return this.triggerMode;
 	}
 
 	public void setTriggerMode(TriggerMode triggerMode) {
 		this.triggerMode = triggerMode;
 	}
 
+	public boolean isTriggerAmountDataDriven() {
+		return this.isTriggerAmountDataDriven;
+	}
+
+	public void setIsTriggerAmountDataDriven(boolean isTriggerAmountDataDriven) {
+		this.isTriggerAmountDataDriven = isTriggerAmountDataDriven;
+	}
+
+	public BlockPos getDataProvidingBlockPosOffset() {
+		return this.dataProvidingBlockPosOffset;
+	}
+
+	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {
+		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
+	}
+
+	public String getDataIdentifier() {
+		return this.dataIdentifier;
+	}
+
+	public void setDataIdentifier(String dataIdentifier) {
+		this.dataIdentifier = dataIdentifier;
+	}
+
 	public int getTriggerAmount() {
-		return triggerAmount;
+		return this.triggerAmount;
 	}
 
 	public void setTriggerAmount(int triggerAmount) {
 		this.triggerAmount = triggerAmount;
+	}
+
+	private int getActualTriggerAmount() {
+		if (this.world != null && this.isTriggerAmountDataDriven && this.dataProvidingBlockPosOffset != BlockPos.ORIGIN && !this.dataIdentifier.isEmpty()) {
+			BlockPos dataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
+			BlockEntity blockEntity = world.getBlockEntity(dataProviderBlockPos);
+			if (blockEntity instanceof ProvidesData providesDataEntity) {
+				String data = providesDataEntity.getData(this.dataIdentifier);
+				return ItemUtils.parseInt(data);
+			}
+		}
+		return this.triggerAmount;
 	}
 
 	@Override
@@ -232,7 +301,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 						totalAmount += triggeredBlock.getRight();
 					}
 					if (totalAmount > 0) {
-						for (int i = 0; i < this.triggerAmount; i++) {
+						int triggerAmount = this.getActualTriggerAmount();
+						for (int i = 0; i < triggerAmount; i++) {
 							int pickedChoice = this.world.random.nextInt(totalAmount);
 							for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 								pickedChoice -= triggeredBlock.getRight();
@@ -257,7 +327,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 					}
 				} else if (this.triggerMode == TriggerMode.HYPER_GEOMETRIC) {
 					List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> list = new ArrayList<>(this.triggeredBlocks);
-					for (int i = 0; i < this.triggerAmount; i++) {
+					int triggerAmount = this.getActualTriggerAmount();
+					for (int i = 0; i < triggerAmount; i++) {
 						int totalAmount = 0;
 						for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : list) {
 							totalAmount += triggeredBlock.getRight();

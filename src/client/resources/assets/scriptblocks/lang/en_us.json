@@ -75,10 +75,11 @@
 	"gui.data_access_block.toggle_is_writing_button_label.off": "Is Reading",
 
 
-	"gui.data_provider_block.newDataProvidingBlockPositionOffset": "New Data Provider Block Position Offset",
-	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Provider Block Position Offset",
-	"gui.data_provider_block.firstDataProvidingBlockPositionOffset": "First Data Provider Block Position Offset",
-	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Provider Block Position Offset",
+	"gui.data_provider_block.newDataProvidingBlockPositionOffset": "New Providing Data Block Position Offset",
+	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Providing Block Position Offset",
+	"gui.data_provider_block.data_block_pos_offset": "Data Block Pos Offset",
+	"gui.data_provider_block.firstDataProvidingBlockPositionOffset": "First Data Providing Block Position Offset",
+	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Providing Block Position Offset",
 
 
 	"gui.data_saving_block.new_data_identifier_placeholder": "New Data Identifier",
@@ -220,7 +221,11 @@
 	"gui.relay_trigger_block.area_dimensions_label": "Area Dimensions",
 	"gui.relay_trigger_block.area_position_offset_label": "Area Position Offset",
 
-	"gui.relay_trigger_block.newTriggeredBlockChanceLabel": "Trigger Chance: ",
+	"gui.relay_trigger_block.new_triggered_block_chance_label": "Trigger Chance",
+	"gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.on": "Data Driven: True",
+	"gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.off": "Data Driven: False",
+	"gui.relay_trigger_block.data_identifier_label": "Checked Data",
+	"gui.relay_trigger_block.trigger_amount_label": "Trigger Amount",
 
 	"gui.relay_trigger_block.selectionMode.list": "Selection Mode: List",
 	"gui.relay_trigger_block.selectionMode.area": "Selection Mode: Area",
@@ -447,7 +452,11 @@
 	"gui.triggered_block.list.entry": "Block with offset X: %s, Y: %s, Z: %s",
 	"gui.triggered_block.list.is_triggered": " is triggered",
 	"gui.triggered_block.list.is_reset": " is reset",
+	"gui.triggered_block.list.triggered": "triggered",
+	"gui.triggered_block.list.reset": "reset",
 	"gui.triggered_block.list.threshold": " when %s is reached",
+	"gui.triggered_block.list.chance": "Has a chance of %s percent to be ",
+	"gui.triggered_block.list.weight": "Has a weight of %s to be chosen",
 
 
 	"gui.shop_block.trade_button_label": "Trade",

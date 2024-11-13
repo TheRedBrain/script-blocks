@@ -264,7 +264,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public BlockPos getDataProvidingBlockPosOffset() {
-		return dataProvidingBlockPosOffset;
+		return this.dataProvidingBlockPosOffset;
 	}
 
 	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {

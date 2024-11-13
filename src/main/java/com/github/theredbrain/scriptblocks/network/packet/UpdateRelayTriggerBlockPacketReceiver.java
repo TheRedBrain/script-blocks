@@ -36,6 +36,11 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = payload.triggeredBlocks();
 		RelayTriggerBlockEntity.TriggerMode triggerMode = RelayTriggerBlockEntity.TriggerMode.byName(payload.triggerMode()).orElse(RelayTriggerBlockEntity.TriggerMode.NORMAL);
+
+		boolean isTriggerAmountDataDriven = payload.isTriggerAmountDataDriven();
+		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPosOffset();
+		String dataIdentifier = payload.dataIdentifier();
+
 		int triggerAmount = payload.triggerAmount();
 
 		World world = serverPlayerEntity.getWorld();
@@ -51,6 +56,9 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 			relayTriggerBlockEntity.setAreaPositionOffset(areaPositionOffset);
 			relayTriggerBlockEntity.setTriggeredBlocks(triggeredBlocks);
 			relayTriggerBlockEntity.setTriggerMode(triggerMode);
+			relayTriggerBlockEntity.setIsTriggerAmountDataDriven(isTriggerAmountDataDriven);
+			relayTriggerBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
+			relayTriggerBlockEntity.setDataIdentifier(dataIdentifier);
 			relayTriggerBlockEntity.setTriggerAmount(triggerAmount);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 

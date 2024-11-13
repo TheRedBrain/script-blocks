@@ -261,17 +261,17 @@ public class TriggeredRNGBlockScreen extends Screen {
 		this.newTriggeredBlockPositionOffsetXField.setMaxLength(128);
 		this.newTriggeredBlockPositionOffsetXField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newTriggeredBlockPositionOffsetXField);
-		this.newTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 151, 50, 20, Text.empty());
+		this.newTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 104, 151, 50, 20, Text.empty());
 		this.newTriggeredBlockPositionOffsetYField.setMaxLength(128);
 		this.newTriggeredBlockPositionOffsetYField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newTriggeredBlockPositionOffsetYField);
-		this.newTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 151, 50, 20, Text.empty());
+		this.newTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 151, 50, 20, Text.empty());
 		this.newTriggeredBlockPositionOffsetZField.setMaxLength(128);
 		this.newTriggeredBlockPositionOffsetZField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newTriggeredBlockPositionOffsetZField);
 
 		this.newTriggeredBlockResets = false;
-		this.toggleNewTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.newTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 151, 150, 20, Text.empty(), (button, newTriggeredBlockResets) -> {
+		this.toggleNewTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.newTriggeredBlockResets).omitKeyText().build(this.width / 2 + 4, 151, 150, 20, Text.empty(), (button, newTriggeredBlockResets) -> {
 			this.newTriggeredBlockResets = newTriggeredBlockResets;
 		}));
 
@@ -440,7 +440,7 @@ public class TriggeredRNGBlockScreen extends Screen {
 				&& this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS) {
 			int i = this.width / 2 - 152;
 			int j = 44;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 136)) {
+			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 92)) {
 				this.mouseClicked = true;
 			}
 		}
