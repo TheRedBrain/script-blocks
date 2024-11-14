@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
@@ -27,6 +28,7 @@ import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.CopyDataBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataRelayBlockScreen;
@@ -237,6 +239,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 //	public void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
 //		this.client.setScreen(new DataAccessBlockScreen(dataAccessBlockEntity));
 //	}
+
+	@Override
+	public void scriptblocks$openCopyDataBlockScreen(CopyDataBlockEntity copyDataBlockEntity) {
+		this.client.setScreen(new CopyDataBlockScreen(copyDataBlockEntity));
+	}
 
 	@Override
 	public void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity) {

@@ -1,8 +1,10 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -73,6 +75,11 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	@Override
 	public void setData(String id, String value) {
 		this.data.put(id, value);
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	public List<MutablePair<String, String>> getDataList() {

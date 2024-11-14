@@ -61,6 +61,10 @@
 	"gui.area_block.triggered_mode.once": "Gets triggered once.",
 
 
+	"gui.copy_data_block.first_data_providing_block_position_offset": "Reading Data Block Position Offset",
+	"gui.copy_data_block.second_data_providing_block_position_offset": "Writing Data Block Position Offset",
+
+
 	"gui.data_access_block.screenPage.block_offsets": "Block Offsets",
 	"gui.data_access_block.screenPage.interaction": "Data Interaction",
 
@@ -80,6 +84,7 @@
 	"gui.data_provider_block.data_block_pos_offset": "Data Block Pos Offset",
 	"gui.data_provider_block.firstDataProvidingBlockPositionOffset": "First Data Providing Block Position Offset",
 	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Providing Block Position Offset",
+	"gui.data_provider_block.data_identifier": "Data Identifier",
 
 
 	"gui.data_saving_block.new_data_identifier_placeholder": "New Data Identifier",
@@ -493,6 +498,7 @@
 
 	"block.scriptblocks.area_block": "Area Block",
 	"block.scriptblocks.boss_controller_block": "Boss Controller Block",
+	"block.scriptblocks.copy_data_block": "Copy Data Block",
 	"block.scriptblocks.data_access_block": "Data Access Block",
 	"block.scriptblocks.data_relay_block": "Data Relay Block",
 	"block.scriptblocks.data_saving_block": "Data Saving Block",

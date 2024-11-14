@@ -489,8 +489,8 @@ public class RelayTriggerBlockScreen extends Screen {
 				BlockPos triggeredBlockPos = triggeredBlock.left.left;
 				MutableText text = Text.translatable("gui.triggered_block.list.entry", triggeredBlockPos.getX(), triggeredBlockPos.getY(), triggeredBlockPos.getZ());
 				if (this.triggerMode == RelayTriggerBlockEntity.TriggerMode.NORMAL) {
+					text.append(triggeredBlock.left.right ? Text.translatable("gui.triggered_block.list.is_reset") : Text.translatable("gui.triggered_block.list.is_triggered"));
 					context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 40 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-					text.append(Text.translatable("gui.triggered_block.list.chance", triggeredBlock.right));
 				} else {
 					Text text1;
 					if (this.triggerMode == RelayTriggerBlockEntity.TriggerMode.RANDOM) {

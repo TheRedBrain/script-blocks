@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.mixin.entity.player;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
@@ -262,6 +263,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 //	@Override
 //	public void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
 //	}
+
+	@Override
+	public void scriptblocks$openCopyDataBlockScreen(CopyDataBlockEntity copyDataBlockEntity) {
+	}
 
 	@Override
 	public void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity) {

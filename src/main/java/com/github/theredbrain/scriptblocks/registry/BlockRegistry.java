@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.registry;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.AreaBlock;
 import com.github.theredbrain.scriptblocks.block.BossControllerBlock;
+import com.github.theredbrain.scriptblocks.block.CopyDataBlock;
 import com.github.theredbrain.scriptblocks.block.DataRelayBlock;
 import com.github.theredbrain.scriptblocks.block.DataSavingBlock;
 import com.github.theredbrain.scriptblocks.block.DataWritingBlock;
@@ -73,6 +74,7 @@ public class BlockRegistry {
 	public static final Block AREA_BLOCK = registerBlock("area_block", new AreaBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block BOSS_CONTROLLER_BLOCK = registerBlock("boss_controller_block", new BossControllerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 //	public static final Block DATA_ACCESS_BLOCK = registerBlock("data_access_block", new DataAccessBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block COPY_DATA_BLOCK = registerBlock("copy_data_block", new CopyDataBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DATA_WRITING_BLOCK = registerBlock("data_writing_block", new DataWritingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DATA_RELAY_BLOCK = registerBlock("data_relay_block", new DataRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DATA_SAVING_BLOCK = registerBlock("data_saving_block", new DataSavingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

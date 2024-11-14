@@ -22,6 +22,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateCopyDataBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateCopyDataBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataRelayBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataSavingBlockPacket;
@@ -75,6 +77,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateDataWritingBlockPacket.PACKET_ID, UpdateDataWritingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataWritingBlockPacket.PACKET_ID, new UpdateDataWritingBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateCopyDataBlockPacket.PACKET_ID, UpdateCopyDataBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateCopyDataBlockPacket.PACKET_ID, new UpdateCopyDataBlockPacketReceiver());
 
 //		PayloadTypeRegistry.playC2S().register(UpdateDataAccessBlockPacket.PACKET_ID, UpdateDataAccessBlockPacket.PACKET_CODEC);
 //		ServerPlayNetworking.registerGlobalReceiver(UpdateDataAccessBlockPacket.PACKET_ID, new UpdateDataAccessBlockPacketReceiver());
