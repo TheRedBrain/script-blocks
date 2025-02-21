@@ -58,8 +58,13 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 		return BlockEntityUpdateS2CPacket.create(this);
 	}
 
+	@Override
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+		return this.createComponentlessNbt(registryLookup);
+	}
+
 	public BlockPos getRelayBlockPositionOffset() {
-		return relayBlockPositionOffset;
+		return this.relayBlockPositionOffset;
 	}
 
 	public boolean setRelayBlockPositionOffset(BlockPos relayBlockPositionOffset) {
