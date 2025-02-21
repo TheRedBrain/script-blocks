@@ -30,10 +30,10 @@ public abstract class WorldMixin implements WorldAccess {
 	 */
 	@Overwrite
 	public BlockPos getSpawnPos() {
-		if (ScriptBlocks.serverConfig.use_predefined_position_for_world_spawn) {
-			List<Integer> worldSpawnXList = ScriptBlocks.serverConfig.worldSpawnXList;
-			List<Integer> worldSpawnYList = ScriptBlocks.serverConfig.worldSpawnYList;
-			List<Integer> worldSpawnZList = ScriptBlocks.serverConfig.worldSpawnZList;
+		if (ScriptBlocks.SERVER_CONFIG.use_predefined_position_for_world_spawn) {
+			List<Integer> worldSpawnXList = ScriptBlocks.SERVER_CONFIG.worldSpawnXList;
+			List<Integer> worldSpawnYList = ScriptBlocks.SERVER_CONFIG.worldSpawnYList;
+			List<Integer> worldSpawnZList = ScriptBlocks.SERVER_CONFIG.worldSpawnZList;
 			int listSize = worldSpawnXList.size();
 			if (listSize > 0) {
 				int spawnPointIndex = this.random.nextBetweenExclusive(0, listSize);

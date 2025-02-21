@@ -1,13 +1,14 @@
 package com.github.theredbrain.scriptblocks.config;
 
-import me.shedaniel.autoconfig.ConfigData;
-import me.shedaniel.autoconfig.annotation.Config;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import me.fzzyhmstrs.fzzy_config.annotations.ConvertFrom;
+import me.fzzyhmstrs.fzzy_config.config.Config;
 
-@Config(
-		name = "client"
-)
-public class ClientConfig implements ConfigData {
+@ConvertFrom(fileName = "client.json5", folder = "scriptblocks")
+public class ClientConfig extends Config {
+
 	public ClientConfig() {
-
+		super(ScriptBlocks.identifier("client"));
 	}
+
 }

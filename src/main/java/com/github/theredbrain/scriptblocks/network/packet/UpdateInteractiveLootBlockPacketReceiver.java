@@ -24,6 +24,12 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 
 		String lootTableIdentifierString = payload.lootTableIdentifierString();
 
+		InteractiveLootBlockEntity.Mode mode = InteractiveLootBlockEntity.Mode.byName(payload.mode()).orElse(InteractiveLootBlockEntity.Mode.VANILLA);
+
+		int rolls = payload.rolls();
+
+		int choices = payload.choices();
+
 		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(interactiveLootBlockPosition);
@@ -31,6 +37,9 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 
 		if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
 			interactiveLootBlockEntity.setLootTableIdentifierString(lootTableIdentifierString);
+			interactiveLootBlockEntity.setMode(mode);
+			interactiveLootBlockEntity.setRolls(rolls);
+			interactiveLootBlockEntity.setChoices(choices);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			interactiveLootBlockEntity.markDirty();
 			world.updateListeners(interactiveLootBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

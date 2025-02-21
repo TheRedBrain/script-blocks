@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks;
 
+import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
-import com.github.theredbrain.scriptblocks.config.ServerConfigWrapper;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
@@ -19,33 +19,69 @@ import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegistry;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
-import eu.midnightdust.lib.config.MidnightConfig;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
-import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
+import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
+import me.fzzyhmstrs.fzzy_config.api.RegisterType;
+import me.fzzyhmstrs.lootables.api.LootablesApi;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import qouteall.dimlib.DimLibEntry;
-import qouteall.dimlib.api.DimensionAPI;
 
 public class ScriptBlocks implements ModInitializer {
 	public static final String MOD_ID = "scriptblocks";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static ServerConfig serverConfig;
+	public static ServerConfig SERVER_CONFIG;
 
 	// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
 //	public static final boolean isMidnightLibLoaded = FabricLoader.getInstance().isModLoaded("midnightlib");
+	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
+
+	public static boolean supplyLootableLoot(Identifier identifier, ServerPlayerEntity serverPlayerEntity, Vec3d pos, int rolls, int choices, boolean withChoice) {
+		if (isLootablesLoaded) {
+			if (withChoice) {
+				return LootablesApi.supplyLootWithChoices(
+						identifier,
+						serverPlayerEntity,
+						pos,
+						(serverPlayerEntity1, vec3d) -> {
+
+						},
+						(serverPlayerEntity2, vec3d) -> {
+							BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z));
+							if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
+								interactiveLootBlockEntity.removePlayerFromSet(serverPlayerEntity);
+							}
+						},
+						null,
+						rolls,
+						choices
+				);
+			} else {
+				return LootablesApi.supplyLootRandomly(
+						identifier,
+						serverPlayerEntity,
+						pos,
+						null,
+						rolls
+				);
+			}
+		} else {
+			info("Tried to supply loot via Lootables, but the mod is not installed!");
+			return false;
+		}
+	}
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("This was scripted!");
 
 		// Config
-		AutoConfig.register(ServerConfigWrapper.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
-		serverConfig = ((ServerConfigWrapper) AutoConfig.getConfigHolder(ServerConfigWrapper.class).getConfig()).server;
+		SERVER_CONFIG = ConfigApiJava.registerAndLoadConfig(ServerConfig::new, RegisterType.BOTH);
 
 		// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
 //		if (isMidnightLibLoaded) {

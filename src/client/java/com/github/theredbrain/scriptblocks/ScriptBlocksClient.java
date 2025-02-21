@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks;
 
 import com.github.theredbrain.scriptblocks.config.ClientConfig;
-import com.github.theredbrain.scriptblocks.config.ClientConfigWrapper;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
@@ -15,9 +14,8 @@ import com.github.theredbrain.scriptblocks.render.block.entity.RelayTriggerBlock
 import com.github.theredbrain.scriptblocks.render.block.entity.StatusEffectApplierBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TeleporterBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDisplayBlockEntityRenderer;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
-import me.shedaniel.autoconfig.serializer.PartitioningSerializer;
+import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
+import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -28,13 +26,12 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 
 @Environment(value = EnvType.CLIENT)
 public class ScriptBlocksClient implements ClientModInitializer {
-	public static ClientConfig clientConfig;
+	public static ClientConfig CLIENT_CONFIG;
 
 	@Override
 	public void onInitializeClient() {
 		// Config
-		AutoConfig.register(ClientConfigWrapper.class, PartitioningSerializer.wrap(JanksonConfigSerializer::new));
-		clientConfig = ((ClientConfigWrapper) AutoConfig.getConfigHolder(ClientConfigWrapper.class).getConfig()).client;
+		CLIENT_CONFIG = ConfigApiJava.registerAndLoadConfig(ClientConfig::new, RegisterType.CLIENT);
 
 		// Packets
 		ClientPacketRegistry.init();

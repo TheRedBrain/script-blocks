@@ -1,16 +1,20 @@
 package com.github.theredbrain.scriptblocks.config;
 
-import me.shedaniel.autoconfig.ConfigData;
-import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import me.fzzyhmstrs.fzzy_config.annotations.Comment;
+import me.fzzyhmstrs.fzzy_config.annotations.ConvertFrom;
+import me.fzzyhmstrs.fzzy_config.config.Config;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Config(
-		name = "server"
-)
-public class ServerConfig implements ConfigData {
+@ConvertFrom(fileName = "server.json5", folder = "scriptblocks")
+public class ServerConfig extends Config {
+
+	public ServerConfig() {
+		super(ScriptBlocks.identifier("server"));
+	}
+
 	@Comment("""
 			World Spawn is chosen randomly from the following lists.
 			It is recommended to set the gamerule 'spawnRadius' to 0.
@@ -45,7 +49,4 @@ public class ServerConfig implements ConfigData {
 	@Comment("Enables debug messages for the various registries.")
 	public boolean enable_registry_debugging = true;
 
-	public ServerConfig() {
-
-	}
 }

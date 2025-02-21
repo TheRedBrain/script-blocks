@@ -43,7 +43,7 @@ public class ClientPacketRegistry {
 			((DuckPlayerEntityMixin) context.player()).scriptblocks$sendAnnouncement(payload.announcement());
 		});
 		ClientPlayNetworking.registerGlobalReceiver(ServerConfigSyncPacket.PACKET_ID, (payload, context) -> {
-			ScriptBlocks.serverConfig = payload.serverConfig();
+			ScriptBlocks.SERVER_CONFIG = payload.serverConfig();
 		});
 	}
 }

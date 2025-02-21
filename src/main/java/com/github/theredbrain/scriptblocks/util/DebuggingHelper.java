@@ -8,18 +8,18 @@ import org.jetbrains.annotations.Nullable;
 public class DebuggingHelper {
 
 	public static boolean isTeleporterLoggingEnabled() {
-		return ScriptBlocks.serverConfig.enable_debug_logging && ScriptBlocks.serverConfig.enable_teleporter_debugging;
+		return ScriptBlocks.SERVER_CONFIG.enable_debug_logging && ScriptBlocks.SERVER_CONFIG.enable_teleporter_debugging;
 	}
 
 	public static boolean isRegistryLoggingEnabled() {
-		return ScriptBlocks.serverConfig.enable_debug_logging && ScriptBlocks.serverConfig.enable_registry_debugging;
+		return ScriptBlocks.SERVER_CONFIG.enable_debug_logging && ScriptBlocks.SERVER_CONFIG.enable_registry_debugging;
 	}
 
 	public static void sendDebuggingMessage(String message, @Nullable PlayerEntity playerEntity) {
-		if (ScriptBlocks.serverConfig.enable_debug_console_logging) {
+		if (ScriptBlocks.SERVER_CONFIG.enable_debug_console_logging) {
 			ScriptBlocks.LOGGER.info("[" + ScriptBlocks.MOD_ID + "] [info]: " + message);
 		}
-		if (ScriptBlocks.serverConfig.enable_debug_messages && playerEntity != null) {
+		if (ScriptBlocks.SERVER_CONFIG.enable_debug_messages && playerEntity != null) {
 			playerEntity.sendMessage(Text.of("[" + ScriptBlocks.MOD_ID + "] [info]: " + message));
 		}
 	}

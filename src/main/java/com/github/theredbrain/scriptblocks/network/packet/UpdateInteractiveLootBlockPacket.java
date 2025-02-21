@@ -8,7 +8,10 @@ import net.minecraft.util.math.BlockPos;
 
 public record UpdateInteractiveLootBlockPacket(
 		BlockPos interactiveLootBlockPosition,
-		String lootTableIdentifierString
+		String lootTableIdentifierString,
+		String mode,
+		int rolls,
+		int choices
 ) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateInteractiveLootBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_interactive_loot_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateInteractiveLootBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateInteractiveLootBlockPacket::write, UpdateInteractiveLootBlockPacket::new);
@@ -16,13 +19,19 @@ public record UpdateInteractiveLootBlockPacket(
 	public UpdateInteractiveLootBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString()
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readInt(),
+				registryByteBuf.readInt()
 		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.interactiveLootBlockPosition);
 		registryByteBuf.writeString(this.lootTableIdentifierString);
+		registryByteBuf.writeString(this.mode);
+		registryByteBuf.writeInt(this.rolls);
+		registryByteBuf.writeInt(this.choices);
 	}
 
 	@Override

@@ -8,16 +8,23 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.text.Text;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 public class InteractiveLootBlockEntity extends BlockEntity implements Resetable {
 	private Set<UUID> playerSet = new HashSet<>();
 	private String lootTableIdentifierString = "";
+	private Mode mode = Mode.VANILLA;
+	private int rolls = 3;
+	private int choices = 1;
 
 	public InteractiveLootBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.INTERACTIVE_LOOT_BLOCK_ENTITY, pos, state);
@@ -33,8 +40,28 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			nbt.putUuid("listEntry_" + i, list.get(i));
 		}
 
-		if (!this.lootTableIdentifierString.equals("")) {
+		if (!this.lootTableIdentifierString.isEmpty()) {
 			nbt.putString("lootTableIdentifierString", this.lootTableIdentifierString);
+		} else {
+			nbt.remove("lootTableIdentifierString");
+		}
+
+		if (this.mode != Mode.VANILLA) {
+			nbt.putString("mode", this.mode.asString());
+		} else {
+			nbt.remove("mode");
+		}
+
+		if (this.rolls != 3) {
+			nbt.putInt("rolls", this.rolls);
+		} else {
+			nbt.remove("rolls");
+		}
+
+		if (this.choices != 1) {
+			nbt.putInt("choices", this.choices);
+		} else {
+			nbt.remove("choices");
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -51,7 +78,25 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			}
 		}
 
-		this.lootTableIdentifierString = nbt.getString("lootTableIdentifierString");
+		if (nbt.contains("lootTableIdentifierString")) {
+			this.lootTableIdentifierString = nbt.getString("lootTableIdentifierString");
+		} else {
+			this.lootTableIdentifierString = "";
+		}
+
+		this.mode = Mode.byName(nbt.getString("mode")).orElse(Mode.VANILLA);
+
+		if (nbt.contains("rolls")) {
+			this.rolls = nbt.getInt("rolls");
+		} else {
+			this.rolls = 3;
+		}
+
+		if (nbt.contains("choices")) {
+			this.choices = nbt.getInt("choices");
+		} else {
+			this.choices = 1;
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -73,16 +118,70 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 		this.lootTableIdentifierString = lootTableIdentifierString;
 	}
 
+	public Mode getMode() {
+		return this.mode;
+	}
+
+	public void setMode(Mode mode) {
+		this.mode = mode;
+	}
+
+	public int getRolls() {
+		return this.rolls;
+	}
+
+	public void setRolls(int rolls) {
+		this.rolls = rolls;
+	}
+
+	public int getChoices() {
+		return this.choices;
+	}
+
+	public void setChoices(int choices) {
+		this.choices = choices;
+	}
+
 	public boolean isPlayerInSet(PlayerEntity playerEntity) {
 		return this.playerSet.contains(playerEntity.getUuid());
 	}
 
-	public boolean addPlayerToSet(PlayerEntity playerEntity) {
-		return this.playerSet.add(playerEntity.getUuid());
+	public void addPlayerToSet(PlayerEntity playerEntity) {
+		this.playerSet.add(playerEntity.getUuid());
+	}
+
+	public void removePlayerFromSet(PlayerEntity playerEntity) {
+		this.playerSet.remove(playerEntity.getUuid());
 	}
 
 	@Override
 	public void reset() {
 		this.playerSet.clear();
+	}
+
+
+	public static enum Mode implements StringIdentifiable {
+		CHOICE("choice"),
+		RANDOM("random"),
+		VANILLA("vanilla");
+
+		private final String name;
+
+		private Mode(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String asString() {
+			return this.name;
+		}
+
+		public static Optional<Mode> byName(String name) {
+			return Arrays.stream(InteractiveLootBlockEntity.Mode.values()).filter(mode -> mode.asString().equals(name)).findFirst();
+		}
+
+		public Text asText() {
+			return Text.translatable("gui.interactive_loot_block.mode." + this.name);
+		}
 	}
 }

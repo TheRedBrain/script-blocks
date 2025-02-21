@@ -28,7 +28,7 @@ public class EventsRegistry {
 		PayloadTypeRegistry.playS2C().register(LocationsSyncPacket.PACKET_ID, LocationsSyncPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(ShopsSyncPacket.PACKET_ID, ShopsSyncPacket.PACKET_CODEC);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			ServerPlayNetworking.send(handler.player, new ServerConfigSyncPacket(ScriptBlocks.serverConfig));
+			ServerPlayNetworking.send(handler.player, new ServerConfigSyncPacket(ScriptBlocks.SERVER_CONFIG));
 			ServerPlayNetworking.send(handler.player, new BossesSyncPacket(BossesRegistry.registeredBosses));
 			ServerPlayNetworking.send(handler.player, new DialoguesSyncPacket(DialoguesRegistry.registeredDialogues));
 			ServerPlayNetworking.send(handler.player, new DialogueAnswersSyncPacket(DialogueAnswersRegistry.registeredDialogueAnswers));

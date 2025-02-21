@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
@@ -15,7 +16,10 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
@@ -59,20 +63,34 @@ public class InteractiveLootBlock extends BlockWithEntity {
 				if (player.isCreativeLevelTwoOp()) {
 					((DuckPlayerEntityMixin) player).scriptblocks$openInteractiveLootBlockScreen(interactiveLootBlockEntity);
 					return ActionResult.success(world.isClient);
-				} else if (world instanceof ServerWorld serverWorld && !serverWorld.isClient()) {
-					if (interactiveLootBlockEntity.addPlayerToSet(player)) {
-						List<ItemStack> lootStacks = getLootItems(serverWorld, pos, player, interactiveLootBlockEntity);
-						for (ItemStack itemStack : lootStacks) {
-							player.getInventory().offerOrDrop(itemStack);
-						}
-						// TODO InteractiveLootBlockEntity should have list of sound events to play
-						// TODO InteractiveLootBlockEntity should have list of text messages
-						int i = world.getRandom().nextInt(5);
-						player.sendMessage(Text.translatable("gui.interactive_loot_block.loot_acquired_" + i), true);
-						return ActionResult.SUCCESS;
+				} else if (world instanceof ServerWorld serverWorld && !serverWorld.isClient() && player instanceof ServerPlayerEntity serverPlayerEntity) {
+					if (interactiveLootBlockEntity.isPlayerInSet(serverPlayerEntity)) {
+//						// TODO InteractiveLootBlockEntity should have list of sound events to play when already looted
+//						// TODO InteractiveLootBlockEntity should have list of text messages when already looted
+						serverPlayerEntity.playSoundToPlayer(SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, 1.0F, 1.0F);
+						serverPlayerEntity.sendMessage(Text.translatable("gui.interactive_lootable_block.no_loot_left_in_chest"), true);
 					} else {
-						// TODO InteractiveLootBlockEntity should have list of sound events to play when already looted
-						// TODO InteractiveLootBlockEntity should have list of text messages when already looted
+						boolean lootSupplied;
+						Vec3d lootPos = new Vec3d(interactiveLootBlockEntity.getPos().getX(), interactiveLootBlockEntity.getPos().getY(), interactiveLootBlockEntity.getPos().getZ());
+						if (interactiveLootBlockEntity.getMode() == InteractiveLootBlockEntity.Mode.CHOICE) {
+							lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(interactiveLootBlockEntity.getLootTableIdentifierString()), serverPlayerEntity, lootPos, interactiveLootBlockEntity.getRolls(), interactiveLootBlockEntity.getChoices(), true);
+						} else if (interactiveLootBlockEntity.getMode() == InteractiveLootBlockEntity.Mode.RANDOM) {
+							lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(interactiveLootBlockEntity.getLootTableIdentifierString()), serverPlayerEntity, lootPos, interactiveLootBlockEntity.getRolls(), interactiveLootBlockEntity.getChoices(), false);
+						} else {
+							List<ItemStack> lootStacks = getLootItems(serverWorld, pos, player, interactiveLootBlockEntity);
+							for (ItemStack itemStack : lootStacks) {
+								player.getInventory().offerOrDrop(itemStack);
+							}
+							lootSupplied = true;
+						}
+						if (lootSupplied) {
+							interactiveLootBlockEntity.addPlayerToSet(serverPlayerEntity);
+							// TODO InteractiveLootBlockEntity should have list of sound events to play
+							// TODO InteractiveLootBlockEntity should have list of text messages
+							int i = world.getRandom().nextInt(5);
+							player.sendMessage(Text.translatable("gui.interactive_loot_block.loot_acquired_" + i), true);
+						}
+						return ActionResult.SUCCESS;
 					}
 				}
 			}

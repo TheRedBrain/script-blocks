@@ -66,7 +66,10 @@ public class InteractiveLootBlockScreen extends Screen {
 	private void updateInteractiveLootBlock() {
 		ClientPlayNetworking.send(new UpdateInteractiveLootBlockPacket(
 				this.interactiveLootBlockEntity.getPos(),
-				this.lootTableIdentifierStringField.getText()
+				this.lootTableIdentifierStringField.getText(),
+				"choice",
+				3,
+				1
 		));
 	}
 

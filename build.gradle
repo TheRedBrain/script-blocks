@@ -13,16 +13,10 @@ base {
 }
 
 repositories {
-
-	// Cloth Config
+	// Fzzy Config, Lootables
 	maven {
-		url "https://maven.shedaniel.me/"
-	}
-
-	// Cloth Config, Mod Menu
-	maven {
-		name = "TerraformersMC"
-		url = "https://maven.terraformersmc.com/"
+		name = "FzzyMaven"
+		url = "https://maven.fzzyhmstrs.me/"
 	}
 
 	// DimLib
@@ -104,19 +98,16 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	// Cloth Config
-	modImplementation ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}")
+	// Fzzy Config
+	modImplementation"me.fzzyhmstrs:fzzy_config:${project.fzzy_config_version}"
+
+	// Lootable
+	modImplementation "me.fzzyhmstrs:lootables:${project.lootable_version}"
 
 	// DimLib
 	modApi("com.github.iPortalTeam:DimLib:${dimlib_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-
-	// Mod Menu
-	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
-
-	// Midnight Lib
-	modImplementation "maven.modrinth:midnightlib:${project.midnightlib_version}"
 
 	// Slot Customization API
 	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
@@ -180,10 +171,10 @@ if (project.hasProperty('release_type')) {
 			addGameVersion "Fabric"
 
 			relations {
-				requiredDependency 'cloth-config'
+				requiredDependency 'fzzy-config'
 				requiredDependency 'fabric-api'
 				requiredDependency 'slot-customization-api'
-				optionalDependency 'midnightlib'
+				optionalDependency 'lootables'
 			}
 
 			mainArtifact(remapJar)
@@ -212,11 +203,11 @@ if (project.hasProperty('release_type')) {
 			// scope.type
 			// The scope can be `required`, `optional`, `incompatible`, or `embedded`
 			// The type can either be `project` or `version`
-			required.project 'cloth-config'
+			required.project 'fzzy-config'
 			required.project 'fabric-api'
-			embedded.project 'dimlib'
+			required.project 'dimlib'
 			required.project 'slot-customization-api'
-			optional.project 'midnightlib'
+			optional.project 'slot-customization-api'
 		}
 	}
 
