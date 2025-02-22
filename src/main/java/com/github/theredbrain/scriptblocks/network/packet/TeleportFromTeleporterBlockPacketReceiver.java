@@ -8,6 +8,7 @@ import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
+import com.github.theredbrain.scriptblocks.registry.Tags;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
@@ -256,7 +257,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 				if (statusEffectInstance != null) {
 					RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
-					if (statusEffectEntry.isIn(tag) || statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT) {
+					if (statusEffectEntry.isIn(tag) || statusEffectEntry.isIn(Tags.ALWAYS_DECREMENT_AFTER_TELEPORT)) {
 						int oldAmplifier = statusEffectInstance.getAmplifier();
 						if (oldAmplifier > 0) {
 							StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
@@ -287,7 +288,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 								if (statusEffectInstance != null) {
 									RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
-									if (statusEffectEntry.isIn(tag) || statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT) {
+									if (statusEffectEntry.isIn(tag) || statusEffectEntry.isIn(Tags.ALWAYS_DECREMENT_AFTER_TELEPORT)) {
 										int oldAmplifier = statusEffectInstance.getAmplifier();
 										if (oldAmplifier > 0) {
 											StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
