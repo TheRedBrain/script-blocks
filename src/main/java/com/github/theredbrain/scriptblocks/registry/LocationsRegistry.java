@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Location;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -42,6 +43,9 @@ public class LocationsRegistry {
 								var id = identifier
 										.toString().replace("locations/", "");
 								id = id.substring(0, id.lastIndexOf('.'));
+								if (DebuggingHelper.isRegistryLoggingEnabled()) {
+									DebuggingHelper.sendDebuggingMessage("Registered Location: " + location, null);
+								}
 								registeredLocations.put(Identifier.of(id), location);
 							} catch (Exception e) {
 								System.err.println("Failed to parse: " + identifier);

@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Boss;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -42,6 +43,9 @@ public class BossesRegistry {
 								var id = identifier
 										.toString().replace("bosses/", "");
 								id = id.substring(0, id.lastIndexOf('.'));
+								if (DebuggingHelper.isRegistryLoggingEnabled()) {
+									DebuggingHelper.sendDebuggingMessage("Registered Boss: " + boss, null);
+								}
 								registeredBosses.put(Identifier.of(id), boss);
 							} catch (Exception e) {
 								System.err.println("Failed to parse: " + identifier);
