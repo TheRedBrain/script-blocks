@@ -34,7 +34,6 @@ import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
 public class CreativeTeleporterBlockScreen extends Screen {
-	private static final int VISIBLE_STATUS_EFFECT_LIST_ENTRIES = 4;
 	private static final Text HIDE_ADVENTURE_SCREEN_LABEL_TEXT = Text.translatable("gui.teleporter_block.hide_adventure_screen_label");
 	private static final Text SHOW_ADVENTURE_SCREEN_LABEL_TEXT = Text.translatable("gui.teleporter_block.show_adventure_screen_label");
 	private static final Text HIDE_ACTIVATION_AREA_LABEL_TEXT = Text.translatable("gui.teleporter_block.hide_activation_area_label");
@@ -64,14 +63,12 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text SEND_DATA_VALUE_LABEL_TEXT = Text.translatable("gui.teleporter_block.send_data_value_label");
 	private static final Text DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.teleporter_block.data_providing_block_pos_offset_label");
 
-	private static final Text ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.add_new_status_effect_button_label");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.off");
-	private static final Text NEW_STATUS_EFFECT_FIELD_TEXT = Text.translatable("gui.teleporter_block.new_status_effect_field");
+	private static final Text STATUS_EFFECT_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effect_tag_id_field");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_88_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_88");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
 			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
@@ -91,12 +88,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget accessPositionOffsetXField;
 	private TextFieldWidget accessPositionOffsetYField;
 	private TextFieldWidget accessPositionOffsetZField;
-	private ButtonWidget removeStatusEffectButton0;
-	private ButtonWidget removeStatusEffectButton1;
-	private ButtonWidget removeStatusEffectButton2;
-	private ButtonWidget removeStatusEffectButton3;
-	private TextFieldWidget newStatusEffectField;
-	private ButtonWidget addNewStatusEffectButton;
+	private TextFieldWidget statusEffectTagIdField;
 	private CyclingButtonWidget<Boolean> toggleSetAccessPositionButton;
 	private CyclingButtonWidget<Boolean> toggleOnlyTeleportDimensionOwnerButton;
 	private CyclingButtonWidget<Boolean> toggleTeleportTeamButton;
@@ -150,16 +142,11 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 	private TeleporterBlockEntity.SpawnPointType spawnPointType;
 
-	private final List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
-
 	private final List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
 
 	private int creativeLocationsListScrollPosition = 0;
-	private int statusEffectListScrollPosition = 0;
 	private float creativeLocationsListScrollAmount = 0.0f;
-	private float statusEffectListScrollAmount = 0.0f;
 	private boolean creativeLocationsListMouseClicked = false;
-	private boolean statusEffectListMouseClicked = false;
 
 	public CreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlock) {
 		super(NarratorManager.EMPTY);
@@ -223,25 +210,10 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void addStatusEffectToList(String identifier) {
-		if (!identifier.isEmpty()) {
-			this.statusEffectsToDecrementLevelOnTeleport.add(identifier);
-		}
-		this.updateWidgets();
-	}
-
-	private void removeStatusEffectFromStatusEffectList(int index) {
-		if (index + this.statusEffectListScrollPosition < this.statusEffectsToDecrementLevelOnTeleport.size()) {
-			this.statusEffectsToDecrementLevelOnTeleport.remove(index + this.statusEffectListScrollPosition);
-		}
-		this.updateWidgets();
-	}
-
 	@Override
 	protected void init() {
 		this.creativeScreenPage = this.teleporterBlock.getCreativeScreenPage();
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
-		this.statusEffectsToDecrementLevelOnTeleport.addAll(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
@@ -473,17 +445,10 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		// --- status effect page ---
 
-		this.removeStatusEffectButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(0)));
-		this.removeStatusEffectButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(1)));
-		this.removeStatusEffectButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(2)));
-		this.removeStatusEffectButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStatusEffectFromStatusEffectList(3)));
-
-		this.newStatusEffectField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
-		this.newStatusEffectField.setMaxLength(128);
-		this.newStatusEffectField.setPlaceholder(NEW_STATUS_EFFECT_FIELD_TEXT);
-		this.addSelectableChild(this.newStatusEffectField);
-
-		this.addNewStatusEffectButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_STATUS_EFFECT_BUTTON_LABEL_TEXT, button -> this.addStatusEffectToList(this.newStatusEffectField.getText())).dimensions(this.width / 2 - 154, 185, 300, 20).build());
+		this.statusEffectTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
+		this.statusEffectTagIdField.setMaxLength(128);
+		this.teleporterNameField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
+		this.addSelectableChild(this.statusEffectTagIdField);
 
 		// --- adventure screen customization page ---
 
@@ -593,12 +558,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.sendDataIdentifierDataIdentifierField.setVisible(false);
 		this.sendDataValueDataIdentifierField.setVisible(false);
 
-		this.removeStatusEffectButton0.visible = false;
-		this.removeStatusEffectButton1.visible = false;
-		this.removeStatusEffectButton2.visible = false;
-		this.removeStatusEffectButton3.visible = false;
-		this.newStatusEffectField.setVisible(false);
-		this.addNewStatusEffectButton.visible = false;
+		this.statusEffectTagIdField.setVisible(false);
 
 		this.teleporterNameField.setVisible(false);
 		this.currentTargetIdentifierLabelField.setVisible(false);
@@ -694,22 +654,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
 
-			int index = 0;
-			for (int i = 0; i < Math.min(VISIBLE_STATUS_EFFECT_LIST_ENTRIES, this.statusEffectsToDecrementLevelOnTeleport.size()); i++) {
-				if (index == 0) {
-					this.removeStatusEffectButton0.visible = true;
-				} else if (index == 1) {
-					this.removeStatusEffectButton1.visible = true;
-				} else if (index == 2) {
-					this.removeStatusEffectButton2.visible = true;
-				} else if (index == 3) {
-					this.removeStatusEffectButton3.visible = true;
-				}
-				index++;
-			}
-
-			this.newStatusEffectField.setVisible(true);
-			this.addNewStatusEffectButton.visible = true;
+			this.statusEffectTagIdField.setVisible(true);
 
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
@@ -731,11 +676,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.cancelButton.visible = true;
 
 		this.creativeLocationsListScrollPosition = 0;
-		this.statusEffectListScrollPosition = 0;
-		this.statusEffectListScrollAmount = 0.0f;
 		this.creativeLocationsListScrollAmount = 0.0f;
 		this.creativeLocationsListMouseClicked = false;
-		this.statusEffectListMouseClicked = false;
 
 	}
 
@@ -769,7 +711,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string15 = this.newLocationEntranceField.getText();
 		String string16 = this.newDataIdField.getText();
 		String string17 = this.newDataField.getText();
-		String string18 = this.newStatusEffectField.getText();
+		String string18 = this.statusEffectTagIdField.getText();
 		String string19 = this.teleporterNameField.getText();
 		String string20 = this.currentTargetOwnerLabelField.getText();
 		String string21 = this.currentTargetIdentifierLabelField.getText();
@@ -779,7 +721,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string25 = this.locationEntranceField.getText();
 		String string26 = this.locationDataIdField.getText();
 		String string27 = this.locationDataField.getText();
-		List<String> list = new ArrayList<>(this.statusEffectsToDecrementLevelOnTeleport);
+		String string28 = this.statusEffectTagIdField.getText();
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list1 = new ArrayList<>(this.locationsList);
 		this.init(client, width, height);
 		this.creativeScreenPage = var;
@@ -810,7 +752,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.newLocationEntranceField.setText(string15);
 		this.newDataIdField.setText(string16);
 		this.newDataField.setText(string17);
-		this.newStatusEffectField.setText(string18);
+		this.statusEffectTagIdField.setText(string18);
 		this.teleporterNameField.setText(string19);
 		this.currentTargetOwnerLabelField.setText(string20);
 		this.currentTargetIdentifierLabelField.setText(string21);
@@ -820,16 +762,14 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.locationEntranceField.setText(string25);
 		this.locationDataIdField.setText(string26);
 		this.locationDataField.setText(string27);
-		this.statusEffectsToDecrementLevelOnTeleport.clear();
+		this.statusEffectTagIdField.setText(string28);
 		this.locationsList.clear();
-		this.statusEffectsToDecrementLevelOnTeleport.addAll(list);
 		this.locationsList.addAll(list1);
 	}
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		this.creativeLocationsListMouseClicked = false;
-		this.statusEffectListMouseClicked = false;
 		int i;
 		int j;
 		if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.TELEPORTATION_MODE
@@ -839,14 +779,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			j = 71;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 68)) {
 				this.creativeLocationsListMouseClicked = true;
-			}
-		}
-		if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT
-				&& this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES) {
-			i = this.width / 2 - 152;
-			j = 44;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 112)) {
-				this.statusEffectListMouseClicked = true;
 			}
 		}
 		return super.mouseClicked(mouseX, mouseY, button);
@@ -863,14 +795,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			this.creativeLocationsListScrollAmount = MathHelper.clamp(this.creativeLocationsListScrollAmount + f, 0.0f, 1.0f);
 			this.creativeLocationsListScrollPosition = (int) ((double) (this.creativeLocationsListScrollAmount * (float) i));
 		}
-		if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT
-				&& this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES
-				&& this.statusEffectListMouseClicked) {
-			int i = this.statusEffectsToDecrementLevelOnTeleport.size() - VISIBLE_STATUS_EFFECT_LIST_ENTRIES;
-			float f = (float) deltaY / (float) i;
-			this.statusEffectListScrollAmount = MathHelper.clamp(this.statusEffectListScrollAmount + f, 0.0f, 1.0f);
-			this.statusEffectListScrollPosition = (int) ((double) (this.statusEffectListScrollAmount * (float) i));
-		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
 	}
 
@@ -885,15 +809,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			float f = (float) verticalAmount / (float) i;
 			this.creativeLocationsListScrollAmount = MathHelper.clamp(this.creativeLocationsListScrollAmount - f, 0.0f, 1.0f);
 			this.creativeLocationsListScrollPosition = (int) ((double) (this.creativeLocationsListScrollAmount * (float) i));
-		}
-		if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT
-				&& this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 154)
-				&& mouseY >= 44 && mouseY <= 112) {
-			int i = this.statusEffectsToDecrementLevelOnTeleport.size() - VISIBLE_STATUS_EFFECT_LIST_ENTRIES;
-			float f = (float) verticalAmount / (float) i;
-			this.statusEffectListScrollAmount = MathHelper.clamp(this.statusEffectListScrollAmount - f, 0.0f, 1.0f);
-			this.statusEffectListScrollPosition = (int) ((double) (this.statusEffectListScrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
@@ -992,17 +907,10 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				}
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
-			for (int i = this.statusEffectListScrollPosition; i < Math.min(this.statusEffectListScrollPosition + VISIBLE_STATUS_EFFECT_LIST_ENTRIES, this.statusEffectsToDecrementLevelOnTeleport.size()); i++) {
-				String text = this.statusEffectsToDecrementLevelOnTeleport.get(i);
-				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 50 + ((i - this.statusEffectListScrollPosition) * 24), 0xA0A0A0);
-			}
-			if (this.statusEffectsToDecrementLevelOnTeleport.size() > VISIBLE_STATUS_EFFECT_LIST_ENTRIES) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_88_TEXTURE, this.width / 2 - 153, 44, 8, 88);
-				int k = (int) (79.0f * this.statusEffectListScrollAmount);
-				context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
-			}
-			context.drawTextWithShadow(this.textRenderer, NEW_STATUS_EFFECT_FIELD_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-			this.newStatusEffectField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECT_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			this.statusEffectTagIdField.render(context, mouseX, mouseY, delta);
+
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
 			this.teleporterNameField.render(context, mouseX, mouseY, delta);
@@ -1073,7 +981,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 						ItemUtils.parseInt(this.accessPositionOffsetZField.getText())
 				),
 				this.setAccessPosition,
-				this.statusEffectsToDecrementLevelOnTeleport,
+				this.statusEffectTagIdField.getText(),
 				this.onlyTeleportDimensionOwner,
 				this.teleportTeam,
 				this.teleportationMode.asString(),

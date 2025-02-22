@@ -3,11 +3,8 @@ package com.github.theredbrain.scriptblocks.network.packet;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.List;
 
 public record TeleportFromTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
@@ -23,7 +20,7 @@ public record TeleportFromTeleporterBlockPacket(
 		String targetDimensionOwnerName,
 		String targetLocation,
 		String targetLocationEntrance,
-		List<String> statusEffectsToDecrementLevelOnTeleport,
+		String statusEffectsToDecrementLevelOnTeleport,
 		String dataId,
 		String data
 ) implements CustomPayload {
@@ -45,7 +42,7 @@ public record TeleportFromTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
-				registryByteBuf.readList(PacketCodecs.STRING),
+				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString()
 		);
@@ -65,7 +62,7 @@ public record TeleportFromTeleporterBlockPacket(
 		registryByteBuf.writeString(this.targetDimensionOwnerName);
 		registryByteBuf.writeString(this.targetLocation);
 		registryByteBuf.writeString(this.targetLocationEntrance);
-		registryByteBuf.writeCollection(this.statusEffectsToDecrementLevelOnTeleport, PacketCodecs.STRING);
+		registryByteBuf.writeString(this.statusEffectsToDecrementLevelOnTeleport);
 		registryByteBuf.writeString(this.dataId);
 		registryByteBuf.writeString(this.data);
 	}

@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
-import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Location;
@@ -18,10 +17,10 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -31,10 +30,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportFromTeleporterBlockPacket> {
 	@Override
@@ -61,7 +56,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
 		String targetLocation = payload.targetLocation();
 		String targetLocationEntrance = payload.targetLocationEntrance();
-		List<String> statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
+		String statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
 		String dataId = payload.dataId();
 		String data = payload.data();
 
@@ -248,15 +243,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 		if (targetWorld != null && targetPos != null && playerHadKeyItem) {
 
-			List<RegistryEntry<StatusEffect>> statusEffectList = new ArrayList<>();
-			for (String statusEffectString : statusEffectsToDecrementLevelOnTeleport) {
-				Optional<RegistryEntry.Reference<StatusEffect>> optional_status_effect_entry = Registries.STATUS_EFFECT.getEntry(Identifier.tryParse(statusEffectString));
-				if (optional_status_effect_entry.isPresent()) {
-					statusEffectList.add(optional_status_effect_entry.get());
-				}
-			}
-			RegistryEntry<StatusEffect> portal_resistance_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT);
-			statusEffectList.add(portal_resistance_status_effect);
+			TagKey<StatusEffect> tag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToDecrementLevelOnTeleport));
 			serverPlayerEntity.fallDistance = 0;
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
@@ -266,16 +253,18 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				}
 			}
 			serverPlayerEntity.closeHandledScreen();
-			for (RegistryEntry<StatusEffect> statusEffectEntry : statusEffectList) {
-				StatusEffectInstance statusEffectInstance = serverPlayerEntity.getStatusEffect(statusEffectEntry);
+			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 				if (statusEffectInstance != null) {
-					int oldAmplifier = statusEffectInstance.getAmplifier();
-					if (oldAmplifier > 0) {
-						StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-						serverPlayerEntity.removeStatusEffect(statusEffectEntry);
-						serverPlayerEntity.addStatusEffect(newStatusEffectInstance);
-					} else {
-						serverPlayerEntity.removeStatusEffect(statusEffectEntry);
+					RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
+					if (statusEffectEntry.isIn(tag) || statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT) {
+						int oldAmplifier = statusEffectInstance.getAmplifier();
+						if (oldAmplifier > 0) {
+							StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
+							serverPlayerEntity.removeStatusEffect(statusEffectEntry);
+							serverPlayerEntity.addStatusEffect(newStatusEffectInstance);
+						} else {
+							serverPlayerEntity.removeStatusEffect(statusEffectEntry);
+						}
 					}
 				}
 			}
@@ -295,16 +284,18 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 								}
 							}
 							serverPlayerEntity.closeHandledScreen();
-							for (RegistryEntry<StatusEffect> statusEffectEntry : statusEffectList) {
-								StatusEffectInstance statusEffectInstance = teamServerPlayerEntity.getStatusEffect(statusEffectEntry);
+							for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 								if (statusEffectInstance != null) {
-									int oldAmplifier = statusEffectInstance.getAmplifier();
-									if (oldAmplifier > 0) {
-										StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-										teamServerPlayerEntity.removeStatusEffect(statusEffectEntry);
-										teamServerPlayerEntity.addStatusEffect(newStatusEffectInstance);
-									} else {
-										teamServerPlayerEntity.removeStatusEffect(statusEffectEntry);
+									RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
+									if (statusEffectEntry.isIn(tag) || statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT) {
+										int oldAmplifier = statusEffectInstance.getAmplifier();
+										if (oldAmplifier > 0) {
+											StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
+											teamServerPlayerEntity.removeStatusEffect(statusEffectEntry);
+											teamServerPlayerEntity.addStatusEffect(newStatusEffectInstance);
+										} else {
+											teamServerPlayerEntity.removeStatusEffect(statusEffectEntry);
+										}
 									}
 								}
 							}

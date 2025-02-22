@@ -51,7 +51,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private BlockPos accessPositionOffset = new BlockPos(0, 0, 0);
 	private boolean setAccessPosition = false;
 
-	private List<String> statusEffectsToDecrementLevelOnTeleport = new ArrayList<>();
+	private String statusEffectsToDecrementLevelOnTeleport = "";
 
 	private boolean onlyTeleportDimensionOwner = false;
 	private boolean teleportTeam = false;
@@ -117,11 +117,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 		nbt.putBoolean("setAccessPosition", this.setAccessPosition);
 
-		nbt.putInt("statusEffectsToDecrementLevelOnTeleportListSize", this.statusEffectsToDecrementLevelOnTeleport.size());
-
-		for (int i = 0; i < this.statusEffectsToDecrementLevelOnTeleport.size(); i++) {
-			nbt.putString("statusEffectsToDecrementLevelOnTeleport_" + i, this.statusEffectsToDecrementLevelOnTeleport.get(i));
-		}
+		nbt.putString("statusEffectsToDecrementLevelOnTeleport", this.statusEffectsToDecrementLevelOnTeleport);
 
 		nbt.putBoolean("onlyTeleportDimensionOwner", this.onlyTeleportDimensionOwner);
 
@@ -207,11 +203,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 		this.setAccessPosition = nbt.getBoolean("setAccessPosition");
 
-		int listSize = nbt.getInt("statusEffectsToDecrementLevelOnTeleportListSize");
-		this.statusEffectsToDecrementLevelOnTeleport.clear();
-		for (int i = 0; i < listSize; i++) {
-			this.statusEffectsToDecrementLevelOnTeleport.add(nbt.getString("statusEffectsToDecrementLevelOnTeleport_" + i));
-		}
+		this.statusEffectsToDecrementLevelOnTeleport = nbt.getString("statusEffectsToDecrementLevelOnTeleport");
 
 		this.onlyTeleportDimensionOwner = nbt.getBoolean("onlyTeleportDimensionOwner");
 
@@ -389,11 +381,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.setAccessPosition = setAccessPosition;
 	}
 
-	public List<String> getStatusEffectsToDecrementLevelOnTeleport() {
-		return statusEffectsToDecrementLevelOnTeleport;
+	public String getStatusEffectsToDecrementLevelOnTeleport() {
+		return this.statusEffectsToDecrementLevelOnTeleport;
 	}
 
-	public void setStatusEffectsToDecrementLevelOnTeleport(List<String> statusEffectsToDecrementLevelOnTeleport) {
+	public void setStatusEffectsToDecrementLevelOnTeleport(String statusEffectsToDecrementLevelOnTeleport) {
 		this.statusEffectsToDecrementLevelOnTeleport = statusEffectsToDecrementLevelOnTeleport;
 	}
 
