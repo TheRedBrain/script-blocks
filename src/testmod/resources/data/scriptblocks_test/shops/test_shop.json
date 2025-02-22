@@ -1,0 +1,23 @@
+{
+  "shopTitle": "Test Shop",
+  "offersTitle": "Test Shop Offers",
+  "dealList": [
+    {
+      "offer": [
+        {
+          "id": "minecraft:diamond",
+          "count": 1
+        }
+      ],
+      "price": [
+        {
+          "id": "minecraft:stick",
+          "count": 2
+        }
+      ],
+      "maxStockCount": 1,
+      "unlockAdvancement": "",
+      "lockAdvancement": ""
+    }
+  ]
+}

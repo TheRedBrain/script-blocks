@@ -231,8 +231,8 @@ public class ShopScreenHandler extends ScreenHandler {
 				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
 			}
 		}
-		Identifier lockAdvancementIdentifier;
-		Identifier unlockAdvancementIdentifier;
+		String lockAdvancement;
+		String unlockAdvancement;
 
 //        if (this.world.isClient && this.playerInventory.player instanceof ClientPlayerEntity clientPlayerEntity) {
 //
@@ -252,14 +252,14 @@ public class ShopScreenHandler extends ScreenHandler {
 			for (int i = 0; i < this.dealsList.size(); i++) {
 
 				Shop.Deal deal = this.dealsList.get(i);
-				lockAdvancementIdentifier = deal.lockAdvancement();
-				unlockAdvancementIdentifier = deal.unlockAdvancement();
+				lockAdvancement = deal.lockAdvancement();
+				unlockAdvancement = deal.unlockAdvancement();
 
 				AdvancementEntry lockAdvancementEntry = null;
-				lockAdvancementEntry = serverAdvancementLoader.get(lockAdvancementIdentifier);
+				lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(lockAdvancement));
 
 				AdvancementEntry unlockAdvancementEntry = null;
-				unlockAdvancementEntry = serverAdvancementLoader.get(unlockAdvancementIdentifier);
+				unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(unlockAdvancement));
 
 				if ((lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) &&
 						(unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone())) {
