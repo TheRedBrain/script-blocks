@@ -210,6 +210,13 @@
 	"gui.interactive_loot_block.loot_acquired_3": "Looooot!",
 	"gui.interactive_loot_block.loot_acquired_4": "Shiny!",
 	"gui.interactive_loot_block.loot_table_identifier_label": "Loot Table Identifier",
+	"gui.interactive_loot_block.lootable_identifier_label": "Lootable Identifier",
+	"gui.interactive_loot_block.rolls_label": "Rolls",
+	"gui.interactive_loot_block.choices_label": "Choices",
+
+	"gui.interactive_loot_block.mode.choice": "Choice Lootable",
+	"gui.interactive_loot_block.mode.random": "Random Lootable",
+	"gui.interactive_loot_block.mode.vanilla": "Vanilla Loot Table",
 
 
 	"gui.jigsaw_placer_block.first_structure_pool_string_field": "First Structure Pool String",
