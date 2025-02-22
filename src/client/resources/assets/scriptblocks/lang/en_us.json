@@ -449,6 +449,13 @@
 	"gui.triggered_spawner_block.new_entity_attribute_modifier_value_label": "Value",
 
 
+	"gui.boss_controller_block.boss_identifier_label": "Boss Identifier",
+
+	"gui.boss_controller_block.creativeScreenPage.area": "Area",
+	"gui.boss_controller_block.creativeScreenPage.boss_triggered_blocks": "Boss Triggered Blocks",
+	"gui.boss_controller_block.creativeScreenPage.spawn_position": "Spawn Position",
+
+
 	"gui.triggered_block.newTriggeredBlockPositionOffset": "New Triggered Block Position Offset",
 	"gui.triggered_block.triggeredBlockPositionOffset": "Triggered Block Position Offset",
 

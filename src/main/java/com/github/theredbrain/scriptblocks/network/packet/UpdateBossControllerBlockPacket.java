@@ -5,7 +5,6 @@ import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -17,7 +16,7 @@ public record UpdateBossControllerBlockPacket(
 		boolean showArea,
 		Vec3i applicationAreaDimensions,
 		BlockPos applicationAreaPositionOffset,
-		Identifier bossIdentifier,
+		String bossIdentifier,
 		BlockPos entitySpawnPositionOffset,
 		double entitySpawnOrientationPitch,
 		double entitySpawnOrientationYaw,
@@ -36,7 +35,7 @@ public record UpdateBossControllerBlockPacket(
 						registryByteBuf.readInt()
 				),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readIdentifier(),
+				registryByteBuf.readString(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
@@ -53,7 +52,7 @@ public record UpdateBossControllerBlockPacket(
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.applicationAreaPositionOffset);
 
-		registryByteBuf.writeIdentifier(this.bossIdentifier);
+		registryByteBuf.writeString(this.bossIdentifier);
 		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);

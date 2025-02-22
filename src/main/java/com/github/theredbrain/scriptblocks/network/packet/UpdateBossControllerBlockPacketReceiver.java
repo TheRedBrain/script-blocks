@@ -7,7 +7,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -33,7 +32,7 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 		Vec3i areaDimensions = payload.applicationAreaDimensions();
 		BlockPos areaPositionOffset = payload.applicationAreaPositionOffset();
 
-		Identifier bossIdentifier = payload.bossIdentifier();
+		String bossIdentifier = payload.bossIdentifier();
 		BlockPos entitySpawnPositionOffset = payload.entitySpawnPositionOffset();
 		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
 		double entitySpawnOrientationYaw = payload.entitySpawnOrientationYaw();
@@ -62,10 +61,7 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
-			if (!bossControllerBlockEntity.setBossIdentifier(bossIdentifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("shop_block.bossIdentifier.invalid"), false);
-				updateSuccessful = false;
-			}
+			bossControllerBlockEntity.setBossIdentifier(bossIdentifier);
 			if (!bossControllerBlockEntity.setBossSpawnPositionOffset(entitySpawnPositionOffset)) {
 				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
 				updateSuccessful = false;
