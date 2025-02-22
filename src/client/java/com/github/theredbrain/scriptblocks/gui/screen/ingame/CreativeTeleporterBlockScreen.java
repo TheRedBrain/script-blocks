@@ -447,7 +447,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		this.statusEffectTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
 		this.statusEffectTagIdField.setMaxLength(128);
-		this.teleporterNameField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
+		this.statusEffectTagIdField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
 		this.addSelectableChild(this.statusEffectTagIdField);
 
 		// --- adventure screen customization page ---
