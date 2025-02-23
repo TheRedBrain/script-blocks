@@ -42,6 +42,7 @@ import java.util.UUID;
 
 public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
+	private static final BlockPos TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 0, 0);
 	private boolean calculateAreaBox = true;
 	private Box area = null;
 	private boolean showArea = false;
@@ -58,7 +59,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	private boolean wasTriggered = false;
 	private TriggerMode triggerMode = TriggerMode.ALWAYS;
 	private TriggeredMode triggeredMode = TriggeredMode.ONCE;
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(TRIGGERED_BLOCK_POS_DEFAULT, false);
 
 	private MessageMode messageMode = MessageMode.OVERLAY;
 	private String joinMessage = "";
@@ -222,27 +223,15 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			nbt.remove("maxTimer");
 		}
 
-		if (this.triggeredBlock.getLeft().getX() != 0) {
+		if (this.triggeredBlock.getLeft() != TRIGGERED_BLOCK_POS_DEFAULT || !this.triggeredBlock.getRight()) {
 			nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
+			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
+			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
+			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 		} else {
 			nbt.remove("triggeredBlockPositionOffsetX");
-		}
-
-		if (this.triggeredBlock.getLeft().getX() != 0) {
-			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getX());
-		} else {
 			nbt.remove("triggeredBlockPositionOffsetY");
-		}
-
-		if (this.triggeredBlock.getLeft().getX() != 0) {
-			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getX());
-		} else {
 			nbt.remove("triggeredBlockPositionOffsetZ");
-		}
-
-		if (this.triggeredBlock.getRight()) {
-			nbt.putBoolean("triggeredBlockResets", true);
-		} else {
 			nbt.remove("triggeredBlockResets");
 		}
 
@@ -326,10 +315,16 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			this.maxTimer = 1;
 		}
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("triggeredBlockPositionOffsetX", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetY", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetZ", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockResets")
+			);
+		}
 
 		int playerListSize = nbt.getInt("playerListSize");
 		for (i = 0; i < playerListSize; i++) {
@@ -491,7 +486,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	private void triggerBlock() {
-		ScriptBlocks.info("triggerBlock");
+		ScriptBlocks.info("areablock triggerBlock");
 		int x = this.triggeredBlock.getLeft().getX();
 		int y = this.triggeredBlock.getLeft().getY();
 		int z = this.triggeredBlock.getLeft().getZ();
@@ -510,7 +505,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 	private void sendMessage(String message) {
 		if (this.world instanceof ServerWorld) {
-			ScriptBlocks.info("sendMessage");
+			ScriptBlocks.info("areablock sendMessage");
 			if (this.calculateAreaBox || this.area == null) {
 				BlockPos messageAreaPositionOffset = this.areaPositionOffset;
 				Vec3i messageAreaDimensions = this.areaDimensions;
