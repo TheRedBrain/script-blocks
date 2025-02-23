@@ -40,7 +40,7 @@ public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 
 	public UseRelayAnvilBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.NORTH));
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH));
 	}
 
 	public MapCodec<UseRelayAnvilBlock> getCodec() {
@@ -93,6 +93,7 @@ public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		super.appendProperties(builder);
 		builder.add(FACING);
 	}
 

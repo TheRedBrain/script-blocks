@@ -44,6 +44,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 	}
 
 	private void registerTransparency() {
+		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.USE_RELAY_ANVIL, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.USE_RELAY_OAK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.USE_RELAY_IRON_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.USE_RELAY_SPRUCE_DOOR, RenderLayer.getCutout());
@@ -69,6 +70,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.USE_RELAY_CRIMSON_TRAPDOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.USE_RELAY_WARPED_TRAPDOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.TRIGGERED_SPAWNER_BLOCK, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.BOSS_CONTROLLER_BLOCK, RenderLayer.getCutout());
 	}
 
 	private void registerBlockEntityRenderer() {

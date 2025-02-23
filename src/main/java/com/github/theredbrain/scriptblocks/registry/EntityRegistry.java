@@ -110,6 +110,7 @@ public class EntityRegistry {
 			ScriptBlocks.identifier("use_relay_block"),
 			FabricBlockEntityTypeBuilder.create(UseRelayBlockEntity::new,
 					BlockRegistry.USE_RELAY_BLOCK,
+					BlockRegistry.USE_RELAY_ANVIL,
 					BlockRegistry.USE_RELAY_OAK_DOOR,
 					BlockRegistry.USE_RELAY_IRON_DOOR,
 					BlockRegistry.USE_RELAY_SPRUCE_DOOR,

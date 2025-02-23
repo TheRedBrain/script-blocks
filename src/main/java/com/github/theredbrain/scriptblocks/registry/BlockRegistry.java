@@ -43,7 +43,7 @@ public class BlockRegistry {
 
 	//region Content Blocks
 	// content script blocks
-	public static final Block USE_RELAY_ANVIL = registerBlock("use_relay_anvil", new UseRelayAnvilBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block USE_RELAY_ANVIL = registerBlock("use_relay_anvil", new UseRelayAnvilBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_OAK_DOOR = registerBlock("use_relay_oak_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_IRON_DOOR = registerBlock("use_relay_iron_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_SPRUCE_DOOR = registerBlock("use_relay_spruce_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.SPRUCE_BROWN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
