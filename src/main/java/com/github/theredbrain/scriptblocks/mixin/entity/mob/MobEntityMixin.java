@@ -162,7 +162,7 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 			if (this.getWorld() instanceof ServerWorld serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
 				BlockEntity blockEntity = serverWorld.getBlockEntity(controllerBlockPos);
 				if (blockEntity instanceof BossControllerBlockEntity bossControllerBlockEntity) {
-					BossControllerBlockEntity.bossReachedHealthThreshold(bossControllerBlockEntity);
+					BossControllerBlockEntity.bossReachedHealthThreshold(bossControllerBlockEntity, ((MobEntity) (Object) this));
 				}
 			}
 		}

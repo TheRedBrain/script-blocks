@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
+import com.github.theredbrain.scriptblocks.mixin.entity.mob.MobEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -453,7 +454,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 	}
 
-	public static void bossReachedHealthThreshold(BossControllerBlockEntity bC) {
+	public static void bossReachedHealthThreshold(BossControllerBlockEntity bC, MobEntity mobEntity) {
+		if (mobEntity.getUuid() != bC.bossEntityUuid) {
+			mobEntity.discard();
+		}
 		advancePhase(bC);
 	}
 
