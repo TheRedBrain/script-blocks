@@ -170,8 +170,6 @@ public class DialogueScreen extends Screen {
 			this.client.setScreen(null);
 			return;
 		}
-		this.dialogueUsedBlocksList.clear();
-		this.dialogueTriggeredBlocksList.clear();
 		this.startingDialogueList.clear();
 		this.unlockedAnswersList.clear();
 		this.visibleAnswersList.clear();

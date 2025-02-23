@@ -481,6 +481,8 @@
 	"gui.shop_block.trade_button_label": "Trade",
 
 
+	"block.scriptblocks.use_relay_anvil": "Use Relay Anvil",
+
 	"block.scriptblocks.use_relay_oak_door": "Use Relay Oak Door",
 	"block.scriptblocks.use_relay_iron_door": "Use Relay Iron Door",
 	"block.scriptblocks.use_relay_spruce_door": "Use Relay Spruce Door",
