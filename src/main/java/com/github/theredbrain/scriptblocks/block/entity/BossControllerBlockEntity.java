@@ -460,12 +460,12 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getEntityAttributeModifiers(Boss.Phase phase) {
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
-		for (EntityAttributeModifier entityAttributeModifier : phase.entityAttributeModifiers()) {
+		for (Boss.Phase.AttributeModifierEntry entityAttributeModifier : phase.entityAttributeModifiers()) {
 			Optional<EntityAttribute> optional = Registries.ATTRIBUTE
-					.getOrEmpty(entityAttributeModifier.id());
+					.getOrEmpty(Identifier.of(entityAttributeModifier.attributeIdentifier()));
 			if (optional.isPresent()) {
 				RegistryEntry<EntityAttribute> key = Registries.ATTRIBUTE.getEntry(optional.get());
-				entityAttributeModifiers.put(key, new EntityAttributeModifier(entityAttributeModifier.id(), entityAttributeModifier.value(), entityAttributeModifier.operation()));
+				entityAttributeModifiers.put(key, new EntityAttributeModifier(Identifier.of(entityAttributeModifier.id()), entityAttributeModifier.amount(), EntityAttributeModifier.Operation.valueOf(entityAttributeModifier.operation())));
 			}
 		}
 		return entityAttributeModifiers;
