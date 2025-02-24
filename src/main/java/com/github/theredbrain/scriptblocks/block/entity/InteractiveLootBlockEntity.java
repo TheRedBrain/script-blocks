@@ -25,6 +25,11 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	private Mode mode = Mode.VANILLA;
 	private int rolls = 3;
 	private int choices = 1;
+	private boolean trackPlayers = false;
+	private String lootAcquiredMessage = "gui.interactive_loot_block.loot_acquired";
+	private String lootAcquiredSoundId = "";
+	private String alreadyLootedMessage = "gui.interactive_loot_block.already_looted";
+	private String alreadyLootedSoundId = "block.chest.locked";
 
 	public InteractiveLootBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.INTERACTIVE_LOOT_BLOCK_ENTITY, pos, state);
@@ -64,6 +69,36 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			nbt.remove("choices");
 		}
 
+		if (this.trackPlayers) {
+			nbt.putBoolean("trackPlayers", true);
+		} else {
+			nbt.remove("trackPlayers");
+		}
+
+		if (!this.lootAcquiredMessage.isEmpty()) {
+			nbt.putString("lootAcquiredMessage", this.lootAcquiredMessage);
+		} else {
+			nbt.remove("lootAcquiredMessage");
+		}
+
+		if (!this.lootAcquiredSoundId.isEmpty()) {
+			nbt.putString("lootAcquiredSoundId", this.lootAcquiredSoundId);
+		} else {
+			nbt.remove("lootAcquiredSoundId");
+		}
+
+		if (!this.alreadyLootedMessage.isEmpty()) {
+			nbt.putString("alreadyLootedMessage", this.alreadyLootedMessage);
+		} else {
+			nbt.remove("alreadyLootedMessage");
+		}
+
+		if (!this.alreadyLootedSoundId.isEmpty()) {
+			nbt.putString("alreadyLootedSoundId", this.alreadyLootedSoundId);
+		} else {
+			nbt.remove("alreadyLootedSoundId");
+		}
+
 		super.writeNbt(nbt, registryLookup);
 	}
 
@@ -96,6 +131,32 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			this.choices = nbt.getInt("choices");
 		} else {
 			this.choices = 1;
+		}
+
+		this.trackPlayers = nbt.contains("trackPlayers");
+
+		if (nbt.contains("lootAcquiredMessage")) {
+			this.lootAcquiredMessage = nbt.getString("lootAcquiredMessage");
+		} else {
+			this.lootAcquiredMessage = "";
+		}
+
+		if (nbt.contains("lootAcquiredSoundId")) {
+			this.lootAcquiredSoundId = nbt.getString("lootAcquiredSoundId");
+		} else {
+			this.lootAcquiredSoundId = "";
+		}
+
+		if (nbt.contains("alreadyLootedMessage")) {
+			this.alreadyLootedMessage = nbt.getString("alreadyLootedMessage");
+		} else {
+			this.alreadyLootedMessage = "";
+		}
+
+		if (nbt.contains("alreadyLootedSoundId")) {
+			this.alreadyLootedSoundId = nbt.getString("alreadyLootedSoundId");
+		} else {
+			this.alreadyLootedSoundId = "";
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -140,6 +201,46 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 
 	public void setChoices(int choices) {
 		this.choices = choices;
+	}
+
+	public boolean getTrackPlayers() {
+		return this.trackPlayers;
+	}
+
+	public void setTrackPlayers(boolean trackPlayers) {
+		this.trackPlayers = trackPlayers;
+	}
+
+	public String getLootAcquiredMessage() {
+		return this.lootAcquiredMessage;
+	}
+
+	public void setLootAcquiredMessage(String lootAcquiredMessage) {
+		this.lootAcquiredMessage = lootAcquiredMessage;
+	}
+
+	public String getLootAcquiredSoundId() {
+		return this.lootAcquiredSoundId;
+	}
+
+	public void setLootAcquiredSoundId(String lootAcquiredSoundId) {
+		this.lootAcquiredSoundId = lootAcquiredSoundId;
+	}
+
+	public String getAlreadyLootedMessage() {
+		return this.alreadyLootedMessage;
+	}
+
+	public void setAlreadyLootedMessage(String alreadyLootedMessage) {
+		this.alreadyLootedMessage = alreadyLootedMessage;
+	}
+
+	public String getAlreadyLootedSoundId() {
+		return this.alreadyLootedSoundId;
+	}
+
+	public void setAlreadyLootedSoundId(String alreadyLootedSoundId) {
+		this.alreadyLootedSoundId = alreadyLootedSoundId;
 	}
 
 	public boolean isPlayerInSet(PlayerEntity playerEntity) {

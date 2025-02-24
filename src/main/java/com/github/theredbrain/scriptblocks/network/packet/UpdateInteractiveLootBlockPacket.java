@@ -11,8 +11,13 @@ public record UpdateInteractiveLootBlockPacket(
 		String lootTableIdentifierString,
 		String mode,
 		int rolls,
-		int choices
-) implements CustomPayload {
+		int choices,
+		boolean trackPlayers,
+		String lootAcquiredMessage,
+		String lootAcquiredSoundId,
+		String alreadyLootedMessage,
+		String alreadyLootedSoundId
+		) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateInteractiveLootBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_interactive_loot_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateInteractiveLootBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateInteractiveLootBlockPacket::write, UpdateInteractiveLootBlockPacket::new);
 
@@ -22,7 +27,12 @@ public record UpdateInteractiveLootBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readInt(),
-				registryByteBuf.readInt()
+				registryByteBuf.readInt(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString()
 		);
 	}
 
@@ -32,6 +42,11 @@ public record UpdateInteractiveLootBlockPacket(
 		registryByteBuf.writeString(this.mode);
 		registryByteBuf.writeInt(this.rolls);
 		registryByteBuf.writeInt(this.choices);
+		registryByteBuf.writeBoolean(this.trackPlayers);
+		registryByteBuf.writeString(this.lootAcquiredMessage);
+		registryByteBuf.writeString(this.lootAcquiredSoundId);
+		registryByteBuf.writeString(this.alreadyLootedMessage);
+		registryByteBuf.writeString(this.alreadyLootedSoundId);
 	}
 
 	@Override

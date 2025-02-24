@@ -30,6 +30,16 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 
 		int choices = payload.choices();
 
+		boolean trackPlayers = payload.trackPlayers();
+
+		String lootAcquiredMessage = payload.lootAcquiredMessage();
+
+		String lootAcquiredSoundId = payload.lootAcquiredSoundId();
+
+		String alreadyLootedMessage = payload.alreadyLootedMessage();
+
+		String alreadyLootedSoundId = payload.alreadyLootedSoundId();
+
 		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(interactiveLootBlockPosition);
@@ -40,6 +50,11 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 			interactiveLootBlockEntity.setMode(mode);
 			interactiveLootBlockEntity.setRolls(rolls);
 			interactiveLootBlockEntity.setChoices(choices);
+			interactiveLootBlockEntity.setTrackPlayers(trackPlayers);
+			interactiveLootBlockEntity.setLootAcquiredMessage(lootAcquiredMessage);
+			interactiveLootBlockEntity.setLootAcquiredSoundId(lootAcquiredSoundId);
+			interactiveLootBlockEntity.setAlreadyLootedMessage(alreadyLootedMessage);
+			interactiveLootBlockEntity.setAlreadyLootedSoundId(alreadyLootedSoundId);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			interactiveLootBlockEntity.markDirty();
 			world.updateListeners(interactiveLootBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

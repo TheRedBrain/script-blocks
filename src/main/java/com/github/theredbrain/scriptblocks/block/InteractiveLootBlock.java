@@ -14,11 +14,15 @@ import net.minecraft.loot.LootTable;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -65,10 +69,19 @@ public class InteractiveLootBlock extends BlockWithEntity {
 					return ActionResult.success(world.isClient);
 				} else if (world instanceof ServerWorld serverWorld && !serverWorld.isClient() && player instanceof ServerPlayerEntity serverPlayerEntity) {
 					if (interactiveLootBlockEntity.isPlayerInSet(serverPlayerEntity)) {
-//						// TODO InteractiveLootBlockEntity should have list of sound events to play when already looted
-//						// TODO InteractiveLootBlockEntity should have list of text messages when already looted
-						serverPlayerEntity.playSoundToPlayer(SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, 1.0F, 1.0F);
-						serverPlayerEntity.sendMessage(Text.translatable("gui.interactive_lootable_block.no_loot_left_in_chest"), true);
+						String alreadyLootedSoundId = interactiveLootBlockEntity.getAlreadyLootedSoundId();
+						if (!alreadyLootedSoundId.isEmpty()) {
+							SoundEvent soundEvent = SoundEvent.of(Identifier.of(alreadyLootedSoundId));
+							if (Registries.SOUND_EVENT.getEntry(soundEvent) != null) {
+								serverPlayerEntity.playSoundToPlayer(soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+							} else {
+								ScriptBlocks.info("No registered sound event of id '" + alreadyLootedSoundId + "' found.");
+							}
+						}
+						String alreadyLootedMessage = interactiveLootBlockEntity.getAlreadyLootedMessage();
+						if (!alreadyLootedMessage.isEmpty()) {
+							serverPlayerEntity.sendMessage(Text.translatable(alreadyLootedMessage), true);
+						}
 					} else {
 						boolean lootSupplied;
 						Vec3d lootPos = new Vec3d(interactiveLootBlockEntity.getPos().getX(), interactiveLootBlockEntity.getPos().getY(), interactiveLootBlockEntity.getPos().getZ());
@@ -84,11 +97,22 @@ public class InteractiveLootBlock extends BlockWithEntity {
 							lootSupplied = true;
 						}
 						if (lootSupplied) {
-							interactiveLootBlockEntity.addPlayerToSet(serverPlayerEntity);
-							// TODO InteractiveLootBlockEntity should have list of sound events to play
-							// TODO InteractiveLootBlockEntity should have list of text messages
-							int i = world.getRandom().nextInt(5);
-							player.sendMessage(Text.translatable("gui.interactive_loot_block.loot_acquired_" + i), true);
+							if (interactiveLootBlockEntity.getTrackPlayers()) {
+								interactiveLootBlockEntity.addPlayerToSet(serverPlayerEntity);
+							}
+							String lootAcquiredSoundId = interactiveLootBlockEntity.getLootAcquiredSoundId();
+							if (!lootAcquiredSoundId.isEmpty()) {
+								SoundEvent soundEvent = SoundEvent.of(Identifier.of(lootAcquiredSoundId));
+								if (Registries.SOUND_EVENT.getEntry(soundEvent) != null) {
+									serverPlayerEntity.playSoundToPlayer(soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+								} else {
+									ScriptBlocks.info("No registered sound event of id '" + lootAcquiredSoundId + "' found.");
+								}
+							}
+							String lootAcquiredMessage = interactiveLootBlockEntity.getLootAcquiredMessage();
+							if (!lootAcquiredMessage.isEmpty()) {
+								serverPlayerEntity.sendMessage(Text.translatable(lootAcquiredMessage), true);
+							}
 						}
 						return ActionResult.SUCCESS;
 					}

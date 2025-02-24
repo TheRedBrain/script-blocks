@@ -213,6 +213,11 @@
 	"gui.interactive_loot_block.lootable_identifier_label": "Lootable Identifier",
 	"gui.interactive_loot_block.rolls_label": "Rolls",
 	"gui.interactive_loot_block.choices_label": "Choices",
+	"gui.interactive_loot_block.track_players_label": "Track players",
+	"gui.interactive_loot_block.loot_acquired_message_placeholder": "Loot Acquired Message",
+	"gui.interactive_loot_block.loot_acquired_sound_id_placeholder": "Loot Acquired Sound Id",
+	"gui.interactive_loot_block.already_looted_message_placeholder": "Already Looted Message",
+	"gui.interactive_loot_block.already_looted_sound_id_placeholder": "Already Looted Sound Id",
 
 	"gui.interactive_loot_block.mode.choice": "Choice Lootable",
 	"gui.interactive_loot_block.mode.random": "Random Lootable",
