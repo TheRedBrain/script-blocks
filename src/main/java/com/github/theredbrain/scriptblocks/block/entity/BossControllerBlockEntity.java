@@ -324,14 +324,18 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	private static void advancePhase(BossControllerBlockEntity bC) {
 		ScriptBlocks.info("advancePhase");
-		if ((bC.currentPhaseId + 1) < bC.boss.phases().size()) {
-			bC.phaseTimer = 0;
-			endPhase(bC);
-			bC.currentPhaseId++;
-			bC.currentPhase = bC.boss.phases().get(bC.currentPhaseId);
-			startPhase(bC);
+		if (bC.boss != null) {
+			if ((bC.currentPhaseId + 1) < bC.boss.phases().size()) {
+				bC.phaseTimer = 0;
+				endPhase(bC);
+				bC.currentPhaseId++;
+				bC.currentPhase = bC.boss.phases().get(bC.currentPhaseId);
+				startPhase(bC);
+			} else {
+				endBattle(bC);
+			}
 		} else {
-			endBattle(bC);
+			ScriptBlocks.warn("A bossControllerBlock tried to advance a non existing boss fight. The blockEntity is at: " + bC.getPos().toString());
 		}
 	}
 
