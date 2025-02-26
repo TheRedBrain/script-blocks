@@ -46,7 +46,7 @@ public class DialogueBlock extends RotatedBlockWithEntity {
 				((DuckPlayerEntityMixin) player).scriptblocks$openDialogueBlockScreen(dialogueBlockEntity);
 				return ActionResult.success(world.isClient);
 			} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-				String dialogue = DialogueBlockEntity.getDialogue(player, dialogueBlockEntity);
+				String dialogue = DialogueAnchor.getDialogue(player, dialogueBlockEntity.getStartingDialogueList());
 				if (!dialogue.isEmpty()) {
 					ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(dialogue, dialogueBlockEntity.getDialogueUsedBlocks(), dialogueBlockEntity.getDialogueTriggeredBlocks()));
 					return ActionResult.CONSUME;

@@ -110,50 +110,6 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	public static String getDialogue(PlayerEntity player, DialogueBlockEntity dialogueBlockEntity) {
-		if (dialogueBlockEntity.startingDialogueList.isEmpty()) {
-			return "";
-		}
-		PlayerAdvancementTracker playerAdvancementTracker = null;
-		ServerAdvancementLoader serverAdvancementLoader = null;
-
-		if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-			playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
-			MinecraftServer minecraftServer = serverPlayerEntity.getServer();
-			if (minecraftServer != null) {
-				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
-			}
-		}
-		String lockAdvancement;
-		String unlockAdvancement;
-
-		for (String dialogueEntry : dialogueBlockEntity.startingDialogueList) {
-			Dialogue dialogue = DialoguesRegistry.registeredDialogues.get(Identifier.tryParse(dialogueEntry));
-			if (dialogue != null) {
-				lockAdvancement = dialogue.lockAdvancement();
-				unlockAdvancement = dialogue.unlockAdvancement();
-
-				AdvancementEntry lockAdvancementEntry = null;
-				AdvancementEntry unlockAdvancementEntry = null;
-				if (serverAdvancementLoader != null) {
-					if (!lockAdvancement.isEmpty()) {
-						lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(lockAdvancement));
-					}
-					if (!unlockAdvancement.isEmpty()) {
-						unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(unlockAdvancement));
-					}
-
-				}
-				if (playerAdvancementTracker != null) {
-					if ((lockAdvancement.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) && (unlockAdvancement.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
-						return dialogueEntry;
-					}
-				}
-			}
-		}
-		return "";
-	}
-
 	public HashMap<String, BlockPos> getDialogueUsedBlocksMap() {
 		return this.dialogueUsedBlocksMap;
 	}

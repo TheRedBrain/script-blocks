@@ -3,9 +3,11 @@ package com.github.theredbrain.scriptblocks.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.List;
+
 public record DialogueAnswer(
 		String answerText,
-		String responseDialogue,
+		List<String> responseDialogues,
 		String unlockAdvancement,
 		String lockAdvancement,
 		boolean showLockedAnswer,
@@ -23,7 +25,7 @@ public record DialogueAnswer(
 
 	public static final Codec<DialogueAnswer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.STRING.optionalFieldOf("answerText", "").forGetter(x -> x.answerText),
-			Codec.STRING.optionalFieldOf("responseDialogue", null).forGetter(x -> x.responseDialogue),
+			Codec.STRING.listOf().optionalFieldOf("responseDialogues", null).forGetter(x -> x.responseDialogues),
 			Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
 			Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
 			Codec.BOOL.optionalFieldOf("showLockedAnswer", true).forGetter(x -> x.showLockedAnswer),
@@ -41,7 +43,7 @@ public record DialogueAnswer(
 
 	public DialogueAnswer(
 			String answerText,
-			String responseDialogue,
+			List<String> responseDialogues,
 			String unlockAdvancement,
 			String lockAdvancement,
 			boolean showLockedAnswer,
@@ -57,7 +59,7 @@ public record DialogueAnswer(
 			int itemCount
 	) {
 		this.answerText = answerText != null ? answerText : "";
-		this.responseDialogue = responseDialogue != null ? responseDialogue : "";
+		this.responseDialogues = responseDialogues != null ? responseDialogues : List.of();
 		this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
 		this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
 		this.showLockedAnswer = showLockedAnswer;

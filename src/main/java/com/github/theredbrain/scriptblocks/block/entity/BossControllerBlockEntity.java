@@ -6,7 +6,6 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.mixin.entity.mob.MobEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -327,7 +326,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		if (bC.boss != null) {
 			if ((bC.currentPhaseId + 1) < bC.boss.phases().size()) {
 				bC.phaseTimer = 0;
-				endPhase(bC);
+				endPhase(bC, true);
 				bC.currentPhaseId++;
 				bC.currentPhase = bC.boss.phases().get(bC.currentPhaseId);
 				startPhase(bC);
@@ -340,7 +339,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	private static void endBattle(BossControllerBlockEntity bC) {
-		endPhase(bC);
+		endPhase(bC, false);
 		bC.currentPhase = null;
 		if (bC.boss.discardEntityAtEnd() && bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
 			Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
@@ -409,7 +408,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 	}
 
-	private static void endPhase(BossControllerBlockEntity bC) {
+	private static void endPhase(BossControllerBlockEntity bC, boolean removeAttributeModifiers) {
 		Boss.Phase phase = bC.currentPhase;
 
 		ScriptBlocks.info("endPhase");
@@ -444,7 +443,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 
 		// modify boss entity
-		if (bC.bossEntityUuid != null && bC.world instanceof ServerWorld serverWorld) {
+		if (bC.bossEntityUuid != null && removeAttributeModifiers && bC.world instanceof ServerWorld serverWorld) {
 			Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
 			if (!bC.entityAttributeModifiers.isEmpty() && entity instanceof LivingEntity) {
 				AttributeContainer attributeContainer = ((LivingEntity) entity).getAttributes();
@@ -481,6 +480,12 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	private static boolean spawnBossEntity(BossControllerBlockEntity bC) {
 		if (bC.world instanceof ServerWorld serverWorld) {
+			if (bC.bossEntityUuid != null) {
+				Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
+				if (entity != null) {
+					entity.discard();
+				}
+			}
 			Optional<EntityType<?>> optional = EntityType.fromNbt(bC.entityTypeCompound);
 			if (optional.isEmpty()) {
 				ScriptBlocks.info("optional.isEmpty()");
@@ -520,6 +525,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 				bC.bossEntityUuid = ((LivingEntity) entity2).getUuid();
 				if (entity2 instanceof MobEntity mobEntity) {
+					mobEntity.playSpawnEffects(); // TODO make optional
+
 					mobEntity.setPersistent();
 					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.pos);
 				}
@@ -538,12 +545,21 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.currentPhaseId = -1;
 		this.currentPhase = null;
 		this.boss = null;
-		if (this.bossEntityUuid != null && this.world instanceof ServerWorld serverWorld) {
-			Entity entity = serverWorld.getEntity(this.bossEntityUuid);
-			if (entity != null) {
-				entity.discard();
+
+		ScriptBlocks.info("BossControllerBlock reset");
+		if (this.world instanceof ServerWorld serverWorld) {
+			ScriptBlocks.info("world instanceof ServerWorld");
+			// TODO bossEntityUuid is sometimes null, even if the entity is still alive
+			if (this.bossEntityUuid != null) {
+				ScriptBlocks.info("bossEntityUuid != null");
+				Entity entity = serverWorld.getEntity(this.bossEntityUuid);
+				if (entity != null) {
+					// TODO alternative: set flag in mobEntity, that is checked in tick and triggers the discard on the entity side
+					ScriptBlocks.info("BossControllerBlock discard bossEntity");
+					entity.discard();
+				}
+				this.bossEntityUuid = null;
 			}
-			this.bossEntityUuid = null;
 		}
 	}
 

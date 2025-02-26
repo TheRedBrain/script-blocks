@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
+import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
@@ -147,7 +148,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
 			}
 
-			String responseDialogue = dialogueAnswer.responseDialogue();
+			String responseDialogue = DialogueAnchor.getDialogue(serverPlayerEntity, dialogueAnswer.responseDialogues());
 			if (responseDialogue.isEmpty()) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {

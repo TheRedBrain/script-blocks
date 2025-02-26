@@ -743,8 +743,8 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	public String getCompleteTextString(World world) {
 		String completeString = this.getTextString();
-		ScriptBlocks.info("getCompleteTextString pre, completeString:" + completeString);
-			ScriptBlocks.info("getCompleteTextString, dataIdentifierString:" + this.getDataIdentifierString());
+//		ScriptBlocks.info("getCompleteTextString pre, completeString:" + completeString);
+//			ScriptBlocks.info("getCompleteTextString, dataIdentifierString:" + this.getDataIdentifierString());
 			BlockPos dataProvidingBlockPosOffset = this.getDataProvidingBlockPosOffset();
 			if (dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
 				BlockEntity blockEntity = world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
@@ -752,7 +752,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 					completeString = completeString + providesDataBlockEntity.getData(this.getDataIdentifierString());
 				}
 			}
-		ScriptBlocks.info("getCompleteTextString post, completeString:" + completeString);
+//		ScriptBlocks.info("getCompleteTextString post, completeString:" + completeString);
 		return completeString;
 	}
 

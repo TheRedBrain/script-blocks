@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -154,6 +155,12 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			nbt.put("EntityTypeCompound", this.entityTypeCompound);
 		} else {
 			nbt.remove("EntityTypeCompound");
+		}
+
+		if (this.boundEntityUuid != null) {
+			nbt.putUuid("boundEntityUuid", this.boundEntityUuid);
+		} else {
+			nbt.remove("boundEntityUuid");
 		}
 
 	}
@@ -358,12 +365,19 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		if (this.triggered) {
 			this.triggered = false;
 		}
-		if (this.boundEntityUuid != null && this.world instanceof ServerWorld serverWorld) {
-			Entity entity = serverWorld.getEntity(this.boundEntityUuid);
-			if (entity != null) {
-				entity.discard();
+
+		ScriptBlocks.info("TriggeredSpawnerBlock reset");
+		if (this.world instanceof ServerWorld serverWorld) {
+			ScriptBlocks.info("world instanceof ServerWorld");
+			if (this.boundEntityUuid != null) {
+				ScriptBlocks.info("boundEntityUuid != null");
+				Entity entity = serverWorld.getEntity(this.boundEntityUuid);
+				if (entity != null) {
+					ScriptBlocks.info("TriggeredSpawnerBlock discard mobEntity");
+					entity.discard();
+				}
+				this.boundEntityUuid = null;
 			}
-			this.boundEntityUuid = null;
 		}
 	}
 
