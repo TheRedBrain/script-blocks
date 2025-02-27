@@ -23,6 +23,7 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -36,6 +37,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
@@ -49,12 +51,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class BossControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
 	// TODO define defaults
 	private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
 
+	public static final Predicate<Entity> EXCEPT_PLAYERS = entity -> !(entity instanceof PlayerEntity);
 
 	private long globalTimer;
 	private long phaseTimer;
@@ -559,6 +563,30 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					entity.discard();
 				}
 				this.bossEntityUuid = null;
+			} else {
+				ScriptBlocks.info("bossEntityUuid == null");
+			}
+		}
+
+		this.discardLivingEntitiesInBossArena();
+	}
+
+	private void discardLivingEntitiesInBossArena() {
+		ScriptBlocks.info("discardLivingEntitiesInBossArena");
+		if (this.calculateAreaBox || this.area == null) {
+			BlockPos areaPositionOffset = this.areaPositionOffset;
+			Vec3i areaDimensions = this.areaDimensions;
+			Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
+			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
+			this.area = new Box(areaStart, areaEnd);
+			this.calculateAreaBox = false;
+		}
+
+		if (this.world != null) {
+			List<LivingEntity> entityList = this.world.getEntitiesByClass(LivingEntity.class, this.area, EXCEPT_PLAYERS);
+			ScriptBlocks.info("Discarding " + entityList.size() + " entities.");
+			for (LivingEntity livingEntity : entityList) {
+				livingEntity.discard();
 			}
 		}
 	}

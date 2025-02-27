@@ -377,6 +377,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 					entity.discard();
 				}
 				this.boundEntityUuid = null;
+			} else {
+				ScriptBlocks.info("boundEntityUuid == null");
 			}
 		}
 	}
