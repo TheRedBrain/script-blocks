@@ -20,6 +20,7 @@ import com.github.theredbrain.scriptblocks.block.RelayTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.ShopBlock;
 import com.github.theredbrain.scriptblocks.block.TeleporterBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredAdvancementCheckerBlock;
+import com.github.theredbrain.scriptblocks.block.TriggeredBeaconBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredCounterBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDisplayBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRNGBlock;
@@ -94,6 +95,7 @@ public class BlockRegistry {
 	public static final Block SHOP_BLOCK = registerBlock("shop_block", new ShopBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_BLOCK = registerBlock("teleporter_block", new TeleporterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_ADVANCEMENT_CHECKER_BLOCK = registerBlock("triggered_advancement_checker_block", new TriggeredAdvancementCheckerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TRIGGERED_BEACON_BLOCK = registerBlock("triggered_beacon_block", new TriggeredBeaconBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_COUNTER_BLOCK = registerBlock("triggered_counter_block", new TriggeredCounterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_SPAWNER_BLOCK = registerBlock("triggered_spawner_block", new TriggeredSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_DISPLAY_BLOCK = registerBlock("triggered_display_block", new TriggeredDisplayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);

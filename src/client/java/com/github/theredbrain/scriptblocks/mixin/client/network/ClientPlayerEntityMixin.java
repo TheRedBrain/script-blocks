@@ -19,6 +19,7 @@ import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
@@ -47,6 +48,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.RedstoneTriggerBloc
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancementCheckerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredBeaconBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDisplayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockScreen;
@@ -133,6 +135,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		} else {
 			this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
 		}
+	}
+
+	@Override
+	public void scriptblocks$openTriggeredBeaconBlockScreen(TriggeredBeaconBlockEntity triggeredBeaconBlockEntity) {
+		this.client.setScreen(new TriggeredBeaconBlockScreen(triggeredBeaconBlockEntity));
 	}
 
 	@Override

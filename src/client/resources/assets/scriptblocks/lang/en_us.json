@@ -376,6 +376,30 @@
 	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",
 
 
+	"gui.triggered_beacon_block.triggered_true_label": "Triggered Override: True",
+	"gui.triggered_beacon_block.triggered_false_label": "Triggered Override: False",
+	"gui.triggered_beacon_block.hide_area_label": "Hide Area",
+	"gui.triggered_beacon_block.show_area_label": "Show Area",
+	"gui.triggered_beacon_block.area_dimensions_label": "Area Dimensions",
+	"gui.triggered_beacon_block.area_position_offset_label": "Area Position Offset",
+
+	"gui.triggered_beacon_block.status_effect_identifier_label": "Effect Identifier",
+	"gui.triggered_beacon_block.status_effect_amplifier_label": "Effect Amplifier",
+	"gui.triggered_beacon_block.ambient_true_label": "Effect Is Ambient: True",
+	"gui.triggered_beacon_block.ambient_false_label": "Effect Is Ambient: False",
+	"gui.triggered_beacon_block.hide_particles_label": "Effect Hides Particles",
+	"gui.triggered_beacon_block.show_particles_label": "Effect Shows Particles",
+	"gui.triggered_beacon_block.hide_icon_label": "Effect Hides Icon",
+	"gui.triggered_beacon_block.show_icon_label": "Effect Shows Icon",
+
+	"gui.triggered_beacon_block.triggered_mode.continuous": "Triggering enables continuous effect application.",
+	"gui.triggered_beacon_block.triggered_mode.once": "Effect gets applied once when triggered.",
+
+	"gui.triggered_beacon_block.screenPage.area": "Area",
+	"gui.triggered_beacon_block.screenPage.applied_effect": "Applied Effect",
+	"gui.triggered_beacon_block.screenPage.trigger_settings": "Trigger Setting",
+
+
 	"gui.triggered_display_block.toggle_is_triggered_button_label.on": "Is Triggered",
 	"gui.triggered_display_block.toggle_is_triggered_button_label.off": "Is Not Triggered",
 
@@ -538,6 +562,7 @@
 	"block.scriptblocks.shop_block": "Shop Block",
 	"block.scriptblocks.teleporter_block": "Teleporter Block",
 	"block.scriptblocks.triggered_advancement_checker_block": "Triggered Advancement Checker Block",
+	"block.scriptblocks.triggered_beacon_block": "Triggered Beacon Block",
 	"block.scriptblocks.triggered_counter_block": "Triggered Counter Block",
 	"block.scriptblocks.triggered_display_block": "Triggered Display Block",
 	"block.scriptblocks.triggered_rng_block": "Triggered RNG Block",

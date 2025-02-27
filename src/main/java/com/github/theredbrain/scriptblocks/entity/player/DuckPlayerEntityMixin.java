@@ -19,6 +19,7 @@ import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
@@ -47,6 +48,8 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity);
 
 	void scriptblocks$openHousingScreen();
+
+	void scriptblocks$openTriggeredBeaconBlockScreen(TriggeredBeaconBlockEntity triggeredBeaconBlockEntity);
 
 	void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity);
 

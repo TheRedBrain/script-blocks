@@ -20,6 +20,7 @@ import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
@@ -34,6 +35,9 @@ import net.minecraft.registry.Registry;
 public class EntityRegistry {
 
 	//region Script Blocks
+	public static final BlockEntityType<TriggeredBeaconBlockEntity> TRIGGERED_BEACON_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggered_beacon_block"),
+			FabricBlockEntityTypeBuilder.create(TriggeredBeaconBlockEntity::new, BlockRegistry.TRIGGERED_BEACON_BLOCK).build());
 	public static final BlockEntityType<TriggeredDisplayBlockEntity> TRIGGERED_DISPLAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_display_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredDisplayBlockEntity::new, BlockRegistry.TRIGGERED_DISPLAY_BLOCK).build());

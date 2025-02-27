@@ -58,6 +58,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockP
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredAdvancementCheckerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredAdvancementCheckerBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredBeaconBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredBeaconBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacket;
@@ -152,6 +154,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateAreaBlockPacket.PACKET_ID, UpdateAreaBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaBlockPacket.PACKET_ID, new UpdateAreaBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredBeaconBlockPacket.PACKET_ID, UpdateTriggeredBeaconBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredBeaconBlockPacket.PACKET_ID, new UpdateTriggeredBeaconBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, new UpdateTriggeredAdvancementCheckerBlockPacketReceiver());
