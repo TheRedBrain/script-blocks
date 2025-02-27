@@ -133,21 +133,13 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaMaxZ");
 		}
 
-		if (this.areaDimensions.getX() != 0) {
+		if (this.areaDimensions != Vec3i.ZERO) {
 			nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-		} else {
-			nbt.remove("areaDimensionsX");
-		}
-
-		if (this.areaDimensions.getY() != 0) {
 			nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-		} else {
-			nbt.remove("areaDimensionsY");
-		}
-
-		if (this.areaDimensions.getZ() != 0) {
 			nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
 		} else {
+			nbt.remove("areaDimensionsX");
+			nbt.remove("areaDimensionsY");
 			nbt.remove("areaDimensionsZ");
 		}
 
@@ -223,11 +215,15 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		if (nbt.contains("showArea", NbtElement.BYTE_TYPE)) {
 			this.showArea = nbt.getBoolean("showArea");
+		} else {
+			this.showArea = false;
 		}
 
 		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
 			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
 			this.calculateAreaBox = true;
+		} else {
+			this.area = null;
 		}
 
 		if (nbt.contains("areaDimensionsX", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsY", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsZ", NbtElement.INT_TYPE)) {
@@ -236,6 +232,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
 					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
 			);
+		} else {
+			this.areaDimensions = Vec3i.ZERO;
 		}
 
 		if (nbt.contains("areaPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetZ", NbtElement.INT_TYPE)) {
@@ -244,6 +242,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
 			);
+		} else {
+			this.areaPositionOffset = POSITION_OFFSET_DEFAULT;
 		}
 
 		if (nbt.contains("bossIdentifier", NbtElement.STRING_TYPE)) {
@@ -258,14 +258,20 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetZ"), -48, 48)
 			);
+		} else {
+			this.bossSpawnPositionOffset = POSITION_OFFSET_DEFAULT;
 		}
 
 		if (nbt.contains("bossSpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
 			this.bossSpawnOrientationPitch = nbt.getDouble("bossSpawnOrientationPitch");
+		} else {
+			this.bossSpawnOrientationPitch = 0.0;
 		}
 
 		if (nbt.contains("bossSpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
 			this.bossSpawnOrientationYaw = nbt.getDouble("bossSpawnOrientationYaw");
+		} else {
+			this.bossSpawnOrientationYaw = 0.0;
 		}
 
 		this.bossTriggeredBlocks.clear();
@@ -282,10 +288,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		if (nbt.contains("EntityTypeCompound", NbtElement.COMPOUND_TYPE)) {
 			this.entityTypeCompound = nbt.getCompound("EntityTypeCompound");
+		} else {
+			this.entityTypeCompound = new NbtCompound();
 		}
 
 		if (nbt.containsUuid("bossEntityUuid")) {
 			this.bossEntityUuid = nbt.getUuid("bossEntityUuid");
+		} else {
+			this.bossEntityUuid = null;
 		}
 	}
 
