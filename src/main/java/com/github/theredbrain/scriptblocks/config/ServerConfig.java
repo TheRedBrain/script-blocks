@@ -43,6 +43,9 @@ public class ServerConfig extends Config {
 	@Comment("Debug messages are send in game.")
 	public boolean enable_debug_messages = true;
 
+	@Comment("Enables debug messages for the boss controller block and all corresponding mechanics.")
+	public boolean enable_boss_controller_debugging = true;
+
 	@Comment("Enables debug messages for the teleporter block and all corresponding mechanics.")
 	public boolean enable_teleporter_debugging = true;
 

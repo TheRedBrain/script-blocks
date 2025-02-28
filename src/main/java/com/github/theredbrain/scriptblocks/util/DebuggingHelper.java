@@ -7,6 +7,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class DebuggingHelper {
 
+	public static boolean isBossControllerLoggingEnabled() {
+		return ScriptBlocks.SERVER_CONFIG.enable_debug_logging && ScriptBlocks.SERVER_CONFIG.enable_boss_controller_debugging;
+	}
+
 	public static boolean isTeleporterLoggingEnabled() {
 		return ScriptBlocks.SERVER_CONFIG.enable_debug_logging && ScriptBlocks.SERVER_CONFIG.enable_teleporter_debugging;
 	}
