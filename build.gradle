@@ -207,7 +207,7 @@ if (project.hasProperty('release_type')) {
 			required.project 'fabric-api'
 			required.project 'dimlib'
 			required.project 'slot-customization-api'
-			optional.project 'slot-customization-api'
+			optional.project 'lootables'
 		}
 	}
 
