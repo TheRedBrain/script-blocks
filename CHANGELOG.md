@@ -1,16 +1,19 @@
 # 0.0.3
 
 - updated to 1.21.1
-- added "BossControllerBlock"
-- added a series of "data blocks"
-  - added "DataAccessBlock"
-  - added "DataRelayBlock"
-  - added "DataSavingBlock"
-- removed all custom mobs, TriggeredSpawner and BossController now work with every MobEntity
+- added (optional) compatibility with Lootables
 - now depends on Slot Customization API
+- now depends on Fzzy Config
 - removed dependency on AzureLib
 - removed dependency on Cardinal Components API
-- lots of internal refactors
+- removed dependency on Cloth Config
+- lots of internal refactors, bug fixes and improvements, some highlights:
+
+- added "BossControllerBlock" and data-driven boss fights
+- added a series of "data blocks", that can save data in world and influence other script blocks
+- removed all custom mobs, TriggeredSpawner and BossController now work with every MobEntity
+
+- check the GitHub commits if you are interested in more details
 
 # 0.0.2
 
