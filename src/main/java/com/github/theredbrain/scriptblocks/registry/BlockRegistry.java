@@ -19,6 +19,8 @@ import com.github.theredbrain.scriptblocks.block.RedstoneTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.RelayTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.ShopBlock;
 import com.github.theredbrain.scriptblocks.block.TeleporterBlock;
+import com.github.theredbrain.scriptblocks.block.TeleporterDoorBlock;
+import com.github.theredbrain.scriptblocks.block.TeleporterTrapdoorBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredAdvancementCheckerBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredBeaconBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredCounterBlock;
@@ -44,6 +46,31 @@ public class BlockRegistry {
 
 	//region Content Blocks
 	// content script blocks
+	public static final Block TELEPORTER_OAK_DOOR = registerBlock("teleporter_oak_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_IRON_DOOR = registerBlock("teleporter_iron_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_SPRUCE_DOOR = registerBlock("teleporter_spruce_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.SPRUCE_BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_BIRCH_DOOR = registerBlock("teleporter_birch_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.PALE_YELLOW).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_JUNGLE_DOOR = registerBlock("teleporter_jungle_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.DIRT_BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_ACACIA_DOOR = registerBlock("teleporter_acacia_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.ORANGE).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_CHERRY_DOOR = registerBlock("teleporter_cherry_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_WHITE).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_DARK_OAK_DOOR = registerBlock("teleporter_dark_oak_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_MANGROVE_DOOR = registerBlock("teleporter_mangrove_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.RED).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_BAMBOO_DOOR = registerBlock("teleporter_bamboo_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.YELLOW).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_CRIMSON_DOOR = registerBlock("teleporter_crimson_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.DULL_PINK).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_WARPED_DOOR = registerBlock("teleporter_warped_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_OAK_TRAPDOOR = registerBlock("teleporter_oak_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_IRON_TRAPDOOR = registerBlock("teleporter_iron_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_SPRUCE_TRAPDOOR = registerBlock("teleporter_spruce_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.SPRUCE_BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_BIRCH_TRAPDOOR = registerBlock("teleporter_birch_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.PALE_YELLOW).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_JUNGLE_TRAPDOOR = registerBlock("teleporter_jungle_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DIRT_BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_ACACIA_TRAPDOOR = registerBlock("teleporter_acacia_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.ORANGE).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_CHERRY_TRAPDOOR = registerBlock("teleporter_cherry_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_WHITE).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_DARK_OAK_TRAPDOOR = registerBlock("teleporter_dark_oak_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_MANGROVE_TRAPDOOR = registerBlock("teleporter_mangrove_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.RED).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_BAMBOO_TRAPDOOR = registerBlock("teleporter_bamboo_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.YELLOW).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_CRIMSON_TRAPDOOR = registerBlock("teleporter_crimson_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DULL_PINK).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TELEPORTER_WARPED_TRAPDOOR = registerBlock("teleporter_warped_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+
 	public static final Block USE_RELAY_ANVIL = registerBlock("use_relay_anvil", new UseRelayAnvilBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_OAK_DOOR = registerBlock("use_relay_oak_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_IRON_DOOR = registerBlock("use_relay_iron_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

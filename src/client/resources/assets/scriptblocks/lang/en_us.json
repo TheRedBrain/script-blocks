@@ -510,6 +510,32 @@
 	"gui.shop_block.trade_button_label": "Trade",
 
 
+	"block.scriptblocks.teleporter_oak_door": "Teleporter Oak Door",
+	"block.scriptblocks.teleporter_iron_door": "Teleporter Iron Door",
+	"block.scriptblocks.teleporter_spruce_door": "Teleporter Spruce Door",
+	"block.scriptblocks.teleporter_birch_door": "Teleporter Birch Door",
+	"block.scriptblocks.teleporter_jungle_door": "Teleporter Jungle Door",
+	"block.scriptblocks.teleporter_acacia_door": "Teleporter Acacia Door",
+	"block.scriptblocks.teleporter_cherry_door": "Teleporter Cherry Door",
+	"block.scriptblocks.teleporter_dark_oak_door": "Teleporter Dark Oak Door",
+	"block.scriptblocks.teleporter_mangrove_door": "Teleporter Mangrove Door",
+	"block.scriptblocks.teleporter_bamboo_door": "Teleporter Bamboo Door",
+	"block.scriptblocks.teleporter_crimson_door": "Teleporter Crimson Door",
+	"block.scriptblocks.teleporter_warped_door": "Teleporter Warped Door",
+
+	"block.scriptblocks.teleporter_oak_trapdoor": "Teleporter Oak Trapdoor",
+	"block.scriptblocks.teleporter_iron_trapdoor": "Teleporter Iron Trapdoor",
+	"block.scriptblocks.teleporter_spruce_trapdoor": "Teleporter Spruce Trapdoor",
+	"block.scriptblocks.teleporter_birch_trapdoor": "Teleporter Birch Trapdoor",
+	"block.scriptblocks.teleporter_jungle_trapdoor": "Teleporter Jungle Trapdoor",
+	"block.scriptblocks.teleporter_acacia_trapdoor": "Teleporter Acacia Trapdoor",
+	"block.scriptblocks.teleporter_cherry_trapdoor": "Teleporter Cherry Trapdoor",
+	"block.scriptblocks.teleporter_dark_oak_trapdoor": "Teleporter Dark Oak Trapdoor",
+	"block.scriptblocks.teleporter_mangrove_trapdoor": "Teleporter Mangrove Trapdoor",
+	"block.scriptblocks.teleporter_bamboo_trapdoor": "Teleporter Bamboo Trapdoor",
+	"block.scriptblocks.teleporter_crimson_trapdoor": "Teleporter Crimson Trapdoor",
+	"block.scriptblocks.teleporter_warped_trapdoor": "Teleporter Warped Trapdoor",
+
 	"block.scriptblocks.use_relay_anvil": "Use Relay Anvil",
 
 	"block.scriptblocks.use_relay_oak_door": "Use Relay Oak Door",
