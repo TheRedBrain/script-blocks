@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block;
 
-import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;

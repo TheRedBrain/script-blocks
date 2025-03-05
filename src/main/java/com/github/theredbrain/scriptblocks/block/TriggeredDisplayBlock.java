@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block;
 
-import com.github.theredbrain.scriptblocks.block.entity.DelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;

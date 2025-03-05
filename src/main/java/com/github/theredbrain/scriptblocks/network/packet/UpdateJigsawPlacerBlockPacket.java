@@ -4,11 +4,8 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.block.entity.JigsawBlockEntity;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.List;
 
 public record UpdateJigsawPlacerBlockPacket(
 		BlockPos jigsawPlacerBlockPosition,

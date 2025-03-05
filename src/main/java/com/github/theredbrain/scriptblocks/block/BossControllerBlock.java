@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BossControllerBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<BossControllerBlock> CODEC = createCodec(BossControllerBlock::new);
+
 	public BossControllerBlock(Settings settings) {
 		super(settings);
 	}

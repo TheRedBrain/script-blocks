@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
-import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -13,16 +12,10 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 public class DataWritingBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);

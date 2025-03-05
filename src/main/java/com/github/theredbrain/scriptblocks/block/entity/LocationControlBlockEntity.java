@@ -16,7 +16,6 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;

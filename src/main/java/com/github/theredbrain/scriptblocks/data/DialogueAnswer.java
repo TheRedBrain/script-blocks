@@ -71,7 +71,7 @@ public record DialogueAnswer(
 		this.triggeredBlock = triggeredBlock != null ? triggeredBlock : "";
 		this.overlayMessage = overlayMessage != null ? overlayMessage : "";
 		this.consumeItem = consumeItem;
-		this.itemIdentifier = itemIdentifier !=  null ? itemIdentifier : "";
+		this.itemIdentifier = itemIdentifier != null ? itemIdentifier : "";
 		this.itemCount = itemCount;
 	}
 

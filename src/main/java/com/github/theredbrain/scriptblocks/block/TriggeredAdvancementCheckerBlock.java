@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class TriggeredAdvancementCheckerBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<TriggeredAdvancementCheckerBlock> CODEC = createCodec(TriggeredAdvancementCheckerBlock::new);
+
 	public TriggeredAdvancementCheckerBlock(Settings settings) {
 		super(settings);
 	}

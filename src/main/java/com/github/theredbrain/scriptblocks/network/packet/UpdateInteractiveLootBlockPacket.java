@@ -17,7 +17,7 @@ public record UpdateInteractiveLootBlockPacket(
 		String lootAcquiredSoundId,
 		String alreadyLootedMessage,
 		String alreadyLootedSoundId
-		) implements CustomPayload {
+) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateInteractiveLootBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_interactive_loot_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateInteractiveLootBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateInteractiveLootBlockPacket::write, UpdateInteractiveLootBlockPacket::new);
 

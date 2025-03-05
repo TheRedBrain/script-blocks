@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -14,7 +13,6 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
@@ -24,8 +22,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -43,8 +39,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<TeleporterTrapdoorBlock> CODEC = createCodec(TeleporterTrapdoorBlock::new);

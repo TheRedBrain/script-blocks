@@ -65,27 +65,27 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 						playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
 					}
 
-						for (int j = 0; j < playerInventorySize; j++) {
-							if (playerInventoryCopy.getStack(j).isOf(item)) {
-								itemStack = playerInventoryCopy.getStack(j).copy();
-								int stackCount = itemStack.getCount();
-								if (stackCount >= itemCount) {
-									itemStack.setCount(stackCount - itemCount);
-									playerInventoryCopy.setStack(j, itemStack);
-									itemCount = 0;
-									break;
-								} else {
-									playerInventoryCopy.setStack(j, ItemStack.EMPTY);
-									itemCount = itemCount - stackCount;
-								}
+					for (int j = 0; j < playerInventorySize; j++) {
+						if (playerInventoryCopy.getStack(j).isOf(item)) {
+							itemStack = playerInventoryCopy.getStack(j).copy();
+							int stackCount = itemStack.getCount();
+							if (stackCount >= itemCount) {
+								itemStack.setCount(stackCount - itemCount);
+								playerInventoryCopy.setStack(j, itemStack);
+								itemCount = 0;
+								break;
+							} else {
+								playerInventoryCopy.setStack(j, ItemStack.EMPTY);
+								itemCount = itemCount - stackCount;
 							}
 						}
-						if (itemCount > 0) {
-							serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
-							return;
-						}
+					}
+					if (itemCount > 0) {
+						serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
+						return;
+					}
 
-					if(dialogueAnswer.consumeItem()) {
+					if (dialogueAnswer.consumeItem()) {
 						int ingredientCount = dialogueAnswer.itemCount();
 
 						for (int j = 0; j < playerInventorySize; j++) {

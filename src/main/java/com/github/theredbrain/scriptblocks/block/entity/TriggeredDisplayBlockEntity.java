@@ -17,7 +17,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
@@ -745,13 +744,13 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		String completeString = this.getTextString();
 //		ScriptBlocks.info("getCompleteTextString pre, completeString:" + completeString);
 //			ScriptBlocks.info("getCompleteTextString, dataIdentifierString:" + this.getDataIdentifierString());
-			BlockPos dataProvidingBlockPosOffset = this.getDataProvidingBlockPosOffset();
-			if (dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
-				BlockEntity blockEntity = world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
-				if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
-					completeString = completeString + providesDataBlockEntity.getData(this.getDataIdentifierString());
-				}
+		BlockPos dataProvidingBlockPosOffset = this.getDataProvidingBlockPosOffset();
+		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
+			BlockEntity blockEntity = world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
+			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
+				completeString = completeString + providesDataBlockEntity.getData(this.getDataIdentifierString());
 			}
+		}
 //		ScriptBlocks.info("getCompleteTextString post, completeString:" + completeString);
 		return completeString;
 	}

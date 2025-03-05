@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

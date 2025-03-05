@@ -1,9 +1,7 @@
 package com.github.theredbrain.scriptblocks.data;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,10 +72,10 @@ public record Location(
 		this.controlBlockPosX = controlBlockPosX;
 		this.controlBlockPosY = controlBlockPosY;
 		this.controlBlockPosZ = controlBlockPosZ;
-		this.structureIdentifier = structureIdentifier !=  null ? structureIdentifier : "";
-		this.displayName = displayName !=  null ? displayName : "";
-		this.unlockAdvancement = unlockAdvancement !=  null ? unlockAdvancement : "";
-		this.lockAdvancement = lockAdvancement !=  null ? lockAdvancement : "";
+		this.structureIdentifier = structureIdentifier != null ? structureIdentifier : "";
+		this.displayName = displayName != null ? displayName : "";
+		this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
+		this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
 		this.showLockedLocation = showLockedLocation;
 		this.showUnlockAdvancement = showUnlockAdvancement;
 		this.showLockAdvancement = showLockAdvancement;
@@ -86,7 +84,7 @@ public record Location(
 		this.isPublic = isPublic;
 //		this.canOwnerBeChosen = canOwnerBeChosen;
 		this.consumeKey = consumeKey;
-		this.keyItemIdentifier = keyItemIdentifier !=  null ? keyItemIdentifier : "";
+		this.keyItemIdentifier = keyItemIdentifier != null ? keyItemIdentifier : "";
 		this.keyItemCount = keyItemCount;
 		this.side_entrances = side_entrances != null ? side_entrances : new HashMap<>();
 	}
@@ -135,17 +133,17 @@ public record Location(
 				String keyItemIdentifier,
 				int keyItemCount
 		) {
-			this.identifier = identifier !=  null ? identifier : "";
-			this.name = name !=  null ? name : "";
-			this.unlockAdvancement = unlockAdvancement !=  null ? unlockAdvancement : "";
-			this.lockAdvancement = lockAdvancement !=  null ? lockAdvancement : "";
+			this.identifier = identifier != null ? identifier : "";
+			this.name = name != null ? name : "";
+			this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
+			this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
 			this.showLockedLocation = showLockedLocation;
 			this.showUnlockAdvancement = showUnlockAdvancement;
 			this.showLockAdvancement = showLockAdvancement;
 //			this.showLocationName = showLocationName;
 			this.showLocationOwner = showLocationOwner;
 			this.consumeKey = consumeKey;
-			this.keyItemIdentifier = keyItemIdentifier !=  null ? keyItemIdentifier : "";
+			this.keyItemIdentifier = keyItemIdentifier != null ? keyItemIdentifier : "";
 			this.keyItemCount = keyItemCount;
 		}
 	}

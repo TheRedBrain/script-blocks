@@ -7,7 +7,6 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.registry.Tags;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;

@@ -2,27 +2,17 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.data.Dialogue;
-import com.github.theredbrain.scriptblocks.registry.DialoguesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerAdvancementLoader;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;

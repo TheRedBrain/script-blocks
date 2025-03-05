@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;

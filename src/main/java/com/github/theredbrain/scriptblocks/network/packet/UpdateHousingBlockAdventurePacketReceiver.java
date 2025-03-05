@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;

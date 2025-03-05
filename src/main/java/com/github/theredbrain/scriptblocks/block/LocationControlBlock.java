@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class LocationControlBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<LocationControlBlock> CODEC = createCodec(LocationControlBlock::new);
+
 	public LocationControlBlock(Settings settings) {
 		super(settings);
 	}

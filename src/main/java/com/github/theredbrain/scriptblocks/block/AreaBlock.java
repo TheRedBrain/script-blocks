@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AreaBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<AreaBlock> CODEC = createCodec(AreaBlock::new);
+
 	public AreaBlock(Settings settings) {
 		super(settings);
 	}

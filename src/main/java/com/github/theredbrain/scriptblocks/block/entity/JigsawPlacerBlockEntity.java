@@ -15,7 +15,6 @@ import net.minecraft.block.entity.JigsawBlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -58,7 +57,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		nbt.putString(TARGET_KEY, this.target.toString());
 
 		nbt.putString("firstStructurePoolString", this.firstStructurePoolString);
-		
+
 		nbt.putString("secondStructurePoolString", this.secondStructurePoolString);
 
 		nbt.putString(JOINT_KEY, this.joint.asString());
@@ -108,7 +107,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		this.target = Identifier.of(nbt.getString(TARGET_KEY));
 
 		this.firstStructurePoolString = nbt.getString("firstStructurePoolString");
-		
+
 		this.secondStructurePoolString = nbt.getString("secondStructurePoolString");
 
 		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString(JOINT_KEY)).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);

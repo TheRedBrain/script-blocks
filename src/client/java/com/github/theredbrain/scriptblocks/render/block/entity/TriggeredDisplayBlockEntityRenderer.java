@@ -18,7 +18,6 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.AffineTransformation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -161,7 +160,7 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 
 	private TriggeredDisplayBlockEntity.TextLines getLines(Text text, int width) {
 		List<OrderedText> list = this.textRenderer.wrapLines(text, width);
-		List<TriggeredDisplayBlockEntity.TextLine> list2 = new ArrayList(list.size());
+		List<TriggeredDisplayBlockEntity.TextLine> list2 = new ArrayList<>(list.size());
 		int i = 0;
 
 		for (OrderedText orderedText : list) {

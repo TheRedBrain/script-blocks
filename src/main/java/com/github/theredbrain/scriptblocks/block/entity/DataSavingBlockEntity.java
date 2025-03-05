@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -96,6 +95,7 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 			this.data.put(listEntry.left, listEntry.right);
 		}
 	}
+
 	@Override
 	public void reset() {
 		this.data.clear();

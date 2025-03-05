@@ -75,7 +75,7 @@ public record Shop(
 					String id,
 					int count
 			) {
-				this.id = id !=  null ? id : "";
+				this.id = id != null ? id : "";
 				this.count = count;
 			}
 

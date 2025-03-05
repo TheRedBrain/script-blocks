@@ -10,7 +10,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredDisplayBlockPacket> {
 	@Override

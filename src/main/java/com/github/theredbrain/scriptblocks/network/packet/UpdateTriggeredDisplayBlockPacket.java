@@ -1,13 +1,11 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
 
 public record UpdateTriggeredDisplayBlockPacket(
 		BlockPos triggeredDisplayBlockPosition,
