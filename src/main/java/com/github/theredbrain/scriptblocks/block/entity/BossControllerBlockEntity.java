@@ -316,25 +316,25 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	//region Boss Battle Logic
 	private static void startBattle(BossControllerBlockEntity bC) {
-		if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.info("startBattle");
-		}
+
+		DebuggingHelper.sendBossControllerLogMessage("startBattle", null);
+
 		String identifierString = bC.bossIdentifier;
 		if (!identifierString.isEmpty()) {
 			bC.boss = BossesRegistry.registeredBosses.get(Identifier.of(identifierString));
 		}
 
 		if (bC.boss != null) {
-			if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-				ScriptBlocks.info("bC.boss != null");
-			}
+
+			DebuggingHelper.sendBossControllerLogMessage("bC.boss != null", null);
+
 			if (bC.setEntityType(bC.boss.bossEntityTypeId())) {
 				bC.currentPhaseId = 0;
 				bC.currentPhase = bC.boss.phases().getFirst();
 				if (spawnBossEntity(bC)) {
-					if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-						ScriptBlocks.info("boss spawned");
-					}
+
+					DebuggingHelper.sendBossControllerLogMessage("boss spawned", null);
+
 					startPhase(bC);
 				}
 			}
@@ -342,9 +342,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	private static void advancePhase(BossControllerBlockEntity bC) {
-		if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.info("advancePhase");
-		}
+
+		DebuggingHelper.sendBossControllerLogMessage("advancePhase", null);
+
 		if (bC.boss != null) {
 			if ((bC.currentPhaseId + 1) < bC.boss.phases().size()) {
 				bC.phaseTimer = 0;
@@ -355,8 +355,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			} else {
 				endBattle(bC);
 			}
-		} else if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.warn("A bossControllerBlock tried to advance a non existing boss fight. The blockEntity is at: " + bC.getPos().toString());
+		} else {
+
+			DebuggingHelper.sendBossControllerLogMessage("A bossControllerBlock at " + bC.getPos().toString() + " tried to advance a non existing boss fight.", null);
+
 		}
 	}
 
@@ -375,9 +377,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static void startPhase(BossControllerBlockEntity bC) {
 		Boss.Phase phase = bC.currentPhase;
 
-		if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.info("startPhase");
-		}
+		DebuggingHelper.sendBossControllerLogMessage("startPhase", null);
+
 		bC.entityAttributeModifiers = getEntityAttributeModifiers(bC.currentPhase);
 
 		// trigger block
@@ -435,9 +436,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private static void endPhase(BossControllerBlockEntity bC, boolean removeAttributeModifiers) {
 		Boss.Phase phase = bC.currentPhase;
 
-		if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.info("endPhase");
-		}
+		DebuggingHelper.sendBossControllerLogMessage("endPhase, removeAttributeModifiers: " + removeAttributeModifiers, null);
+
 		// trigger block
 		String triggeredBlock = phase.triggeredBlockAtEnd();
 		if (triggeredBlock != null) {
@@ -479,6 +479,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 						entityAttributeInstance.removeModifier(attributeModifier);
 					}
 				});
+			} else if (bC.entityAttributeModifiers.isEmpty()) {
+
+				DebuggingHelper.sendBossControllerLogMessage("bC.entityAttributeModifiers.isEmpty()", null);
+
 			}
 		}
 	}
@@ -521,9 +525,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			double e = (double) bC.pos.getY() + bC.bossSpawnPositionOffset.getY();
 			double f = (double) bC.pos.getZ() + bC.bossSpawnPositionOffset.getZ() + 0.5;
 			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) {
-				if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-					ScriptBlocks.info("not enough space for spawning boss entity");
-				}
+
+				DebuggingHelper.sendBossControllerLogMessage("not enough space for spawning boss entity", null);
 				return false;
 			}
 			BlockPos blockPos = BlockPos.ofFloored(d, e, f);
@@ -572,29 +575,26 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.currentPhase = null;
 		this.boss = null;
 
-		if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.info("BossControllerBlock reset");
-		}
+		DebuggingHelper.sendBossControllerLogMessage("BossControllerBlock reset", null);
+
 		if (this.world instanceof ServerWorld serverWorld) {
-			if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-				ScriptBlocks.info("world instanceof ServerWorld");
-			}
+			DebuggingHelper.sendBossControllerLogMessage("world instanceof ServerWorld", null);
 			// TODO bossEntityUuid is sometimes null, even if the entity is still alive
 			if (this.bossEntityUuid != null) {
-				if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-					ScriptBlocks.info("bossEntityUuid != null");
-				}
+
+				DebuggingHelper.sendBossControllerLogMessage("bossEntityUuid != null", null);
+
 				Entity entity = serverWorld.getEntity(this.bossEntityUuid);
 				if (entity != null) {
 					// TODO alternative: set flag in mobEntity, that is checked in tick and triggers the discard on the entity side
-					if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-						ScriptBlocks.info("BossControllerBlock discard bossEntity");
-					}
+
+					DebuggingHelper.sendBossControllerLogMessage("bossEntity discarded", null);
+
 					entity.discard();
 				}
 				this.bossEntityUuid = null;
-			} else if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-				ScriptBlocks.info("bossEntityUuid == null");
+			} else {
+				DebuggingHelper.sendBossControllerLogMessage("bossEntityUuid == null", null);
 			}
 		}
 
@@ -602,9 +602,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	private void discardLivingEntitiesInBossArena() {
-		if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-			ScriptBlocks.info("discardLivingEntitiesInBossArena");
-		}
+
+		DebuggingHelper.sendBossControllerLogMessage("LivingEntities in boss arena discarded", null);
+
 		if (this.calculateAreaBox || this.area == null) {
 			BlockPos areaPositionOffset = this.areaPositionOffset;
 			Vec3i areaDimensions = this.areaDimensions;
@@ -616,9 +616,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		if (this.world != null) {
 			List<LivingEntity> entityList = this.world.getEntitiesByClass(LivingEntity.class, this.area, EXCEPT_PLAYERS);
-			if (DebuggingHelper.isBossControllerLoggingEnabled()) {
-				ScriptBlocks.info("Discarding " + entityList.size() + " entities.");
-			}
+
+			DebuggingHelper.sendBossControllerLogMessage("Discarding " + entityList.size() + " entities.", null);
+
 			for (LivingEntity livingEntity : entityList) {
 				livingEntity.discard();
 			}

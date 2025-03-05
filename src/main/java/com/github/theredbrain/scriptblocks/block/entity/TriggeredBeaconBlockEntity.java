@@ -230,7 +230,6 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	}
 
 	private void applyStatusEffect(World world) {
-		ScriptBlocks.info("areablock applyStatusEffect");
 		Optional<RegistryEntry.Reference<StatusEffect>> statusEffect = Registries.STATUS_EFFECT.getEntry(Identifier.tryParse(this.appliedStatusEffectIdentifier));
 		if (statusEffect.isEmpty()) {
 			return;
