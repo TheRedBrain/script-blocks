@@ -1,3 +1,8 @@
+# 0.0.4
+
+- added Teleporter(Trap)Doors, can be broken in survival and keep their settings
+- several small fixes
+
 # 0.0.3
 
 - updated to 1.21.1

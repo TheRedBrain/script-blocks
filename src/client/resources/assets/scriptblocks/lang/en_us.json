@@ -317,7 +317,7 @@
 	"gui.teleporter_block.spawn_point_type_label": "Spawn Point Type",
 	"gui.teleporter_block.spawn_point_type.world_spawn": "World Spawn",
 	"gui.teleporter_block.spawn_point_type.player_spawn": "Player Spawn",
-	"gui.teleporter_block.spawn_point_type.player_location_access_position": "Location Access Position",
+	"gui.teleporter_block.spawn_point_type.location_access_position": "Location Access Position",
 
 	"gui.teleporter_block.location_mode_screen_page.page_1": "Page 1",
 	"gui.teleporter_block.location_mode_screen_page.page_2": "Page 2",
