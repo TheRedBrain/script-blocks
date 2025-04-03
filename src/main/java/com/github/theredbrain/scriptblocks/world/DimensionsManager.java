@@ -33,6 +33,13 @@ public class DimensionsManager {
 		DimensionAPI.addDimensionDynamically(server, dimensionId, PLAYER_LOCATIONS_DIMENSION_TEMPLATE.createLevelStem(server));
 	}
 
+//	public static final DimensionTemplate RESOURCE_WORLD_DIMENSION_TEMPLATE = new DimensionTemplate(
+//			DimensionTypes.OVERWORLD,
+//			(server, dimTypeHolder) -> {
+//				return WorldPresets.getDefaultOverworldOptions(server.getRegistryManager());
+//			}
+//	);
+
 	public static final DimensionTemplate PLAYER_LOCATIONS_DIMENSION_TEMPLATE = new DimensionTemplate(
 			DimensionTypes.OVERWORLD,
 			(server, dimTypeHolder) -> {
