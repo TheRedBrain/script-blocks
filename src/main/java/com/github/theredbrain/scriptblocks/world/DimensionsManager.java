@@ -17,10 +17,16 @@ import qouteall.dimlib.api.DimensionAPI;
 
 public class DimensionsManager {
 
+	public static Identifier PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER = ScriptBlocks.identifier("public_locations_dimension");
+
 	public static void init() {
 		DimensionAPI.registerDimensionTemplate(
 				"player_locations", PLAYER_LOCATIONS_DIMENSION_TEMPLATE
 		);
+	}
+
+	public static void addAndSavePublicDimension(Identifier dimensionId, MinecraftServer server) {
+		DimensionAPI.addDimensionDynamically(server, dimensionId, PUBLIC_LOCATIONS_DIMENSION_TEMPLATE.createLevelStem(server));
 	}
 
 	public static void addAndSaveDynamicDimension(Identifier dimensionId, MinecraftServer server) {
@@ -35,6 +41,21 @@ public class DimensionsManager {
 				Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = registryAccess.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
 
 				RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("player_locations_dimension")));
+
+				FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
+
+				return new DimensionOptions(dimTypeHolder, chunkGenerator);
+			}
+	);
+
+	public static final DimensionTemplate PUBLIC_LOCATIONS_DIMENSION_TEMPLATE = new DimensionTemplate(
+			DimensionTypes.OVERWORLD,
+			(server, dimTypeHolder) -> {
+				DynamicRegistryManager.Immutable registryAccess = server.getRegistryManager();
+
+				Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = registryAccess.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
+
+				RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("public_locations_dimension")));
 
 				FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
 

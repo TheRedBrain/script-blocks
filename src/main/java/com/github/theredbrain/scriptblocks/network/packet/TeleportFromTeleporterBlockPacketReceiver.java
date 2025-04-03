@@ -71,6 +71,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		boolean locationWasGeneratedByOwner = true;
 		boolean playerHadKeyItem = true;
 		boolean locationWasReset = false;
+		boolean targetLocationIsPublic = false;
 
 		if (teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
 			targetWorld = serverWorld;
@@ -106,7 +107,19 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			if (location != null) {
 
 				if (location.isPublic()) {
-					targetWorld = server.getOverworld();
+					if (ScriptBlocks.SERVER_CONFIG.enable_public_locations_dimension) {
+						RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
+						targetWorld = server.getWorld(dimensionregistryKey);
+
+						if (targetWorld == null) {
+							DimensionsManager.addAndSavePublicDimension(DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER, server);
+							dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
+							targetWorld = server.getWorld(dimensionregistryKey);
+						}
+					} else {
+						targetWorld = server.getOverworld();
+					}
+					targetLocationIsPublic = true;
 				} else if (targetDimensionOwner != null) {
 //                ScriptBlocks.info("targetDimensionOwner: " + targetDimensionOwner);
 					Identifier targetDimensionId = ScriptBlocks.identifier(targetDimensionOwner.getUuidAsString());
@@ -248,7 +261,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
-				if (targetWorld != server.getOverworld()) {
+				if (!targetLocationIsPublic) {
 					DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
 				}
 			}
@@ -279,7 +292,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
 							if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 								DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, teamServerPlayerEntity);
-								if (targetWorld != server.getOverworld()) {
+								if (targetLocationIsPublic) {
 									DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, teamServerPlayerEntity);
 								}
 							}
