@@ -75,6 +75,8 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
 
+//	void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock);
+
 	void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
 
 	void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);

@@ -12,6 +12,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -51,26 +52,31 @@ import java.util.UUID;
 
 public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
-	private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
+	protected static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
 
-	private BlockPos entitySpawnPositionOffset = POSITION_OFFSET_DEFAULT;
-	private double entitySpawnOrientationPitch = 0.0;
-	private double entitySpawnOrientationYaw = 0.0;
+	protected BlockPos entitySpawnPositionOffset = POSITION_OFFSET_DEFAULT;
+	protected double entitySpawnOrientationPitch = 0.0;
+	protected double entitySpawnOrientationYaw = 0.0;
 	@Nullable
-	private UUID boundEntityUuid = null;
+	protected UUID boundEntityUuid = null;
 
-	private SpawningMode spawningMode = SpawningMode.ONCE;
+	protected SpawningMode spawningMode = SpawningMode.ONCE;
 
-	private Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	protected Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(POSITION_OFFSET_DEFAULT, false);
-	private BlockPos useRelayBlockPositionOffset = POSITION_OFFSET_DEFAULT;
+	protected BlockPos useRelayBlockPositionOffset = POSITION_OFFSET_DEFAULT;
+
+	protected NbtCompound entityTypeCompound = new NbtCompound();
 
 	private boolean triggered = false;
-	private NbtCompound entityTypeCompound = new NbtCompound();
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(POSITION_OFFSET_DEFAULT, false);
 
 	public TriggeredSpawnerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_SPAWNER_BLOCK_ENTITY, pos, state);
+		this(EntityRegistry.TRIGGERED_SPAWNER_BLOCK_ENTITY, pos, state);
+	}
+
+	public TriggeredSpawnerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 
 	@Override
@@ -414,7 +420,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		}
 	}
 
-	private boolean spawnEntity() {
+	protected boolean spawnEntity() {
 		if (this.world instanceof ServerWorld serverWorld) {
 			Optional<EntityType<?>> optional = EntityType.fromNbt(this.entityTypeCompound);
 			if (optional.isEmpty()) {

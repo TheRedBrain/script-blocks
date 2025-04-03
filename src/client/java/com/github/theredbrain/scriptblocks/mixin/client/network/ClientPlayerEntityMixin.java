@@ -202,6 +202,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		this.client.setScreen(new TriggeredSpawnerBlockScreen(triggeredSpawnerBlock));
 	}
 
+//	@Override
+//	public void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock) {
+//		this.client.setScreen(new TriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlock));
+//	}
+
 	@Override
 	public void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock) {
 		this.client.setScreen(new MimicBlockScreen(mimicBlock));
