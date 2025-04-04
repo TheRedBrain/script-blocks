@@ -22,6 +22,8 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
@@ -30,6 +32,8 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.VillagerData;
+import net.minecraft.village.VillagerProfession;
+import net.minecraft.village.VillagerType;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -46,6 +50,9 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 	private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_yaw_label");
 	private static final Text SPAWNING_MODE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.spawning_mode_label");
 	private static final Text ENTITY_TYPE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_type_label");
+	private static final Text VILLAGER_TYPE_LABEL_TEXT = Text.translatable("gui.triggered_villager_spawner_block.villager_type_field_label");
+	private static final Text VILLAGER_PROFESSION_LABEL_TEXT = Text.translatable("gui.triggered_villager_spawner_block.villager_profession_field_label");
+	private static final Text VILLAGER_LEVEL_LABEL_TEXT = Text.translatable("gui.triggered_villager_spawner_block.villager_level_field_label");
 	private static final Text REMOVE_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
 	private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_IDENTIFIER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_identifier_label");
 	private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_NAME_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_name_label");
@@ -69,12 +76,13 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 
 	private TextFieldWidget entityTypeIdField;
 
+	private final List<net.minecraft.village.VillagerType> villagerTypes = new ArrayList<>();
+	private final List<net.minecraft.village.VillagerProfession> villagerProfessions = new ArrayList<>();
 	private VillagerType villagerType;
 	private CyclingButtonWidget<VillagerType> cycleVillagerTypeButton;
 	private VillagerProfession villagerProfession;
 	private CyclingButtonWidget<VillagerProfession> cycleVillagerProfessionButton;
-	private int villagerLevel;
-	private SliderWidget villagerLevelSlider;
+	private TextFieldWidget villagerLevelField;
 
 	private ButtonWidget removeListEntryButton0;
 	private ButtonWidget removeListEntryButton1;
@@ -207,39 +215,56 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 
 		VillagerData villagerData = this.triggeredVillagerSpawnerBlock.getVillagerData();
 
-		this.villagerType = VillagerType.byType(villagerData.getType()).orElseGet(() -> {
-			return VillagerType.PLAINS;
-		});
-		this.cycleVillagerTypeButton = this.addDrawableChild(CyclingButtonWidget.builder(VillagerType::asText).values((VillagerType[]) VillagerType.values()).initially(this.villagerType).omitKeyText().build(this.width / 2 - 154, 60, 300, 20, Text.empty(), (button, villagerType) -> {
-			ScriptBlocks.info("villagerType: " + villagerType);
-			this.villagerType = villagerType;
-		}));
+		this.updateVillagerRegistryLists();
+
+		this.villagerType = villagerData.getType();
+		this.cycleVillagerTypeButton = this.addDrawableChild(CyclingButtonWidget.<VillagerType>builder((villagerType) -> Text.translatable("gui.triggered_villager_spawner_block.villager_type." + villagerType.toString()))
+				.values(new CyclingButtonWidget.Values<VillagerType>() {
+					@Override
+					public List<VillagerType> getCurrent() {
+						return TriggeredVillagerSpawnerBlockScreen.this.villagerTypes;
+					}
+
+					@Override
+					public List<VillagerType> getDefaults() {
+						return TriggeredVillagerSpawnerBlockScreen.this.villagerTypes;
+					}
+				})
+				.initially(this.villagerType)
+				.omitKeyText()
+				.build(this.width / 2 - 154, 60, 300, 20, Text.empty(), (button, villagerType) -> {
+					ScriptBlocks.info("villagerType: " + villagerType);
+					this.villagerType = villagerType;
+				})
+		);
 		this.addSelectableChild(this.cycleVillagerTypeButton);
 
-		this.villagerProfession = VillagerProfession.byProfession(villagerData.getProfession()).orElseGet(() -> {
-			return VillagerProfession.NONE;
-		});
-		this.cycleVillagerProfessionButton = this.addDrawableChild(CyclingButtonWidget.builder(VillagerProfession::asText).values((VillagerProfession[]) VillagerProfession.values()).initially(this.villagerProfession).omitKeyText().build(this.width / 2 - 154, 95, 300, 20, Text.empty(), (button, villagerProfession) -> {
-			ScriptBlocks.info("villagerProfession: " + villagerProfession);
-			this.villagerProfession = villagerProfession;
-		}));
+		this.villagerProfession = villagerData.getProfession();
+		this.cycleVillagerProfessionButton = this.addDrawableChild(CyclingButtonWidget.<VillagerProfession>builder((villagerProfession) -> Text.translatable("gui.triggered_villager_spawner_block.villager_profession." + villagerProfession.toString()))
+				.values(new CyclingButtonWidget.Values<VillagerProfession>() {
+					@Override
+					public List<VillagerProfession> getCurrent() {
+						return TriggeredVillagerSpawnerBlockScreen.this.villagerProfessions;
+					}
+
+					@Override
+					public List<VillagerProfession> getDefaults() {
+						return TriggeredVillagerSpawnerBlockScreen.this.villagerProfessions;
+					}
+				})
+				.initially(this.villagerProfession)
+				.omitKeyText()
+				.build(this.width / 2 - 154, 95, 300, 20, Text.empty(), (button, villagerProfession) -> {
+					ScriptBlocks.info("villagerProfession: " + villagerProfession);
+					this.villagerProfession = villagerProfession;
+				})
+		);
 		this.addSelectableChild(this.cycleVillagerProfessionButton);
 
-		this.villagerLevel = villagerData.getLevel();
-		this.villagerLevelSlider = this.addDrawableChild(new SliderWidget(this.width / 2 - 154, 130, 300, 20, ScreenTexts.EMPTY, this.villagerLevel) {
-					{
-						this.updateMessage();
-					}
-
-					protected void updateMessage() {
-						this.setMessage(Text.translatable("gui.triggered_villager_spawner_block.villager_level", new Object[]{TriggeredVillagerSpawnerBlockScreen.this.villagerLevel}));
-					}
-
-					protected void applyValue() {
-						TriggeredVillagerSpawnerBlockScreen.this.villagerLevel = MathHelper.floor(MathHelper.clampedLerp(1.0, 5.0, this.value));
-					}
-				});
-		this.addSelectableChild(this.villagerLevelSlider);
+		this.villagerLevelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 130, 300, 20, Text.empty());
+		this.villagerLevelField.setMaxLength(128);
+		this.villagerLevelField.setText(Integer.toString(villagerData.getLevel()));
+		this.addSelectableChild(this.villagerLevelField);
 
 		// --- entity attribute modifier page ---
 
@@ -314,7 +339,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 
 		this.cycleVillagerTypeButton.visible = false;
 		this.cycleVillagerProfessionButton.visible = false;
-		this.villagerLevelSlider.visible = false;
+		this.villagerLevelField.setVisible(false);
 
 		this.removeListEntryButton0.visible = false;
 		this.removeListEntryButton1.visible = false;
@@ -355,7 +380,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 
 			this.cycleVillagerTypeButton.visible = true;
 			this.cycleVillagerProfessionButton.visible = true;
-			this.villagerLevelSlider.visible = true;
+			this.villagerLevelField.setVisible(true);
 
 		} else if (this.creativeScreenPage == CreativeScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
@@ -402,6 +427,8 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 		CreativeScreenPage var = this.creativeScreenPage;
 		TriggeredSpawnerBlockEntity.SpawningMode var1 = this.spawningMode;
 		EntityAttributeModifier.Operation var2 = this.newEntityAttributeModifierOperation;
+		VillagerType var3 = this.villagerType;
+		VillagerProfession var4 = this.villagerProfession;
 		List<MutablePair<Identifier, EntityAttributeModifier>> list = this.entityAttributeModifiersList;
 		String string = this.entitySpawnPositionOffsetXField.getText();
 		String string1 = this.entitySpawnPositionOffsetYField.getText();
@@ -418,14 +445,14 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 		String string12 = this.triggeredBlockPositionOffsetXField.getText();
 		String string13 = this.triggeredBlockPositionOffsetYField.getText();
 		String string14 = this.triggeredBlockPositionOffsetZField.getText();
-		String string15 = this.villagerProfession.name();
-		String string16 = this.villagerType.name();
-		int integer = this.villagerLevel;
+		String string15 = this.villagerLevelField.getText();
 		boolean bl = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.creativeScreenPage = var;
 		this.spawningMode = var1;
 		this.newEntityAttributeModifierOperation = var2;
+		this.villagerType = var3;
+		this.villagerProfession = var4;
 		this.entityAttributeModifiersList = list;
 		this.entitySpawnPositionOffsetXField.setText(string);
 		this.entitySpawnPositionOffsetYField.setText(string1);
@@ -442,13 +469,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.setText(string12);
 		this.triggeredBlockPositionOffsetYField.setText(string13);
 		this.triggeredBlockPositionOffsetZField.setText(string14);
-		this.villagerType = VillagerType.byName(string15).orElseGet(() -> {
-			return VillagerType.PLAINS;
-		});
-		this.villagerProfession = VillagerProfession.byName(string16).orElseGet(() -> {
-			return VillagerProfession.NONE;
-		});
-		this.villagerLevel = integer;
+		this.villagerLevelField.setText(string15);
 		this.triggeredBlockResets = bl;
 	}
 
@@ -516,7 +537,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 						ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getText()),
 						this.spawningMode.asString(),
 						this.entityTypeIdField.getText(),
-						new VillagerData(this.villagerType.villagerType, this.villagerProfession.isUnlocked ? this.villagerProfession.villagerProfession : net.minecraft.village.VillagerProfession.NONE, this.villagerLevel),
+						new VillagerData(this.villagerType, this.villagerProfession, Math.clamp(ItemUtils.parseInt(this.villagerLevelField.getText()), 1, 5)),
 						this.entityAttributeModifiersList,
 						new BlockPos(
 								ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
@@ -554,6 +575,11 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 			context.drawTextWithShadow(this.textRenderer, ENTITY_TYPE_LABEL_TEXT, this.width / 2 - 153, 155, 0xA0A0A0);
 			this.entityTypeIdField.render(context, mouseX, mouseY, delta);
 		} else if (this.creativeScreenPage == CreativeScreenPage.VILLAGER_DATA) {
+
+			context.drawTextWithShadow(this.textRenderer, VILLAGER_TYPE_LABEL_TEXT, this.width / 2 - 153, 50, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, VILLAGER_PROFESSION_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, VILLAGER_LEVEL_LABEL_TEXT, this.width / 2 - 153, 120, 0xA0A0A0);
+			this.villagerLevelField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.creativeScreenPage == CreativeScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
@@ -618,87 +644,20 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 		}
 	}
 
-	public static enum VillagerProfession implements StringIdentifiable {
-		NONE("none", net.minecraft.village.VillagerProfession.NONE, true),
-		ARMORER("armorer", net.minecraft.village.VillagerProfession.ARMORER, true),
-		BUTCHER("butcher", net.minecraft.village.VillagerProfession.BUTCHER, true),
-		CARTOGRAPHER("cartographer", net.minecraft.village.VillagerProfession.CARTOGRAPHER, true),
-		CLERIC("cleric", net.minecraft.village.VillagerProfession.CLERIC, true),
-		FARMER("farmer", net.minecraft.village.VillagerProfession.FARMER, true),
-		FISHERMAN("fisherman", net.minecraft.village.VillagerProfession.FISHERMAN, true),
-		FLETCHER("fletcher", net.minecraft.village.VillagerProfession.FLETCHER, true),
-		LEATHERWORKER("leatherworker", net.minecraft.village.VillagerProfession.LEATHERWORKER, true),
-		LIBRARIAN("librarian", net.minecraft.village.VillagerProfession.LIBRARIAN, true),
-		MASON("mason", net.minecraft.village.VillagerProfession.MASON, true),
-		NITWIT("nitwit", net.minecraft.village.VillagerProfession.NITWIT, true),
-		SHEPHERD("shepherd", net.minecraft.village.VillagerProfession.SHEPHERD, true),
-		TOOLSMITH("toolsmith", net.minecraft.village.VillagerProfession.TOOLSMITH, true),
-		WEAPONSMITH("weaponsmith", net.minecraft.village.VillagerProfession.WEAPONSMITH, true);
-
-		private final String name;
-		private final net.minecraft.village.VillagerProfession villagerProfession;
-		private final boolean isUnlocked;
-
-		private VillagerProfession(String name, net.minecraft.village.VillagerProfession villagerProfession, boolean isUnlocked) {
-			this.name = name;
-			this.villagerProfession = villagerProfession;
-			this.isUnlocked = isUnlocked;
-		}
-
-		@Override
-		public String asString() {
-			return this.name;
-		}
-
-		public static Optional<VillagerProfession> byProfession(net.minecraft.village.VillagerProfession profession) {
-			return Arrays.stream(VillagerProfession.values()).filter(villagerProfession -> villagerProfession.villagerProfession.equals(profession)).findFirst();
-		}
-
-		public static Optional<VillagerProfession> byName(String name) {
-			return Arrays.stream(VillagerProfession.values()).filter(villagerProfession -> villagerProfession.asString().equals(name)).findFirst();
-		}
-
-		public Text asText() {
-			return Text.translatable("gui.triggered_villager_spawner_block.villager_profession." + this.name);
-		}
-	}
-
-	public static enum VillagerType implements StringIdentifiable {
-		DESERT("desert", net.minecraft.village.VillagerType.DESERT),
-		JUNGLE("jungle", net.minecraft.village.VillagerType.JUNGLE),
-		PLAINS("plains", net.minecraft.village.VillagerType.PLAINS),
-		SAVANNA("savanna", net.minecraft.village.VillagerType.SAVANNA),
-		SNOW("snow", net.minecraft.village.VillagerType.SNOW),
-		SWAMP("swamp", net.minecraft.village.VillagerType.SWAMP),
-		TAIGA("taiga", net.minecraft.village.VillagerType.TAIGA);
-
-		private final String name;
-		private final net.minecraft.village.VillagerType villagerType;
-
-		private VillagerType(String name, net.minecraft.village.VillagerType villagerType) {
-			this.name = name;
-			this.villagerType = villagerType;
-		}
-
-		@Override
-		public String asString() {
-			return this.name;
-		}
-
-		public net.minecraft.village.VillagerType getVillagerType() {
-			return this.villagerType;
-		}
-
-		public static Optional<VillagerType> byType(net.minecraft.village.VillagerType type) {
-			return Arrays.stream(VillagerType.values()).filter(villagerType -> villagerType.villagerType.equals(type)).findFirst();
-		}
-
-		public static Optional<VillagerType> byName(String name) {
-			return Arrays.stream(VillagerType.values()).filter(villagerType -> villagerType.asString().equals(name)).findFirst();
-		}
-
-		public Text asText() {
-			return Text.translatable("gui.triggered_villager_spawner_block.villager_type." + this.name);
+	private void updateVillagerRegistryLists() {
+		if (this.client != null && this.client.world != null) {
+			Registry<net.minecraft.village.VillagerType> villagerTypeRegistry = this.client.world.getRegistryManager().get(RegistryKeys.VILLAGER_TYPE);
+			this.villagerTypes.clear();
+			List<RegistryEntry.Reference<VillagerType>> villagerTypeReferenceList = villagerTypeRegistry.streamEntries().toList();
+			for (RegistryEntry.Reference<VillagerType> entry : villagerTypeReferenceList) {
+				this.villagerTypes.add(entry.value());
+			}
+			Registry<net.minecraft.village.VillagerProfession> villagerProfessionRegistry = this.client.world.getRegistryManager().get(RegistryKeys.VILLAGER_PROFESSION);
+			this.villagerProfessions.clear();
+			List<RegistryEntry.Reference<VillagerProfession>> villagerProfessionReferenceList = villagerProfessionRegistry.streamEntries().toList();
+			for (RegistryEntry.Reference<VillagerProfession> entry : villagerProfessionReferenceList) {
+				this.villagerProfessions.add(entry.value());
+			}
 		}
 	}
 }

@@ -475,9 +475,17 @@
 	"gui.triggered_spawner_block.new_entity_attribute_modifier_value_label": "Value",
 
 
-	"gui.triggered_villager_spawner_block.spawner_bound_villager_entity_profession_identifier_field_label": "Villager Profession",
-	"gui.triggered_villager_spawner_block.spawner_bound_villager_entity_type_identifier_field_label": "Villager Biome Type",
-	"gui.triggered_villager_spawner_block.spawner_bound_villager_entity_level_field_label": "Villager Level",
+	"gui.triggered_villager_spawner_block.villager_type_field_label": "Villager Biome Type",
+	"gui.triggered_villager_spawner_block.villager_profession_field_label": "Villager Profession",
+	"gui.triggered_villager_spawner_block.villager_level_field_label": "Villager Level",
+
+	"gui.triggered_villager_spawner_block.villager_type.desert": "Desert",
+	"gui.triggered_villager_spawner_block.villager_type.jungle": "Jungle",
+	"gui.triggered_villager_spawner_block.villager_type.plains": "Plains",
+	"gui.triggered_villager_spawner_block.villager_type.savanna": "Savanna",
+	"gui.triggered_villager_spawner_block.villager_type.snow": "Snow",
+	"gui.triggered_villager_spawner_block.villager_type.swamp": "Swamp",
+	"gui.triggered_villager_spawner_block.villager_type.taiga": "Taiga",
 
 	"gui.triggered_villager_spawner_block.villager_profession.none": "None",
 	"gui.triggered_villager_spawner_block.villager_profession.armorer": "Armorer",
@@ -494,14 +502,6 @@
 	"gui.triggered_villager_spawner_block.villager_profession.shepherd": "Shepherd",
 	"gui.triggered_villager_spawner_block.villager_profession.toolsmith": "Toolsmith",
 	"gui.triggered_villager_spawner_block.villager_profession.weaponsmith": "Weaponsmith",
-
-	"gui.triggered_villager_spawner_block.villager_type.desert": "Desert",
-	"gui.triggered_villager_spawner_block.villager_type.jungle": "Jungle",
-	"gui.triggered_villager_spawner_block.villager_type.plains": "Plains",
-	"gui.triggered_villager_spawner_block.villager_type.savanna": "Savanna",
-	"gui.triggered_villager_spawner_block.villager_type.snow": "Snow",
-	"gui.triggered_villager_spawner_block.villager_type.swamp": "Swamp",
-	"gui.triggered_villager_spawner_block.villager_type.taiga": "Taiga",
 
 	"gui.triggered_villager_spawner_block.villager_level": "Level: %s",
 
