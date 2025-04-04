@@ -25,6 +25,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEnt
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -77,9 +78,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<TriggeredSpawnerBlockEntity> TRIGGERED_SPAWNER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_spawner_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_SPAWNER_BLOCK).build());
-//	public static final BlockEntityType<TriggeredVillagerSpawnerBlockEntity> TRIGGERED_VILLAGER_SPAWNER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
-//			ScriptBlocks.identifier("triggered_villager_spawner_block"),
-//			FabricBlockEntityTypeBuilder.create(TriggeredVillagerSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK).build());
+	public static final BlockEntityType<TriggeredVillagerSpawnerBlockEntity> TRIGGERED_VILLAGER_SPAWNER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggered_villager_spawner_block"),
+			FabricBlockEntityTypeBuilder.create(TriggeredVillagerSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK).build());
 	public static final BlockEntityType<LocationControlBlockEntity> LOCATION_CONTROL_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("location_control_block"),
 			FabricBlockEntityTypeBuilder.create(LocationControlBlockEntity::new, BlockRegistry.LOCATION_CONTROL_BLOCK).build());

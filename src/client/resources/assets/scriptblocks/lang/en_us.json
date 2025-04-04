@@ -444,10 +444,6 @@
 	"gui.triggered_spawner_block.spawner_bound_entity_bounding_box_width_field_label": "Bounding Box Width",
 	"gui.triggered_spawner_block.spawner_bound_entity_loot_table_identifier_field_label": "Loot Table Identifier",
 
-	"gui.triggered_spawner_block.spawner_bound_villager_entity_profession_identifier_field_label": "Villager Profession",
-	"gui.triggered_spawner_block.spawner_bound_villager_entity_type_identifier_field_label": "Villager Biome Type",
-	"gui.triggered_spawner_block.spawner_bound_villager_entity_level_field_label": "Villager Level",
-
 	"gui.triggered_spawner_block.spawning_mode_label": "Spawning Mode",
 	"gui.triggered_spawner_block.entity_mode_label": "Entity Mode",
 	"gui.triggered_spawner_block.entity_spawn_position_offset_label": "Entity Spawn Position Offset",
@@ -458,6 +454,7 @@
 	"gui.triggered_spawner_block.open_spawner_bound_villager_entity_config_screen_button_label": "Open Spawner Bound Villager Entity Config",
 
 	"gui.triggered_spawner_block.creativeScreenPage.misc": "Misc",
+	"gui.triggered_spawner_block.creativeScreenPage.villager_data": "Villager Data",
 	"gui.triggered_spawner_block.creativeScreenPage.entity_attribute_modifier": "Entity Attribute Modifiers",
 	"gui.triggered_spawner_block.creativeScreenPage.use_relay_block": "Use Relay Block",
 	"gui.triggered_spawner_block.creativeScreenPage.triggered_block": "Triggered Block",
@@ -476,6 +473,37 @@
 	"gui.triggered_spawner_block.new_entity_attribute_modifier_identifier_label": "Attribute Identifier",
 	"gui.triggered_spawner_block.new_entity_attribute_modifier_name_label": "Name",
 	"gui.triggered_spawner_block.new_entity_attribute_modifier_value_label": "Value",
+
+
+	"gui.triggered_villager_spawner_block.spawner_bound_villager_entity_profession_identifier_field_label": "Villager Profession",
+	"gui.triggered_villager_spawner_block.spawner_bound_villager_entity_type_identifier_field_label": "Villager Biome Type",
+	"gui.triggered_villager_spawner_block.spawner_bound_villager_entity_level_field_label": "Villager Level",
+
+	"gui.triggered_villager_spawner_block.villager_profession.none": "None",
+	"gui.triggered_villager_spawner_block.villager_profession.armorer": "Armorer",
+	"gui.triggered_villager_spawner_block.villager_profession.butcher": "Butcher",
+	"gui.triggered_villager_spawner_block.villager_profession.cartographer": "Cartographer",
+	"gui.triggered_villager_spawner_block.villager_profession.cleric": "Cleric",
+	"gui.triggered_villager_spawner_block.villager_profession.farmer": "Farmer",
+	"gui.triggered_villager_spawner_block.villager_profession.fisherman": "Fisherman",
+	"gui.triggered_villager_spawner_block.villager_profession.fletcher": "Fletcher",
+	"gui.triggered_villager_spawner_block.villager_profession.leatherworker": "Leatherworker",
+	"gui.triggered_villager_spawner_block.villager_profession.librarian": "Librarian",
+	"gui.triggered_villager_spawner_block.villager_profession.mason": "Mason",
+	"gui.triggered_villager_spawner_block.villager_profession.nitwit": "Nitwit",
+	"gui.triggered_villager_spawner_block.villager_profession.shepherd": "Shepherd",
+	"gui.triggered_villager_spawner_block.villager_profession.toolsmith": "Toolsmith",
+	"gui.triggered_villager_spawner_block.villager_profession.weaponsmith": "Weaponsmith",
+
+	"gui.triggered_villager_spawner_block.villager_type.desert": "Desert",
+	"gui.triggered_villager_spawner_block.villager_type.jungle": "Jungle",
+	"gui.triggered_villager_spawner_block.villager_type.plains": "Plains",
+	"gui.triggered_villager_spawner_block.villager_type.savanna": "Savanna",
+	"gui.triggered_villager_spawner_block.villager_type.snow": "Snow",
+	"gui.triggered_villager_spawner_block.villager_type.swamp": "Swamp",
+	"gui.triggered_villager_spawner_block.villager_type.taiga": "Taiga",
+
+	"gui.triggered_villager_spawner_block.villager_level": "Level: %s",
 
 
 	"gui.boss_controller_block.boss_identifier_label": "Boss Identifier",
@@ -593,6 +621,7 @@
 	"block.scriptblocks.triggered_display_block": "Triggered Display Block",
 	"block.scriptblocks.triggered_rng_block": "Triggered RNG Block",
 	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
+	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
 	"block.scriptblocks.use_relay_block": "Use Relay Block",
 
 

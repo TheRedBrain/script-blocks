@@ -24,6 +24,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEnt
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
@@ -53,6 +54,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlo
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDisplayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredVillagerSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.network.message.DuckMessageHandlerMixin;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
@@ -202,10 +204,10 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		this.client.setScreen(new TriggeredSpawnerBlockScreen(triggeredSpawnerBlock));
 	}
 
-//	@Override
-//	public void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock) {
-//		this.client.setScreen(new TriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlock));
-//	}
+	@Override
+	public void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock) {
+		this.client.setScreen(new TriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlock));
+	}
 
 	@Override
 	public void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock) {

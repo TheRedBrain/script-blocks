@@ -68,6 +68,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredRNGBloc
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredRNGBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacketReceiver;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -145,6 +147,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, UpdateTriggeredSpawnerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, new UpdateTriggeredSpawnerBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_ID, UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_ID, new UpdateTriggeredVillagerSpawnerBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateLocationControlBlockPacket.PACKET_ID, UpdateLocationControlBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateLocationControlBlockPacket.PACKET_ID, new UpdateLocationControlBlockPacketReceiver());
