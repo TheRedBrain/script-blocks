@@ -257,6 +257,8 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 		this.entitySpawnPositionOffsetXField.setVisible(false);
 		this.entitySpawnPositionOffsetYField.setVisible(false);
 		this.entitySpawnPositionOffsetZField.setVisible(false);
+		this.entitySpawnOrientationYawField.setVisible(false);
+		this.entitySpawnOrientationPitchField.setVisible(false);
 
 		this.cycleSpawningModeButton.visible = false;
 
@@ -290,6 +292,8 @@ public class TriggeredSpawnerBlockScreen extends Screen {
 			this.entitySpawnPositionOffsetXField.setVisible(true);
 			this.entitySpawnPositionOffsetYField.setVisible(true);
 			this.entitySpawnPositionOffsetZField.setVisible(true);
+			this.entitySpawnOrientationYawField.setVisible(true);
+			this.entitySpawnOrientationPitchField.setVisible(true);
 
 			this.cycleSpawningModeButton.visible = true;
 
