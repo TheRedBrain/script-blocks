@@ -15,6 +15,10 @@ public class ItemGroupRegistry {
 	public static final RegistryKey<ItemGroup> SCRIPT_BLOCKS = RegistryKey.of(RegistryKeys.ITEM_GROUP, ScriptBlocks.identifier("script_blocks"));
 
 	public static void init() {
+		Registry.register(Registries.ITEM_GROUP, DECORATIVE_SCRIPT_BLOCKS, FabricItemGroup.builder()
+				.icon(() -> new ItemStack(BlockRegistry.AESTHETIC_NETHER_PORTAL))
+				.displayName(Text.translatable("itemGroup.scriptblocks.decorative_script_blocks"))
+				.build());
 		Registry.register(Registries.ITEM_GROUP, SCRIPT_BLOCKS, FabricItemGroup.builder()
 				.icon(() -> new ItemStack(BlockRegistry.TELEPORTER_BLOCK))
 				.displayName(Text.translatable("itemGroup.scriptblocks.script_blocks"))

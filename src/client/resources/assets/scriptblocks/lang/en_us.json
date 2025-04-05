@@ -544,6 +544,7 @@
 	"gui.shop_block.trade_button_label": "Trade",
 
 
+	"block.scriptblocks.aesthetic_nether_portal": "Aesthetic Nether Portal",
 	"block.scriptblocks.teleporter_oak_door": "Teleporter Oak Door",
 	"block.scriptblocks.teleporter_iron_door": "Teleporter Iron Door",
 	"block.scriptblocks.teleporter_spruce_door": "Teleporter Spruce Door",
@@ -660,5 +661,6 @@
 	"item.scriptblocks.block_position_distance_meter.info": "Offset is %s, %s, %s.",
 
 
+	"itemGroup.scriptblocks.decorative_script_blocks": "Decorative Script Blocks",
 	"itemGroup.scriptblocks.script_blocks": "Script Blocks"
 }

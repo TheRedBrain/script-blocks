@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.AestheticVerticalPortalBlock;
 import com.github.theredbrain.scriptblocks.block.AreaBlock;
 import com.github.theredbrain.scriptblocks.block.BossControllerBlock;
 import com.github.theredbrain.scriptblocks.block.CopyDataBlock;
@@ -36,17 +37,22 @@ import com.github.theredbrain.scriptblocks.block.UseRelayTrapdoorBlock;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.MapColor;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundEvents;
 
 public class BlockRegistry {
 
 	//region Content Blocks
 	// content script blocks
+	public static final Block AESTHETIC_NETHER_PORTAL = registerBlock("aesthetic_nether_portal", new AestheticVerticalPortalBlock(Block.Settings.create().strength(-1.0F).sounds(BlockSoundGroup.GLASS).luminance(state -> 11).pistonBehavior(PistonBehavior.BLOCK).dropsNothing(), ParticleTypes.PORTAL, SoundEvents.BLOCK_PORTAL_AMBIENT), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_OAK_DOOR = registerBlock("teleporter_oak_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_IRON_DOOR = registerBlock("teleporter_iron_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_SPRUCE_DOOR = registerBlock("teleporter_spruce_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.SPRUCE_BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
