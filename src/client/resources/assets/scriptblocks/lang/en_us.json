@@ -503,6 +503,12 @@
 	"gui.triggered_villager_spawner_block.villager_profession.toolsmith": "Toolsmith",
 	"gui.triggered_villager_spawner_block.villager_profession.weaponsmith": "Weaponsmith",
 
+	"gui.triggered_villager_spawner_block.villager_profession.archers.archery_artisan": "Archery Artisan (Archers)",
+	"gui.triggered_villager_spawner_block.villager_profession.jewelry.jeweler": "Jeweler (Jewelry)",
+	"gui.triggered_villager_spawner_block.villager_profession.paladins.monk": "Monk (Paladins)",
+	"gui.triggered_villager_spawner_block.villager_profession.rogues.arms_merchant": "Arms Merchant (Rogues)",
+	"gui.triggered_villager_spawner_block.villager_profession.wizards.wizard_merchant": "Wizard (Wizards)",
+
 	"gui.triggered_villager_spawner_block.villager_level": "Level: %s",
 
 

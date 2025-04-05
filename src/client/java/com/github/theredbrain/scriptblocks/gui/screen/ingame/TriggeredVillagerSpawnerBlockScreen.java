@@ -218,7 +218,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 		this.updateVillagerRegistryLists();
 
 		this.villagerType = villagerData.getType();
-		this.cycleVillagerTypeButton = this.addDrawableChild(CyclingButtonWidget.<VillagerType>builder((villagerType) -> Text.translatable("gui.triggered_villager_spawner_block.villager_type." + villagerType.toString()))
+		this.cycleVillagerTypeButton = this.addDrawableChild(CyclingButtonWidget.<VillagerType>builder((villagerType) -> Text.translatable("gui.triggered_villager_spawner_block.villager_type." + villagerType.toString().replaceAll(":", ".")))
 				.values(new CyclingButtonWidget.Values<VillagerType>() {
 					@Override
 					public List<VillagerType> getCurrent() {
@@ -233,14 +233,13 @@ public class TriggeredVillagerSpawnerBlockScreen extends Screen {
 				.initially(this.villagerType)
 				.omitKeyText()
 				.build(this.width / 2 - 154, 60, 300, 20, Text.empty(), (button, villagerType) -> {
-					ScriptBlocks.info("villagerType: " + villagerType);
 					this.villagerType = villagerType;
 				})
 		);
 		this.addSelectableChild(this.cycleVillagerTypeButton);
 
 		this.villagerProfession = villagerData.getProfession();
-		this.cycleVillagerProfessionButton = this.addDrawableChild(CyclingButtonWidget.<VillagerProfession>builder((villagerProfession) -> Text.translatable("gui.triggered_villager_spawner_block.villager_profession." + villagerProfession.toString()))
+		this.cycleVillagerProfessionButton = this.addDrawableChild(CyclingButtonWidget.<VillagerProfession>builder((villagerProfession) -> Text.translatable("gui.triggered_villager_spawner_block.villager_profession." + villagerProfession.toString().replaceAll(":", ".")))
 				.values(new CyclingButtonWidget.Values<VillagerProfession>() {
 					@Override
 					public List<VillagerProfession> getCurrent() {
