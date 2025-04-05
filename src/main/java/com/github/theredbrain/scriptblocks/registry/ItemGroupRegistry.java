@@ -11,6 +11,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 
 public class ItemGroupRegistry {
+	public static final RegistryKey<ItemGroup> DECORATIVE_SCRIPT_BLOCKS = RegistryKey.of(RegistryKeys.ITEM_GROUP, ScriptBlocks.identifier("decorative_script_blocks"));
 	public static final RegistryKey<ItemGroup> SCRIPT_BLOCKS = RegistryKey.of(RegistryKeys.ITEM_GROUP, ScriptBlocks.identifier("script_blocks"));
 
 	public static void init() {
