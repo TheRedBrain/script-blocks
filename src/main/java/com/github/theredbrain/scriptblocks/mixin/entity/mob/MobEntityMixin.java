@@ -143,13 +143,18 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	protected void scriptblocks$interactMob(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
 
 		BlockPos useRelayBlockPos = this.scriptblocks$getUseRelayBlockPos();
-		if (!Objects.equals(useRelayBlockPos, USE_RELAY_BLOCK_POS_DEFAULT) && player instanceof ServerPlayerEntity serverPlayerEntity) {
-			World world = player.getWorld();
-			BlockHitResult blockHitResult = new BlockHitResult(player.getPos(), Direction.UP, useRelayBlockPos, false);
-			ItemStack itemStack = player.getStackInHand(hand);
-			serverPlayerEntity.interactionManager.interactBlock(serverPlayerEntity, world, itemStack, hand, blockHitResult);
-			cir.setReturnValue(ActionResult.SUCCESS);
-			cir.cancel();
+		if (!Objects.equals(useRelayBlockPos, USE_RELAY_BLOCK_POS_DEFAULT)) {
+			if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+				World world = player.getWorld();
+				BlockHitResult blockHitResult = new BlockHitResult(player.getPos(), Direction.UP, useRelayBlockPos, false);
+				ItemStack itemStack = player.getStackInHand(hand);
+				serverPlayerEntity.interactionManager.interactBlock(serverPlayerEntity, world, itemStack, hand, blockHitResult);
+				cir.setReturnValue(ActionResult.CONSUME);
+				cir.cancel();
+			} else {
+				cir.setReturnValue(ActionResult.SUCCESS);
+				cir.cancel();
+			}
 		}
 	}
 
