@@ -52,7 +52,7 @@ public class BlockRegistry {
 
 	//region Content Blocks
 	// content script blocks
-	public static final Block AESTHETIC_NETHER_PORTAL = registerBlock("aesthetic_nether_portal", new AestheticVerticalPortalBlock(Block.Settings.create().strength(-1.0F).sounds(BlockSoundGroup.GLASS).luminance(state -> 11).pistonBehavior(PistonBehavior.BLOCK).dropsNothing(), ParticleTypes.PORTAL, SoundEvents.BLOCK_PORTAL_AMBIENT), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block AESTHETIC_NETHER_PORTAL = registerBlock("aesthetic_nether_portal", new AestheticVerticalPortalBlock(Block.Settings.create().noCollision().strength(-1.0F).sounds(BlockSoundGroup.GLASS).luminance(state -> 11).pistonBehavior(PistonBehavior.BLOCK).dropsNothing(), ParticleTypes.PORTAL, SoundEvents.BLOCK_PORTAL_AMBIENT), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_OAK_DOOR = registerBlock("teleporter_oak_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_IRON_DOOR = registerBlock("teleporter_iron_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_SPRUCE_DOOR = registerBlock("teleporter_spruce_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.SPRUCE_BROWN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);

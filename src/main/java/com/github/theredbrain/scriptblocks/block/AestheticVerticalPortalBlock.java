@@ -16,6 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,7 @@ public class AestheticVerticalPortalBlock extends Block {
 	public static final EnumProperty<Direction.Axis> AXIS = Properties.HORIZONTAL_AXIS;
 	protected static final VoxelShape X_SHAPE = Block.createCuboidShape(0.0, 0.0, 6.0, 16.0, 16.0, 10.0);
 	protected static final VoxelShape Z_SHAPE = Block.createCuboidShape(6.0, 0.0, 0.0, 10.0, 16.0, 16.0);
+	protected static final VoxelShape EMPTY_SHAPE = VoxelShapes.empty();
 	@Nullable
 	private final ParticleEffect particleEffect;
 	@Nullable
@@ -48,12 +50,16 @@ public class AestheticVerticalPortalBlock extends Block {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		switch ((Direction.Axis) state.get(AXIS)) {
-			case Z:
-				return Z_SHAPE;
-			case X:
-			default:
-				return X_SHAPE;
+		if (context.isHolding(this.asItem())) {
+			switch ((Direction.Axis) state.get(AXIS)) {
+				case Z:
+					return Z_SHAPE;
+				case X:
+				default:
+					return X_SHAPE;
+			}
+		} else {
+			return EMPTY_SHAPE;
 		}
 	}
 
