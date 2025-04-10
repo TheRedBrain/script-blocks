@@ -3,7 +3,9 @@ package com.github.theredbrain.scriptblocks.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.EntityShapeContext;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.sound.SoundCategory;
@@ -50,7 +52,7 @@ public class AestheticVerticalPortalBlock extends Block {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (context.isHolding(this.asItem())) {
+		if (context.isHolding(this.asItem()) || (context instanceof EntityShapeContext entityShapeContext && entityShapeContext.getEntity() instanceof PlayerEntity playerEntity && playerEntity.isCreative())) {
 			switch ((Direction.Axis) state.get(AXIS)) {
 				case Z:
 					return Z_SHAPE;
