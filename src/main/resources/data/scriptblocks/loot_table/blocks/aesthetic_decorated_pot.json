@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "include": [
+                "minecraft:pot_decorations"
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "scriptblocks:aesthetic_decorated_pot"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "scriptblocks:blocks/aesthetic_decorated_pot"
+}

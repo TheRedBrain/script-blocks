@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.AestheticDecoratedPotBlock;
 import com.github.theredbrain.scriptblocks.block.AestheticVerticalPortalBlock;
 import com.github.theredbrain.scriptblocks.block.AreaBlock;
 import com.github.theredbrain.scriptblocks.block.BossControllerBlock;
@@ -37,7 +38,9 @@ import com.github.theredbrain.scriptblocks.block.UseRelayTrapdoorBlock;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.MapColor;
+import net.minecraft.block.entity.Sherds;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -52,6 +55,7 @@ public class BlockRegistry {
 
 	//region Content Blocks
 	// content script blocks
+	public static final Block AESTHETIC_DECORATED_POT = registerAestheticDecoratedPotBlock("aesthetic_decorated_pot", new AestheticDecoratedPotBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_RED).strength(10.0F, 3600000.0f).sounds(BlockSoundGroup.DECORATED_POT).pistonBehavior(PistonBehavior.DESTROY).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block AESTHETIC_NETHER_PORTAL = registerBlock("aesthetic_nether_portal", new AestheticVerticalPortalBlock(Block.Settings.create().noCollision().strength(-1.0F).sounds(BlockSoundGroup.GLASS).luminance(state -> 11).pistonBehavior(PistonBehavior.BLOCK).dropsNothing(), ParticleTypes.PORTAL, SoundEvents.BLOCK_PORTAL_AMBIENT), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_OAK_DOOR = registerBlock("teleporter_oak_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_IRON_DOOR = registerBlock("teleporter_iron_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
@@ -137,6 +141,12 @@ public class BlockRegistry {
 	public static final Block TRIGGERED_RNG_BLOCK = registerBlock("triggered_rng_block", new TriggeredRNGBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_BLOCK = registerBlock("use_relay_block", new UseRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	//endregion Script Blocks
+
+	private static Block registerAestheticDecoratedPotBlock(String name, Block block, RegistryKey<ItemGroup> itemGroup) {
+		Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), new BlockItem(block, new Item.Settings().component(DataComponentTypes.POT_DECORATIONS, Sherds.DEFAULT)));
+		ItemGroupEvents.modifyEntriesEvent(itemGroup).register(content -> content.add(block));
+		return Registry.register(Registries.BLOCK, ScriptBlocks.identifier(name), block);
+	}
 
 	private static Block registerBlock(String name, Block block, RegistryKey<ItemGroup> itemGroup) {
 		Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), new BlockItem(block, new Item.Settings()));

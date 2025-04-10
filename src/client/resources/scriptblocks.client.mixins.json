@@ -5,7 +5,8 @@
   "client": [
     "network.ClientPlayerEntityMixin",
     "network.ClientPlayerInteractionManagerMixin",
-    "network.message.MessageHandlerMixin"
+    "network.message.MessageHandlerMixin",
+    "render.item.BuiltinModelItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

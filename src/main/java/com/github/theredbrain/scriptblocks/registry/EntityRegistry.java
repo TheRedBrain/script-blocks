@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.AestheticDecoratedPotBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
@@ -36,6 +37,9 @@ import net.minecraft.registry.Registry;
 public class EntityRegistry {
 
 	//region Script Blocks
+	public static final BlockEntityType<AestheticDecoratedPotBlockEntity> AESTHETIC_DECORATED_POT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("aesthetic_decorated_pot"),
+			FabricBlockEntityTypeBuilder.create(AestheticDecoratedPotBlockEntity::new, BlockRegistry.AESTHETIC_DECORATED_POT).build());
 	public static final BlockEntityType<TriggeredBeaconBlockEntity> TRIGGERED_BEACON_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_beacon_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredBeaconBlockEntity::new, BlockRegistry.TRIGGERED_BEACON_BLOCK).build());
