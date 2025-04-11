@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -8,7 +9,6 @@ import net.minecraft.block.entity.Sherds;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
@@ -65,13 +65,13 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	}
 
 	public ItemStack asStack() {
-		ItemStack itemStack = Items.DECORATED_POT.getDefaultStack();
+		ItemStack itemStack = BlockRegistry.AESTHETIC_DECORATED_POT.asItem().getDefaultStack();
 		itemStack.applyComponentsFrom(this.createComponentMap());
 		return itemStack;
 	}
 
 	public static ItemStack getStackWith(Sherds sherds) {
-		ItemStack itemStack = Items.DECORATED_POT.getDefaultStack();
+		ItemStack itemStack = BlockRegistry.AESTHETIC_DECORATED_POT.asItem().getDefaultStack();
 		itemStack.set(DataComponentTypes.POT_DECORATIONS, sherds);
 		return itemStack;
 	}
