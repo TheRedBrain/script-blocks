@@ -17,6 +17,9 @@ import qouteall.dimlib.api.DimensionAPI;
 
 public class DimensionsManager {
 
+	// TODO
+	//  check out https://github.com/NucleoidMC/fantasy
+
 	public static Identifier PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER = ScriptBlocks.identifier("public_locations_dimension");
 
 	public static void init() {
