@@ -23,6 +23,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredDispenserBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
@@ -40,6 +41,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<AestheticDecoratedPotBlockEntity> AESTHETIC_DECORATED_POT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("aesthetic_decorated_pot"),
 			FabricBlockEntityTypeBuilder.create(AestheticDecoratedPotBlockEntity::new, BlockRegistry.AESTHETIC_DECORATED_POT).build());
+	public static final BlockEntityType<TriggeredDispenserBlockEntity> TRIGGERED_DISPENSER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggered_dispenser_block"),
+			FabricBlockEntityTypeBuilder.create(TriggeredDispenserBlockEntity::new, BlockRegistry.TRIGGERED_DISPENSER_BLOCK).build());
 	public static final BlockEntityType<TriggeredBeaconBlockEntity> TRIGGERED_BEACON_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_beacon_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredBeaconBlockEntity::new, BlockRegistry.TRIGGERED_BEACON_BLOCK).build());

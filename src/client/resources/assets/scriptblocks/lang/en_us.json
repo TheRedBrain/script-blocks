@@ -17,6 +17,9 @@
 	"gui.edit_teleporter_title": "Edit Teleporter",
 
 
+	"container.triggered_dispenser": "Triggered Dispenser",
+
+
 	"effect.scriptblocks.building_mode": "Building Mode",
 	"effect.scriptblocks.building_mode.description": "Unleash your creativity.",
 
@@ -544,6 +547,7 @@
 	"gui.shop_block.trade_button_label": "Trade",
 
 
+	"block.scriptblocks.triggered_dispenser_block": "Triggered Dispenser",
 	"block.scriptblocks.aesthetic_decorated_pot": "Aesthetic Decorated Pot",
 	"block.scriptblocks.aesthetic_nether_portal": "Aesthetic Nether Portal",
 	"block.scriptblocks.teleporter_oak_door": "Teleporter Oak Door",
