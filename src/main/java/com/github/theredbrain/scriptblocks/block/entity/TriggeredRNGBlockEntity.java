@@ -441,15 +441,18 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 					}
 				}
 
+				// fallback
+				if (Objects.equals(triggeredBlock, new MutablePair<>(BlockPos.ORIGIN, false))) {
+					triggeredBlock = this.fallbackTriggeredBlock;
+				}
+
 				// trigger chosen triggeredBlock
-				if (!Objects.equals(triggeredBlock, new MutablePair<>(BlockPos.ORIGIN, false))) {
-					BlockEntity blockEntity = world.getBlockEntity(triggeredBlock.left);
-					if (blockEntity != this) {
-						if (triggeredBlock.right && blockEntity instanceof Resetable resetable) {
-							resetable.reset();
-						} else if (!triggeredBlock.right && blockEntity instanceof Triggerable triggerable) {
-							triggerable.trigger();
-						}
+				BlockEntity blockEntity = world.getBlockEntity(triggeredBlock.left);
+				if (blockEntity != this) {
+					if (triggeredBlock.right && blockEntity instanceof Resetable resetable) {
+						resetable.reset();
+					} else if (!triggeredBlock.right && blockEntity instanceof Triggerable triggerable) {
+						triggerable.trigger();
 					}
 				}
 			}

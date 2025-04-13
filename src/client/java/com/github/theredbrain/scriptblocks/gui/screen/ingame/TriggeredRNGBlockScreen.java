@@ -232,17 +232,17 @@ public class TriggeredRNGBlockScreen extends Screen {
 
 		this.fallbackTriggeredBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 149, 50, 20, Text.empty());
 		this.fallbackTriggeredBlockPosOffsetXField.setMaxLength(128);
-		this.fallbackTriggeredBlockPosOffsetXField.setText(Integer.toString(this.triggeredRNGBlock.getOverrideTriggeredBlock().getLeft().getX()));
+		this.fallbackTriggeredBlockPosOffsetXField.setText(Integer.toString(this.triggeredRNGBlock.getFallbackTriggeredBlock().getLeft().getX()));
 		this.addSelectableChild(this.fallbackTriggeredBlockPosOffsetXField);
 		this.fallbackTriggeredBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 149, 50, 20, Text.empty());
 		this.fallbackTriggeredBlockPosOffsetYField.setMaxLength(128);
-		this.fallbackTriggeredBlockPosOffsetYField.setText(Integer.toString(this.triggeredRNGBlock.getOverrideTriggeredBlock().getLeft().getY()));
+		this.fallbackTriggeredBlockPosOffsetYField.setText(Integer.toString(this.triggeredRNGBlock.getFallbackTriggeredBlock().getLeft().getY()));
 		this.addSelectableChild(this.fallbackTriggeredBlockPosOffsetYField);
 		this.fallbackTriggeredBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 149, 50, 20, Text.empty());
 		this.fallbackTriggeredBlockPosOffsetZField.setMaxLength(128);
-		this.fallbackTriggeredBlockPosOffsetZField.setText(Integer.toString(this.triggeredRNGBlock.getOverrideTriggeredBlock().getLeft().getZ()));
+		this.fallbackTriggeredBlockPosOffsetZField.setText(Integer.toString(this.triggeredRNGBlock.getFallbackTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.fallbackTriggeredBlockPosOffsetZField);
-		this.fallbackTriggeredBlockResets = this.triggeredRNGBlock.getOverrideTriggeredBlock().getRight();
+		this.fallbackTriggeredBlockResets = this.triggeredRNGBlock.getFallbackTriggeredBlock().getRight();
 		this.toggleFallbackTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.fallbackTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 149, 150, 20, Text.empty(), (button, fallbackTriggeredBlockResets) -> {
 			this.fallbackTriggeredBlockResets = fallbackTriggeredBlockResets;
 		}));
