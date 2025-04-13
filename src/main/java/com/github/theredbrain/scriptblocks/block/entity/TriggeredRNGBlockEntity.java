@@ -47,7 +47,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 
 	private int randomMinValue = 0;
 	private int randomMaxValue = 1;
-	MutablePair<BlockPos, Boolean> fallbackTriggeredBlock = new MutablePair<>(FALLBACK_TRIGGERED_BLOCK_POS_DEFAULT, false);
+	private MutablePair<BlockPos, Boolean> fallbackTriggeredBlock = new MutablePair<>(FALLBACK_TRIGGERED_BLOCK_POS_DEFAULT, false);
 	private List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>();
 
 	public TriggeredRNGBlockEntity(BlockPos pos, BlockState state) {
@@ -469,6 +469,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 
 				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), blockRotation));
 
+				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), blockRotation));
+
 				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(triggeredBlock.getLeft().getLeft(), blockRotation), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
@@ -483,6 +485,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 
 				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
 
+				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+
 				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
@@ -496,6 +500,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
 
 				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+
+				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
 
 				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
