@@ -123,7 +123,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 
 		BlockPos fallbackTriggeredBlockPositionOffset = this.fallbackTriggeredBlock.getLeft();
-		if (!fallbackTriggeredBlockPositionOffset.equals(OVERRIDE_TRIGGERED_BLOCK_POS_DEFAULT)) {
+		if (!fallbackTriggeredBlockPositionOffset.equals(FALLBACK_TRIGGERED_BLOCK_POS_DEFAULT)) {
 			nbt.putInt("fallbackTriggeredBlockPositionOffsetX", fallbackTriggeredBlockPositionOffset.getX());
 			nbt.putInt("fallbackTriggeredBlockPositionOffsetY", fallbackTriggeredBlockPositionOffset.getY());
 			nbt.putInt("fallbackTriggeredBlockPositionOffsetZ", fallbackTriggeredBlockPositionOffset.getZ());
