@@ -631,6 +631,7 @@
 	"block.scriptblocks.triggered_beacon_block": "Triggered Beacon Block",
 	"block.scriptblocks.triggered_counter_block": "Triggered Counter Block",
 	"block.scriptblocks.triggered_display_block": "Triggered Display Block",
+	"block.scriptblocks.triggered_redstone_block": "Triggered Redstone Block",
 	"block.scriptblocks.triggered_rng_block": "Triggered RNG Block",
 	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
 	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
