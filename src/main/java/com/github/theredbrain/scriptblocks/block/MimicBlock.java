@@ -80,7 +80,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !debugMode) {
+		if (!blockState.isOf(this) && !(debugMode || context.isHolding(BlockRegistry.MIMIC_BLOCK.asItem()))) {
 			mimicBlockState = blockState;
 		}
 		return mimicBlockState.getBlock().getOutlineShape(mimicBlockState, world, mimicBlockPos, context);
@@ -104,7 +104,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !debugMode) {
+		if (!blockState.isOf(this) && !(debugMode || context.isHolding(BlockRegistry.MIMIC_BLOCK.asItem()))) {
 			mimicBlockState = blockState;
 		}
 		return mimicBlockState.getBlock().getCollisionShape(mimicBlockState, world, mimicBlockPos, context);

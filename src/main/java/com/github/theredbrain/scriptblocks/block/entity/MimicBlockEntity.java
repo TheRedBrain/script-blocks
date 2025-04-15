@@ -154,7 +154,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 
 		World world = this.getWorld();
 		if (world != null) {
-			world.getGameRules().getBoolean(GameRulesRegistry.MIMIC_DEBUG_MODE);
+			debugRender = world.getGameRules().getBoolean(GameRulesRegistry.MIMIC_DEBUG_MODE);
 		}
 		return debugRender;
 	}
