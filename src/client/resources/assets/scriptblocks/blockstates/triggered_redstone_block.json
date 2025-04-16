@@ -1,100 +1,196 @@
 {
   "variants": {
-    "power=0,triggered=true": {
+    "power=0,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_0"
     },
-    "power=0,triggered=false": {
+    "power=0,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_0"
     },
-    "power=1,triggered=true": {
+    "power=1,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_1"
     },
-    "power=1,triggered=false": {
+    "power=1,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_1"
     },
-    "power=2,triggered=true": {
+    "power=2,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_2"
     },
-    "power=2,triggered=false": {
+    "power=2,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_2"
     },
-    "power=3,triggered=true": {
+    "power=3,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_3"
     },
-    "power=3,triggered=false": {
+    "power=3,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_3"
     },
-    "power=4,triggered=true": {
+    "power=4,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_4"
     },
-    "power=4,triggered=false": {
+    "power=4,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_4"
     },
-    "power=5,triggered=true": {
+    "power=5,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_5"
     },
-    "power=5,triggered=false": {
+    "power=5,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_5"
     },
-    "power=6,triggered=true": {
+    "power=6,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_6"
     },
-    "power=6,triggered=false": {
+    "power=6,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_6"
     },
-    "power=7,triggered=true": {
+    "power=7,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_7"
     },
-    "power=7,triggered=false": {
+    "power=7,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_7"
     },
-    "power=8,triggered=true": {
+    "power=8,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_8"
     },
-    "power=8,triggered=false": {
+    "power=8,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_8"
     },
-    "power=9,triggered=true": {
+    "power=9,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_9"
     },
-    "power=9,triggered=false": {
+    "power=9,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_9"
     },
-    "power=10,triggered=true": {
+    "power=10,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_10"
     },
-    "power=10,triggered=false": {
+    "power=10,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_10"
     },
-    "power=11,triggered=true": {
+    "power=11,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_11"
     },
-    "power=11,triggered=false": {
+    "power=11,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_11"
     },
-    "power=12,triggered=true": {
+    "power=12,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_12"
     },
-    "power=12,triggered=false": {
+    "power=12,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_12"
     },
-    "power=13,triggered=true": {
+    "power=13,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_13"
     },
-    "power=13,triggered=false": {
+    "power=13,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_13"
     },
-    "power=14,triggered=true": {
+    "power=14,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_14"
     },
-    "power=14,triggered=false": {
+    "power=14,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_14"
     },
-    "power=15,triggered=true": {
+    "power=15,triggered=true,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/powered_15"
     },
-    "power=15,triggered=false": {
+    "power=15,triggered=false,toggled=false": {
       "model": "scriptblocks:block/triggered_redstone_block/unpowered_15"
+    },
+    "power=0,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_0_toggled"
+    },
+    "power=0,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_0_toggled"
+    },
+    "power=1,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_1_toggled"
+    },
+    "power=1,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_1_toggled"
+    },
+    "power=2,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_2_toggled"
+    },
+    "power=2,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_2_toggled"
+    },
+    "power=3,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_3_toggled"
+    },
+    "power=3,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_3_toggled"
+    },
+    "power=4,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_4_toggled"
+    },
+    "power=4,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_4_toggled"
+    },
+    "power=5,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_5_toggled"
+    },
+    "power=5,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_5_toggled"
+    },
+    "power=6,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_6_toggled"
+    },
+    "power=6,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_6_toggled"
+    },
+    "power=7,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_7_toggled"
+    },
+    "power=7,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_7_toggled"
+    },
+    "power=8,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_8_toggled"
+    },
+    "power=8,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_8_toggled"
+    },
+    "power=9,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_9_toggled"
+    },
+    "power=9,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_9_toggled"
+    },
+    "power=10,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_10_toggled"
+    },
+    "power=10,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_10_toggled"
+    },
+    "power=11,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_11_toggled"
+    },
+    "power=11,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_11_toggled"
+    },
+    "power=12,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_12_toggled"
+    },
+    "power=12,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_12_toggled"
+    },
+    "power=13,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_13_toggled"
+    },
+    "power=13,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_13_toggled"
+    },
+    "power=14,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_14_toggled"
+    },
+    "power=14,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_14_toggled"
+    },
+    "power=15,triggered=true,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/powered_15_toggled"
+    },
+    "power=15,triggered=false,toggled=true": {
+      "model": "scriptblocks:block/triggered_redstone_block/unpowered_15_toggled"
     }
   }
 }

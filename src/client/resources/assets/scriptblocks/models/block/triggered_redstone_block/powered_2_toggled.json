@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "scriptblocks:block/triggered_redstone_block/powered_2_toggled"
+  }
+}

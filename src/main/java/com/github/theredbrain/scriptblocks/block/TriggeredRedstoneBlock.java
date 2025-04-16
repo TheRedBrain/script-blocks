@@ -25,11 +25,12 @@ import org.jetbrains.annotations.Nullable;
 public class TriggeredRedstoneBlock extends BlockWithEntity {
 	public static final MapCodec<TriggeredRedstoneBlock> CODEC = createCodec(TriggeredRedstoneBlock::new);
 	public static final IntProperty POWER = Properties.POWER;
+	public static final BooleanProperty TOGGLED = BooleanProperty.of("toggled");
 	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
 
 	public TriggeredRedstoneBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(POWER, 0).with(TRIGGERED, false));
+		this.setDefaultState(this.stateManager.getDefaultState().with(POWER, 0).with(TOGGLED, false).with(TRIGGERED, false));
 	}
 
 	public MapCodec<TriggeredRedstoneBlock> getCodec() {
@@ -39,7 +40,7 @@ public class TriggeredRedstoneBlock extends BlockWithEntity {
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(POWER, TRIGGERED);
+		builder.add(POWER, TOGGLED, TRIGGERED);
 	}
 
 	@Nullable
@@ -55,10 +56,15 @@ public class TriggeredRedstoneBlock extends BlockWithEntity {
 
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		boolean decreasePower = player.isSneaking();
 		if (player.isCreativeLevelTwoOp()) {
-			int newPower = state.get(POWER) + (decreasePower ? -1 : 1);
-			world.setBlockState(pos, state.with(POWER, newPower < 0 ? 15 : newPower > 15 ? 0 : newPower).with(TRIGGERED, false));
+			int newPower = state.get(POWER);
+			boolean toggle = state.get(TOGGLED);
+			if (player.isSneaking()) {
+				toggle = !toggle;
+			} else {
+				newPower += 1;
+			}
+			world.setBlockState(pos, state.with(POWER, newPower < 0 ? 15 : newPower > 15 ? 0 : newPower).with(TOGGLED, toggle).with(TRIGGERED, false));
 			world.updateNeighborsAlways(pos, this);
 			for (Direction direction : Direction.values()) {
 				world.updateNeighborsAlways(pos.offset(direction), this);
@@ -85,7 +91,7 @@ public class TriggeredRedstoneBlock extends BlockWithEntity {
 
 	@Override
 	protected void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-		if ((Boolean) state.get(TRIGGERED)) {
+		if (state.get(TRIGGERED)) {
 			world.setBlockState(pos, (BlockState) state.with(TRIGGERED, false), Block.NOTIFY_ALL);
 			world.updateNeighborsAlways(pos, this);
 			for (Direction direction : Direction.values()) {
@@ -96,8 +102,16 @@ public class TriggeredRedstoneBlock extends BlockWithEntity {
 
 	public void trigger(World world, BlockState blockState, BlockPos pos) {
 		if (!blockState.get(TRIGGERED)) {
-			world.scheduleBlockTick(pos, this, 4);
+			if (!blockState.get(TOGGLED)) {
+				world.scheduleBlockTick(pos, this, 4);
+			}
 			world.setBlockState(pos, (BlockState) blockState.with(TRIGGERED, true), Block.NOTIFY_ALL);
+			world.updateNeighborsAlways(pos, this);
+			for (Direction direction : Direction.values()) {
+				world.updateNeighborsAlways(pos.offset(direction), this);
+			}
+		} else if (blockState.get(TOGGLED) && blockState.get(TRIGGERED)) {
+			world.setBlockState(pos, (BlockState) blockState.with(TRIGGERED, false), Block.NOTIFY_ALL);
 			world.updateNeighborsAlways(pos, this);
 			for (Direction direction : Direction.values()) {
 				world.updateNeighborsAlways(pos.offset(direction), this);
