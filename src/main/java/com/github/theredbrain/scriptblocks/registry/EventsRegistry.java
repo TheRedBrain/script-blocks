@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.network.packet.BossesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswersSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialoguesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LocationsSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.LootableVaultConfigsSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
@@ -27,6 +28,7 @@ public class EventsRegistry {
 		PayloadTypeRegistry.playS2C().register(DialogueAnswersSyncPacket.PACKET_ID, DialogueAnswersSyncPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(LocationsSyncPacket.PACKET_ID, LocationsSyncPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(ShopsSyncPacket.PACKET_ID, ShopsSyncPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(LootableVaultConfigsSyncPacket.PACKET_ID, LootableVaultConfigsSyncPacket.PACKET_CODEC);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayNetworking.send(handler.player, new ServerConfigSyncPacket(ScriptBlocks.SERVER_CONFIG));
 			ServerPlayNetworking.send(handler.player, new BossesSyncPacket(BossesRegistry.registeredBosses));
@@ -34,6 +36,7 @@ public class EventsRegistry {
 			ServerPlayNetworking.send(handler.player, new DialogueAnswersSyncPacket(DialogueAnswersRegistry.registeredDialogueAnswers));
 			ServerPlayNetworking.send(handler.player, new LocationsSyncPacket(LocationsRegistry.registeredLocations));
 			ServerPlayNetworking.send(handler.player, new ShopsSyncPacket(ShopsRegistry.registeredShops));
+			ServerPlayNetworking.send(handler.player, new LootableVaultConfigsSyncPacket(LootableVaultConfigsRegistry.registeredLootableVaultConfigs));
 		});
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
 			for (ServerPlayerEntity player : PlayerLookup.all(server)) {
@@ -42,6 +45,7 @@ public class EventsRegistry {
 				ServerPlayNetworking.send(player, new DialogueAnswersSyncPacket(DialogueAnswersRegistry.registeredDialogueAnswers));
 				ServerPlayNetworking.send(player, new LocationsSyncPacket(LocationsRegistry.registeredLocations));
 				ServerPlayNetworking.send(player, new ShopsSyncPacket(ShopsRegistry.registeredShops));
+				ServerPlayNetworking.send(player, new LootableVaultConfigsSyncPacket(LootableVaultConfigsRegistry.registeredLootableVaultConfigs));
 			}
 		});
 	}

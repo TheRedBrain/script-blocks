@@ -13,6 +13,7 @@ import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
@@ -103,4 +104,6 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
 
 	void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity);
+
+	void scriptblocks$openLootableVaultBlockScreen(LootableVaultBlockEntity lootableVaultBlockEntity);
 }

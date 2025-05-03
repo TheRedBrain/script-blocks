@@ -15,6 +15,7 @@ import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
@@ -39,6 +40,9 @@ import net.minecraft.registry.Registry;
 public class EntityRegistry {
 
 	//region Script Blocks
+	public static final BlockEntityType<LootableVaultBlockEntity> LOOTABLE_VAULT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("lootable_vault_block"),
+			FabricBlockEntityTypeBuilder.create(LootableVaultBlockEntity::new, BlockRegistry.LOOTABLE_VAULT_BLOCK).build());
 	public static final BlockEntityType<AestheticDecoratedPotBlockEntity> AESTHETIC_DECORATED_POT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("aesthetic_decorated_pot"),
 			FabricBlockEntityTypeBuilder.create(AestheticDecoratedPotBlockEntity::new, BlockRegistry.AESTHETIC_DECORATED_POT).build());
@@ -69,7 +73,7 @@ public class EntityRegistry {
 	public static final BlockEntityType<DataSavingBlockEntity> DATA_SAVING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_saving_block"),
 			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_SAVING_BLOCK).build());
-//	public static final BlockEntityType<DataAccessBlockEntity> DATA_ACCESS_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+	//	public static final BlockEntityType<DataAccessBlockEntity> DATA_ACCESS_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 //			ScriptBlocks.identifier("data_access_block"),
 //			FabricBlockEntityTypeBuilder.create(DataAccessBlockEntity::new, BlockRegistry.DATA_ACCESS_BLOCK).build());
 	public static final BlockEntityType<DataWritingBlockEntity> DATA_WRITING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,

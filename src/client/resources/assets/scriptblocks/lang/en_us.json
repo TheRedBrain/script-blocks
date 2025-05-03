@@ -368,6 +368,12 @@
 	"gui.location_controller_block.screenPage.interacted_blocks": "Interacted Blocks",
 
 
+	"gui.lootable_vault_block.new_lootable_vault_config_identifier_label": "Lootable Vault Config Id",
+	"gui.lootable_vault_block.cycle_is_ominous_button_label": "Change",
+	"gui.lootable_vault_block.is_ominous_label": "Is Ominous: True",
+	"gui.lootable_vault_block.is_not_ominous_label": "Is Ominous: False",
+
+
 	"gui.mimic_block.activeMimicBlockPositionOffset": "Active Mimic Block Position Offset",
 	"gui.mimic_block.inactiveMimicBlockPositionOffset": "Inactive Mimic Block Position Offset",
 
@@ -606,6 +612,8 @@
 
 	"block.scriptblocks.use_relay_chest": "Use Relay Chest",
 	"block.scriptblocks.locked_use_relay_chest": "Locked Use Relay Chest",
+
+	"block.scriptblocks.lootable_vault_block": "Lootable Vault",
 
 	"block.scriptblocks.area_block": "Area Block",
 	"block.scriptblocks.boss_controller_block": "Boss Controller Block",

@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.network.packet.BossesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswersSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialoguesSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LocationsSyncPacket;
+import com.github.theredbrain.scriptblocks.network.packet.LootableVaultConfigsSyncPacket;
 import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ServerConfigSyncPacket;
@@ -38,6 +39,9 @@ public class ClientPacketRegistry {
 		});
 		ClientPlayNetworking.registerGlobalReceiver(ShopsSyncPacket.PACKET_ID, (payload, context) -> {
 			ShopsRegistry.registeredShops = payload.registeredShops();
+		});
+		ClientPlayNetworking.registerGlobalReceiver(LootableVaultConfigsSyncPacket.PACKET_ID, (payload, context) -> {
+			LootableVaultConfigsRegistry.registeredLootableVaultConfigs = payload.registeredLootableVaultConfigs();
 		});
 		ClientPlayNetworking.registerGlobalReceiver(SendAnnouncementPacket.PACKET_ID, (payload, context) -> {
 			((DuckPlayerEntityMixin) context.player()).scriptblocks$sendAnnouncement(payload.announcement());

@@ -16,6 +16,7 @@ import com.github.theredbrain.scriptblocks.block.HousingBlock;
 import com.github.theredbrain.scriptblocks.block.InteractiveLootBlock;
 import com.github.theredbrain.scriptblocks.block.JigsawPlacerBlock;
 import com.github.theredbrain.scriptblocks.block.LocationControlBlock;
+import com.github.theredbrain.scriptblocks.block.LootableVaultBlock;
 import com.github.theredbrain.scriptblocks.block.MimicBlock;
 import com.github.theredbrain.scriptblocks.block.RedstoneTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.RelayTriggerBlock;
@@ -37,10 +38,13 @@ import com.github.theredbrain.scriptblocks.block.UseRelayBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayChestBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayDoorBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayTrapdoorBlock;
+import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.Sherds;
+import net.minecraft.block.enums.NoteBlockInstrument;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
@@ -111,12 +115,13 @@ public class BlockRegistry {
 	public static final Block USE_RELAY_WARPED_TRAPDOOR = registerBlock("use_relay_warped_trapdoor", new UseRelayTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_CHEST = registerBlock("use_relay_chest", new UseRelayChestBlock(null, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block LOCKED_USE_RELAY_CHEST = registerBlock("locked_use_relay_chest", new UseRelayChestBlock(Tags.KEYS_FOR_LOCKED_USE_RELAY_CHEST, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block LOOTABLE_VAULT_BLOCK = registerBlock("lootable_vault_block", new LootableVaultBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.VAULT).luminance(state -> ((LootableVaultState) state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	//endregion Content Blocks
 
 	//region Script Blocks
 	public static final Block AREA_BLOCK = registerBlock("area_block", new AreaBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block BOSS_CONTROLLER_BLOCK = registerBlock("boss_controller_block", new BossControllerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
-//	public static final Block DATA_ACCESS_BLOCK = registerBlock("data_access_block", new DataAccessBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	//	public static final Block DATA_ACCESS_BLOCK = registerBlock("data_access_block", new DataAccessBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block COPY_DATA_BLOCK = registerBlock("copy_data_block", new CopyDataBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DATA_WRITING_BLOCK = registerBlock("data_writing_block", new DataWritingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DATA_RELAY_BLOCK = registerBlock("data_relay_block", new DataRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

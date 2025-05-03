@@ -13,6 +13,7 @@ import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
@@ -44,6 +45,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.HousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.InteractiveLootBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.JigsawPlacerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.LocationControlBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.LootableVaultBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.MimicBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RedstoneTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RelayTriggerBlockScreen;
@@ -272,5 +274,10 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity) {
 		this.client.setScreen(new DataSavingBlockScreen(dataSavingBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openLootableVaultBlockScreen(LootableVaultBlockEntity lootableVaultBlockEntity) {
+		this.client.setScreen(new LootableVaultBlockScreen(lootableVaultBlockEntity));
 	}
 }

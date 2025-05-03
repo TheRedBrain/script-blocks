@@ -12,6 +12,7 @@ import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.render.block.entity.AestheticDecoratedPotBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.BossControllerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.HousingBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.block.entity.LootableVaultBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.MimicBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.RelayTriggerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.StatusEffectApplierBlockEntityRenderer;
@@ -101,6 +102,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.TRIGGERED_SPAWNER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.BOSS_CONTROLLER_BLOCK, renderLayer);
+		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.LOOTABLE_VAULT_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getTranslucent(),
 				BlockRegistry.AESTHETIC_NETHER_PORTAL
 		);
@@ -116,6 +118,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_BEACON_BLOCK_ENTITY, TriggeredBeaconBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY, LootableVaultBlockEntityRenderer::new);
 	}
 
 	private void registerScreens() {
