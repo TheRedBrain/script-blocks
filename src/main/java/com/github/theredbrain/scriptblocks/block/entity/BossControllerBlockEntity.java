@@ -5,8 +5,9 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
+import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
@@ -320,8 +321,11 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		DebuggingHelper.sendBossControllerLogMessage("startBattle", null);
 
 		String identifierString = bC.bossIdentifier;
-		if (!identifierString.isEmpty()) {
-			bC.boss = BossesRegistry.registeredBosses.get(Identifier.of(identifierString));
+		if (!identifierString.isEmpty() && bC.world != null) {
+			Optional<RegistryEntry.Reference<Boss>> optionalBossReference = bC.world.getRegistryManager().get(CustomDynamicRegistries.BOSS_REGISTRY_KEY).getEntry(Identifier.of(identifierString));
+			if (optionalBossReference.isPresent()) {
+				bC.boss = optionalBossReference.get().value();
+			}
 		}
 
 		if (bC.boss != null) {

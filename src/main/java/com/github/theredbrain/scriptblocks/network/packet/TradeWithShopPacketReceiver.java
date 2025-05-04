@@ -1,18 +1,20 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.data.Shop;
-import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TradeWithShopPacket> {
 	@Override
@@ -26,8 +28,11 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		ScreenHandler screenHandler = serverPlayerEntity.currentScreenHandler;
 		List<Shop.Deal> dealsList = new ArrayList<>(List.of());
 		Shop shop = null;
-		if (!shopIdentifier.equals("")) {
-			shop = ShopsRegistry.registeredShops.get(Identifier.of(shopIdentifier));
+		if (!shopIdentifier.isEmpty()) {
+			Optional<RegistryEntry.Reference<Shop>> optionalShopReference = serverPlayerEntity.getWorld().getRegistryManager().get(CustomDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.of(shopIdentifier));
+			if (optionalShopReference.isPresent()) {
+				shop = optionalShopReference.get().value();
+			}
 		}
 		if (shop != null) {
 			dealsList = shop.dealList();

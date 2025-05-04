@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
-import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
@@ -17,6 +17,7 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.MinecraftServer;
@@ -29,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ShopScreenHandler extends ScreenHandler {
 
@@ -74,7 +76,10 @@ public class ShopScreenHandler extends ScreenHandler {
 			Shop shop = null;
 			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
 			if (!shopIdentifier.isEmpty()) {
-				shop = ShopsRegistry.registeredShops.get(Identifier.of(shopIdentifier));
+				Optional<RegistryEntry.Reference<Shop>> optionalShopReference = this.world.getRegistryManager().get(CustomDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.of(shopIdentifier));
+				if (optionalShopReference.isPresent()) {
+					shop = optionalShopReference.get().value();
+				}
 			}
 			this.shop = shop;
 			if (shop != null) {

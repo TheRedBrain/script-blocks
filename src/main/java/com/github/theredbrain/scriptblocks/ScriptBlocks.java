@@ -1,21 +1,18 @@
 package com.github.theredbrain.scriptblocks;
 
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.BossesRegistry;
-import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
-import com.github.theredbrain.scriptblocks.registry.DialoguesRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.registry.EventsRegistry;
 import com.github.theredbrain.scriptblocks.registry.GameRulesRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemGroupRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemRegistry;
-import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
 import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.registry.ServerPacketRegistry;
-import com.github.theredbrain.scriptblocks.registry.ShopsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegistry;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
@@ -52,9 +49,13 @@ public class ScriptBlocks implements ModInitializer {
 
 						},
 						(serverPlayerEntity2, vec3d) -> {
+							// gets called when player leaves choices screen without making a choice
 							BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z));
 							if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
 								interactiveLootBlockEntity.removePlayerFromSet(serverPlayerEntity);
+							}
+							if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity) {
+								lootableVaultBlockEntity.unmarkAsRewarded(serverPlayerEntity);
 							}
 						},
 						null,
@@ -98,11 +99,13 @@ public class ScriptBlocks implements ModInitializer {
 		EntityRegistry.init();
 		DimensionsManager.init();
 		EventsRegistry.initializeEvents();
-		DialoguesRegistry.init();
-		DialogueAnswersRegistry.init();
-		ShopsRegistry.init();
-		BossesRegistry.init();
-		LocationsRegistry.init();
+		CustomDynamicRegistries.init();
+//		DialoguesRegistry.init();
+//		DialogueAnswersRegistry.init();
+//		ShopsRegistry.init();
+//		BossesRegistry.init();
+//		LocationsRegistry.init();
+//		LootableVaultConfigsRegistry.init();
 		ItemRegistry.init();
 		ItemGroupRegistry.init();
 		ScreenHandlerTypesRegistry.registerAll();

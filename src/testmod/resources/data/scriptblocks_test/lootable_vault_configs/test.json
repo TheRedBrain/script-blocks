@@ -1,0 +1,12 @@
+{
+  "lootableIdentifier": "scriptblocks_test:test",
+  "rolls": 3,
+  "choices": 1,
+  "withChoice": true,
+  "activationRange": 4.0,
+  "deactivationRange": 4.5,
+  "keyItem": {
+    "id": "minecraft:trial_key",
+    "count": 1
+  }
+}

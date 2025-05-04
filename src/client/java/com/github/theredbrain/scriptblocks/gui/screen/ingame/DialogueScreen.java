@@ -5,7 +5,7 @@ import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
-import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -22,14 +22,17 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class DialogueScreen extends Screen {
@@ -61,8 +64,11 @@ public class DialogueScreen extends Screen {
 	private float answersScrollAmount = 0.0f;
 	private boolean answersMouseClicked = false;
 
-	public DialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
+	private World world;
+
+	public DialogueScreen(World world, Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
 		super(NarratorManager.EMPTY);
+		this.world = world;
 		this.dialogue = dialogue;
 		this.dialogueUsedBlocksList.addAll(dialogueUsedBlocks);
 		this.dialogueTriggeredBlocksList.addAll(dialogueTriggeredBlocks);
@@ -96,7 +102,15 @@ public class DialogueScreen extends Screen {
 			if (answerIdentifierString.isEmpty()) {
 				continue;
 			}
-			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(Identifier.of(answerIdentifierString));
+
+			DialogueAnswer dialogueAnswer = null;
+			if (this.world != null) {
+				Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifierString));
+				if (optionalDialogueAnswerReference.isPresent()) {
+					dialogueAnswer = optionalDialogueAnswerReference.get().value();
+				}
+			}
+
 			if (dialogueAnswer == null) {
 				continue;
 			}
@@ -341,8 +355,19 @@ public class DialogueScreen extends Screen {
 		}
 		int index = 0;
 		for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + 4, this.visibleAnswersList.size()); i++) {
-			DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(Identifier.of(this.visibleAnswersList.get(i)));
-			String text = dialogueAnswer.answerText();
+			String text = "";
+
+			DialogueAnswer dialogueAnswer = null;
+			if (this.world != null) {
+				Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(this.visibleAnswersList.get(i)));
+				if (optionalDialogueAnswerReference.isPresent()) {
+					dialogueAnswer = optionalDialogueAnswerReference.get().value();
+				}
+			}
+
+			if (dialogueAnswer != null) {
+				text = dialogueAnswer.answerText();
+			}
 			if (index == 0) {
 				this.answerButton0.setMessage(Text.translatable(text));
 			} else if (index == 1) {

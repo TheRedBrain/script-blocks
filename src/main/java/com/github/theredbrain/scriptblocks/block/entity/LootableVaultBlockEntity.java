@@ -1,15 +1,14 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.LootableVaultBlock;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultClientData;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultServerData;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSharedData;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
-import com.github.theredbrain.scriptblocks.registry.LootableVaultConfigsRegistry;
-import com.google.common.annotations.VisibleForTesting;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
@@ -34,10 +33,12 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -59,7 +60,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 	private final LootableVaultServerData serverData = new LootableVaultServerData();
 	private final LootableVaultSharedData sharedData = new LootableVaultSharedData();
 	private final LootableVaultClientData clientData = new LootableVaultClientData();
-	private LootableVaultConfig config = LootableVaultConfig.DEFAULT;
+	//	private LootableVaultConfig config = LootableVaultConfig.DEFAULT;
 	private String lootableVaultConfigIdentifier = "";
 
 	public LootableVaultBlockEntity(BlockPos pos, BlockState state) {
@@ -79,11 +80,14 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.writeNbt(nbt, registryLookup);
+//		if (!this.lootableVaultConfigIdentifier.isEmpty()) {
 		nbt.putString("config_identifier", this.lootableVaultConfigIdentifier);
+//		}
 //		nbt.put("config", encodeValue(LootableVaultConfig.CODEC, this.config, registryLookup));
 		nbt.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup));
 		nbt.put("server_data", encodeValue(LootableVaultServerData.CODEC, this.serverData, registryLookup));
+
+		super.writeNbt(nbt, registryLookup);
 	}
 
 	private static <T> NbtElement encodeValue(Codec<T> codec, T value, RegistryWrapper.WrapperLookup registries) {
@@ -92,7 +96,6 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.readNbt(nbt, registryLookup);
 		DynamicOps<NbtElement> dynamicOps = registryLookup.getOps(NbtOps.INSTANCE);
 		if (nbt.contains("server_data")) {
 			LootableVaultServerData.CODEC.parse(dynamicOps, nbt.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::copyFrom);
@@ -102,26 +105,26 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //			LootableVaultConfig.CODEC.parse(dynamicOps, nbt.get("config")).resultOrPartial(LOGGER::error).ifPresent(config -> this.config = config);
 //		}
 
-		if (nbt.contains("config_identifier")) {
-			this.lootableVaultConfigIdentifier = nbt.getString("config_identifier");
-		} else {
-			this.lootableVaultConfigIdentifier = "";
-		}
+//		if (nbt.contains("config_identifier")) {
+		this.lootableVaultConfigIdentifier = nbt.getString("config_identifier");
+//		}
 
 		if (nbt.contains("shared_data")) {
 			LootableVaultSharedData.CODEC.parse(dynamicOps, nbt.get("shared_data")).resultOrPartial(LOGGER::error).ifPresent(this.sharedData::copyFrom);
 		}
+
+		super.readNbt(nbt, registryLookup);
 	}
 
-	public boolean isOminous() {
-		if (this.world != null) {
-			BlockState state = this.world.getBlockState(this.pos);
-			if (state.isOf(BlockRegistry.LOOTABLE_VAULT_BLOCK)) {
-				return state.get(LootableVaultBlock.OMINOUS);
-			}
-		}
-		return false;
-	}
+//	public boolean isOminous() {
+//		if (this.world != null) {
+//			BlockState state = this.world.getBlockState(this.pos);
+//			if (state.isOf(BlockRegistry.LOOTABLE_VAULT_BLOCK)) {
+//				return state.get(LootableVaultBlock.OMINOUS);
+//			}
+//		}
+//		return false;
+//	}
 
 	@Nullable
 	public LootableVaultServerData getServerData() {
@@ -136,22 +139,43 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		return this.clientData;
 	}
 
-	public String getConfigId() {
-		return this.lootableVaultConfigIdentifier;
+	public void unmarkAsRewarded(ServerPlayerEntity serverPlayerEntity) {
+		if (this.world instanceof ServerWorld serverWorld) {
+			LootableVaultServerData serverData = this.getServerData();
+			LootableVaultSharedData sharedData = this.getSharedData();
+			LootableVaultConfig config = this.getConfig(serverWorld);
+			if (serverData != null && sharedData != null) {
+				serverData.unmarkPlayerAsRewarded(serverPlayerEntity);
+				sharedData.updateConnectedPlayers(serverWorld, this.pos, serverData, config, config.deactivationRange());
+			}
+		}
 	}
 
-	public void setConfigId(String lootableVaultConfigIdentifier) {
-		this.lootableVaultConfigIdentifier = lootableVaultConfigIdentifier;
+//	public String getConfigId() {
+//		ScriptBlocks.info("getConfigId: " + this.lootableVaultConfigIdentifier);
+//		return this.lootableVaultConfigIdentifier;
+//	}
+//
+//	public void setConfigId(String lootableVaultConfigIdentifier) {
+//		ScriptBlocks.info("setConfigId: " + lootableVaultConfigIdentifier);
+//		this.lootableVaultConfigIdentifier = lootableVaultConfigIdentifier;
+//	}
+
+	public LootableVaultConfig getConfig(World world) {
+//		return this.config;
+		LootableVaultConfig lootableVaultConfig = world.getRegistryManager().get(CustomDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY).get(Identifier.of(this.lootableVaultConfigIdentifier));
+		if (lootableVaultConfig != null) {
+			return lootableVaultConfig;
+		}
+		return LootableVaultConfig.DEFAULT;
+//		return LootableVaultConfigsRegistry.registeredLootableVaultConfigs.getOrDefault(Identifier.of(this.lootableVaultConfigIdentifier), LootableVaultConfig.DEFAULT);
+//		return LootableVaultConfigsRegistry.entry(this.world, this.lootableVaultConfigIdentifier).value();
 	}
 
-	public LootableVaultConfig getConfig() {
-		return LootableVaultConfigsRegistry.registeredLootableVaultConfigs.getOrDefault(Identifier.of(this.lootableVaultConfigIdentifier), LootableVaultConfig.DEFAULT);
-	}
-
-	@VisibleForTesting
-	public void setConfig(LootableVaultConfig config) {
-		this.config = config;
-	}
+//	@VisibleForTesting
+//	public void setConfig(LootableVaultConfig config) {
+//		this.config = config;
+//	}
 
 	public static final class Client {
 		private static final int field_48870 = 20;
@@ -302,19 +326,25 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			LootableVaultState vaultState = state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE);
 			if (canBeUnlocked(config, vaultState)) {
 				if (!isValidKey(config, stack)) {
+					ScriptBlocks.info("invalid key");
 					playFailedUnlockSound(world, serverData, pos, SoundEvents.BLOCK_VAULT_INSERT_ITEM_FAIL);
 				} else if (serverData.hasRewardedPlayer(player)) {
+					ScriptBlocks.info("player already rewarded");
 					playFailedUnlockSound(world, serverData, pos, SoundEvents.BLOCK_VAULT_REJECT_REWARDED_PLAYER);
-				} else {
+				} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
 					// TODO loot
+//					Vec3d lootPos = new Vec3d(this.getPos().getX(), interactiveLootBlockEntity.getPos().getY(), interactiveLootBlockEntity.getPos().getZ());
+//					boolean lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice());
+
 //					List<ItemStack> list = generateLoot(world, config, pos, player);
-//					if (!list.isEmpty()) {
-//						player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
-//						stack.decrementUnlessCreative(config.keyItem().getCount(), player);
-//						unlock(world, state, pos, config, serverData, sharedData, list);
-//						serverData.markPlayerAsRewarded(player);
-//						sharedData.updateConnectedPlayers(world, pos, serverData, config, config.deactivationRange());
-//					}
+					if (ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice())) {
+						ScriptBlocks.info("loot supplied");
+						player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
+						stack.decrementUnlessCreative(config.keyItem().getCount(), player);
+						unlock(world, state, pos, config, serverData, sharedData);
+						serverData.markPlayerAsRewarded(player);
+						sharedData.updateConnectedPlayers(world, pos, serverData, config, config.deactivationRange());
+					}
 				}
 			}
 		}
@@ -345,10 +375,10 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		}
 
 		private static void unlock(
-				ServerWorld world, BlockState state, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData, List<ItemStack> itemsToEject
+				ServerWorld world, BlockState state, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData
 		) {
-			serverData.setItemsToEject(itemsToEject);
-			sharedData.setDisplayItem(serverData.getItemToDisplay());
+//			serverData.setItemsToEject(itemsToEject);
+			sharedData.setDisplayItem(ItemStack.EMPTY);
 			serverData.setStateUpdatingResumeTime(world.getTime() + 14L);
 			changeVaultState(world, pos, state, state.with(LootableVaultBlock.LOOTABLE_VAULT_STATE, LootableVaultState.UNLOCKING), config, sharedData);
 		}

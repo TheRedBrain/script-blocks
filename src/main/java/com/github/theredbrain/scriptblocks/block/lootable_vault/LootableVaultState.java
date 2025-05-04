@@ -79,18 +79,19 @@ public enum LootableVaultState implements StringIdentifiable {
 				yield EJECTING;
 			}
 			case EJECTING -> {
-				if (serverData.getItemsToEject().isEmpty()) {
-					serverData.finishEjecting();
-					yield updateActiveState(world, pos, config, serverData, sharedData, config.deactivationRange());
-				} else {
-					float f = serverData.getEjectSoundPitchModifier();
-					this.ejectItem(world, pos, serverData.getItemToEject(), f);
-					sharedData.setDisplayItem(serverData.getItemToDisplay());
-					boolean bl = serverData.getItemsToEject().isEmpty();
-					int i = bl ? 20 : 20;
-					serverData.setStateUpdatingResumeTime(world.getTime() + (long) i);
-					yield EJECTING;
-				}
+//				if (serverData.getItemsToEject().isEmpty()) {
+//					serverData.finishEjecting();
+//					yield updateActiveState(world, pos, config, serverData, sharedData, config.deactivationRange());
+//				} else {
+////					sharedData.setDisplayItem(serverData.getItemToDisplay());
+////					boolean bl = serverData.getItemsToEject().isEmpty();
+////					int i = bl ? 20 : 20;
+////					yield EJECTING;
+//				}
+//				float f = serverData.getEjectSoundPitchModifier();
+				this.ejectReward(world, pos);
+				serverData.setStateUpdatingResumeTime(world.getTime() + 20L);
+				yield updateActiveState(world, pos, config, serverData, sharedData, config.deactivationRange());
 			}
 		};
 	}
@@ -114,10 +115,10 @@ public enum LootableVaultState implements StringIdentifiable {
 	protected void onChangedFrom(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData) {
 	}
 
-	private void ejectItem(ServerWorld world, BlockPos pos, ItemStack stack, float pitchModifier) {
-		ItemDispenserBehavior.spawnItem(world, stack, 2, Direction.UP, Vec3d.ofBottomCenter(pos).offset(Direction.UP, 1.2));
+	private void ejectReward(ServerWorld world, BlockPos pos) {
+//		ItemDispenserBehavior.spawnItem(world, stack, 2, Direction.UP, Vec3d.ofBottomCenter(pos).offset(Direction.UP, 1.2));
 		world.syncWorldEvent(WorldEvents.VAULT_EJECTS_ITEM, pos, 0);
-		world.playSound(null, pos, SoundEvents.BLOCK_VAULT_EJECT_ITEM, SoundCategory.BLOCKS, 1.0F, 0.8F + 0.4F * pitchModifier);
+		world.playSound(null, pos, SoundEvents.BLOCK_VAULT_EJECT_ITEM, SoundCategory.BLOCKS, 1.0F, 0.8F + 0.4F);
 	}
 
 	static enum Light {

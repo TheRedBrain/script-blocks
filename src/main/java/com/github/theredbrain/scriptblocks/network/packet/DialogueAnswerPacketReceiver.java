@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
-import com.github.theredbrain.scriptblocks.registry.DialogueAnswersRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.entity.BlockEntity;
@@ -20,6 +20,7 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
@@ -34,6 +35,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<DialogueAnswerPacket> {
 
@@ -46,12 +48,12 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocks = payload.dialogueUsedBlocks();
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
-		DialogueAnswer dialogueAnswer = DialogueAnswersRegistry.registeredDialogueAnswers.get(answerIdentifier);
+		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = serverPlayerEntity.getWorld().getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();
 
-		if (dialogueAnswer != null && server != null) {
-
+		if (optionalDialogueAnswerReference.isPresent() && server != null) {
+			DialogueAnswer dialogueAnswer = optionalDialogueAnswerReference.get().value();
 			String itemIdentifier = dialogueAnswer.itemIdentifier();
 			int itemCount = dialogueAnswer.itemCount();
 			if (!itemIdentifier.isEmpty() && itemCount > 0) {
@@ -148,7 +150,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
 			}
 
-			String responseDialogue = DialogueAnchor.getDialogue(serverPlayerEntity, dialogueAnswer.responseDialogues());
+			String responseDialogue = DialogueAnchor.getDialogue(serverPlayerEntity.getWorld(), serverPlayerEntity, dialogueAnswer.responseDialogues());
 			if (responseDialogue.isEmpty()) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {

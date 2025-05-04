@@ -3,8 +3,9 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
+import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDialogueBlockPacket;
-import com.github.theredbrain.scriptblocks.registry.DialoguesRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,12 +17,14 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -168,7 +171,16 @@ public class DialogueBlockScreen extends Screen {
 	private void addStartingDialogueEntry() {
 		String message = "";
 		String newStartingDialogueIdentifier = this.newStartingDialogueIdentifierField.getText();
-		Dialogue newStartingDialogue = DialoguesRegistry.registeredDialogues.get(Identifier.tryParse(newStartingDialogueIdentifier));
+
+		Dialogue newStartingDialogue = null;
+		World world = this.dialogueBlockEntity.getWorld();
+		if (world != null) {
+			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(newStartingDialogueIdentifier));
+			if (optionalDialogueReference.isPresent()) {
+				newStartingDialogue = optionalDialogueReference.get().value();
+			}
+		}
+
 		if (newStartingDialogue == null) {
 			message = "gui.dialogue_block.invalid_dialogue_identifier";
 		}

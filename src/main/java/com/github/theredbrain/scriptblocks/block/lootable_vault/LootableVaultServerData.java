@@ -21,25 +21,19 @@ public class LootableVaultServerData {
 	public static Codec<LootableVaultServerData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 							Uuids.LINKED_SET_CODEC.lenientOptionalFieldOf("rewarded_players", Set.of()).forGetter(data -> data.rewardedPlayers),
-							Codec.LONG.lenientOptionalFieldOf("state_updating_resumes_at", Long.valueOf(0L)).forGetter(data -> data.stateUpdatingResumesAt),
-							ItemStack.CODEC.listOf().lenientOptionalFieldOf("items_to_eject", List.of()).forGetter(data -> data.itemsToEject),
-							Codec.INT.lenientOptionalFieldOf("total_ejections_needed", Integer.valueOf(0)).forGetter(data -> data.totalEjectionsNeeded)
+							Codec.LONG.lenientOptionalFieldOf("state_updating_resumes_at", Long.valueOf(0L)).forGetter(data -> data.stateUpdatingResumesAt)
 					)
 					.apply(instance, LootableVaultServerData::new)
 	);
 	private static final int MAX_STORED_REWARDED_PLAYERS = 128;
 	private final Set<UUID> rewardedPlayers = new ObjectLinkedOpenHashSet<>();
 	private long stateUpdatingResumesAt;
-	private final List<ItemStack> itemsToEject = new ObjectArrayList<>();
 	private long lastFailedUnlockTime;
-	private int totalEjectionsNeeded;
 	boolean dirty;
 
-	LootableVaultServerData(Set<UUID> rewardedPlayers, long stateUpdatingResumesAt, List<ItemStack> itemsToEject, int totalEjectionsNeeded) {
+	LootableVaultServerData(Set<UUID> rewardedPlayers, long stateUpdatingResumesAt) {
 		this.rewardedPlayers.addAll(rewardedPlayers);
 		this.stateUpdatingResumesAt = stateUpdatingResumesAt;
-		this.itemsToEject.addAll(itemsToEject);
-		this.totalEjectionsNeeded = totalEjectionsNeeded;
 	}
 
 	public LootableVaultServerData() {
@@ -75,6 +69,13 @@ public class LootableVaultServerData {
 		this.markDirty();
 	}
 
+	@VisibleForTesting
+	public void unmarkPlayerAsRewarded(PlayerEntity player) {
+		this.rewardedPlayers.remove(player.getUuid());
+
+		this.markDirty();
+	}
+
 	public long getStateUpdatingResumeTime() {
 		return this.stateUpdatingResumesAt;
 	}
@@ -83,42 +84,40 @@ public class LootableVaultServerData {
 		this.stateUpdatingResumesAt = stateUpdatingResumesAt;
 		this.markDirty();
 	}
+//
+//	List<ItemStack> getItemsToEject() {
+//		return this.itemsToEject;
+//	}
 
-	List<ItemStack> getItemsToEject() {
-		return this.itemsToEject;
-	}
+//	void finishEjecting() {
+//		this.totalEjectionsNeeded = 0;
+//		this.markDirty();
+//	}
+//
+//	public void setItemsToEject(List<ItemStack> itemsToEject) {
+//		this.itemsToEject.clear();
+//		this.itemsToEject.addAll(itemsToEject);
+//		this.totalEjectionsNeeded = this.itemsToEject.size();
+//		this.markDirty();
+//	}
 
-	void finishEjecting() {
-		this.totalEjectionsNeeded = 0;
-		this.markDirty();
-	}
+//	public ItemStack getItemToDisplay() {
+//		return this.itemsToEject.isEmpty()
+//				? ItemStack.EMPTY
+//				: (ItemStack) Objects.requireNonNullElse((ItemStack) this.itemsToEject.get(this.itemsToEject.size() - 1), ItemStack.EMPTY);
+//	}
 
-	public void setItemsToEject(List<ItemStack> itemsToEject) {
-		this.itemsToEject.clear();
-		this.itemsToEject.addAll(itemsToEject);
-		this.totalEjectionsNeeded = this.itemsToEject.size();
-		this.markDirty();
-	}
-
-	public ItemStack getItemToDisplay() {
-		return this.itemsToEject.isEmpty()
-				? ItemStack.EMPTY
-				: (ItemStack) Objects.requireNonNullElse((ItemStack) this.itemsToEject.get(this.itemsToEject.size() - 1), ItemStack.EMPTY);
-	}
-
-	ItemStack getItemToEject() {
-		if (this.itemsToEject.isEmpty()) {
-			return ItemStack.EMPTY;
-		} else {
-			this.markDirty();
-			return (ItemStack) Objects.requireNonNullElse((ItemStack) this.itemsToEject.remove(this.itemsToEject.size() - 1), ItemStack.EMPTY);
-		}
-	}
+//	ItemStack getItemToEject() {
+//		if (this.itemsToEject.isEmpty()) {
+//			return ItemStack.EMPTY;
+//		} else {
+//			this.markDirty();
+//			return (ItemStack) Objects.requireNonNullElse((ItemStack) this.itemsToEject.remove(this.itemsToEject.size() - 1), ItemStack.EMPTY);
+//		}
+//	}
 
 	public void copyFrom(LootableVaultServerData data) {
 		this.stateUpdatingResumesAt = data.getStateUpdatingResumeTime();
-		this.itemsToEject.clear();
-		this.itemsToEject.addAll(data.itemsToEject);
 		this.rewardedPlayers.clear();
 		this.rewardedPlayers.addAll(data.rewardedPlayers);
 	}
@@ -135,9 +134,9 @@ public class LootableVaultServerData {
 		this.dirty = false;
 	}
 
-	public float getEjectSoundPitchModifier() {
-		return this.totalEjectionsNeeded == 1
-				? 1.0F
-				: 1.0F - MathHelper.getLerpProgress((float) this.getItemsToEject().size(), 1.0F, (float) this.totalEjectionsNeeded);
-	}
+//	public float getEjectSoundPitchModifier() {
+//		return this.totalEjectionsNeeded == 1
+//				? 1.0F
+//				: 1.0F - MathHelper.getLerpProgress((float) this.getItemsToEject().size(), 1.0F, (float) this.totalEjectionsNeeded);
+//	}
 }

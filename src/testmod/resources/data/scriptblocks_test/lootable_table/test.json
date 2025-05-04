@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "pools": [
+    {
+      "id": "scriptblocks_test:test_0",
+      "rarity": "rare",
+      "entry": {
+        "type": "lootables:item",
+        "item": "minecraft:trial_key"
+      }
+    },
+    {
+      "id": "scriptblocks_test:test_1",
+      "rarity": "common",
+      "entry": {
+        "type": "lootables:item",
+        "item": "minecraft:stone"
+      }
+    },
+    {
+      "id": "scriptblocks_test:test_2",
+      "rarity": "common",
+      "entry": {
+        "type": "lootables:item",
+        "item": "minecraft:stone_pickaxe"
+      }
+    },
+    {
+      "id": "scriptblocks_test:test_3",
+      "rarity": "uncommon",
+      "entry": {
+        "type": "lootables:item",
+        "item": "minecraft:oak_log"
+      }
+    }
+  ]
+}

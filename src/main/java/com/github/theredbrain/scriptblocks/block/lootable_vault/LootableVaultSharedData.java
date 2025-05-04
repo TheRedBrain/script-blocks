@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
+import net.minecraft.block.spawner.EntityDetector;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Uuids;
@@ -67,8 +68,8 @@ public class LootableVaultSharedData {
 	}
 
 	public void updateConnectedPlayers(ServerWorld world, BlockPos pos, LootableVaultServerData serverData, LootableVaultConfig config, double radius) {
-		Set<UUID> set = (Set<UUID>) config.playerDetector()
-				.detect(world, config.entitySelector(), pos, radius, false)
+		Set<UUID> set = (Set<UUID>) EntityDetector.NON_SPECTATOR_PLAYERS
+				.detect(world, EntityDetector.Selector.IN_WORLD, pos, radius, false)
 				.stream()
 				.filter(uuid -> !serverData.getRewardedPlayers().contains(uuid))
 				.collect(Collectors.toSet());

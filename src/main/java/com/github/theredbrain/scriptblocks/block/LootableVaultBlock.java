@@ -53,15 +53,15 @@ public class LootableVaultBlock extends BlockWithEntity {
 		);
 	}
 
-	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity && player.isCreativeLevelTwoOp()) {
-			((DuckPlayerEntityMixin) player).scriptblocks$openLootableVaultBlockScreen(lootableVaultBlockEntity);
-			return ActionResult.success(world.isClient);
-		}
-		return ActionResult.PASS;
-	}
+//	@Override
+//	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+//		BlockEntity blockEntity = world.getBlockEntity(pos);
+//		if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity && player.isCreativeLevelTwoOp()) {
+//			((DuckPlayerEntityMixin) player).scriptblocks$openLootableVaultBlockScreen(lootableVaultBlockEntity);
+//			return ActionResult.success(world.isClient);
+//		}
+//		return ActionResult.PASS;
+//	}
 
 	@Override
 	public ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
@@ -70,7 +70,7 @@ public class LootableVaultBlock extends BlockWithEntity {
 		} else if (world instanceof ServerWorld serverWorld) {
 			if (serverWorld.getBlockEntity(pos) instanceof LootableVaultBlockEntity lootableVaultBlockEntity) {
 				LootableVaultBlockEntity.Server.tryUnlock(
-						serverWorld, pos, state, lootableVaultBlockEntity.getConfig(), lootableVaultBlockEntity.getServerData(), lootableVaultBlockEntity.getSharedData(), player, stack
+						serverWorld, pos, state, lootableVaultBlockEntity.getConfig(world), lootableVaultBlockEntity.getServerData(), lootableVaultBlockEntity.getSharedData(), player, stack
 				);
 				return ItemActionResult.SUCCESS;
 			} else {
@@ -100,7 +100,7 @@ public class LootableVaultBlock extends BlockWithEntity {
 				type,
 				EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY,
 				(worldx, pos, statex, blockEntity) -> LootableVaultBlockEntity.Server.tick(
-						serverWorld, pos, statex, blockEntity.getConfig(), blockEntity.getServerData(), blockEntity.getSharedData()
+						serverWorld, pos, statex, blockEntity.getConfig(world), blockEntity.getServerData(), blockEntity.getSharedData()
 				)
 		)
 				: validateTicker(

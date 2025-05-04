@@ -46,8 +46,6 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateJigsawPlacerBloc
 import com.github.theredbrain.scriptblocks.network.packet.UpdateJigsawPlacerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlBlockPacketReceiver;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateLootableVaultBlockPacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateLootableVaultBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateMimicBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateMimicBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateRedstoneTriggerBlockPacket;
@@ -80,6 +78,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 public class ServerPacketRegistry {
 
 	public static void init() {
+
+//		PayloadTypeRegistry.configurationS2C().register(Packets.SpellRegistrySync.PACKET_ID, Packets.SpellRegistrySync.CODEC);
 
 		PayloadTypeRegistry.playC2S().register(UpdateDataWritingBlockPacket.PACKET_ID, UpdateDataWritingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataWritingBlockPacket.PACKET_ID, new UpdateDataWritingBlockPacketReceiver());
@@ -155,9 +155,6 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateLocationControlBlockPacket.PACKET_ID, UpdateLocationControlBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateLocationControlBlockPacket.PACKET_ID, new UpdateLocationControlBlockPacketReceiver());
-
-		PayloadTypeRegistry.playC2S().register(UpdateLootableVaultBlockPacket.PACKET_ID, UpdateLootableVaultBlockPacket.PACKET_CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(UpdateLootableVaultBlockPacket.PACKET_ID, new UpdateLootableVaultBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateEntranceDelegationBlockPacket.PACKET_ID, UpdateEntranceDelegationBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateEntranceDelegationBlockPacket.PACKET_ID, new UpdateEntranceDelegationBlockPacketReceiver());

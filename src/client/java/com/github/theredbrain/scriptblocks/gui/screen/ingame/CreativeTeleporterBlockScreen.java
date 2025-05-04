@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockPacket;
-import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import net.fabricmc.api.EnvType;
@@ -19,6 +19,7 @@ import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -26,11 +27,13 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class CreativeTeleporterBlockScreen extends Screen {
@@ -174,7 +177,17 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private void addLocationToList(String identifier, String entrance, String dataId, String data) {
 		Text message = Text.literal("");
 //		if (Identifier.isValid(identifier)) {
-		Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(identifier));
+//		Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(identifier));
+
+		Location location = null;
+		World world = this.teleporterBlock.getWorld();
+		if (world != null) {
+			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(identifier));
+			if (optionalLocationReference.isPresent()) {
+				location = optionalLocationReference.get().value();
+			}
+		}
+
 		if (location != null) {
 			if (!LocationUtils.hasEntrance(location, entrance)) {
 				entrance = "";

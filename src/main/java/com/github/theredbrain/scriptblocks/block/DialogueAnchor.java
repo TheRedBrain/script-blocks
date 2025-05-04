@@ -1,25 +1,30 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.data.Dialogue;
-import com.github.theredbrain.scriptblocks.registry.DialoguesRegistry;
+import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import java.lang.ref.Reference;
 import java.util.List;
+import java.util.Optional;
 
 public interface DialogueAnchor {
 	List<MutablePair<String, BlockPos>> getDialogueUsedBlocks();
 
 	List<MutablePair<String, MutablePair<BlockPos, Boolean>>> getDialogueTriggeredBlocks();
 
-	static String getDialogue(PlayerEntity player, List<String> dialogueList) {
+	static String getDialogue(World world, PlayerEntity player, List<String> dialogueList) {
 		if (dialogueList.isEmpty()) {
 			return "";
 		}
@@ -37,10 +42,10 @@ public interface DialogueAnchor {
 		String unlockAdvancement;
 
 		for (String dialogueEntry : dialogueList) {
-			Dialogue dialogue = DialoguesRegistry.registeredDialogues.get(Identifier.tryParse(dialogueEntry));
-			if (dialogue != null) {
-				lockAdvancement = dialogue.lockAdvancement();
-				unlockAdvancement = dialogue.unlockAdvancement();
+			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueEntry));
+			if (optionalDialogueReference.isPresent()) {
+				lockAdvancement = optionalDialogueReference.get().value().lockAdvancement();
+				unlockAdvancement = optionalDialogueReference.get().value().unlockAdvancement();
 
 				AdvancementEntry lockAdvancementEntry = null;
 				AdvancementEntry unlockAdvancementEntry = null;

@@ -7,7 +7,7 @@ import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerM
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetManualResetLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.TeleportFromTeleporterBlockPacket;
-import com.github.theredbrain.scriptblocks.registry.LocationsRegistry;
+import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
@@ -29,12 +29,14 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,7 +99,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
 	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> visibleLocationsList = new ArrayList<>();
 	List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> unlockedLocationsList = new ArrayList<>();
-	MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = new MutablePair<>();
+	MutablePair<MutablePair<String, String>, MutablePair<String, String>> dataDrivenLocation = new MutablePair<>();
 	List<PlayerListEntry> partyMemberList = new ArrayList<>();
 	private int teamListScrollPosition = 0;
 	private int visibleLocationsListScrollPosition = 0;
@@ -223,7 +225,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		}
 		this.locationsList.clear();
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
-		this.location = this.teleporterBlock.getDataDrivenLocation();
+		this.dataDrivenLocation = this.teleporterBlock.getDataDrivenLocation();
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
@@ -404,8 +406,57 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				this.visibleLocationsList.clear();
 				if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 					for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : this.locationsList) {
-						Location location = LocationsRegistry.registeredLocations.get(Identifier.of(entry.getLeft().getLeft()));
-						String entrance = entry.getLeft().getRight();
+
+						Location location = null;
+						World world = this.teleporterBlock.getWorld();
+						if (world != null) {
+							Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(entry.getLeft().getLeft()));
+							if (optionalLocationReference.isPresent()) {
+								location = optionalLocationReference.get().value();
+							}
+						}
+						if (location != null) {
+
+							String entrance = entry.getLeft().getRight();
+							lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, entrance);
+							unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, entrance);
+							showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
+
+							if (advancementHandler != null) {
+//						ScriptBlocks.info("advancementHandler != null");
+								AdvancementEntry lockAdvancementEntry = null;
+								if (lockAdvancementIdentifier != null) {
+									lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
+								}
+								AdvancementEntry unlockAdvancementEntry = null;
+								if (unlockAdvancementIdentifier != null) {
+									unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
+								}
+								if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
+
+//							ScriptBlocks.info("location unlocked: " + entry);
+									this.unlockedLocationsList.add(entry);
+									this.visibleLocationsList.add(entry);
+								} else if (showLockedLocation) {
+//							ScriptBlocks.info("location locked but visible: " + entry);
+									this.visibleLocationsList.add(entry);
+								}
+							}
+						}
+					}
+				} else if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+
+					Location location = null;
+					World world = this.teleporterBlock.getWorld();
+					if (world != null) {
+						Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(this.dataDrivenLocation.getLeft().getLeft()));
+						if (optionalLocationReference.isPresent()) {
+							location = optionalLocationReference.get().value();
+						}
+					}
+					if (location != null) {
+
+						String entrance = this.dataDrivenLocation.getLeft().getRight();
 						lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, entrance);
 						unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, entrance);
 						showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
@@ -423,39 +474,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 							if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
 
 //							ScriptBlocks.info("location unlocked: " + entry);
-								this.unlockedLocationsList.add(entry);
-								this.visibleLocationsList.add(entry);
+								this.unlockedLocationsList.add(this.dataDrivenLocation);
+								this.visibleLocationsList.add(this.dataDrivenLocation);
 							} else if (showLockedLocation) {
 //							ScriptBlocks.info("location locked but visible: " + entry);
-								this.visibleLocationsList.add(entry);
+								this.visibleLocationsList.add(this.dataDrivenLocation);
 							}
-						}
-					}
-				} else if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
-					Location location = LocationsRegistry.registeredLocations.get(Identifier.of(this.location.getLeft().getLeft()));
-					String entrance = this.location.getLeft().getRight();
-					lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, entrance);
-					unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, entrance);
-					showLockedLocation = LocationUtils.showLockedLocationForEntrance(location, entrance);
-
-					if (advancementHandler != null) {
-//						ScriptBlocks.info("advancementHandler != null");
-						AdvancementEntry lockAdvancementEntry = null;
-						if (lockAdvancementIdentifier != null) {
-							lockAdvancementEntry = advancementHandler.get(lockAdvancementIdentifier);
-						}
-						AdvancementEntry unlockAdvancementEntry = null;
-						if (unlockAdvancementIdentifier != null) {
-							unlockAdvancementEntry = advancementHandler.get(unlockAdvancementIdentifier);
-						}
-						if ((lockAdvancementIdentifier == null || (lockAdvancementEntry != null && !((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(lockAdvancementEntry.value()).isDone())) && (unlockAdvancementIdentifier == null || (unlockAdvancementEntry != null && ((DuckClientAdvancementManagerMixin) advancementHandler).scriptblocks$getAdvancementProgress(unlockAdvancementEntry.value()).isDone()))) {
-
-//							ScriptBlocks.info("location unlocked: " + entry);
-							this.unlockedLocationsList.add(this.location);
-							this.visibleLocationsList.add(this.location);
-						} else if (showLockedLocation) {
-//							ScriptBlocks.info("location locked but visible: " + entry);
-							this.visibleLocationsList.add(this.location);
 						}
 					}
 				}
@@ -477,7 +501,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			}
 		}
 
-		Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(this.currentTargetIdentifier));
+		Location location = null;
+		World world = this.teleporterBlock.getWorld();
+		if (world != null) {
+			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTargetIdentifier));
+			if (optionalLocationReference.isPresent()) {
+				location = optionalLocationReference.get().value();
+			}
+		}
+
 		if (location != null) {
 			lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, this.currentTargetEntrance);
 			unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, this.currentTargetEntrance);
@@ -742,7 +774,14 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private boolean tryDungeonRegeneration() {
 		if (this.canLocationBeRegenerated) {
-			Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(this.currentTargetIdentifier));
+			Location location = null;
+			World world = this.teleporterBlock.getWorld();
+			if (world != null) {
+				Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTargetIdentifier));
+				if (optionalLocationReference.isPresent()) {
+					location = optionalLocationReference.get().value();
+				}
+			}
 			if (location != null) {
 				ClientPlayNetworking.send(new SetManualResetLocationControlBlockPacket(
 						LocationUtils.getControlBlockPosForLocation(location),
