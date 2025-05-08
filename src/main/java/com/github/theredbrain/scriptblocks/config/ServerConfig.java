@@ -47,6 +47,9 @@ public class ServerConfig extends Config {
 	@Comment("Enables debug messages for the boss controller block and all corresponding mechanics.")
 	public boolean enable_boss_controller_debugging = true;
 
+	@Comment("Enables debug messages for the lootable vault block and all corresponding mechanics.")
+	public boolean enable_lootable_vault_debugging = true;
+
 	@Comment("Enables debug messages for the teleporter block and all corresponding mechanics.")
 	public boolean enable_teleporter_debugging = true;
 

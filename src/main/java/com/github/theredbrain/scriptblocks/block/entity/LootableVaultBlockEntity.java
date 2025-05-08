@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSta
 import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
@@ -19,7 +20,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTables;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -31,7 +31,8 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -52,6 +53,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -167,6 +169,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		if (lootableVaultConfig != null) {
 			return lootableVaultConfig;
 		}
+		DebuggingHelper.sendLootableVaultLogMessage("Config not valid: " + this.lootableVaultConfigIdentifier, null);
 		return LootableVaultConfig.DEFAULT;
 //		return LootableVaultConfigsRegistry.registeredLootableVaultConfigs.getOrDefault(Identifier.of(this.lootableVaultConfigIdentifier), LootableVaultConfig.DEFAULT);
 //		return LootableVaultConfigsRegistry.entry(this.world, this.lootableVaultConfigIdentifier).value();
@@ -360,17 +363,26 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			if (!canBeUnlocked(config, state)) {
 				sharedData.setDisplayItem(ItemStack.EMPTY);
 			} else {
-				ItemStack itemStack = generateDisplayItem(world, pos, (RegistryKey<LootTable>) config.overrideLootTableToDisplay().orElse(LootTables.EMPTY));
+				ItemStack itemStack = ItemStack.EMPTY;
+				if (!config.displayLootTableIdentifier().isEmpty()) {
+					Optional<Registry<LootTable>> optionalRegistry = world.getRegistryManager().getOptional(RegistryKeys.LOOT_TABLE);
+					if (optionalRegistry.isPresent()) {
+						LootTable lootTable = optionalRegistry.get().get(Identifier.of(config.displayLootTableIdentifier()));
+						if (lootTable != null) {
+							itemStack = generateDisplayItem(world, pos, lootTable);
+						}
+					}
+				}
 				sharedData.setDisplayItem(itemStack);
 			}
 		}
 
-		private static ItemStack generateDisplayItem(ServerWorld world, BlockPos pos, RegistryKey<LootTable> lootTable) {
-			LootTable lootTable2 = world.getServer().getReloadableRegistries().getLootTable(lootTable);
+		private static ItemStack generateDisplayItem(ServerWorld world, BlockPos pos, LootTable lootTable) {
+//			LootTable lootTable2 = world.getServer().getReloadableRegistries().getLootTable(lootTable);
 			LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(world)
 					.add(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos))
 					.build(LootContextTypes.VAULT);
-			List<ItemStack> list = lootTable2.generateLoot(lootContextParameterSet, world.getRandom());
+			List<ItemStack> list = lootTable.generateLoot(lootContextParameterSet, world.getRandom());
 			return list.isEmpty() ? ItemStack.EMPTY : Util.getRandom(list, world.getRandom());
 		}
 

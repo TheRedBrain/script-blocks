@@ -19,7 +19,7 @@ public record LootableVaultConfig(
 		double activationRange,
 		double deactivationRange,
 		ItemStack keyItem,
-		Optional<RegistryKey<LootTable>> overrideLootTableToDisplay/*,
+		String displayLootTableIdentifier/*,
 		EntityDetector playerDetector,
 		EntityDetector.Selector entitySelector*/
 ) {
@@ -34,9 +34,7 @@ public record LootableVaultConfig(
 									Codec.DOUBLE.fieldOf("activationRange").forGetter(LootableVaultConfig::activationRange),
 									Codec.DOUBLE.fieldOf("deactivationRange").forGetter(LootableVaultConfig::deactivationRange),
 									ItemStack.VALIDATED_CODEC.fieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
-									RegistryKey.createCodec(RegistryKeys.LOOT_TABLE)
-											.lenientOptionalFieldOf("override_loot_table_to_display")
-											.forGetter(LootableVaultConfig::overrideLootTableToDisplay)
+									Codec.STRING.fieldOf("displayLootTableIdentifier").forGetter(LootableVaultConfig::lootableIdentifier)
 							)
 							.apply(instance, LootableVaultConfig::new)
 			)
@@ -51,7 +49,7 @@ public record LootableVaultConfig(
 				4.0,
 				4.5,
 				new ItemStack(Items.TRIAL_KEY),
-				Optional.empty()//,
+				""//,
 //				EntityDetector.NON_SPECTATOR_PLAYERS,
 //				EntityDetector.Selector.IN_WORLD
 		);
