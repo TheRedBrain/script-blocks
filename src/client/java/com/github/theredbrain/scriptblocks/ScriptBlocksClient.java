@@ -103,6 +103,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.BOSS_CONTROLLER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.LOOTABLE_VAULT_BLOCK, renderLayer);
+		BlockRenderLayerMap.INSTANCE.putBlock(BlockRegistry.TRIGGERING_TRIAL_SPAWNER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getTranslucent(),
 				BlockRegistry.AESTHETIC_NETHER_PORTAL
 		);

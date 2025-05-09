@@ -30,6 +30,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRedstoneBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -43,6 +44,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<LootableVaultBlockEntity> LOOTABLE_VAULT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("lootable_vault_block"),
 			FabricBlockEntityTypeBuilder.create(LootableVaultBlockEntity::new, BlockRegistry.LOOTABLE_VAULT_BLOCK).build());
+	public static final BlockEntityType<TriggeringTrialSpawnerBlockEntity> TRIGGERING_TRIAL_SPAWNER = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggering_trial_spawner_block"),
+			FabricBlockEntityTypeBuilder.create(TriggeringTrialSpawnerBlockEntity::new, BlockRegistry.TRIGGERING_TRIAL_SPAWNER_BLOCK).build());
 	public static final BlockEntityType<AestheticDecoratedPotBlockEntity> AESTHETIC_DECORATED_POT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("aesthetic_decorated_pot"),
 			FabricBlockEntityTypeBuilder.create(AestheticDecoratedPotBlockEntity::new, BlockRegistry.AESTHETIC_DECORATED_POT).build());

@@ -33,6 +33,7 @@ import com.github.theredbrain.scriptblocks.block.TriggeredRNGBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRedstoneBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredSpawnerBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredVillagerSpawnerBlock;
+import com.github.theredbrain.scriptblocks.block.TriggeringTrialSpawnerBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayAnvilBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayChestBlock;
@@ -45,6 +46,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.Sherds;
 import net.minecraft.block.enums.NoteBlockInstrument;
+import net.minecraft.block.enums.TrialSpawnerState;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.BlockItem;
@@ -116,6 +118,7 @@ public class BlockRegistry {
 	public static final Block USE_RELAY_CHEST = registerBlock("use_relay_chest", new UseRelayChestBlock(null, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block LOCKED_USE_RELAY_CHEST = registerBlock("locked_use_relay_chest", new UseRelayChestBlock(Tags.KEYS_FOR_LOCKED_USE_RELAY_CHEST, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block LOOTABLE_VAULT_BLOCK = registerBlock("lootable_vault_block", new LootableVaultBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.VAULT).luminance(state -> ((LootableVaultState) state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block TRIGGERING_TRIAL_SPAWNER_BLOCK = registerBlock("triggering_trial_spawner_block", new TriggeringTrialSpawnerBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.TRIAL_SPAWNER).blockVision(Blocks::never).luminance(state -> ((TrialSpawnerState) state.get(TriggeringTrialSpawnerBlock.TRIAL_SPAWNER_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	//endregion Content Blocks
 
 	//region Script Blocks

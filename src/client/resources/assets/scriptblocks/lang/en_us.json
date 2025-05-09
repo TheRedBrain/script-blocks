@@ -614,6 +614,7 @@
 	"block.scriptblocks.locked_use_relay_chest": "Locked Use Relay Chest",
 
 	"block.scriptblocks.lootable_vault_block": "Lootable Vault",
+	"block.scriptblocks.triggering_trial_spawner_block": "Triggering Trial Spawner",
 
 	"block.scriptblocks.area_block": "Area Block",
 	"block.scriptblocks.boss_controller_block": "Boss Controller Block",
