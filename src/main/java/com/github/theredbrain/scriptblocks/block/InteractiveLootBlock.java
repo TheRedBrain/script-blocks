@@ -80,36 +80,17 @@ public class InteractiveLootBlock extends BlockWithEntity {
 							serverPlayerEntity.sendMessage(Text.translatable(alreadyLootedMessage), true);
 						}
 					} else {
-						boolean lootSupplied;
 						Vec3d lootPos = new Vec3d(interactiveLootBlockEntity.getPos().getX(), interactiveLootBlockEntity.getPos().getY(), interactiveLootBlockEntity.getPos().getZ());
 						if (interactiveLootBlockEntity.getMode() == InteractiveLootBlockEntity.Mode.CHOICE) {
-							lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(interactiveLootBlockEntity.getLootTableIdentifierString()), serverPlayerEntity, lootPos, interactiveLootBlockEntity.getRolls(), interactiveLootBlockEntity.getChoices(), true);
+							ScriptBlocks.supplyLootableLoot(Identifier.of(interactiveLootBlockEntity.getLootTableIdentifierString()), serverWorld, serverPlayerEntity, lootPos, interactiveLootBlockEntity.getRolls(), interactiveLootBlockEntity.getChoices(), true, null);
 						} else if (interactiveLootBlockEntity.getMode() == InteractiveLootBlockEntity.Mode.RANDOM) {
-							lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(interactiveLootBlockEntity.getLootTableIdentifierString()), serverPlayerEntity, lootPos, interactiveLootBlockEntity.getRolls(), interactiveLootBlockEntity.getChoices(), false);
+							ScriptBlocks.supplyLootableLoot(Identifier.of(interactiveLootBlockEntity.getLootTableIdentifierString()), serverWorld, serverPlayerEntity, lootPos, interactiveLootBlockEntity.getRolls(), interactiveLootBlockEntity.getChoices(), false, null);
 						} else {
 							List<ItemStack> lootStacks = getLootItems(serverWorld, pos, player, interactiveLootBlockEntity);
 							for (ItemStack itemStack : lootStacks) {
 								player.getInventory().offerOrDrop(itemStack);
 							}
-							lootSupplied = true;
-						}
-						if (lootSupplied) {
-							if (interactiveLootBlockEntity.getTrackPlayers()) {
-								interactiveLootBlockEntity.addPlayerToSet(serverPlayerEntity);
-							}
-							String lootAcquiredSoundId = interactiveLootBlockEntity.getLootAcquiredSoundId();
-							if (!lootAcquiredSoundId.isEmpty()) {
-								SoundEvent soundEvent = SoundEvent.of(Identifier.of(lootAcquiredSoundId));
-								if (Registries.SOUND_EVENT.getEntry(soundEvent) != null) {
-									serverPlayerEntity.playSoundToPlayer(soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
-								} else {
-									ScriptBlocks.info("No registered sound event of id '" + lootAcquiredSoundId + "' found.");
-								}
-							}
-							String lootAcquiredMessage = interactiveLootBlockEntity.getLootAcquiredMessage();
-							if (!lootAcquiredMessage.isEmpty()) {
-								serverPlayerEntity.sendMessage(Text.translatable(lootAcquiredMessage), true);
-							}
+							lootWasSupplied(serverPlayerEntity, interactiveLootBlockEntity);
 						}
 						return ActionResult.SUCCESS;
 					}
@@ -117,6 +98,25 @@ public class InteractiveLootBlock extends BlockWithEntity {
 			}
 		}
 		return ActionResult.PASS;
+	}
+
+	public static void lootWasSupplied(ServerPlayerEntity serverPlayerEntity, InteractiveLootBlockEntity interactiveLootBlockEntity) {
+		if (interactiveLootBlockEntity.getTrackPlayers()) {
+			interactiveLootBlockEntity.addPlayerToSet(serverPlayerEntity);
+		}
+		String lootAcquiredSoundId = interactiveLootBlockEntity.getLootAcquiredSoundId();
+		if (!lootAcquiredSoundId.isEmpty()) {
+			SoundEvent soundEvent = SoundEvent.of(Identifier.of(lootAcquiredSoundId));
+			if (Registries.SOUND_EVENT.getEntry(soundEvent) != null) {
+				serverPlayerEntity.playSoundToPlayer(soundEvent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+			} else {
+				ScriptBlocks.info("No registered sound event of id '" + lootAcquiredSoundId + "' found.");
+			}
+		}
+		String lootAcquiredMessage = interactiveLootBlockEntity.getLootAcquiredMessage();
+		if (!lootAcquiredMessage.isEmpty()) {
+			serverPlayerEntity.sendMessage(Text.translatable(lootAcquiredMessage), true);
+		}
 	}
 
 	private static List<ItemStack> getLootItems(ServerWorld serverWorld, BlockPos pos, PlayerEntity player, InteractiveLootBlockEntity interactiveLootBlockEntity) {

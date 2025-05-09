@@ -32,8 +32,10 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -141,17 +143,33 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		return this.clientData;
 	}
 
-	public void unmarkAsRewarded(ServerPlayerEntity serverPlayerEntity) {
+	public void markAsRewarded(ServerPlayerEntity serverPlayerEntity, ItemStack itemStack) {
 		if (this.world instanceof ServerWorld serverWorld) {
 			LootableVaultServerData serverData = this.getServerData();
 			LootableVaultSharedData sharedData = this.getSharedData();
 			LootableVaultConfig config = this.getConfig(serverWorld);
 			if (serverData != null && sharedData != null) {
-				serverData.unmarkPlayerAsRewarded(serverPlayerEntity);
+//				ScriptBlocks.info("loot supplied");
+				serverPlayerEntity.incrementStat(Stats.USED.getOrCreateStat(itemStack.getItem()));
+				itemStack.decrementUnlessCreative(config.keyItem().getCount(), serverPlayerEntity);
+				Server.unlock(serverWorld, serverWorld.getBlockState(this.pos), this.pos, config, serverData, sharedData);
+				serverData.markPlayerAsRewarded(serverPlayerEntity);
 				sharedData.updateConnectedPlayers(serverWorld, this.pos, serverData, config, config.deactivationRange());
 			}
 		}
 	}
+
+//	public void unmarkAsRewarded(ServerPlayerEntity serverPlayerEntity) {
+//		if (this.world instanceof ServerWorld serverWorld) {
+//			LootableVaultServerData serverData = this.getServerData();
+//			LootableVaultSharedData sharedData = this.getSharedData();
+//			LootableVaultConfig config = this.getConfig(serverWorld);
+//			if (serverData != null && sharedData != null) {
+//				serverData.unmarkPlayerAsRewarded(serverPlayerEntity);
+//				sharedData.updateConnectedPlayers(serverWorld, this.pos, serverData, config, config.deactivationRange());
+//			}
+//		}
+//	}
 
 //	public String getConfigId() {
 //		ScriptBlocks.info("getConfigId: " + this.lootableVaultConfigIdentifier);
@@ -340,14 +358,14 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //					boolean lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice());
 
 //					List<ItemStack> list = generateLoot(world, config, pos, player);
-					if (ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice())) {
+					/*if (*/ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), world, serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice(), stack);/*) {
 						ScriptBlocks.info("loot supplied");
 						player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
 						stack.decrementUnlessCreative(config.keyItem().getCount(), player);
 						unlock(world, state, pos, config, serverData, sharedData);
-						serverData.markPlayerAsRewarded(player);
-						sharedData.updateConnectedPlayers(world, pos, serverData, config, config.deactivationRange());
-					}
+					}*/
+					serverData.markPlayerAsRewarded(player);
+					sharedData.updateConnectedPlayers(world, pos, serverData, config, config.deactivationRange());
 				}
 			}
 		}
@@ -365,13 +383,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			} else {
 				ItemStack itemStack = ItemStack.EMPTY;
 				if (!config.displayLootTableIdentifier().isEmpty()) {
-					Optional<Registry<LootTable>> optionalRegistry = world.getRegistryManager().getOptional(RegistryKeys.LOOT_TABLE);
-					if (optionalRegistry.isPresent()) {
-						LootTable lootTable = optionalRegistry.get().get(Identifier.of(config.displayLootTableIdentifier()));
-						if (lootTable != null) {
-							itemStack = generateDisplayItem(world, pos, lootTable);
-						}
-					}
+					itemStack = generateDisplayItem(world, pos, world.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(config.displayLootTableIdentifier()))));
 				}
 				sharedData.setDisplayItem(itemStack);
 			}
@@ -386,7 +398,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			return list.isEmpty() ? ItemStack.EMPTY : Util.getRandom(list, world.getRandom());
 		}
 
-		private static void unlock(
+		public static void unlock(
 				ServerWorld world, BlockState state, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData
 		) {
 //			serverData.setItemsToEject(itemsToEject);
