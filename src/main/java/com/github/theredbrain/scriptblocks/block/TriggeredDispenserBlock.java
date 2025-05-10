@@ -43,6 +43,9 @@ public class TriggeredDispenserBlock extends DispenserBlock {
 
 	@Override
 	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+		if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
+			world.removeBlockEntity(pos);
+		}
 	}
 
 	@Override
