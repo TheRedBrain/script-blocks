@@ -29,6 +29,7 @@ import com.github.theredbrain.scriptblocks.block.TriggeredBeaconBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredCounterBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDispenserBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDisplayBlock;
+import com.github.theredbrain.scriptblocks.block.TriggeredEntityRemoverBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRNGBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRedstoneBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredSpawnerBlock;
@@ -62,7 +63,6 @@ import net.minecraft.sound.SoundEvents;
 public class BlockRegistry {
 
 	//region Content Blocks
-	// content script blocks
 	public static final Block AESTHETIC_DECORATED_POT = registerAestheticDecoratedPotBlock("aesthetic_decorated_pot", new AestheticDecoratedPotBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_RED).strength(10.0F, 3600000.0f).sounds(BlockSoundGroup.DECORATED_POT).pistonBehavior(PistonBehavior.DESTROY).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block AESTHETIC_NETHER_PORTAL = registerBlock("aesthetic_nether_portal", new AestheticVerticalPortalBlock(Block.Settings.create().noCollision().strength(-1.0F).sounds(BlockSoundGroup.GLASS).luminance(state -> 11).pistonBehavior(PistonBehavior.BLOCK).dropsNothing(), ParticleTypes.PORTAL, SoundEvents.BLOCK_PORTAL_AMBIENT), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_OAK_DOOR = registerBlock("teleporter_oak_door", new TeleporterDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
@@ -115,9 +115,12 @@ public class BlockRegistry {
 	public static final Block USE_RELAY_BAMBOO_TRAPDOOR = registerBlock("use_relay_bamboo_trapdoor", new UseRelayTrapdoorBlock(Block.Settings.create().mapColor(MapColor.YELLOW).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_CRIMSON_TRAPDOOR = registerBlock("use_relay_crimson_trapdoor", new UseRelayTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DULL_PINK).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_WARPED_TRAPDOOR = registerBlock("use_relay_warped_trapdoor", new UseRelayTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+
 	public static final Block USE_RELAY_CHEST = registerBlock("use_relay_chest", new UseRelayChestBlock(null, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block LOCKED_USE_RELAY_CHEST = registerBlock("locked_use_relay_chest", new UseRelayChestBlock(Tags.KEYS_FOR_LOCKED_USE_RELAY_CHEST, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+
 	public static final Block LOOTABLE_VAULT_BLOCK = registerBlock("lootable_vault_block", new LootableVaultBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.VAULT).luminance(state -> ((LootableVaultState) state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+
 	public static final Block TRIGGERING_TRIAL_SPAWNER_BLOCK = registerBlock("triggering_trial_spawner_block", new TriggeringTrialSpawnerBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.TRIAL_SPAWNER).blockVision(Blocks::never).luminance(state -> ((TrialSpawnerState) state.get(TriggeringTrialSpawnerBlock.TRIAL_SPAWNER_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	//endregion Content Blocks
 
@@ -146,11 +149,12 @@ public class BlockRegistry {
 	public static final Block TRIGGERED_BEACON_BLOCK = registerBlock("triggered_beacon_block", new TriggeredBeaconBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_COUNTER_BLOCK = registerBlock("triggered_counter_block", new TriggeredCounterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_DISPENSER_BLOCK = registerBlock("triggered_dispenser_block", new TriggeredDispenserBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TRIGGERED_DISPLAY_BLOCK = registerBlock("triggered_display_block", new TriggeredDisplayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TRIGGERED_ENTITY_REMOVER_BLOCK = registerBlock("triggered_entity_remover_block", new TriggeredEntityRemoverBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_REDSTONE_BLOCK = registerBlock("triggered_redstone_block", new TriggeredRedstoneBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TRIGGERED_RNG_BLOCK = registerBlock("triggered_rng_block", new TriggeredRNGBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_SPAWNER_BLOCK = registerBlock("triggered_spawner_block", new TriggeredSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_VILLAGER_SPAWNER_BLOCK = registerBlock("triggered_villager_spawner_block", new TriggeredVillagerSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
-	public static final Block TRIGGERED_DISPLAY_BLOCK = registerBlock("triggered_display_block", new TriggeredDisplayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
-	public static final Block TRIGGERED_RNG_BLOCK = registerBlock("triggered_rng_block", new TriggeredRNGBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_BLOCK = registerBlock("use_relay_block", new UseRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	//endregion Script Blocks
 

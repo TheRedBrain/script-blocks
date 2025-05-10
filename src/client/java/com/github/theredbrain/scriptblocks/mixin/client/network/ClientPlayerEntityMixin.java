@@ -22,6 +22,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementChec
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
@@ -52,6 +53,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancemen
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredBeaconBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDisplayBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredEntityRemoverBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredVillagerSpawnerBlockScreen;
@@ -272,6 +274,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity) {
 		this.client.setScreen(new DataSavingBlockScreen(dataSavingBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openTriggeredEntityRemoverBlockScreen(TriggeredEntityRemoverBlockEntity triggeredEntityRemoverBlockEntity) {
+		this.client.setScreen(new TriggeredEntityRemoverBlockScreen(triggeredEntityRemoverBlockEntity));
 	}
 
 //	@Override

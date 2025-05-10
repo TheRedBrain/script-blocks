@@ -64,6 +64,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounter
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredEntityRemoverBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredEntityRemoverBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredRNGBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredRNGBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacket;
@@ -128,6 +130,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredDisplayBlockPacket.PACKET_ID, UpdateTriggeredDisplayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredDisplayBlockPacket.PACKET_ID, new UpdateTriggeredDisplayBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredEntityRemoverBlockPacket.PACKET_ID, UpdateTriggeredEntityRemoverBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredEntityRemoverBlockPacket.PACKET_ID, new UpdateTriggeredEntityRemoverBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredRNGBlockPacket.PACKET_ID, UpdateTriggeredRNGBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredRNGBlockPacket.PACKET_ID, new UpdateTriggeredRNGBlockPacketReceiver());

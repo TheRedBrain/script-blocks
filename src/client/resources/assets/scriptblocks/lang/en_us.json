@@ -130,6 +130,12 @@
 	"gui.triggered_message_block.trigger_mode.once": "Trigger Mode: Once",
 
 
+	"gui.triggered_entity_remover_block.hide_area_label": "Hide Area",
+	"gui.triggered_entity_remover_block.show_area_label": "Show Area §c(Be careful when area is large!)",
+	"gui.triggered_entity_remover_block.area_dimensions_label": "Area Dimensions",
+	"gui.triggered_entity_remover_block.area_position_offset_label": "Area Position Offset",
+
+
 	"gui.use_relay_block.relayBlockPositionOffset": "Relay Block Position Offset",
 
 
@@ -641,6 +647,7 @@
 	"block.scriptblocks.triggered_counter_block": "Triggered Counter Block",
 	"block.scriptblocks.triggered_display_block": "Triggered Display Block",
 	"block.scriptblocks.triggered_redstone_block": "Triggered Redstone Block",
+	"block.scriptblocks.triggered_entity_remover_block": "Triggered Entity Remover Block",
 	"block.scriptblocks.triggered_rng_block": "Triggered RNG Block",
 	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
 	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
