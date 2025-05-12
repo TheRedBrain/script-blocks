@@ -391,6 +391,12 @@
 	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",
 
 
+	"gui.player_detector_block.hide_area_label": "Hide Area",
+	"gui.player_detector_block.show_area_label": "Show Area",
+	"gui.player_detector_block.area_dimensions_label": "Area Dimensions",
+	"gui.player_detector_block.area_position_offset_label": "Area Position Offset",
+
+
 	"gui.triggered_beacon_block.triggered_true_label": "Triggered Override: True",
 	"gui.triggered_beacon_block.triggered_false_label": "Triggered Override: False",
 	"gui.triggered_beacon_block.hide_area_label": "Hide Area",
@@ -638,6 +644,7 @@
 	"block.scriptblocks.location_control_block": "Location Control Block",
 	"block.scriptblocks.mimic_block": "Mimic Block",
 	"block.scriptblocks.mimic_fallback_block": "Mimic Fallback Block",
+	"block.scriptblocks.player_detector_block": "Player Detector Block",
 	"block.scriptblocks.redstone_trigger_block": "Redstone Trigger Block",
 	"block.scriptblocks.relay_trigger_block": "Relay Trigger Block",
 	"block.scriptblocks.shop_block": "Shop Block",

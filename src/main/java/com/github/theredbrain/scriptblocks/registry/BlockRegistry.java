@@ -18,6 +18,7 @@ import com.github.theredbrain.scriptblocks.block.JigsawPlacerBlock;
 import com.github.theredbrain.scriptblocks.block.LocationControlBlock;
 import com.github.theredbrain.scriptblocks.block.LootableVaultBlock;
 import com.github.theredbrain.scriptblocks.block.MimicBlock;
+import com.github.theredbrain.scriptblocks.block.PlayerDetectorBlock;
 import com.github.theredbrain.scriptblocks.block.RedstoneTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.RelayTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.ShopBlock;
@@ -142,6 +143,7 @@ public class BlockRegistry {
 	public static final Block MIMIC_BLOCK = registerBlock("mimic_block", new MimicBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block MIMIC_FALLBACK_BLOCK = Registry.register(Registries.BLOCK, ScriptBlocks.identifier("mimic_fallback_block"), new Block(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
 	public static final Block REDSTONE_TRIGGER_BLOCK = registerBlock("redstone_trigger_block", new RedstoneTriggerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block PLAYER_DETECTOR_BLOCK = registerBlock("player_detector_block", new PlayerDetectorBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block RELAY_TRIGGER_BLOCK = registerBlock("relay_trigger_block", new RelayTriggerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block SHOP_BLOCK = registerBlock("shop_block", new ShopBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_BLOCK = registerBlock("teleporter_block", new TeleporterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

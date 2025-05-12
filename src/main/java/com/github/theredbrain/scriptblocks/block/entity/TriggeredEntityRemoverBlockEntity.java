@@ -16,6 +16,7 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -107,12 +108,9 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 
 		if (nbt.contains("areaDimensionsX", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsY", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsZ", NbtElement.INT_TYPE)) {
 			this.areaDimensions = new Vec3i(
-//					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-//					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-//					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
-					nbt.getInt("areaDimensionsX"),
-					nbt.getInt("areaDimensionsY"),
-					nbt.getInt("areaDimensionsZ")
+					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
+					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
+					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
 			);
 		} else {
 			this.areaDimensions = Vec3i.ZERO;
@@ -120,12 +118,9 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 
 		if (nbt.contains("areaPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetZ", NbtElement.INT_TYPE)) {
 			this.areaPositionOffset = new BlockPos(
-//					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-//					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-//					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
-					nbt.getInt("areaPositionOffsetX"),
-					nbt.getInt("areaPositionOffsetY"),
-					nbt.getInt("areaPositionOffsetZ")
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
 			);
 		} else {
 			this.areaPositionOffset = AREA_POSITION_OFFSET_DEFAULT;

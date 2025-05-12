@@ -48,6 +48,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlB
 import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateMimicBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateMimicBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdatePlayerDetectorBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdatePlayerDetectorBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateRedstoneTriggerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateRedstoneTriggerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateRelayTriggerBlockPacket;
@@ -148,6 +150,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateMimicBlockPacket.PACKET_ID, UpdateMimicBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateMimicBlockPacket.PACKET_ID, new UpdateMimicBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdatePlayerDetectorBlockPacket.PACKET_ID, UpdatePlayerDetectorBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdatePlayerDetectorBlockPacket.PACKET_ID, new UpdatePlayerDetectorBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateBossControllerBlockPacket.PACKET_ID, UpdateBossControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateBossControllerBlockPacket.PACKET_ID, new UpdateBossControllerBlockPacketReceiver());
