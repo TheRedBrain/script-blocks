@@ -31,7 +31,7 @@ public class TriggeredEntityRemoverBlockEntityRenderer implements BlockEntityRen
 		double m;
 		double k;
 		ClientPlayerEntity clientPlayerEntity = MinecraftClient.getInstance().player;
-		if (clientPlayerEntity == null || !clientPlayerEntity.isCreativeLevelTwoOp() || clientPlayerEntity.isSpectator() || ScriptBlocksClient.CLIENT_CONFIG.disable_area_renderer) {
+		if (clientPlayerEntity == null || !clientPlayerEntity.isCreativeLevelTwoOp() || clientPlayerEntity.isSpectator()) {
 			return;
 		}
 		BlockPos blockPos = triggeredEntityRemoverBlockEntity.getAreaPositionOffset();

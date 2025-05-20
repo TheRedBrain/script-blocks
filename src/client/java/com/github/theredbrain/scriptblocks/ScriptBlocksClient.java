@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks;
 
-import com.github.theredbrain.scriptblocks.config.ClientConfig;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDispenserBlockScreen;
@@ -21,29 +20,32 @@ import com.github.theredbrain.scriptblocks.render.block.entity.TeleporterBlockEn
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredBeaconBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDisplayBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredEntityRemoverBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.renderer.FakeVillagerEntityRenderer;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 
 @Environment(value = EnvType.CLIENT)
 public class ScriptBlocksClient implements ClientModInitializer {
-	public static ClientConfig CLIENT_CONFIG;
+//	public static ClientConfig CLIENT_CONFIG;
 
 	@Override
 	public void onInitializeClient() {
-		// Config
-		CLIENT_CONFIG = ConfigApiJava.registerAndLoadConfig(ClientConfig::new, RegisterType.CLIENT);
+//		// Config
+//		CLIENT_CONFIG = ConfigApiJava.registerAndLoadConfig(ClientConfig::new, RegisterType.CLIENT);
 
 		// Packets
 		ClientPacketRegistry.init();
 
 		// Registry
+		registerEntityRenderer();
 		KeyBindingsRegistry.registerKeyBindings();
 		registerTransparency();
 		registerBlockEntityRenderer();
@@ -131,5 +133,9 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		HandledScreens.register(ScreenHandlerTypesRegistry.TRIGGERED_DISPENSER_BLOCK_SCREEN_HANDLER, TriggeredDispenserBlockScreen::new);
 		HandledScreens.register(ScreenHandlerTypesRegistry.SHOP_BLOCK_SCREEN_HANDLER, ShopScreen::new);
 		HandledScreens.register(ScreenHandlerTypesRegistry.TELEPORTER_BLOCK_SCREEN_HANDLER, TeleporterBlockScreen::new);
+	}
+
+	private void registerEntityRenderer() {
+		EntityRendererRegistry.register(EntityRegistry.FAKE_VILLAGER_ENTITY, FakeVillagerEntityRenderer::new);
 	}
 }

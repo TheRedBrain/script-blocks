@@ -35,8 +35,14 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawner
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
+import com.github.theredbrain.scriptblocks.entity.passive.FakeVillagerEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
@@ -203,6 +209,15 @@ public class EntityRegistry {
 					BlockRegistry.LOCKED_USE_RELAY_CHEST).build());
 	//endregion Script Blocks
 
+	public static final EntityType<FakeVillagerEntity> FAKE_VILLAGER_ENTITY = Registry.register(Registries.ENTITY_TYPE,
+			ScriptBlocks.identifier("fake_villager"),
+			FabricEntityTypeBuilder.create(SpawnGroup.MISC, FakeVillagerEntity::new).dimensions(EntityDimensions.changing(0.6F, 1.95F)).build());
+
 	public static void init() {
+		registerEntityAttributes();
+	}
+
+	public static void registerEntityAttributes() {
+		FabricDefaultAttributeRegistry.register(EntityRegistry.FAKE_VILLAGER_ENTITY, FakeVillagerEntity.createMobAttributes());
 	}
 }
