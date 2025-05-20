@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -180,7 +181,9 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 			List<PlayerEntity> newPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, areaBlockEntity.area);
 			List<UUID> newPLayerUuidList = new ArrayList<>();
 			for (PlayerEntity player : newPlayerList) {
-				newPLayerUuidList.add(player.getUuid());
+				if (!player.isCreative() || ScriptBlocks.SERVER_CONFIG.enable_creative_player_detection) {
+					newPLayerUuidList.add(player.getUuid());
+				}
 			}
 			ArrayList<UUID> tempList = new ArrayList<>();
 
