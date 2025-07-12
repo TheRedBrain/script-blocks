@@ -19,6 +19,12 @@ public class DebuggingHelper {
 		}
 	}
 
+	public static void sendJigsawPlacerLogMessage(String message, @Nullable PlayerEntity playerEntity) {
+		if (ScriptBlocks.SERVER_CONFIG.enable_debug_logging && ScriptBlocks.SERVER_CONFIG.enable_jigsaw_placer_debugging) {
+			sendDebuggingMessage(message, playerEntity);
+		}
+	}
+
 	public static boolean isTeleporterLoggingEnabled() {
 		return ScriptBlocks.SERVER_CONFIG.enable_debug_logging && ScriptBlocks.SERVER_CONFIG.enable_teleporter_debugging;
 	}

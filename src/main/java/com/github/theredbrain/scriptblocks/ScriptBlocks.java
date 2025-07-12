@@ -1,8 +1,6 @@
 package com.github.theredbrain.scriptblocks;
 
-import com.github.theredbrain.scriptblocks.block.InteractiveLootBlock;
-import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
+import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
@@ -19,16 +17,12 @@ import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegis
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import me.fzzyhmstrs.fzzy_config.api.RegisterType;
-import me.fzzyhmstrs.lootables.api.LootablesApi;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -45,45 +39,7 @@ public class ScriptBlocks implements ModInitializer {
 
 	public static void supplyLootableLoot(Identifier identifier, ServerWorld world, ServerPlayerEntity serverPlayerEntity, Vec3d pos, int rolls, int choices, boolean withChoice, @Nullable ItemStack itemStack) {
 		if (isLootablesLoaded) {
-			if (withChoice) {
-				LootablesApi.supplyLootWithChoices(
-						identifier,
-						serverPlayerEntity,
-						pos,
-						(serverPlayerEntity1, vec3d) -> {
-
-							BlockPos blockPos = new BlockPos((int) pos.x, (int) pos.y, (int) pos.z);
-							BlockEntity blockEntity = world.getBlockEntity(blockPos);
-							if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
-								InteractiveLootBlock.lootWasSupplied(serverPlayerEntity, interactiveLootBlockEntity);
-							}
-							if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity) {
-								lootableVaultBlockEntity.markAsRewarded(serverPlayerEntity, itemStack);
-							}
-						},
-						(serverPlayerEntity2, vec3d) -> {
-							// gets called when player leaves choices screen without making a choice
-//							BlockEntity blockEntity = world.getBlockEntity(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z));
-//							if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
-//								interactiveLootBlockEntity.removePlayerFromSet(serverPlayerEntity);
-//							}
-//							if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity) {
-//								lootableVaultBlockEntity.unmarkAsRewarded(serverPlayerEntity);
-//							}
-						},
-						null,
-						rolls,
-						choices
-				);
-			} else {
-				LootablesApi.supplyLootRandomly(
-						identifier,
-						serverPlayerEntity,
-						pos,
-						null,
-						rolls
-				);
-			}
+			LootableCompat.supplyLootableLoot(identifier, world, serverPlayerEntity, pos, rolls, choices, withChoice, itemStack);
 		} else {
 			info("Tried to supply loot via Lootables, but the mod is not installed!");
 		}

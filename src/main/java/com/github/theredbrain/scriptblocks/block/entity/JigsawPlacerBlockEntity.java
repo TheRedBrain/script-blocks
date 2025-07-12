@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
@@ -8,6 +7,7 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.structure.pool.FixedRotationStructurePoolBasedGenerator;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.JigsawBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -240,23 +240,26 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 			if (this.world instanceof ServerWorld serverWorld) {
 				BlockPos blockPos = this.getPos().offset(this.getCachedState().get(JigsawBlock.ORIENTATION).getFacing());
 				Registry<StructurePool> registry = world.getRegistryManager().get(RegistryKeys.TEMPLATE_POOL);
-				RegistryEntry.Reference<StructurePool> registryEntry = registry.entryOf(this.getCurrentPool(serverWorld));
+				try {
+					RegistryEntry.Reference<StructurePool> registryEntry = registry.entryOf(this.getCurrentPool(serverWorld));
 
-				Direction rotation = this.getCachedState().get(JigsawBlock.ORIENTATION).getRotation();
-				Direction facing = this.getCachedState().get(JigsawBlock.ORIENTATION).getFacing();
+					Direction rotation = this.getCachedState().get(JigsawBlock.ORIENTATION).getRotation();
+					Direction facing = this.getCachedState().get(JigsawBlock.ORIENTATION).getFacing();
 
-				ScriptBlocks.info("facing: " + facing + ", rotation: " + rotation);
-
-				if (registryEntry.hasKeyAndValue()) {
-					FixedRotationStructurePoolBasedGenerator.generate(
-							serverWorld,
-							registryEntry,
-							this.target,
-							20,
-							/*blockPos*/(facing == Direction.UP || facing == Direction.DOWN) ? new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()) : facing == Direction.SOUTH ? new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ() + 2) : facing == Direction.WEST ? new BlockPos(blockPos.getX() - 2, blockPos.getY() + 1, blockPos.getZ()) : facing == Direction.EAST ? new BlockPos(blockPos.getX() + 2, blockPos.getY() + 1, blockPos.getZ()) : new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ() - 2), // offsets to fix vanilla bug
-							false,
-							facing == Direction.EAST ? BlockRotation.CLOCKWISE_90 : facing == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : facing == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : facing == Direction.NORTH ? BlockRotation.NONE : rotation == Direction.EAST ? BlockRotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : BlockRotation.NONE
-					);
+					if (registryEntry.hasKeyAndValue()) {
+						FixedRotationStructurePoolBasedGenerator.generate(
+								serverWorld,
+								registryEntry,
+								this.target,
+								20,
+								/*blockPos*/(facing == Direction.UP || facing == Direction.DOWN) ? new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()) : facing == Direction.SOUTH ? new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ() + 2) : facing == Direction.WEST ? new BlockPos(blockPos.getX() - 2, blockPos.getY() + 1, blockPos.getZ()) : facing == Direction.EAST ? new BlockPos(blockPos.getX() + 2, blockPos.getY() + 1, blockPos.getZ()) : new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ() - 2), // offsets to fix vanilla bug
+								false,
+								facing == Direction.EAST ? BlockRotation.CLOCKWISE_90 : facing == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : facing == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : facing == Direction.NORTH ? BlockRotation.NONE : rotation == Direction.EAST ? BlockRotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : BlockRotation.NONE
+						);
+					}
+				} catch (IllegalStateException illegalStateException) {
+					DebuggingHelper.sendJigsawPlacerLogMessage("JigsawPlacerBlock couldn't find a structure pool: " + illegalStateException.getMessage(), null);
+					return;
 				}
 			}
 			// trigger next block
