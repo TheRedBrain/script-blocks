@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "scriptblocks:block/use_relay_lectern",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "scriptblocks:block/use_relay_lectern"
+    },
+    "facing=south": {
+      "model": "scriptblocks:block/use_relay_lectern",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "scriptblocks:block/use_relay_lectern",
+      "y": 270
+    }
+  }
+}

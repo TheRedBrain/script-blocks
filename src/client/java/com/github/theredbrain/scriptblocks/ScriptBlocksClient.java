@@ -21,6 +21,7 @@ import com.github.theredbrain.scriptblocks.render.block.entity.TeleporterBlockEn
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredBeaconBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDisplayBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredEntityRemoverBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.block.entity.UseRelayLecternBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.renderer.FakeVillagerEntityRenderer;
 import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import me.fzzyhmstrs.fzzy_config.api.RegisterType;
@@ -127,6 +128,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_BEACON_BLOCK_ENTITY, TriggeredBeaconBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY, LootableVaultBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(EntityRegistry.USE_RELAY_LECTERN_BLOCK_ENTITY, UseRelayLecternBlockEntityRenderer::new);
 	}
 
 	private void registerScreens() {

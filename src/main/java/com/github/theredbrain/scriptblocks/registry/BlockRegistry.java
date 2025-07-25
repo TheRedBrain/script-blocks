@@ -40,6 +40,7 @@ import com.github.theredbrain.scriptblocks.block.UseRelayAnvilBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayChestBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayDoorBlock;
+import com.github.theredbrain.scriptblocks.block.UseRelayLecternBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayTrapdoorBlock;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -92,6 +93,7 @@ public class BlockRegistry {
 	public static final Block TELEPORTER_WARPED_TRAPDOOR = registerBlock("teleporter_warped_trapdoor", new TeleporterTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
 	public static final Block USE_RELAY_ANVIL = registerBlock("use_relay_anvil", new UseRelayAnvilBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+
 	public static final Block USE_RELAY_OAK_DOOR = registerBlock("use_relay_oak_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.OAK_TAN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_IRON_DOOR = registerBlock("use_relay_iron_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_SPRUCE_DOOR = registerBlock("use_relay_spruce_door", new UseRelayDoorBlock(Block.Settings.create().mapColor(MapColor.SPRUCE_BROWN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
@@ -119,6 +121,8 @@ public class BlockRegistry {
 
 	public static final Block USE_RELAY_CHEST = registerBlock("use_relay_chest", new UseRelayChestBlock(null, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block LOCKED_USE_RELAY_CHEST = registerBlock("locked_use_relay_chest", new UseRelayChestBlock(Tags.KEYS_FOR_LOCKED_USE_RELAY_CHEST, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+
+	public static final Block USE_RELAY_LECTERN = registerBlock("use_relay_lectern", new UseRelayLecternBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
 	public static final Block LOOTABLE_VAULT_BLOCK = registerBlock("lootable_vault_block", new LootableVaultBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.VAULT).luminance(state -> ((LootableVaultState) state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 

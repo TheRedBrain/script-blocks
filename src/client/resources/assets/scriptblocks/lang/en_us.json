@@ -599,6 +599,7 @@
 	"block.scriptblocks.teleporter_warped_trapdoor": "Teleporter Warped Trapdoor",
 
 	"block.scriptblocks.use_relay_anvil": "Use Relay Anvil",
+	"block.scriptblocks.use_relay_lectern": "Use Relay Lectern",
 
 	"block.scriptblocks.use_relay_oak_door": "Use Relay Oak Door",
 	"block.scriptblocks.use_relay_iron_door": "Use Relay Iron Door",

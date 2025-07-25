@@ -35,6 +35,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawner
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UseRelayLecternBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.passive.FakeVillagerEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -207,6 +208,10 @@ public class EntityRegistry {
 			FabricBlockEntityTypeBuilder.create(UseRelayChestBlockEntity::new,
 					BlockRegistry.USE_RELAY_CHEST,
 					BlockRegistry.LOCKED_USE_RELAY_CHEST).build());
+	public static final BlockEntityType<UseRelayLecternBlockEntity> USE_RELAY_LECTERN_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("use_relay_lectern"),
+			FabricBlockEntityTypeBuilder.create(UseRelayLecternBlockEntity::new,
+					BlockRegistry.USE_RELAY_LECTERN).build());
 	//endregion Script Blocks
 
 	public static final EntityType<FakeVillagerEntity> FAKE_VILLAGER_ENTITY = Registry.register(Registries.ENTITY_TYPE,
