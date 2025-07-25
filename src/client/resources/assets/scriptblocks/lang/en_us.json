@@ -389,6 +389,7 @@
 
 	"gui.dialogue_screen.item_cost_too_high": "You don't have the required items!",
 
+	"gui.dialogue_screen.creativeScreenPage.data_block_offset": "Data Block Offset",
 	"gui.dialogue_screen.creativeScreenPage.dialogue_used_blocks": "Used Blocks",
 	"gui.dialogue_screen.creativeScreenPage.dialogue_triggered_blocks": "Triggered Blocks",
 	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",

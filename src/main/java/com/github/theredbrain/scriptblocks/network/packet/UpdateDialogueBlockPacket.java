@@ -15,7 +15,8 @@ public record UpdateDialogueBlockPacket(
 		BlockPos dialogueBlockPosition,
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocksList,
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList,
-		List<String> startingDialogueList
+		List<String> startingDialogueList,
+		BlockPos dataBlockOffset
 ) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateDialogueBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_dialogue_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateDialogueBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDialogueBlockPacket::write, UpdateDialogueBlockPacket::new);
@@ -25,7 +26,8 @@ public record UpdateDialogueBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN),
-				registryByteBuf.readList(PacketCodecs.STRING)
+				registryByteBuf.readList(PacketCodecs.STRING),
+				registryByteBuf.readBlockPos()
 		);
 	}
 
@@ -34,6 +36,7 @@ public record UpdateDialogueBlockPacket(
 		registryByteBuf.writeCollection(this.dialogueUsedBlocksList, CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS);
 		registryByteBuf.writeCollection(this.dialogueTriggeredBlocksList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN);
 		registryByteBuf.writeCollection(this.startingDialogueList, PacketCodecs.STRING);
+		registryByteBuf.writeBlockPos(this.dataBlockOffset);
 	}
 
 	@Override

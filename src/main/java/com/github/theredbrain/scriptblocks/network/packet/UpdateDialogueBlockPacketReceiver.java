@@ -42,6 +42,8 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 
 		List<String> startingDialogueList = new ArrayList<>(payload.startingDialogueList());
 
+		BlockPos dataBlockOffset = payload.dataBlockOffset();
+
 		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(dialogueBlockPosition);
@@ -52,6 +54,7 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 			dialogueBlockEntity.setDialogueUsedBlocksMap(dialogueUsedBlocksMap);
 			dialogueBlockEntity.setDialogueTriggeredBlocksMap(dialogueTriggeredBlocksMap);
 			dialogueBlockEntity.setStartingDialogueList(startingDialogueList);
+			dialogueBlockEntity.setDataBlockOffset(dataBlockOffset);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			dialogueBlockEntity.markDirty();
 			world.updateListeners(dialogueBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

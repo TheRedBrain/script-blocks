@@ -13,6 +13,7 @@ import java.util.List;
 
 public record DialogueAnswerPacket(
 		Identifier answerIdentifier,
+		BlockPos dataBlockPos,
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocks,
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks
 ) implements CustomPayload {
@@ -22,6 +23,7 @@ public record DialogueAnswerPacket(
 	public DialogueAnswerPacket(RegistryByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readIdentifier(),
+				registryByteBuf.readBlockPos(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN)
 		);
@@ -29,6 +31,7 @@ public record DialogueAnswerPacket(
 
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeIdentifier(this.answerIdentifier);
+		registryByteBuf.writeBlockPos(this.dataBlockPos);
 		registryByteBuf.writeCollection(this.dialogueUsedBlocks, CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS);
 		registryByteBuf.writeCollection(this.dialogueTriggeredBlocks, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN);
 	}

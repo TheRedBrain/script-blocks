@@ -1,17 +1,29 @@
 {
     "answerText": "dialogue_answers.test_dialogue.answer_1",
-    "responseDialogue": "",
-    "unlockAdvancement": "",
-    "lockAdvancement": "",
-    "showLockedAnswer": true,
-    "showUnaffordableAnswer": false,
-    "grantedAdvancement": "",
-    "criterionName": "",
-    "lootTable": "",
-    "usedBlock": "",
-    "triggeredBlock": "",
-    "overlayMessage": "",
-    "consumeItem": false,
-    "itemIdentifier": "",
-    "itemCount": 0
+    "responseDialogues": [],
+    "availability": {
+        "unlockAdvancement": "",
+        "lockAdvancement": "",
+        "unlockDataCheck": {
+            "dataIdentifier": "",
+            "dataValue": "",
+            "comparisonMode": 0
+        },
+        "lockDataCheck": {
+            "dataIdentifier": "",
+            "dataValue": "",
+            "comparisonMode": 0
+        },
+        "showLockedAnswer": true,
+        "itemCosts": [],
+        "showUnaffordableAnswer": false
+    },
+    "results": {
+        "grantedAdvancement": "",
+        "criterionName": "",
+        "lootTable": "",
+        "usedBlock": "",
+        "triggeredBlock": "",
+        "overlayMessage": ""
+    }
 }

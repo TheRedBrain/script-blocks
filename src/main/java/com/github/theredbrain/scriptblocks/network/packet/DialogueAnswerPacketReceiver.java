@@ -11,13 +11,10 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -45,32 +42,37 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 		ServerPlayerEntity serverPlayerEntity = context.player();
 
 		Identifier answerIdentifier = payload.answerIdentifier();
+		BlockPos dataBlockPos = payload.dataBlockPos();
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocks = payload.dialogueUsedBlocks();
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
-		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = serverPlayerEntity.getWorld().getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
+		World world = serverPlayerEntity.getWorld();
+		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();
 
 		if (optionalDialogueAnswerReference.isPresent() && server != null) {
 			DialogueAnswer dialogueAnswer = optionalDialogueAnswerReference.get().value();
-			String itemIdentifier = dialogueAnswer.itemIdentifier();
-			int itemCount = dialogueAnswer.itemCount();
-			if (!itemIdentifier.isEmpty() && itemCount > 0) {
-				Item item = Registries.ITEM.get(Identifier.tryParse(itemIdentifier));
-				if (item != Items.AIR) {
-					int playerInventorySize = serverPlayerEntity.getInventory().size();
-					Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
-					ItemStack itemStack;
 
-					for (int k = 0; k < playerInventorySize; k++) {
-						playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
-					}
+			if (!dialogueAnswer.availability().itemCosts().isEmpty()) {
 
+				// create inventory copy
+				int playerInventorySize = serverPlayerEntity.getInventory().size();
+				Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
+				ItemStack itemStack;
+				for (int k = 0; k < playerInventorySize; k++) {
+					playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
+				}
+
+				// check for itemCosts
+				for (DialogueAnswer.Availability.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
+					int itemCount = itemCost.itemStack().getCount();
 					for (int j = 0; j < playerInventorySize; j++) {
-						if (playerInventoryCopy.getStack(j).isOf(item)) {
+
+						if (ItemStack.areItemsAndComponentsEqual(playerInventoryCopy.getStack(j), itemCost.itemStack())) {
 							itemStack = playerInventoryCopy.getStack(j).copy();
 							int stackCount = itemStack.getCount();
+
 							if (stackCount >= itemCount) {
 								itemStack.setCount(stackCount - itemCount);
 								playerInventoryCopy.setStack(j, itemStack);
@@ -86,14 +88,19 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 						serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
 						return;
 					}
+				}
 
-					if (dialogueAnswer.consumeItem()) {
-						int ingredientCount = dialogueAnswer.itemCount();
+				// apply item cost
+				for (DialogueAnswer.Availability.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
 
+					if (itemCost.consumeStack()) {
+						int ingredientCount = itemCost.itemStack().getCount();
 						for (int j = 0; j < playerInventorySize; j++) {
-							if (serverPlayerEntity.getInventory().getStack(j).isOf(item)) {
+
+							if (ItemStack.areItemsAndComponentsEqual(serverPlayerEntity.getInventory().getStack(j), itemCost.itemStack())) {
 								itemStack = serverPlayerEntity.getInventory().getStack(j).copy();
 								int stackCount = itemStack.getCount();
+
 								if (stackCount >= ingredientCount) {
 									itemStack.setCount(stackCount - ingredientCount);
 									serverPlayerEntity.getInventory().setStack(j, itemStack);
@@ -113,18 +120,21 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// loot_table
-			String lootTable = dialogueAnswer.lootTable();
+			String lootTable = dialogueAnswer.results().lootTable();
+
 			if (!lootTable.isEmpty()) {
 				Identifier lootTableIdentifier = Identifier.of(lootTable);
 				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParameters.THIS_ENTITY, serverPlayerEntity).add(LootContextParameters.ORIGIN, serverPlayerEntity.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
 				boolean bl = false;
 				for (ItemStack itemStack : server.getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableIdentifier)).generateLoot(lootContextParameterSet)) {
+
 					if (serverPlayerEntity.giveItemStack(itemStack)) {
 						serverPlayerEntity.getWorld().playSound(null, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
 						bl = true;
 						continue;
 					}
 					ItemEntity itemEntity = serverPlayerEntity.dropItem(itemStack, false);
+
 					if (itemEntity == null) continue;
 					itemEntity.resetPickupDelay();
 					itemEntity.setOwner(serverPlayerEntity.getUuid());
@@ -135,36 +145,43 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// advancement
-			String grantedAdvancement = dialogueAnswer.grantedAdvancement();
-			String criterionName = dialogueAnswer.criterionName();
+			String grantedAdvancement = dialogueAnswer.results().grantedAdvancement();
+			String criterionName = dialogueAnswer.results().criterionName();
+
 			if (!grantedAdvancement.isEmpty() && !criterionName.isEmpty()) {
 				AdvancementEntry advancementEntry = server.getAdvancementLoader().get(Identifier.of(grantedAdvancement));
+
 				if (advancementEntry != null) {
 					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
 				}
 			}
 
 			// overlay message
-			String overlayMessage = dialogueAnswer.overlayMessage();
+			String overlayMessage = dialogueAnswer.results().overlayMessage();
+
 			if (overlayMessage != null) {
 				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
 			}
 
-			String responseDialogue = DialogueAnchor.getDialogue(serverPlayerEntity.getWorld(), serverPlayerEntity, dialogueAnswer.responseDialogues());
-			if (responseDialogue.isEmpty()) {
+			String responseDialogueIdentifierString = DialogueAnchor.getDialogue(serverPlayerEntity.getWorld(), serverPlayerEntity, dialogueAnswer.responseDialogues());
+
+			if (responseDialogueIdentifierString.isEmpty()) {
 				serverPlayerEntity.closeHandledScreen();
 			} else {
-				ServerPlayNetworking.send(serverPlayerEntity, new OpenDialogueScreenPacket(responseDialogue, dialogueUsedBlocks, dialogueTriggeredBlocks));
+				DialogueAnchor.openDialogueScreen(world, server, serverPlayerEntity, responseDialogueIdentifierString, dataBlockPos, dialogueUsedBlocks, dialogueTriggeredBlocks);
 			}
 
 
 			// trigger block
-			String triggeredBlock = dialogueAnswer.triggeredBlock();
+			String triggeredBlock = dialogueAnswer.results().triggeredBlock();
+
 			if (triggeredBlock != null) {
 				for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocks) {
+
 					if (entry.getLeft().equals(triggeredBlock)) {
 						BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(entry.getRight().getLeft());
 						boolean triggeredBlockResets = entry.getRight().getRight();
+
 						if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
 							resetable.reset();
 						} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
@@ -176,12 +193,13 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			}
 
 			// use block
-			String usedBlock = dialogueAnswer.usedBlock();
+			String usedBlock = dialogueAnswer.results().usedBlock();
+
 			if (usedBlock != null) {
 				for (MutablePair<String, BlockPos> entry : dialogueUsedBlocks) {
+
 					if (entry.getLeft().equals(usedBlock)) {
 						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.getPos(), Direction.UP, entry.getRight(), false);
-						World world = serverPlayerEntity.getWorld();
 						Hand hand = serverPlayerEntity.getActiveHand();
 						ItemStack itemStack = serverPlayerEntity.getStackInHand(hand);
 

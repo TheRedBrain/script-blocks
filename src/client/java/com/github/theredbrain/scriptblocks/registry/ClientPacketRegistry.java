@@ -1,39 +1,31 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
-import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class ClientPacketRegistry {
 
 	public static void init() {
 
-		ClientPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, (payload, context) -> {
-
-			Dialogue dialogue = null;
-			World world = context.player().getWorld();
-			if (world != null) {
-				Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.of(payload.dialogueIdentifierString()));
-				if (optionalDialogueReference.isPresent()) {
-					dialogue = optionalDialogueReference.get().value();
-				}
-			}
-
-			if (dialogue != null) {
-				context.client().setScreen(new DialogueScreen(context.player().getWorld(), dialogue, payload.dialogueUsedBlocks(), payload.dialogueTriggeredBlocks()));
-			}
-		});
+//		ClientPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, (payload, context) -> {
+//
+//			Dialogue dialogue = null;
+//			World world = context.player().getWorld();
+//			if (world != null) {
+//				Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.of(payload.dialogueIdentifierString()));
+//				if (optionalDialogueReference.isPresent()) {
+//					dialogue = optionalDialogueReference.get().value();
+//				}
+//			}
+//
+//			if (dialogue != null) {
+//				context.client().setScreen(new DialogueScreen(context.player().getWorld(), dialogue, payload.dialogueUsedBlocks(), payload.dialogueTriggeredBlocks()));
+//			}
+//		});
 //		ClientPlayNetworking.registerGlobalReceiver(BossesSyncPacket.PACKET_ID, (payload, context) -> {
 //			BossesRegistry.registeredBosses = payload.registeredBosses();
 //		});

@@ -20,6 +20,7 @@ import java.util.List;
 
 public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueAnchor {
 
+	private BlockPos dataBlockOffset = BlockPos.ORIGIN;
 	private HashMap<String, BlockPos> dialogueUsedBlocksMap = new HashMap<>();
 	private HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocksMap = new HashMap<>();
 	private List<String> startingDialogueList = new ArrayList<>();
@@ -51,6 +52,10 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 			nbt.putBoolean("dialogueTriggeredBlocks_entry_resets_" + i, this.dialogueTriggeredBlocksMap.get(key).getRight());
 		}
 
+		nbt.putInt("dataBlockOffsetX", this.dataBlockOffset.getX());
+		nbt.putInt("dataBlockOffsetY", this.dataBlockOffset.getY());
+		nbt.putInt("dataBlockOffsetZ", this.dataBlockOffset.getZ());
+
 		nbt.putInt("startingDialogueListSize", this.startingDialogueList.size());
 		for (int i = 0; i < this.startingDialogueList.size(); i++) {
 			nbt.putString("startingDialogueList_name_" + i, this.startingDialogueList.get(i));
@@ -81,6 +86,12 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 							MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Z_" + i), -48, 48)
 					), nbt.getBoolean("dialogueTriggeredBlocks_entry_resets_" + i)));
 		}
+
+		this.dataBlockOffset = new BlockPos(
+				MathHelper.clamp(nbt.getInt("dataBlockOffsetX"), -48, 48),
+				MathHelper.clamp(nbt.getInt("dataBlockOffsetY"), -48, 48),
+				MathHelper.clamp(nbt.getInt("dataBlockOffsetZ"), -48, 48)
+		);
 
 		this.startingDialogueList.clear();
 		int startingDialogueListSize = nbt.getInt("startingDialogueListSize");
@@ -122,6 +133,19 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 
 	public void setStartingDialogueList(List<String> startingDialogueList) {
 		this.startingDialogueList = startingDialogueList;
+	}
+
+	public BlockPos getDataBlockOffset() {
+		return this.dataBlockOffset;
+	}
+
+	public void setDataBlockOffset(BlockPos dataBlockOffset) {
+		this.dataBlockOffset = dataBlockOffset;
+	}
+
+	@Override
+	public BlockPos getDataBlockPos() {
+		return new BlockPos(this.pos.add(this.dataBlockOffset));
 	}
 
 	@Override

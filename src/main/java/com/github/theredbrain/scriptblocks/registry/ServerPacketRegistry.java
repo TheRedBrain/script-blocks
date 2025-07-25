@@ -6,6 +6,8 @@ import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingScreenPacket;
 import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingScreenPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacket;
+import com.github.theredbrain.scriptblocks.network.packet.OpenDialogueScreenPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
@@ -204,6 +206,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateDialogueBlockPacket.PACKET_ID, UpdateDialogueBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDialogueBlockPacket.PACKET_ID, new UpdateDialogueBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(OpenDialogueScreenPacket.PACKET_ID, OpenDialogueScreenPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, new OpenDialogueScreenPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(DialogueAnswerPacket.PACKET_ID, DialogueAnswerPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(DialogueAnswerPacket.PACKET_ID, new DialogueAnswerPacketReceiver());

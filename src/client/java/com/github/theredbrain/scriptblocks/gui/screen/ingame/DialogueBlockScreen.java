@@ -3,7 +3,6 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
-import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDialogueBlockPacket;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
@@ -73,6 +72,10 @@ public class DialogueBlockScreen extends Screen {
 	private ButtonWidget removeStartingDialogueEntryButton;
 	private TextFieldWidget newStartingDialogueIdentifierField;
 	private ButtonWidget addStartingDialogueButton;
+
+	private TextFieldWidget dataBlockOffsetXField;
+	private TextFieldWidget dataBlockOffsetYField;
+	private TextFieldWidget dataBlockOffsetZField;
 
 	private ButtonWidget saveCreativeButton;
 	private ButtonWidget cancelCreativeButton;
@@ -300,6 +303,21 @@ public class DialogueBlockScreen extends Screen {
 
 		this.addStartingDialogueButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addStartingDialogueEntry()).dimensions(this.width / 2 - 4 - 150, 186, 300, 20).build());
 
+		this.dataBlockOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 162, 100, 20, Text.empty());
+		this.dataBlockOffsetXField.setMaxLength(128);
+		this.dataBlockOffsetXField.setText(Integer.toString(this.dialogueBlockEntity.getDataBlockOffset().getX()));
+		this.addSelectableChild(this.dataBlockOffsetXField);
+
+		this.dataBlockOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 162, 100, 20, Text.empty());
+		this.dataBlockOffsetYField.setMaxLength(128);
+		this.dataBlockOffsetYField.setText(Integer.toString(this.dialogueBlockEntity.getDataBlockOffset().getY()));
+		this.addSelectableChild(this.dataBlockOffsetYField);
+
+		this.dataBlockOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 162, 100, 20, Text.empty());
+		this.dataBlockOffsetZField.setMaxLength(128);
+		this.dataBlockOffsetZField.setText(Integer.toString(this.dialogueBlockEntity.getDataBlockOffset().getZ()));
+		this.addSelectableChild(this.dataBlockOffsetZField);
+
 		this.saveCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.saveCreative()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.cancelCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
@@ -340,6 +358,10 @@ public class DialogueBlockScreen extends Screen {
 		this.newStartingDialogueIdentifierField.setVisible(false);
 
 		this.addStartingDialogueButton.visible = false;
+
+		this.dataBlockOffsetXField.setVisible(false);
+		this.dataBlockOffsetYField.setVisible(false);
+		this.dataBlockOffsetZField.setVisible(false);
 
 		this.saveCreativeButton.visible = false;
 		this.cancelCreativeButton.visible = false;
@@ -403,6 +425,12 @@ public class DialogueBlockScreen extends Screen {
 
 			this.addStartingDialogueButton.visible = true;
 
+		} else if (this.creativeScreenPage == CreativeScreenPage.DATA_BLOCK_OFFSET) {
+
+			this.dataBlockOffsetXField.setVisible(true);
+			this.dataBlockOffsetYField.setVisible(true);
+			this.dataBlockOffsetZField.setVisible(true);
+
 		}
 
 		this.saveCreativeButton.visible = true;
@@ -429,6 +457,9 @@ public class DialogueBlockScreen extends Screen {
 		String string6 = this.newDialogueTriggeredBlockPositionOffsetYField.getText();
 		String string7 = this.newDialogueTriggeredBlockPositionOffsetZField.getText();
 		String string8 = this.newStartingDialogueIdentifierField.getText();
+		String string9 = this.dataBlockOffsetXField.getText();
+		String string10 = this.dataBlockOffsetYField.getText();
+		String string11 = this.dataBlockOffsetZField.getText();
 		this.init(client, width, height);
 		this.dialogueUsedBlocksList.clear();
 		this.dialogueTriggeredBlocksList.clear();
@@ -448,6 +479,9 @@ public class DialogueBlockScreen extends Screen {
 		this.newDialogueTriggeredBlockPositionOffsetYField.setText(string6);
 		this.newDialogueTriggeredBlockPositionOffsetZField.setText(string7);
 		this.newStartingDialogueIdentifierField.setText(string8);
+		this.dataBlockOffsetXField.setText(string9);
+		this.dataBlockOffsetYField.setText(string10);
+		this.dataBlockOffsetZField.setText(string11);
 		this.updateWidgets();
 	}
 
@@ -596,6 +630,12 @@ public class DialogueBlockScreen extends Screen {
 				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 71 + 1 + k, 6, 7);
 			}
 			this.newStartingDialogueIdentifierField.render(context, mouseX, mouseY, delta);
+		} else if (this.creativeScreenPage == CreativeScreenPage.DATA_BLOCK_OFFSET) {
+
+//			context.drawTextWithShadow(this.textRenderer, DATA_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.dataBlockOffsetXField.render(context, mouseX, mouseY, delta);
+			this.dataBlockOffsetYField.render(context, mouseX, mouseY, delta);
+			this.dataBlockOffsetZField.render(context, mouseX, mouseY, delta);
 		}
 	}
 
@@ -609,12 +649,18 @@ public class DialogueBlockScreen extends Screen {
 				this.dialogueBlockEntity.getPos(),
 				this.dialogueUsedBlocksList,
 				this.dialogueTriggeredBlocksList,
-				this.startingDialogueList
+				this.startingDialogueList,
+				new BlockPos(
+						ItemUtils.parseInt(this.dataBlockOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataBlockOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataBlockOffsetZField.getText())
+				)
 		));
 		return true;
 	}
 
 	public static enum CreativeScreenPage implements StringIdentifiable {
+		DATA_BLOCK_OFFSET("data_block_offset"),
 		DIALOGUE_USED_BLOCKS("dialogue_used_blocks"),
 		DIALOGUE_TRIGGERED_BLOCKS("dialogue_triggered_blocks"),
 		STARTING_DIALOGUES("starting_dialogues");
