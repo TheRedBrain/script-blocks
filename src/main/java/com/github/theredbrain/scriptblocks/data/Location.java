@@ -47,26 +47,22 @@ public record Location(
 	}
 
 	public record SideEntrance(
-			String identifier,
 			String name,
 			Location.Availability availability,
 			boolean showLocationOwner
 	) {
 
 		public static final Codec<SideEntrance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.STRING.optionalFieldOf("identifier", "").forGetter(x -> x.identifier),
 				Codec.STRING.optionalFieldOf("name", "").forGetter(x -> x.name),
 				Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 				Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner)
 		).apply(instance, SideEntrance::new));
 
 		public SideEntrance(
-				String identifier,
 				String name,
 				Location.Availability availability,
 				boolean showLocationOwner
 		) {
-			this.identifier = identifier != null ? identifier : "";
 			this.name = name != null ? name : "";
 			this.availability = availability;
 			this.showLocationOwner = showLocationOwner;
