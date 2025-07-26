@@ -2,149 +2,114 @@ package com.github.theredbrain.scriptblocks.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public record Location(
-//		BlockPos controlBlockPos,
-		int controlBlockPosX,
-		int controlBlockPosY,
-		int controlBlockPosZ,
+		BlockPos controlBlockPos,
 		String structureIdentifier,
 		String displayName,
-		String unlockAdvancement,
-		String lockAdvancement,
-		boolean showLockedLocation,
-		boolean showUnlockAdvancement,
-		boolean showLockAdvancement,
-//		boolean showLocationName, // TODO replace with check for empty displayName
+		Location.Availability availability,
 		boolean showLocationOwner,
 		boolean isPublic,
-//		boolean canOwnerBeChosen, // TODO set in TeleporterBlock
-		boolean consumeKey,
-		String keyItemIdentifier,
-		int keyItemCount,
 		Map<String, SideEntrance> side_entrances
 ) {
 
 	public static final Codec<Location> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.INT.optionalFieldOf("controlBlockPosX", 0).forGetter(x -> x.controlBlockPosX),
-			Codec.INT.optionalFieldOf("controlBlockPosY", 0).forGetter(x -> x.controlBlockPosY),
-			Codec.INT.optionalFieldOf("controlBlockPosZ", 0).forGetter(x -> x.controlBlockPosZ),
+			BlockPos.CODEC.optionalFieldOf("controlBlockPos", BlockPos.ORIGIN).forGetter(x -> x.controlBlockPos),
 			Codec.STRING.optionalFieldOf("structureIdentifier", "").forGetter(x -> x.structureIdentifier),
 			Codec.STRING.optionalFieldOf("displayName", "").forGetter(x -> x.displayName),
-			Codec.STRING.optionalFieldOf("lockAdvancement", "").forGetter(x -> x.lockAdvancement),
-			Codec.STRING.optionalFieldOf("unlockAdvancement", "").forGetter(x -> x.unlockAdvancement),
-			Codec.BOOL.optionalFieldOf("showLockedLocation", true).forGetter(x -> x.showLockedLocation),
-			Codec.BOOL.optionalFieldOf("showUnlockAdvancement", true).forGetter(x -> x.showUnlockAdvancement),
-			Codec.BOOL.optionalFieldOf("showLockAdvancement", true).forGetter(x -> x.showLockAdvancement),
-//			Codec.BOOL.optionalFieldOf("showLocationName", true).forGetter(x -> x.showLocationName),
+			Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 			Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner),
 			Codec.BOOL.optionalFieldOf("isPublic", true).forGetter(x -> x.isPublic),
-//			Codec.BOOL.optionalFieldOf("canOwnerBeChosen", true).forGetter(x -> x.canOwnerBeChosen),
-			Codec.BOOL.optionalFieldOf("consumeKey", true).forGetter(x -> x.consumeKey),
-			Codec.STRING.optionalFieldOf("keyItemIdentifier", "").forGetter(x -> x.keyItemIdentifier),
-			Codec.INT.optionalFieldOf("keyItemCount", 0).forGetter(x -> x.keyItemCount),
 			Codec.unboundedMap(Codec.STRING, SideEntrance.CODEC).optionalFieldOf("side_entrances", new HashMap<>()).forGetter(x -> x.side_entrances)
 	).apply(instance, Location::new));
 
 	public Location(
-			int controlBlockPosX,
-			int controlBlockPosY,
-			int controlBlockPosZ,
+			BlockPos controlBlockPos,
 			String structureIdentifier,
 			String displayName,
-			String unlockAdvancement,
-			String lockAdvancement,
-			boolean showLockedLocation,
-			boolean showUnlockAdvancement,
-			boolean showLockAdvancement,
-//			boolean showLocationName,
+			Location.Availability availability,
 			boolean showLocationOwner,
 			boolean isPublic,
-//			boolean canOwnerBeChosen,
-			boolean consumeKey,
-			String keyItemIdentifier,
-			int keyItemCount,
 			Map<String, SideEntrance> side_entrances
 	) {
-		this.controlBlockPosX = controlBlockPosX;
-		this.controlBlockPosY = controlBlockPosY;
-		this.controlBlockPosZ = controlBlockPosZ;
+		this.controlBlockPos = controlBlockPos != null ? controlBlockPos : BlockPos.ORIGIN;
 		this.structureIdentifier = structureIdentifier != null ? structureIdentifier : "";
 		this.displayName = displayName != null ? displayName : "";
-		this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
-		this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
-		this.showLockedLocation = showLockedLocation;
-		this.showUnlockAdvancement = showUnlockAdvancement;
-		this.showLockAdvancement = showLockAdvancement;
-//		this.showLocationName = showLocationName;
+		this.availability = availability;
 		this.showLocationOwner = showLocationOwner;
 		this.isPublic = isPublic;
-//		this.canOwnerBeChosen = canOwnerBeChosen;
-		this.consumeKey = consumeKey;
-		this.keyItemIdentifier = keyItemIdentifier != null ? keyItemIdentifier : "";
-		this.keyItemCount = keyItemCount;
 		this.side_entrances = side_entrances != null ? side_entrances : new HashMap<>();
 	}
 
 	public record SideEntrance(
 			String identifier,
 			String name,
-			String unlockAdvancement,
-			String lockAdvancement,
-			boolean showLockedLocation,
-			boolean showUnlockAdvancement,
-			boolean showLockAdvancement,
-//			boolean showLocationName,
-			boolean showLocationOwner,
-			boolean consumeKey,
-			String keyItemIdentifier,
-			int keyItemCount
+			Location.Availability availability,
+			boolean showLocationOwner
 	) {
 
 		public static final Codec<SideEntrance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.optionalFieldOf("identifier", "").forGetter(x -> x.identifier),
 				Codec.STRING.optionalFieldOf("name", "").forGetter(x -> x.name),
-				Codec.STRING.optionalFieldOf("lockAdvancement", "").forGetter(x -> x.lockAdvancement),
-				Codec.STRING.optionalFieldOf("unlockAdvancement", "").forGetter(x -> x.unlockAdvancement),
-				Codec.BOOL.optionalFieldOf("showLockedLocation", true).forGetter(x -> x.showLockedLocation),
-				Codec.BOOL.optionalFieldOf("showUnlockAdvancement", true).forGetter(x -> x.showUnlockAdvancement),
-				Codec.BOOL.optionalFieldOf("showLockAdvancement", true).forGetter(x -> x.showLockAdvancement),
-//				Codec.BOOL.optionalFieldOf("showLocationName", true).forGetter(x -> x.showLocationName),
-				Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner),
-				Codec.BOOL.optionalFieldOf("consumeKey", true).forGetter(x -> x.consumeKey),
-				Codec.STRING.optionalFieldOf("keyItemIdentifier", "").forGetter(x -> x.keyItemIdentifier),
-				Codec.INT.optionalFieldOf("keyItemCount", 0).forGetter(x -> x.keyItemCount)
+				Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
+				Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner)
 		).apply(instance, SideEntrance::new));
 
 		public SideEntrance(
 				String identifier,
 				String name,
-				String unlockAdvancement,
-				String lockAdvancement,
-				boolean showLockedLocation,
-				boolean showUnlockAdvancement,
-				boolean showLockAdvancement,
-//				boolean showLocationName,
-				boolean showLocationOwner,
-				boolean consumeKey,
-				String keyItemIdentifier,
-				int keyItemCount
+				Location.Availability availability,
+				boolean showLocationOwner
 		) {
 			this.identifier = identifier != null ? identifier : "";
 			this.name = name != null ? name : "";
-			this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
-			this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
-			this.showLockedLocation = showLockedLocation;
-			this.showUnlockAdvancement = showUnlockAdvancement;
-			this.showLockAdvancement = showLockAdvancement;
-//			this.showLocationName = showLocationName;
+			this.availability = availability;
 			this.showLocationOwner = showLocationOwner;
-			this.consumeKey = consumeKey;
-			this.keyItemIdentifier = keyItemIdentifier != null ? keyItemIdentifier : "";
-			this.keyItemCount = keyItemCount;
 		}
 	}
+
+	public record Availability(
+			String unlockAdvancement,
+			String lockAdvancement,
+			CommonDataStructures.DataCheck unlockDataCheck,
+			CommonDataStructures.DataCheck lockDataCheck,
+			boolean showLockedLocation,
+			List<CommonDataStructures.ItemCost> itemCosts,
+			boolean showUnaffordableLocation
+	) {
+
+		public static final Codec<Location.Availability> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+				Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
+				Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("unlockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("lockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
+				Codec.BOOL.optionalFieldOf("showLockedLocation", true).forGetter(x -> x.showLockedLocation),
+				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("itemCosts", List.of()).forGetter(x -> x.itemCosts),
+				Codec.BOOL.optionalFieldOf("showUnaffordableLocation", true).forGetter(x -> x.showUnaffordableLocation)
+		).apply(instance, Location.Availability::new));
+
+		public Availability(
+				String unlockAdvancement,
+				String lockAdvancement,
+				CommonDataStructures.DataCheck unlockDataCheck,
+				CommonDataStructures.DataCheck lockDataCheck,
+				boolean showLockedLocation,
+				List<CommonDataStructures.ItemCost> itemCosts,
+				boolean showUnaffordableLocation
+		) {
+			this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
+			this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
+			this.unlockDataCheck = unlockDataCheck != null ? unlockDataCheck : CommonDataStructures.DataCheck.DEFAULT;
+			this.lockDataCheck = lockDataCheck != null ? lockDataCheck : CommonDataStructures.DataCheck.DEFAULT;
+			this.showLockedLocation = showLockedLocation;
+			this.itemCosts = itemCosts != null ? itemCosts : List.of();
+			this.showUnaffordableLocation = showUnaffordableLocation;
+		}
+	}
+
 }

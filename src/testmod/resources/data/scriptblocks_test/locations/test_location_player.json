@@ -1,18 +1,29 @@
 {
-  "controlBlockPosX": 0,
-  "controlBlockPosY": -63,
-  "controlBlockPosZ": 0,
+  "controlBlockPos": [
+    0,
+    -63,
+    0
+  ],
   "structureIdentifier": "scriptblocks_test:test_location_player",
   "displayName": "Test Location Player",
-  "lockAdvancement": "",
-  "unlockAdvancement": "",
-  "showLockedLocation": true,
-  "showUnlockAdvancement": true,
-  "showLockAdvancement": true,
+  "availability": {
+    "unlockAdvancement": "",
+    "lockAdvancement": "",
+    "unlockDataCheck": {
+      "dataIdentifier": "",
+      "dataValue": "",
+      "comparisonMode": 0
+    },
+    "lockDataCheck": {
+      "dataIdentifier": "",
+      "dataValue": "",
+      "comparisonMode": 0
+    },
+    "showLockedLocation": true,
+    "itemCosts": [],
+    "showUnaffordableLocation": false
+  },
   "showLocationOwner": true,
   "isPublic": false,
-  "consumeKey": false,
-  "keyItemIdentifier": "",
-  "keyItemCount": 0,
   "side_entrances": {}
 }

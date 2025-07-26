@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
+import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
@@ -121,7 +122,7 @@ public interface DialogueAnchor {
 						playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
 					}
 
-					for (DialogueAnswer.Availability.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
+					for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
 						ItemStack costStack = itemCost.itemStack();
 						int itemCount = costStack.getCount();
 						if (!costStack.isEmpty()) {
@@ -147,13 +148,13 @@ public interface DialogueAnchor {
 					}
 				}
 
-				DialogueAnswer.Availability.DataCheck unlockDataCheck = dialogueAnswer.availability().unlockDataCheck();
-				DialogueAnswer.Availability.DataCheck lockDataCheck = dialogueAnswer.availability().lockDataCheck();
+				CommonDataStructures.DataCheck unlockDataCheck = dialogueAnswer.availability().unlockDataCheck();
+				CommonDataStructures.DataCheck lockDataCheck = dialogueAnswer.availability().lockDataCheck();
 
 				boolean unlockDataCheckPassed = true;
 				boolean lockDataCheckPassed = false;
 
-				if (unlockDataCheck != DialogueAnswer.Availability.DataCheck.DEFAULT || lockDataCheck != DialogueAnswer.Availability.DataCheck.DEFAULT) {
+				if (unlockDataCheck != CommonDataStructures.DataCheck.DEFAULT || lockDataCheck != CommonDataStructures.DataCheck.DEFAULT) {
 					BlockEntity blockEntity = world.getBlockEntity(dataBlockPos);
 					if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
 						String existingUnlockData = providesDataBlockEntity.getData(unlockDataCheck.dataIdentifier());

@@ -10,15 +10,16 @@ import com.github.theredbrain.scriptblocks.data.Shop;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
 
 public class CustomDynamicRegistries {
 
-	public static final RegistryKey<Registry<Boss>> BOSS_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("bosses"));
-	public static final RegistryKey<Registry<DialogueAnswer>> DIALOGUE_ANSWER_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("dialogue_answers"));
-	public static final RegistryKey<Registry<Dialogue>> DIALOGUE_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("dialogues"));
-	public static final RegistryKey<Registry<Location>> LOCATION_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("locations"));
-	public static final RegistryKey<Registry<LootableVaultConfig>> LOOTABLE_VAULT_CONFIG_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("lootable_vault_configs"));
-	public static final RegistryKey<Registry<Shop>> SHOP_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("shops"));
+	public static final RegistryKey<Registry<Boss>> BOSS_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("bosses"));
+	public static final RegistryKey<Registry<DialogueAnswer>> DIALOGUE_ANSWER_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("dialogue_answers"));
+	public static final RegistryKey<Registry<Dialogue>> DIALOGUE_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("dialogues"));
+	public static final RegistryKey<Registry<Location>> LOCATION_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("locations"));
+	public static final RegistryKey<Registry<LootableVaultConfig>> LOOTABLE_VAULT_CONFIG_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("lootable_vault_configs"));
+	public static final RegistryKey<Registry<Shop>> SHOP_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("shops"));
 
 	public static void init() {
 		DynamicRegistries.registerSynced(BOSS_REGISTRY_KEY, Boss.CODEC);

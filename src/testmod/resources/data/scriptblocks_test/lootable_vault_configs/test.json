@@ -8,5 +8,6 @@
   "keyItem": {
     "id": "minecraft:trial_key",
     "count": 1
-  }
+  },
+  "displayLootTableIdentifier": ""
 }

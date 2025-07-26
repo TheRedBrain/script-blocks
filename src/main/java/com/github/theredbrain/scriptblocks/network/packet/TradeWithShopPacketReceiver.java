@@ -4,9 +4,7 @@ import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -41,11 +39,10 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		Shop.Deal currentDeal = dealsList.get(id);
 		if (currentDeal != null && screenHandler instanceof ShopScreenHandler shopScreenHandler) {
 			boolean bl = true;
-			for (Shop.Deal.Item price : currentDeal.price()) {
-				Item priceItem = Registries.ITEM.get(Identifier.tryParse(price.id()));
-				int priceCount = price.count();
+			for (ItemStack priceStack : currentDeal.price()) {
+				int priceCount = priceStack.getCount();
 				for (int j = 0; j < shopScreenHandler.inventory.size(); j++) {
-					if (shopScreenHandler.inventory.getStack(j).isOf(priceItem)) {
+					if (ItemStack.areItemsAndComponentsEqual(shopScreenHandler.inventory.getStack(j), priceStack)) {
 						ItemStack itemStack = shopScreenHandler.slots.get(j + 36).getStack().copy();
 						int stackCount = itemStack.getCount();
 						if (stackCount >= priceCount) {
@@ -65,10 +62,8 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 			}
 			if (bl) {
 				for (int j = 0; j < currentDeal.offer().size(); j++) {
-					Shop.Deal.Item virtualItem = currentDeal.offer().get(j);
-					ItemStack itemStack = Registries.ITEM.get(Identifier.tryParse(virtualItem.id())).getDefaultStack();
-					itemStack.setCount(virtualItem.count());
-					serverPlayerEntity.getInventory().offerOrDrop(itemStack);
+					ItemStack offerStack = currentDeal.offer().get(j);
+					serverPlayerEntity.getInventory().offerOrDrop(offerStack);
 				}
 			}
 		}

@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
@@ -35,82 +34,39 @@ public record DialogueAnswer(
 	public record Availability(
 			String unlockAdvancement,
 			String lockAdvancement,
-			DataCheck unlockDataCheck,
-			DataCheck lockDataCheck,
+			CommonDataStructures.DataCheck unlockDataCheck,
+			CommonDataStructures.DataCheck lockDataCheck,
 			boolean showLockedAnswer,
-			List<ItemCost> itemCosts,
+			List<CommonDataStructures.ItemCost> itemCosts,
 			boolean showUnaffordableAnswer
 	) {
 
 		public static final Codec<Availability> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
 				Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
-				DataCheck.CODEC.optionalFieldOf("unlockDataCheck", DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
-				DataCheck.CODEC.optionalFieldOf("lockDataCheck", DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("unlockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("lockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
 				Codec.BOOL.optionalFieldOf("showLockedAnswer", true).forGetter(x -> x.showLockedAnswer),
-				ItemCost.CODEC.listOf().optionalFieldOf("itemCosts", List.of()).forGetter(x -> x.itemCosts),
+				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("itemCosts", List.of()).forGetter(x -> x.itemCosts),
 				Codec.BOOL.optionalFieldOf("showUnaffordableAnswer", true).forGetter(x -> x.showUnaffordableAnswer)
 		).apply(instance, Availability::new));
 
 		public Availability(
 				String unlockAdvancement,
 				String lockAdvancement,
-				DataCheck unlockDataCheck,
-				DataCheck lockDataCheck,
+				CommonDataStructures.DataCheck unlockDataCheck,
+				CommonDataStructures.DataCheck lockDataCheck,
 				boolean showLockedAnswer,
-				List<ItemCost> itemCosts,
+				List<CommonDataStructures.ItemCost> itemCosts,
 				boolean showUnaffordableAnswer
 		) {
 			this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
 			this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
-			this.unlockDataCheck = unlockDataCheck != null ? unlockDataCheck : DataCheck.DEFAULT;
-			this.lockDataCheck = lockDataCheck != null ? lockDataCheck : DataCheck.DEFAULT;
+			this.unlockDataCheck = unlockDataCheck != null ? unlockDataCheck : CommonDataStructures.DataCheck.DEFAULT;
+			this.lockDataCheck = lockDataCheck != null ? lockDataCheck : CommonDataStructures.DataCheck.DEFAULT;
 			this.showLockedAnswer = showLockedAnswer;
 			this.itemCosts = itemCosts != null ? itemCosts : List.of();
 			this.showUnaffordableAnswer = showUnaffordableAnswer;
-		}
-
-		public record ItemCost(
-				ItemStack itemStack,
-				boolean consumeStack
-		) {
-
-			public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-					ItemStack.VALIDATED_CODEC.fieldOf("itemStack").forGetter(x -> x.itemStack),
-					Codec.BOOL.optionalFieldOf("consumeStack", true).forGetter(x -> x.consumeStack)
-			).apply(instance, ItemCost::new));
-
-			public ItemCost(
-					ItemStack itemStack,
-					boolean consumeStack
-			) {
-				this.itemStack = itemStack;
-				this.consumeStack = consumeStack;
-			}
-		}
-
-		public record DataCheck(
-				String dataIdentifier,
-				String dataValue,
-				int comparisonMode
-		) {
-
-			public static final DataCheck DEFAULT = new DataCheck("", "", 0);
-			public static final Codec<DataCheck> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-					Codec.STRING.fieldOf("dataIdentifier").forGetter(x -> x.dataIdentifier),
-					Codec.STRING.fieldOf("dataValue").forGetter(x -> x.dataValue),
-					Codec.INT.fieldOf("comparisonMode").forGetter(x -> x.comparisonMode)
-			).apply(instance, DataCheck::new));
-
-			public DataCheck(
-					String dataIdentifier,
-					String dataValue,
-					int comparisonMode
-			) {
-				this.dataIdentifier = dataIdentifier;
-				this.dataValue = dataValue;
-				this.comparisonMode = comparisonMode;
-			}
 		}
 	}
 

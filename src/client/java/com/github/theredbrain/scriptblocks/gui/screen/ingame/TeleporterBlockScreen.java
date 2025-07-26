@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
+import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerMixin;
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
@@ -120,8 +121,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private Advancement currentUnlockAdvancement;
 	private boolean isCurrentLocationPublic;
 	private boolean showCurrentLocationOwner;
-	private boolean consumeKeyItem = false;
-	private ItemStack currentKeyItemStack;
+	private List<CommonDataStructures.ItemCost> currentKeys;
 
 	public TeleporterBlockScreen(TeleporterBlockScreenHandler handler, PlayerInventory inventory, Text title) {
 		super(handler, inventory, title);
@@ -513,13 +513,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		if (location != null) {
 			lockAdvancementIdentifier = LocationUtils.lockAdvancementForEntrance(location, this.currentTargetEntrance);
 			unlockAdvancementIdentifier = LocationUtils.unlockAdvancementForEntrance(location, this.currentTargetEntrance);
-			this.showCurrentLockAdvancement = LocationUtils.showLockAdvancementForEntrance(location, this.currentTargetEntrance);
-			this.showCurrentUnlockAdvancement = LocationUtils.showUnlockAdvancementForEntrance(location, this.currentTargetEntrance);
+//			this.showCurrentLockAdvancement = LocationUtils.showLockAdvancementForEntrance(location, this.currentTargetEntrance);
+//			this.showCurrentUnlockAdvancement = LocationUtils.showUnlockAdvancementForEntrance(location, this.currentTargetEntrance);
 			this.currentTargetDisplayName = location.displayName();
 			this.currentTargetEntranceDisplayName = LocationUtils.getEntranceDisplayName(location, this.currentTargetEntrance);
 			this.isCurrentLocationPublic = location.isPublic();
-			this.consumeKeyItem = LocationUtils.consumeKeyAtEntrance(location, this.currentTargetEntrance);
-			this.currentKeyItemStack = LocationUtils.getKeyForEntrance(location, this.currentTargetEntrance);
+//			this.consumeKeyItem = LocationUtils.consumeKeyAtEntrance(location, this.currentTargetEntrance);
+			this.currentKeys = LocationUtils.getKeyForEntrance(location, this.currentTargetEntrance);
 
 			this.showCurrentLocationOwner = LocationUtils.showLocationOwnerForEntrance(location, this.currentTargetEntrance);
 			if (advancementHandler != null) {
@@ -544,25 +544,27 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					inventory.setStack(k, itemStack.copy());
 				}
 				boolean bl = true;
-				if (!this.currentKeyItemStack.isEmpty()) {
-					ItemStack currentKeyItemStack = this.currentKeyItemStack;
-					int keyCount = currentKeyItemStack.getCount();
-					for (int j = 0; j < inventory.size(); j++) {
-						ItemStack itemStack = inventory.getStack(j);
-						if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
-							int stackCount = inventory.getStack(j).getCount();
-							if (stackCount >= keyCount) {
-								inventory.removeStack(j, keyCount);
-								keyCount = 0;
-								break;
-							} else {
-								inventory.setStack(j, ItemStack.EMPTY);
-								keyCount = keyCount - stackCount;
+				if (!this.currentKeys.isEmpty()) {
+					for (CommonDataStructures.ItemCost itemCost : this.currentKeys) {
+						ItemStack currentKeyItemStack = itemCost.itemStack();
+						int keyCount = currentKeyItemStack.getCount();
+						for (int j = 0; j < inventory.size(); j++) {
+							ItemStack itemStack = inventory.getStack(j);
+							if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
+								int stackCount = inventory.getStack(j).getCount();
+								if (stackCount >= keyCount) {
+									inventory.removeStack(j, keyCount);
+									keyCount = 0;
+									break;
+								} else {
+									inventory.setStack(j, ItemStack.EMPTY);
+									keyCount = keyCount - stackCount;
+								}
 							}
 						}
-					}
-					if (keyCount > 0) {
-						bl = false;
+						if (keyCount > 0) {
+							bl = false;
+						}
 					}
 				}
 
@@ -729,12 +731,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), x + 19, y + 77, 0x404040, false);
 				}
 
-				if (this.currentKeyItemStack != null && !this.currentKeyItemStack.isEmpty()) {
-					ItemStack currentKey = this.currentKeyItemStack;
-					context.drawItemWithoutEntity(currentKey, x + 8, y + 95);
-					context.drawItemInSlot(this.textRenderer, currentKey, x + 8, y + 95);
-					context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 26, y + 100, 0x404040, false);
-				}
+				// TODO redo key rendering, possibly with slots
+//				if (this.currentKeyItemStack != null && !this.currentKeyItemStack.isEmpty()) {
+//					ItemStack currentKey = this.currentKeyItemStack;
+//					context.drawItemWithoutEntity(currentKey, x + 8, y + 95);
+//					context.drawItemInSlot(this.textRenderer, currentKey, x + 8, y + 95);
+//					context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 26, y + 100, 0x404040, false);
+//				}
 			} else {
 				context.drawTexture(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 

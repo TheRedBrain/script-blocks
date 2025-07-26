@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
@@ -28,8 +29,8 @@ public record Shop(
 	).apply(instance, Shop::new));
 
 	public record Deal(
-			List<Item> offer,
-			List<Item> price,
+			List<ItemStack> offer,
+			List<ItemStack> price,
 			int maxStockCount,
 			String unlockAdvancement,
 			String lockAdvancement,
@@ -37,8 +38,8 @@ public record Shop(
 	) {
 
 		public static final Codec<Deal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Item.CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
-				Item.CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
+				ItemStack.VALIDATED_CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
+				ItemStack.VALIDATED_CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
 				Codec.INT.optionalFieldOf("maxStockCount", 1).forGetter(x -> x.maxStockCount),
 				Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
 				Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
@@ -46,8 +47,8 @@ public record Shop(
 		).apply(instance, Deal::new));
 
 		public Deal(
-				List<Item> offer,
-				List<Item> price,
+				List<ItemStack> offer,
+				List<ItemStack> price,
 				int maxStockCount,
 				String unlockAdvancement,
 				String lockAdvancement,
@@ -59,26 +60,6 @@ public record Shop(
 			this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
 			this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
 			this.showLockedDeal = showLockedDeal;
-		}
-
-		public record Item(
-				String id,
-				int count
-		) {
-
-			public static final Codec<Shop.Deal.Item> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-					Codec.STRING.optionalFieldOf("id", "").forGetter(x -> x.id),
-					Codec.INT.optionalFieldOf("count", 0).forGetter(x -> x.count)
-			).apply(instance, Shop.Deal.Item::new));
-
-			public Item(
-					String id,
-					int count
-			) {
-				this.id = id != null ? id : "";
-				this.count = count;
-			}
-
 		}
 	}
 }

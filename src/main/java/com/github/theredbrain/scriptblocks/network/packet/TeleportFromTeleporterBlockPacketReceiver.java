@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
+import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
-import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.Tags;
@@ -224,9 +224,9 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						targetYaw = entrance.getRight().getLeft();
 						targetPitch = entrance.getRight().getRight();
 
-						boolean consumeKey = LocationUtils.consumeKeyAtEntrance(location, targetLocationEntrance);
-						ItemStack keyStack = LocationUtils.getKeyForEntrance(location, targetLocationEntrance);
-						if (!keyStack.isEmpty()) {
+						for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, targetLocationEntrance)) {
+
+							ItemStack keyStack = itemCost.itemStack();
 							int keyCount = keyStack.getCount();
 							PlayerInventory playerInventory = serverPlayerEntity.getInventory();
 
@@ -237,20 +237,23 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 									int currentItemStackCount = currentItemStackCopy.getCount();
 									if (currentItemStackCount >= keyCount) {
 										currentItemStackCopy.setCount(currentItemStackCount - keyCount);
-										if (consumeKey) {
+										if (itemCost.consumeStack()) {
 											playerInventory.setStack(i, currentItemStackCopy);
 										}
 										keyCount = 0;
 										break;
 									} else {
-										if (consumeKey) {
+										if (itemCost.consumeStack()) {
 											playerInventory.setStack(i, ItemStack.EMPTY);
 										}
 										keyCount = keyCount - currentItemStackCount;
 									}
 								}
 							}
-							playerHadKeyItem = keyCount <= 0;
+							if (keyCount > 0) {
+								playerHadKeyItem = false;
+								break;
+							}
 						}
 
 						if (setAccessPosition && Identifier.tryParse(accessPositionDimension) != null) {

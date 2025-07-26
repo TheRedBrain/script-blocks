@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
+import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -65,7 +66,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				}
 
 				// check for itemCosts
-				for (DialogueAnswer.Availability.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
+				for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
 					int itemCount = itemCost.itemStack().getCount();
 					for (int j = 0; j < playerInventorySize; j++) {
 
@@ -91,7 +92,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				}
 
 				// apply item cost
-				for (DialogueAnswer.Availability.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
+				for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
 
 					if (itemCost.consumeStack()) {
 						int ingredientCount = itemCost.itemStack().getCount();

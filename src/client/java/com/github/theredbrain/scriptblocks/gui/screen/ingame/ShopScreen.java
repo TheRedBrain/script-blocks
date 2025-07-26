@@ -15,13 +15,10 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
@@ -91,12 +88,11 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 						inventory.setStack(k, itemStack.copy());
 					}
 					boolean bl = true;
-					List<Shop.Deal.Item> priceList = deal.price();
-					for (Shop.Deal.Item price : priceList) {
-						Item virtualItem = Registries.ITEM.get(Identifier.tryParse(price.id()));
-						int priceCount = price.count();
+					List<ItemStack> priceList = deal.price();
+					for (ItemStack priceStack : priceList) {
+						int priceCount = priceStack.getCount();
 						for (int j = 0; j < inventory.size(); j++) {
-							if (inventory.getStack(j).isOf(virtualItem)) {
+							if (ItemStack.areItemsAndComponentsEqual(inventory.getStack(j), priceStack)) {
 								int stackCount = inventory.getStack(j).getCount();
 								if (stackCount >= priceCount) {
 									inventory.removeStack(j, priceCount);
@@ -270,24 +266,20 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 			Shop.Deal deal = this.handler.getUnlockedDealsList().get(i);
 			if (deal != null) {
 				for (int j = 0; j < deal.offer().size(); j++) {
-					Shop.Deal.Item virtualItem = deal.offer().get(j);
-					ItemStack itemStack = Registries.ITEM.get(Identifier.tryParse(virtualItem.id())).getDefaultStack();
-					itemStack.setCount(virtualItem.count());
+					ItemStack offerStack = deal.offer().get(j);
 					x = this.x + 85 + (j * 18);
 					y = this.y + 18 + (index * 24);
 					k = x + y * this.backgroundWidth;
-					context.drawItemWithoutEntity(itemStack, x, y, k);
-					context.drawItemInSlot(this.textRenderer, itemStack, x, y);
+					context.drawItemWithoutEntity(offerStack, x, y, k);
+					context.drawItemInSlot(this.textRenderer, offerStack, x, y);
 				}
 				for (int j = 0; j < deal.price().size(); j++) {
-					Shop.Deal.Item virtualItem = deal.price().get(j);
-					ItemStack itemStack = Registries.ITEM.get(Identifier.tryParse(virtualItem.id())).getDefaultStack();
-					itemStack.setCount(virtualItem.count());
+					ItemStack priceStack = deal.price().get(j);
 					x = this.x + 8 + (j * 18);
 					y = this.y + 18 + (index * 24);
 					k = x + y * this.backgroundWidth;
-					context.drawItemWithoutEntity(itemStack, x, y, k);
-					context.drawItemInSlot(this.textRenderer, itemStack, x, y);
+					context.drawItemWithoutEntity(priceStack, x, y, k);
+					context.drawItemInSlot(this.textRenderer, priceStack, x, y);
 				}
 				context.drawGuiTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 28, 21);
 				index++;
