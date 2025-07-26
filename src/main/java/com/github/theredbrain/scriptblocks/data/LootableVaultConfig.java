@@ -5,11 +5,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.LootTable;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-
-import java.util.Optional;
 
 public record LootableVaultConfig(
 		String lootableIdentifier,
@@ -23,7 +18,7 @@ public record LootableVaultConfig(
 		EntityDetector playerDetector,
 		EntityDetector.Selector entitySelector*/
 ) {
-//	static final String CONFIG_KEY = "config";
+	//	static final String CONFIG_KEY = "config";
 	public static LootableVaultConfig DEFAULT = new LootableVaultConfig();
 	public static final Codec<LootableVaultConfig> CODEC = RecordCodecBuilder.<LootableVaultConfig>create(
 					instance -> instance.group(

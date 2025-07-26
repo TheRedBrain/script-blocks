@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.mixin.client.network;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
@@ -31,6 +32,7 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaFillerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CopyDataBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScreen;
@@ -231,6 +233,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity) {
 		this.client.setScreen(new AreaBlockScreen(areaBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openAreaFillerBlockScreen(AreaFillerBlockEntity areaFillerBlockEntity) {
+		this.client.setScreen(new AreaFillerBlockScreen(areaFillerBlockEntity));
 	}
 
 	@Override

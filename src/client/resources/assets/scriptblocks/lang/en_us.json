@@ -67,6 +67,13 @@
 	"gui.area_block.triggered_mode.once": "Gets triggered once.",
 
 
+	"gui.area_filler_block.hide_area_label": "Hide Area",
+	"gui.area_filler_block.show_area_label": "Show Area",
+	"gui.area_filler_block.area_dimensions_label": "Area Dimensions",
+	"gui.area_filler_block.area_position_offset_label": "Area Position Offset",
+	"gui.area_filler_block.block_identifier_label": "Block Identifier",
+
+
 	"gui.copy_data_block.first_data_providing_block_position_offset": "Reading Data Block Position Offset",
 	"gui.copy_data_block.second_data_providing_block_position_offset": "Writing Data Block Position Offset",
 
@@ -634,6 +641,7 @@
 	"block.scriptblocks.triggering_trial_spawner_block": "Triggering Trial Spawner",
 
 	"block.scriptblocks.area_block": "Area Block",
+	"block.scriptblocks.area_filler_block": "Area Filler Block",
 	"block.scriptblocks.boss_controller_block": "Boss Controller Block",
 	"block.scriptblocks.copy_data_block": "Copy Data Block",
 	"block.scriptblocks.data_access_block": "Data Access Block",

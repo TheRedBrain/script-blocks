@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.AestheticDecoratedPotBlock;
 import com.github.theredbrain.scriptblocks.block.AestheticVerticalPortalBlock;
 import com.github.theredbrain.scriptblocks.block.AreaBlock;
+import com.github.theredbrain.scriptblocks.block.AreaFillerBlock;
 import com.github.theredbrain.scriptblocks.block.BossControllerBlock;
 import com.github.theredbrain.scriptblocks.block.CopyDataBlock;
 import com.github.theredbrain.scriptblocks.block.DataRelayBlock;
@@ -131,6 +132,7 @@ public class BlockRegistry {
 
 	//region Script Blocks
 	public static final Block AREA_BLOCK = registerBlock("area_block", new AreaBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block AREA_FILLER_BLOCK = registerBlock("area_filler_block", new AreaFillerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block BOSS_CONTROLLER_BLOCK = registerBlock("boss_controller_block", new BossControllerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	//	public static final Block DATA_ACCESS_BLOCK = registerBlock("data_access_block", new DataAccessBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block COPY_DATA_BLOCK = registerBlock("copy_data_block", new CopyDataBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

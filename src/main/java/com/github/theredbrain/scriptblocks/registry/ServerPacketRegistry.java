@@ -22,6 +22,8 @@ import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
 import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaFillerBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaFillerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateBossControllerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateCopyDataBlockPacket;
@@ -173,6 +175,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateAreaBlockPacket.PACKET_ID, UpdateAreaBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaBlockPacket.PACKET_ID, new UpdateAreaBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateAreaFillerBlockPacket.PACKET_ID, UpdateAreaFillerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaFillerBlockPacket.PACKET_ID, new UpdateAreaFillerBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredBeaconBlockPacket.PACKET_ID, UpdateTriggeredBeaconBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredBeaconBlockPacket.PACKET_ID, new UpdateTriggeredBeaconBlockPacketReceiver());

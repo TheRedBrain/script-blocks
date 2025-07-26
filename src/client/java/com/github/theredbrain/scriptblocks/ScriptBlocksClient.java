@@ -10,6 +10,7 @@ import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
 import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
 import com.github.theredbrain.scriptblocks.render.block.entity.AestheticDecoratedPotBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.block.entity.AreaFillerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.BossControllerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.HousingBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.LootableVaultBlockEntityRenderer;
@@ -120,6 +121,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(EntityRegistry.HOUSING_BLOCK_ENTITY, HousingBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.MIMIC_BLOCK_ENTITY, MimicBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.AREA_BLOCK_ENTITY, StatusEffectApplierBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(EntityRegistry.AREA_FILLER_BLOCK_ENTITY, AreaFillerBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.RELAY_TRIGGER_BLOCK_ENTITY, RelayTriggerBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.PLAYER_DETECTOR_BLOCK_ENTITY, PlayerDetectorBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntityRenderer::new);

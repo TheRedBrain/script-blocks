@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.registry;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.AestheticDecoratedPotBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
@@ -165,6 +166,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<AreaBlockEntity> AREA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("area_block"),
 			FabricBlockEntityTypeBuilder.create(AreaBlockEntity::new, BlockRegistry.AREA_BLOCK).build());
+	public static final BlockEntityType<AreaFillerBlockEntity> AREA_FILLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("area_filler_block"),
+			FabricBlockEntityTypeBuilder.create(AreaFillerBlockEntity::new, BlockRegistry.AREA_FILLER_BLOCK).build());
 	public static final BlockEntityType<BossControllerBlockEntity> BOSS_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("boss_controller_block"),
 			FabricBlockEntityTypeBuilder.create(BossControllerBlockEntity::new, BlockRegistry.BOSS_CONTROLLER_BLOCK).build());

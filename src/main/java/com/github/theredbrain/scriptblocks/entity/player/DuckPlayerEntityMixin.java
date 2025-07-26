@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.entity.player;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
@@ -88,6 +89,8 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
 
 	void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity);
+
+	void scriptblocks$openAreaFillerBlockScreen(AreaFillerBlockEntity areaFillerBlockEntity);
 
 	void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity);
 
