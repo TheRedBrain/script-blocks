@@ -126,17 +126,17 @@ public class AreaFillerBlockScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 44, 0xA0A0A0);
+		context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
 		this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
 		this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
 		this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+		context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
 		this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, BLOCK_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+		context.drawTextWithShadow(this.textRenderer, BLOCK_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
 		this.blockIdentifierField.render(context, mouseX, mouseY, delta);
 	}
 
