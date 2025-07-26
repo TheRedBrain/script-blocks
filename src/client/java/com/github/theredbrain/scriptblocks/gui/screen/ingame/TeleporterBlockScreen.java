@@ -88,6 +88,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private ButtonWidget confirmDungeonRegenerationButton;
 	private ButtonWidget cancelDungeonRegenerationButton;
 
+	private boolean showCurrentEntranceDisplayNameFirst;
 	private boolean showChooseTargetOwnerScreen;
 	private boolean showChooseTargetIdentifierScreen;
 	private boolean showRegenerationConfirmScreen;
@@ -517,8 +518,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 //			this.showCurrentUnlockAdvancement = LocationUtils.showUnlockAdvancementForEntrance(location, this.currentTargetEntrance);
 			this.currentTargetDisplayName = location.displayName();
 			this.currentTargetEntranceDisplayName = LocationUtils.getEntranceDisplayName(location, this.currentTargetEntrance);
+			this.showCurrentEntranceDisplayNameFirst = LocationUtils.isEntranceNameShownFirst(location, this.currentTargetEntrance);
 			this.isCurrentLocationPublic = location.isPublic();
-//			this.consumeKeyItem = LocationUtils.consumeKeyAtEntrance(location, this.currentTargetEntrance);
 			this.currentKeys = LocationUtils.getKeyForEntrance(location, this.currentTargetEntrance);
 
 			this.showCurrentLocationOwner = LocationUtils.showLocationOwnerForEntrance(location, this.currentTargetEntrance);
@@ -711,9 +712,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 				if (!this.currentTargetDisplayName.isEmpty() || this.visibleLocationsList.size() > 1) {
 					if (!this.currentTargetEntrance.isEmpty() && !this.currentTargetEntranceDisplayName.isEmpty()) {
-
-						context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), x + 8, y + 20, 0x404040, false);
-						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 8, y + 33, 0x404040, false);
+						if (this.showCurrentEntranceDisplayNameFirst) {
+							context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), x + 8, y + 20, 0x404040, false);
+							context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 8, y + 33, 0x404040, false);
+						} else {
+							context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 8, y + 33, 0x404040, false);
+							context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), x + 8, y + 20, 0x404040, false);
+						}
 
 					} else {
 

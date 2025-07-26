@@ -12,9 +12,9 @@ public record Location(
 		BlockPos controlBlockPos,
 		String structureIdentifier,
 		String displayName,
-		Location.Availability availability,
 		boolean showLocationOwner,
 		boolean isPublic,
+		Location.Availability availability,
 		Map<String, SideEntrance> side_entrances
 ) {
 
@@ -22,9 +22,9 @@ public record Location(
 			BlockPos.CODEC.optionalFieldOf("controlBlockPos", BlockPos.ORIGIN).forGetter(x -> x.controlBlockPos),
 			Codec.STRING.optionalFieldOf("structureIdentifier", "").forGetter(x -> x.structureIdentifier),
 			Codec.STRING.optionalFieldOf("displayName", "").forGetter(x -> x.displayName),
-			Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 			Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner),
 			Codec.BOOL.optionalFieldOf("isPublic", true).forGetter(x -> x.isPublic),
+			Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 			Codec.unboundedMap(Codec.STRING, SideEntrance.CODEC).optionalFieldOf("side_entrances", new HashMap<>()).forGetter(x -> x.side_entrances)
 	).apply(instance, Location::new));
 
@@ -32,9 +32,9 @@ public record Location(
 			BlockPos controlBlockPos,
 			String structureIdentifier,
 			String displayName,
-			Location.Availability availability,
 			boolean showLocationOwner,
 			boolean isPublic,
+			Location.Availability availability,
 			Map<String, SideEntrance> side_entrances
 	) {
 		this.controlBlockPos = controlBlockPos != null ? controlBlockPos : BlockPos.ORIGIN;
@@ -48,24 +48,28 @@ public record Location(
 
 	public record SideEntrance(
 			String name,
-			Location.Availability availability,
-			boolean showLocationOwner
+			boolean showLocationOwner,
+			boolean isEntranceNameShownFirst,
+			Location.Availability availability
 	) {
 
 		public static final Codec<SideEntrance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.optionalFieldOf("name", "").forGetter(x -> x.name),
-				Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
-				Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner)
+				Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner),
+				Codec.BOOL.optionalFieldOf("isEntranceNameShownFirst", true).forGetter(x -> x.isEntranceNameShownFirst),
+				Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability)
 		).apply(instance, SideEntrance::new));
 
 		public SideEntrance(
 				String name,
-				Location.Availability availability,
-				boolean showLocationOwner
+				boolean showLocationOwner,
+				boolean isEntranceNameShownFirst,
+				Location.Availability availability
 		) {
 			this.name = name != null ? name : "";
-			this.availability = availability;
 			this.showLocationOwner = showLocationOwner;
+			this.isEntranceNameShownFirst = isEntranceNameShownFirst;
+			this.availability = availability;
 		}
 	}
 

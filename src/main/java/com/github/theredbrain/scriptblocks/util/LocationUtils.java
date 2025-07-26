@@ -132,4 +132,15 @@ public class LocationUtils {
 		}
 		return entranceDisplayName;
 	}
+
+	public static boolean isEntranceNameShownFirst(Location location, String entrance) {
+		boolean isEntranceNameShownFirst = true;
+		if (location.side_entrances() != null) {
+			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
+			if (sideEntrance != null) {
+				isEntranceNameShownFirst = sideEntrance.isEntranceNameShownFirst();
+			}
+		}
+		return isEntranceNameShownFirst;
+	}
 }
