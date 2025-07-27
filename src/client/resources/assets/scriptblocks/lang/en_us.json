@@ -379,9 +379,15 @@
 	"gui.location_controller_block.new_side_entrance.name": "Name",
 	"gui.location_controller_block.new_side_entrance.orientation": "Yaw/Pitch",
 
+	"gui.location_controller_block.resetAreaMinX": "Minimum X",
+	"gui.location_controller_block.resetAreaMinZ": "Minimum Z",
+	"gui.location_controller_block.resetAreaMaxX": "Maximum X",
+	"gui.location_controller_block.resetAreaMaxZ": "Maximum Z",
+
 	"gui.location_controller_block.screenPage.main_entrance": "Main Entrance",
 	"gui.location_controller_block.screenPage.side_entrances": "Side Entrances",
 	"gui.location_controller_block.screenPage.interacted_blocks": "Interacted Blocks",
+	"gui.location_controller_block.screenPage.reset_area": "Reset Area",
 
 
 	"gui.lootable_vault_block.new_lootable_vault_config_identifier_label": "Lootable Vault Config Id",

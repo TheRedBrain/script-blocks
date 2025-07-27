@@ -16,6 +16,7 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
@@ -25,6 +26,10 @@ import java.util.Map;
 public class LocationControlBlockEntity extends RotatedBlockEntity implements Resetable {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, 1, 0);
 	private static final BlockPos TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 2, 0);
+	private static final int RESET_AREA_MIN_X_DEFAULT = -16;
+	private static final int RESET_AREA_MIN_Z_DEFAULT = -16;
+	private static final int RESET_AREA_MAX_X_DEFAULT = 31;
+	private static final int RESET_AREA_MAX_Z_DEFAULT = 31;
 	private MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
 	private HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(TRIGGERED_BLOCK_POS_DEFAULT, false);
@@ -37,6 +42,11 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private boolean manualReset = false;
 	private boolean shouldAlwaysReset = false;
 	private int initialResetTimer = -1;
+
+	private int resetAreaMinX = RESET_AREA_MIN_X_DEFAULT;
+	private int resetAreaMinZ = RESET_AREA_MIN_Z_DEFAULT;
+	private int resetAreaMaxX = RESET_AREA_MAX_X_DEFAULT;
+	private int resetAreaMaxZ = RESET_AREA_MAX_Z_DEFAULT;
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
@@ -88,6 +98,19 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 		nbt.putInt("initialResetTimer", this.initialResetTimer);
 
+		if (this.resetAreaMinX != RESET_AREA_MIN_X_DEFAULT) {
+			nbt.putInt("resetAreaMinX", this.resetAreaMinX);
+		}
+		if (this.resetAreaMinZ != RESET_AREA_MIN_Z_DEFAULT) {
+			nbt.putInt("resetAreaMinZ", this.resetAreaMinZ);
+		}
+		if (this.resetAreaMaxX != RESET_AREA_MAX_X_DEFAULT) {
+			nbt.putInt("resetAreaMaxX", this.resetAreaMaxX);
+		}
+		if (this.resetAreaMaxZ != RESET_AREA_MAX_Z_DEFAULT) {
+			nbt.putInt("resetAreaMaxZ", this.resetAreaMaxZ);
+		}
+
 		super.writeNbt(nbt, registryLookup);
 	}
 
@@ -138,6 +161,27 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		this.shouldAlwaysReset = nbt.getBoolean("shouldAlwaysReset");
 
 		this.initialResetTimer = nbt.contains("initialResetTimer", NbtElement.INT_TYPE) ? nbt.getInt("initialResetTimer") : -1;
+
+		if (nbt.contains("resetAreaMinX")) {
+			this.resetAreaMinX = nbt.getInt("resetAreaMinX");
+		} else {
+			this.resetAreaMinX = RESET_AREA_MIN_X_DEFAULT;
+		}
+		if (nbt.contains("resetAreaMinZ")) {
+			this.resetAreaMinZ = nbt.getInt("resetAreaMinZ");
+		} else {
+			this.resetAreaMinZ = RESET_AREA_MIN_Z_DEFAULT;
+		}
+		if (nbt.contains("resetAreaMaxX")) {
+			this.resetAreaMaxX = nbt.getInt("resetAreaMaxX");
+		} else {
+			this.resetAreaMaxX = RESET_AREA_MAX_X_DEFAULT;
+		}
+		if (nbt.contains("resetAreaMaxZ")) {
+			this.resetAreaMaxZ = nbt.getInt("resetAreaMaxZ");
+		} else {
+			this.resetAreaMaxZ = RESET_AREA_MAX_Z_DEFAULT;
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -243,6 +287,38 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		this.shouldAlwaysReset = shouldAlwaysReset;
 	}
 
+	public int getResetAreaMinX() {
+		return this.resetAreaMinX;
+	}
+
+	public void setResetAreaMinX(int resetAreaMinX) {
+		this.resetAreaMinX = resetAreaMinX;
+	}
+
+	public int getResetAreaMinZ() {
+		return this.resetAreaMinZ;
+	}
+
+	public void setResetAreaMinZ(int resetAreaMinZ) {
+		this.resetAreaMinZ = resetAreaMinZ;
+	}
+
+	public int getResetAreaMaxX() {
+		return this.resetAreaMaxX;
+	}
+
+	public void setResetAreaMaxX(int resetAreaMaxX) {
+		this.resetAreaMaxX = resetAreaMaxX;
+	}
+
+	public int getResetAreaMaxZ() {
+		return this.resetAreaMaxZ;
+	}
+
+	public void setResetAreaMaxZ(int resetAreaMaxZ) {
+		this.resetAreaMaxZ = resetAreaMaxZ;
+	}
+
 	public int getInitialResetTimer() {
 		return this.initialResetTimer;
 	}
@@ -268,6 +344,14 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
 
+				Vec3i resetAreaMin = BlockRotationUtils.rotateOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), blockRotation);
+				this.resetAreaMinX = resetAreaMin.getX();
+				this.resetAreaMinZ = resetAreaMin.getZ();
+
+				Vec3i resetAreaMax = BlockRotationUtils.rotateOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), blockRotation);
+				this.resetAreaMaxX = resetAreaMax.getX();
+				this.resetAreaMaxZ = resetAreaMax.getZ();
+
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
@@ -283,6 +367,14 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
 
+				Vec3i resetAreaMin = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), BlockMirror.FRONT_BACK);
+				this.resetAreaMinX = resetAreaMin.getX();
+				this.resetAreaMinZ = resetAreaMin.getZ();
+
+				Vec3i resetAreaMax = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), BlockMirror.FRONT_BACK);
+				this.resetAreaMaxX = resetAreaMax.getX();
+				this.resetAreaMaxZ = resetAreaMax.getZ();
+
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
@@ -297,6 +389,14 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				}
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+
+				Vec3i resetAreaMin = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), BlockMirror.LEFT_RIGHT);
+				this.resetAreaMinX = resetAreaMin.getX();
+				this.resetAreaMinZ = resetAreaMin.getZ();
+
+				Vec3i resetAreaMax = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), BlockMirror.LEFT_RIGHT);
+				this.resetAreaMaxX = resetAreaMax.getX();
+				this.resetAreaMaxZ = resetAreaMax.getZ();
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}

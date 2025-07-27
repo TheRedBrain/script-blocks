@@ -188,7 +188,12 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					if (blockEntity instanceof LocationControlBlockEntity locationControlBlock) {
 						if (locationControlBlock.shouldReset() || initialise) {
 
-							String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
+							int resetAreaMinX = blockPos.getX() + locationControlBlock.getResetAreaMinX();
+							int resetAreaMinZ = blockPos.getZ() + locationControlBlock.getResetAreaMinZ();
+							int resetAreaMaxX = blockPos.getX() + locationControlBlock.getResetAreaMaxX();
+							int resetAreaMaxZ = blockPos.getZ() + locationControlBlock.getResetAreaMaxZ();
+
+							String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
 
 							BlockPos dataBlockPos = locationControlBlock.getDataProvidingBlockPosOffset();
@@ -210,7 +215,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							locationControlBlock.trigger();
 
-							String forceLoadRemoveAllCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload remove " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
+							String forceLoadRemoveAllCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload remove " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadRemoveAllCommand);
 
 							locationWasReset = true;

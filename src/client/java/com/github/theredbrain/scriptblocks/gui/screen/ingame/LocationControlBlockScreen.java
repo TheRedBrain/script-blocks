@@ -38,6 +38,10 @@ public class LocationControlBlockScreen extends Screen {
 	private static final Text NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.orientation");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
 	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
+	private static final Text RESET_AREA_MIN_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMinX");
+	private static final Text RESET_AREA_MIN_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMinZ");
+	private static final Text RESET_AREA_MAX_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMaxX");
+	private static final Text RESET_AREA_MAX_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMaxZ");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final LocationControlBlockEntity locationControlBlock;
@@ -66,6 +70,10 @@ public class LocationControlBlockScreen extends Screen {
 	private TextFieldWidget dataProvidingBlockPosOffsetXField;
 	private TextFieldWidget dataProvidingBlockPosOffsetYField;
 	private TextFieldWidget dataProvidingBlockPosOffsetZField;
+	private TextFieldWidget resetAreaMinXField;
+	private TextFieldWidget resetAreaMinZField;
+	private TextFieldWidget resetAreaMaxXField;
+	private TextFieldWidget resetAreaMaxZField;
 	private ButtonWidget saveButton;
 	private ButtonWidget cancelButton;
 	private ScreenPage screenPage;
@@ -249,6 +257,29 @@ public class LocationControlBlockScreen extends Screen {
 		this.addSelectableChild(this.dataProvidingBlockPosOffsetZField);
 
 
+		// --- reset area page ---
+
+		this.resetAreaMinXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 65, 300, 20, Text.empty());
+		this.resetAreaMinXField.setMaxLength(128);
+		this.resetAreaMinXField.setText(Integer.toString(this.locationControlBlock.getResetAreaMinX()));
+		this.addSelectableChild(this.resetAreaMinXField);
+
+		this.resetAreaMinZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 100, 300, 20, Text.empty());
+		this.resetAreaMinZField.setMaxLength(128);
+		this.resetAreaMinZField.setText(Integer.toString(this.locationControlBlock.getResetAreaMinZ()));
+		this.addSelectableChild(this.resetAreaMinZField);
+
+		this.resetAreaMaxXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 135, 300, 20, Text.empty());
+		this.resetAreaMaxXField.setMaxLength(128);
+		this.resetAreaMaxXField.setText(Integer.toString(this.locationControlBlock.getResetAreaMaxX()));
+		this.addSelectableChild(this.resetAreaMaxXField);
+
+		this.resetAreaMaxZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 170, 300, 20, Text.empty());
+		this.resetAreaMaxZField.setMaxLength(128);
+		this.resetAreaMaxZField.setText(Integer.toString(this.locationControlBlock.getResetAreaMaxZ()));
+		this.addSelectableChild(this.resetAreaMaxZField);
+
+
 		this.saveButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
@@ -287,6 +318,11 @@ public class LocationControlBlockScreen extends Screen {
 		this.dataProvidingBlockPosOffsetXField.setVisible(false);
 		this.dataProvidingBlockPosOffsetYField.setVisible(false);
 		this.dataProvidingBlockPosOffsetZField.setVisible(false);
+
+		this.resetAreaMinXField.setVisible(false);
+		this.resetAreaMinZField.setVisible(false);
+		this.resetAreaMaxXField.setVisible(false);
+		this.resetAreaMaxZField.setVisible(false);
 
 		this.saveButton.visible = false;
 		this.cancelButton.visible = false;
@@ -336,6 +372,13 @@ public class LocationControlBlockScreen extends Screen {
 			this.dataProvidingBlockPosOffsetYField.setVisible(true);
 			this.dataProvidingBlockPosOffsetZField.setVisible(true);
 
+		} else if (this.screenPage == ScreenPage.RESET_AREA) {
+
+			this.resetAreaMinXField.setVisible(true);
+			this.resetAreaMinZField.setVisible(true);
+			this.resetAreaMaxXField.setVisible(true);
+			this.resetAreaMaxZField.setVisible(true);
+
 		}
 
 		this.saveButton.visible = true;
@@ -367,6 +410,10 @@ public class LocationControlBlockScreen extends Screen {
 		String string14 = this.dataProvidingBlockPosOffsetXField.getText();
 		String string15 = this.dataProvidingBlockPosOffsetYField.getText();
 		String string16 = this.dataProvidingBlockPosOffsetZField.getText();
+		String string17 = this.resetAreaMinXField.getText();
+		String string18 = this.resetAreaMinZField.getText();
+		String string19 = this.resetAreaMaxXField.getText();
+		String string20 = this.resetAreaMaxZField.getText();
 		boolean bl2 = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.sideEntranceList.clear();
@@ -392,6 +439,10 @@ public class LocationControlBlockScreen extends Screen {
 		this.dataProvidingBlockPosOffsetXField.setText(string14);
 		this.dataProvidingBlockPosOffsetYField.setText(string15);
 		this.dataProvidingBlockPosOffsetZField.setText(string16);
+		this.resetAreaMinXField.setText(string17);
+		this.resetAreaMinZField.setText(string18);
+		this.resetAreaMaxXField.setText(string19);
+		this.resetAreaMaxZField.setText(string20);
 		this.triggeredBlockResets = bl2;
 		this.updateWidgets();
 	}
@@ -492,6 +543,15 @@ public class LocationControlBlockScreen extends Screen {
 			this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
 			this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
 			this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+		} else if (this.screenPage == ScreenPage.RESET_AREA) {
+			context.drawTextWithShadow(this.textRenderer, RESET_AREA_MIN_X_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			this.resetAreaMinXField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, RESET_AREA_MIN_Z_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			this.resetAreaMinZField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, RESET_AREA_MAX_X_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
+			this.resetAreaMaxXField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, RESET_AREA_MAX_Z_LABEL_TEXT, this.width / 2 - 153, 160, 0xA0A0A0);
+			this.resetAreaMaxZField.render(context, mouseX, mouseY, delta);
 		}
 	}
 
@@ -531,7 +591,11 @@ public class LocationControlBlockScreen extends Screen {
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
 				),
-				this.shouldAlwaysReset
+				this.shouldAlwaysReset,
+				ItemUtils.parseInt(this.resetAreaMinXField.getText()),
+				ItemUtils.parseInt(this.resetAreaMinZField.getText()),
+				ItemUtils.parseInt(this.resetAreaMaxXField.getText()),
+				ItemUtils.parseInt(this.resetAreaMaxZField.getText())
 		));
 		return true;
 	}
@@ -539,7 +603,8 @@ public class LocationControlBlockScreen extends Screen {
 	public static enum ScreenPage implements StringIdentifiable {
 		MAIN_ENTRANCE("main_entrance"),
 		SIDE_ENTRANCES("side_entrances"),
-		INTERACTED_BLOCKS("interacted_blocks");
+		INTERACTED_BLOCKS("interacted_blocks"),
+		RESET_AREA("reset_area");
 
 		private final String name;
 

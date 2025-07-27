@@ -19,7 +19,11 @@ public record UpdateLocationControlBlockPacket(
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		BlockPos dataSavingBlockPosOffset,
-		boolean shouldAlwaysReset
+		boolean shouldAlwaysReset,
+		int resetAreaMinX,
+		int resetAreaMinZ,
+		int resetAreaMaxX,
+		int resetAreaMaxZ
 ) implements CustomPayload {
 	public static final CustomPayload.Id<UpdateLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_location_control_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateLocationControlBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateLocationControlBlockPacket::write, UpdateLocationControlBlockPacket::new);
@@ -34,7 +38,11 @@ public record UpdateLocationControlBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBoolean()
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readInt(),
+				registryByteBuf.readInt(),
+				registryByteBuf.readInt(),
+				registryByteBuf.readInt()
 		);
 	}
 
@@ -48,6 +56,10 @@ public record UpdateLocationControlBlockPacket(
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBlockPos(this.dataSavingBlockPosOffset);
 		registryByteBuf.writeBoolean(this.shouldAlwaysReset);
+		registryByteBuf.writeInt(this.resetAreaMinX);
+		registryByteBuf.writeInt(this.resetAreaMinZ);
+		registryByteBuf.writeInt(this.resetAreaMaxX);
+		registryByteBuf.writeInt(this.resetAreaMaxZ);
 	}
 
 	@Override
