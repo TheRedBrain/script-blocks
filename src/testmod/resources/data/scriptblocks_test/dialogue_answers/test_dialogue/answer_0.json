@@ -1,5 +1,5 @@
 {
-    "answerText": "dialogue_answers.test_dialogue.answer_3",
+    "answerText": "dialogue_answers.test_dialogue.answer_0",
     "responseDialogues": [],
     "availability": {
         "unlockAdvancement": "",
@@ -14,7 +14,7 @@
             "dataValue": "",
             "comparisonMode": 0
         },
-        "showLockedAnswer": false,
+        "showLockedAnswer": true,
         "itemCosts": [],
         "showUnaffordableAnswer": false
     },

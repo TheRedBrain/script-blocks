@@ -33,6 +33,8 @@ public class DialogueScreenHandler extends ScreenHandler {
 	public List<String> unlockedAnswersList;
 	public List<String> visibleAnswersList;
 	public List<String> dialogueTextList = new ArrayList<>(List.of());
+	public int dialogueTextsStartingIndex;
+	public int answersStartingIndex;
 
 	public DialogueScreenHandler(int syncId, PlayerInventory playerInventory, DialogueData data) {
 		this(syncId, playerInventory, data.dialogueIdentifierString, data.dataBlockPos, data.dialogueUsedBlocks, data.dialogueTriggeredBlocks, data.unlockedAnswersList, data.visibleAnswersList);
@@ -50,6 +52,8 @@ public class DialogueScreenHandler extends ScreenHandler {
 		if (optionalDialogueReference.isPresent()) {
 			this.dialogue = optionalDialogueReference.get().value();
 			this.dialogueTextList = this.dialogue.dialogueTextList();
+			this.dialogueTextsStartingIndex = this.dialogue.dialogueTextsStartingIndex();
+			this.answersStartingIndex = this.dialogue.answersStartingIndex();
 		}
 	}
 
@@ -61,6 +65,14 @@ public class DialogueScreenHandler extends ScreenHandler {
 	@Override
 	public boolean canUse(PlayerEntity player) {
 		return true;
+	}
+
+	public int getDialogueTextsStartingIndex() {
+		return Math.max(0,Math.min(7, this.dialogueTextsStartingIndex));
+	}
+
+	public int getAnswersStartingIndex() {
+		return Math.max(0,Math.min(7, this.answersStartingIndex));
 	}
 
 	public record DialogueData(

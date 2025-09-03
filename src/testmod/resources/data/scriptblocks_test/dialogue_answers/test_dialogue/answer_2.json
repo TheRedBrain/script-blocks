@@ -10,9 +10,9 @@
             "comparisonMode": 0
         },
         "lockDataCheck": {
-            "dataIdentifier": "test",
-            "dataValue": "1",
-            "comparisonMode": 1
+            "dataIdentifier": "",
+            "dataValue": "",
+            "comparisonMode": 0
         },
         "showLockedAnswer": false,
         "itemCosts": [],

@@ -1,0 +1,18 @@
+{
+    "dialogueTextList": [
+        "dialogues.test_dialogue.line_3",
+        "",
+        "dialogues.test_dialogue.line_6"
+    ],
+    "dialogueTextsStartingIndex": 0,
+    "answerList": [
+        "scriptblocks_test:test_dialogue/answer_0",
+        "",
+        "scriptblocks_test:test_dialogue/answer_2",
+        "scriptblocks_test:test_dialogue/answer_3"
+    ],
+    "answersStartingIndex": 4,
+    "unlockAdvancement": "",
+    "lockAdvancement": "",
+    "cancellable": true
+}

@@ -96,110 +96,112 @@ public interface DialogueAnchor {
 
 			for (String answerIdentifierString : dialogue.answerList()) {
 
-				if (answerIdentifierString.isEmpty()) {
-					continue;
-				}
+				if (!answerIdentifierString.isEmpty()) {
 
-				DialogueAnswer dialogueAnswer = null;
-				Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifierString));
-				if (optionalDialogueAnswerReference1.isPresent()) {
-					dialogueAnswer = optionalDialogueAnswerReference1.get().value();
-				}
-
-				if (dialogueAnswer == null) {
-					continue;
-				}
-
-				boolean isItemCostAffordable = true;
-				if (!dialogueAnswer.availability().itemCosts().isEmpty()) {
-
-					// player inventory copy
-					int inventorySize = serverPlayerEntity.getInventory().size();
-					Inventory playerInventoryCopy = new SimpleInventory(inventorySize);
-					ItemStack itemStack;
-					int j;
-					for (int k = 0; k < inventorySize; k++) {
-						playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
+					DialogueAnswer dialogueAnswer = null;
+					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifierString));
+					if (optionalDialogueAnswerReference1.isPresent()) {
+						dialogueAnswer = optionalDialogueAnswerReference1.get().value();
 					}
 
-					for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
-						ItemStack costStack = itemCost.itemStack();
-						int itemCount = costStack.getCount();
-						if (!costStack.isEmpty()) {
-							for (j = 0; j < inventorySize; j++) {
-								if (ItemStack.areItemsAndComponentsEqual(playerInventoryCopy.getStack(j), costStack)) {
-									itemStack = playerInventoryCopy.getStack(j).copy();
-									int stackCount = itemStack.getCount();
-									if (stackCount >= itemCount) {
-										itemStack.setCount(stackCount - itemCount);
-										playerInventoryCopy.setStack(j, itemStack);
-										itemCount = 0;
-										break;
-									} else {
-										playerInventoryCopy.setStack(j, ItemStack.EMPTY);
-										itemCount = itemCount - stackCount;
+					if (dialogueAnswer == null) {
+						continue;
+					}
+
+					boolean isItemCostAffordable = true;
+					if (!dialogueAnswer.availability().itemCosts().isEmpty()) {
+
+						// player inventory copy
+						int inventorySize = serverPlayerEntity.getInventory().size();
+						Inventory playerInventoryCopy = new SimpleInventory(inventorySize);
+						ItemStack itemStack;
+						int j;
+						for (int k = 0; k < inventorySize; k++) {
+							playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
+						}
+
+						for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
+							ItemStack costStack = itemCost.itemStack();
+							int itemCount = costStack.getCount();
+							if (!costStack.isEmpty()) {
+								for (j = 0; j < inventorySize; j++) {
+									if (ItemStack.areItemsAndComponentsEqual(playerInventoryCopy.getStack(j), costStack)) {
+										itemStack = playerInventoryCopy.getStack(j).copy();
+										int stackCount = itemStack.getCount();
+										if (stackCount >= itemCount) {
+											itemStack.setCount(stackCount - itemCount);
+											playerInventoryCopy.setStack(j, itemStack);
+											itemCount = 0;
+											break;
+										} else {
+											playerInventoryCopy.setStack(j, ItemStack.EMPTY);
+											itemCount = itemCount - stackCount;
+										}
 									}
 								}
-							}
-							if (itemCount > 0) {
-								isItemCostAffordable = false;
+								if (itemCount > 0) {
+									isItemCostAffordable = false;
+								}
 							}
 						}
 					}
-				}
 
-				CommonDataStructures.DataCheck unlockDataCheck = dialogueAnswer.availability().unlockDataCheck();
-				CommonDataStructures.DataCheck lockDataCheck = dialogueAnswer.availability().lockDataCheck();
+					CommonDataStructures.DataCheck unlockDataCheck = dialogueAnswer.availability().unlockDataCheck();
+					CommonDataStructures.DataCheck lockDataCheck = dialogueAnswer.availability().lockDataCheck();
 
-				boolean unlockDataCheckPassed = true;
-				boolean lockDataCheckPassed = false;
+					boolean unlockDataCheckPassed = true;
+					boolean lockDataCheckPassed = false;
 
-				if (unlockDataCheck != CommonDataStructures.DataCheck.DEFAULT || lockDataCheck != CommonDataStructures.DataCheck.DEFAULT) {
-					BlockEntity blockEntity = world.getBlockEntity(dataBlockPos);
-					if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
-						String existingUnlockData = providesDataBlockEntity.getData(unlockDataCheck.dataIdentifier());
-						String existingLockData = providesDataBlockEntity.getData(lockDataCheck.dataIdentifier());
+					if (unlockDataCheck != CommonDataStructures.DataCheck.DEFAULT || lockDataCheck != CommonDataStructures.DataCheck.DEFAULT) {
+						BlockEntity blockEntity = world.getBlockEntity(dataBlockPos);
+						if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
+							String existingUnlockData = providesDataBlockEntity.getData(unlockDataCheck.dataIdentifier());
+							String existingLockData = providesDataBlockEntity.getData(lockDataCheck.dataIdentifier());
 
-						unlockDataCheckPassed = switch (unlockDataCheck.comparisonMode()) {
-							case 0 -> Objects.equals(unlockDataCheck.dataValue(), existingUnlockData);
-							case 1 -> !Objects.equals(unlockDataCheck.dataValue(), existingUnlockData);
-							case 2 ->
-									ItemUtils.parseInt(unlockDataCheck.dataValue()) < ItemUtils.parseInt(existingUnlockData);
-							case 3 ->
-									ItemUtils.parseInt(unlockDataCheck.dataValue()) > ItemUtils.parseInt(existingUnlockData);
-							default -> true;
-						};
-						lockDataCheckPassed = switch (lockDataCheck.comparisonMode()) {
-							case 0 -> Objects.equals(lockDataCheck.dataValue(), existingLockData);
-							case 1 -> !Objects.equals(lockDataCheck.dataValue(), existingLockData);
-							case 2 ->
-									ItemUtils.parseInt(lockDataCheck.dataValue()) < ItemUtils.parseInt(existingLockData);
-							case 3 ->
-									ItemUtils.parseInt(lockDataCheck.dataValue()) > ItemUtils.parseInt(existingLockData);
-							default -> false;
-						};
+							unlockDataCheckPassed = switch (unlockDataCheck.comparisonMode()) {
+								case 0 -> Objects.equals(unlockDataCheck.dataValue(), existingUnlockData);
+								case 1 -> !Objects.equals(unlockDataCheck.dataValue(), existingUnlockData);
+								case 2 ->
+										ItemUtils.parseInt(unlockDataCheck.dataValue()) < ItemUtils.parseInt(existingUnlockData);
+								case 3 ->
+										ItemUtils.parseInt(unlockDataCheck.dataValue()) > ItemUtils.parseInt(existingUnlockData);
+								default -> true;
+							};
+							lockDataCheckPassed = switch (lockDataCheck.comparisonMode()) {
+								case 0 -> Objects.equals(lockDataCheck.dataValue(), existingLockData);
+								case 1 -> !Objects.equals(lockDataCheck.dataValue(), existingLockData);
+								case 2 ->
+										ItemUtils.parseInt(lockDataCheck.dataValue()) < ItemUtils.parseInt(existingLockData);
+								case 3 ->
+										ItemUtils.parseInt(lockDataCheck.dataValue()) > ItemUtils.parseInt(existingLockData);
+								default -> false;
+							};
+						}
 					}
-				}
 
-				if (playerAdvancementTracker != null && serverAdvancementLoader != null) {
+					if (playerAdvancementTracker != null && serverAdvancementLoader != null) {
 
-					AdvancementEntry lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(dialogueAnswer.availability().lockAdvancement()));
+						AdvancementEntry lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(dialogueAnswer.availability().lockAdvancement()));
 
-					AdvancementEntry unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(dialogueAnswer.availability().unlockAdvancement()));
+						AdvancementEntry unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(dialogueAnswer.availability().unlockAdvancement()));
 
-					if ((lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) &&
-							(unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()) &&
-							unlockDataCheckPassed && !lockDataCheckPassed
-					) {
-						if (isItemCostAffordable) {
-							unlockedAnswersList.add(answerIdentifierString);
-							visibleAnswersList.add(answerIdentifierString);
-						} else if (dialogueAnswer.availability().showUnaffordableAnswer()) {
+						if ((dialogueAnswer.availability().lockAdvancement().isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) &&
+								(dialogueAnswer.availability().unlockAdvancement().isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone())) &&
+								unlockDataCheckPassed && !lockDataCheckPassed
+						) {
+							if (isItemCostAffordable) {
+								unlockedAnswersList.add(answerIdentifierString);
+								visibleAnswersList.add(answerIdentifierString);
+							} else if (dialogueAnswer.availability().showUnaffordableAnswer()) {
+								visibleAnswersList.add(answerIdentifierString);
+							}
+						} else if (dialogueAnswer.availability().showLockedAnswer()) {
 							visibleAnswersList.add(answerIdentifierString);
 						}
-					} else if (dialogueAnswer.availability().showLockedAnswer()) {
-						visibleAnswersList.add(answerIdentifierString);
 					}
+				} else {
+					unlockedAnswersList.add("");
+					visibleAnswersList.add("");
 				}
 			}
 			serverPlayerEntity.openHandledScreen(new ExtendedScreenHandlerFactory<>() {

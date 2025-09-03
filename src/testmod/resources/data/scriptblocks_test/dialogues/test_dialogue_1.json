@@ -1,0 +1,23 @@
+{
+    "dialogueTextList": [
+        "dialogues.test_dialogue.line_1",
+        "dialogues.test_dialogue.line_2",
+        "dialogues.test_dialogue.line_3",
+        "",
+        "",
+        "dialogues.test_dialogue.line_6",
+        "dialogues.test_dialogue.line_7",
+        "dialogues.test_dialogue.line_8",
+        "dialogues.test_dialogue.line_9",
+        "dialogues.test_dialogue.line_10",
+        "dialogues.test_dialogue.line_11",
+        "dialogues.test_dialogue.line_12"
+    ],
+    "dialogueTextsStartingIndex": 0,
+    "answerList": [
+    ],
+    "answersStartingIndex": 7,
+    "unlockAdvancement": "",
+    "lockAdvancement": "",
+    "cancellable": true
+}
