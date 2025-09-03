@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
+import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
@@ -39,7 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory {
+public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory, Triggerable {
 
 	private boolean calculateActivationBox = true;
 	private Box activationArea = null;
@@ -47,6 +48,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private boolean showActivationArea = false;
 	private Vec3i activationAreaDimensions = Vec3i.ZERO;
 	private BlockPos activationAreaPositionOffset = new BlockPos(0, 1, 0);
+
+	private boolean tickActivation = true;
 
 	private BlockPos accessPositionOffset = new BlockPos(0, 0, 0);
 	private boolean setAccessPosition = false;
@@ -263,7 +266,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TeleporterBlockEntity blockEntity) {
-		TeleporterBlockEntity.tryOpenScreenRemotely(world, pos, state, blockEntity);
+		if (blockEntity.tickActivation()) {
+			TeleporterBlockEntity.tryOpenScreenRemotely(world, pos, state, blockEntity);
+		}
 	}
 
 	private static void tryOpenScreenRemotely(World world, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
@@ -303,6 +308,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	public void trigger() {
+		World world = this.world;
+		if (world != null) {
+			tryOpenScreenRemotely(world, this.pos, world.getBlockState(this.pos), this);
 		}
 	}
 
@@ -359,6 +372,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	public void setActivationAreaPositionOffset(BlockPos activationAreaPositionOffset) {
 		this.activationAreaPositionOffset = activationAreaPositionOffset;
 		this.calculateActivationBox = true;
+	}
+
+	public boolean tickActivation() {
+		return this.tickActivation;
+	}
+
+	public void setTickActivation(boolean tickActivation) {
+		this.tickActivation = tickActivation;
 	}
 
 	public BlockPos getAccessPositionOffset() {

@@ -41,8 +41,8 @@ public record Shop(
 				ItemStack.VALIDATED_CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
 				ItemStack.VALIDATED_CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
 				Codec.INT.optionalFieldOf("maxStockCount", 1).forGetter(x -> x.maxStockCount),
-				Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
-				Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
+				Codec.STRING.optionalFieldOf("unlockAdvancement", "").forGetter(x -> x.unlockAdvancement),
+				Codec.STRING.optionalFieldOf("lockAdvancement", "").forGetter(x -> x.lockAdvancement),
 				Codec.BOOL.optionalFieldOf("showLockedDeal", true).forGetter(x -> x.showLockedDeal)
 		).apply(instance, Deal::new));
 
