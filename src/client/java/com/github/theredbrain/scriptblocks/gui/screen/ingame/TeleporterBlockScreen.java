@@ -237,8 +237,10 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.currentTargetEntranceDisplayName = "";
 		this.currentTargetEntranceDataId = "";
 		this.currentTargetEntranceData = "";
-		if ((this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT || this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) && !this.showAdventureScreen) {
-			this.teleport();
+		if ((this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT || this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS)) {
+			if (!this.showAdventureScreen) {
+				this.teleport();
+			}
 		} else {
 			this.calculateUnlockedAndVisibleLocations(true);
 			if (this.visibleLocationsList.isEmpty()) {

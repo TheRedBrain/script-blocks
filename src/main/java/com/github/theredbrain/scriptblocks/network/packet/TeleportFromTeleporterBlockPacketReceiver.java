@@ -81,6 +81,15 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			targetPos = new BlockPos(teleportBlockPosition.getX() + directTeleportPositionOffset.getX(), teleportBlockPosition.getY() + directTeleportPositionOffset.getY(), teleportBlockPosition.getZ() + directTeleportPositionOffset.getZ());
 			targetYaw = directTeleportOrientationYaw;
 			targetPitch = directTeleportOrientationPitch;
+
+			if (targetWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+
+				targetPos = entrance.getLeft();
+				targetYaw = entrance.getRight().getLeft();
+				targetPitch = entrance.getRight().getRight();
+			}
+
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
 			MutablePair<String, BlockPos> location_access_pos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getLocationAccessPosition();
 			if (spawnPointType == TeleporterBlockEntity.SpawnPointType.LOCATION_ACCESS_POSITION && location_access_pos != null) {
