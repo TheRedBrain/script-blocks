@@ -23,6 +23,7 @@ import com.github.theredbrain.scriptblocks.block.PlayerDetectorBlock;
 import com.github.theredbrain.scriptblocks.block.RedstoneTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.RelayTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.ShopBlock;
+import com.github.theredbrain.scriptblocks.block.TeamControllerBlock;
 import com.github.theredbrain.scriptblocks.block.TeleporterBlock;
 import com.github.theredbrain.scriptblocks.block.TeleporterDoorBlock;
 import com.github.theredbrain.scriptblocks.block.TeleporterTrapdoorBlock;
@@ -152,6 +153,7 @@ public class BlockRegistry {
 	public static final Block PLAYER_DETECTOR_BLOCK = registerBlock("player_detector_block", new PlayerDetectorBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block RELAY_TRIGGER_BLOCK = registerBlock("relay_trigger_block", new RelayTriggerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block SHOP_BLOCK = registerBlock("shop_block", new ShopBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TEAM_CONTROLLER_BLOCK = registerBlock("team_controller_block", new TeamControllerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TELEPORTER_BLOCK = registerBlock("teleporter_block", new TeleporterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_ADVANCEMENT_CHECKER_BLOCK = registerBlock("triggered_advancement_checker_block", new TriggeredAdvancementCheckerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_BEACON_BLOCK = registerBlock("triggered_beacon_block", new TriggeredBeaconBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

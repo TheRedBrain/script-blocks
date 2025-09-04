@@ -19,6 +19,7 @@ import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntit
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
@@ -53,6 +54,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.PlayerDetectorBlock
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RedstoneTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeamControllerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancementCheckerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredBeaconBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlockScreen;
@@ -143,6 +145,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		} else {
 			this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
 		}
+	}
+
+	@Override
+	public void scriptblocks$openTeamControllerBlockScreen(TeamControllerBlockEntity teamControllerBlockEntity) {
+		this.client.setScreen(new TeamControllerBlockScreen(teamControllerBlockEntity));
 	}
 
 	@Override

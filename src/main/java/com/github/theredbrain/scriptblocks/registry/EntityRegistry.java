@@ -22,6 +22,7 @@ import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntit
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
@@ -120,6 +121,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<HousingBlockEntity> HOUSING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("housing_block"),
 			FabricBlockEntityTypeBuilder.create(HousingBlockEntity::new, BlockRegistry.HOUSING_BLOCK).build());
+	public static final BlockEntityType<TeamControllerBlockEntity> TEAM_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("team_controller_block"),
+			FabricBlockEntityTypeBuilder.create(TeamControllerBlockEntity::new, BlockRegistry.TEAM_CONTROLLER_BLOCK).build());
 	public static final BlockEntityType<TeleporterBlockEntity> TELEPORTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("teleporter_block"),
 			FabricBlockEntityTypeBuilder.create(TeleporterBlockEntity::new,

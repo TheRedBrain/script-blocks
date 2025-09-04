@@ -18,14 +18,13 @@ import com.github.theredbrain.scriptblocks.render.block.entity.MimicBlockEntityR
 import com.github.theredbrain.scriptblocks.render.block.entity.PlayerDetectorBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.RelayTriggerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.StatusEffectApplierBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.block.entity.TeamControllerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TeleporterBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredBeaconBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDisplayBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredEntityRemoverBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.UseRelayLecternBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.renderer.FakeVillagerEntityRenderer;
-import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
-import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -131,6 +130,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY, LootableVaultBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.USE_RELAY_LECTERN_BLOCK_ENTITY, UseRelayLecternBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(EntityRegistry.TEAM_CONTROLLER_BLOCK_ENTITY, TeamControllerBlockEntityRenderer::new);
 	}
 
 	private void registerScreens() {
