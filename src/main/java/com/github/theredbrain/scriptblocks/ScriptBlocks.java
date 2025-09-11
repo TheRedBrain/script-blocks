@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks;
 
-import com.github.theredbrain.scriptblocks.block.PVPControllerBlock;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
@@ -23,6 +22,7 @@ import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.scoreboard.Team;
@@ -54,6 +54,10 @@ public class ScriptBlocks implements ModInitializer {
 		} else {
 			info("Tried to supply loot via Lootables, but the mod is not installed!");
 		}
+	}
+
+	public static void setCurrentPVPControllerBlockPosition(PlayerEntity playerEntity, Optional<BlockPos> currentPVPControllerBlockPosition) {
+		((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(currentPVPControllerBlockPosition);
 	}
 
 	@Nullable
@@ -106,12 +110,6 @@ public class ScriptBlocks implements ModInitializer {
 		DimensionsManager.init();
 		EventsRegistry.initializeEvents();
 		CustomDynamicRegistries.init();
-//		DialoguesRegistry.init();
-//		DialogueAnswersRegistry.init();
-//		ShopsRegistry.init();
-//		BossesRegistry.init();
-//		LocationsRegistry.init();
-//		LootableVaultConfigsRegistry.init();
 		ItemRegistry.init();
 		ItemGroupRegistry.init();
 		ScreenHandlerTypesRegistry.registerAll();
