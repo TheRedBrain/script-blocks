@@ -14,7 +14,6 @@ import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
@@ -31,7 +30,6 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
-import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -55,7 +53,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
+import java.util.Optional;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlayerEntityMixin {
@@ -67,10 +65,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	public abstract ItemStack getEquippedStack(EquipmentSlot slot);
 
 	@Unique
-	private static final TrackedData<BlockPos> CURRENT_HOUSING_BLOCK_POS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.BLOCK_POS);
+	private static final TrackedData<Optional<BlockPos>> CURRENT_HOUSING_BLOCK_POS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
 
 	@Unique
-	private static final TrackedData<BlockPos> CURRENT_LOCATION_ACCESS_BLOCK_POS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.BLOCK_POS);
+	private static final TrackedData<Optional<BlockPos>> CURRENT_LOCATION_ACCESS_BLOCK_POS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
 
 	@Unique
 	private static final TrackedData<String> CURRENT_LOCATION_ACCESS_DIMENSION = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.STRING);
@@ -81,8 +79,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@Inject(method = "initDataTracker", at = @At("RETURN"))
 	protected void scriptblocks$initDataTracker(DataTracker.Builder builder, CallbackInfo ci) {
-		builder.add(CURRENT_HOUSING_BLOCK_POS, BlockPos.ORIGIN);
-		builder.add(CURRENT_LOCATION_ACCESS_BLOCK_POS, BlockPos.ORIGIN);
+		builder.add(CURRENT_HOUSING_BLOCK_POS, Optional.empty());
+		builder.add(CURRENT_LOCATION_ACCESS_BLOCK_POS, Optional.empty());
 		builder.add(CURRENT_LOCATION_ACCESS_DIMENSION, "");
 	}
 
@@ -90,19 +88,23 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	public void scriptblocks$readCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
 
 		if (nbt.contains("currentHousingBlockPositionX", NbtElement.INT_TYPE) && nbt.contains("currentHousingBlockPositionY", NbtElement.INT_TYPE) && nbt.contains("currentHousingBlockPositionZ", NbtElement.INT_TYPE)) {
-			this.dataTracker.set(CURRENT_HOUSING_BLOCK_POS, new BlockPos(
+			this.dataTracker.set(CURRENT_HOUSING_BLOCK_POS, Optional.of(new BlockPos(
 					nbt.getInt("currentHousingBlockPositionX"),
 					nbt.getInt("currentHousingBlockPositionY"),
 					nbt.getInt("currentHousingBlockPositionZ")
-			));
+			)));
+		} else {
+			this.dataTracker.set(CURRENT_HOUSING_BLOCK_POS, Optional.empty());
 		}
 
 		if (nbt.contains("currentLocationAccessBlockPositionX", NbtElement.INT_TYPE) && nbt.contains("currentLocationAccessBlockPositionY", NbtElement.INT_TYPE) && nbt.contains("currentLocationAccessBlockPositionZ", NbtElement.INT_TYPE)) {
-			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, new BlockPos(
+			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, Optional.of(new BlockPos(
 					nbt.getInt("currentLocationAccessBlockPositionX"),
 					nbt.getInt("currentLocationAccessBlockPositionY"),
 					nbt.getInt("currentLocationAccessBlockPositionZ")
-			));
+			)));
+		} else {
+			this.dataTracker.set(CURRENT_HOUSING_BLOCK_POS, Optional.empty());
 		}
 
 		if (nbt.contains("currentLocationAccessDimension", NbtElement.STRING_TYPE)) {
@@ -114,22 +116,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
 	public void scriptblocks$writeCustomDataToNbt(NbtCompound nbt, CallbackInfo ci) {
 
-		BlockPos currentHousingBlockPosition = this.dataTracker.get(CURRENT_HOUSING_BLOCK_POS);
-		if (currentHousingBlockPosition != BlockPos.ORIGIN) {
-			nbt.putInt("currentHousingBlockPositionX", currentHousingBlockPosition.getX());
-			nbt.putInt("currentHousingBlockPositionY", currentHousingBlockPosition.getY());
-			nbt.putInt("currentHousingBlockPositionZ", currentHousingBlockPosition.getZ());
+		Optional<BlockPos> optionalCurrentHousingBlockPosition = this.dataTracker.get(CURRENT_HOUSING_BLOCK_POS);
+		if (optionalCurrentHousingBlockPosition.isPresent()) {
+			nbt.putInt("currentHousingBlockPositionX", optionalCurrentHousingBlockPosition.get().getX());
+			nbt.putInt("currentHousingBlockPositionY", optionalCurrentHousingBlockPosition.get().getY());
+			nbt.putInt("currentHousingBlockPositionZ", optionalCurrentHousingBlockPosition.get().getZ());
 		} else {
 			nbt.remove("currentHousingBlockPositionX");
 			nbt.remove("currentHousingBlockPositionY");
 			nbt.remove("currentHousingBlockPositionZ");
 		}
 
-		BlockPos currentLocationAccessBlockPosition = this.dataTracker.get(CURRENT_LOCATION_ACCESS_BLOCK_POS);
-		if (currentLocationAccessBlockPosition != BlockPos.ORIGIN) {
-			nbt.putInt("currentLocationAccessBlockPositionX", currentLocationAccessBlockPosition.getX());
-			nbt.putInt("currentLocationAccessBlockPositionY", currentLocationAccessBlockPosition.getY());
-			nbt.putInt("currentLocationAccessBlockPositionZ", currentLocationAccessBlockPosition.getZ());
+		Optional<BlockPos> optionalCurrentLocationAccessBlockPosition = this.dataTracker.get(CURRENT_LOCATION_ACCESS_BLOCK_POS);
+		if (optionalCurrentLocationAccessBlockPosition.isPresent()) {
+			nbt.putInt("currentLocationAccessBlockPositionX", optionalCurrentLocationAccessBlockPosition.get().getX());
+			nbt.putInt("currentLocationAccessBlockPositionY", optionalCurrentLocationAccessBlockPosition.get().getY());
+			nbt.putInt("currentLocationAccessBlockPositionZ", optionalCurrentLocationAccessBlockPosition.get().getZ());
 		} else {
 			nbt.remove("currentLocationAccessBlockPositionX");
 			nbt.remove("currentLocationAccessBlockPositionY");
@@ -146,35 +148,34 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	}
 
 	@Override
-	@Nullable
-	public BlockPos scriptblocks$getCurrentHousingBlockPosition() {
+	public Optional<BlockPos> scriptblocks$getCurrentHousingBlockPosition() {
 		return this.dataTracker.get(CURRENT_HOUSING_BLOCK_POS);
 	}
 
 	@Override
-	public void scriptblocks$setCurrentHousingBlockPosition(@Nullable BlockPos currentHousingBlockPosition) {
+	public void scriptblocks$setCurrentHousingBlockPosition(Optional<BlockPos> currentHousingBlockPosition) {
 		this.dataTracker.set(CURRENT_HOUSING_BLOCK_POS, currentHousingBlockPosition);
 	}
 
 	@Override
 	@Nullable
 	public MutablePair<String, BlockPos> scriptblocks$getLocationAccessPosition() {
-		BlockPos blockPos = this.dataTracker.get(CURRENT_LOCATION_ACCESS_BLOCK_POS);
+		Optional<BlockPos> optionalBlockPos = this.dataTracker.get(CURRENT_LOCATION_ACCESS_BLOCK_POS);
 		String string = this.dataTracker.get(CURRENT_LOCATION_ACCESS_DIMENSION);
-		if (string.isEmpty()) {
+		if (string.isEmpty() || optionalBlockPos.isEmpty()) {
 			return null;
 		} else {
-			return new MutablePair<>(string, blockPos);
+			return new MutablePair<>(string, optionalBlockPos.get());
 		}
 	}
 
 	@Override
 	public void scriptblocks$setLocationAccessPosition(@Nullable MutablePair<String, BlockPos> locationAccessPosition) {
 		if (locationAccessPosition == null) {
-			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, BlockPos.ORIGIN);
+			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, Optional.empty());
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_DIMENSION, "");
 		} else {
-			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, locationAccessPosition.right);
+			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, Optional.of(locationAccessPosition.right));
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_DIMENSION, locationAccessPosition.left);
 		}
 	}

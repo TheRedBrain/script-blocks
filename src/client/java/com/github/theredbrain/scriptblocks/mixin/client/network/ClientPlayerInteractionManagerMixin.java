@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 @Mixin(ClientPlayerInteractionManager.class)
@@ -73,10 +74,12 @@ public abstract class ClientPlayerInteractionManagerMixin {
 	@Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
 		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
-			BlockPos housingBlockPos = ((DuckPlayerEntityMixin) this.client.player).scriptblocks$getCurrentHousingBlockPosition();
+			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) this.client.player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
-			if (!Objects.equals(housingBlockPos, new BlockPos(0, 0, 0)) && this.client.world != null && this.client.world.getBlockEntity(housingBlockPos) instanceof HousingBlockEntity housingBlockEntity) {
+			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 				bl = housingBlockEntity.influenceAreaContains(pos);
+			} else {
+				((DuckPlayerEntityMixin) this.client.player).scriptblocks$setCurrentHousingBlockPosition(Optional.empty()); // TODO C2S packet reset position
 			}
 			if (bl) {
 				BlockState blockState = this.client.world.getBlockState(pos);
@@ -96,10 +99,12 @@ public abstract class ClientPlayerInteractionManagerMixin {
 	public void scriptblocks$interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
 		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
 			this.syncSelectedSlot();
-			BlockPos housingBlockPos = ((DuckPlayerEntityMixin) player).scriptblocks$getCurrentHousingBlockPosition();
+			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
-			if (!Objects.equals(housingBlockPos, new BlockPos(0, 0, 0)) && this.client.world != null && this.client.world.getBlockEntity(housingBlockPos) instanceof HousingBlockEntity housingBlockEntity) {
+			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 				bl = housingBlockEntity.influenceAreaContains(hitResult.getBlockPos().offset(hitResult.getSide()));
+			} else {
+				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(Optional.empty());
 			}
 			if (!bl) {
 				cir.setReturnValue(ActionResult.FAIL);

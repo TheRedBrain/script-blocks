@@ -187,7 +187,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 				} else {
 					playerEntity.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT), 100, 0, true, false, false));
 				}
-				((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentHousingBlockPosition(blockEntity.pos);
+				((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentHousingBlockPosition(Optional.of(blockEntity.pos));
 			}
 		}
 	}

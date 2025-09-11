@@ -84,6 +84,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ClientPlayerEntity.class)
@@ -119,7 +120,8 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
 	@Override
 	public void scriptblocks$openHousingScreen() {
-		if (this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(this.scriptblocks$getCurrentHousingBlockPosition()) instanceof HousingBlockEntity housingBlockEntity) {
+		Optional<BlockPos> optionalBlockPos = this.scriptblocks$getCurrentHousingBlockPosition();
+		if (optionalBlockPos.isPresent() && this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 			int currentPermissionLevel;
 
 			RegistryEntry<StatusEffect> housingOwnerStatusEffect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_OWNER_EFFECT);

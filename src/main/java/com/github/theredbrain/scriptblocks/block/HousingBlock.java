@@ -16,6 +16,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public class HousingBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<HousingBlock> CODEC = createCodec(HousingBlock::new);
 
@@ -51,7 +53,7 @@ public class HousingBlock extends RotatedBlockWithEntity {
 			if (player.isCreativeLevelTwoOp()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeHousingScreen(housingBlockEntity);
 			} else {
-				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(housingBlockEntity.getPos());
+				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(Optional.of(housingBlockEntity.getPos()));
 				((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
 			}
 			return ActionResult.success(world.isClient);

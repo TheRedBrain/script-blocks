@@ -38,12 +38,13 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DuckPlayerEntityMixin {
 
-	@Nullable BlockPos scriptblocks$getCurrentHousingBlockPosition();
+	Optional<BlockPos> scriptblocks$getCurrentHousingBlockPosition();
 
-	void scriptblocks$setCurrentHousingBlockPosition(@Nullable BlockPos currentHousingBlockPosition);
+	void scriptblocks$setCurrentHousingBlockPosition(Optional<BlockPos> currentHousingBlockPosition);
 
 	@Nullable MutablePair<String, BlockPos> scriptblocks$getLocationAccessPosition();
 
