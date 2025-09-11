@@ -41,6 +41,7 @@ public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetw
 		BlockState blockState = world.getBlockState(triggeredCounterBlockPosition);
 
 		if (blockEntity instanceof TriggeredCounterBlockEntity triggeredCounterBlockEntity) {
+			triggeredCounterBlockEntity.reset();
 			if (!triggeredCounterBlockEntity.setTriggeredBlocks(triggeredBlocks)) {
 				serverPlayerEntity.sendMessage(Text.translatable("triggered_block.triggeredBlocks.invalid"), false);
 				updateSuccessful = false;

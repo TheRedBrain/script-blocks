@@ -46,6 +46,7 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 		BlockState blockState = world.getBlockState(interactiveLootBlockPosition);
 
 		if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
+			interactiveLootBlockEntity.reset();
 			interactiveLootBlockEntity.setLootTableIdentifierString(lootTableIdentifierString);
 			interactiveLootBlockEntity.setMode(mode);
 			interactiveLootBlockEntity.setRolls(rolls);

@@ -32,6 +32,7 @@ public class UpdateDataRelayBlockPacketReceiver implements ServerPlayNetworking.
 		BlockState blockState = world.getBlockState(dataRelayBlockPosition);
 
 		if (blockEntity instanceof DataRelayBlockEntity dataRelayBlockEntity) {
+			dataRelayBlockEntity.reset();
 			dataRelayBlockEntity.setDataProvidingBlockPosOffsetList(dataProvidingBlockPosOffsetList);
 			dataRelayBlockEntity.setIndex(0);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);

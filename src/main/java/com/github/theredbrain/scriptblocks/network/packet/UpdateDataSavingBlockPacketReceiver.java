@@ -33,6 +33,7 @@ public class UpdateDataSavingBlockPacketReceiver implements ServerPlayNetworking
 		BlockState blockState = world.getBlockState(dataSavingBlockPosition);
 
 		if (blockEntity instanceof DataSavingBlockEntity dataSavingBlockEntity) {
+			dataSavingBlockEntity.reset();
 			dataSavingBlockEntity.setDataList(dataList);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			dataSavingBlockEntity.markDirty();

@@ -33,6 +33,7 @@ public class UpdateMimicBlockPacketReceiver implements ServerPlayNetworking.Play
 		BlockState blockState = world.getBlockState(mimicBlockPosition);
 
 		if (blockEntity instanceof MimicBlockEntity mimicBlockEntity) {
+			mimicBlockEntity.reset();
 			if (!mimicBlockEntity.setActiveMimicBlockPositionOffset(activeMimicBlockPositionOffset)) {
 				serverPlayerEntity.sendMessage(Text.translatable("mimic_block.activeMimicBlockPositionOffset.invalid"), false);
 				updateSuccessful = false;

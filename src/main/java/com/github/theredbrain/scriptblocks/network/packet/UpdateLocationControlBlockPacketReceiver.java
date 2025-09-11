@@ -54,7 +54,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 		BlockState blockState = world.getBlockState(locationControlBlockPosition);
 
 		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
-
+			locationControlBlockEntity.reset();
 			locationControlBlockEntity.setMainEntrance(new MutablePair<>(mainEntrancePositionOffset, new MutablePair<>(mainEntranceYaw, mainEntrancePitch)));
 			locationControlBlockEntity.setSideEntrances(sideEntrances);
 			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
