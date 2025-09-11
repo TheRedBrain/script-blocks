@@ -18,6 +18,7 @@ import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
@@ -124,6 +125,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<TeamControllerBlockEntity> TEAM_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("team_controller_block"),
 			FabricBlockEntityTypeBuilder.create(TeamControllerBlockEntity::new, BlockRegistry.TEAM_CONTROLLER_BLOCK).build());
+	public static final BlockEntityType<PVPControllerBlockEntity> PVP_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("pvp_controller_block"),
+			FabricBlockEntityTypeBuilder.create(PVPControllerBlockEntity::new, BlockRegistry.PVP_CONTROLLER_BLOCK).build());
 	public static final BlockEntityType<TeleporterBlockEntity> TELEPORTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("teleporter_block"),
 			FabricBlockEntityTypeBuilder.create(TeleporterBlockEntity::new,

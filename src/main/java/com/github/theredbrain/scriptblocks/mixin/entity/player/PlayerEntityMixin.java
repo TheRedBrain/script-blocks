@@ -15,6 +15,7 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
@@ -73,6 +74,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	@Unique
 	private static final TrackedData<String> CURRENT_LOCATION_ACCESS_DIMENSION = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.STRING);
 
+	@Unique
+	private static final TrackedData<Optional<BlockPos>> CURRENT_PVP_CONTROLLER_BLOCK_POS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
+
 	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
 		super(entityType, world);
 	}
@@ -82,6 +86,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 		builder.add(CURRENT_HOUSING_BLOCK_POS, Optional.empty());
 		builder.add(CURRENT_LOCATION_ACCESS_BLOCK_POS, Optional.empty());
 		builder.add(CURRENT_LOCATION_ACCESS_DIMENSION, "");
+		builder.add(CURRENT_PVP_CONTROLLER_BLOCK_POS, Optional.empty());
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
@@ -109,6 +114,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 		if (nbt.contains("currentLocationAccessDimension", NbtElement.STRING_TYPE)) {
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_DIMENSION, nbt.getString("currentLocationAccessDimension"));
+		}
+
+		if (nbt.contains("currentPVPControllerBlockPositionX", NbtElement.INT_TYPE) && nbt.contains("currentPVPControllerBlockPositionY", NbtElement.INT_TYPE) && nbt.contains("currentPVPControllerBlockPositionZ", NbtElement.INT_TYPE)) {
+			this.dataTracker.set(CURRENT_PVP_CONTROLLER_BLOCK_POS, Optional.of(new BlockPos(
+					nbt.getInt("currentPVPControllerBlockPositionX"),
+					nbt.getInt("currentPVPControllerBlockPositionY"),
+					nbt.getInt("currentPVPControllerBlockPositionZ")
+			)));
+		} else {
+			this.dataTracker.set(CURRENT_PVP_CONTROLLER_BLOCK_POS, Optional.empty());
 		}
 
 	}
@@ -145,6 +160,17 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 			nbt.remove("currentLocationAccessDimension");
 		}
 
+		Optional<BlockPos> optionalCurrentPVPControllerBlockPosition = this.dataTracker.get(CURRENT_PVP_CONTROLLER_BLOCK_POS);
+		if (optionalCurrentPVPControllerBlockPosition.isPresent()) {
+			nbt.putInt("currentPVPControllerBlockPositionX", optionalCurrentPVPControllerBlockPosition.get().getX());
+			nbt.putInt("currentPVPControllerBlockPositionY", optionalCurrentPVPControllerBlockPosition.get().getY());
+			nbt.putInt("currentPVPControllerBlockPositionZ", optionalCurrentPVPControllerBlockPosition.get().getZ());
+		} else {
+			nbt.remove("currentPVPControllerBlockPositionX");
+			nbt.remove("currentPVPControllerBlockPositionY");
+			nbt.remove("currentPVPControllerBlockPositionZ");
+		}
+
 	}
 
 	@Override
@@ -178,6 +204,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_BLOCK_POS, Optional.of(locationAccessPosition.right));
 			this.dataTracker.set(CURRENT_LOCATION_ACCESS_DIMENSION, locationAccessPosition.left);
 		}
+	}
+
+	@Override
+	public Optional<BlockPos> scriptblocks$getCurrentPVPControllerBlockPosition() {
+		return this.dataTracker.get(CURRENT_PVP_CONTROLLER_BLOCK_POS);
+	}
+
+	@Override
+	public void scriptblocks$setCurrentPVPControllerBlockPosition(Optional<BlockPos> currentPVPControllerBlockPosition) {
+		this.dataTracker.set(CURRENT_PVP_CONTROLLER_BLOCK_POS, currentPVPControllerBlockPosition);
 	}
 
 	@Override
@@ -310,6 +346,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@Override
 	public void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity) {
+	}
+
+	@Override
+	public void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity) {
 	}
 
 //	@Override

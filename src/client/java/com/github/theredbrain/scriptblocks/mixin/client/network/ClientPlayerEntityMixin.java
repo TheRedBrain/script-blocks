@@ -15,6 +15,7 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
@@ -50,6 +51,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.InteractiveLootBloc
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.JigsawPlacerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.LocationControlBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.MimicBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.PVPControllerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.PlayerDetectorBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RedstoneTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RelayTriggerBlockScreen;
@@ -302,6 +304,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity) {
 		this.client.setScreen(new PlayerDetectorBlockScreen(playerDetectorBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity) {
+		this.client.setScreen(new PVPControllerBlockScreen(pvpControllerBlockEntity));
 	}
 
 //	@Override

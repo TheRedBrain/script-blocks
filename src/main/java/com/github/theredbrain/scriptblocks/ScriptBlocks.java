@@ -1,7 +1,10 @@
 package com.github.theredbrain.scriptblocks;
 
+import com.github.theredbrain.scriptblocks.block.PVPControllerBlock;
+import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -19,14 +22,22 @@ import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
 import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class ScriptBlocks implements ModInitializer {
 	public static final String MOD_ID = "scriptblocks";
@@ -43,6 +54,33 @@ public class ScriptBlocks implements ModInitializer {
 		} else {
 			info("Tried to supply loot via Lootables, but the mod is not installed!");
 		}
+	}
+
+	@Nullable
+	public static MutablePair<RegistryKey<World>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(ServerPlayerEntity serverPlayerEntity, boolean endOfBattle) {
+		Optional<BlockPos> optionalBlockPos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getCurrentPVPControllerBlockPosition();
+		Team team = serverPlayerEntity.getScoreboardTeam();
+		World world = serverPlayerEntity.getWorld();
+		if (optionalBlockPos.isPresent() && team != null && world instanceof ServerWorld serverWorld) {
+			String teamId = team.getName();
+			BlockEntity blockEntity = serverWorld.getBlockEntity(optionalBlockPos.get());
+			if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
+				MutablePair<BlockPos, MutablePair<Double, Double>> teamRespawnPos = pvpControllerBlockEntity.getTeamRespawnPosition(teamId, endOfBattle);
+				if (teamRespawnPos != null) {
+					return new MutablePair<>(
+							serverWorld.getRegistryKey(),
+							new MutablePair<>(
+									teamRespawnPos.getLeft(),
+									new MutablePair<>(
+											teamRespawnPos.getRight().getLeft(),
+											teamRespawnPos.getRight().getRight()
+									)
+							)
+					);
+				}
+			}
+		}
+		return null;
 	}
 
 	@Override
