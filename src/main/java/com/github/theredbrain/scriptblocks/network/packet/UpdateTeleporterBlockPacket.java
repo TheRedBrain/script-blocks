@@ -18,7 +18,7 @@ public record UpdateTeleporterBlockPacket(
 		boolean showAdventureScreen,
 		Vec3i activationAreaDimensions,
 		BlockPos activationAreaPositionOffset,
-		boolean tickActivation,
+		boolean triggerActivation,
 		BlockPos accessPositionOffset,
 		boolean setAccessPosition,
 		String statusEffectsToDecrementLevelOnTeleport,
@@ -101,7 +101,7 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeInt(this.activationAreaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.activationAreaPositionOffset);
 
-		registryByteBuf.writeBoolean(this.tickActivation);
+		registryByteBuf.writeBoolean(this.triggerActivation);
 
 		registryByteBuf.writeBlockPos(this.accessPositionOffset);
 		registryByteBuf.writeBoolean(this.setAccessPosition);

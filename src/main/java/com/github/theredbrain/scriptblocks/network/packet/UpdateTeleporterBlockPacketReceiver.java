@@ -33,7 +33,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		Vec3i activationAreaDimensions = payload.activationAreaDimensions();
 		BlockPos activationAreaPositionOffset = payload.activationAreaPositionOffset();
 
-		boolean tickActivation = payload.tickActivation();
+		boolean triggerActivation = payload.triggerActivation();
 
 		BlockPos accessPositionOffset = payload.accessPositionOffset();
 		boolean setAccessPosition = payload.setAccessPosition();
@@ -82,7 +82,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setShowActivationArea(showActivationArea);
 			teleporterBlockEntity.setActivationAreaDimensions(activationAreaDimensions);
 			teleporterBlockEntity.setActivationAreaPositionOffset(activationAreaPositionOffset);
-			teleporterBlockEntity.setTickActivation(tickActivation);
+			teleporterBlockEntity.setTriggerActivation(triggerActivation);
 			teleporterBlockEntity.setAccessPositionOffset(accessPositionOffset);
 			teleporterBlockEntity.setSetAccessPosition(setAccessPosition);
 			teleporterBlockEntity.setStatusEffectsToDecrementLevelOnTeleport(statusEffectsToDecrementLevelOnTeleport);

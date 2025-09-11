@@ -84,7 +84,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private CyclingButtonWidget<TeleporterBlockEntity.CreativeScreenPage> creativeScreenPageButton;
 	private CyclingButtonWidget<Boolean> toggleShowAdventureScreenButton;
 	private CyclingButtonWidget<Boolean> toggleShowActivationAreaButton;
-	private CyclingButtonWidget<Boolean> toggleTickActivationButton;
+	private CyclingButtonWidget<Boolean> toggleTriggerActivationButton;
 	private TextFieldWidget activationAreaDimensionsXField;
 	private TextFieldWidget activationAreaDimensionsYField;
 	private TextFieldWidget activationAreaDimensionsZField;
@@ -138,7 +138,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TeleporterBlockEntity.CreativeScreenPage creativeScreenPage;
 	private LocationModeScreenPage locationModeScreenPage;
 	private boolean showActivationArea;
-	private boolean tickActivation;
+	private boolean triggerActivation;
 	private boolean showAdventureScreen;
 	private boolean setAccessPosition;
 	private boolean onlyTeleportDimensionOwner;
@@ -167,7 +167,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	private void cancel() {
 		this.teleporterBlock.setShowActivationArea(this.showActivationArea);
-		this.teleporterBlock.setTickActivation(this.tickActivation);
+		this.teleporterBlock.setTriggerActivation(this.triggerActivation);
 		this.teleporterBlock.setShowAdventureScreen(this.showAdventureScreen);
 		this.teleporterBlock.setSetAccessPosition(this.setAccessPosition);
 		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
@@ -234,7 +234,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.showActivationArea = this.teleporterBlock.getShowActivationArea();
-		this.tickActivation = this.teleporterBlock.tickActivation();
+		this.triggerActivation = this.teleporterBlock.triggerActivation();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
@@ -257,8 +257,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			this.showActivationArea = showActivationArea;
 		}));
 
-		this.toggleTickActivationButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TRIGGER_ACTIVATION_LABEL_TEXT, TICK_ACTIVATION_LABEL_TEXT).initially(this.tickActivation).omitKeyText().build(this.width / 2 + 54, 45, 100, 20, Text.empty(), (button, tickActivation) -> {
-			this.tickActivation = tickActivation;
+		this.toggleTriggerActivationButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TICK_ACTIVATION_LABEL_TEXT, TRIGGER_ACTIVATION_LABEL_TEXT).initially(this.triggerActivation).omitKeyText().build(this.width / 2 + 54, 45, 100, 20, Text.empty(), (button, triggerActivation) -> {
+			this.triggerActivation = triggerActivation;
 		}));
 
 		this.activationAreaDimensionsXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 100, 20, Text.empty());
@@ -535,7 +535,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		this.toggleShowAdventureScreenButton.visible = false;
 		this.toggleShowActivationAreaButton.visible = false;
-		this.toggleTickActivationButton.visible = false;
+		this.toggleTriggerActivationButton.visible = false;
 		this.activationAreaDimensionsXField.setVisible(false);
 		this.activationAreaDimensionsYField.setVisible(false);
 		this.activationAreaDimensionsZField.setVisible(false);
@@ -601,7 +601,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 			this.toggleShowAdventureScreenButton.visible = true;
 			this.toggleShowActivationAreaButton.visible = true;
-			this.toggleTickActivationButton.visible = true;
+			this.toggleTriggerActivationButton.visible = true;
 			this.activationAreaDimensionsXField.setVisible(true);
 			this.activationAreaDimensionsYField.setVisible(true);
 			this.activationAreaDimensionsZField.setVisible(true);
@@ -718,7 +718,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		boolean bool4 = this.teleportTeam;
 		boolean bool5 = this.showRegenerateButton;
 		boolean bool6 = this.canOwnerBeChosen;
-		boolean bool7 = this.tickActivation;
+		boolean bool7 = this.triggerActivation;
 		String string0 = this.activationAreaDimensionsXField.getText();
 		String string1 = this.activationAreaDimensionsYField.getText();
 		String string2 = this.activationAreaDimensionsZField.getText();
@@ -760,7 +760,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.teleportTeam = bool4;
 		this.showRegenerateButton = bool5;
 		this.canOwnerBeChosen = bool6;
-		this.tickActivation = bool7;
+		this.triggerActivation = bool7;
 		this.activationAreaDimensionsXField.setText(string0);
 		this.activationAreaDimensionsYField.setText(string1);
 		this.activationAreaDimensionsZField.setText(string2);
@@ -1002,7 +1002,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 						ItemUtils.parseInt(this.activationAreaPositionOffsetYField.getText()),
 						ItemUtils.parseInt(this.activationAreaPositionOffsetZField.getText())
 				),
-				this.tickActivation,
+				this.triggerActivation,
 				new BlockPos(
 						ItemUtils.parseInt(this.accessPositionOffsetXField.getText()),
 						ItemUtils.parseInt(this.accessPositionOffsetYField.getText()),
