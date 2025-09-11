@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdatePVPControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
@@ -31,18 +30,11 @@ import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class PVPControllerBlockScreen extends Screen {
-	private static final Text MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.location_controller_block.main_entrance.position_offset");
-	private static final Text MAIN_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.main_entrance.orientation");
-	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.remove_list_entry_button_label");
-	private static final Text NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.position_offset");
-	private static final Text NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.name");
-	private static final Text NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.orientation");
-	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
-	private static final Text RESET_AREA_MIN_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMinX");
-	private static final Text RESET_AREA_MIN_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMinZ");
-	private static final Text RESET_AREA_MAX_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMaxX");
-	private static final Text RESET_AREA_MAX_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMaxZ");
+	private static final Text PVP_ARENA_SETTINGS_ID_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.pvp_arena_settings_id_label");
+	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.remove_list_entry_button_label");
+	private static final Text NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_position_offset_label");
+	private static final Text NEW_RESPAWN_POSITION_NAME_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_position_name_label");
+	private static final Text NEW_RESPAWN_ORIENTATION_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_orientation_label");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final PVPControllerBlockEntity pvpControllerBlockEntity;
@@ -140,7 +132,7 @@ public class PVPControllerBlockScreen extends Screen {
 
 		// --- settings id page ---
 
-		this.pvpArenaSettingsIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 100, 20, Text.empty());
+		this.pvpArenaSettingsIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 300, 20, Text.empty());
 		this.pvpArenaSettingsIdentifierField.setMaxLength(128);
 		this.pvpArenaSettingsIdentifierField.setText(this.pvpControllerBlockEntity.getPVPArenaSettingsIdentifier());
 		this.addSelectableChild(this.pvpArenaSettingsIdentifierField);
@@ -325,7 +317,7 @@ public class PVPControllerBlockScreen extends Screen {
 		super.render(context, mouseX, mouseY, delta);
 
 		if (this.screenPage == ScreenPage.SETTINGS_ID) {
-			context.drawTextWithShadow(this.textRenderer, MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, PVP_ARENA_SETTINGS_ID_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 			this.pvpArenaSettingsIdentifierField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.respawnPositionsList.size()); i++) {
@@ -342,12 +334,12 @@ public class PVPControllerBlockScreen extends Screen {
 //                context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 				context.drawTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 0, 0, 6, 7);
 			}
-			context.drawTextWithShadow(this.textRenderer, NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
 			this.newRespawnPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.newRespawnPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.newRespawnPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, NEW_RESPAWN_POSITION_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, NEW_RESPAWN_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
 			this.newRespawnOrientationYawField.render(context, mouseX, mouseY, delta);
 			this.newRespawnOrientationPitchField.render(context, mouseX, mouseY, delta);
 			this.newRespawnPositionNameField.render(context, mouseX, mouseY, delta);

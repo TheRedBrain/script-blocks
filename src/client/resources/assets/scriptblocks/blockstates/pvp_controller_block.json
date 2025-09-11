@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/pvp_controller_block"
+    }
+  }
+}
