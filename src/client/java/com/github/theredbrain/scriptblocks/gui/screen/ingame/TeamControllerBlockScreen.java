@@ -1,9 +1,7 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeamControllerBlockPacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredBeaconBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,6 +30,7 @@ public class TeamControllerBlockScreen extends Screen {
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.team_controller_block.show_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_dimensions_label");
 	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_position_offset_label");
+	private static final Text PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.pvp_controller_block_position_offset_label");
 	private static final Text TEAM_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_identifier_label");
 	private static final Text DISPLAY_NAME_LABEL_TEXT = Text.translatable("gui.team_controller_block.display_name_label");
 	private static final Text PREFIX_LABEL_TEXT = Text.translatable("gui.team_controller_block.prefix_label");
@@ -46,6 +45,9 @@ public class TeamControllerBlockScreen extends Screen {
 	private TextFieldWidget areaPositionOffsetYField;
 	private TextFieldWidget areaPositionOffsetZField;
 	private boolean showArea;
+	private TextFieldWidget pvpControllerBlockPositionOffsetXField;
+	private TextFieldWidget pvpControllerBlockPositionOffsetYField;
+	private TextFieldWidget pvpControllerBlockPositionOffsetZField;
 
 	private TextFieldWidget teamIdentifierField;
 	private TextFieldWidget displayNameField;
@@ -134,6 +136,21 @@ public class TeamControllerBlockScreen extends Screen {
 		this.areaPositionOffsetZField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getZ()));
 		this.addSelectableChild(this.areaPositionOffsetZField);
 
+		this.pvpControllerBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 149, 100, 20, Text.empty());
+		this.pvpControllerBlockPositionOffsetXField.setMaxLength(128);
+		this.pvpControllerBlockPositionOffsetXField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getX()));
+		this.addSelectableChild(this.pvpControllerBlockPositionOffsetXField);
+
+		this.pvpControllerBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 149, 100, 20, Text.empty());
+		this.pvpControllerBlockPositionOffsetYField.setMaxLength(128);
+		this.pvpControllerBlockPositionOffsetYField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getY()));
+		this.addSelectableChild(this.pvpControllerBlockPositionOffsetYField);
+
+		this.pvpControllerBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 149, 100, 20, Text.empty());
+		this.pvpControllerBlockPositionOffsetZField.setMaxLength(128);
+		this.pvpControllerBlockPositionOffsetZField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getZ()));
+		this.addSelectableChild(this.pvpControllerBlockPositionOffsetZField);
+
 
 		this.teamIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
 		this.teamIdentifierField.setMaxLength(128);
@@ -197,6 +214,9 @@ public class TeamControllerBlockScreen extends Screen {
 		this.areaPositionOffsetXField.visible = false;
 		this.areaPositionOffsetYField.visible = false;
 		this.areaPositionOffsetZField.visible = false;
+		this.pvpControllerBlockPositionOffsetXField.setVisible(false);
+		this.pvpControllerBlockPositionOffsetYField.setVisible(false);
+		this.pvpControllerBlockPositionOffsetZField.setVisible(false);
 
 		this.teamIdentifierField.setVisible(false);
 		this.displayNameField.setVisible(false);
@@ -218,6 +238,9 @@ public class TeamControllerBlockScreen extends Screen {
 			this.areaPositionOffsetXField.visible = true;
 			this.areaPositionOffsetYField.visible = true;
 			this.areaPositionOffsetZField.visible = true;
+			this.pvpControllerBlockPositionOffsetXField.setVisible(true);
+			this.pvpControllerBlockPositionOffsetYField.setVisible(true);
+			this.pvpControllerBlockPositionOffsetZField.setVisible(true);
 
 		} else if (this.screenPage == ScreenPage.TEAM) {
 
@@ -235,7 +258,7 @@ public class TeamControllerBlockScreen extends Screen {
 		}
 	}
 
-	@Override // TODO
+	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		ScreenPage var = this.screenPage;
 		AbstractTeam.VisibilityRule var1 = this.nametagVisibility;
@@ -251,10 +274,13 @@ public class TeamControllerBlockScreen extends Screen {
 		String string3 = this.areaPositionOffsetXField.getText();
 		String string4 = this.areaPositionOffsetYField.getText();
 		String string5 = this.areaPositionOffsetZField.getText();
-		String string6 = this.teamIdentifierField.getText();
-		String string7 = this.displayNameField.getText();
-		String string8 = this.prefixField.getText();
-		String string9 = this.suffixField.getText();
+		String string6 = this.pvpControllerBlockPositionOffsetXField.getText();
+		String string7 = this.pvpControllerBlockPositionOffsetYField.getText();
+		String string8 = this.pvpControllerBlockPositionOffsetZField.getText();
+		String string9 = this.teamIdentifierField.getText();
+		String string10 = this.displayNameField.getText();
+		String string11 = this.prefixField.getText();
+		String string12 = this.suffixField.getText();
 		this.init(client, width, height);
 		this.screenPage = var;
 		this.nametagVisibility = var1;
@@ -270,10 +296,13 @@ public class TeamControllerBlockScreen extends Screen {
 		this.areaPositionOffsetXField.setText(string3);
 		this.areaPositionOffsetYField.setText(string4);
 		this.areaPositionOffsetZField.setText(string5);
-		this.teamIdentifierField.setText(string6);
-		this.displayNameField.setText(string7);
-		this.prefixField.setText(string8);
-		this.suffixField.setText(string9);
+		this.pvpControllerBlockPositionOffsetXField.setText(string6);
+		this.pvpControllerBlockPositionOffsetYField.setText(string7);
+		this.pvpControllerBlockPositionOffsetZField.setText(string8);
+		this.teamIdentifierField.setText(string9);
+		this.displayNameField.setText(string10);
+		this.prefixField.setText(string11);
+		this.suffixField.setText(string12);
 	}
 
 	@Override
@@ -290,6 +319,10 @@ public class TeamControllerBlockScreen extends Screen {
 			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			this.pvpControllerBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.pvpControllerBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.pvpControllerBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.TEAM) {
 			context.drawTextWithShadow(this.textRenderer, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.teamIdentifierField.render(context, mouseX, mouseY, delta);
@@ -320,6 +353,11 @@ public class TeamControllerBlockScreen extends Screen {
 						ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
 						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
 						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
+				),
+				new BlockPos(
+						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetZField.getText())
 				),
 				this.teamIdentifierField.getText(),
 				this.displayNameField.getText(),

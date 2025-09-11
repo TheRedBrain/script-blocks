@@ -27,6 +27,7 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 		boolean showArea = payload.showArea();
 		Vec3i areaDimensions = payload.areaDimensions();
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
+		BlockPos pvpControllerBlockPositionOffset = payload.pvpControllerBlockPositionOffset();
 
 		String teamIdentifierString = payload.teamIdentifierString();
 		String displayNameString = payload.displayNameString();
@@ -57,6 +58,7 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 				serverPlayerEntity.sendMessage(Text.translatable("team_controller_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
+			teamControllerBlockEntity.setPVPControllerBlockPositionOffset(pvpControllerBlockPositionOffset);
 			teamControllerBlockEntity.setTeamIdentifier(teamIdentifierString);
 			teamControllerBlockEntity.setDisplayNameString(displayNameString);
 			teamControllerBlockEntity.setTeamColor(teamColorIndex);

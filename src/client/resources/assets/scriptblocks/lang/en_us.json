@@ -302,6 +302,7 @@
 	"gui.team_controller_block.show_area_label": "Show Area",
 	"gui.team_controller_block.area_dimensions_label": "Area Dimensions",
 	"gui.team_controller_block.area_position_offset_label": "Area Position Offset",
+	"gui.team_controller_block.pvp_controller_block_position_offset_label": "PVP Controller Block Position Offset",
 
 	"gui.team_controller_block.team_identifier_label": "Team Identifier",
 	"gui.team_controller_block.display_name_label": "Display Name",

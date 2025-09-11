@@ -3,10 +3,12 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
+import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
@@ -25,6 +27,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import java.util.Optional;
 
 public class TeamControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
@@ -32,7 +35,8 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private Box area = null;
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
-	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
+	private BlockPos areaPositionOffset = new BlockPos(0, 0, 0);
+	private BlockPos pvpControllerBlockPositionOffset = new BlockPos(0, 0, 0);
 
 	private String teamIdentifier = "";
 	private String displayNameString = "";
@@ -112,6 +116,24 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaPositionOffsetZ");
 		}
 
+		if (this.pvpControllerBlockPositionOffset.getX() != 0) {
+			nbt.putInt("pvpControllerBlockPositionOffsetX", this.pvpControllerBlockPositionOffset.getX());
+		} else {
+			nbt.remove("pvpControllerBlockPositionOffsetX");
+		}
+
+		if (this.pvpControllerBlockPositionOffset.getY() != 0) {
+			nbt.putInt("pvpControllerBlockPositionOffsetY", this.pvpControllerBlockPositionOffset.getY());
+		} else {
+			nbt.remove("pvpControllerBlockPositionOffsetY");
+		}
+
+		if (this.pvpControllerBlockPositionOffset.getZ() != 0) {
+			nbt.putInt("pvpControllerBlockPositionOffsetZ", this.pvpControllerBlockPositionOffset.getZ());
+		} else {
+			nbt.remove("pvpControllerBlockPositionOffsetZ");
+		}
+
 		nbt.putString("teamIdentifier", this.teamIdentifier);
 
 		nbt.putString("displayNameString", this.displayNameString);
@@ -164,6 +186,12 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 		int n = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
 		this.areaPositionOffset = new BlockPos(l, m, n);
 
+		this.pvpControllerBlockPositionOffset = new BlockPos(
+				MathHelper.clamp(nbt.getInt("pvpControllerBlockPositionOffsetX"), -48, 48),
+				MathHelper.clamp(nbt.getInt("pvpControllerBlockPositionOffsetY"), -48, 48),
+				MathHelper.clamp(nbt.getInt("pvpControllerBlockPositionOffsetZ"), -48, 48)
+		);
+
 		this.teamIdentifier = nbt.getString("teamIdentifier");
 
 		this.displayNameString = nbt.getString("displayNameString");
@@ -211,9 +239,17 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 				teamControllerBlockEntity.calculateAreaBox = false;
 			}
 			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient) {
+				BlockPos pvpControllerBlockPos = null;
+				if (teamControllerBlockEntity.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
+					BlockPos pvpControllerBlockPositionOffset = teamControllerBlockEntity.pvpControllerBlockPositionOffset;
+					pvpControllerBlockPos = teamControllerBlockEntity.pos.add(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
+				}
 				List<LivingEntity> livingEntityList = world.getNonSpectatingEntities(LivingEntity.class, teamControllerBlockEntity.area);
 				for (LivingEntity livingEntity : livingEntityList) {
 					teamControllerBlockEntity.world.getScoreboard().addScoreHolderToTeam(livingEntity.getNameForScoreboard(), teamControllerBlockEntity.team);
+					if (livingEntity instanceof PlayerEntity playerEntity && pvpControllerBlockPos != null) {
+						((DuckPlayerEntityMixin)playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
+					}
 				}
 			}
 		}
@@ -248,6 +284,14 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.areaPositionOffset = areaPositionOffset;
 		this.calculateAreaBox = true;
 		return true;
+	}
+
+	public BlockPos getPVPControllerBlockPositionOffset() {
+		return this.pvpControllerBlockPositionOffset;
+	}
+
+	public void setPVPControllerBlockPositionOffset(BlockPos pvpControllerBlockPositionOffset) {
+		this.pvpControllerBlockPositionOffset = pvpControllerBlockPositionOffset;
 	}
 
 	public String getTeamIdentifier() {

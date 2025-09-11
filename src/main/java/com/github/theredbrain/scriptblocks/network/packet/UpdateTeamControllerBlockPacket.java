@@ -12,6 +12,7 @@ public record UpdateTeamControllerBlockPacket(
 		boolean showArea,
 		Vec3i areaDimensions,
 		BlockPos areaPositionOffset,
+		BlockPos pvpControllerBlockPositionOffset,
 		String teamIdentifierString,
 		String displayNameString,
 		int teamColorIndex,
@@ -36,6 +37,7 @@ public record UpdateTeamControllerBlockPacket(
 						registryByteBuf.readInt()
 				),
 				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readInt(),
@@ -56,6 +58,7 @@ public record UpdateTeamControllerBlockPacket(
 		registryByteBuf.writeInt(this.areaDimensions.getY());
 		registryByteBuf.writeInt(this.areaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.areaPositionOffset);
+		registryByteBuf.writeBlockPos(this.pvpControllerBlockPositionOffset);
 		registryByteBuf.writeString(this.teamIdentifierString);
 		registryByteBuf.writeString(this.displayNameString);
 		registryByteBuf.writeInt(this.teamColorIndex);
