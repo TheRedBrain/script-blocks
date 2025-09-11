@@ -1,8 +1,6 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateAreaBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredBeaconBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
@@ -148,7 +146,6 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		this.toggleAppliedStatusEffectShowIconButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(SHOW_ICON_LABEL_TEXT, HIDE_ICON_LABEL_TEXT).initially(this.appliedStatusEffectShowIcon).omitKeyText().build(this.width / 2 + 4, 124, 150, 20, Text.empty(), (button, appliedStatusEffectShowIcon) -> {
 			this.appliedStatusEffectShowIcon = appliedStatusEffectShowIcon;
 		}));
-
 
 
 		this.triggered = this.triggeredBeaconBlock.getTriggered();

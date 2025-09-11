@@ -297,6 +297,9 @@
 	"gui.pvp_controller_block.new_respawn_position_name_label": "Name",
 	"gui.pvp_controller_block.new_respawn_orientation_label": "Orientation",
 
+	"gui.pvp_controller_block.screenPage.settings_id": "Settings Identifier",
+	"gui.pvp_controller_block.screenPage.respawn_positions": "Respawn Positions",
+
 
 	"gui.team_controller_block.hide_area_label": "Hide Area",
 	"gui.team_controller_block.show_area_label": "Show Area",
@@ -306,10 +309,16 @@
 
 	"gui.team_controller_block.team_identifier_label": "Team Identifier",
 	"gui.team_controller_block.display_name_label": "Display Name",
+	"gui.team_controller_block.team_color_label": "Team Color",
+	"gui.team_controller_block.friendly_fire_label": "Friendly Fire",
+	"gui.team_controller_block.friendly_invisibles_label": "Friendly Invisibles",
+	"gui.team_controller_block.name_tag_visibility_label": "Name Tag Visibility",
+	"gui.team_controller_block.death_message_visibility_label": "Death Message",
+	"gui.team_controller_block.collision_rule_label": "Collision Rule",
 	"gui.team_controller_block.prefix_label": "Name Prefix",
 	"gui.team_controller_block.suffix_label": "Name Suffix",
 
-	"gui.team_controller_block.screenPage.area": "Area",
+	"gui.team_controller_block.screenPage.area": "Area & PVP Controller Block",
 	"gui.team_controller_block.screenPage.team": "Team",
 
 

@@ -43,9 +43,9 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private Formatting teamColor = Formatting.RESET;
 	private boolean friendlyFire = false;
 	private boolean showFriendlyInvisibles = false;
-	private AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS;
-	private AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS;
-	private AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.ALWAYS;
+	private String nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
+	private String deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
+	private String collisionRule = AbstractTeam.CollisionRule.ALWAYS.name;
 	private String prefixString = "";
 	private String suffixString = "";
 
@@ -152,11 +152,11 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("showFriendlyInvisibles");
 		}
 
-		nbt.putString("nametagVisibility", this.nametagVisibility.name);
+		nbt.putString("nametagVisibility", this.nametagVisibility);
 
-		nbt.putString("deathMessageVisibility", this.deathMessageVisibility.name);
+		nbt.putString("deathMessageVisibility", this.deathMessageVisibility);
 
-		nbt.putString("collisionRule", this.collisionRule.name);
+		nbt.putString("collisionRule", this.collisionRule);
 
 		nbt.putString("prefixString", this.prefixString);
 
@@ -202,14 +202,11 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		this.showFriendlyInvisibles = nbt.getBoolean("showFriendlyInvisibles");
 
-		AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.getRule(nbt.getString("nametagVisibilityString"));
-		this.nametagVisibility = nametagVisibility != null ? nametagVisibility : AbstractTeam.VisibilityRule.ALWAYS;
+		this.nametagVisibility = nbt.getString("nametagVisibility");
 
-		AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.getRule(nbt.getString("deathMessageVisibilityString"));
-		this.deathMessageVisibility = deathMessageVisibility != null ? deathMessageVisibility : AbstractTeam.VisibilityRule.ALWAYS;
+		this.deathMessageVisibility = nbt.getString("deathMessageVisibility");
 
-		AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.getRule(nbt.getString("collisionRuleString"));
-		this.collisionRule = collisionRule != null ? collisionRule : AbstractTeam.CollisionRule.ALWAYS;
+		this.collisionRule = nbt.getString("collisionRule");
 
 		this.prefixString = nbt.getString("prefixString");
 
@@ -343,27 +340,39 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.showFriendlyInvisibles = showFriendlyInvisibles;
 	}
 
-	public AbstractTeam.VisibilityRule getNametagVisibility() {
+	public String getNametagVisibility() {
 		return this.nametagVisibility;
 	}
 
-	public void setNametagVisibility(AbstractTeam.VisibilityRule nametagVisibility) {
+	public void setNametagVisibility(String nametagVisibility) {
+		AbstractTeam.VisibilityRule var = AbstractTeam.VisibilityRule.getRule(nametagVisibility);
+		if (var == null) {
+			nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
+		}
 		this.nametagVisibility = nametagVisibility;
 	}
 
-	public AbstractTeam.VisibilityRule getDeathMessageVisibility() {
+	public String getDeathMessageVisibility() {
 		return this.deathMessageVisibility;
 	}
 
-	public void setDeathMessageVisibility(AbstractTeam.VisibilityRule deathMessageVisibility) {
+	public void setDeathMessageVisibility(String deathMessageVisibility) {
+		AbstractTeam.VisibilityRule var = AbstractTeam.VisibilityRule.getRule(deathMessageVisibility);
+		if (var == null) {
+			deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
+		}
 		this.deathMessageVisibility = deathMessageVisibility;
 	}
 
-	public AbstractTeam.CollisionRule getCollisionRule() {
+	public String getCollisionRule() {
 		return this.collisionRule;
 	}
 
-	public void setCollisionRule(AbstractTeam.CollisionRule collisionRule) {
+	public void setCollisionRule(String collisionRule) {
+		AbstractTeam.CollisionRule var = AbstractTeam.CollisionRule.getRule(collisionRule);
+		if (var == null) {
+			collisionRule = AbstractTeam.CollisionRule.ALWAYS.name;
+		}
 		this.collisionRule = collisionRule;
 	}
 
@@ -418,9 +427,12 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 				}
 				this.team.setFriendlyFireAllowed(this.friendlyFire);
 				this.team.setShowFriendlyInvisibles(this.showFriendlyInvisibles);
-				this.team.setNameTagVisibilityRule(this.nametagVisibility);
-				this.team.setDeathMessageVisibilityRule(this.deathMessageVisibility);
-				this.team.setCollisionRule(this.collisionRule);
+				AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.getRule(this.nametagVisibility);
+				this.team.setNameTagVisibilityRule(nametagVisibility != null ? nametagVisibility : AbstractTeam.VisibilityRule.ALWAYS);
+				AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.getRule(this.deathMessageVisibility);
+				this.team.setDeathMessageVisibilityRule(deathMessageVisibility != null ? deathMessageVisibility : AbstractTeam.VisibilityRule.ALWAYS);
+				AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.getRule(this.collisionRule);
+				this.team.setCollisionRule(collisionRule != null ? collisionRule : AbstractTeam.CollisionRule.ALWAYS);
 				this.team.setColor(this.teamColor);
 			}
 		}

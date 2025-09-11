@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
+import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
@@ -223,6 +224,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							}
 
 							locationControlBlock.trigger();
+
+//							locationControlBlock.setForceLoadRemoveTimer(5);
 
 							String forceLoadRemoveAllCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload remove " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadRemoveAllCommand);

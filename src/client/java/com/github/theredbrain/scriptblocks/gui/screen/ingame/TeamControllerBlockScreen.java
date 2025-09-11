@@ -33,6 +33,12 @@ public class TeamControllerBlockScreen extends Screen {
 	private static final Text PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.pvp_controller_block_position_offset_label");
 	private static final Text TEAM_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_identifier_label");
 	private static final Text DISPLAY_NAME_LABEL_TEXT = Text.translatable("gui.team_controller_block.display_name_label");
+	private static final Text TEAM_COLOR_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_color_label");
+	private static final Text FRIENDLY_FIRE_LABEL_TEXT = Text.translatable("gui.team_controller_block.friendly_fire_label");
+	private static final Text FRIENDLY_INVISIBLES_LABEL_TEXT = Text.translatable("gui.team_controller_block.friendly_invisibles_label");
+	private static final Text NAME_TAG_VISIBILITY_LABEL_TEXT = Text.translatable("gui.team_controller_block.name_tag_visibility_label");
+	private static final Text DEATH_MESSAGE_VISIBILITY_LABEL_TEXT = Text.translatable("gui.team_controller_block.death_message_visibility_label");
+	private static final Text COLLISION_RULE_LABEL_TEXT = Text.translatable("gui.team_controller_block.collision_rule_label");
 	private static final Text PREFIX_LABEL_TEXT = Text.translatable("gui.team_controller_block.prefix_label");
 	private static final Text SUFFIX_LABEL_TEXT = Text.translatable("gui.team_controller_block.suffix_label");
 	private final TeamControllerBlockEntity teamControllerBlockEntity;
@@ -175,17 +181,20 @@ public class TeamControllerBlockScreen extends Screen {
 			this.showFriendlyInvisibles = showFriendlyInvisibles;
 		}));
 
-		this.nametagVisibility = this.teamControllerBlockEntity.getNametagVisibility();
+		AbstractTeam.VisibilityRule var = AbstractTeam.VisibilityRule.getRule(this.teamControllerBlockEntity.getNametagVisibility());
+		this.nametagVisibility = var != null ? var : AbstractTeam.VisibilityRule.ALWAYS;
 		this.cycleNametagVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName).values((AbstractTeam.VisibilityRule[]) AbstractTeam.VisibilityRule.values()).initially(this.nametagVisibility).omitKeyText().build(this.width / 2 - 154, 160, 100, 20, Text.empty(), (button, nametagVisibility) -> {
 			this.nametagVisibility = nametagVisibility;
 		}));
 
-		this.deathMessageVisibility = this.teamControllerBlockEntity.getDeathMessageVisibility();
+		AbstractTeam.VisibilityRule var1 = AbstractTeam.VisibilityRule.getRule(this.teamControllerBlockEntity.getDeathMessageVisibility());
+		this.deathMessageVisibility = var1 != null ? var1 : AbstractTeam.VisibilityRule.ALWAYS;
 		this.cycleDeathMessageVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName).values((AbstractTeam.VisibilityRule[]) AbstractTeam.VisibilityRule.values()).initially(this.deathMessageVisibility).omitKeyText().build(this.width / 2 - 50, 160, 100, 20, Text.empty(), (button, deathMessageVisibility) -> {
 			this.deathMessageVisibility = deathMessageVisibility;
 		}));
 
-		this.collisionRule = this.teamControllerBlockEntity.getCollisionRule();
+		AbstractTeam.CollisionRule var2 = AbstractTeam.CollisionRule.getRule(this.teamControllerBlockEntity.getCollisionRule());
+		this.collisionRule = var2 != null ? var2 : AbstractTeam.CollisionRule.ALWAYS;
 		this.cycleCollisionRuleButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.CollisionRule::getDisplayName).values((AbstractTeam.CollisionRule[]) AbstractTeam.CollisionRule.values()).initially(this.collisionRule).omitKeyText().build(this.width / 2 + 54, 160, 100, 20, Text.empty(), (button, collisionRule) -> {
 			this.collisionRule = collisionRule;
 		}));
@@ -319,7 +328,7 @@ public class TeamControllerBlockScreen extends Screen {
 			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
 			this.pvpControllerBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.pvpControllerBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.pvpControllerBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
@@ -328,6 +337,12 @@ public class TeamControllerBlockScreen extends Screen {
 			this.teamIdentifierField.render(context, mouseX, mouseY, delta);
 			context.drawTextWithShadow(this.textRenderer, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.displayNameField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, 0xA0A0A0);
 			context.drawTextWithShadow(this.textRenderer, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
 			context.drawTextWithShadow(this.textRenderer, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
 			this.prefixField.render(context, mouseX, mouseY, delta);

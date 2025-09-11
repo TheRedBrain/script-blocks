@@ -322,17 +322,15 @@ public class PVPControllerBlockScreen extends Screen {
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.respawnPositionsList.size()); i++) {
 				String text = this.respawnPositionsList.get(i).getLeft();
-				if (!this.respawnPositionsList.get(i).getLeft().equals("")) {
+				if (!this.respawnPositionsList.get(i).getLeft().isEmpty()) {
 					text = this.respawnPositionsList.get(i).getLeft() + ", " + this.respawnPositionsList.get(i).getRight();
 				}
 				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.respawnPositionsList.size() > 3) {
-//                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
-				context.drawTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 0, 0, 8, 70);
+                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
 				int k = (int) (61.0f * this.scrollAmount);
-//                context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
-				context.drawTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 0, 0, 6, 7);
+                context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
 			context.drawTextWithShadow(this.textRenderer, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
 			this.newRespawnPositionOffsetXField.render(context, mouseX, mouseY, delta);

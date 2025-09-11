@@ -34,9 +34,9 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 		int teamColorIndex = payload.teamColorIndex();
 		boolean friendlyFire = payload.friendlyFire();
 		boolean showFriendlyInvisibles = payload.showFriendlyInvisibles();
-		AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.getRule(payload.nametagVisibilityString());
-		AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.getRule(payload.deathMessageVisibilityString());
-		AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.getRule(payload.collisionRuleString());
+		String nametagVisibility = payload.nametagVisibilityString();
+		String deathMessageVisibility = payload.deathMessageVisibilityString();
+		String collisionRule = payload.collisionRuleString();
 		String prefixString = payload.prefixString();
 		String suffixString = payload.suffixString();
 
@@ -64,9 +64,9 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 			teamControllerBlockEntity.setTeamColor(teamColorIndex);
 			teamControllerBlockEntity.setFriendlyFire(friendlyFire);
 			teamControllerBlockEntity.setShowFriendlyInvisibles(showFriendlyInvisibles);
-			teamControllerBlockEntity.setNametagVisibility(nametagVisibility != null ? nametagVisibility : AbstractTeam.VisibilityRule.ALWAYS);
-			teamControllerBlockEntity.setDeathMessageVisibility(deathMessageVisibility != null ? deathMessageVisibility : AbstractTeam.VisibilityRule.ALWAYS);
-			teamControllerBlockEntity.setCollisionRule(collisionRule != null ? collisionRule : AbstractTeam.CollisionRule.ALWAYS);
+			teamControllerBlockEntity.setNametagVisibility(nametagVisibility);
+			teamControllerBlockEntity.setDeathMessageVisibility(deathMessageVisibility);
+			teamControllerBlockEntity.setCollisionRule(collisionRule);
 			teamControllerBlockEntity.setPrefixString(prefixString);
 			teamControllerBlockEntity.setSuffixString(suffixString);
 
