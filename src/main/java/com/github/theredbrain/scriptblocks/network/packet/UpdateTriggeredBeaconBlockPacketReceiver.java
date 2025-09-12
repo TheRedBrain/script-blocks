@@ -29,6 +29,7 @@ public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetwo
 
 		String appliedStatusEffectIdentifier = payload.appliedStatusEffectIdentifier();
 		int appliedStatusEffectAmplifier = payload.appliedStatusEffectAmplifier();
+		int appliedStatusEffectDuration = payload.appliedStatusEffectDuration();
 		boolean appliedStatusEffectAmbient = payload.appliedStatusEffectAmbient();
 		boolean appliedStatusEffectShowParticles = payload.appliedStatusEffectShowParticles();
 		boolean appliedStatusEffectShowIcon = payload.appliedStatusEffectShowIcon();
@@ -64,6 +65,7 @@ public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetwo
 				serverPlayerEntity.sendMessage(Text.translatable("triggered_beacon_block.appliedStatusEffectAmplifier.invalid"), false);
 				updateSuccessful = false;
 			}
+			triggeredBeaconBlockEntity.setAppliedStatusEffectDuration(appliedStatusEffectDuration);
 			triggeredBeaconBlockEntity.setAppliedStatusEffectAmbient(appliedStatusEffectAmbient);
 			triggeredBeaconBlockEntity.setAppliedStatusEffectShowParticles(appliedStatusEffectShowParticles);
 			triggeredBeaconBlockEntity.setAppliedStatusEffectShowIcon(appliedStatusEffectShowIcon);

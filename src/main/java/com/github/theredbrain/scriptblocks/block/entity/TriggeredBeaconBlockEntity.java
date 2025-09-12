@@ -44,6 +44,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 
 	private String appliedStatusEffectIdentifier = "";
 	private int appliedStatusEffectAmplifier = 0;
+	private int appliedStatusEffectDuration = 100;
 	private boolean appliedStatusEffectAmbient = false;
 	private boolean appliedStatusEffectShowParticles = false;
 	private boolean appliedStatusEffectShowIcon = false;
@@ -130,6 +131,12 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 			nbt.remove("appliedStatusEffectAmplifier");
 		}
 
+		if (this.appliedStatusEffectDuration != 100) {
+			nbt.putInt("appliedStatusEffectDuration", this.appliedStatusEffectDuration);
+		} else {
+			nbt.remove("appliedStatusEffectDuration");
+		}
+
 		if (this.appliedStatusEffectAmbient) {
 			nbt.putBoolean("appliedStatusEffectAmbient", true);
 		} else {
@@ -188,6 +195,12 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		this.appliedStatusEffectIdentifier = nbt.getString("appliedStatusEffectIdentifier");
 
 		this.appliedStatusEffectAmplifier = nbt.getInt("appliedStatusEffectAmplifier");
+
+		if (nbt.contains("appliedStatusEffectDuration")) {
+			this.appliedStatusEffectDuration = nbt.getInt("appliedStatusEffectDuration");
+		} else {
+			this.appliedStatusEffectDuration = 100;
+		}
 
 		this.appliedStatusEffectAmbient = nbt.getBoolean("appliedStatusEffectAmbient");
 
@@ -252,7 +265,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 				playerEntity.addStatusEffect(
 						new StatusEffectInstance(
 								statusEffect.get(),
-								100,
+								this.appliedStatusEffectDuration,
 								this.appliedStatusEffectAmplifier,
 								this.appliedStatusEffectAmbient,
 								this.appliedStatusEffectShowParticles,
@@ -316,6 +329,17 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 			return true;
 		}
 		return false;
+	}
+
+	public int getAppliedStatusEffectDuration() {
+		return appliedStatusEffectDuration;
+	}
+
+	public void setAppliedStatusEffectDuration(int appliedStatusEffectDuration) {
+		if (appliedStatusEffectDuration < -1) {
+			appliedStatusEffectDuration = 100;
+		}
+		this.appliedStatusEffectDuration = appliedStatusEffectDuration;
 	}
 
 	public boolean getAppliedStatusEffectAmbient() {

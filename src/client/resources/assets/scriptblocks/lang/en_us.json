@@ -474,7 +474,8 @@
 	"gui.triggered_beacon_block.area_position_offset_label": "Area Position Offset",
 
 	"gui.triggered_beacon_block.status_effect_identifier_label": "Effect Identifier",
-	"gui.triggered_beacon_block.status_effect_amplifier_label": "Effect Amplifier",
+	"gui.triggered_beacon_block.status_effect_amplifier_label": "Amplifier",
+	"gui.triggered_beacon_block.status_effect_duration_label": "Duration",
 	"gui.triggered_beacon_block.ambient_true_label": "Effect Is Ambient: True",
 	"gui.triggered_beacon_block.ambient_false_label": "Effect Is Ambient: False",
 	"gui.triggered_beacon_block.hide_particles_label": "Effect Hides Particles",

@@ -14,6 +14,7 @@ public record UpdateTriggeredBeaconBlockPacket(
 		BlockPos applicationAreaPositionOffset,
 		String appliedStatusEffectIdentifier,
 		int appliedStatusEffectAmplifier,
+		int appliedStatusEffectDuration,
 		boolean appliedStatusEffectAmbient,
 		boolean appliedStatusEffectShowParticles,
 		boolean appliedStatusEffectShowIcon,
@@ -35,6 +36,7 @@ public record UpdateTriggeredBeaconBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
 				registryByteBuf.readInt(),
+				registryByteBuf.readInt(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
@@ -52,6 +54,7 @@ public record UpdateTriggeredBeaconBlockPacket(
 		registryByteBuf.writeBlockPos(this.applicationAreaPositionOffset);
 		registryByteBuf.writeString(this.appliedStatusEffectIdentifier);
 		registryByteBuf.writeInt(this.appliedStatusEffectAmplifier);
+		registryByteBuf.writeInt(this.appliedStatusEffectDuration);
 		registryByteBuf.writeBoolean(this.appliedStatusEffectAmbient);
 		registryByteBuf.writeBoolean(this.appliedStatusEffectShowParticles);
 		registryByteBuf.writeBoolean(this.appliedStatusEffectShowIcon);

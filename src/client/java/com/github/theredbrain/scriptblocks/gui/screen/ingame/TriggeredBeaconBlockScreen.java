@@ -32,6 +32,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.area_position_offset_label");
 	private static final Text STATUS_EFFECT_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.status_effect_identifier_label");
 	private static final Text STATUS_EFFECT_AMPLIFIER_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.status_effect_amplifier_label");
+	private static final Text STATUS_EFFECT_DURATION_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.status_effect_duration_label");
 	private static final Text AMBIENT_TRUE_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.ambient_true_label");
 	private static final Text AMBIENT_FALSE_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.ambient_false_label");
 	private static final Text HIDE_PARTICLES_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.hide_particles_label");
@@ -51,6 +52,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 
 	private TextFieldWidget appliedStatusEffectIdentifierField;
 	private TextFieldWidget appliedStatusEffectAmplifierField;
+	private TextFieldWidget appliedStatusEffectDurationField;
 	private CyclingButtonWidget<Boolean> toggleAppliedStatusEffectAmbientButton;
 	private CyclingButtonWidget<Boolean> toggleAppliedStatusEffectShowParticlesButton;
 	private CyclingButtonWidget<Boolean> toggleAppliedStatusEffectShowIconButton;
@@ -128,9 +130,13 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		this.appliedStatusEffectIdentifierField.setText(this.triggeredBeaconBlock.getAppliedStatusEffectIdentifier());
 		this.addSelectableChild(this.appliedStatusEffectIdentifierField);
 
-		this.appliedStatusEffectAmplifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 100, 150, 20, Text.empty());
+		this.appliedStatusEffectAmplifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 100, 75, 20, Text.empty());
 		this.appliedStatusEffectAmplifierField.setText(Integer.toString(this.triggeredBeaconBlock.getAppliedStatusEffectAmplifier()));
 		this.addSelectableChild(this.appliedStatusEffectAmplifierField);
+
+		this.appliedStatusEffectDurationField = new TextFieldWidget(this.textRenderer, this.width / 2 - 75, 100, 75, 20, Text.empty());
+		this.appliedStatusEffectDurationField.setText(Integer.toString(this.triggeredBeaconBlock.getAppliedStatusEffectDuration()));
+		this.addSelectableChild(this.appliedStatusEffectDurationField);
 
 		this.appliedStatusEffectAmbient = this.triggeredBeaconBlock.getAppliedStatusEffectAmbient();
 		this.toggleAppliedStatusEffectAmbientButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(AMBIENT_TRUE_LABEL_TEXT, AMBIENT_FALSE_LABEL_TEXT).initially(this.appliedStatusEffectAmbient).omitKeyText().build(this.width / 2 + 4, 100, 150, 20, Text.empty(), (button, appliedStatusEffectAmbient) -> {
@@ -178,6 +184,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 
 		this.appliedStatusEffectIdentifierField.setVisible(false);
 		this.appliedStatusEffectAmplifierField.setVisible(false);
+		this.appliedStatusEffectDurationField.setVisible(false);
 		this.toggleAppliedStatusEffectAmbientButton.visible = false;
 		this.toggleAppliedStatusEffectShowParticlesButton.visible = false;
 		this.toggleAppliedStatusEffectShowIconButton.visible = false;
@@ -199,6 +206,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 
 			this.appliedStatusEffectIdentifierField.setVisible(true);
 			this.appliedStatusEffectAmplifierField.setVisible(true);
+			this.appliedStatusEffectDurationField.setVisible(true);
 
 			this.toggleAppliedStatusEffectAmbientButton.visible = true;
 			this.toggleAppliedStatusEffectShowParticlesButton.visible = true;
@@ -230,6 +238,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		String string5 = this.areaPositionOffsetZField.getText();
 		String string6 = this.appliedStatusEffectIdentifierField.getText();
 		String string7 = this.appliedStatusEffectAmplifierField.getText();
+		String string8 = this.appliedStatusEffectDurationField.getText();
 		this.init(client, width, height);
 		this.screenPage = var;
 		this.triggeredMode = var2;
@@ -247,6 +256,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		this.areaPositionOffsetZField.setText(string5);
 		this.appliedStatusEffectIdentifierField.setText(string6);
 		this.appliedStatusEffectAmplifierField.setText(string7);
+		this.appliedStatusEffectDurationField.setText(string8);
 	}
 
 	@Override
@@ -268,6 +278,8 @@ public class TriggeredBeaconBlockScreen extends Screen {
 			this.appliedStatusEffectIdentifierField.render(context, mouseX, mouseY, delta);
 			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
 			this.appliedStatusEffectAmplifierField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECT_DURATION_LABEL_TEXT, this.width / 2 - 74, 90, 0xA0A0A0);
+			this.appliedStatusEffectDurationField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.TRIGGER_SETTINGS) {
 		}
 	}
@@ -293,6 +305,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 				),
 				this.appliedStatusEffectIdentifierField.getText(),
 				ItemUtils.parseInt(this.appliedStatusEffectAmplifierField.getText()),
+				ItemUtils.parseInt(this.appliedStatusEffectDurationField.getText()),
 				this.appliedStatusEffectAmbient,
 				this.appliedStatusEffectShowParticles,
 				this.appliedStatusEffectShowIcon,
