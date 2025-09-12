@@ -193,9 +193,11 @@ public interface DialogueAnchor {
 								unlockedAnswersList.add(answerIdentifierString);
 								visibleAnswersList.add(answerIdentifierString);
 							} else if (dialogueAnswer.availability().showUnaffordableAnswer()) {
+								unlockedAnswersList.add("");
 								visibleAnswersList.add(answerIdentifierString);
 							}
 						} else if (dialogueAnswer.availability().showLockedAnswer()) {
+							unlockedAnswersList.add("");
 							visibleAnswersList.add(answerIdentifierString);
 						}
 					}

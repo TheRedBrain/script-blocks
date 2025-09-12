@@ -129,25 +129,33 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 
 		int index = this.handler.getAnswersStartingIndex();
 		for (int i = 0; i < Math.min(TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex(), this.handler.visibleAnswersList.size()); i++) {
-			if (!this.handler.visibleAnswersList.get(i).isEmpty()) {
+			boolean visible = !this.handler.visibleAnswersList.get(i).isEmpty();
+			boolean active = visible && !this.handler.unlockedAnswersList.get(i).isEmpty();
 				if (index == 0) {
-					this.answerButton0.visible = true;
+					this.answerButton0.visible = visible;
+					this.answerButton0.active = active;
 				} else if (index == 1) {
-					this.answerButton1.visible = true;
+					this.answerButton1.visible = visible;
+					this.answerButton1.active = active;
 				} else if (index == 2) {
-					this.answerButton2.visible = true;
+					this.answerButton2.visible = visible;
+					this.answerButton2.active = active;
 				} else if (index == 3) {
-					this.answerButton3.visible = true;
+					this.answerButton3.visible = visible;
+					this.answerButton3.active = active;
 				} else if (index == 4) {
-					this.answerButton4.visible = true;
+					this.answerButton4.visible = visible;
+					this.answerButton4.active = active;
 				} else if (index == 5) {
-					this.answerButton5.visible = true;
+					this.answerButton5.visible = visible;
+					this.answerButton5.active = active;
 				} else if (index == 6) {
-					this.answerButton6.visible = true;
+					this.answerButton6.visible = visible;
+					this.answerButton6.active = active;
 				} else if (index == 7) {
-					this.answerButton7.visible = true;
+					this.answerButton7.visible = visible;
+					this.answerButton7.active = active;
 				}
-			}
 			index++;
 		}
 	}
