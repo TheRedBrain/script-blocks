@@ -25,6 +25,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
@@ -60,6 +61,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeamControllerBlock
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancementCheckerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredBeaconBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredCounterBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDamageDealingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDisplayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredEntityRemoverBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockScreen;
@@ -294,6 +296,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity) {
 		this.client.setScreen(new DataSavingBlockScreen(dataSavingBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openTriggeredDamageDealingBlockScreen(TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
+		this.client.setScreen(new TriggeredDamageDealingBlockScreen(triggeredDamageDealingBlockEntity));
 	}
 
 	@Override

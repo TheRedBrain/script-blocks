@@ -28,6 +28,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDispenserBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
@@ -71,6 +72,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<TriggeredDisplayBlockEntity> TRIGGERED_DISPLAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_display_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredDisplayBlockEntity::new, BlockRegistry.TRIGGERED_DISPLAY_BLOCK).build());
+	public static final BlockEntityType<TriggeredDamageDealingBlockEntity> TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggered_damage_dealing_block"),
+			FabricBlockEntityTypeBuilder.create(TriggeredDamageDealingBlockEntity::new, BlockRegistry.TRIGGERED_DAMAGE_DEALING_BLOCK).build());
 	public static final BlockEntityType<TriggeredEntityRemoverBlockEntity> TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_entity_remover_block"),
 			FabricBlockEntityTypeBuilder.create(TriggeredEntityRemoverBlockEntity::new, BlockRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK).build());

@@ -21,6 +21,7 @@ import com.github.theredbrain.scriptblocks.render.block.entity.StatusEffectAppli
 import com.github.theredbrain.scriptblocks.render.block.entity.TeamControllerBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TeleporterBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredBeaconBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDamageDealingBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDisplayBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredEntityRemoverBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.UseRelayLecternBlockEntityRenderer;
@@ -125,6 +126,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(EntityRegistry.PLAYER_DETECTOR_BLOCK_ENTITY, PlayerDetectorBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY, TriggeredDamageDealingBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, TriggeredEntityRemoverBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_BEACON_BLOCK_ENTITY, TriggeredBeaconBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(EntityRegistry.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);

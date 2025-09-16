@@ -31,6 +31,7 @@ import com.github.theredbrain.scriptblocks.block.TeleporterTrapdoorBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredAdvancementCheckerBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredBeaconBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredCounterBlock;
+import com.github.theredbrain.scriptblocks.block.TriggeredDamageDealingBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDispenserBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDisplayBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredEntityRemoverBlock;
@@ -160,6 +161,7 @@ public class BlockRegistry {
 	public static final Block TRIGGERED_ADVANCEMENT_CHECKER_BLOCK = registerBlock("triggered_advancement_checker_block", new TriggeredAdvancementCheckerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_BEACON_BLOCK = registerBlock("triggered_beacon_block", new TriggeredBeaconBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_COUNTER_BLOCK = registerBlock("triggered_counter_block", new TriggeredCounterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TRIGGERED_DAMAGE_DEALING_BLOCK = registerBlock("triggered_damage_dealing_block", new TriggeredDamageDealingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_DISPENSER_BLOCK = registerBlock("triggered_dispenser_block", new TriggeredDispenserBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_DISPLAY_BLOCK = registerBlock("triggered_display_block", new TriggeredDisplayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_ENTITY_REMOVER_BLOCK = registerBlock("triggered_entity_remover_block", new TriggeredEntityRemoverBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
