@@ -111,8 +111,8 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 		this.damageAmountField.setText(Float.toString(this.triggeredDamageDealingBlockEntity.getDamageAmount()));
 		this.addSelectableChild(this.damageAmountField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 215, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 215, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 219, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 219, 150, 20).build());
 	}
 
 	@Override

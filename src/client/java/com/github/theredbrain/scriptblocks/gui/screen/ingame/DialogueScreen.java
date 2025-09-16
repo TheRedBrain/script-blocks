@@ -53,17 +53,11 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	}
 
 	private void answer(int index) {
-		ScriptBlocks.info("answer");
-		ScriptBlocks.info("index: " + index);
-		ScriptBlocks.info("this.answersScrollPosition: " + this.answersScrollPosition);
-		ScriptBlocks.info("this.handler.visibleAnswersList.size(): " + this.handler.visibleAnswersList.size());
 		int finalIndex = index + this.answersScrollPosition - this.handler.answersStartingIndex;
-		ScriptBlocks.info("finalIndex: " + finalIndex);
+
 		if (finalIndex >= 0 && finalIndex < this.handler.visibleAnswersList.size()) {
-			ScriptBlocks.info("this.handler.answersStartingIndex: " + this.handler.answersStartingIndex);
 			String currentAnswerIdentifierString = this.handler.visibleAnswersList.get(finalIndex);
 
-			ScriptBlocks.info("currentAnswerIdentifier: " + currentAnswerIdentifierString);
 			if (!currentAnswerIdentifierString.isEmpty()) {
 				ClientPlayNetworking.send(new DialogueAnswerPacket(
 						Identifier.of(currentAnswerIdentifierString),
@@ -127,10 +121,11 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 		this.answerButton6.visible = false;
 		this.answerButton7.visible = false;
 
-		int index = this.handler.getAnswersStartingIndex();
-		for (int i = 0; i < Math.min(TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex(), this.handler.visibleAnswersList.size()); i++) {
-			boolean visible = !this.handler.visibleAnswersList.get(i).isEmpty();
-			boolean active = visible && !this.handler.unlockedAnswersList.get(i).isEmpty();
+		if (this.handler.visibleAnswersList.size() == this.handler.unlockedAnswersList.size()) {
+			int index = this.handler.getAnswersStartingIndex();
+			for (int i = 0; i < Math.min(TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex(), this.handler.visibleAnswersList.size()); i++) {
+				boolean visible = !this.handler.visibleAnswersList.get(i).isEmpty();
+				boolean active = visible && !this.handler.unlockedAnswersList.get(i).isEmpty();
 				if (index == 0) {
 					this.answerButton0.visible = visible;
 					this.answerButton0.active = active;
@@ -156,7 +151,8 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 					this.answerButton7.visible = visible;
 					this.answerButton7.active = active;
 				}
-			index++;
+				index++;
+			}
 		}
 	}
 

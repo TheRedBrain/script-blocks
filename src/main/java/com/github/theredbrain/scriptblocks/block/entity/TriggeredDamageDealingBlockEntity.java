@@ -44,12 +44,12 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = new BlockPos(0, 0, 0);
 
-	private String exceptionTagIdentifierString;
-	private String damageTypeIdentifierString;
-	private float damageAmount;
+	private String exceptionTagIdentifierString = "";
+	private String damageTypeIdentifierString = "";
+	private float damageAmount = 0;
 
 	public TriggeredDamageDealingBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, pos, state);
+		super(EntityRegistry.TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
