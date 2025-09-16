@@ -165,6 +165,16 @@
 	"gui.triggered_entity_remover_block.area_position_offset_label": "Area Position Offset",
 
 
+
+	"gui.triggered_damage_dealing_block.hide_area_label": "Hide Area",
+	"gui.triggered_damage_dealing_block.show_area_label": "Show Area",
+	"gui.triggered_damage_dealing_block.area_dimensions_label": "Area Dimensions",
+	"gui.triggered_damage_dealing_block.area_position_offset_label": "Area Position Offset",
+	"gui.triggered_damage_dealing_block.exception_tag_identifier_label": "Exception Entity Tag",
+	"gui.triggered_damage_dealing_block.damage_type_identifier_label": "Damage Type Identifier",
+	"gui.triggered_damage_dealing_block.damage_amount_label": "Damage Amount",
+
+
 	"gui.use_relay_block.relayBlockPositionOffset": "Relay Block Position Offset",
 
 
@@ -725,6 +735,7 @@
 	"block.scriptblocks.triggered_advancement_checker_block": "Triggered Advancement Checker Block",
 	"block.scriptblocks.triggered_beacon_block": "Triggered Beacon Block",
 	"block.scriptblocks.triggered_counter_block": "Triggered Counter Block",
+	"block.scriptblocks.triggered_damage_dealing_block": "Triggered Damage Dealing Block",
 	"block.scriptblocks.triggered_display_block": "Triggered Display Block",
 	"block.scriptblocks.triggered_redstone_block": "Triggered Redstone Block",
 	"block.scriptblocks.triggered_entity_remover_block": "Triggered Entity Remover Block",

@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -29,6 +28,10 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 		Vec3i areaDimensions = payload.areaDimensions();
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
 
+		String exceptionTagIdentifierString = payload.exceptionTagIdentifierString();
+		String damageTypeIdentifierString = payload.damageTypeIdentifierString();
+		float damageAmount = payload.damageAmount();
+
 		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(triggeredDamageDealingBlockPosition);
@@ -38,6 +41,9 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 			triggeredDamageDealingBlockEntity.setShowArea(showArea);
 			triggeredDamageDealingBlockEntity.setAreaDimensions(areaDimensions);
 			triggeredDamageDealingBlockEntity.setAreaPositionOffset(areaPositionOffset);
+			triggeredDamageDealingBlockEntity.setExceptionTagIdentifierString(exceptionTagIdentifierString);
+			triggeredDamageDealingBlockEntity.setDamageTypeIdentifierString(damageTypeIdentifierString);
+			triggeredDamageDealingBlockEntity.setDamageAmount(damageAmount);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			triggeredDamageDealingBlockEntity.markDirty();
 			world.updateListeners(triggeredDamageDealingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

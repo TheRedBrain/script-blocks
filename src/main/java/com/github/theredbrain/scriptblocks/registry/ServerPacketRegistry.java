@@ -72,6 +72,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredBeaconB
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredBeaconBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredCounterBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDamageDealingBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDamageDealingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredDisplayBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredEntityRemoverBlockPacket;
@@ -137,6 +139,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateDelayTriggerBlockPacket.PACKET_ID, UpdateDelayTriggerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDelayTriggerBlockPacket.PACKET_ID, new UpdateDelayTriggerBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeredDamageDealingBlockPacket.PACKET_ID, UpdateTriggeredDamageDealingBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredDamageDealingBlockPacket.PACKET_ID, new UpdateTriggeredDamageDealingBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredDisplayBlockPacket.PACKET_ID, UpdateTriggeredDisplayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredDisplayBlockPacket.PACKET_ID, new UpdateTriggeredDisplayBlockPacketReceiver());

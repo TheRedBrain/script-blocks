@@ -11,7 +11,10 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 		BlockPos triggeredDamageDealingBlockPosition,
 		boolean showArea,
 		Vec3i areaDimensions,
-		BlockPos areaPositionOffset
+		BlockPos areaPositionOffset,
+		String exceptionTagIdentifierString,
+		String damageTypeIdentifierString,
+		float damageAmount
 ) implements CustomPayload {
 	public static final Id<UpdateTriggeredDamageDealingBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggered_damage_dealing_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredDamageDealingBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredDamageDealingBlockPacket::write, UpdateTriggeredDamageDealingBlockPacket::new);
@@ -25,7 +28,10 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 						registryByteBuf.readInt(),
 						registryByteBuf.readInt()
 				),
-				registryByteBuf.readBlockPos()
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readFloat()
 		);
 	}
 
@@ -37,6 +43,9 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 		registryByteBuf.writeInt(this.areaDimensions.getY());
 		registryByteBuf.writeInt(this.areaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.areaPositionOffset);
+		registryByteBuf.writeString(this.exceptionTagIdentifierString);
+		registryByteBuf.writeString(this.damageTypeIdentifierString);
+		registryByteBuf.writeFloat(this.damageAmount);
 	}
 
 	@Override

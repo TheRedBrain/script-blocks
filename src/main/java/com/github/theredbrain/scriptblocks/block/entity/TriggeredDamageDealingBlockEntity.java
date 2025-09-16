@@ -6,13 +6,24 @@ import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -27,13 +38,15 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 
 	private static final BlockPos AREA_POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
 
-	public static final Predicate<Entity> EXCEPT_PLAYERS = entity -> !(entity instanceof PlayerEntity);
-
 	private boolean calculateAreaBox = true;
 	private Box area = null;
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = new BlockPos(0, 0, 0);
+
+	private String exceptionTagIdentifierString;
+	private String damageTypeIdentifierString;
+	private float damageAmount;
 
 	public TriggeredDamageDealingBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, pos, state);
@@ -85,6 +98,24 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 			nbt.remove("areaPositionOffsetZ");
 		}
 
+		if (!this.exceptionTagIdentifierString.isEmpty()) {
+			nbt.putString("exceptionTagIdentifierString", this.exceptionTagIdentifierString);
+		} else {
+			nbt.remove("exceptionTagIdentifierString");
+		}
+
+		if (!this.damageTypeIdentifierString.isEmpty()) {
+			nbt.putString("damageTypeIdentifierString", this.damageTypeIdentifierString);
+		} else {
+			nbt.remove("damageTypeIdentifierString");
+		}
+
+		if (this.damageAmount != 0) {
+			nbt.putFloat("damageAmount", this.damageAmount);
+		} else {
+			nbt.remove("damageAmount");
+		}
+
 		super.writeNbt(nbt, registryLookup);
 
 	}
@@ -125,6 +156,12 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 			this.areaPositionOffset = AREA_POSITION_OFFSET_DEFAULT;
 		}
 
+		this.exceptionTagIdentifierString = nbt.getString("exceptionTagIdentifierString");
+
+		this.damageTypeIdentifierString = nbt.getString("damageTypeIdentifierString");
+
+		this.damageAmount = nbt.getFloat("damageAmount");
+
 		super.readNbt(nbt, registryLookup);
 	}
 
@@ -163,6 +200,30 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		this.calculateAreaBox = true;
 	}
 
+	public String getExceptionTagIdentifierString() {
+		return this.exceptionTagIdentifierString;
+	}
+
+	public void setExceptionTagIdentifierString(String exceptionTagIdentifierString) {
+		this.exceptionTagIdentifierString = exceptionTagIdentifierString;
+	}
+
+	public String getDamageTypeIdentifierString() {
+		return this.damageTypeIdentifierString;
+	}
+
+	public void setDamageTypeIdentifierString(String damageTypeIdentifierString) {
+		this.damageTypeIdentifierString = damageTypeIdentifierString;
+	}
+
+	public float getDamageAmount() {
+		return this.damageAmount;
+	}
+
+	public void setDamageAmount(float damageAmount) {
+		this.damageAmount = damageAmount;
+	}
+
 	@Override
 	public void trigger() {
 
@@ -176,10 +237,20 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		}
 
 		if (this.world != null) {
-			List<Entity> entityList = this.world.getEntitiesByClass(Entity.class, this.area, EXCEPT_PLAYERS);
+			List<LivingEntity> entityList = this.world.getEntitiesByClass(LivingEntity.class, this.area, entity -> !(entity.getType().isIn(TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(this.exceptionTagIdentifierString)))));
 
-			for (Entity entity : entityList) {
-				entity.discard();
+			Registry<DamageType> registry = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE);
+
+			if (!this.damageTypeIdentifierString.isEmpty()) {
+				Identifier damageTypeIdentifier = Identifier.tryParse(this.damageTypeIdentifierString);
+				if (damageTypeIdentifier != null) {
+					RegistryKey<DamageType> key = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, damageTypeIdentifier);
+					DamageSource damageSource = new DamageSource(registry.entryOf(key));
+
+					for (LivingEntity entity : entityList) {
+						entity.damage(damageSource, this.damageAmount);
+					}
+				}
 			}
 		}
 	}
