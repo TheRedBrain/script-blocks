@@ -21,6 +21,7 @@ public record TeleportFromTeleporterBlockPacket(
 		String targetLocation,
 		String targetLocationEntrance,
 		String statusEffectsToDecrementLevelOnTeleport,
+//		String statusEffectsToRemoveOnTeleport, // TODO statusEffectsToRemoveOnTeleport
 		String dataId,
 		String data
 ) implements CustomPayload {

@@ -113,7 +113,6 @@ public class Tags {
 	public static final TagKey<Item> INTERACTIVE_OAK_LOG_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocks.identifier("tools/interactive_oak_log_tools"));
 	public static final TagKey<Item> KEYS_FOR_LOCKED_USE_RELAY_CHEST = TagKey.of(RegistryKeys.ITEM, ScriptBlocks.identifier("keys_for_locked_use_relay_chest"));
 
-	public static final TagKey<StatusEffect> ALWAYS_DECREMENT_AFTER_TELEPORT = TagKey.of(RegistryKeys.STATUS_EFFECT, ScriptBlocks.identifier("always_decrement_after_teleport"));
 //    public static final TagKey<Item> ADVENTURE_HOTBAR_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("adventure_hotbar_items"));
 //    public static final TagKey<Item> ATTACK_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("attack_items"));
 //    public static final TagKey<Item> TWO_HANDED_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("two_handed_items"));
