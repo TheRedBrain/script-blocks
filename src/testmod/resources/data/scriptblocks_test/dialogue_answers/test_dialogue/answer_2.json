@@ -1,9 +1,9 @@
 {
-    "answerText": "dialogue_answers.test_dialogue.answer_2",
+    "answerText": "test_dialogue.answer_2",
     "responseDialogues": [],
     "availability": {
         "unlockAdvancement": "",
-        "lockAdvancement": "",
+        "lockAdvancement": "minecraft:story/form_obsidian",
         "unlockDataCheck": {
             "dataIdentifier": "",
             "dataValue": "",
@@ -14,7 +14,7 @@
             "dataValue": "",
             "comparisonMode": 0
         },
-        "showLockedAnswer": false,
+        "showLockedAnswer": true,
         "itemCosts": [],
         "showUnaffordableAnswer": false
     },
