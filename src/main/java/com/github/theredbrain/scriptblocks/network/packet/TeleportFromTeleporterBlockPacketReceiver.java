@@ -296,7 +296,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 				if (statusEffectInstance != null) {
 					RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
-					boolean isPortalResistanceEffect = statusEffectEntry == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
+					boolean isPortalResistanceEffect = statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
 					if (statusEffectEntry.isIn(tag) || isPortalResistanceEffect) {
 						int oldAmplifier = statusEffectInstance.getAmplifier();
 						if (oldAmplifier <= 0 || isPortalResistanceEffect) {
@@ -328,7 +328,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 								if (statusEffectInstance != null) {
 									RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
-									boolean isPortalResistanceEffect = statusEffectEntry == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
+									boolean isPortalResistanceEffect = statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
 									if (statusEffectEntry.isIn(tag) || isPortalResistanceEffect) {
 										int oldAmplifier = statusEffectInstance.getAmplifier();
 										if (oldAmplifier <= 0 || isPortalResistanceEffect) {
