@@ -60,10 +60,25 @@ public class ScriptBlocks implements ModInitializer {
 		((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(currentPVPControllerBlockPosition);
 	}
 
+	public static void addPlayerAndTeamToPVPControllerBlock(Team team, PlayerEntity playerEntity, ServerWorld serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
+		if (currentPVPControllerBlockPosition.isPresent()) {
+			if (serverWorld.getBlockEntity(currentPVPControllerBlockPosition.get()) instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
+				pvpControllerBlockEntity.addPlayerAndTeam(team, playerEntity);
+			}
+		}
+	}
+
+	public static void removePlayerFromPVPControllerBlock(PlayerEntity playerEntity, ServerWorld serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
+		if (currentPVPControllerBlockPosition.isPresent()) {
+			if (serverWorld.getBlockEntity(currentPVPControllerBlockPosition.get()) instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
+				pvpControllerBlockEntity.removePlayer(playerEntity);
+			}
+		}
+	}
+
 	@Nullable
-	public static MutablePair<RegistryKey<World>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(ServerPlayerEntity serverPlayerEntity, boolean endOfBattle) {
+	public static MutablePair<RegistryKey<World>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(Team team, ServerPlayerEntity serverPlayerEntity, boolean endOfBattle) {
 		Optional<BlockPos> optionalBlockPos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getCurrentPVPControllerBlockPosition();
-		Team team = serverPlayerEntity.getScoreboardTeam();
 		World world = serverPlayerEntity.getWorld();
 		if (optionalBlockPos.isPresent() && team != null && world instanceof ServerWorld serverWorld) {
 			String teamId = team.getName();
@@ -71,6 +86,10 @@ public class ScriptBlocks implements ModInitializer {
 			if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 				MutablePair<BlockPos, MutablePair<Double, Double>> teamRespawnPos = pvpControllerBlockEntity.getTeamRespawnPosition(teamId, endOfBattle);
 				if (teamRespawnPos != null) {
+					if (endOfBattle) {
+						pvpControllerBlockEntity.removePlayer(serverPlayerEntity);
+						pvpControllerBlockEntity.removeEmptyTeams();
+					}
 					return new MutablePair<>(
 							serverWorld.getRegistryKey(),
 							new MutablePair<>(

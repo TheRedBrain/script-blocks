@@ -9,11 +9,14 @@ import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -24,15 +27,24 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public class PVPControllerBlockEntity extends RotatedBlockEntity implements Resetable, Triggerable {
 
 	private String pvpArenaSettingsIdentifier = "";
 	private HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions = new HashMap<>(Map.of());
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+
+	private Set<String> teamSet = new HashSet<>();
+	private Set<UUID> playerUUIDSet = new HashSet<>();
 
 	public PVPControllerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.PVP_CONTROLLER_BLOCK_ENTITY, pos, state);
@@ -60,6 +72,11 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			nbt.putDouble("respawnPosition_" + i + "_Pitch", this.respawnPositions.get(key).getRight().getRight());
 		}
 
+		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
+		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
+		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
+		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+
 		super.writeNbt(nbt, registryLookup);
 	}
 
@@ -83,6 +100,11 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			double respawnPositionPitch = nbt.getDouble("respawnPosition_" + i + "_Pitch");
 			this.respawnPositions.put(key, new MutablePair<>(new BlockPos(respawnPositionX, respawnPositionY, respawnPositionZ), new MutablePair<>(respawnPositionYaw, respawnPositionPitch)));
 		}
+
+		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
+		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
+		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
+		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -138,6 +160,40 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		return null;
 	}
 
+	public void addPlayerAndTeam(Team team, PlayerEntity playerEntity) {
+		this.teamSet.add(team.getName());
+		this.playerUUIDSet.add(playerEntity.getUuid());
+	}
+
+	public void removePlayer(PlayerEntity playerEntity) {
+		this.playerUUIDSet.remove(playerEntity.getUuid());
+		this.removeEmptyTeams();
+	}
+
+	public void removeEmptyTeams() {
+		if (this.world != null) {
+			Iterator<String> iterator = this.teamSet.stream().iterator();
+			Scoreboard scoreboard = this.world.getScoreboard();
+			// new list
+			Team team;
+			int activeTeamCounter = 0;
+			while (iterator.hasNext()) {
+				team = scoreboard.getTeam(iterator.next());
+
+				if (team != null) {
+					if (team.getPlayerList().isEmpty()) {
+						this.teamSet.remove(team.getName());
+					} else {
+						activeTeamCounter++;
+					}
+				}
+			}
+			if (activeTeamCounter <= 1) {
+				this.onMatchEnd();
+			}
+		}
+	}
+
 	public HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> getRespawnPositions() {
 		return respawnPositions;
 	}
@@ -147,13 +203,56 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		this.respawnPositions.putAll(respawnPositions);
 	}
 
+	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
+		return this.triggeredBlock;
+	}
+
+	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
+		this.triggeredBlock = triggeredBlock;
+	}
+
+	public void onMatchEnd() {
+		if (this.world != null) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.triggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
+			}
+		}
+	}
+
+	@Override
 	public void trigger() {
+		removeEmptyTeams();
 		// TODO show scoreboard of teams in pvpArenaSettingsIdentifier with pvp deaths, kills, ctf points
+//		if (this.world != null) {
+//
+//			PVPArenaSettings pvpArenaSettings = null;
+//			Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
+//			if (identifier != null) {
+//				Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(CustomDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+//				if (optionalPVPArenaSettingsReference.isPresent()) {
+//					pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
+//				}
+//			}
+//			if (pvpArenaSettings != null) {
+//				Scoreboard scoreboard = this.world.getScoreboard();
+//				for (Map.Entry<String, PVPArenaSettings.TeamSettings> entry : pvpArenaSettings.team_settings().entrySet()) {
+//					scoreboard.
+//				}
+//			}
+//		}
 	}
 
 	@Override
 	public void reset() {
 		// TODO no longer show scoreboard
+		this.teamSet.clear();
+		this.playerUUIDSet.clear();
 	}
 
 	@Override
@@ -170,6 +269,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 					this.respawnPositions.put(key, rotatedEntrance);
 				}
 
+				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
+
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
@@ -182,6 +283,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 					this.respawnPositions.put(key, mirroredEntrance);
 				}
 
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
@@ -193,6 +296,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorEntrance(this.respawnPositions.get(key), BlockMirror.LEFT_RIGHT);
 					this.respawnPositions.put(key, mirroredEntrance);
 				}
+
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}

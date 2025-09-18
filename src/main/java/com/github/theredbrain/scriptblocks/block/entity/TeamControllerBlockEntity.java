@@ -237,15 +237,20 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient) {
 				BlockPos pvpControllerBlockPos = null;
+				PVPControllerBlockEntity pvpControllerBlockEntity = null;
 				if (teamControllerBlockEntity.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
 					BlockPos pvpControllerBlockPositionOffset = teamControllerBlockEntity.pvpControllerBlockPositionOffset;
 					pvpControllerBlockPos = teamControllerBlockEntity.pos.add(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
+					if (teamControllerBlockEntity.world.getBlockEntity(pvpControllerBlockPos) instanceof PVPControllerBlockEntity pvpControllerBlockEntity1) {
+						pvpControllerBlockEntity = pvpControllerBlockEntity1;
+					}
 				}
 				List<LivingEntity> livingEntityList = world.getNonSpectatingEntities(LivingEntity.class, teamControllerBlockEntity.area);
 				for (LivingEntity livingEntity : livingEntityList) {
 					teamControllerBlockEntity.world.getScoreboard().addScoreHolderToTeam(livingEntity.getNameForScoreboard(), teamControllerBlockEntity.team);
-					if (livingEntity instanceof PlayerEntity playerEntity && pvpControllerBlockPos != null) {
+					if (livingEntity instanceof PlayerEntity playerEntity && pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
 						((DuckPlayerEntityMixin)playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
+						pvpControllerBlockEntity.addPlayerAndTeam(teamControllerBlockEntity.team, playerEntity);
 					}
 				}
 			}

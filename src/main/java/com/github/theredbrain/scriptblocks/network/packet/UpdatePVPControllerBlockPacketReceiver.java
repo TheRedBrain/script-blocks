@@ -34,6 +34,10 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 			sideEntrances.put(sideEntrance.getLeft(), sideEntrance.getRight());
 		}
 
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
+
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
+
 		World world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(pvpControllerBlockPosition);
@@ -43,6 +47,7 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 			pvpControllerBlockEntity.reset();
 			pvpControllerBlockEntity.setPVPArenaSettingsIdentifier(pvpArenaSettingsIdentifier);
 			pvpControllerBlockEntity.setRespawnPositions(sideEntrances);
+			pvpControllerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			pvpControllerBlockEntity.markDirty();

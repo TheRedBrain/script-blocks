@@ -31,6 +31,7 @@ import java.util.Optional;
 @Environment(value = EnvType.CLIENT)
 public class PVPControllerBlockScreen extends Screen {
 	private static final Text PVP_ARENA_SETTINGS_ID_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.pvp_arena_settings_id_label");
+	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
 	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.remove_list_entry_button_label");
 	private static final Text NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_position_offset_label");
 	private static final Text NEW_RESPAWN_POSITION_NAME_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_position_name_label");
@@ -40,6 +41,12 @@ public class PVPControllerBlockScreen extends Screen {
 	private final PVPControllerBlockEntity pvpControllerBlockEntity;
 	private CyclingButtonWidget<ScreenPage> creativeScreenPageButton;
 	private TextFieldWidget pvpArenaSettingsIdentifierField;
+	private TextFieldWidget triggeredBlockPositionOffsetXField;
+	private TextFieldWidget triggeredBlockPositionOffsetYField;
+	private TextFieldWidget triggeredBlockPositionOffsetZField;
+	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
+	private boolean triggeredBlockResets;
+
 	private ButtonWidget removeRespawnPositionButton0;
 	private ButtonWidget removeRespawnPositionButton1;
 	private ButtonWidget removeRespawnPositionButton2;
@@ -137,6 +144,23 @@ public class PVPControllerBlockScreen extends Screen {
 		this.pvpArenaSettingsIdentifierField.setText(this.pvpControllerBlockEntity.getPVPArenaSettingsIdentifier());
 		this.addSelectableChild(this.pvpArenaSettingsIdentifierField);
 
+		this.triggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 115, 50, 20, Text.empty());
+		this.triggeredBlockPositionOffsetXField.setMaxLength(128);
+		this.triggeredBlockPositionOffsetXField.setText(Integer.toString(this.pvpControllerBlockEntity.getTriggeredBlock().getLeft().getX()));
+		this.addSelectableChild(this.triggeredBlockPositionOffsetXField);
+		this.triggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 115, 50, 20, Text.empty());
+		this.triggeredBlockPositionOffsetYField.setMaxLength(128);
+		this.triggeredBlockPositionOffsetYField.setText(Integer.toString(this.pvpControllerBlockEntity.getTriggeredBlock().getLeft().getY()));
+		this.addSelectableChild(this.triggeredBlockPositionOffsetYField);
+		this.triggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 115, 50, 20, Text.empty());
+		this.triggeredBlockPositionOffsetZField.setMaxLength(128);
+		this.triggeredBlockPositionOffsetZField.setText(Integer.toString(this.pvpControllerBlockEntity.getTriggeredBlock().getLeft().getZ()));
+		this.addSelectableChild(this.triggeredBlockPositionOffsetZField);
+		this.triggeredBlockResets = this.pvpControllerBlockEntity.getTriggeredBlock().getRight();
+		this.toggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 115, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+			this.triggeredBlockResets = triggeredBlockResets;
+		}));
+
 		// --- respawn positions page ---
 
 		this.removeRespawnPositionButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeSideEntrance(0)).dimensions(this.width / 2 + 104, 44, 50, 20).build());
@@ -182,6 +206,12 @@ public class PVPControllerBlockScreen extends Screen {
 
 		this.pvpArenaSettingsIdentifierField.setVisible(false);
 
+		this.triggeredBlockPositionOffsetXField.setVisible(false);
+		this.triggeredBlockPositionOffsetYField.setVisible(false);
+		this.triggeredBlockPositionOffsetZField.setVisible(false);
+
+		this.toggleTriggeredBlockResetsButton.visible = false;
+
 		this.removeRespawnPositionButton0.visible = false;
 		this.removeRespawnPositionButton1.visible = false;
 		this.removeRespawnPositionButton2.visible = false;
@@ -202,6 +232,12 @@ public class PVPControllerBlockScreen extends Screen {
 		if (this.screenPage == ScreenPage.SETTINGS_ID) {
 
 			this.pvpArenaSettingsIdentifierField.setVisible(true);
+
+			this.triggeredBlockPositionOffsetXField.setVisible(true);
+			this.triggeredBlockPositionOffsetYField.setVisible(true);
+			this.triggeredBlockPositionOffsetZField.setVisible(true);
+
+			this.toggleTriggeredBlockResetsButton.visible = true;
 
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 
@@ -236,6 +272,7 @@ public class PVPControllerBlockScreen extends Screen {
 	public void resize(MinecraftClient client, int width, int height) {
 		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> list = new ArrayList<>(this.respawnPositionsList);
 		ScreenPage var = this.screenPage;
+		boolean bl = this.triggeredBlockResets;
 		int number = this.scrollPosition;
 		float number1 = this.scrollAmount;
 		String string = this.pvpArenaSettingsIdentifierField.getText();
@@ -245,10 +282,14 @@ public class PVPControllerBlockScreen extends Screen {
 		String string8 = this.newRespawnOrientationYawField.getText();
 		String string9 = this.newRespawnOrientationPitchField.getText();
 		String string10 = this.newRespawnPositionNameField.getText();
+		String string11 = this.triggeredBlockPositionOffsetXField.getText();
+		String string12 = this.triggeredBlockPositionOffsetYField.getText();
+		String string13 = this.triggeredBlockPositionOffsetZField.getText();
 		this.init(client, width, height);
 		this.respawnPositionsList.clear();
 		this.respawnPositionsList.addAll(list);
 		this.screenPage = var;
+		this.triggeredBlockResets = bl;
 		this.scrollPosition = number;
 		this.scrollAmount = number1;
 		this.pvpArenaSettingsIdentifierField.setText(string);
@@ -258,6 +299,9 @@ public class PVPControllerBlockScreen extends Screen {
 		this.newRespawnOrientationYawField.setText(string8);
 		this.newRespawnOrientationPitchField.setText(string9);
 		this.newRespawnPositionNameField.setText(string10);
+		this.triggeredBlockPositionOffsetXField.setText(string11);
+		this.triggeredBlockPositionOffsetYField.setText(string12);
+		this.triggeredBlockPositionOffsetZField.setText(string13);
 		this.updateWidgets();
 	}
 
@@ -319,6 +363,11 @@ public class PVPControllerBlockScreen extends Screen {
 		if (this.screenPage == ScreenPage.SETTINGS_ID) {
 			context.drawTextWithShadow(this.textRenderer, PVP_ARENA_SETTINGS_ID_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 			this.pvpArenaSettingsIdentifierField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.respawnPositionsList.size()); i++) {
 				String text = this.respawnPositionsList.get(i).getLeft();
@@ -362,7 +411,13 @@ public class PVPControllerBlockScreen extends Screen {
 		ClientPlayNetworking.send(new UpdatePVPControllerBlockPacket(
 				this.pvpControllerBlockEntity.getPos(),
 				this.pvpArenaSettingsIdentifierField.getText(),
-				this.respawnPositionsList
+				this.respawnPositionsList,
+				new BlockPos(
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+				),
+				this.triggeredBlockResets
 		));
 		return true;
 	}

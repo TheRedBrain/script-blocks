@@ -13,7 +13,9 @@ import java.util.List;
 public record UpdatePVPControllerBlockPacket(
 		BlockPos pvpControllerBlockPosition,
 		String pvpArenaSettingsIdentifier,
-		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList
+		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList,
+		BlockPos triggeredBlockPositionOffset,
+		boolean triggeredBlockResets
 ) implements CustomPayload {
 	public static final Id<UpdatePVPControllerBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_pvp_controller_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdatePVPControllerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdatePVPControllerBlockPacket::write, UpdatePVPControllerBlockPacket::new);
@@ -22,7 +24,9 @@ public record UpdatePVPControllerBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
-				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE)
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean()
 		);
 	}
 
@@ -30,6 +34,8 @@ public record UpdatePVPControllerBlockPacket(
 		registryByteBuf.writeBlockPos(this.pvpControllerBlockPosition);
 		registryByteBuf.writeString(this.pvpArenaSettingsIdentifier);
 		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE);
+		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 	}
 
 	@Override
