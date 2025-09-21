@@ -17,6 +17,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class HousingBlockEntity extends RotatedBlockEntity {
 	private String ownerUuid = "";
@@ -151,11 +153,15 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 
 	public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity blockEntity) {
 		if (!world.isClient && world.getTime() % 20L == 0L) {
+			Team ownerTeam = null;
 			if (blockEntity.hasWorld() && !blockEntity.isOwnerSet && blockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
 				blockEntity.ownerUuid = initOwner(blockEntity.world);
 				if (UUIDUtilities.isStringValidUUID(blockEntity.ownerUuid)) {
-					ScriptBlocks.info(blockEntity.ownerUuid);
 					blockEntity.isOwnerSet = true;
+					PlayerEntity owner = world.getPlayerByUuid(UUID.fromString(blockEntity.ownerUuid));
+					if (owner != null) {
+						ownerTeam = owner.getScoreboardTeam();
+					}
 				}
 			}
 
@@ -182,7 +188,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 					playerEntity.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_CO_OWNER_EFFECT), 100, 0, true, false, false));
 				} else if (blockEntity.getTrustedList().contains(playerName)) {
 					playerEntity.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_TRUSTED_EFFECT), 100, 0, true, false, false));
-				} else if (blockEntity.getGuestList().contains(playerName)) {
+				} else if (blockEntity.getGuestList().contains(playerName) || (ownerTeam != null && ownerTeam.getPlayerList().contains(playerName))) {
 					playerEntity.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_GUEST_EFFECT), 100, 0, true, false, false));
 				} else {
 					playerEntity.addStatusEffect(new StatusEffectInstance(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.HOUSING_STRANGER_EFFECT), 100, 0, true, false, false));
