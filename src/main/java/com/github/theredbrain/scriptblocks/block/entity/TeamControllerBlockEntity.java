@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -241,15 +242,16 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 				if (teamControllerBlockEntity.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
 					BlockPos pvpControllerBlockPositionOffset = teamControllerBlockEntity.pvpControllerBlockPositionOffset;
 					pvpControllerBlockPos = teamControllerBlockEntity.pos.add(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
-					if (teamControllerBlockEntity.world.getBlockEntity(pvpControllerBlockPos) instanceof PVPControllerBlockEntity pvpControllerBlockEntity1) {
-						pvpControllerBlockEntity = pvpControllerBlockEntity1;
+					BlockEntity blockEntity = teamControllerBlockEntity.world.getBlockEntity(pvpControllerBlockPos);
+					if (blockEntity instanceof PVPControllerBlockEntity) {
+						pvpControllerBlockEntity = (PVPControllerBlockEntity) blockEntity;
 					}
 				}
 				List<LivingEntity> livingEntityList = world.getNonSpectatingEntities(LivingEntity.class, teamControllerBlockEntity.area);
 				for (LivingEntity livingEntity : livingEntityList) {
 					teamControllerBlockEntity.world.getScoreboard().addScoreHolderToTeam(livingEntity.getNameForScoreboard(), teamControllerBlockEntity.team);
 					if (livingEntity instanceof PlayerEntity playerEntity && pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
-						((DuckPlayerEntityMixin)playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
+						((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
 						pvpControllerBlockEntity.addPlayerAndTeam(teamControllerBlockEntity.team, playerEntity);
 					}
 				}

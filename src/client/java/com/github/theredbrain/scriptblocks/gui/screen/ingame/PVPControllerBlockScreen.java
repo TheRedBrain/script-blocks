@@ -32,6 +32,8 @@ import java.util.Optional;
 public class PVPControllerBlockScreen extends Screen {
 	private static final Text PVP_ARENA_SETTINGS_ID_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.pvp_arena_settings_id_label");
 	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_TEXT = Text.translatable("gui.pvp_controller_block.data_providing_block_position_offset");
+	private static final Text MATCH_DURATION_DATA_IDENTIFIER_TEXT = Text.translatable("gui.pvp_controller_block.match_duration_data_identifier");
 	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.remove_list_entry_button_label");
 	private static final Text NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_position_offset_label");
 	private static final Text NEW_RESPAWN_POSITION_NAME_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.new_respawn_position_name_label");
@@ -46,6 +48,10 @@ public class PVPControllerBlockScreen extends Screen {
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
 	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
+	private TextFieldWidget dataProvidingBlockPositionOffsetXField;
+	private TextFieldWidget dataProvidingBlockPositionOffsetYField;
+	private TextFieldWidget dataProvidingBlockPositionOffsetZField;
+	private TextFieldWidget matchDurationDataIdentifierField;
 
 	private ButtonWidget removeRespawnPositionButton0;
 	private ButtonWidget removeRespawnPositionButton1;
@@ -161,6 +167,28 @@ public class PVPControllerBlockScreen extends Screen {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
+		this.dataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 150, 50, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetXField.setMaxLength(128);
+		this.dataProvidingBlockPositionOffsetXField.setText(Integer.toString(this.pvpControllerBlockEntity.getDataProvidingBlockPosOffset().getX()));
+		this.addSelectableChild(this.dataProvidingBlockPositionOffsetXField);
+		this.dataProvidingBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 150, 50, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetYField.setMaxLength(128);
+		this.dataProvidingBlockPositionOffsetYField.setText(Integer.toString(this.pvpControllerBlockEntity.getDataProvidingBlockPosOffset().getY()));
+		this.addSelectableChild(this.dataProvidingBlockPositionOffsetYField);
+		this.dataProvidingBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 150, 50, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetZField.setMaxLength(128);
+		this.dataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.pvpControllerBlockEntity.getDataProvidingBlockPosOffset().getZ()));
+		this.addSelectableChild(this.dataProvidingBlockPositionOffsetZField);
+		this.dataProvidingBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 150, 50, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetZField.setMaxLength(128);
+		this.dataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.pvpControllerBlockEntity.getDataProvidingBlockPosOffset().getZ()));
+		this.addSelectableChild(this.dataProvidingBlockPositionOffsetZField);
+
+		this.matchDurationDataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 + 8, 150, 150, 20, Text.empty());
+		this.matchDurationDataIdentifierField.setMaxLength(128);
+		this.matchDurationDataIdentifierField.setText(this.pvpControllerBlockEntity.getMatchDurationDataIdentifier());
+		this.addSelectableChild(this.matchDurationDataIdentifierField);
+
 		// --- respawn positions page ---
 
 		this.removeRespawnPositionButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeSideEntrance(0)).dimensions(this.width / 2 + 104, 44, 50, 20).build());
@@ -212,6 +240,12 @@ public class PVPControllerBlockScreen extends Screen {
 
 		this.toggleTriggeredBlockResetsButton.visible = false;
 
+		this.dataProvidingBlockPositionOffsetXField.setVisible(false);
+		this.dataProvidingBlockPositionOffsetYField.setVisible(false);
+		this.dataProvidingBlockPositionOffsetZField.setVisible(false);
+
+		this.matchDurationDataIdentifierField.setVisible(false);
+
 		this.removeRespawnPositionButton0.visible = false;
 		this.removeRespawnPositionButton1.visible = false;
 		this.removeRespawnPositionButton2.visible = false;
@@ -238,6 +272,12 @@ public class PVPControllerBlockScreen extends Screen {
 			this.triggeredBlockPositionOffsetZField.setVisible(true);
 
 			this.toggleTriggeredBlockResetsButton.visible = true;
+
+			this.dataProvidingBlockPositionOffsetXField.setVisible(true);
+			this.dataProvidingBlockPositionOffsetYField.setVisible(true);
+			this.dataProvidingBlockPositionOffsetZField.setVisible(true);
+
+			this.matchDurationDataIdentifierField.setVisible(true);
 
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 
@@ -285,6 +325,10 @@ public class PVPControllerBlockScreen extends Screen {
 		String string11 = this.triggeredBlockPositionOffsetXField.getText();
 		String string12 = this.triggeredBlockPositionOffsetYField.getText();
 		String string13 = this.triggeredBlockPositionOffsetZField.getText();
+		String string14 = this.dataProvidingBlockPositionOffsetXField.getText();
+		String string15 = this.dataProvidingBlockPositionOffsetYField.getText();
+		String string16 = this.dataProvidingBlockPositionOffsetZField.getText();
+		String string17 = this.matchDurationDataIdentifierField.getText();
 		this.init(client, width, height);
 		this.respawnPositionsList.clear();
 		this.respawnPositionsList.addAll(list);
@@ -302,6 +346,10 @@ public class PVPControllerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.setText(string11);
 		this.triggeredBlockPositionOffsetYField.setText(string12);
 		this.triggeredBlockPositionOffsetZField.setText(string13);
+		this.dataProvidingBlockPositionOffsetXField.setText(string14);
+		this.dataProvidingBlockPositionOffsetYField.setText(string15);
+		this.dataProvidingBlockPositionOffsetZField.setText(string16);
+		this.matchDurationDataIdentifierField.setText(string17);
 		this.updateWidgets();
 	}
 
@@ -368,6 +416,14 @@ public class PVPControllerBlockScreen extends Screen {
 			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
+			this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, MATCH_DURATION_DATA_IDENTIFIER_TEXT, this.width / 2 + 9, 140, 0xA0A0A0);
+			this.matchDurationDataIdentifierField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.respawnPositionsList.size()); i++) {
 				String text = this.respawnPositionsList.get(i).getLeft();
@@ -377,9 +433,9 @@ public class PVPControllerBlockScreen extends Screen {
 				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.respawnPositionsList.size() > 3) {
-                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
 				int k = (int) (61.0f * this.scrollAmount);
-                context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+				context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
 			context.drawTextWithShadow(this.textRenderer, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
 			this.newRespawnPositionOffsetXField.render(context, mouseX, mouseY, delta);
@@ -417,7 +473,13 @@ public class PVPControllerBlockScreen extends Screen {
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
 				),
-				this.triggeredBlockResets
+				this.triggeredBlockResets,
+				new BlockPos(
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getText())
+				),
+				this.matchDurationDataIdentifierField.getText()
 		));
 		return true;
 	}

@@ -1,33 +1,40 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.PVPArenaSettings;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.DamageTypesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,10 +48,16 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 
 	private String pvpArenaSettingsIdentifier = "";
 	private HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions = new HashMap<>(Map.of());
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
 
 	private Set<String> teamSet = new HashSet<>();
 	private Set<UUID> playerUUIDSet = new HashSet<>();
+
+	private boolean matchIsActive = false;
+	private String matchDurationDataIdentifier = "";
+	private int matchDuration = 0;
+	private int matchTicker = 0;
 
 	public PVPControllerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.PVP_CONTROLLER_BLOCK_ENTITY, pos, state);
@@ -77,6 +90,16 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
+		nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
+		nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
+		nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
+
+		if (!this.matchDurationDataIdentifier.isEmpty()) {
+			nbt.putString("matchDurationDataIdentifier", this.matchDurationDataIdentifier);
+		} else {
+			nbt.remove("matchDurationDataIdentifier");
+		}
+
 		super.writeNbt(nbt, registryLookup);
 	}
 
@@ -106,6 +129,18 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
 		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
+		this.dataProvidingBlockPosOffset = new BlockPos(
+				MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
+				MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
+				MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
+		);
+
+		if (nbt.contains("matchDurationDataIdentifier")) {
+			this.matchDurationDataIdentifier = nbt.getString("matchDurationDataIdentifier");
+		} else {
+			this.matchDurationDataIdentifier = "";
+		}
+
 		super.readNbt(nbt, registryLookup);
 	}
 
@@ -119,7 +154,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	}
 
 	public String getPVPArenaSettingsIdentifier() {
-		return pvpArenaSettingsIdentifier;
+		return this.pvpArenaSettingsIdentifier;
 	}
 
 	public boolean setPVPArenaSettingsIdentifier(String newPVPArenaSettingsIdentifier) {
@@ -136,6 +171,39 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			return true;
 		}
 		return false;
+	}
+
+	public HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> getRespawnPositions() {
+		return respawnPositions;
+	}
+
+	public void setRespawnPositions(HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions) {
+		this.respawnPositions.clear();
+		this.respawnPositions.putAll(respawnPositions);
+	}
+
+	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
+		return this.triggeredBlock;
+	}
+
+	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
+		this.triggeredBlock = triggeredBlock;
+	}
+
+	public BlockPos getDataProvidingBlockPosOffset() {
+		return this.dataProvidingBlockPosOffset;
+	}
+
+	public void setDataProvidingBlockPosOffset(BlockPos firstDataProvidingBlockPosOffset) {
+		this.dataProvidingBlockPosOffset = firstDataProvidingBlockPosOffset;
+	}
+
+	public String getMatchDurationDataIdentifier() {
+		return this.matchDurationDataIdentifier;
+	}
+
+	public void setMatchDurationDataIdentifier(String matchDurationDataIdentifier) {
+		this.matchDurationDataIdentifier = matchDurationDataIdentifier;
 	}
 
 	@Nullable
@@ -167,70 +235,92 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 
 	public void removePlayer(PlayerEntity playerEntity) {
 		this.playerUUIDSet.remove(playerEntity.getUuid());
-		this.removeEmptyTeams();
 	}
 
-	public void removeEmptyTeams() {
-		if (this.world != null) {
-			Iterator<String> iterator = this.teamSet.stream().iterator();
-			Scoreboard scoreboard = this.world.getScoreboard();
-			// new list
-			Team team;
-			int activeTeamCounter = 0;
-			while (iterator.hasNext()) {
-				team = scoreboard.getTeam(iterator.next());
+	public void initMatchDuration() {
+		if (this.world != null && !this.world.isClient()) {
+			if (this.dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
+				BlockPos firstDataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
 
-				if (team != null) {
-					if (team.getPlayerList().isEmpty()) {
-						this.teamSet.remove(team.getName());
-					} else {
-						activeTeamCounter++;
+				if (world.getBlockEntity(firstDataProviderBlockPos) instanceof ProvidesData providesDataEntity) {
+					this.matchDuration = ItemUtils.parseInt(providesDataEntity.getData(this.matchDurationDataIdentifier));
+					return;
+				}
+			}
+		}
+		this.matchDuration = 0;
+	}
+
+	public void startMatch() {
+		this.initMatchDuration();
+		this.matchIsActive = true;
+	}
+
+	public void endMatch(boolean forceEnd) {
+		if (this.world != null) {
+			if (!forceEnd) {
+				BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+				if (blockEntity != this) {
+					boolean triggeredBlockResets = this.triggeredBlock.getRight();
+					if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+						resetable.reset();
+					} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+						triggerable.trigger();
 					}
 				}
 			}
-			if (activeTeamCounter <= 1) {
-				this.onMatchEnd();
-			}
-		}
-	}
 
-	public HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> getRespawnPositions() {
-		return respawnPositions;
-	}
+			Registry<DamageType> registry = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE);
 
-	public void setRespawnPositions(HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions) {
-		this.respawnPositions.clear();
-		this.respawnPositions.putAll(respawnPositions);
-	}
+			DamageSource damageSource = new DamageSource(registry.entryOf(DamageTypesRegistry.PVP_WINNING_DAMAGE_TYPE));
 
-	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
-		return this.triggeredBlock;
-	}
+			Iterator<UUID> iterator = this.playerUUIDSet.stream().iterator();
+			while (iterator.hasNext()) {
+				PlayerEntity playerEntity = world.getPlayerByUuid(iterator.next());
 
-	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
-		this.triggeredBlock = triggeredBlock;
-	}
+				if (playerEntity != null) {
 
-	public void onMatchEnd() {
-		if (this.world != null) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
-			if (blockEntity != this) {
-				boolean triggeredBlockResets = this.triggeredBlock.getRight();
-				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
-					resetable.reset();
-				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
-					triggerable.trigger();
+					playerEntity.damage(damageSource, 2048.0F);
+					if (!forceEnd && this.world instanceof ServerWorld serverWorld) {
+						serverWorld.getServer().getPlayerManager().broadcast(Text.translatable("hud.message.pvp_controller_block.player_won_match", playerEntity.getDisplayName()), false);
+					}
 				}
 			}
 		}
+		this.matchTicker = 0;
+		this.matchIsActive = false;
 	}
 
-	@Override
-	public void trigger() {
-		removeEmptyTeams();
-		// TODO show scoreboard of teams in pvpArenaSettingsIdentifier with pvp deaths, kills, ctf points
-//		if (this.world != null) {
-//
+	public static void tick(World world, BlockPos pos, BlockState state, PVPControllerBlockEntity pvpControllerBlockEntity) {
+		if (!world.isClient && pvpControllerBlockEntity.matchIsActive) {
+			pvpControllerBlockEntity.matchTicker++;
+
+			if (pvpControllerBlockEntity.matchTicker > pvpControllerBlockEntity.matchDuration) {
+				pvpControllerBlockEntity.endMatch(false);
+			}
+
+			if (pvpControllerBlockEntity.matchTicker % 20 == 0) {
+				Iterator<String> iterator = pvpControllerBlockEntity.teamSet.stream().iterator();
+				Scoreboard scoreboard = world.getScoreboard();
+				// new list
+				Team team;
+				int activeTeamCounter = 0;
+				while (iterator.hasNext()) {
+					team = scoreboard.getTeam(iterator.next());
+
+					if (team != null) {
+						if (team.getPlayerList().isEmpty()) {
+							pvpControllerBlockEntity.teamSet.remove(team.getName());
+						} else {
+							activeTeamCounter++;
+						}
+					}
+				}
+				if (activeTeamCounter <= 1) {
+					pvpControllerBlockEntity.endMatch(false);
+				}
+
+				// TODO show scoreboard of teams in pvpArenaSettingsIdentifier with pvp deaths, kills, ctf points
 //			PVPArenaSettings pvpArenaSettings = null;
 //			Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
 //			if (identifier != null) {
@@ -245,12 +335,22 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 //					scoreboard.
 //				}
 //			}
+			}
+		}
+	}
+
+	@Override
+	public void trigger() {
+		this.startMatch();
+//		if (this.world != null) {
+//
 //		}
 	}
 
 	@Override
 	public void reset() {
 		// TODO no longer show scoreboard
+		this.endMatch(true);
 		this.teamSet.clear();
 		this.playerUUIDSet.clear();
 	}

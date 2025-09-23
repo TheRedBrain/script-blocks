@@ -35,21 +35,33 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 		}
 
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
-
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
+		BlockPos dataProvidingBlockPositionOffset = payload.dataProvidingBlockPositionOffset();
+
+		String matchDurationDataIdentifier = payload.matchDurationDataIdentifier();
+
 		World world = serverPlayerEntity.getWorld();
+
+		boolean updateSuccessful = true;
 
 		BlockEntity blockEntity = world.getBlockEntity(pvpControllerBlockPosition);
 		BlockState blockState = world.getBlockState(pvpControllerBlockPosition);
 
 		if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 			pvpControllerBlockEntity.reset();
-			pvpControllerBlockEntity.setPVPArenaSettingsIdentifier(pvpArenaSettingsIdentifier);
+			if (!pvpControllerBlockEntity.setPVPArenaSettingsIdentifier(pvpArenaSettingsIdentifier)) {
+				serverPlayerEntity.sendMessage(Text.translatable("pvp_controller_block.pvpArenaSettingsIdentifier.invalid"), false);
+				updateSuccessful = false;
+			}
 			pvpControllerBlockEntity.setRespawnPositions(sideEntrances);
 			pvpControllerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			pvpControllerBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPositionOffset);
+			pvpControllerBlockEntity.setMatchDurationDataIdentifier(matchDurationDataIdentifier);
 
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			if (updateSuccessful) {
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			}
 			pvpControllerBlockEntity.markDirty();
 			world.updateListeners(pvpControllerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

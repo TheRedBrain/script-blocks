@@ -306,6 +306,8 @@
 	"gui.pvp_controller_block.new_respawn_position_offset_label": "Position Offset",
 	"gui.pvp_controller_block.new_respawn_position_name_label": "Name",
 	"gui.pvp_controller_block.new_respawn_orientation_label": "Orientation",
+	"gui.pvp_controller_block.data_providing_block_position_offset": "Data Providing Block Offset",
+	"gui.pvp_controller_block.match_duration_data_identifier": "Match Duration Data Identifier",
 
 	"gui.pvp_controller_block.screenPage.settings_id": "Settings Identifier",
 	"gui.pvp_controller_block.screenPage.respawn_positions": "Respawn Positions",
@@ -757,6 +759,7 @@
 	"hud.message.housing_block.unclaimed_successful": "House unclaimed successfully",
 	"hud.message.housing_block.claimed_successful": "House claimed successfully",
 
+	"hud.message.pvp_controller_block.player_won_match": "%s won a PVP match!",
 
 	"item.scriptblocks.block_position_distance_meter": "Block Position Distance Meter",
 

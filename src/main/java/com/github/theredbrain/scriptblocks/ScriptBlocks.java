@@ -88,7 +88,6 @@ public class ScriptBlocks implements ModInitializer {
 				if (teamRespawnPos != null) {
 					if (endOfBattle) {
 						pvpControllerBlockEntity.removePlayer(serverPlayerEntity);
-						pvpControllerBlockEntity.removeEmptyTeams();
 					}
 					return new MutablePair<>(
 							serverWorld.getRegistryKey(),
