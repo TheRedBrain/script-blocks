@@ -49,7 +49,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private Vec3i activationAreaDimensions = Vec3i.ZERO;
 	private BlockPos activationAreaPositionOffset = new BlockPos(0, 1, 0);
 
-	private boolean triggerActivation = true;
+	private boolean triggerActivation = false;
 
 	private BlockPos accessPositionOffset = new BlockPos(0, 0, 0);
 	private boolean setAccessPosition = false;
