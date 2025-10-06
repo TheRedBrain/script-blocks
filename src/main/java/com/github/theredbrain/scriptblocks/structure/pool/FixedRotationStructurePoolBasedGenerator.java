@@ -67,16 +67,16 @@ public class FixedRotationStructurePoolBasedGenerator extends StructurePoolBased
 			StructurePoolAliasLookup aliasLookup,
 			DimensionPadding dimensionPadding,
 			StructureLiquidSettings liquidSettings,
-			BlockRotation blockRotation
+			BlockRotation blockRotation,
+			Random random
 	) {
 		DynamicRegistryManager dynamicRegistryManager = context.dynamicRegistryManager();
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		StructureTemplateManager structureTemplateManager = context.structureTemplateManager();
 		HeightLimitView heightLimitView = context.world();
 		ChunkRandom chunkRandom = context.random(); // generates always same jigsaw combination in the same chunk/position
-		chunkRandom.setSeed(Random.create().nextLong()); // this randomizes the jigsaw generation even in the same chunk/position
+		chunkRandom.setSeed(random.nextLong()); // this randomizes the jigsaw generation even in the same chunk/position
 		Registry<StructurePool> registry = dynamicRegistryManager.get(RegistryKeys.TEMPLATE_POOL);
-//		BlockRotation blockRotation = BlockRotation.random(chunkRandom);
 		StructurePool structurePool2 = (StructurePool) structurePool.getKey()
 				.flatMap(key -> registry.getOrEmpty(aliasLookup.lookup(key)))
 				.orElse(structurePool.value());
@@ -223,7 +223,7 @@ public class FixedRotationStructurePoolBasedGenerator extends StructurePoolBased
 		ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
 		StructureTemplateManager structureTemplateManager = world.getStructureTemplateManager();
 		StructureAccessor structureAccessor = world.getStructureAccessor();
-		Random random = world.getRandom();
+		Random random = Random.create();
 		Structure.Context context = new Structure.Context(
 				world.getRegistryManager(),
 				chunkGenerator,
@@ -247,7 +247,8 @@ public class FixedRotationStructurePoolBasedGenerator extends StructurePoolBased
 				StructurePoolAliasLookup.EMPTY,
 				JigsawStructure.DEFAULT_DIMENSION_PADDING,
 				JigsawStructure.DEFAULT_LIQUID_SETTINGS,
-				blockRotation
+				blockRotation,
+				random
 		);
 		if (optional.isPresent()) {
 			StructurePiecesCollector structurePiecesCollector = ((Structure.StructurePosition) optional.get()).generate();
