@@ -8,7 +8,6 @@
     "item.ItemStackMixin",
     "server.network.ServerPlayerEntityMixin",
     "server.network.ServerPlayerInteractionManagerMixin",
-    "structure.pool.StructurePoolBasedGeneratorMixin",
     "world.WorldMixin"
   ],
   "injectors": {

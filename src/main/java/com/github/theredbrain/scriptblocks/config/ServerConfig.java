@@ -31,10 +31,6 @@ public class ServerConfig extends Config {
 	public List<Integer> worldSpawnXList = new ArrayList<>();
 	public List<Integer> worldSpawnYList = new ArrayList<>();
 	public List<Integer> worldSpawnZList = new ArrayList<>();
-	@Comment("Set to 'true' for the vanilla behaviour")
-	public boolean shouldJigSawGenerationBeDeterministic = true;
-	@Comment("Set to 'true' for the vanilla behaviour")
-	public boolean shouldJigSawStructuresBeRandomlyRotated = true;
 
 	@Comment("Enables 'Player Detector Block' to detect creative mode players.")
 	public boolean enable_creative_player_detection = false;
