@@ -15,13 +15,12 @@ public class ServerConfig extends Config {
 		super(ScriptBlocks.identifier("server"));
 	}
 
+	public boolean enable_public_locations_dimension = true;
 	@Comment("""
 			World Spawn is chosen randomly from the following lists.
 			It is recommended to set the gamerule 'spawnRadius' to 0.
 			""")
-	// TODO define a location entrance, where the world spawn should be
 	public boolean use_predefined_position_for_world_spawn = false;
-	public boolean enable_public_locations_dimension = true;
 	@Comment("""
 			A random value from worldSpawnXList is chosen.
 			If worldSpawnYList and worldSpawnZList have an entry
@@ -31,6 +30,13 @@ public class ServerConfig extends Config {
 	public List<Integer> worldSpawnXList = new ArrayList<>();
 	public List<Integer> worldSpawnYList = new ArrayList<>();
 	public List<Integer> worldSpawnZList = new ArrayList<>();
+	@Comment("""
+			World Spawn is chosen randomly from the following lists.
+			It is recommended to set the gamerule 'spawnRadius' to 0.
+			""")
+	public boolean use_location_entrance_for_world_spawn = false;
+	public String world_spawn_location_identifier = "";
+	public String world_spawn_entrance_identifier = "";
 
 	@Comment("Enables 'Player Detector Block' to detect creative mode players.")
 	public boolean enable_creative_player_detection = false;
