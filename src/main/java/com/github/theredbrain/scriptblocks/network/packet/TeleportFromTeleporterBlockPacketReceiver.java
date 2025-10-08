@@ -19,6 +19,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -33,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportFromTeleporterBlockPacket> {
@@ -285,7 +287,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			TagKey<StatusEffect> tag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToDecrementLevelOnTeleport));
 			serverPlayerEntity.fallDistance = 0;
-			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
+			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
 				if (!targetLocationIsPublic) {
@@ -293,6 +295,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 				}
 			}
 			serverPlayerEntity.closeHandledScreen();
+
+			// TODO rework
 			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 				if (statusEffectInstance != null) {
 					RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
@@ -317,14 +321,16 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
 						if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 							teamServerPlayerEntity.fallDistance = 0;
-							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
+							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
 							if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 								DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, teamServerPlayerEntity);
-								if (targetLocationIsPublic) {
+								if (!targetLocationIsPublic) {
 									DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, teamServerPlayerEntity);
 								}
 							}
 							serverPlayerEntity.closeHandledScreen();
+
+							// TODO rework
 							for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
 								if (statusEffectInstance != null) {
 									RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
