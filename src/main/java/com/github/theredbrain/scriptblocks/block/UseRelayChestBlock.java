@@ -48,7 +48,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 	public static final BooleanProperty OPEN = Properties.OPEN;
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	@Nullable
-	private final TagKey<Item> requiredKeys;
+	private final TagKey<Item> requiredKeys; // TODO refactor into block entity data
 	protected static final VoxelShape CLOSED_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
 	protected static final VoxelShape OPENED_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 10.0, 15.0);
 

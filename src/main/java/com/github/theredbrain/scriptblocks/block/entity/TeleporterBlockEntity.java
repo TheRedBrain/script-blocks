@@ -55,6 +55,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private boolean setAccessPosition = false;
 
 	private String statusEffectsToDecrementLevelOnTeleport = "";
+//	private String statusEffectsToRemoveOnTeleport = ""; // TODO
 
 	private boolean onlyTeleportDimensionOwner = false;
 	private boolean teleportTeam = false;
