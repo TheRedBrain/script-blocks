@@ -1,3 +1,37 @@
+# 0.0.6
+
+## Additions
+
+- added Use Relay Lectern Block, another variant of the Use Relay Block
+- added Area Filler Block, when triggered fills a configurable area with a configurable block
+- added option to Teleporter Block to not teleport on tick, but when triggered
+- added option to Triggered Beacon Block to set applied effect duration
+- added Team Controller Block, creates configured team on trigger and adds entities in configured area to that team
+- added PVP Controller Block, controls player respawning during pvp battles, designed to work with RPG Inventory's "PVP Death" system
+- added data-driven 'PVP Arena Settings', used by the PVP Controller Block
+- added Triggered Damage Dealing Block, dealing configurable damage in a configurable area when triggered
+- added server config option to set world spawn to location entrance (note that the sky access requirement for the world spawn is still active)
+
+## Changes
+
+- several data-driven features were restructured, see the test data for examples
+  - the display order of location (entrance) names is now configurable
+  - in addition to advancements, data (using Data Blocks) can now be used to (un)lock locations and dialogue answers
+- the force-loaded chunk area on location reset is now configurable in the LocationControllerBlock
+- overhauled the dialogue screen, allowing for greater customization by dialogues
+- the custom data location was moved from the "namespace/scriptblocks" to the "namespace" directory
+- visible, locked dialogue answer buttons are now inactive
+- "direct" teleport with Teleporter Block now works with Entrance Delegation Block
+- removed the "shouldJigSawGenerationBeDeterministic" and "shouldJigSawStructuresBeRandomlyRotated" server config options, as they are no longer needed
+
+## Fixes
+
+- Jigsaw Placer Block no longer crashes the game when the specified template pool is not found
+- updating script blocks now properly resets them
+- structures placed by the JigsawPlacer block are now properly randomized
+- horizontal facing JigsawPlacer blocks now place the structure correctly (having proper test structures helps a lot)
+- fixed WorldLoadingScreen not showing when teleporting with Teleporter
+
 # 0.0.5
 
 - data-driven features refactor, items are now defined as itemStacks in the known format
