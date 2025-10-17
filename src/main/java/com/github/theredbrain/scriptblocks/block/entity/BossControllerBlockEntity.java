@@ -157,9 +157,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaPositionOffsetZ");
 		}
 
-		nbt.putInt("noPlayersAroundTriggeredBlockBlockPositionOffsetX", this.noPlayersAroundTriggeredBlock.getLeft().getX());
-		nbt.putInt("noPlayersAroundTriggeredBlockBlockPositionOffsetY", this.noPlayersAroundTriggeredBlock.getLeft().getY());
-		nbt.putInt("noPlayersAroundTriggeredBlockBlockPositionOffsetZ", this.noPlayersAroundTriggeredBlock.getLeft().getZ());
+		nbt.putInt("noPlayersAroundTriggeredBlockPositionOffsetX", this.noPlayersAroundTriggeredBlock.getLeft().getX());
+		nbt.putInt("noPlayersAroundTriggeredBlockPositionOffsetY", this.noPlayersAroundTriggeredBlock.getLeft().getY());
+		nbt.putInt("noPlayersAroundTriggeredBlockPositionOffsetZ", this.noPlayersAroundTriggeredBlock.getLeft().getZ());
 		nbt.putBoolean("noPlayersAroundTriggeredBlockResets", this.noPlayersAroundTriggeredBlock.getRight());
 
 		if (this.bossIdentifier != null) {
@@ -254,9 +254,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			this.areaPositionOffset = POSITION_OFFSET_DEFAULT;
 		}
 
-		int x = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockBlockPositionOffsetZ"), -48, 48);
+		int x = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetX"), -48, 48);
+		int y = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetY"), -48, 48);
+		int z = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetZ"), -48, 48);
 		this.noPlayersAroundTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("noPlayersAroundTriggeredBlockResets"));
 
 		if (nbt.contains("bossIdentifier", NbtElement.STRING_TYPE)) {

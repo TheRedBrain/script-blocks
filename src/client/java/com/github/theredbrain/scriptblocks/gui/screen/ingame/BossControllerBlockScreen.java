@@ -30,17 +30,18 @@ import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class BossControllerBlockScreen extends Screen {
-	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.area_block.hide_area_label");
-	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.area_block.show_area_label");
-	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.area_block.area_dimensions_label");
-	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.area_block.area_position_offset_label");
+	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.boss_controller_block.hide_area_label");
+	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.boss_controller_block.show_area_label");
+	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.boss_controller_block.area_dimensions_label");
+	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.boss_controller_block.area_position_offset_label");
+	private static final Text NO_PLAYERS_AROUND_TRIGGERED_BLOCK_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.boss_controller_block.no_players_around_triggered_block_position_offset_label");
 	private static final Text ADD_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Text REMOVE_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
 	private static final Text ENTRY_ALREADY_IN_LIST_TEXT = Text.translatable("gui.dialogue_block.entry_already_in_list");
 	private static final Text BOSS_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.boss_controller_block.boss_identifier_label");
-	private static final Text ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_position_offset_label");
-	private static final Text ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_pitch_label");
-	private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_yaw_label");
+	private static final Text ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.boss_controller_block.entity_spawn_position_offset_label");
+	private static final Text ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT = Text.translatable("gui.boss_controller_block.entity_spawn_orientation_pitch_label");
+	private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.boss_controller_block.entity_spawn_orientation_yaw_label");
 
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_96");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
@@ -57,6 +58,12 @@ public class BossControllerBlockScreen extends Screen {
 	private TextFieldWidget areaPositionOffsetYField;
 	private TextFieldWidget areaPositionOffsetZField;
 	private boolean showArea;
+
+	private TextFieldWidget noPlayersAroundTriggeredBlockPositionOffsetXField;
+	private TextFieldWidget noPlayersAroundTriggeredBlockPositionOffsetYField;
+	private TextFieldWidget noPlayersAroundTriggeredBlockPositionOffsetZField;
+	private boolean noPlayersAroundTriggeredBlockResets;
+	private CyclingButtonWidget<Boolean> toggleNoPlayersAroundTriggeredBlockResetsButton;
 
 	private TextFieldWidget bossIdentifierField;
 	private TextFieldWidget entitySpawnPositionOffsetXField;
@@ -191,6 +198,27 @@ public class BossControllerBlockScreen extends Screen {
 		this.areaPositionOffsetZField.setText(Integer.toString(this.bossControllerBlock.getAreaPositionOffset().getZ()));
 		this.addSelectableChild(this.areaPositionOffsetZField);
 
+		MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = this.bossControllerBlock.getNoPlayersAroundTriggeredBlock();
+		this.noPlayersAroundTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 159, 50, 20, Text.empty());
+		this.noPlayersAroundTriggeredBlockPositionOffsetXField.setMaxLength(128);
+		this.noPlayersAroundTriggeredBlockPositionOffsetXField.setText(Integer.toString(noPlayersAroundTriggeredBlock.getLeft().getX()));
+		this.addSelectableChild(this.noPlayersAroundTriggeredBlockPositionOffsetXField);
+
+		this.noPlayersAroundTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 159, 50, 20, Text.empty());
+		this.noPlayersAroundTriggeredBlockPositionOffsetYField.setMaxLength(128);
+		this.noPlayersAroundTriggeredBlockPositionOffsetYField.setText(Integer.toString(noPlayersAroundTriggeredBlock.getLeft().getY()));
+		this.addSelectableChild(this.noPlayersAroundTriggeredBlockPositionOffsetYField);
+
+		this.noPlayersAroundTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 159, 50, 20, Text.empty());
+		this.noPlayersAroundTriggeredBlockPositionOffsetZField.setMaxLength(128);
+		this.noPlayersAroundTriggeredBlockPositionOffsetZField.setText(Integer.toString(noPlayersAroundTriggeredBlock.getLeft().getZ()));
+		this.addSelectableChild(this.noPlayersAroundTriggeredBlockPositionOffsetZField);
+
+		this.noPlayersAroundTriggeredBlockResets = noPlayersAroundTriggeredBlock.getRight();
+		this.toggleNoPlayersAroundTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.noPlayersAroundTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 159, 150, 20, Text.empty(), (button, noPlayersAroundTriggeredBlockResets) -> {
+			this.noPlayersAroundTriggeredBlockResets = noPlayersAroundTriggeredBlockResets;
+		}));
+
 		// --- spawning position page ---
 
 		this.bossIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
@@ -263,6 +291,11 @@ public class BossControllerBlockScreen extends Screen {
 		this.areaPositionOffsetYField.visible = false;
 		this.areaPositionOffsetZField.visible = false;
 
+		this.noPlayersAroundTriggeredBlockPositionOffsetXField.setVisible(false);
+		this.noPlayersAroundTriggeredBlockPositionOffsetYField.setVisible(false);
+		this.noPlayersAroundTriggeredBlockPositionOffsetZField.setVisible(false);
+		this.toggleNoPlayersAroundTriggeredBlockResetsButton.visible = false;
+
 
 		this.bossIdentifierField.setVisible(false);
 		this.entitySpawnPositionOffsetXField.setVisible(false);
@@ -299,6 +332,12 @@ public class BossControllerBlockScreen extends Screen {
 			this.areaPositionOffsetXField.visible = true;
 			this.areaPositionOffsetYField.visible = true;
 			this.areaPositionOffsetZField.visible = true;
+
+			this.noPlayersAroundTriggeredBlockPositionOffsetXField.setVisible(true);
+			this.noPlayersAroundTriggeredBlockPositionOffsetYField.setVisible(true);
+			this.noPlayersAroundTriggeredBlockPositionOffsetZField.setVisible(true);
+			this.toggleNoPlayersAroundTriggeredBlockResetsButton.visible = true;
+
 
 		} else if (this.screenPage == ScreenPage.BOSS_TRIGGERED_BLOCKS) {
 
@@ -368,6 +407,11 @@ public class BossControllerBlockScreen extends Screen {
 		String string14 = this.newBossTriggeredBlockPositionOffsetYField.getText();
 		String string15 = this.newBossTriggeredBlockPositionOffsetZField.getText();
 
+		String string16 = this.noPlayersAroundTriggeredBlockPositionOffsetXField.getText();
+		String string17 = this.noPlayersAroundTriggeredBlockPositionOffsetYField.getText();
+		String string18 = this.noPlayersAroundTriggeredBlockPositionOffsetZField.getText();
+		boolean bool = this.noPlayersAroundTriggeredBlockResets;
+
 		this.init(client, width, height);
 
 		this.bossTriggeredBlocksList.clear();
@@ -394,6 +438,11 @@ public class BossControllerBlockScreen extends Screen {
 		this.newBossTriggeredBlockPositionOffsetXField.setText(string13);
 		this.newBossTriggeredBlockPositionOffsetYField.setText(string14);
 		this.newBossTriggeredBlockPositionOffsetZField.setText(string15);
+
+		this.noPlayersAroundTriggeredBlockPositionOffsetXField.setText(string16);
+		this.noPlayersAroundTriggeredBlockPositionOffsetYField.setText(string17);
+		this.noPlayersAroundTriggeredBlockPositionOffsetZField.setText(string18);
+		this.noPlayersAroundTriggeredBlockResets = bool;
 
 		this.updateWidgets();
 	}
@@ -452,6 +501,10 @@ public class BossControllerBlockScreen extends Screen {
 			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, NO_PLAYERS_AROUND_TRIGGERED_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
+			this.noPlayersAroundTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.noPlayersAroundTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.noPlayersAroundTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.SPAWN_POSITION) {
 			context.drawTextWithShadow(this.textRenderer, BOSS_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.bossIdentifierField.render(context, mouseX, mouseY, delta);
@@ -498,6 +551,12 @@ public class BossControllerBlockScreen extends Screen {
 						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
 						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
 				),
+				new BlockPos(
+						ItemUtils.parseInt(this.noPlayersAroundTriggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.noPlayersAroundTriggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.noPlayersAroundTriggeredBlockPositionOffsetZField.getText())
+				),
+				this.noPlayersAroundTriggeredBlockResets,
 				this.bossIdentifierField.getText(),
 				new BlockPos(
 						ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getText()),

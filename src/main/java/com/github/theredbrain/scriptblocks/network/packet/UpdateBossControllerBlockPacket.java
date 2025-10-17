@@ -16,6 +16,8 @@ public record UpdateBossControllerBlockPacket(
 		boolean showArea,
 		Vec3i applicationAreaDimensions,
 		BlockPos applicationAreaPositionOffset,
+		BlockPos noPlayersAroundTriggeredBlockPositionOffset,
+		boolean noPlayersAroundTriggeredBlockResets,
 		String bossIdentifier,
 		BlockPos entitySpawnPositionOffset,
 		double entitySpawnOrientationPitch,
@@ -35,6 +37,8 @@ public record UpdateBossControllerBlockPacket(
 						registryByteBuf.readInt()
 				),
 				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
@@ -51,6 +55,9 @@ public record UpdateBossControllerBlockPacket(
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getY());
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.applicationAreaPositionOffset);
+
+		registryByteBuf.writeBlockPos(this.noPlayersAroundTriggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.noPlayersAroundTriggeredBlockResets);
 
 		registryByteBuf.writeString(this.bossIdentifier);
 		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);

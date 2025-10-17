@@ -32,6 +32,9 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 		Vec3i areaDimensions = payload.applicationAreaDimensions();
 		BlockPos areaPositionOffset = payload.applicationAreaPositionOffset();
 
+		BlockPos noPlayersAroundTriggeredBlockPositionOffset = payload.noPlayersAroundTriggeredBlockPositionOffset();
+		boolean noPlayersAroundTriggeredBlockResets = payload.noPlayersAroundTriggeredBlockResets();
+
 		String bossIdentifier = payload.bossIdentifier();
 		BlockPos entitySpawnPositionOffset = payload.entitySpawnPositionOffset();
 		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
@@ -61,6 +64,7 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
+			bossControllerBlockEntity.setNoPlayersAroundTriggeredBlock(new MutablePair<>(noPlayersAroundTriggeredBlockPositionOffset, noPlayersAroundTriggeredBlockResets));
 			bossControllerBlockEntity.setBossIdentifier(bossIdentifier);
 			if (!bossControllerBlockEntity.setBossSpawnPositionOffset(entitySpawnPositionOffset)) {
 				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
