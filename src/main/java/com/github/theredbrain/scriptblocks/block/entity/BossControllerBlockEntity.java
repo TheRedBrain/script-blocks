@@ -5,7 +5,6 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
-import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
@@ -81,6 +80,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = POSITION_OFFSET_DEFAULT;
 
+	MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+
 	private String bossIdentifier = "";
 
 	private BlockPos bossSpawnPositionOffset = POSITION_OFFSET_DEFAULT;
@@ -155,6 +156,11 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaPositionOffsetY");
 			nbt.remove("areaPositionOffsetZ");
 		}
+
+		nbt.putInt("noPlayersAroundTriggeredBlockBlockPositionOffsetX", this.noPlayersAroundTriggeredBlock.getLeft().getX());
+		nbt.putInt("noPlayersAroundTriggeredBlockBlockPositionOffsetY", this.noPlayersAroundTriggeredBlock.getLeft().getY());
+		nbt.putInt("noPlayersAroundTriggeredBlockBlockPositionOffsetZ", this.noPlayersAroundTriggeredBlock.getLeft().getZ());
+		nbt.putBoolean("noPlayersAroundTriggeredBlockResets", this.noPlayersAroundTriggeredBlock.getRight());
 
 		if (this.bossIdentifier != null) {
 			nbt.putString("bossIdentifier", this.bossIdentifier);
@@ -248,6 +254,11 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			this.areaPositionOffset = POSITION_OFFSET_DEFAULT;
 		}
 
+		int x = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockBlockPositionOffsetX"), -48, 48);
+		int y = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockBlockPositionOffsetY"), -48, 48);
+		int z = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockBlockPositionOffsetZ"), -48, 48);
+		this.noPlayersAroundTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("noPlayersAroundTriggeredBlockResets"));
+
 		if (nbt.contains("bossIdentifier", NbtElement.STRING_TYPE)) {
 			this.bossIdentifier = nbt.getString("bossIdentifier");
 		} else {
@@ -311,6 +322,18 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				advancePhase(bC);
 			} else if (phaseTimerThreshold > -1 && bC.phaseTimer >= phaseTimerThreshold) {
 				advancePhase(bC);
+			}
+			if (bC.boss.triggersBlockWhenNoPlayersAround() && bC.noPlayersPresentInArea()) {
+				MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = bC.getNoPlayersAroundTriggeredBlock();
+				BlockEntity blockEntity = world.getBlockEntity(new BlockPos(bC.pos.getX() + noPlayersAroundTriggeredBlock.getLeft().getX(), bC.pos.getY() + noPlayersAroundTriggeredBlock.getLeft().getY(), bC.pos.getZ() + noPlayersAroundTriggeredBlock.getLeft().getZ()));
+				if (blockEntity != bC) {
+					boolean noPlayersAroundTriggeredBlockResets = noPlayersAroundTriggeredBlock.getRight();
+					if (noPlayersAroundTriggeredBlockResets && blockEntity instanceof Resetable resetable) {
+						resetable.reset();
+					} else if (!noPlayersAroundTriggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+						triggerable.trigger();
+					}
+				}
 			}
 		}
 	}
@@ -601,14 +624,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				DebuggingHelper.sendBossControllerLogMessage("bossEntityUuid == null", null);
 			}
 		}
-
-		this.discardLivingEntitiesInBossArena();
 	}
 
-	private void discardLivingEntitiesInBossArena() {
-
-		DebuggingHelper.sendBossControllerLogMessage("LivingEntities in boss arena discarded", null);
-
+	public boolean noPlayersPresentInArea() {
 		if (this.calculateAreaBox || this.area == null) {
 			BlockPos areaPositionOffset = this.areaPositionOffset;
 			Vec3i areaDimensions = this.areaDimensions;
@@ -617,16 +635,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			this.area = new Box(areaStart, areaEnd);
 			this.calculateAreaBox = false;
 		}
-
 		if (this.world != null) {
-			List<LivingEntity> entityList = this.world.getEntitiesByClass(LivingEntity.class, this.area, EXCEPT_PLAYERS);
-
-			DebuggingHelper.sendBossControllerLogMessage("Discarding " + entityList.size() + " entities.", null);
-
-			for (LivingEntity livingEntity : entityList) {
-				livingEntity.discard();
-			}
+			return this.world.getNonSpectatingEntities(PlayerEntity.class, this.area).isEmpty();
 		}
+		return false;
 	}
 
 	@Override
@@ -745,6 +757,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.areaPositionOffset = areaPositionOffset;
 		this.calculateAreaBox = true;
 		return true;
+	}
+
+	public MutablePair<BlockPos, Boolean> getNoPlayersAroundTriggeredBlock() {
+		return this.noPlayersAroundTriggeredBlock;
+	}
+
+	public void setNoPlayersAroundTriggeredBlock(MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock) {
+		this.noPlayersAroundTriggeredBlock = noPlayersAroundTriggeredBlock;
 	}
 
 	public BlockPos getBossSpawnPositionOffset() {

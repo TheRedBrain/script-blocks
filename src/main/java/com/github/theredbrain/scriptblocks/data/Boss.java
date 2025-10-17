@@ -9,22 +9,26 @@ import java.util.List;
 public record Boss(
 		String bossEntityTypeId,
 		boolean discardEntityAtEnd,
+		boolean triggersBlockWhenNoPlayersAround,
 		List<Phase> phases
 ) {
 
 	public static final Codec<Boss> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.STRING.optionalFieldOf("bossEntityTypeId", "").forGetter(x -> x.bossEntityTypeId),
 			Codec.BOOL.optionalFieldOf("discardEntityAtEnd", true).forGetter(x -> x.discardEntityAtEnd),
+			Codec.BOOL.optionalFieldOf("triggersBlockWhenNoPlayersAround", false).forGetter(x -> x.triggersBlockWhenNoPlayersAround),
 			Phase.CODEC.listOf().optionalFieldOf("phases", List.of()).forGetter(x -> x.phases)
 	).apply(instance, Boss::new));
 
 	public Boss(
 			String bossEntityTypeId,
 			boolean discardEntityAtEnd,
+			boolean triggersBlockWhenNoPlayersAround,
 			List<Phase> phases
 	) {
 		this.bossEntityTypeId = bossEntityTypeId != null ? bossEntityTypeId : "";
 		this.discardEntityAtEnd = discardEntityAtEnd;
+		this.triggersBlockWhenNoPlayersAround = triggersBlockWhenNoPlayersAround;
 		this.phases = phases;
 	}
 
