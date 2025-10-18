@@ -44,7 +44,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
-		nbt.putString("keyIdentifier", this.keyIdentifierString);
+		nbt.putString("keyIdentifierString", this.keyIdentifierString);
 
 		nbt.putString("lockedMessage", this.lockedMessage);
 
@@ -65,7 +65,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
 		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
-		this.keyIdentifierString = nbt.getString("keyItemTag");
+		this.keyIdentifierString = nbt.getString("keyIdentifierString");
 
 		this.lockedMessage = nbt.getString("lockedMessage");
 
