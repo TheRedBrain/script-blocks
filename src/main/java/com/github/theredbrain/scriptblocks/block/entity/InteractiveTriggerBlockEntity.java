@@ -1,23 +1,24 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.InteractiveTriggerBlock;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
+import com.github.theredbrain.scriptblocks.component.type.InteractiveKeyComponent;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -25,7 +26,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements Resetable {
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-	private String keyItemTag = "";
+	private String keyIdentifierString = "";
 	private String lockedMessage = "";
 	private String lockedSound = "";
 	private String unlockedMessage = "";
@@ -43,7 +44,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 
-		nbt.putString("keyItemTag", this.keyItemTag);
+		nbt.putString("keyIdentifier", this.keyIdentifierString);
 
 		nbt.putString("lockedMessage", this.lockedMessage);
 
@@ -64,7 +65,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
 		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
 
-		this.keyItemTag = nbt.getString("keyItemTag");
+		this.keyIdentifierString = nbt.getString("keyItemTag");
 
 		this.lockedMessage = nbt.getString("lockedMessage");
 
@@ -94,12 +95,12 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		this.triggeredBlock = triggeredBlock;
 	}
 
-	public String getKeyItemTag() {
-		return this.keyItemTag;
+	public String getKeyIdentifierString() {
+		return this.keyIdentifierString;
 	}
 
-	public void setKeyItemTag(String keyItemTag) {
-		this.keyItemTag = keyItemTag;
+	public void setKeyIdentifierString(String keyIdentifierString) {
+		this.keyIdentifierString = keyIdentifierString;
 	}
 
 	public String getLockedMessage() {
@@ -135,12 +136,35 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 	}
 
 	public boolean canTrigger(PlayerEntity playerEntity) {
-		if (!this.keyItemTag.isEmpty()) {
-			ScriptBlocks.info("InteractiveTriggerBlockEntity canTrigger !this.keyItemTag.isEmpty()");
-			TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, Identifier.of(this.keyItemTag));
-			return playerEntity.getActiveItem().isIn(tag);
+		if (!this.keyIdentifierString.isEmpty()) {
+			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ItemComponentRegistry.INTERACTIVE_KEY);
+			if (interactiveKeyComponent != null) {
+				return interactiveKeyComponent.identifier_list().contains(Identifier.of(this.keyIdentifierString));
+			}
 		}
 		return true;
+	}
+
+	public void tryToConsumeKeyItem(PlayerEntity playerEntity) {
+		if (!this.keyIdentifierString.isEmpty()) {
+			Hand hand = playerEntity.getActiveHand();
+			ItemStack stack = playerEntity.getStackInHand(hand);
+			InteractiveKeyComponent interactiveKeyComponent = stack.get(ItemComponentRegistry.INTERACTIVE_KEY);
+			if (interactiveKeyComponent != null) {
+				if (interactiveKeyComponent.is_consumed()) {
+					if (stack.getMaxCount() > 1) {
+						stack.decrementUnlessCreative(1, playerEntity);
+						if (stack.getCount() > 0) {
+							playerEntity.setStackInHand(hand, stack);
+						} else {
+							playerEntity.setStackInHand(hand, ItemStack.EMPTY);
+						}
+					} else {
+						stack.damage(1, playerEntity, hand == Hand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+					}
+				}
+			}
+		}
 	}
 
 	public void trigger() {
@@ -154,10 +178,6 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 					triggerable.trigger();
 				}
 			}
-//			BlockState state = this.world.getBlockState(this.pos);
-//			if (state.getBlock() instanceof InteractiveTriggerBlock interactiveTriggerBlock) {
-//				interactiveTriggerBlock.trigger(state, this.world, this.pos);
-//			}
 		}
 	}
 

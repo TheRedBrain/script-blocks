@@ -272,7 +272,7 @@
 	"gui.interactive_loot_block.mode.vanilla": "Vanilla Loot Table",
 
 
-	"gui.interactive_trigger_block.key_item_tag_label": "Key Item Tag",
+	"gui.interactive_trigger_block.key_identifier_string_label": "Key Identifier String",
 	"gui.interactive_trigger_block.locked_message_label": "Locked Message",
 	"gui.interactive_trigger_block.locked_sound_label": "Locked Sound",
 	"gui.interactive_trigger_block.unlock_message_label": "Unlock Message",

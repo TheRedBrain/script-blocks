@@ -57,8 +57,8 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 			if (bl) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openInteractiveTriggerBlockScreen(interactiveTriggerBlockEntity);
 				return ActionResult.success(world.isClient);
-			} else if (canTrigger(state) && interactiveTriggerBlockEntity.canTrigger(player)) {
-				if (interactiveTriggerBlockEntity.canTrigger(player)) {
+			} else {
+				if (canTrigger(state) && interactiveTriggerBlockEntity.canTrigger(player)) {
 					if (!interactiveTriggerBlockEntity.getUnlockedMessage().isEmpty()) {
 						player.sendMessage(Text.translatable(interactiveTriggerBlockEntity.getUnlockedMessage()));
 					}
@@ -68,6 +68,7 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 							world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
 						}
 					}
+					interactiveTriggerBlockEntity.tryToConsumeKeyItem(player);
 					interactiveTriggerBlockEntity.trigger();
 					trigger(state, world, pos);
 				} else {

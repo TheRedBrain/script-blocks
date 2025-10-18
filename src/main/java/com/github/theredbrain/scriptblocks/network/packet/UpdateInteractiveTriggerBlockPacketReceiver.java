@@ -45,7 +45,7 @@ public class UpdateInteractiveTriggerBlockPacketReceiver implements ServerPlayNe
 		if (blockEntity instanceof InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
 			interactiveTriggerBlockEntity.reset();
 			interactiveTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			interactiveTriggerBlockEntity.setKeyItemTag(keyItemTag);
+			interactiveTriggerBlockEntity.setKeyIdentifierString(keyItemTag);
 			interactiveTriggerBlockEntity.setLockedMessage(lockedMessage);
 			interactiveTriggerBlockEntity.setLockedSound(lockedSound);
 			interactiveTriggerBlockEntity.setUnlockedMessage(unlockedMessage);

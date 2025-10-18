@@ -21,7 +21,7 @@ import org.lwjgl.glfw.GLFW;
 @Environment(value = EnvType.CLIENT)
 public class InteractiveTriggerBlockScreen extends Screen {
 	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	private static final Text KEY_ITEM_TAG_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.key_item_tag_label");
+	private static final Text KEY_IDENTIFIER_STRING_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.key_identifier_string_label");
 	private static final Text LOCKED_MESSAGE_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.locked_message_label");
 	private static final Text LOCKED_SOUND_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.locked_sound_label");
 	private static final Text UNLOCK_MESSAGE_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.unlock_message_label");
@@ -31,7 +31,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 	private TextFieldWidget triggeredBlockPositionOffsetYField;
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
 	private boolean triggeredBlockResets;
-	private TextFieldWidget keyItemTagField;
+	private TextFieldWidget keyIdentifierStringField;
 	private TextFieldWidget lockedMessageField;
 	private TextFieldWidget lockedSoundField;
 	private TextFieldWidget unlockedMessageField;
@@ -72,10 +72,10 @@ public class InteractiveTriggerBlockScreen extends Screen {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
-		this.keyItemTagField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 75, 300, 20, Text.empty());
-		this.keyItemTagField.setMaxLength(128);
-		this.keyItemTagField.setText(this.interactiveTriggerBlockEntity.getKeyItemTag());
-		this.addSelectableChild(this.keyItemTagField);
+		this.keyIdentifierStringField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 75, 300, 20, Text.empty());
+		this.keyIdentifierStringField.setMaxLength(128);
+		this.keyIdentifierStringField.setText(this.interactiveTriggerBlockEntity.getKeyIdentifierString());
+		this.addSelectableChild(this.keyIdentifierStringField);
 
 		this.lockedMessageField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 110, 150, 20, Text.empty());
 		this.lockedMessageField.setMaxLength(128);
@@ -107,7 +107,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 		String string2 = this.triggeredBlockPositionOffsetXField.getText();
 		String string3 = this.triggeredBlockPositionOffsetYField.getText();
 		String string4 = this.triggeredBlockPositionOffsetZField.getText();
-		String string5 = this.keyItemTagField.getText();
+		String string5 = this.keyIdentifierStringField.getText();
 		String string6 = this.lockedMessageField.getText();
 		String string7 = this.lockedSoundField.getText();
 		String string8 = this.unlockedMessageField.getText();
@@ -117,7 +117,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.setText(string2);
 		this.triggeredBlockPositionOffsetYField.setText(string3);
 		this.triggeredBlockPositionOffsetZField.setText(string4);
-		this.keyItemTagField.setText(string5);
+		this.keyIdentifierStringField.setText(string5);
 		this.lockedMessageField.setText(string6);
 		this.lockedSoundField.setText(string7);
 		this.unlockedMessageField.setText(string8);
@@ -143,7 +143,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
 				),
 				this.triggeredBlockResets,
-				this.keyItemTagField.getText(),
+				this.keyIdentifierStringField.getText(),
 				this.lockedMessageField.getText(),
 				this.lockedSoundField.getText(),
 				this.unlockedMessageField.getText(),
@@ -162,8 +162,8 @@ public class InteractiveTriggerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, KEY_ITEM_TAG_LABEL_TEXT, this.width / 2 - 153, 65, 0xA0A0A0);
-		this.keyItemTagField.render(context, mouseX, mouseY, delta);
+		context.drawTextWithShadow(this.textRenderer, KEY_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 65, 0xA0A0A0);
+		this.keyIdentifierStringField.render(context, mouseX, mouseY, delta);
 
 		context.drawTextWithShadow(this.textRenderer, LOCKED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 100, 0xA0A0A0);
 		this.lockedMessageField.render(context, mouseX, mouseY, delta);
