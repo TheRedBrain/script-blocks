@@ -46,6 +46,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockCrea
 import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockCreativePacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateInteractiveLootBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateInteractiveLootBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateInteractiveTriggerBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateInteractiveTriggerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateJigsawPlacerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateJigsawPlacerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateLocationControlBlockPacket;
@@ -154,6 +156,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateInteractiveLootBlockPacket.PACKET_ID, UpdateInteractiveLootBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveLootBlockPacket.PACKET_ID, new UpdateInteractiveLootBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateInteractiveTriggerBlockPacket.PACKET_ID, UpdateInteractiveTriggerBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveTriggerBlockPacket.PACKET_ID, new UpdateInteractiveTriggerBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateUseRelayBlockPacket.PACKET_ID, UpdateUseRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayBlockPacket.PACKET_ID, new UpdateUseRelayBlockPacketReceiver());

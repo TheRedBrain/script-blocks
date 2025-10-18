@@ -12,6 +12,7 @@ import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.InteractiveTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
@@ -49,6 +50,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.EntranceDelegationBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.HousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.InteractiveLootBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.InteractiveTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.JigsawPlacerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.LocationControlBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.MimicBlockScreen;
@@ -271,6 +273,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity) {
 		this.client.setScreen(new InteractiveLootBlockScreen(interactiveLootBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openInteractiveTriggerBlockScreen(InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
+		this.client.setScreen(new InteractiveTriggerBlockScreen(interactiveTriggerBlockEntity));
 	}
 
 //	@Override

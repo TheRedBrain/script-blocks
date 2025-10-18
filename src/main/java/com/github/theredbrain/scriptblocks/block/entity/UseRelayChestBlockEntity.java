@@ -15,6 +15,8 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 		super(EntityRegistry.USE_RELAY_CHEST_BLOCK_ENTITY, pos, state);
 	}
 
+	// TODO triggered block on opening
+
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.writeNbt(nbt, registryLookup);

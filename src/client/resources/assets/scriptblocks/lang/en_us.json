@@ -272,6 +272,13 @@
 	"gui.interactive_loot_block.mode.vanilla": "Vanilla Loot Table",
 
 
+	"gui.interactive_trigger_block.key_item_tag_label": "Key Item Tag",
+	"gui.interactive_trigger_block.locked_message_label": "Locked Message",
+	"gui.interactive_trigger_block.locked_sound_label": "Locked Sound",
+	"gui.interactive_trigger_block.unlock_message_label": "Unlock Message",
+	"gui.interactive_trigger_block.unlock_sound_label": "Unlock Sound",
+
+
 	"gui.jigsaw_placer_block.first_structure_pool_string_field": "First Structure Pool String",
 	"gui.jigsaw_placer_block.second_structure_pool_string_field": "Second Structure Pool String",
 
@@ -654,6 +661,32 @@
 
 	"gui.shop_block.trade_button_label": "Trade",
 
+	
+	"block.scriptblocks.interactive_trigger_oak_door": "Interactive Trigger Oak Door",
+	"block.scriptblocks.interactive_trigger_iron_door": "Interactive Trigger Iron Door",
+	"block.scriptblocks.interactive_trigger_spruce_door": "Interactive Trigger Spruce Door",
+	"block.scriptblocks.interactive_trigger_birch_door": "Interactive Trigger Birch Door",
+	"block.scriptblocks.interactive_trigger_jungle_door": "Interactive Trigger Jungle Door",
+	"block.scriptblocks.interactive_trigger_acacia_door": "Interactive Trigger Acacia Door",
+	"block.scriptblocks.interactive_trigger_cherry_door": "Interactive Trigger Cherry Door",
+	"block.scriptblocks.interactive_trigger_dark_oak_door": "Interactive Trigger Dark Oak Door",
+	"block.scriptblocks.interactive_trigger_mangrove_door": "Interactive Trigger Mangrove Door",
+	"block.scriptblocks.interactive_trigger_bamboo_door": "Interactive Trigger Bamboo Door",
+	"block.scriptblocks.interactive_trigger_crimson_door": "Interactive Trigger Crimson Door",
+	"block.scriptblocks.interactive_trigger_warped_door": "Interactive Trigger Warped Door",
+
+	"block.scriptblocks.interactive_trigger_oak_trapdoor": "Interactive Trigger Oak Trapdoor",
+	"block.scriptblocks.interactive_trigger_iron_trapdoor": "Interactive Trigger Iron Trapdoor",
+	"block.scriptblocks.interactive_trigger_spruce_trapdoor": "Interactive Trigger Spruce Trapdoor",
+	"block.scriptblocks.interactive_trigger_birch_trapdoor": "Interactive Trigger Birch Trapdoor",
+	"block.scriptblocks.interactive_trigger_jungle_trapdoor": "Interactive Trigger Jungle Trapdoor",
+	"block.scriptblocks.interactive_trigger_acacia_trapdoor": "Interactive Trigger Acacia Trapdoor",
+	"block.scriptblocks.interactive_trigger_cherry_trapdoor": "Interactive Trigger Cherry Trapdoor",
+	"block.scriptblocks.interactive_trigger_dark_oak_trapdoor": "Interactive Trigger Dark Oak Trapdoor",
+	"block.scriptblocks.interactive_trigger_mangrove_trapdoor": "Interactive Trigger Mangrove Trapdoor",
+	"block.scriptblocks.interactive_trigger_bamboo_trapdoor": "Interactive Trigger Bamboo Trapdoor",
+	"block.scriptblocks.interactive_trigger_crimson_trapdoor": "Interactive Trigger Crimson Trapdoor",
+	"block.scriptblocks.interactive_trigger_warped_trapdoor": "Interactive Trigger Warped Trapdoor",
 
 	"block.scriptblocks.triggered_dispenser_block": "Triggered Dispenser",
 	"block.scriptblocks.aesthetic_decorated_pot": "Aesthetic Decorated Pot",

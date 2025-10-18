@@ -14,6 +14,7 @@ import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.EntranceDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.InteractiveTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
@@ -166,6 +167,33 @@ public class EntityRegistry {
 	public static final BlockEntityType<RedstoneTriggerBlockEntity> REDSTONE_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("redstone_trigger_block"),
 			FabricBlockEntityTypeBuilder.create(RedstoneTriggerBlockEntity::new, BlockRegistry.REDSTONE_TRIGGER_BLOCK).build());
+	public static final BlockEntityType<InteractiveTriggerBlockEntity> INTERACTIVE_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("interactive_trigger_block"),
+			FabricBlockEntityTypeBuilder.create(InteractiveTriggerBlockEntity::new,
+					BlockRegistry.INTERACTIVE_TRIGGER_OAK_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_IRON_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_SPRUCE_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_BIRCH_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_JUNGLE_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_ACACIA_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_CHERRY_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_DARK_OAK_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_MANGROVE_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_BAMBOO_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_CRIMSON_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_WARPED_DOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_OAK_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_IRON_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_SPRUCE_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_BIRCH_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_JUNGLE_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_ACACIA_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_CHERRY_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_DARK_OAK_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_MANGROVE_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_BAMBOO_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_CRIMSON_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_WARPED_TRAPDOOR).build());
 	public static final BlockEntityType<RelayTriggerBlockEntity> RELAY_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("relay_trigger_block"),
 			FabricBlockEntityTypeBuilder.create(RelayTriggerBlockEntity::new, BlockRegistry.RELAY_TRIGGER_BLOCK).build());
