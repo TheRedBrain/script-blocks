@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -267,6 +268,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		// TODO
 		//  implement reset timer
 		//  make sure resets only happen when no players are in location
+		//  this could be achieved with triggered teleporter blocks
 		return this.manualReset || this.shouldAlwaysReset;
 	}
 

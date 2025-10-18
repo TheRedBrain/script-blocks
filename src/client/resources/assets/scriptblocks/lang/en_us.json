@@ -341,9 +341,10 @@
 	"gui.team_controller_block.screenPage.team": "Team",
 
 
-	"gui.teleporter_block.regeneration_confirm_screen.title": "Do you want to regenerate this dungeon?",
-	"gui.teleporter_block.confirmDungeonRegenerationButton": "Yes",
-	"gui.teleporter_block.cancelDungeonRegenerationButton": "No",
+	"gui.teleporter_block.regenerate_button_label": "Regenerate Dungeon",
+	"gui.teleporter_block.regenerate_dungeon": "Do you want to regenerate this dungeon?",
+	"gui.teleporter_block.confirm_regeneration_button_label": "Yes",
+	"gui.teleporter_block.cancel_regeneration_button_label": "No",
 	"gui.teleporter_block.regenerateDimensionFailed": "Something went wrong with regenerating the dungeon. Try visiting it without regenerating.",
 
 	"gui.teleporter_block.teleporter_name_field.label": "Teleporter Name",
