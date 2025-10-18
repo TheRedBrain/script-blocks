@@ -254,7 +254,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 								20,
 								new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()), // offset to fix vanilla bug
 								false,
-								facing == Direction.EAST ? BlockRotation.COUNTERCLOCKWISE_90 : facing == Direction.SOUTH ? BlockRotation.NONE : facing == Direction.WEST ? BlockRotation.CLOCKWISE_90 : facing == Direction.NORTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.EAST ? BlockRotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : BlockRotation.NONE
+								facing == Direction.EAST ? BlockRotation.COUNTERCLOCKWISE_90 : facing == Direction.SOUTH ? BlockRotation.NONE : facing == Direction.WEST ? BlockRotation.CLOCKWISE_90 : facing == Direction.NORTH ? BlockRotation.CLOCKWISE_180 : this.joint == JigsawBlockEntity.Joint.ROLLABLE ? BlockRotation.random(serverWorld.getRandom()) : rotation == Direction.EAST ? BlockRotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : BlockRotation.NONE
 						);
 					}
 				} catch (IllegalStateException illegalStateException) {
