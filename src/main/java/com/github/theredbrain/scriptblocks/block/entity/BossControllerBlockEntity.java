@@ -365,6 +365,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				}
 			}
 		}
+		bC.markDirty();
 	}
 
 	private static void advancePhase(BossControllerBlockEntity bC) {
@@ -386,6 +387,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			DebuggingHelper.sendBossControllerLogMessage("A bossControllerBlock at " + bC.getPos().toString() + " tried to advance a non existing boss fight.", null);
 
 		}
+		bC.markDirty();
 	}
 
 	private static void endBattle(BossControllerBlockEntity bC) {
@@ -398,6 +400,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 			bC.bossEntityUuid = null;
 		}
+		bC.markDirty();
 	}
 
 	private static void startPhase(BossControllerBlockEntity bC) {
@@ -457,6 +460,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				}
 			}
 		}
+		bC.markDirty();
 	}
 
 	private static void endPhase(BossControllerBlockEntity bC, boolean removeAttributeModifiers) {
@@ -597,6 +601,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.pos);
 				}
 			}
+			bC.markDirty();
 			return true;
 		}
 		return false;
@@ -630,6 +635,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					entity.discard();
 				}
 				this.bossEntityUuid = null;
+				this.markDirty();
 			} else {
 				DebuggingHelper.sendBossControllerLogMessage("bossEntityUuid == null", null);
 			}
@@ -644,6 +650,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
 			this.area = new Box(areaStart, areaEnd);
 			this.calculateAreaBox = false;
+			this.markDirty();
 		}
 		if (this.world != null) {
 			return this.world.getNonSpectatingEntities(PlayerEntity.class, this.area).isEmpty();
@@ -670,6 +677,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				this.bossSpawnPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.bossSpawnPositionOffset, blockRotation);
 				this.bossSpawnOrientationYaw = BlockRotationUtils.rotateYaw(this.bossSpawnOrientationYaw, blockRotation);
 
+				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), blockRotation));
+
 				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
 				for (String key : keys) {
 					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
@@ -686,6 +695,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
 				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.FRONT_BACK);
 				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, BlockMirror.FRONT_BACK);
+
+				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
 
 				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
 				for (String key : keys) {
@@ -704,6 +715,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.LEFT_RIGHT);
 				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, BlockMirror.LEFT_RIGHT);
 
+				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
 
 				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
 				for (String key : keys) {

@@ -1,0 +1,27 @@
+{
+    "bossEntityTypeId": "minecraft:zombie",
+    "discardEntityAtEnd": false,
+    "phases": [
+      {
+        "bossHealthThreshold": 0,
+        "globalTimerThreshold": -1,
+        "phaseTimerThreshold": -1,
+        "newHealthRatio": 1.0,
+        "entityAttributeModifiers": [
+          {
+            "attributeIdentifier": "minecraft:generic.max_health",
+            "id": "instanced_dungeons:boss_phase_1",
+            "amount": 50,
+            "operation": "ADD_VALUE"
+          },
+          {
+            "attributeIdentifier": "minecraft:generic.speed",
+            "id": "instanced_dungeons:boss_phase_1",
+            "amount": 0.5,
+            "operation": "ADD_VALUE"
+          }
+        ],
+        "triggeredBlockAtEnd": "boss_killed"
+      }
+    ]
+}
