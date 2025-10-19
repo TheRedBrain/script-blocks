@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
+import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -15,8 +16,8 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 
 		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			return;
+		if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+			DebuggingHelper.sendDebuggingMessage("manual location reset", serverPlayerEntity);
 		}
 
 		BlockPos locationControlBlockPosition = payload.locationControlBlockPosition();

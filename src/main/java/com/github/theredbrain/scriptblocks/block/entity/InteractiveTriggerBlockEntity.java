@@ -141,6 +141,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 			if (interactiveKeyComponent != null) {
 				return interactiveKeyComponent.identifier_list().contains(Identifier.of(this.keyIdentifierString));
 			}
+			return false;
 		}
 		return true;
 	}
