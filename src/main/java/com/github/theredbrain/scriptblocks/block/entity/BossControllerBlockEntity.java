@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -545,18 +544,29 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 			Optional<EntityType<?>> optional = EntityType.fromNbt(bC.entityTypeCompound);
 			if (optional.isEmpty()) {
-				ScriptBlocks.info("optional.isEmpty()");
 				return false;
 			}
-			double d = (double) bC.pos.getX() + bC.bossSpawnPositionOffset.getX() + 0.5;
-			double e = (double) bC.pos.getY() + bC.bossSpawnPositionOffset.getY();
-			double f = (double) bC.pos.getZ() + bC.bossSpawnPositionOffset.getZ() + 0.5;
+			BlockPos blockPos = bC.pos.add(bC.bossSpawnPositionOffset.getX(), bC.bossSpawnPositionOffset.getY(), bC.bossSpawnPositionOffset.getZ());
+			double pitch = bC.bossSpawnOrientationPitch;
+			double yaw = bC.bossSpawnOrientationYaw;
+
+			if (serverWorld.getBlockEntity(blockPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+
+				blockPos = entrance.getLeft();
+				yaw = entrance.getRight().getLeft();
+				pitch = entrance.getRight().getRight();
+			}
+			double d = (double) blockPos.getX() + 0.5;
+			double e = (double) blockPos.getY();
+			double f = (double) blockPos.getZ() + 0.5;
+
 			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) {
 
 				DebuggingHelper.sendBossControllerLogMessage("not enough space for spawning boss entity", null);
 				return false;
 			}
-			BlockPos blockPos = BlockPos.ofFloored(d, e, f);
+			blockPos = BlockPos.ofFloored(d, e, f);
 			Entity entity2 = EntityType.loadEntityWithPassengers(bC.entityTypeCompound, bC.world, entity -> {
 				entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
 				return entity;
@@ -564,9 +574,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			if (entity2 == null) {
 				return false;
 			}
-			entity2.setBodyYaw((float) bC.bossSpawnOrientationYaw);
-			entity2.setHeadYaw((float) bC.bossSpawnOrientationYaw);
-			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) bC.bossSpawnOrientationYaw, (float) bC.bossSpawnOrientationPitch);
+			entity2.setBodyYaw((float) yaw);
+			entity2.setHeadYaw((float) yaw);
+			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
 			if (entity2 instanceof MobEntity) {
 				if (bC.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
 					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);

@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -372,19 +371,13 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			this.triggered = false;
 		}
 
-		ScriptBlocks.info("TriggeredSpawnerBlock reset");
 		if (this.world instanceof ServerWorld serverWorld) {
-			ScriptBlocks.info("world instanceof ServerWorld");
 			if (this.boundEntityUuid != null) {
-				ScriptBlocks.info("boundEntityUuid != null");
 				Entity entity = serverWorld.getEntity(this.boundEntityUuid);
 				if (entity != null) {
-					ScriptBlocks.info("TriggeredSpawnerBlock discard mobEntity");
 					entity.discard();
 				}
 				this.boundEntityUuid = null;
-			} else {
-				ScriptBlocks.info("boundEntityUuid == null");
 			}
 		}
 	}
@@ -426,11 +419,23 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			if (optional.isEmpty()) {
 				return false;
 			}
-			double d = (double) this.pos.getX() + this.entitySpawnPositionOffset.getX() + 0.5;
-			double e = (double) this.pos.getY() + this.entitySpawnPositionOffset.getY();
-			double f = (double) this.pos.getZ() + this.entitySpawnPositionOffset.getZ() + 0.5;
+			BlockPos blockPos = this.pos.add(this.entitySpawnPositionOffset.getX(), this.entitySpawnPositionOffset.getY(), this.entitySpawnPositionOffset.getZ());
+			double pitch = this.entitySpawnOrientationPitch;
+			double yaw = this.entitySpawnOrientationYaw;
+
+			if (serverWorld.getBlockEntity(blockPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+
+				blockPos = entrance.getLeft();
+				yaw = entrance.getRight().getLeft();
+				pitch = entrance.getRight().getRight();
+			}
+			double d = (double) blockPos.getX() + 0.5;
+			double e = (double) blockPos.getY();
+			double f = (double) blockPos.getZ() + 0.5;
+
 			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) return false;
-			BlockPos blockPos = BlockPos.ofFloored(d, e, f);
+			blockPos = BlockPos.ofFloored(d, e, f);
 			Entity entity2 = EntityType.loadEntityWithPassengers(this.entityTypeCompound, world, entity -> {
 				entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
 				return entity;
@@ -438,9 +443,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			if (entity2 == null) {
 				return false;
 			}
-			entity2.setBodyYaw((float) this.entitySpawnOrientationYaw);
-			entity2.setHeadYaw((float) this.entitySpawnOrientationYaw);
-			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) this.entitySpawnOrientationYaw, (float) this.entitySpawnOrientationPitch);
+			entity2.setBodyYaw((float) yaw);
+			entity2.setHeadYaw((float) yaw);
+			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
 			if (entity2 instanceof MobEntity) {
 				if (this.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
 					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);

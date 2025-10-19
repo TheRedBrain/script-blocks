@@ -16,7 +16,6 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -26,6 +25,7 @@ import net.minecraft.village.VillagerProfession;
 import net.minecraft.village.VillagerType;
 import net.minecraft.world.World;
 import net.minecraft.world.event.GameEvent;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.Optional;
 
@@ -74,19 +74,31 @@ public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEn
 		if (var2 instanceof ServerWorld serverWorld) {
 			Optional<EntityType<?>> optional = EntityType.fromNbt(this.entityTypeCompound);
 			if (optional.isPresent()) {
-				double d = (double) this.pos.getX() + (double) this.entitySpawnPositionOffset.getX() + 0.5;
-				double e = (double) this.pos.getY() + (double) this.entitySpawnPositionOffset.getY();
-				double f = (double) this.pos.getZ() + (double) this.entitySpawnPositionOffset.getZ() + 0.5;
+				BlockPos blockPos = this.pos.add(this.entitySpawnPositionOffset.getX(), this.entitySpawnPositionOffset.getY(), this.entitySpawnPositionOffset.getZ());
+				double pitch = this.entitySpawnOrientationPitch;
+				double yaw = this.entitySpawnOrientationYaw;
+
+				if (serverWorld.getBlockEntity(blockPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+					MutablePair<BlockPos, MutablePair<Double, Double>> entrance = entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+
+					blockPos = entrance.getLeft();
+					yaw = entrance.getRight().getLeft();
+					pitch = entrance.getRight().getRight();
+				}
+				double d = (double) blockPos.getX() + 0.5;
+				double e = (double) blockPos.getY();
+				double f = (double) blockPos.getZ() + 0.5;
+
 				if (serverWorld.isSpaceEmpty(((EntityType) optional.get()).getSpawnBox(d, e, f))) {
-					BlockPos blockPos = BlockPos.ofFloored(d, e, f);
+					blockPos = BlockPos.ofFloored(d, e, f);
 					Entity entity2 = EntityType.loadEntityWithPassengers(this.entityTypeCompound, this.world, (entity) -> {
 						entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
 						return entity;
 					});
 					if (entity2 instanceof VillagerDataContainer villagerDataContainer) {
-						entity2.setBodyYaw((float) this.entitySpawnOrientationYaw);
-						entity2.setHeadYaw((float) this.entitySpawnOrientationYaw);
-						entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) this.entitySpawnOrientationYaw, (float) this.entitySpawnOrientationPitch);
+						entity2.setBodyYaw((float) yaw);
+						entity2.setHeadYaw((float) yaw);
+						entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
 						if (entity2 instanceof MobEntity && this.entityTypeCompound.contains("id", 8)) {
 							((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, (EntityData) null);
 						}
