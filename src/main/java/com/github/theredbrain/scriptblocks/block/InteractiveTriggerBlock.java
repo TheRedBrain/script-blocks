@@ -59,10 +59,10 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 				return ActionResult.success(world.isClient);
 			} else {
 				if (canTrigger(state) && interactiveTriggerBlockEntity.canTrigger(player)) {
-					if (!interactiveTriggerBlockEntity.getUnlockedMessage().isEmpty()) {
+					if (!interactiveTriggerBlockEntity.getUnlockedMessage().isEmpty() && !world.isClient) {
 						player.sendMessage(Text.translatable(interactiveTriggerBlockEntity.getUnlockedMessage()));
 					}
-					if (!interactiveTriggerBlockEntity.getUnlockedSound().isEmpty()) {
+					if (!interactiveTriggerBlockEntity.getUnlockedSound().isEmpty() && !world.isClient) {
 						SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(interactiveTriggerBlockEntity.getUnlockedSound()));
 						if (soundEvent != null) {
 							world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
@@ -72,10 +72,10 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 					interactiveTriggerBlockEntity.trigger();
 					trigger(state, world, pos);
 				} else {
-					if (!interactiveTriggerBlockEntity.getLockedMessage().isEmpty()) {
+					if (!interactiveTriggerBlockEntity.getLockedMessage().isEmpty() && !world.isClient) {
 						player.sendMessage(Text.translatable(interactiveTriggerBlockEntity.getLockedMessage()));
 					}
-					if (!interactiveTriggerBlockEntity.getLockedSound().isEmpty()) {
+					if (!interactiveTriggerBlockEntity.getLockedSound().isEmpty() && !world.isClient) {
 						SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(interactiveTriggerBlockEntity.getLockedSound()));
 						if (soundEvent != null) {
 							world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
