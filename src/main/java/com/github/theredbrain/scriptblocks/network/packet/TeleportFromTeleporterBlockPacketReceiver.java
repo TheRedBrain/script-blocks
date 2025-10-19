@@ -120,9 +120,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			ServerPlayerEntity targetDimensionOwner = server.getPlayerManager().getPlayer(targetDimensionOwnerName);
 
-//            ScriptBlocks.info("targetDimensionOwnerName: " + targetDimensionOwnerName);
-//            ScriptBlocks.info("targetLocation: " + targetLocation);
-
 			if (location != null) {
 
 				if (location.isPublic()) {
@@ -140,15 +137,12 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					}
 					targetLocationIsPublic = true;
 				} else if (targetDimensionOwner != null) {
-//                ScriptBlocks.info("targetDimensionOwner: " + targetDimensionOwner);
 					Identifier targetDimensionId = ScriptBlocks.identifier(targetDimensionOwner.getUuidAsString());
-//                ScriptBlocks.info("targetDimensionId: " + targetDimensionId);
 					RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
 					targetWorld = server.getWorld(dimensionregistryKey);
 
 					if (targetWorld == null) {
 						if (targetDimensionOwner.getUuid() == serverPlayerEntity.getUuid()) {
-//                        ScriptBlocks.info("targetDimensionOwner.getUuid() == serverPlayerEntity.getUuid()");
 							DimensionsManager.addAndSaveDynamicDimension(targetDimensionId, server);
 							dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
 							targetWorld = server.getWorld(dimensionregistryKey);
@@ -158,10 +152,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					}
 				}
-//                ScriptBlocks.info("targetWorld: " + targetWorld);
 
 				if (targetWorld != null) {
-//                    ScriptBlocks.info("targetWorld != null && location != null");
 
 					BlockPos blockPos = LocationUtils.getControlBlockPosForLocation(location);
 					BlockEntity blockEntity = targetWorld.getBlockEntity(blockPos);
@@ -177,12 +169,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					if (!(blockEntity instanceof LocationControlBlockEntity)) {
 
-//                        ScriptBlocks.info("!(blockEntity instanceof LocationControlBlockEntity)");
-
 						String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
-
-//                        server.getCommandManager().executeWithPrefix(server.getCommandSource(), "forceload query");
 
 						String placeStructureCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run place structure " + location.structureIdentifier() + " " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), placeStructureCommand);
@@ -193,9 +181,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						blockEntity = targetWorld.getBlockEntity(blockPos);
 						initialise = true;
 					}
-
-//                    ScriptBlocks.info("controlBlockPos: " + blockPos);
-//                    ScriptBlocks.info("block at controlBlockPos: " + targetWorld.getBlockState(blockPos).getBlock());
 
 					if (blockEntity instanceof LocationControlBlockEntity locationControlBlock) {
 						if (locationControlBlock.shouldReset() || initialise) {
@@ -210,18 +195,12 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							BlockPos dataBlockPos = locationControlBlock.getDataProvidingBlockPosOffset();
 							if (dataBlockPos != BlockPos.ORIGIN) {
-//								ScriptBlocks.info("dataBlockPos != BlockPos.ORIGIN");
 								BlockEntity blockEntity1 = targetWorld.getBlockEntity(locationControlBlock.getPos().add(dataBlockPos.getX(), dataBlockPos.getY(), dataBlockPos.getZ()));
 								if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-//									ScriptBlocks.info("providesDataBlockEntity.getData before reset: " + providesDataBlockEntity.getData(dataId));
 									providesDataBlockEntity.reset();
-//									ScriptBlocks.info("providesDataBlockEntity.getData after reset: " + providesDataBlockEntity.getData(dataId));
 									if (!dataId.isEmpty()) {
-//										ScriptBlocks.info("!dataId.isEmpty()");
-//										ScriptBlocks.info("dataId: " + dataId + ", data: " + data);
 										providesDataBlockEntity.setData(dataId, data);
 									}
-//									ScriptBlocks.info("providesDataBlockEntity.getData after setData: " + providesDataBlockEntity.getData(dataId));
 								}
 							}
 
@@ -296,20 +275,17 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			}
 			serverPlayerEntity.closeHandledScreen();
 
-			// TODO rework
-			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
-				if (statusEffectInstance != null) {
-					RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
-					boolean isPortalResistanceEffect = statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
-					if (statusEffectEntry.isIn(tag) || isPortalResistanceEffect) {
-						int oldAmplifier = statusEffectInstance.getAmplifier();
-						if (oldAmplifier <= 0 || isPortalResistanceEffect) {
-							serverPlayerEntity.removeStatusEffect(statusEffectEntry);
-						} else {
-							StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-							serverPlayerEntity.removeStatusEffect(statusEffectEntry);
-							serverPlayerEntity.addStatusEffect(newStatusEffectInstance);
-						}
+			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects().stream().toList()) {
+				RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
+				boolean isPortalResistanceEffect = statusEffectRegistryEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
+				if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(tag)) {
+					int oldAmplifier = statusEffectInstance.getAmplifier();
+					if (oldAmplifier <= 0 || isPortalResistanceEffect) {
+						serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
+					} else {
+						StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
+						serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
+						serverPlayerEntity.addStatusEffect(newStatusEffectInstance);
 					}
 				}
 			}
@@ -330,20 +306,17 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							}
 							serverPlayerEntity.closeHandledScreen();
 
-							// TODO rework
-							for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects()) {
-								if (statusEffectInstance != null) {
-									RegistryEntry<StatusEffect> statusEffectEntry = statusEffectInstance.getEffectType();
-									boolean isPortalResistanceEffect = statusEffectEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
-									if (statusEffectEntry.isIn(tag) || isPortalResistanceEffect) {
-										int oldAmplifier = statusEffectInstance.getAmplifier();
-										if (oldAmplifier <= 0 || isPortalResistanceEffect) {
-											serverPlayerEntity.removeStatusEffect(statusEffectEntry);
-										} else {
-											StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-											serverPlayerEntity.removeStatusEffect(statusEffectEntry);
-											serverPlayerEntity.addStatusEffect(newStatusEffectInstance);
-										}
+							for (StatusEffectInstance statusEffectInstance : teamServerPlayerEntity.getStatusEffects().stream().toList()) {
+								RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
+								boolean isPortalResistanceEffect = statusEffectRegistryEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
+								if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(tag)) {
+									int oldAmplifier = statusEffectInstance.getAmplifier();
+									if (oldAmplifier <= 0 || isPortalResistanceEffect) {
+										teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
+									} else {
+										StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
+										teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
+										teamServerPlayerEntity.addStatusEffect(newStatusEffectInstance);
 									}
 								}
 							}
