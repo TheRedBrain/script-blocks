@@ -203,9 +203,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private void confirmDungeonRegeneration() {
 		this.tryDungeonRegeneration();
-		this.showRegenerationConfirmScreen = false;
-		this.setBackgroundDimensions();
-		this.updateWidgets();
 	}
 
 	private void cancelDungeonRegeneration() {
@@ -834,20 +831,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private void tryDungeonRegeneration() {
 		if (this.canLocationBeRegenerated) {
-			Location location = null;
-			World world = this.teleporterBlock.getWorld();
-			if (world != null) {
-				Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTargetIdentifier));
-				if (optionalLocationReference.isPresent()) {
-					location = optionalLocationReference.get().value();
-				}
+			String currentTargetOwnerName = "";
+			if (!this.isCurrentLocationPublic && this.currentTargetOwner != null) {
+				currentTargetOwnerName = this.currentTargetOwner.getProfile().getName();
 			}
-			if (location != null) {
-				ClientPlayNetworking.send(new SetManualResetLocationControlBlockPacket(
-						LocationUtils.getControlBlockPosForLocation(location),
-						true
-				));
-			}
+			ClientPlayNetworking.send(new SetManualResetLocationControlBlockPacket(
+					currentTargetOwnerName,
+					this.currentTargetIdentifier,
+					true
+			));
 		}
 	}
 

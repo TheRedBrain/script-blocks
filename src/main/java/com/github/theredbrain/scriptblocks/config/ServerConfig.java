@@ -38,6 +38,9 @@ public class ServerConfig extends Config {
 	public String world_spawn_location_identifier = "";
 	public String world_spawn_entrance_identifier = "";
 
+	@Comment("Enables a confirmation message when a location was reset successfully.")
+	public boolean confirm_successful_location_reset = true;
+
 	@Comment("Enables 'Player Detector Block' to detect creative mode players.")
 	public boolean enable_creative_player_detection = false;
 
