@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -55,17 +56,14 @@ import java.util.function.Predicate;
 
 public class BossControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
-	// TODO define defaults
-	private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
+	private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 1, 0);
 
-	public static final Predicate<Entity> EXCEPT_PLAYERS = entity -> !(entity instanceof PlayerEntity);
+	private long globalTimer = 0;
+	private long phaseTimer = 0;
+	private int currentPhaseId = -1;
+	private Boss.Phase currentPhase = null;
 
-	private long globalTimer;
-	private long phaseTimer;
-	private int currentPhaseId;
-	private Boss.Phase currentPhase;
-
-	private Boss boss;
+	private Boss boss = null;
 
 	@Nullable
 	private UUID bossEntityUuid = null;
@@ -93,10 +91,6 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	public BossControllerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, pos, state);
-		this.globalTimer = 0;
-		this.phaseTimer = 0;
-		this.currentPhaseId = -1;
-		this.currentPhase = null;
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -110,8 +104,6 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-
-		super.writeNbt(nbt, registryLookup);
 
 		if (this.showArea) {
 			nbt.putBoolean("showArea", true);
@@ -213,12 +205,13 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		} else {
 			nbt.remove("bossEntityUuid");
 		}
+
+		super.writeNbt(nbt, registryLookup);
+
 	}
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-
-		super.readNbt(nbt, registryLookup);
 
 		if (nbt.contains("showArea", NbtElement.BYTE_TYPE)) {
 			this.showArea = nbt.getBoolean("showArea");
@@ -309,6 +302,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		} else {
 			this.bossEntityUuid = null;
 		}
+
+		super.readNbt(nbt, registryLookup);
+
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, BossControllerBlockEntity bC) {
@@ -621,7 +617,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		if (this.world instanceof ServerWorld serverWorld) {
 			DebuggingHelper.sendBossControllerLogMessage("world instanceof ServerWorld", null);
-			// TODO bossEntityUuid is sometimes null, even if the entity is still alive
+
 			if (this.bossEntityUuid != null) {
 
 				DebuggingHelper.sendBossControllerLogMessage("bossEntityUuid != null", null);

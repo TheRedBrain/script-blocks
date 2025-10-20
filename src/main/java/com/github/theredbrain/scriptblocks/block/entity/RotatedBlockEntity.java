@@ -27,6 +27,9 @@ public abstract class RotatedBlockEntity extends BlockEntity {
 		nbt.putBoolean("z_mirrored", this.z_mirrored);
 	}
 
+	/**
+	 * Has to be called last when overridden to avoid rotated data being overridden by saved data
+	 */
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 		super.readNbt(nbt, registryLookup);

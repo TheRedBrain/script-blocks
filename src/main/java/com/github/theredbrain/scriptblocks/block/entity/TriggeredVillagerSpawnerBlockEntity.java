@@ -39,17 +39,17 @@ public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEn
 	}
 
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.writeNbt(nbt, registryLookup);
 
 		VillagerData.CODEC
 				.encodeStart(NbtOps.INSTANCE, this.villagerData)
 				.resultOrPartial(ScriptBlocks.LOGGER::error)
 				.ifPresent(nbtElement -> nbt.put("VillagerData", nbtElement));
 
+		super.writeNbt(nbt, registryLookup);
+
 	}
 
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.readNbt(nbt, registryLookup);
 
 		if (nbt.contains("VillagerData", NbtElement.COMPOUND_TYPE)) {
 			VillagerData.CODEC
@@ -57,6 +57,8 @@ public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEn
 					.resultOrPartial(ScriptBlocks.LOGGER::error)
 					.ifPresent(villagerData -> this.villagerData = villagerData);
 		}
+
+		super.readNbt(nbt, registryLookup);
 
 	}
 

@@ -80,7 +80,6 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 		z = MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetZ"), -48, 48);
 		this.triggeredBlockOnCooldown = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnCooldownResets"));
 
-		super.readNbt(nbt, registryLookup);
 		if (nbt.contains("normal_config")) {
 			NbtCompound nbtCompound = nbt.getCompound("normal_config").copy();
 			nbt.put("ominous_config", nbtCompound.copyFrom(nbt.getCompound("ominous_config")));
@@ -90,6 +89,9 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 		if (this.world != null) {
 			this.updateListeners();
 		}
+
+		super.readNbt(nbt, registryLookup);
+
 	}
 
 	@Override
@@ -125,12 +127,14 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 		nbt.putInt("triggeredBlockOnCooldownPositionOffsetZ", this.triggeredBlockOnCooldown.getLeft().getZ());
 		nbt.putBoolean("triggeredBlockOnCooldownResets", this.triggeredBlockOnCooldown.getRight());
 
-		super.writeNbt(nbt, registryLookup);
 		this.spawner
 				.codec()
 				.encodeStart(NbtOps.INSTANCE, this.spawner)
 				.ifSuccess(nbtx -> nbt.copyFrom((NbtCompound)nbtx))
 				.ifError(error -> LOGGER.warn("Failed to encode TrialSpawner {}", error.message()));
+
+		super.writeNbt(nbt, registryLookup);
+
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

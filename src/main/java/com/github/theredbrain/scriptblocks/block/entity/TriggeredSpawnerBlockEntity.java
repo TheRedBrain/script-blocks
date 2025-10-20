@@ -81,8 +81,6 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		super.writeNbt(nbt, registryLookup);
-
 		BlockPos entitySpawnPositionOffset = this.entitySpawnPositionOffset;
 		if (!entitySpawnPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
 			nbt.putInt("entitySpawnPositionOffsetX", entitySpawnPositionOffset.getX());
@@ -168,12 +166,12 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			nbt.remove("boundEntityUuid");
 		}
 
+		super.writeNbt(nbt, registryLookup);
+
 	}
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-
-		super.readNbt(nbt, registryLookup);
 
 		if (nbt.contains("entitySpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
 			this.entitySpawnPositionOffset = new BlockPos(
@@ -239,6 +237,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		if (nbt.containsUuid("boundEntityUuid")) {
 			this.boundEntityUuid = nbt.getUuid("boundEntityUuid");
 		}
+
+		super.readNbt(nbt, registryLookup);
+
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

@@ -299,8 +299,6 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		super.readNbt(nbt, registryLookup);
-
 		// common
 		if (nbt.contains("transformation")) {
 			AffineTransformation.ANY_CODEC
@@ -466,6 +464,8 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			}
 		}
 
+		super.readNbt(nbt, registryLookup);
+
 	}
 
 	private static void writeFlag(byte flags, NbtCompound nbt, String nbtKey, byte flag) {
@@ -474,8 +474,6 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-
-		super.writeNbt(nbt, registryLookup);
 
 		// common
 		AffineTransformation.ANY_CODEC
@@ -530,6 +528,8 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		writeFlag(b, nbt, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
 		writeFlag(b, nbt, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
 		TextAlignment.CODEC.encodeStart(NbtOps.INSTANCE, getAlignment(b)).ifSuccess(nbtElement -> nbt.put(ALIGNMENT_NBT_KEY, nbtElement));
+
+		super.writeNbt(nbt, registryLookup);
 
 	}
 
@@ -873,6 +873,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 	//endregion getter/setter
 
+	// TODO
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
