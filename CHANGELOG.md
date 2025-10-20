@@ -1,3 +1,25 @@
+# 0.0.7
+
+## Additions
+
+- "Boss Controller Block" can now trigger a block when no players are present in its defined area
+- added optional "triggersBlockWhenNoPlayersAround" boolean field to boss data files (false by default)
+- added "scriptblocks:interactive_key" data component, used to restrict several block interactions
+- added "Interactive Trigger Blocks" in door and trap door form
+
+## Changes
+
+- "Boss Controller Block" no longer removes non-player entities in its defined area when reset. Use the "Triggered Entity Remover Block" for this instead.
+- Entrance Delegation Block now relays Triggered Spawner / Boss Controller Block spawn position
+- overhauled Use Relay Chest blocks, now use the new "interactive_key" feature and can trigger a block when opened
+
+## Fixes
+
+- fixed "rollable" setting of Jigsaw Placer Block
+- fixed manual location reset in teleporter screen
+- fixed an issue where block entity data would not be updated when the block was rotated/mirrored
+- fixed several issues with the Boss Controller Block
+
 # 0.0.6
 
 ## Additions
