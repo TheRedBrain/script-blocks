@@ -4,7 +4,6 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -15,13 +14,10 @@ import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -30,6 +26,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -40,21 +37,15 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayChestBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<UseRelayChestBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> instance.group(
-			TagKey.codec(RegistryKeys.ITEM).fieldOf("requiredKeys").forGetter(config -> config.requiredKeys),
-			createSettingsCodec()
-	).apply(instance, UseRelayChestBlock::new));
+	public static final MapCodec<UseRelayChestBlock> CODEC = createCodec(UseRelayChestBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty OPEN = Properties.OPEN;
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	@Nullable
-	private final TagKey<Item> requiredKeys; // TODO refactor into block entity data
 	protected static final VoxelShape CLOSED_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
 	protected static final VoxelShape OPENED_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 10.0, 15.0);
 
-	public UseRelayChestBlock(@Nullable TagKey<Item> requiredKeys, Settings settings) {
+	public UseRelayChestBlock(Settings settings) {
 		super(settings);
-		this.requiredKeys = requiredKeys;
 		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(WATERLOGGED, false));
 	}
 
@@ -105,18 +96,35 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayChestBlockEntity useRelayChestBlockEntity) {
 			if (player.isCreativeLevelTwoOp()) {
-				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayChestBlockEntity);
+				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayChestBlockScreen(useRelayChestBlockEntity);
 				return ActionResult.success(world.isClient);
 			} else {
 				if (!state.get(OPEN)) {
-					ItemStack mainHandStack = player.getMainHandStack();
-					if (this.requiredKeys == null || mainHandStack.isIn(this.requiredKeys)) {
+					if (useRelayChestBlockEntity.canTrigger(player)) {
+						if (!useRelayChestBlockEntity.getUnlockedMessage().isEmpty() && !world.isClient) {
+							player.sendMessage(Text.translatable(useRelayChestBlockEntity.getUnlockedMessage()), true);
+						}
+						if (!useRelayChestBlockEntity.getUnlockedSound().isEmpty() && !world.isClient) {
+							SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(useRelayChestBlockEntity.getUnlockedSound()));
+							if (soundEvent != null) {
+								world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+							}
+						}
+						useRelayChestBlockEntity.tryToConsumeKeyItem(player);
 						world.setBlockState(pos, state.with(OPEN, true), Block.NOTIFY_LISTENERS);
-						world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
-						return ActionResult.success(world.isClient);
+						useRelayChestBlockEntity.trigger();
 					} else {
-						player.sendMessage(Text.translatable("hud.message.keyIsNeeded"), true);
+						if (!useRelayChestBlockEntity.getLockedMessage().isEmpty() && !world.isClient) {
+							player.sendMessage(Text.translatable(useRelayChestBlockEntity.getLockedMessage()), true);
+						}
+						if (!useRelayChestBlockEntity.getLockedSound().isEmpty() && !world.isClient) {
+							SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(useRelayChestBlockEntity.getLockedSound()));
+							if (soundEvent != null) {
+								world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+							}
+						}
 					}
+					return ActionResult.success(world.isClient);
 				} else {
 					BlockPos relayBlockPosOffset = useRelayChestBlockEntity.getRelayBlockPositionOffset();
 					BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());

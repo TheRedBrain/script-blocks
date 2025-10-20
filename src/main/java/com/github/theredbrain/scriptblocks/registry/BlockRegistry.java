@@ -152,8 +152,8 @@ public class BlockRegistry {
 	public static final Block USE_RELAY_CRIMSON_TRAPDOOR = registerBlock("use_relay_crimson_trapdoor", new UseRelayTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DULL_PINK).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_WARPED_TRAPDOOR = registerBlock("use_relay_warped_trapdoor", new UseRelayTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
-	public static final Block USE_RELAY_CHEST = registerBlock("use_relay_chest", new UseRelayChestBlock(null, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block LOCKED_USE_RELAY_CHEST = registerBlock("locked_use_relay_chest", new UseRelayChestBlock(Tags.KEYS_FOR_LOCKED_USE_RELAY_CHEST, Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block USE_RELAY_CHEST = registerBlock("use_relay_chest", new UseRelayChestBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block LOCKED_USE_RELAY_CHEST = registerBlock("locked_use_relay_chest", new UseRelayChestBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
 	public static final Block USE_RELAY_LECTERN = registerBlock("use_relay_lectern", new UseRelayLecternBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 

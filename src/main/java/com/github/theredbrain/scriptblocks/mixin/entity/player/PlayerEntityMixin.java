@@ -33,6 +33,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -276,6 +277,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@Override
 	public void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
+	}
+
+	@Override
+	public void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock) {
 	}
 
 	@Override

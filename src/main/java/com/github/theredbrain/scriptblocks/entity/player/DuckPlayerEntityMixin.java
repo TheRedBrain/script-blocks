@@ -34,6 +34,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -88,6 +89,8 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity);
 
 	void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock);
+
+	void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock);
 
 	void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
 

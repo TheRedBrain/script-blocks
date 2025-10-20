@@ -33,6 +33,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.AreaBlockScreen;
@@ -70,6 +71,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockSc
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredVillagerSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayChestBlockScreen;
 import com.github.theredbrain.scriptblocks.network.message.DuckMessageHandlerMixin;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.mojang.authlib.GameProfile;
@@ -218,6 +220,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
 		this.client.setScreen(new UseRelayBlockScreen(useRelayBlock));
+	}
+
+	@Override
+	public void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock) {
+		this.client.setScreen(new UseRelayChestBlockScreen(useRelayChestBlock));
 	}
 
 	@Override

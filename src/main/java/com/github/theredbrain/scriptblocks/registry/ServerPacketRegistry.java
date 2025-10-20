@@ -88,6 +88,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillage
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayChestBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayChestBlockPacketReceiver;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
@@ -162,6 +164,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateUseRelayBlockPacket.PACKET_ID, UpdateUseRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayBlockPacket.PACKET_ID, new UpdateUseRelayBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateUseRelayChestBlockPacket.PACKET_ID, UpdateUseRelayChestBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayChestBlockPacket.PACKET_ID, new UpdateUseRelayChestBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(LeaveHouseFromHousingScreenPacket.PACKET_ID, LeaveHouseFromHousingScreenPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(LeaveHouseFromHousingScreenPacket.PACKET_ID, new LeaveHouseFromHousingScreenPacketReceiver());
