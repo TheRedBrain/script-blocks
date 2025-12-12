@@ -750,7 +750,7 @@
 	"block.scriptblocks.use_relay_chest": "Use Relay Chest",
 	"block.scriptblocks.locked_use_relay_chest": "Locked Use Relay Chest",
 
-	"block.scriptblocks.lootable_vault_block": "Lootable Vault",
+	"block.scriptblocks.lootable_vault_block": "Lootable Vault (Deprecated)",
 	"block.scriptblocks.triggering_trial_spawner_block": "Triggering Trial Spawner",
 
 	"block.scriptblocks.area_block": "Area Block",
@@ -765,7 +765,7 @@
 	"block.scriptblocks.dialogue_block": "Dialogue Block",
 	"block.scriptblocks.entrance_delegation_block": "Entrance Delegation Block",
 	"block.scriptblocks.housing_block": "Housing Block",
-	"block.scriptblocks.interactive_loot_block": "Interactive Loot Block",
+	"block.scriptblocks.interactive_loot_block": "Interactive Loot Block (Deprecated)",
 	"block.scriptblocks.jigsaw_placer_block": "Jigsaw Placer Block",
 	"block.scriptblocks.location_control_block": "Location Control Block",
 	"block.scriptblocks.mimic_block": "Mimic Block",

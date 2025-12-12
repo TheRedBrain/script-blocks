@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import net.minecraft.block.BlockState;
@@ -99,6 +100,7 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			nbt.remove("alreadyLootedSoundId");
 		}
 
+		ScriptBlocks.info("deprecated Interactive Loot Block detected at: " + this.pos.toString());
 		super.writeNbt(nbt, registryLookup);
 	}
 

@@ -91,6 +91,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		nbt.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup));
 		nbt.put("server_data", encodeValue(LootableVaultServerData.CODEC, this.serverData, registryLookup));
 
+		ScriptBlocks.info("deprecated Lootable Vault Block detected at: " + this.pos.toString());
 		super.writeNbt(nbt, registryLookup);
 	}
 
