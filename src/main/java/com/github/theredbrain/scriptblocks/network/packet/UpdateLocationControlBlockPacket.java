@@ -20,6 +20,7 @@ public record UpdateLocationControlBlockPacket(
 		boolean triggeredBlockResets,
 		BlockPos dataSavingBlockPosOffset,
 		boolean shouldAlwaysReset,
+		boolean manualReset,
 		int resetAreaMinX,
 		int resetAreaMinZ,
 		int resetAreaMaxX,
@@ -39,6 +40,7 @@ public record UpdateLocationControlBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt(),
@@ -56,6 +58,7 @@ public record UpdateLocationControlBlockPacket(
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBlockPos(this.dataSavingBlockPosOffset);
 		registryByteBuf.writeBoolean(this.shouldAlwaysReset);
+		registryByteBuf.writeBoolean(this.manualReset);
 		registryByteBuf.writeInt(this.resetAreaMinX);
 		registryByteBuf.writeInt(this.resetAreaMinZ);
 		registryByteBuf.writeInt(this.resetAreaMaxX);

@@ -42,6 +42,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 		BlockPos dataSavingBlockPosOffset = payload.dataSavingBlockPosOffset();
 
 		boolean shouldAlwaysReset = payload.shouldAlwaysReset();
+		boolean manualReset = payload.manualReset();
 
 		int resetAreaMinX = payload.resetAreaMinX();
 		int resetAreaMinZ = payload.resetAreaMinZ();
@@ -60,6 +61,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			locationControlBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);
 			locationControlBlockEntity.setShouldAlwaysReset(shouldAlwaysReset);
+			locationControlBlockEntity.setManualReset(manualReset);
 			locationControlBlockEntity.setResetAreaMinX(resetAreaMinX);
 			locationControlBlockEntity.setResetAreaMinZ(resetAreaMinZ);
 			locationControlBlockEntity.setResetAreaMaxX(resetAreaMaxX);

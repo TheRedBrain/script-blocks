@@ -52,6 +52,7 @@ public class LocationControlBlockScreen extends Screen {
 	private TextFieldWidget mainEntranceOrientationYawField;
 	private TextFieldWidget mainEntranceOrientationPitchField;
 	private CyclingButtonWidget<Boolean> toggleShouldAlwaysResetButton;
+	private CyclingButtonWidget<Boolean> toggleManualResetButton;
 	private ButtonWidget removeSideEntranceButton0;
 	private ButtonWidget removeSideEntranceButton1;
 	private ButtonWidget removeSideEntranceButton2;
@@ -79,6 +80,7 @@ public class LocationControlBlockScreen extends Screen {
 	private ScreenPage screenPage;
 	private List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntranceList = new ArrayList<>();
 	private boolean shouldAlwaysReset;
+	private boolean manualReset;
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
@@ -183,8 +185,13 @@ public class LocationControlBlockScreen extends Screen {
 		this.addSelectableChild(this.mainEntranceOrientationPitchField);
 
 		this.shouldAlwaysReset = this.locationControlBlock.shouldAlwaysReset();
-		this.toggleShouldAlwaysResetButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.on"), Text.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.off")).initially(this.shouldAlwaysReset).omitKeyText().build(this.width / 2 - 154, 150, 300, 20, Text.empty(), (button, shouldAlwaysReset) -> {
+		this.toggleShouldAlwaysResetButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.on"), Text.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.off")).initially(this.shouldAlwaysReset).omitKeyText().build(this.width / 2 - 154, 150, 150, 20, Text.empty(), (button, shouldAlwaysReset) -> {
 			this.shouldAlwaysReset = shouldAlwaysReset;
+		}));
+
+		this.manualReset = this.locationControlBlock.getManualReset();
+		this.toggleManualResetButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.location_controller_block.toggle_manual_reset_button_label.on"), Text.translatable("gui.location_controller_block.toggle_manual_reset_button_label.off")).initially(this.manualReset).omitKeyText().build(this.width / 2 + 4, 150, 150, 20, Text.empty(), (button, manualReset) -> {
+			this.manualReset = manualReset;
 		}));
 
 		// --- side entrances page ---
@@ -297,6 +304,7 @@ public class LocationControlBlockScreen extends Screen {
 		this.mainEntranceOrientationPitchField.setVisible(false);
 
 		this.toggleShouldAlwaysResetButton.visible = false;
+		this.toggleManualResetButton.visible = false;
 
 		this.removeSideEntranceButton0.visible = false;
 		this.removeSideEntranceButton1.visible = false;
@@ -338,6 +346,7 @@ public class LocationControlBlockScreen extends Screen {
 			this.mainEntranceOrientationPitchField.setVisible(true);
 
 			this.toggleShouldAlwaysResetButton.visible = true;
+			this.toggleManualResetButton.visible = true;
 
 		} else if (this.screenPage == ScreenPage.SIDE_ENTRANCES) {
 
@@ -393,6 +402,8 @@ public class LocationControlBlockScreen extends Screen {
 		int number = this.scrollPosition;
 		float number1 = this.scrollAmount;
 		boolean bl = this.shouldAlwaysReset;
+		boolean bl1 = this.manualReset;
+		boolean bl2 = this.triggeredBlockResets;
 		String string = this.mainEntrancePositionOffsetXField.getText();
 		String string1 = this.mainEntrancePositionOffsetYField.getText();
 		String string2 = this.mainEntrancePositionOffsetZField.getText();
@@ -414,7 +425,6 @@ public class LocationControlBlockScreen extends Screen {
 		String string18 = this.resetAreaMinZField.getText();
 		String string19 = this.resetAreaMaxXField.getText();
 		String string20 = this.resetAreaMaxZField.getText();
-		boolean bl2 = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.sideEntranceList.clear();
 		this.sideEntranceList.addAll(list);
@@ -422,6 +432,8 @@ public class LocationControlBlockScreen extends Screen {
 		this.scrollPosition = number;
 		this.scrollAmount = number1;
 		this.shouldAlwaysReset = bl;
+		this.manualReset = bl1;
+		this.triggeredBlockResets = bl2;
 		this.mainEntrancePositionOffsetXField.setText(string);
 		this.mainEntrancePositionOffsetYField.setText(string1);
 		this.mainEntrancePositionOffsetZField.setText(string2);
@@ -443,7 +455,6 @@ public class LocationControlBlockScreen extends Screen {
 		this.resetAreaMinZField.setText(string18);
 		this.resetAreaMaxXField.setText(string19);
 		this.resetAreaMaxZField.setText(string20);
-		this.triggeredBlockResets = bl2;
 		this.updateWidgets();
 	}
 
@@ -592,6 +603,7 @@ public class LocationControlBlockScreen extends Screen {
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
 				),
 				this.shouldAlwaysReset,
+				this.manualReset,
 				ItemUtils.parseInt(this.resetAreaMinXField.getText()),
 				ItemUtils.parseInt(this.resetAreaMinZField.getText()),
 				ItemUtils.parseInt(this.resetAreaMaxXField.getText()),

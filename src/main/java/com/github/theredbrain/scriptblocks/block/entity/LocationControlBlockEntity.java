@@ -277,6 +277,10 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		this.manualReset = true;
 	}
 
+	public boolean getManualReset() {
+		return this.manualReset;
+	}
+
 	public void setManualReset(boolean manualReset) {
 		this.manualReset = manualReset;
 	}
