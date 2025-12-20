@@ -309,6 +309,7 @@
 
 
 	"gui.pvp_controller_block.pvp_arena_settings_id_label": "PVP Arena Settings Identifier",
+	"gui.pvp_controller_block.match_end_triggered_block_position_offset": "Triggered Block position Offset (On Match End)",
 	"gui.pvp_controller_block.remove_list_entry_button_label": "remove",
 	"gui.pvp_controller_block.new_respawn_position_offset_label": "Position Offset",
 	"gui.pvp_controller_block.new_respawn_position_name_label": "Name",

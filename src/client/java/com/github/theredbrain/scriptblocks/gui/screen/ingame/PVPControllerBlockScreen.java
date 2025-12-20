@@ -31,7 +31,7 @@ import java.util.Optional;
 @Environment(value = EnvType.CLIENT)
 public class PVPControllerBlockScreen extends Screen {
 	private static final Text PVP_ARENA_SETTINGS_ID_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.pvp_arena_settings_id_label");
-	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.pvp_controller_block.match_end_triggered_block_position_offset");
 	private static final Text DATA_PROVIDING_BLOCK_POSITION_TEXT = Text.translatable("gui.pvp_controller_block.data_providing_block_position_offset");
 	private static final Text MATCH_DURATION_DATA_IDENTIFIER_TEXT = Text.translatable("gui.pvp_controller_block.match_duration_data_identifier");
 	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.remove_list_entry_button_label");
@@ -456,11 +456,7 @@ public class PVPControllerBlockScreen extends Screen {
 
 	@Override
 	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		super.renderBackground(context, mouseX, mouseY, delta);
-		this.drawBackground(context, delta, mouseX, mouseY);
-	}
-
-	public void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+		this.renderInGameBackground(context);
 	}
 
 	private boolean updatePVPControllerBlock() {
