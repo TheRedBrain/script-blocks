@@ -45,8 +45,6 @@ public class ScriptBlocks implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ServerConfig SERVER_CONFIG;
 
-	// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
-//	public static final boolean isMidnightLibLoaded = FabricLoader.getInstance().isModLoaded("midnightlib");
 	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
 	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");
 
@@ -127,12 +125,6 @@ public class ScriptBlocks implements ModInitializer {
 
 		// Config
 		SERVER_CONFIG = ConfigApiJava.registerAndLoadConfig(ServerConfig::new, RegisterType.BOTH);
-
-		// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
-//		if (isMidnightLibLoaded) {
-//			DimensionAPI.suppressExperimentalWarning();
-//			MidnightConfig.write(DimLibEntry.MODID);
-//		}
 
 		// Packets
 		ServerPacketRegistry.init();

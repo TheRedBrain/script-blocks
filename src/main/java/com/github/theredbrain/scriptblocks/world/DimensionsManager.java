@@ -8,68 +8,54 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionTypes;
 import net.minecraft.world.gen.FlatLevelGeneratorPreset;
 import net.minecraft.world.gen.chunk.FlatChunkGenerator;
-import qouteall.dimlib.DimensionTemplate;
-import qouteall.dimlib.api.DimensionAPI;
+import xyz.nucleoid.fantasy.Fantasy;
+import xyz.nucleoid.fantasy.RuntimeWorldConfig;
 
 public class DimensionsManager {
-
-	// TODO
-	//  check out https://github.com/NucleoidMC/fantasy
 
 	public static Identifier PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER = ScriptBlocks.identifier("public_locations_dimension");
 
 	public static void init() {
-		DimensionAPI.registerDimensionTemplate(
-				"player_locations", PLAYER_LOCATIONS_DIMENSION_TEMPLATE
-		);
 	}
 
 	public static void addAndSavePublicDimension(Identifier dimensionId, MinecraftServer server) {
-		DimensionAPI.addDimensionDynamically(server, dimensionId, PUBLIC_LOCATIONS_DIMENSION_TEMPLATE.createLevelStem(server));
+
+		Fantasy fantasy = Fantasy.get(server);
+
+		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
+				.setDimensionType(DimensionTypes.OVERWORLD)
+				.setFlat(true)
+				.setMirrorOverworldDifficulty(true)
+				.setMirrorOverworldGameRules(true)
+				.setGenerator(server.getOverworld().getChunkManager().getChunkGenerator());
+
+		fantasy.getOrOpenPersistentWorld(dimensionId, worldConfig);
+
 	}
 
 	public static void addAndSaveDynamicDimension(Identifier dimensionId, MinecraftServer server) {
-		DimensionAPI.addDimensionDynamically(server, dimensionId, PLAYER_LOCATIONS_DIMENSION_TEMPLATE.createLevelStem(server));
+
+		Fantasy fantasy = Fantasy.get(server);
+
+		DynamicRegistryManager.Immutable registryAccess = server.getRegistryManager();
+
+		Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = registryAccess.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
+
+		RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("player_locations_dimension")));
+
+		FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
+
+		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
+				.setDimensionType(DimensionTypes.OVERWORLD)
+				.setFlat(true)
+				.setMirrorOverworldDifficulty(true)
+				.setMirrorOverworldGameRules(true)
+				.setGenerator(chunkGenerator);
+
+		fantasy.getOrOpenPersistentWorld(dimensionId, worldConfig);
+
 	}
-
-//	public static final DimensionTemplate RESOURCE_WORLD_DIMENSION_TEMPLATE = new DimensionTemplate(
-//			DimensionTypes.OVERWORLD,
-//			(server, dimTypeHolder) -> {
-//				return WorldPresets.getDefaultOverworldOptions(server.getRegistryManager());
-//			}
-//	);
-
-	public static final DimensionTemplate PLAYER_LOCATIONS_DIMENSION_TEMPLATE = new DimensionTemplate(
-			DimensionTypes.OVERWORLD,
-			(server, dimTypeHolder) -> {
-				DynamicRegistryManager.Immutable registryAccess = server.getRegistryManager();
-
-				Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = registryAccess.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
-
-				RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("player_locations_dimension")));
-
-				FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
-
-				return new DimensionOptions(dimTypeHolder, chunkGenerator);
-			}
-	);
-
-	public static final DimensionTemplate PUBLIC_LOCATIONS_DIMENSION_TEMPLATE = new DimensionTemplate(
-			DimensionTypes.OVERWORLD,
-			(server, dimTypeHolder) -> {
-				DynamicRegistryManager.Immutable registryAccess = server.getRegistryManager();
-
-				Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = registryAccess.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
-
-				RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("public_locations_dimension")));
-
-				FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
-
-				return new DimensionOptions(dimTypeHolder, chunkGenerator);
-			}
-	);
 }

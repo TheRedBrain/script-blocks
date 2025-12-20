@@ -13,12 +13,6 @@ base {
 }
 
 repositories {
-	}
-
-	// DimLib
-	maven {
-		url 'https://jitpack.io'
-	}
 
 	// RPG Inventory, Slot Customization API
 	maven {
@@ -34,6 +28,10 @@ repositories {
 		name = "FzzyMaven"
 		url = "https://maven.fzzyhmstrs.me/"
 	}
+
+	// Fantasy
+	maven { url = 'https://maven.nucleoid.xyz/' }
+
 }
 
 loom {
@@ -105,10 +103,9 @@ dependencies {
 	// Lootable
 	modImplementation "me.fzzyhmstrs:lootables:${project.lootable_version}"
 
-	// DimLib
-	modApi("com.github.iPortalTeam:DimLib:${dimlib_version}") {
-		exclude(group: "net.fabricmc.fabric-api")
-	}
+	// Fantasy
+	include "xyz.nucleoid:fantasy:${project.fantasy_version}"
+	modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
 
 	// Slot Customization API
 	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
