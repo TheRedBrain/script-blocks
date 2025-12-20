@@ -1,57 +1,29 @@
 package com.github.theredbrain.scriptblocks.mixin.item;
 
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.stat.Stats;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
-	@Shadow
-	public Item getItem() {
-		throw new AssertionError();
-	}
-
-	@Shadow
-	public Text getName() {
-		throw new AssertionError();
-	}
-
-	@Shadow
-	public abstract boolean canPlaceOn(CachedBlockPosition pos);
-
 	/**
 	 * @author TheRedBrain
-	 * @reason TODO
 	 */
-	@Overwrite
-	public ActionResult useOnBlock(ItemUsageContext context) {
-		PlayerEntity playerEntity = context.getPlayer();
-		BlockPos blockPos = context.getBlockPos();
-
-		CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(context.getWorld(), blockPos, false);
+	@WrapOperation(method = "useOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/block/pattern/CachedBlockPosition;)Z"))
+	public boolean useOnBlock(ItemStack instance, CachedBlockPosition pos, Operation<Boolean> original, @Local(argsOnly = true) ItemUsageContext context) {
 		RegistryEntry<StatusEffect> building_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE);
-		if (playerEntity != null && !playerEntity.getAbilities().allowModifyWorld && !playerEntity.hasStatusEffect(building_status_effect)/* && !bl*/ && !this.canPlaceOn(cachedBlockPosition)) {
-			return ActionResult.PASS;
-		}
-		Item item = this.getItem();
-		ActionResult actionResult = item.useOnBlock(context);
-		if (playerEntity != null && actionResult.shouldIncrementStat()) {
-			playerEntity.incrementStat(Stats.USED.getOrCreateStat(item));
-		}
-		return actionResult;
+		PlayerEntity playerEntity = context.getPlayer();
+		return original.call(instance, pos) || (playerEntity != null && playerEntity.hasStatusEffect(building_status_effect));
 	}
 }
