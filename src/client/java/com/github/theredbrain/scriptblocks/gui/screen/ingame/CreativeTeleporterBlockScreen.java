@@ -72,7 +72,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.off");
-	private static final Text STATUS_EFFECT_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effect_tag_id_field");
+	private static final Text STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effects_to_decrement_tag_id_field");
+	private static final Text STATUS_EFFECTS_TO_REMOVE_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effects_to_remove_tag_id_field");
+	private static final Text ITEMS_TO_REMOVE_FIELD_TEXT = Text.translatable("gui.teleporter_block.items_to_remove_field");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
@@ -94,7 +96,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget accessPositionOffsetXField;
 	private TextFieldWidget accessPositionOffsetYField;
 	private TextFieldWidget accessPositionOffsetZField;
-	private TextFieldWidget statusEffectTagIdField;
+	private TextFieldWidget statusEffectsToDecrementTagIdField;
+	private TextFieldWidget statusEffectsToRemoveTagIdField;
+	private TextFieldWidget removedItemIdentifierField;
 	private CyclingButtonWidget<Boolean> toggleSetAccessPositionButton;
 	private CyclingButtonWidget<Boolean> toggleOnlyTeleportDimensionOwnerButton;
 	private CyclingButtonWidget<Boolean> toggleTeleportTeamButton;
@@ -468,10 +472,20 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		// --- status effect page ---
 
-		this.statusEffectTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
-		this.statusEffectTagIdField.setMaxLength(128);
-		this.statusEffectTagIdField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
-		this.addSelectableChild(this.statusEffectTagIdField);
+		this.statusEffectsToDecrementTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
+		this.statusEffectsToDecrementTagIdField.setMaxLength(128);
+		this.statusEffectsToDecrementTagIdField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
+		this.addSelectableChild(this.statusEffectsToDecrementTagIdField);
+
+		this.statusEffectsToRemoveTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
+		this.statusEffectsToRemoveTagIdField.setMaxLength(128);
+		this.statusEffectsToRemoveTagIdField.setText(this.teleporterBlock.getStatusEffectsToRemoveOnTeleport());
+		this.addSelectableChild(this.statusEffectsToRemoveTagIdField);
+
+		this.removedItemIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
+		this.removedItemIdentifierField.setMaxLength(128);
+		this.removedItemIdentifierField.setText(this.teleporterBlock.getItemsToRemoveOnTeleport());
+		this.addSelectableChild(this.removedItemIdentifierField);
 
 		// --- adventure screen customization page ---
 
@@ -582,7 +596,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.sendDataIdentifierDataIdentifierField.setVisible(false);
 		this.sendDataValueDataIdentifierField.setVisible(false);
 
-		this.statusEffectTagIdField.setVisible(false);
+		this.statusEffectsToDecrementTagIdField.setVisible(false);
+		this.statusEffectsToRemoveTagIdField.setVisible(false);
+		this.removedItemIdentifierField.setVisible(false);
 
 		this.teleporterNameField.setVisible(false);
 		this.currentTargetIdentifierLabelField.setVisible(false);
@@ -679,7 +695,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
 
-			this.statusEffectTagIdField.setVisible(true);
+			this.statusEffectsToDecrementTagIdField.setVisible(true);
+			this.statusEffectsToRemoveTagIdField.setVisible(true);
+			this.removedItemIdentifierField.setVisible(true);
 
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
@@ -737,7 +755,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string15 = this.newLocationEntranceField.getText();
 		String string16 = this.newDataIdField.getText();
 		String string17 = this.newDataField.getText();
-		String string18 = this.statusEffectTagIdField.getText();
+		String string18 = this.statusEffectsToDecrementTagIdField.getText();
 		String string19 = this.teleporterNameField.getText();
 		String string20 = this.currentTargetOwnerLabelField.getText();
 		String string21 = this.currentTargetIdentifierLabelField.getText();
@@ -747,7 +765,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string25 = this.locationEntranceField.getText();
 		String string26 = this.locationDataIdField.getText();
 		String string27 = this.locationDataField.getText();
-		String string28 = this.statusEffectTagIdField.getText();
+		String string28 = this.statusEffectsToRemoveTagIdField.getText();
+		String string29 = this.removedItemIdentifierField.getText();
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list1 = new ArrayList<>(this.locationsList);
 		this.init(client, width, height);
 		this.creativeScreenPage = var;
@@ -779,7 +798,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.newLocationEntranceField.setText(string15);
 		this.newDataIdField.setText(string16);
 		this.newDataField.setText(string17);
-		this.statusEffectTagIdField.setText(string18);
+		this.statusEffectsToDecrementTagIdField.setText(string18);
 		this.teleporterNameField.setText(string19);
 		this.currentTargetOwnerLabelField.setText(string20);
 		this.currentTargetIdentifierLabelField.setText(string21);
@@ -789,7 +808,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.locationEntranceField.setText(string25);
 		this.locationDataIdField.setText(string26);
 		this.locationDataField.setText(string27);
-		this.statusEffectTagIdField.setText(string28);
+		this.statusEffectsToRemoveTagIdField.setText(string28);
+		this.removedItemIdentifierField.setText(string29);
 		this.locationsList.clear();
 		this.locationsList.addAll(list1);
 	}
@@ -935,8 +955,14 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
 
-			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECT_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-			this.statusEffectTagIdField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			this.statusEffectsToDecrementTagIdField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_REMOVE_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.statusEffectsToRemoveTagIdField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, ITEMS_TO_REMOVE_FIELD_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			this.removedItemIdentifierField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
@@ -1009,7 +1035,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 						ItemUtils.parseInt(this.accessPositionOffsetZField.getText())
 				),
 				this.setAccessPosition,
-				this.statusEffectTagIdField.getText(),
+				this.statusEffectsToDecrementTagIdField.getText(),
+				this.statusEffectsToRemoveTagIdField.getText(),
+				this.removedItemIdentifierField.getText(),
 				this.onlyTeleportDimensionOwner,
 				this.teleportTeam,
 				this.teleportationMode.asString(),

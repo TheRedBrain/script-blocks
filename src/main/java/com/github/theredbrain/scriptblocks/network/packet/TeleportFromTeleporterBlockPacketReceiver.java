@@ -8,6 +8,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
@@ -63,6 +64,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		String targetLocation = payload.targetLocation();
 		String targetLocationEntrance = payload.targetLocationEntrance();
 		String statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
+		String statusEffectsToRemoveOnTeleport = payload.statusEffectsToRemoveOnTeleport();
+		String removedItemIdentifier = payload.itemsToRemoveOnTeleport();
 		String dataId = payload.dataId();
 		String data = payload.data();
 
@@ -264,7 +267,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 		if (targetWorld != null && targetPos != null && playerHadKeyItem) {
 
-			TagKey<StatusEffect> tag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToDecrementLevelOnTeleport));
+			TagKey<StatusEffect> removalTag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToRemoveOnTeleport));
+			TagKey<StatusEffect> decrementingTag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToDecrementLevelOnTeleport));
 			serverPlayerEntity.fallDistance = 0;
 			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
@@ -273,14 +277,19 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
 				}
 			}
+
 			serverPlayerEntity.closeHandledScreen();
 
 			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects().stream().toList()) {
 				RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
 				boolean isPortalResistanceEffect = statusEffectRegistryEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
-				if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(tag)) {
+				if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(removalTag)) {
+					serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
+					continue;
+				}
+				if (statusEffectRegistryEntry.isIn(decrementingTag)) {
 					int oldAmplifier = statusEffectInstance.getAmplifier();
-					if (oldAmplifier <= 0 || isPortalResistanceEffect) {
+					if (oldAmplifier <= 0) {
 						serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
 					} else {
 						StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
@@ -289,6 +298,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					}
 				}
 			}
+			PlayerEntityHelper.removeItemsOnTeleport(serverPlayerEntity, removedItemIdentifier);
 
 			if (teleportTeam) {
 				Team team = serverPlayerEntity.getScoreboardTeam();
@@ -309,9 +319,13 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							for (StatusEffectInstance statusEffectInstance : teamServerPlayerEntity.getStatusEffects().stream().toList()) {
 								RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
 								boolean isPortalResistanceEffect = statusEffectRegistryEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
-								if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(tag)) {
+								if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(removalTag)) {
+									teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
+									continue;
+								}
+								if (statusEffectRegistryEntry.isIn(decrementingTag)) {
 									int oldAmplifier = statusEffectInstance.getAmplifier();
-									if (oldAmplifier <= 0 || isPortalResistanceEffect) {
+									if (oldAmplifier <= 0) {
 										teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
 									} else {
 										StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
@@ -320,6 +334,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 									}
 								}
 							}
+							PlayerEntityHelper.removeItemsOnTeleport(teamServerPlayerEntity, removedItemIdentifier);
 						}
 					}
 				}

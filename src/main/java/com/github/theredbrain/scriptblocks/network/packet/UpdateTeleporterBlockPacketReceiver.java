@@ -39,6 +39,8 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		boolean setAccessPosition = payload.setAccessPosition();
 
 		String statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
+		String statusEffectsToRemoveOnTeleport = payload.statusEffectsToRemoveOnTeleport();
+		String itemsToRemoveOnTeleport = payload.itemsToRemoveOnTeleport();
 
 		boolean onlyTeleportDimensionOwner = payload.onlyTeleportDimensionOwner();
 		boolean teleportTeam = payload.teleportTeam();
@@ -86,6 +88,8 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setAccessPositionOffset(accessPositionOffset);
 			teleporterBlockEntity.setSetAccessPosition(setAccessPosition);
 			teleporterBlockEntity.setStatusEffectsToDecrementLevelOnTeleport(statusEffectsToDecrementLevelOnTeleport);
+			teleporterBlockEntity.setStatusEffectsToRemoveOnTeleport(statusEffectsToRemoveOnTeleport);
+			teleporterBlockEntity.setItemsToRemoveOnTeleport(itemsToRemoveOnTeleport);
 			teleporterBlockEntity.setOnlyTeleportDimensionOwner(onlyTeleportDimensionOwner);
 			teleporterBlockEntity.setTeleportTeam(teleportTeam);
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);

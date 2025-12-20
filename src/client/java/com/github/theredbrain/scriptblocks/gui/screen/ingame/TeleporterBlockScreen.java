@@ -871,6 +871,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				this.currentTargetIdentifier,
 				this.currentTargetEntrance,
 				this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport(),
+				this.teleporterBlock.getStatusEffectsToRemoveOnTeleport(),
+				this.teleporterBlock.getItemsToRemoveOnTeleport(),
 				this.currentTargetEntranceDataId,
 				this.currentTargetEntranceData
 		));

@@ -55,7 +55,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private boolean setAccessPosition = false;
 
 	private String statusEffectsToDecrementLevelOnTeleport = "";
-//	private String statusEffectsToRemoveOnTeleport = ""; // TODO
+	private String statusEffectsToRemoveOnTeleport = "";
+	private String itemsToRemoveOnTeleport = "";
 
 	private boolean onlyTeleportDimensionOwner = false;
 	private boolean teleportTeam = false;
@@ -124,6 +125,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putBoolean("setAccessPosition", this.setAccessPosition);
 
 		nbt.putString("statusEffectsToDecrementLevelOnTeleport", this.statusEffectsToDecrementLevelOnTeleport);
+
+		nbt.putString("statusEffectsToRemoveOnTeleport", this.statusEffectsToRemoveOnTeleport);
+
+		nbt.putString("itemsToRemoveOnTeleport", this.itemsToRemoveOnTeleport);
 
 		nbt.putBoolean("onlyTeleportDimensionOwner", this.onlyTeleportDimensionOwner);
 
@@ -212,6 +217,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.setAccessPosition = nbt.getBoolean("setAccessPosition");
 
 		this.statusEffectsToDecrementLevelOnTeleport = nbt.getString("statusEffectsToDecrementLevelOnTeleport");
+
+		this.statusEffectsToRemoveOnTeleport = nbt.getString("statusEffectsToRemoveOnTeleport");
+
+		this.itemsToRemoveOnTeleport = nbt.getString("itemsToRemoveOnTeleport");
 
 		this.onlyTeleportDimensionOwner = nbt.getBoolean("onlyTeleportDimensionOwner");
 
@@ -413,6 +422,22 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 	public void setStatusEffectsToDecrementLevelOnTeleport(String statusEffectsToDecrementLevelOnTeleport) {
 		this.statusEffectsToDecrementLevelOnTeleport = statusEffectsToDecrementLevelOnTeleport;
+	}
+
+	public String getStatusEffectsToRemoveOnTeleport() {
+		return this.statusEffectsToRemoveOnTeleport;
+	}
+
+	public void setStatusEffectsToRemoveOnTeleport(String statusEffectsToRemoveOnTeleport) {
+		this.statusEffectsToRemoveOnTeleport = statusEffectsToRemoveOnTeleport;
+	}
+
+	public String getItemsToRemoveOnTeleport() {
+		return this.itemsToRemoveOnTeleport;
+	}
+
+	public void setItemsToRemoveOnTeleport(String itemsToRemoveOnTeleport) {
+		this.itemsToRemoveOnTeleport = itemsToRemoveOnTeleport;
 	}
 
 	public boolean onlyTeleportDimensionOwner() {

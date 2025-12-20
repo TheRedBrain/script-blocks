@@ -22,6 +22,8 @@ public record UpdateTeleporterBlockPacket(
 		BlockPos accessPositionOffset,
 		boolean setAccessPosition,
 		String statusEffectsToDecrementLevelOnTeleport,
+		String statusEffectsToRemoveOnTeleport,
+		String itemsToRemoveOnTeleport,
 		boolean onlyTeleportDimensionOwner,
 		boolean teleportTeam,
 		String teleportationMode,
@@ -62,6 +64,8 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
@@ -107,6 +111,8 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeBoolean(this.setAccessPosition);
 
 		registryByteBuf.writeString(this.statusEffectsToDecrementLevelOnTeleport);
+		registryByteBuf.writeString(this.statusEffectsToRemoveOnTeleport);
+		registryByteBuf.writeString(this.itemsToRemoveOnTeleport);
 
 		registryByteBuf.writeBoolean(this.onlyTeleportDimensionOwner);
 		registryByteBuf.writeBoolean(this.teleportTeam);

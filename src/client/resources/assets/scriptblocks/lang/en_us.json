@@ -429,7 +429,9 @@
 	"gui.teleporter_block.send_data_id_label": "Data Id - Provided Data Id",
 	"gui.teleporter_block.send_data_value_label": "Data Value - Provided Data Id",
 	"gui.teleporter_block.data_providing_block_pos_offset_label": "Data Providing Block Pos Offset",
-	"gui.teleporter_block.status_effect_tag_id_field": "Status Effect Tag Identifier",
+	"gui.teleporter_block.status_effects_to_decrement_tag_id_field": "Status Effects To Decrement Tag Identifier",
+	"gui.teleporter_block.status_effects_to_remove_tag_id_field": "Status Effects To Remove Tag Identifier",
+	"gui.teleporter_block.items_to_remove_field": "Items To Remove On Teleport",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 
 	"gui.teleporter_block.requiredItemStackSlot.tooltip": "Item required for Teleportation",
@@ -796,6 +798,10 @@
 	"hud.message.onlyDimensionOwnerCanTeleport": "Only the dimension owner can teleport",
 	"hud.message.keyIsNeeded": "You need a key.",
 	"hud.message.script_block.update_successful": "Update successful",
+
+	"hud.message.location_reset.success": "Location was reset successfully!",
+	"hud.message.location_reset.target_world_not_found": "Location reset failed! Target world not found!",
+	"hud.message.location_reset.location_not_found": "Location reset failed! Location not found!",
 
 	"hud.message.housing_block.owner_uuid_invalid": "Invalid player UUID. This should not happen",
 	"hud.message.housing_block.unclaimed_successful": "House unclaimed successfully",

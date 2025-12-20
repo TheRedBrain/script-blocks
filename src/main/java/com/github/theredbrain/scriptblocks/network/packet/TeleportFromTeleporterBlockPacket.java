@@ -21,7 +21,8 @@ public record TeleportFromTeleporterBlockPacket(
 		String targetLocation,
 		String targetLocationEntrance,
 		String statusEffectsToDecrementLevelOnTeleport,
-//		String statusEffectsToRemoveOnTeleport, // TODO statusEffectsToRemoveOnTeleport
+		String statusEffectsToRemoveOnTeleport,
+		String itemsToRemoveOnTeleport,
 		String dataId,
 		String data
 ) implements CustomPayload {
@@ -39,6 +40,8 @@ public record TeleportFromTeleporterBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -64,6 +67,8 @@ public record TeleportFromTeleporterBlockPacket(
 		registryByteBuf.writeString(this.targetLocation);
 		registryByteBuf.writeString(this.targetLocationEntrance);
 		registryByteBuf.writeString(this.statusEffectsToDecrementLevelOnTeleport);
+		registryByteBuf.writeString(this.statusEffectsToRemoveOnTeleport);
+		registryByteBuf.writeString(this.itemsToRemoveOnTeleport);
 		registryByteBuf.writeString(this.dataId);
 		registryByteBuf.writeString(this.data);
 	}

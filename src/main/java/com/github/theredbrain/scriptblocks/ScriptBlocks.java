@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks;
 
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
+import com.github.theredbrain.scriptblocks.compatibility.RPGInventoryCompat;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
@@ -47,6 +48,7 @@ public class ScriptBlocks implements ModInitializer {
 	// TODO DimLib MidnightLib Integration seems to be unstable, need to further investigate
 //	public static final boolean isMidnightLibLoaded = FabricLoader.getInstance().isModLoaded("midnightlib");
 	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
+	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");
 
 	public static void supplyLootableLoot(Identifier identifier, ServerWorld world, ServerPlayerEntity serverPlayerEntity, Vec3d pos, int rolls, int choices, boolean withChoice, @Nullable ItemStack itemStack) {
 		if (isLootablesLoaded) {
@@ -73,6 +75,20 @@ public class ScriptBlocks implements ModInitializer {
 			if (serverWorld.getBlockEntity(currentPVPControllerBlockPosition.get()) instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 				pvpControllerBlockEntity.removePlayer(playerEntity);
 			}
+		}
+	}
+
+	public static ItemStack getRPGEquipmentStack(PlayerEntity playerEntity, int index) {
+		if (isRPGInventoryLoaded) {
+			return RPGInventoryCompat.getRPGEquipmentStack(playerEntity, index);
+		} else {
+			return ItemStack.EMPTY;
+		}
+	}
+
+	public static void setRPGEquipmentStack(PlayerEntity playerEntity, int index, ItemStack stack) {
+		if (isRPGInventoryLoaded) {
+			RPGInventoryCompat.setRPGEquipmentStack(playerEntity, index, stack);
 		}
 	}
 
