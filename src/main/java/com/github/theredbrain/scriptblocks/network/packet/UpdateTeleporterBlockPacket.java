@@ -42,6 +42,7 @@ public record UpdateTeleporterBlockPacket(
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
 		boolean showRegenerateButton,
+		boolean showCancelButton,
 		boolean canOwnerBeChosen,
 		String teleportButtonLabel,
 		String cancelTeleportButtonLabel
@@ -84,6 +85,7 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
@@ -140,6 +142,7 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);
 		registryByteBuf.writeString(this.currentTargetOwnerLabel);
 		registryByteBuf.writeBoolean(this.showRegenerateButton);
+		registryByteBuf.writeBoolean(this.showCancelButton);
 		registryByteBuf.writeBoolean(this.canOwnerBeChosen);
 		registryByteBuf.writeString(this.teleportButtonLabel);
 		registryByteBuf.writeString(this.cancelTeleportButtonLabel);

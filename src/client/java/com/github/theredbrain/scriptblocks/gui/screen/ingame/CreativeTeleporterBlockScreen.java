@@ -70,6 +70,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
+	private static final Text TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_cancel_button_button_label.on");
+	private static final Text TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_cancel_button_button_label.off");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.off");
 	private static final Text STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effects_to_decrement_tag_id_field");
@@ -148,6 +150,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private boolean onlyTeleportDimensionOwner;
 	private boolean teleportTeam;
 	private boolean showRegenerateButton;
+	private boolean showCancelButton;
 	private boolean canOwnerBeChosen;
 
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
@@ -177,6 +180,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
 		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
 		this.teleporterBlock.setShowRegenerateButton(this.showRegenerateButton);
+		this.teleporterBlock.setShowCancelButton(this.showCancelButton);
 		this.teleporterBlock.setCanOwnerBeChosen(this.canOwnerBeChosen);
 		this.teleporterBlock.setTeleportationMode(this.teleportationMode);
 		this.teleporterBlock.setSpawnPointType(this.spawnPointType);
@@ -241,6 +245,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.triggerActivation = this.teleporterBlock.triggerActivation();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
+		this.showCancelButton = this.teleporterBlock.showCancelButton();
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
 		this.locationModeScreenPage = LocationModeScreenPage.PAGE_1;
 
@@ -521,11 +526,15 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.teleportButtonLabelField.setText(this.teleporterBlock.getTeleportButtonLabel());
 		this.addSelectableChild(this.teleportButtonLabelField);
 
-		this.cancelTeleportButtonLabelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 300, 20, Text.empty());
+		this.cancelTeleportButtonLabelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 150, 20, Text.empty());
 		this.cancelTeleportButtonLabelField.setMaxLength(128);
 		this.cancelTeleportButtonLabelField.setPlaceholder(Text.translatable("gui.teleporter_block.cancel_teleport_button.place_holder"));
 		this.cancelTeleportButtonLabelField.setText(this.teleporterBlock.getCancelTeleportButtonLabel());
 		this.addSelectableChild(this.cancelTeleportButtonLabelField);
+
+		this.toggleShowRegenerateButtonButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF).initially(this.showCancelButton).omitKeyText().build(this.width / 2 + 4, 164, 150, 20, Text.empty(), (button, showCancelButton) -> {
+			this.showCancelButton = showCancelButton;
+		}));
 
 		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
@@ -737,6 +746,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		boolean bool5 = this.showRegenerateButton;
 		boolean bool6 = this.canOwnerBeChosen;
 		boolean bool7 = this.triggerActivation;
+		boolean bool8 = this.showCancelButton;
 		String string0 = this.activationAreaDimensionsXField.getText();
 		String string1 = this.activationAreaDimensionsYField.getText();
 		String string2 = this.activationAreaDimensionsZField.getText();
@@ -780,6 +790,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.showRegenerateButton = bool5;
 		this.canOwnerBeChosen = bool6;
 		this.triggerActivation = bool7;
+		this.showCancelButton = bool8;
 		this.activationAreaDimensionsXField.setText(string0);
 		this.activationAreaDimensionsYField.setText(string1);
 		this.activationAreaDimensionsZField.setText(string2);
@@ -1060,6 +1071,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				this.currentTargetIdentifierLabelField.getText(),
 				this.currentTargetOwnerLabelField.getText(),
 				this.showRegenerateButton,
+				this.showCancelButton,
 				this.canOwnerBeChosen,
 				this.teleportButtonLabelField.getText(),
 				this.cancelTeleportButtonLabelField.getText()

@@ -67,6 +67,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();
 		String currentTargetOwnerLabel = payload.currentTargetOwnerLabel();
 		boolean showRegenerateButton = payload.showRegenerateButton();
+		boolean showCancelButton = payload.showCancelButton();
 		boolean canOwnerBeChosen = payload.canOwnerBeChosen();
 		String teleportButtonLabel = payload.teleportButtonLabel();
 		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
@@ -114,6 +115,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);
 			teleporterBlockEntity.setCurrentTargetOwnerLabel(currentTargetOwnerLabel);
 			teleporterBlockEntity.setShowRegenerateButton(showRegenerateButton);
+			teleporterBlockEntity.setShowCancelButton(showCancelButton);
 			teleporterBlockEntity.setCanOwnerBeChosen(canOwnerBeChosen);
 			teleporterBlockEntity.setTeleportButtonLabel(teleportButtonLabel);
 			teleporterBlockEntity.setCancelTeleportButtonLabel(cancelTeleportButtonLabel);

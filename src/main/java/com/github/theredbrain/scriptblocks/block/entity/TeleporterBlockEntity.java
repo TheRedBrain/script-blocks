@@ -90,6 +90,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
 	private String currentTargetIdentifierLabel = "gui.teleporter_block.target_identifier_field.label";
 	private boolean showRegenerateButton = true;
+	private boolean showCancelButton = true;
 	private boolean canOwnerBeChosen = true;
 	private String teleportButtonLabel = "gui.teleporter_block.teleport_button.label";
 	private String cancelTeleportButtonLabel = "gui.teleporter_block.cancel_teleport_button.label";
@@ -168,6 +169,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
 		nbt.putString("currentTargetOwnerLabel", this.currentTargetOwnerLabel);
 		nbt.putBoolean("showRegenerateButton", this.showRegenerateButton);
+		nbt.putBoolean("showCancelButton", this.showCancelButton);
 		nbt.putBoolean("canOwnerBeChosen", this.canOwnerBeChosen);
 		nbt.putString("teleportButtonLabel", this.teleportButtonLabel);
 		nbt.putString("cancelTeleportButtonLabel", this.cancelTeleportButtonLabel);
@@ -258,6 +260,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
 		this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
 		this.showRegenerateButton = nbt.getBoolean("showRegenerateButton");
+		this.showCancelButton = nbt.getBoolean("showCancelButton");
 		this.canOwnerBeChosen = nbt.getBoolean("canOwnerBeChosen");
 		this.teleportButtonLabel = nbt.getString("teleportButtonLabel");
 		this.cancelTeleportButtonLabel = nbt.getString("cancelTeleportButtonLabel");
@@ -594,11 +597,19 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	public boolean showRegenerateButton() {
-		return showRegenerateButton;
+		return this.showRegenerateButton;
 	}
 
 	public void setShowRegenerateButton(boolean showRegenerateButton) {
 		this.showRegenerateButton = showRegenerateButton;
+	}
+
+	public boolean showCancelButton() {
+		return this.showCancelButton;
+	}
+
+	public void setShowCancelButton(boolean showCancelButton) {
+		this.showCancelButton = showCancelButton;
 	}
 
 	public boolean canOwnerBeChosen() {

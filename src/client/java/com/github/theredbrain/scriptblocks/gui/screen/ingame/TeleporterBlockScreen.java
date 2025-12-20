@@ -99,6 +99,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private boolean canOwnerBeChosen;
 	private boolean showAdventureScreen;
 	private boolean showRegenerateButton;
+	private boolean showCancelButton;
 
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 
@@ -251,6 +252,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
 		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
+		this.showCancelButton = this.teleporterBlock.showCancelButton();
 		this.currentTargetIdentifier = "";
 		this.currentTargetDisplayName = "";
 		this.currentTargetEntrance = "";
@@ -406,7 +408,13 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			}
 
 			this.teleportButton.visible = true;
-			this.cancelTeleportButton.visible = true;
+
+			if (this.showCancelButton) {
+				this.teleportButton.setWidth(100);
+				this.cancelTeleportButton.visible = true;
+			} else {
+				this.teleportButton.setWidth(204);
+			}
 
 			this.teleportButton.active = this.isTeleportButtonActive;
 		}
