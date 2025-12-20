@@ -13,10 +13,6 @@ base {
 }
 
 repositories {
-	// Fzzy Config, Lootables
-	maven {
-		name = "FzzyMaven"
-		url = "https://maven.fzzyhmstrs.me/"
 	}
 
 	// DimLib
@@ -24,7 +20,7 @@ repositories {
 		url 'https://jitpack.io'
 	}
 
-	// Slot Customization API
+	// RPG Inventory, Slot Customization API
 	maven {
 		name = "Modrinth"
 		url = "https://api.modrinth.com/maven"
@@ -33,6 +29,11 @@ repositories {
 		}
 	}
 
+	// Fzzy Config
+	maven {
+		name = "FzzyMaven"
+		url = "https://maven.fzzyhmstrs.me/"
+	}
 }
 
 loom {
@@ -96,7 +97,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// Fzzy Config
 	modImplementation"me.fzzyhmstrs:fzzy_config:${project.fzzy_config_version}"
@@ -111,6 +112,9 @@ dependencies {
 
 	// Slot Customization API
 	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
+
+	// RPG Inventory
+	modImplementation "maven.modrinth:rpg-inventory:${project.rpg_inventory_version}"
 
 	// Test mod
 	testmodImplementation sourceSets.main.output
@@ -174,6 +178,7 @@ if (project.hasProperty('release_type')) {
 				requiredDependency 'fzzy-config'
 				requiredDependency 'fabric-api'
 				requiredDependency 'slot-customization-api'
+				optionalDependency 'rpg-inventory'
 				optionalDependency 'lootables'
 			}
 
@@ -207,6 +212,7 @@ if (project.hasProperty('release_type')) {
 			required.project 'fabric-api'
 			required.project 'dimlib'
 			required.project 'slot-customization-api'
+			optional.project 'rpg-inventory'
 			optional.project 'lootables'
 		}
 	}
