@@ -67,6 +67,6 @@ A housing block has an owner and an area of influence (AOI).\
 In the AOI only the owner can place, break or interact with blocks. Even players in adventure mode can break or place blocks here.\
 The owner can add other players to different lists, which grants them various rights in the AOI, like placing, breaking or interacting with blocks.
 
-Housing blocks have two different modi to determine their owner. 
+Housing blocks have two different modes to determine their owner. 
 - Interaction, the owner can be set by interacting with the housing block. The owner can revoke ownership of the housing block.
 - Dimension, when the housing block is placed in a 'player_locations_dimension', the player owning the dimension also owns the housing block

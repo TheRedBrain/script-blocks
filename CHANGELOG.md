@@ -1,3 +1,46 @@
+# 0.0.8
+
+## Additions
+
+- added "scriptblocks:removed_on_teleport" data component, which holds a list of strings
+- Teleporter Blocks can now remove status effects in a configurable tag on teleport (in addition to the existing "reduce level by 1" status effect tag)
+- Teleporter Blocks can now remove items from the player inventory on teleport
+  - item stacks with the new "scriptblocks:removed_on_teleport" component are removed if the components string list contains a string specified by the Teleporter Block
+- added option to set the manual reset for Location Controller Blocks in their config screen
+  - can be used to ensure that locations are reset when first visited, without the need for always resetting/player initialized reset before entering/complicated script block structures
+- added option to hide the "Cancel Teleport" button in the teleport screen
+
+## Changes
+
+- deprecated Lootable Vault Block and Interactive Loot Block
+  - these block were extracted into a standalone mod
+  - this includes all integration with the Lootables mod
+  - existing blocks are still present, but several warning log messages were added and these blocks will be removed eventually
+- no longer depends on DimLib, the dynamic dimensions are now implemented using Fantasy (https://github.com/NucleoidMC/fantasy)
+- changed several mixin implementations to be more compatible
+
+
+TODO
+- interactive candle block
+  - when interacted with (optional item required), triggers block
+  - interacting toggles lit state
+  - interacting only possible once
+  - can be reset
+  - interacting in creative mode prevents triggering
+- interactive torch block
+  - when interacted with (optional item required), triggers block
+  - interacting toggles lit state
+  - interacting only possible once
+  - can be reset
+  - interacting in creative mode prevents triggering
+- triggered candle/torch block
+  - lit state is toggled when triggered
+  - can be reset
+  - interacting in creative mode prevents triggering
+- cooldown on having access to a location?
+  - how would that be tracked?
+- copper (trap)door variants for the script blocks (trap)doors
+
 # 0.0.7
 
 ## Additions
