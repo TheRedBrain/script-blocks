@@ -136,6 +136,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget currentTargetIdentifierLabelField;
 	private CyclingButtonWidget<Boolean> toggleShowRegenerateButtonButton;
 	private CyclingButtonWidget<Boolean> toggleCanOwnerBeChosenButton;
+	private CyclingButtonWidget<Boolean> toggleShowCancelButtonButton;
 	private TextFieldWidget teleportButtonLabelField;
 	private TextFieldWidget cancelTeleportButtonLabelField;
 	private ButtonWidget doneButton;
@@ -532,7 +533,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.cancelTeleportButtonLabelField.setText(this.teleporterBlock.getCancelTeleportButtonLabel());
 		this.addSelectableChild(this.cancelTeleportButtonLabelField);
 
-		this.toggleShowRegenerateButtonButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF).initially(this.showCancelButton).omitKeyText().build(this.width / 2 + 4, 164, 150, 20, Text.empty(), (button, showCancelButton) -> {
+		this.toggleShowCancelButtonButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF).initially(this.showCancelButton).omitKeyText().build(this.width / 2 + 4, 164, 150, 20, Text.empty(), (button, showCancelButton) -> {
 			this.showCancelButton = showCancelButton;
 		}));
 
@@ -614,6 +615,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.currentTargetOwnerLabelField.setVisible(false);
 		this.toggleShowRegenerateButtonButton.visible = false;
 		this.toggleCanOwnerBeChosenButton.visible = false;
+		this.toggleShowCancelButtonButton.visible = false;
 		this.teleportButtonLabelField.setVisible(false);
 		this.cancelTeleportButtonLabelField.setVisible(false);
 
@@ -719,6 +721,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 			this.toggleShowRegenerateButtonButton.visible = true;
 			this.toggleCanOwnerBeChosenButton.visible = true;
+			this.toggleShowCancelButtonButton.visible = true;
 			this.teleportButtonLabelField.setVisible(true);
 			this.cancelTeleportButtonLabelField.setVisible(true);
 
