@@ -6,6 +6,7 @@
     "entity.mob.MobEntityMixin",
     "entity.player.PlayerEntityMixin",
     "item.ItemStackMixin",
+    "server.PlayerManagerMixin",
     "server.network.ServerPlayerEntityMixin",
     "server.network.ServerPlayerInteractionManagerMixin",
     "world.WorldMixin"
