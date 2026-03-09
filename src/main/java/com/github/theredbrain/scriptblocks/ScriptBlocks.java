@@ -23,9 +23,11 @@ import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -44,6 +46,15 @@ public class ScriptBlocks implements ModInitializer {
 	public static final String MOD_ID = "scriptblocks";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ServerConfig SERVER_CONFIG;
+
+	public static RegistryEntry<StatusEffect> HOUSING_OWNER_EFFECT;
+	public static RegistryEntry<StatusEffect> HOUSING_CO_OWNER_EFFECT;
+	public static RegistryEntry<StatusEffect> HOUSING_TRUSTED_EFFECT;
+	public static RegistryEntry<StatusEffect> HOUSING_GUEST_EFFECT;
+	public static RegistryEntry<StatusEffect> HOUSING_STRANGER_EFFECT;
+//	public static RegistryEntry<StatusEffect> EDIT_HOUSING_RESISTANCE_EFFECT;
+	public static RegistryEntry<StatusEffect> BUILDING_MODE;
+	public static RegistryEntry<StatusEffect> PORTAL_RESISTANCE_EFFECT;
 
 	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
 	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");
