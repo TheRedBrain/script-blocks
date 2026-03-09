@@ -59,6 +59,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@Deprecated
 public class LootableVaultBlockEntity extends BlockEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final LootableVaultServerData serverData = new LootableVaultServerData();

@@ -13,6 +13,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.WorldEvents;
 
+@Deprecated
 public enum LootableVaultState implements StringIdentifiable {
 	INACTIVE("inactive", LootableVaultState.Light.HALF_LIT) {
 		@Override

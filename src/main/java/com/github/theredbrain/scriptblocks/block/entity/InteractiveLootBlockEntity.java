@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@Deprecated
 public class InteractiveLootBlockEntity extends BlockEntity implements Resetable {
 	private Set<UUID> playerSet = new HashSet<>();
 	private String lootTableIdentifierString = "";

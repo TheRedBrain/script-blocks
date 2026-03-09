@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+@Deprecated
 public class LootableVaultServerData {
 	static final String SERVER_DATA_KEY = "server_data";
 	public static Codec<LootableVaultServerData> CODEC = RecordCodecBuilder.create(

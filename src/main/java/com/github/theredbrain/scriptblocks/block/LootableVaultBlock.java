@@ -35,6 +35,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated
 public class LootableVaultBlock extends BlockWithEntity {
 	public static final MapCodec<LootableVaultBlock> CODEC = createCodec(LootableVaultBlock::new);
 	public static final Property<LootableVaultState> LOOTABLE_VAULT_STATE = EnumProperty.of("lootable_vault_state", LootableVaultState.class);

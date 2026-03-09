@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class InteractiveLootBlock extends BlockWithEntity {
 	public static final MapCodec<InteractiveLootBlock> CODEC = createCodec(InteractiveLootBlock::new);
 

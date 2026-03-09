@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.registry;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
@@ -18,7 +19,8 @@ public class CustomDynamicRegistries {
 	public static final RegistryKey<Registry<DialogueAnswer>> DIALOGUE_ANSWER_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("dialogue_answers"));
 	public static final RegistryKey<Registry<Dialogue>> DIALOGUE_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("dialogues"));
 	public static final RegistryKey<Registry<Location>> LOCATION_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("locations"));
-	public static final RegistryKey<Registry<LootableVaultConfig>> LOOTABLE_VAULT_CONFIG_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("lootable_vault_configs"));
+	@Deprecated
+	public static final RegistryKey<Registry<LootableVaultConfig>> LOOTABLE_VAULT_CONFIG_REGISTRY_KEY = RegistryKey.ofRegistry(ScriptBlocks.identifier("lootable_vault_configs"));
 	public static final RegistryKey<Registry<PVPArenaSettings>> PVP_ARENA_SETTINGS_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("pvp_arena_settings"));
 	public static final RegistryKey<Registry<Shop>> SHOP_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("shops"));
 

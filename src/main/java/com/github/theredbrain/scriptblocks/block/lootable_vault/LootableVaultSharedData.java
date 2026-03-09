@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class LootableVaultSharedData {
 	static final String SHARED_DATA_KEY = "shared_data";
 	public static Codec<LootableVaultSharedData> CODEC = RecordCodecBuilder.create(

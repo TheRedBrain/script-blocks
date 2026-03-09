@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
+@Deprecated
 public record LootableVaultConfig(
 		String lootableIdentifier,
 		int rolls,
