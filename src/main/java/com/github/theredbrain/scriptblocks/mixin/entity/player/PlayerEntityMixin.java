@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.mixin.entity.player;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
@@ -35,6 +36,8 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawner
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -47,6 +50,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
@@ -174,6 +179,16 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 			nbt.remove("currentPVPControllerBlockPositionZ");
 		}
 
+	}
+
+	@WrapMethod(method = "canModifyBlocks")
+	public boolean scriptblocks$wrap_canModifyBlocks(Operation<Boolean> original) {
+		return original.call() && !this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT);
+	}
+
+	@WrapMethod(method = "canPlaceOn")
+	public boolean scriptblocks$wrap_canPlaceOn(BlockPos pos, Direction facing, ItemStack stack, Operation<Boolean> original) {
+		return original.call(pos, facing, stack) && !this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT);
 	}
 
 	@Override

@@ -52,9 +52,9 @@ public class ScriptBlocks implements ModInitializer {
 	public static RegistryEntry<StatusEffect> HOUSING_TRUSTED_EFFECT;
 	public static RegistryEntry<StatusEffect> HOUSING_GUEST_EFFECT;
 	public static RegistryEntry<StatusEffect> HOUSING_STRANGER_EFFECT;
-//	public static RegistryEntry<StatusEffect> EDIT_HOUSING_RESISTANCE_EFFECT;
 	public static RegistryEntry<StatusEffect> BUILDING_MODE;
 	public static RegistryEntry<StatusEffect> PORTAL_RESISTANCE_EFFECT;
+	public static RegistryEntry<StatusEffect> ADVENTURE_EFFECT;
 
 	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
 	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");

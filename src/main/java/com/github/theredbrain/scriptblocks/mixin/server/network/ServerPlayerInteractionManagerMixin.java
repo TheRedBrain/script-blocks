@@ -1,25 +1,23 @@
 package com.github.theredbrain.scriptblocks.mixin.server.network;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.OperatorBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = ServerPlayerInteractionManager.class, priority = 950)
 public abstract class ServerPlayerInteractionManagerMixin {
@@ -34,30 +32,20 @@ public abstract class ServerPlayerInteractionManagerMixin {
 	@Shadow
 	private GameMode gameMode;
 
-	@Shadow
-	public abstract void finishMining(BlockPos pos, int sequence, String reason);
-
-	@Inject(method = "processBlockBreakingAction", at = @At("HEAD"), cancellable = true)
-	public void processBlockBreakingAction(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int sequence, CallbackInfo ci) {
-		if (action == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK) {
-			if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
-				this.finishMining(pos, sequence, "creative destroy");
-				ci.cancel();
-			}
-		}
-
+	@WrapOperation(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;isCreative()Z"))
+	public boolean scriptblocks$wrap_isCreative(ServerPlayerInteractionManager instance, Operation<Boolean> original) {
+		return original.call(instance) || ((this.gameMode.isSurvivalLike() || this.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
 	}
 
-	@Inject(method = "tryBreakBlock", at = @At("HEAD"), cancellable = true)
-	public void tryBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+	@WrapMethod(method = "tryBreakBlock")
+	public boolean scriptblocks$wrap_tryBreakBlock(BlockPos pos, Operation<Boolean> original) {
+		if ((this.gameMode.isSurvivalLike() || this.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			BlockState blockState = this.world.getBlockState(pos);
 			BlockEntity blockEntity = this.world.getBlockEntity(pos);
 			Block block = blockState.getBlock();
 			if (block instanceof OperatorBlock && !this.player.isCreativeLevelTwoOp()) {
 				this.world.updateListeners(pos, blockState, blockState, Block.NOTIFY_ALL);
-				cir.setReturnValue(false);
-				cir.cancel();
+				return false;
 			}
 			block.onBreak(this.world, pos, blockState, this.player);
 			boolean bl = this.world.removeBlock(pos, false);
@@ -71,8 +59,8 @@ public abstract class ServerPlayerInteractionManagerMixin {
 			if (bl && bl2) {
 				block.afterBreak(this.world, this.player, pos, blockState, blockEntity, itemStack2);
 			}
-			cir.setReturnValue(true);
-			cir.cancel();
+			return true;
 		}
+		return original.call(pos);
 	}
 }

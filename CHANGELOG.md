@@ -9,6 +9,7 @@
 - added option to set the manual reset for Location Controller Blocks in their config screen
   - can be used to ensure that locations are reset when first visited, without the need for always resetting/player initialized reset before entering/complicated script block structures
 - added option to hide the "Cancel Teleport" button in the teleport screen
+- added "scriptblocks:adventure" status effect, players with this effect are under the same restrictions as if they were in adventure mode
 
 ## Changes
 

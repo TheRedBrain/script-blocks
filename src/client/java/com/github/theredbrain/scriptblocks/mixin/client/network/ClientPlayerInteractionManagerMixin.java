@@ -3,7 +3,8 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.Block;
@@ -15,7 +16,6 @@ import net.minecraft.client.network.SequencedPacketCreator;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -25,11 +25,7 @@ import net.minecraft.world.GameMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
@@ -55,26 +51,28 @@ public abstract class ClientPlayerInteractionManagerMixin {
 	@Shadow
 	protected abstract void syncSelectedSlot();
 
-	@Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
-	public void scriptblocks$breakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+	@WrapMethod(method = "breakBlock")
+	public boolean scriptblocks$wrap_breakBlock(BlockPos pos, Operation<Boolean> original) {
+		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			ClientWorld world = this.client.world;
-			BlockState blockState = world.getBlockState(pos);
-			Block block = blockState.getBlock();
-			block.onBreak(world, pos, blockState, this.client.player);
-			FluidState fluidState = world.getFluidState(pos);
-			boolean bl = world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_ALL | Block.REDRAW_ON_MAIN_THREAD);
-			if (bl) {
-				block.onBroken(world, pos, blockState);
+			if (world != null) {
+				BlockState blockState = world.getBlockState(pos);
+				Block block = blockState.getBlock();
+				block.onBreak(world, pos, blockState, this.client.player);
+				FluidState fluidState = world.getFluidState(pos);
+				boolean bl = world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_ALL | Block.REDRAW_ON_MAIN_THREAD);
+				if (bl) {
+					block.onBroken(world, pos, blockState);
+				}
+				return bl;
 			}
-			cir.setReturnValue(bl);
-			cir.cancel();
 		}
+		return original.call(pos);
 	}
 
-	@Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
-	public void scriptblocks$attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+	@WrapMethod(method = "attackBlock")
+	public boolean scriptblocks$wrap_attackBlock(BlockPos pos, Direction direction, Operation<Boolean> original) {
+		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) this.client.player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
 			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
@@ -91,26 +89,26 @@ public abstract class ClientPlayerInteractionManagerMixin {
 				});
 				this.blockBreakingCooldown = 5;
 			}
-			cir.setReturnValue(bl);
-			cir.cancel();
+			return bl;
 		}
+		return original.call(pos, direction);
 	}
 
-	@Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
-	public void scriptblocks$interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+	@WrapMethod(method = "interactBlock")
+	public ActionResult scriptblocks$wrap_interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, Operation<ActionResult> original) {
+		if ((this.gameMode.isSurvivalLike() || player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			this.syncSelectedSlot();
 			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
 			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 				bl = housingBlockEntity.influenceAreaContains(hitResult.getBlockPos().offset(hitResult.getSide()));
 			} else {
-				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(Optional.empty());
+				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(Optional.empty()); // TODO C2S packet reset position
 			}
 			if (!bl) {
-				cir.setReturnValue(ActionResult.FAIL);
-				cir.cancel();
+				return ActionResult.FAIL;
 			}
 		}
+		return original.call(player, hand, hitResult);
 	}
 }
