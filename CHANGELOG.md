@@ -19,6 +19,7 @@
   - existing blocks are still present, but several warning log messages were added and these blocks will be removed eventually
 - no longer depends on DimLib, the dynamic dimensions are now implemented using Fantasy (https://github.com/NucleoidMC/fantasy)
 - changed several mixin implementations to be more compatible
+- housing effects now affect players in survival mode
 
 # 0.0.7
 
