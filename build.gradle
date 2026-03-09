@@ -104,8 +104,7 @@ dependencies {
 	modImplementation "me.fzzyhmstrs:lootables:${project.lootable_version}"
 
 	// Fantasy
-	include "xyz.nucleoid:fantasy:${project.fantasy_version}"
-	modImplementation "xyz.nucleoid:fantasy:${project.fantasy_version}"
+	include(modImplementation("xyz.nucleoid:fantasy:${project.fantasy_version}"))
 
 	// Slot Customization API
 	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
