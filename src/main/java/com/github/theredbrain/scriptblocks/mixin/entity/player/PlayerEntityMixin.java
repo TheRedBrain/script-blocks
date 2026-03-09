@@ -38,6 +38,7 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -73,6 +74,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	@Shadow
 	public abstract ItemStack getEquippedStack(EquipmentSlot slot);
 
+	@Shadow
+	public abstract boolean isCreative();
+
+	@Shadow
+	public abstract boolean isSpectator();
+
 	@Unique
 	private static final TrackedData<Optional<BlockPos>> CURRENT_HOUSING_BLOCK_POS = DataTracker.registerData(PlayerEntity.class, TrackedDataHandlerRegistry.OPTIONAL_BLOCK_POS);
 
@@ -87,6 +94,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
 		super(entityType, world);
+	}
+
+	@WrapOperation(method = "isBlockBreakingRestricted", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;isBlockBreakingRestricted()Z"))
+	public boolean scriptblocks$wrap_isBlockBreakingRestricted(GameMode instance, Operation<Boolean> original) {
+		return original.call(instance) || (!this.isCreative() && this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT));
 	}
 
 	@Inject(method = "initDataTracker", at = @At("RETURN"))
@@ -183,12 +195,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@WrapMethod(method = "canModifyBlocks")
 	public boolean scriptblocks$wrap_canModifyBlocks(Operation<Boolean> original) {
-		return original.call() && !this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT);
+		return original.call() && !(!(this.isCreative() || this.isSpectator()) && this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT) && !this.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
 	}
 
 	@WrapMethod(method = "canPlaceOn")
 	public boolean scriptblocks$wrap_canPlaceOn(BlockPos pos, Direction facing, ItemStack stack, Operation<Boolean> original) {
-		return original.call(pos, facing, stack) && !this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT);
+		return original.call(pos, facing, stack) && !(!(this.isCreative() || this.isSpectator()) && this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT) && !this.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
 	}
 
 	@Override

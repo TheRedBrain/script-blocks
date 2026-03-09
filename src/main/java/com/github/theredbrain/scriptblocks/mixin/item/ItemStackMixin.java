@@ -18,6 +18,6 @@ public abstract class ItemStackMixin {
 	@WrapOperation(method = "useOnBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowModifyWorld:Z", opcode = Opcodes.GETFIELD))
 	public boolean scriptblocks$wrap_allowModifyWorld(PlayerAbilities instance, Operation<Boolean> original, @Local(argsOnly = true) ItemUsageContext context) {
 		PlayerEntity playerEntity = context.getPlayer();
-		return (original.call(instance) && (playerEntity == null || !playerEntity.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT))) || (playerEntity != null && playerEntity.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
+		return (original.call(instance) && playerEntity != null && (playerEntity.isCreative() || !playerEntity.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) || (playerEntity != null && playerEntity.hasStatusEffect(ScriptBlocks.BUILDING_MODE)));
 	}
 }
