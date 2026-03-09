@@ -7,7 +7,6 @@ import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingS
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockAdventurePacket;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -18,9 +17,7 @@ import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -273,9 +270,8 @@ public class HousingScreen extends Screen {
 		this.closeListEditScreensButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.closeListScreens()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
 
 		boolean isAdventureBuilding = false;
-		RegistryEntry<StatusEffect> building_mode_status_effect = Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE);
 		if (this.client != null && this.client.player != null) {
-			isAdventureBuilding = this.client.player.hasStatusEffect(building_mode_status_effect);
+			isAdventureBuilding = this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE);
 		}
 		this.toggleAdventureBuildingEffectButton = this.addDrawableChild(ButtonWidget.builder(isAdventureBuilding ? TOGGLE_ADVENTURE_BUILDING_OFF_BUTTON_LABEL_TEXT : TOGGLE_ADVENTURE_BUILDING_ON_BUTTON_LABEL_TEXT, button -> this.toggleAdventureBuildingEffect()).dimensions(this.x + 7, this.y + 20, this.backgroundWidth - 14, 20).build());
 
@@ -645,7 +641,7 @@ public class HousingScreen extends Screen {
 
 	private void toggleAdventureBuildingEffect() {
 		ClientPlayNetworking.send(new AddStatusEffectPacket(
-				Registries.STATUS_EFFECT.getId(StatusEffectsRegistry.BUILDING_MODE),
+				Registries.STATUS_EFFECT.getId(ScriptBlocks.BUILDING_MODE.value()),
 				-1,
 				0,
 				false,

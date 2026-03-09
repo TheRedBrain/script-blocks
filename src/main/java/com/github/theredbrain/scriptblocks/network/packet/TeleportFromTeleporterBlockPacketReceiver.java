@@ -10,7 +10,6 @@ import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
@@ -282,8 +281,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects().stream().toList()) {
 				RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-				boolean isPortalResistanceEffect = statusEffectRegistryEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
-				if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(removalTag)) {
+				if (statusEffectRegistryEntry.value() == ScriptBlocks.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
 					serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
 					continue;
 				}
@@ -318,8 +316,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							for (StatusEffectInstance statusEffectInstance : teamServerPlayerEntity.getStatusEffects().stream().toList()) {
 								RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-								boolean isPortalResistanceEffect = statusEffectRegistryEntry.value() == StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT;
-								if (isPortalResistanceEffect || statusEffectRegistryEntry.isIn(removalTag)) {
+								if (statusEffectRegistryEntry.value() == ScriptBlocks.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
 									teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
 									continue;
 								}

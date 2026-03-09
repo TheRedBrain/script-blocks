@@ -9,7 +9,6 @@ import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetManualResetLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.TeleportFromTeleporterBlockPacket;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
@@ -888,7 +887,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private void givePortalResistanceEffect() {
 		ClientPlayNetworking.send(new AddStatusEffectPacket(
-				Registries.STATUS_EFFECT.getId(StatusEffectsRegistry.PORTAL_RESISTANCE_EFFECT),
+				Registries.STATUS_EFFECT.getId(ScriptBlocks.PORTAL_RESISTANCE_EFFECT.value()),
 				40,
 				0,
 				false,

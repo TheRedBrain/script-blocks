@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.mixin.client.network;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
@@ -56,7 +57,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$breakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
+		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			ClientWorld world = this.client.world;
 			BlockState blockState = world.getBlockState(pos);
 			Block block = blockState.getBlock();
@@ -73,7 +74,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$attackBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
+		if (this.gameMode == GameMode.ADVENTURE && this.client.player != null && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) this.client.player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
 			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
@@ -97,7 +98,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
 	public void scriptblocks$interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
-		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(Registries.STATUS_EFFECT.getEntry(StatusEffectsRegistry.BUILDING_MODE))) {
+		if (this.gameMode == GameMode.ADVENTURE && player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
 			this.syncSelectedSlot();
 			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
