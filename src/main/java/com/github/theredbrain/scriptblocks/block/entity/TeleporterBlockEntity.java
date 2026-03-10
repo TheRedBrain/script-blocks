@@ -280,7 +280,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TeleporterBlockEntity blockEntity) {
-		if (!blockEntity.triggerActivation()) {
+		if (!blockEntity.triggerActivation() && world.getTime() % 80L == 0) {
 			TeleporterBlockEntity.tryOpenScreenRemotely(world, pos, state, blockEntity);
 		}
 	}
@@ -301,25 +301,28 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, teleporterBlockEntity.activationArea);
 			String worldName = world.getRegistryKey().getValue().getPath();
 			for (PlayerEntity playerEntity : list) {
-				if (!playerEntity.hasStatusEffect(ScriptBlocks.PORTAL_RESISTANCE_EFFECT) && !playerEntity.isCreative()) {
-					if (!teleporterBlockEntity.onlyTeleportDimensionOwner || playerEntity.getUuid().toString().equals(worldName)) {
-						// prevents continuous opening of a screen
-						playerEntity.setStatusEffect(
-								new StatusEffectInstance(
-										ScriptBlocks.PORTAL_RESISTANCE_EFFECT,
-										-1,
-										0,
-										false,
-										false,
-										false
-								),
-								playerEntity
-						);
-						playerEntity.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-					} else {
-						playerEntity.sendMessage(Text.translatable("hud.message.onlyDimensionOwnerCanTeleport"), true);
+				if (!playerEntity.isCreative()) {
+					if (!playerEntity.hasStatusEffect(ScriptBlocks.PORTAL_RESISTANCE_EFFECT)) {
+						if (!teleporterBlockEntity.onlyTeleportDimensionOwner || playerEntity.getUuid().toString().equals(worldName)) {
+							playerEntity.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+						} else {
+							playerEntity.sendMessage(Text.translatable("hud.message.onlyDimensionOwnerCanTeleport"), true);
+						}
 					}
+					// prevents continuous opening of the screen
+					playerEntity.setStatusEffect(
+							new StatusEffectInstance(
+									ScriptBlocks.PORTAL_RESISTANCE_EFFECT,
+									100,
+									0,
+									false,
+									false,
+									false
+							),
+							playerEntity
+					);
 				}
+
 			}
 		}
 	}
