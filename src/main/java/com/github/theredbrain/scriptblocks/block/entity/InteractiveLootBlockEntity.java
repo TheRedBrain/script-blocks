@@ -101,7 +101,7 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 			nbt.remove("alreadyLootedSoundId");
 		}
 
-		ScriptBlocks.info("deprecated Interactive Loot Block detected at: " + this.pos.toString());
+		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Interactive Loot Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.world != null ? this.world.getServer() : null);
 		super.writeNbt(nbt, registryLookup);
 	}
 

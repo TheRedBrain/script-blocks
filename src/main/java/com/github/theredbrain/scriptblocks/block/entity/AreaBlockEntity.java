@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Deprecated
 public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
 	private static final BlockPos TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 0, 0);
@@ -256,6 +257,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			nbt.putInt("timer_" + i, this.playerMap.get(key));
 		}
 
+		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Area Block detected at: " + this.pos.toString() + ". This block will be removed in the future.", this.world != null ? this.world.getServer() : null);
 		super.writeNbt(nbt, registryLookup);
 
 	}

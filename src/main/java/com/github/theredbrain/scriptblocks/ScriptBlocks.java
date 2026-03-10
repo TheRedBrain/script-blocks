@@ -29,8 +29,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -153,6 +155,13 @@ public class ScriptBlocks implements ModInitializer {
 		StatusEffectsRegistry.registerEffects();
 		GameRulesRegistry.init();
 		StructurePlacementTypesRegistry.register();
+	}
+
+	public static void sendDeprecatedFeatureInfo(String message, @Nullable MinecraftServer minecraftServer) {
+		if (SERVER_CONFIG.enable_deprecated_feature_chat_message && minecraftServer != null) {
+			minecraftServer.getPlayerManager().broadcast(Text.of(message), false);
+		}
+		info(message);
 	}
 
 	public static Identifier identifier(String path) {

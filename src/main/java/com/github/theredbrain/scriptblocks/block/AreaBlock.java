@@ -16,6 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated
 public class AreaBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<AreaBlock> CODEC = createCodec(AreaBlock::new);
 

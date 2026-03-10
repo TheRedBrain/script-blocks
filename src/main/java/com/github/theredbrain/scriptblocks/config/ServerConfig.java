@@ -44,6 +44,9 @@ public class ServerConfig extends Config {
 	@Comment("Enables 'Player Detector Block' to detect creative mode players.")
 	public boolean enable_creative_player_detection = false;
 
+	@Comment("Globally enables/disables chat messages about deprecated features.")
+	public boolean enable_deprecated_feature_chat_message = true;
+
 	@Comment("Globally enables/disables debug logging. When set to false, no debug logs are send.")
 	public boolean enable_debug_logging = false;
 
