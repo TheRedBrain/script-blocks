@@ -6,7 +6,6 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
-import com.github.theredbrain.scriptblocks.registry.GameRulesRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -17,7 +16,6 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 
 public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 	private BlockPos activeMimicBlockPositionOffset = new BlockPos(0, 1, 0);
@@ -149,15 +147,5 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 			}
 		}
 		return fallbackMimicBlockState;
-	}
-
-	public boolean isDebugModeActive() {
-		boolean debugRender = false;
-
-		World world = this.getWorld();
-		if (world != null) {
-			debugRender = world.getGameRules().getBoolean(GameRulesRegistry.MIMIC_DEBUG_MODE);
-		}
-		return debugRender;
 	}
 }

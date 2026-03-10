@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.render.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import net.fabricmc.api.EnvType;
@@ -25,7 +26,7 @@ public class MimicBlockEntityRenderer
 	public void render(MimicBlockEntity mimicBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
 		BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
 		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(mimicBlockEntity.getCurrentMimicBlockState()));
-		boolean debugRender = mimicBlockEntity.isDebugModeActive();
+		boolean debugRender = ScriptBlocks.SERVER_CONFIG.enable_mimic_block_debug_mode;
 		ClientPlayerEntity player = MinecraftClient.getInstance().player;
 		if (player != null) {
 			debugRender = debugRender || (player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(BlockRegistry.MIMIC_BLOCK.asItem()));

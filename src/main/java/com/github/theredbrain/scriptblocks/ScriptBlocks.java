@@ -9,7 +9,6 @@ import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.registry.EventsRegistry;
-import com.github.theredbrain.scriptblocks.registry.GameRulesRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemGroupRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemRegistry;
@@ -153,7 +152,6 @@ public class ScriptBlocks implements ModInitializer {
 		ItemGroupRegistry.init();
 		ScreenHandlerTypesRegistry.registerAll();
 		StatusEffectsRegistry.registerEffects();
-		GameRulesRegistry.init();
 		StructurePlacementTypesRegistry.register();
 	}
 
