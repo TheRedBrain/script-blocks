@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -138,6 +139,7 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -163,6 +165,7 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 		this.areaPositionOffset = areaPositionOffset;
 		this.calculateAreaBox = true;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {
@@ -182,6 +185,11 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 			for (Entity entity : entityList) {
 				entity.discard();
 			}
+		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 

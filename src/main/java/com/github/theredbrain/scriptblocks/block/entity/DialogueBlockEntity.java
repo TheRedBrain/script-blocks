@@ -111,6 +111,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public HashMap<String, BlockPos> getDialogueUsedBlocksMap() {
 		return this.dialogueUsedBlocksMap;
 	}
@@ -142,6 +143,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	public void setDataBlockOffset(BlockPos dataBlockOffset) {
 		this.dataBlockOffset = dataBlockOffset;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public BlockPos getDataBlockPos() {

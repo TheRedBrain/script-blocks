@@ -13,6 +13,7 @@ import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -330,6 +331,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					}
 				}
 			}
+			bC.markDirty();
 		}
 	}
 
@@ -631,10 +633,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					entity.discard();
 				}
 				this.bossEntityUuid = null;
-				this.markDirty();
 			} else {
 				DebuggingHelper.sendBossControllerLogMessage("bossEntityUuid == null", null);
 			}
+		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 
@@ -746,7 +752,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		return entityTypeId.isEmpty();
 	}
 
-	//region Getter & Setter
+	// endregion --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -833,6 +839,6 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.bossTriggeredBlocks = bossTriggeredBlocks;
 		return true;
 	}
-	//endregion Getter & Setter
+	// endregion --- getter & setter ---
 
 }

@@ -80,6 +80,7 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public MutablePair<BlockPos, Boolean> getFirstTriggeredBlock() {
 		return this.firstTriggeredBlock;
 	}
@@ -104,6 +105,7 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 		this.checkedAdvancementIdentifier = checkedAdvancementIdentifier;
 		return true;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {

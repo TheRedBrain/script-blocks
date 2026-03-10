@@ -54,6 +54,7 @@ public class RedstoneTriggerBlockEntity extends RotatedBlockEntity {
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
 		return this.triggeredBlock;
 	}
@@ -61,6 +62,7 @@ public class RedstoneTriggerBlockEntity extends RotatedBlockEntity {
 	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
 		this.triggeredBlock = triggeredBlock;
 	}
+	// endregion --- getter & setter ---
 
 	public void trigger() {
 		if (this.world != null) {

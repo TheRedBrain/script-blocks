@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.decoration.Brightness;
@@ -542,7 +543,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	//region getter/setter
+	// region --- getter & setter ---
 	// common
 
 	public double getLerpTargetX() {
@@ -871,7 +872,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	public void setIsTriggered(boolean isTriggered) {
 		this.isTriggered = isTriggered;
 	}
-	//endregion getter/setter
+	// endregion --- getter & setter ---
 
 	// TODO
 	@Override
@@ -910,6 +911,11 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		if (this.isTriggered) {
 			this.isTriggered = false;
 			this.renderingDataSet = true;
+			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 		}
 	}
 
@@ -917,6 +923,11 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	public void trigger() {
 		this.isTriggered = true;
 		this.renderingDataSet = true;
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	private RenderState copyRenderState() {

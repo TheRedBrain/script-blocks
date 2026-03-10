@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -251,7 +252,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	//region getter/setter
+	// region --- getter & setter ---
 	public BlockPos getEntitySpawnPositionOffset() {
 		return this.entitySpawnPositionOffset;
 	}
@@ -332,8 +333,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	public void setUseRelayBlockPositionOffset(BlockPos useRelayedBlockPositionOffset) {
 		this.useRelayBlockPositionOffset = useRelayedBlockPositionOffset;
 	}
-
-	//endregion getter/setter
+	// endregion --- getter & setter ---
 
 	@Override
 	protected void onRotate(BlockState state) {
@@ -381,6 +381,11 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 				this.boundEntityUuid = null;
 			}
 		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override
@@ -392,6 +397,11 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		) {
 			if (this.spawnEntity()) {
 				this.triggered = true;
+			}
+			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 			}
 		}
 	}
@@ -411,6 +421,11 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			if (this.spawningMode == SpawningMode.BOUND_RESPAWN) {
 				this.trigger();
 			}
+		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 

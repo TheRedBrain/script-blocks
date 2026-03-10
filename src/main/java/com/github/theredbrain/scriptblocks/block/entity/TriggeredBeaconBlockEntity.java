@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -234,6 +235,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
 				triggeredBeaconBlockEntity.area = new Box(areaStart, areaEnd);
 				triggeredBeaconBlockEntity.calculateAreaBox = false;
+				triggeredBeaconBlockEntity.markDirty();
 			}
 			if (triggeredBeaconBlockEntity.triggeredMode == TriggeredMode.CONTINUOUS && triggeredBeaconBlockEntity.triggered) {
 				triggeredBeaconBlockEntity.applyStatusEffect(world);
@@ -276,7 +278,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		}
 	}
 
-	//region --- getter & setter ---
+	// region --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -381,12 +383,17 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	public void setTriggeredMode(TriggeredMode triggeredMode) {
 		this.triggeredMode = triggeredMode;
 	}
-	//endregion --- getter & setter ---
+	// endregion --- getter & setter ---
 
 	@Override
 	public void reset() {
 		if (this.triggered) {
 			this.triggered = false;
+			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 		}
 	}
 
@@ -394,6 +401,11 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	public void trigger() {
 		if (this.triggeredMode == TriggeredMode.CONTINUOUS && !this.triggered) {
 			this.triggered = true;
+			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 		} else if (this.triggeredMode == TriggeredMode.ONCE && this.world != null) {
 			this.applyStatusEffect(this.world);
 		}

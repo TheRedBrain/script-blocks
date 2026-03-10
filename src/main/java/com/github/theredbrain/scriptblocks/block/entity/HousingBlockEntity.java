@@ -41,6 +41,9 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	private List<String> coOwnerList = new ArrayList<>(List.of());
 	private List<String> trustedList = new ArrayList<>(List.of());
 	private List<String> guestList = new ArrayList<>(List.of());
+
+	private boolean calculateAreaBox = true;
+	private Box area = null;
 	private boolean showInfluenceArea = false;
 	private Vec3i influenceAreaDimensions = Vec3i.ZERO;
 	private BlockPos influenceAreaPositionOffset = new BlockPos(0, 1, 0);
@@ -73,6 +76,22 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		nbt.putInt("guestListSize", guestListSize);
 		for (int i = 0; i < guestListSize; i++) {
 			nbt.putString("guestListEntry" + i, this.guestList.get(i));
+		}
+
+		if (this.area != null) {
+			nbt.putDouble("areaMinX", this.area.minX);
+			nbt.putDouble("areaMaxX", this.area.maxX);
+			nbt.putDouble("areaMinY", this.area.minY);
+			nbt.putDouble("areaMaxY", this.area.maxY);
+			nbt.putDouble("areaMinZ", this.area.minZ);
+			nbt.putDouble("areaMaxZ", this.area.maxZ);
+		} else {
+			nbt.remove("areaMinX");
+			nbt.remove("areaMaxX");
+			nbt.remove("areaMinY");
+			nbt.remove("areaMaxY");
+			nbt.remove("areaMinZ");
+			nbt.remove("areaMaxZ");
 		}
 
 		nbt.putBoolean("showInfluenceArea", this.showInfluenceArea);
@@ -118,6 +137,13 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 			this.guestList.add(nbt.getString("guestListEntry" + i));
 		}
 
+		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
+			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
+			this.calculateAreaBox = true;
+		} else {
+			this.area = null;
+		}
+
 		this.showInfluenceArea = nbt.getBoolean("showInfluenceArea");
 
 		int i = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsX"), 0, 48);
@@ -149,29 +175,35 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity blockEntity) {
+	public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity housingBlockEntity) {
 		if (!world.isClient && world.getTime() % 20L == 0L) {
 			Team ownerTeam = null;
-			if (blockEntity.hasWorld() && !blockEntity.isOwnerSet && blockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
-				blockEntity.ownerUuid = initOwner(blockEntity.world);
-				if (UUIDUtilities.isStringValidUUID(blockEntity.ownerUuid)) {
-					blockEntity.isOwnerSet = true;
-					PlayerEntity owner = world.getPlayerByUuid(UUID.fromString(blockEntity.ownerUuid));
+			if (housingBlockEntity.hasWorld() && !housingBlockEntity.isOwnerSet && housingBlockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
+				housingBlockEntity.ownerUuid = initOwner(housingBlockEntity.world);
+				if (UUIDUtilities.isStringValidUUID(housingBlockEntity.ownerUuid)) {
+					housingBlockEntity.isOwnerSet = true;
+					PlayerEntity owner = world.getPlayerByUuid(UUID.fromString(housingBlockEntity.ownerUuid));
 					if (owner != null) {
 						ownerTeam = owner.getScoreboardTeam();
 					}
 				}
+				housingBlockEntity.markDirty();
 			}
 
-			Box box = new Box(
-					blockEntity.pos.getX() + blockEntity.influenceAreaPositionOffset.getX(),
-					blockEntity.pos.getY() + blockEntity.influenceAreaPositionOffset.getY(),
-					blockEntity.pos.getZ() + blockEntity.influenceAreaPositionOffset.getZ(),
-					blockEntity.pos.getX() + blockEntity.influenceAreaPositionOffset.getX() + blockEntity.influenceAreaDimensions.getX(),
-					blockEntity.pos.getY() + blockEntity.influenceAreaPositionOffset.getY() + blockEntity.influenceAreaDimensions.getY(),
-					blockEntity.pos.getZ() + blockEntity.influenceAreaPositionOffset.getZ() + blockEntity.influenceAreaDimensions.getZ()
-			);
-			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, box);
+			if (housingBlockEntity.calculateAreaBox || housingBlockEntity.area == null) {
+
+				housingBlockEntity.area = new Box(
+						housingBlockEntity.pos.getX() + housingBlockEntity.influenceAreaPositionOffset.getX(),
+						housingBlockEntity.pos.getY() + housingBlockEntity.influenceAreaPositionOffset.getY(),
+						housingBlockEntity.pos.getZ() + housingBlockEntity.influenceAreaPositionOffset.getZ(),
+						housingBlockEntity.pos.getX() + housingBlockEntity.influenceAreaPositionOffset.getX() + housingBlockEntity.influenceAreaDimensions.getX(),
+						housingBlockEntity.pos.getY() + housingBlockEntity.influenceAreaPositionOffset.getY() + housingBlockEntity.influenceAreaDimensions.getY(),
+						housingBlockEntity.pos.getZ() + housingBlockEntity.influenceAreaPositionOffset.getZ() + housingBlockEntity.influenceAreaDimensions.getZ()
+				);
+				housingBlockEntity.calculateAreaBox = false;
+				housingBlockEntity.markDirty();
+			}
+			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, housingBlockEntity.area);
 			Iterator var11 = list.iterator();
 
 			PlayerEntity playerEntity;
@@ -180,22 +212,23 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 
 				String playerName = playerEntity.getName().getString();
 				String playerUuid = playerEntity.getUuidAsString();
-				if (Objects.equals(playerUuid, blockEntity.getOwnerUuid())) {
+				if (Objects.equals(playerUuid, housingBlockEntity.getOwnerUuid())) {
 					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
-				} else if (blockEntity.getCoOwnerList().contains(playerName)) {
+				} else if (housingBlockEntity.getCoOwnerList().contains(playerName)) {
 					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_CO_OWNER_EFFECT, 100, 0, true, false, false));
-				} else if (blockEntity.getTrustedList().contains(playerName)) {
+				} else if (housingBlockEntity.getTrustedList().contains(playerName)) {
 					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_TRUSTED_EFFECT, 100, 0, true, false, false));
-				} else if (blockEntity.getGuestList().contains(playerName) || (ownerTeam != null && ownerTeam.getPlayerList().contains(playerName))) {
+				} else if (housingBlockEntity.getGuestList().contains(playerName) || (ownerTeam != null && ownerTeam.getPlayerList().contains(playerName))) {
 					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_GUEST_EFFECT, 100, 0, true, false, false));
 				} else {
 					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_STRANGER_EFFECT, 100, 0, true, false, false));
 				}
-				((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentHousingBlockPosition(Optional.of(blockEntity.pos));
+				((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentHousingBlockPosition(Optional.of(housingBlockEntity.pos));
 			}
 		}
 	}
 
+	// region --- getter & setter ---
 	public String getOwnerUuid() {
 		return this.ownerUuid;
 	}
@@ -289,6 +322,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	public void setIsOwnerSet(boolean isOwnerSet) {
 		this.isOwnerSet = isOwnerSet;
 	}
+	// endregion --- getter & setter ---
 
 	private static String initOwner(World world) {
 		if (world != null) {

@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -174,6 +175,7 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -223,6 +225,7 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	public void setDamageAmount(float damageAmount) {
 		this.damageAmount = damageAmount;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {
@@ -234,6 +237,11 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
 			this.area = new Box(areaStart, areaEnd);
 			this.calculateAreaBox = false;
+			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 		}
 
 		if (this.world != null) {

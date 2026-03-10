@@ -263,6 +263,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public BlockPos getDataProvidingBlockPosOffset() {
 		return this.dataProvidingBlockPosOffset;
 	}
@@ -350,6 +351,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	public void setTriggeredBlocks(List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks) {
 		this.triggeredBlocks = triggeredBlocks;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {

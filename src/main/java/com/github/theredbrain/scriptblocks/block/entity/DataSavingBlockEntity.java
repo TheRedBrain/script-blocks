@@ -81,6 +81,7 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 		}
 	}
 
+	// region --- getter & setter ---
 	public List<MutablePair<String, String>> getDataList() {
 		List<MutablePair<String, String>> dataList = new ArrayList<>();
 		for (Map.Entry<String, String> entry : this.data.entrySet()) {
@@ -95,9 +96,15 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 			this.data.put(listEntry.left, listEntry.right);
 		}
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void reset() {
 		this.data.clear();
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 }

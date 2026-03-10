@@ -160,7 +160,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	//region --- getter & setter ---
+	// region --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -205,7 +205,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 		}
 		return false;
 	}
-	//endregion --- getter & setter ---
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {
@@ -216,6 +216,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 			// calculate sub areas
 			if (this.subAreasList.isEmpty()) {
 				this.subAreasList = splitArea(this.areaPositionOffset, this.areaDimensions, server.getGameRules().get(GameRules.COMMAND_MODIFICATION_BLOCK_LIMIT).get(), 16); // TODO maxIterations gamerule or config
+				this.markDirty();
 			}
 
 			BlockPos startPos;

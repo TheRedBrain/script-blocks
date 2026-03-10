@@ -62,6 +62,7 @@ public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEn
 
 	}
 
+	// region --- getter & setter ---
 	public VillagerData getVillagerData() {
 		return this.villagerData;
 	}
@@ -69,6 +70,7 @@ public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEn
 	public void setVillagerData(VillagerData villagerData) {
 		this.villagerData = villagerData;
 	}
+	//endregion --- getter & setter ---
 
 	@Override
 	protected boolean spawnEntity() {

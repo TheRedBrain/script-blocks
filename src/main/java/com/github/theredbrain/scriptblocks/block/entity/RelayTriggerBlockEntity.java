@@ -153,6 +153,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public SelectionMode getSelectionMode() {
 		return this.selectionMode;
 	}
@@ -240,6 +241,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	public void setTriggerAmount(int triggerAmount) {
 		this.triggerAmount = triggerAmount;
 	}
+	// endregion --- getter & setter ---
 
 	private int getActualTriggerAmount() {
 		if (this.world != null && this.isTriggerAmountDataDriven && this.dataProvidingBlockPosOffset != BlockPos.ORIGIN && !this.dataIdentifier.isEmpty()) {

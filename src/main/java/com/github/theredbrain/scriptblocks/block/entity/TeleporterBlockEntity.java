@@ -332,7 +332,28 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 	}
 
-	//region --- getter & setter ---
+	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getDataDrivenLocation() {
+
+		String locationString = this.location.getLeft().getLeft();
+		String entranceString = this.location.getLeft().getRight();
+		String dataIdString = this.location.getRight().getLeft() + this.sendDataIdentifierDataIdentifier;
+		String dataValueString = this.location.getRight().getRight() + this.sendDataValueDataIdentifier;
+
+		BlockPos dataProvidingBlockPosOffset = this.dataProvidingBlockPosOffset;
+		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
+			BlockEntity blockEntity = this.world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
+			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
+				locationString = locationString + providesDataBlockEntity.getData(this.locationDataIdentifier);
+				entranceString = entranceString + providesDataBlockEntity.getData(this.entranceDataIdentifier);
+				dataIdString = dataIdString + providesDataBlockEntity.getData(this.sendDataIdentifierDataIdentifier);
+				dataValueString = dataValueString + providesDataBlockEntity.getData(this.sendDataValueDataIdentifier);
+			}
+		}
+
+		return new MutablePair<>(new MutablePair<>(locationString, entranceString), new MutablePair<>(dataIdString, dataValueString));
+	}
+
+	// region --- getter & setter ---
 	public String getTeleporterName() {
 		return teleporterName;
 	}
@@ -507,27 +528,6 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.locationsList = locationsList;
 	}
 
-	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getDataDrivenLocation() {
-
-		String locationString = this.location.getLeft().getLeft();
-		String entranceString = this.location.getLeft().getRight();
-		String dataIdString = this.location.getRight().getLeft() + this.sendDataIdentifierDataIdentifier;
-		String dataValueString = this.location.getRight().getRight() + this.sendDataValueDataIdentifier;
-
-		BlockPos dataProvidingBlockPosOffset = this.dataProvidingBlockPosOffset;
-		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity = this.world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
-			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
-				locationString = locationString + providesDataBlockEntity.getData(this.locationDataIdentifier);
-				entranceString = entranceString + providesDataBlockEntity.getData(this.entranceDataIdentifier);
-				dataIdString = dataIdString + providesDataBlockEntity.getData(this.sendDataIdentifierDataIdentifier);
-				dataValueString = dataValueString + providesDataBlockEntity.getData(this.sendDataValueDataIdentifier);
-			}
-		}
-
-		return new MutablePair<>(new MutablePair<>(locationString, entranceString), new MutablePair<>(dataIdString, dataValueString));
-	}
-
 	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getLocation() {
 		return this.location;
 	}
@@ -631,7 +631,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	public void setCancelTeleportButtonLabel(String cancelTeleportButtonLabel) {
 		this.cancelTeleportButtonLabel = cancelTeleportButtonLabel;
 	}
-	//endregion
+	// endregion --- getter & setter ---
 
 	@Override
 	public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayerEntity player) {

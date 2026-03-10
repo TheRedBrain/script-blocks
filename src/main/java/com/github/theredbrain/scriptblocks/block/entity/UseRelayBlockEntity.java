@@ -63,6 +63,7 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public BlockPos getRelayBlockPositionOffset() {
 		return this.relayBlockPositionOffset;
 	}
@@ -79,6 +80,7 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 		);
 		return true;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	protected void onRotate(BlockState state) {

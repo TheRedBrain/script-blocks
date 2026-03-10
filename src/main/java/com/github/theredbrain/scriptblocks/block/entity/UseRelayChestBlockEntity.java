@@ -99,6 +99,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public BlockPos getRelayBlockPositionOffset() {
 		return this.relayBlockPositionOffset;
 	}
@@ -163,6 +164,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 	public void setUnlockedSound(String unlockedSound) {
 		this.unlockedSound = unlockedSound;
 	}
+	// endregion --- getter & setter ---
 
 	public boolean canTrigger(PlayerEntity playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {

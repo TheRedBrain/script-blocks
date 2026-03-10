@@ -157,6 +157,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public Identifier getTarget() {
 		return this.target;
 	}
@@ -233,6 +234,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	public void setSecondCheckedDataId(String secondCheckedDataId) {
 		this.secondCheckedDataId = secondCheckedDataId;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {

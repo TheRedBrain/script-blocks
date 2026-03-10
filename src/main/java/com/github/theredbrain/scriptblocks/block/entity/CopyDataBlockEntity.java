@@ -99,6 +99,7 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public BlockPos getFirstDataProvidingBlockPosOffset() {
 		return this.firstDataProvidingBlockPosOffset;
 	}
@@ -122,6 +123,7 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	public void setDataIdentifier(String dataIdentifier) {
 		this.dataIdentifier = dataIdentifier;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {

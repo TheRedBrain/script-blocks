@@ -66,6 +66,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public BlockPos getActiveMimicBlockPositionOffset() {
 		return activeMimicBlockPositionOffset;
 	}
@@ -89,6 +90,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		this.inactiveMimicBlockPositionOffset = inactiveMimicBlockPositionOffset;
 		return true;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	protected void onRotate(BlockState state) {

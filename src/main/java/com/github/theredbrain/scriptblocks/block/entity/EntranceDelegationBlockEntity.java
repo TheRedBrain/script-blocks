@@ -56,6 +56,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getDelegatedEntrance() {
 		return this.delegatedEntrance;
 	}
@@ -64,6 +65,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		this.delegatedEntrance = delegatedEntrance;
 		return true;
 	}
+	// endregion --- getter & setter ---
 
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerWorld serverWorld) {
 		BlockPos targetPos;

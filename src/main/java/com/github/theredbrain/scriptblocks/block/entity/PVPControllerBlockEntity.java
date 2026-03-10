@@ -11,6 +11,7 @@ import com.github.theredbrain.scriptblocks.registry.DamageTypesRegistry;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -153,6 +154,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public String getPVPArenaSettingsIdentifier() {
 		return this.pvpArenaSettingsIdentifier;
 	}
@@ -205,6 +207,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	public void setMatchDurationDataIdentifier(String matchDurationDataIdentifier) {
 		this.matchDurationDataIdentifier = matchDurationDataIdentifier;
 	}
+	// endregion --- getter & setter ---
 
 	@Nullable
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getTeamRespawnPosition(String teamId, boolean endOfBattle) {
@@ -231,13 +234,28 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	public void addPlayerAndTeam(Team team, PlayerEntity playerEntity) {
 		this.teamSet.add(team.getName());
 		this.playerUUIDSet.add(playerEntity.getUuid());
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	public void removePlayer(PlayerEntity playerEntity) {
 		this.playerUUIDSet.remove(playerEntity.getUuid());
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
-	public void initMatchDuration() {
+	public void startMatch() {
+		this.initMatchDuration();
+		this.matchIsActive = true;
+	}
+
+	private void initMatchDuration() {
 		if (this.world != null && !this.world.isClient()) {
 			if (this.dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
 				BlockPos firstDataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
@@ -249,11 +267,6 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			}
 		}
 		this.matchDuration = 0;
-	}
-
-	public void startMatch() {
-		this.initMatchDuration();
-		this.matchIsActive = true;
 	}
 
 	public void endMatch(boolean forceEnd) {
@@ -289,6 +302,11 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		}
 		this.matchTicker = 0;
 		this.matchIsActive = false;
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, PVPControllerBlockEntity pvpControllerBlockEntity) {
@@ -336,15 +354,22 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 //				}
 //			}
 			}
+			pvpControllerBlockEntity.markDirty();
+			if (pvpControllerBlockEntity.world != null) {
+				BlockState blockState = pvpControllerBlockEntity.world.getBlockState(pvpControllerBlockEntity.pos);
+				pvpControllerBlockEntity.world.updateListeners(pvpControllerBlockEntity.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 		}
 	}
 
 	@Override
 	public void trigger() {
 		this.startMatch();
-//		if (this.world != null) {
-//
-//		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override
@@ -353,6 +378,11 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		this.endMatch(true);
 		this.teamSet.clear();
 		this.playerUUIDSet.clear();
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override

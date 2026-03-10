@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -73,6 +74,7 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public HashMap<Integer, MutablePair<BlockPos, Boolean>> getTriggeredBlocks() {
 		return triggeredBlocks;
 	}
@@ -81,6 +83,7 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 		this.triggeredBlocks = triggeredBlocks;
 		return true;
 	}
+	// endregion --- getter & setter ---
 
 	public void trigger() {
 		if (this.world != null) {
@@ -98,11 +101,21 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 				}
 			}
 		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override
 	public void reset() {
 		this.counter = 0;
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override

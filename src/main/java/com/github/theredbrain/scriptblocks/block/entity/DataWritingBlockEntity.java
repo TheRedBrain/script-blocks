@@ -92,6 +92,7 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public BlockPos getDataProvidingBlockPosOffset() {
 		return dataProvidingBlockPosOffset;
 	}
@@ -115,12 +116,11 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 	public void setNewDataValue(String newDataValue) {
 		this.newDataValue = newDataValue;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {
 		if (this.world != null) {
-			String worldName = this.world.getRegistryKey().getValue().getPath();
-			MinecraftServer server = this.world.getServer();
 			BlockPos dataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
 
 			BlockEntity blockEntity = world.getBlockEntity(dataProviderBlockPos);

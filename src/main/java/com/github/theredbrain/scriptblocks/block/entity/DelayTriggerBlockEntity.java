@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -92,23 +93,30 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, DelayTriggerBlockEntity blockEntity) {
+	public static void tick(World world, BlockPos pos, BlockState state, DelayTriggerBlockEntity delayTriggerBlockEntity) {
 
-		if (!world.isClient && blockEntity.remainingTicks > 0) {
-			blockEntity.remainingTicks--;
-			if (blockEntity.remainingTicks <= 0) {
-				blockEntity.triggerTriggeredBlock();
+		if (!world.isClient && delayTriggerBlockEntity.remainingTicks > 0) {
+			delayTriggerBlockEntity.remainingTicks--;
+			if (delayTriggerBlockEntity.remainingTicks <= 0) {
+				delayTriggerBlockEntity.triggerTriggeredBlock();
+			}
+			delayTriggerBlockEntity.markDirty();
+		}
+	}
+
+	@Override
+	public void trigger() {
+		if (this.world != null) {
+			this.remainingTicks = this.triggerDelay;
+			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 			}
 		}
 	}
 
-	public void trigger() {
-		if (this.world != null) {
-			this.remainingTicks = this.triggerDelay;
-		}
-	}
-
-	public void triggerTriggeredBlock() {
+	private void triggerTriggeredBlock() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
@@ -122,6 +130,7 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 	}
 
+	// region --- getter & setter ---
 	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
 		return this.triggeredBlock;
 	}
@@ -137,6 +146,7 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	public void setTriggerDelay(int triggerDelay) {
 		this.triggerDelay = Math.max(0, triggerDelay);
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	protected void onRotate(BlockState state) {

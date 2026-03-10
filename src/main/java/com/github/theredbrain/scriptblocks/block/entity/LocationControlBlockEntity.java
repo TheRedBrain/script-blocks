@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -196,6 +197,40 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	public void trigger() {
+		this.manualReset = false;
+		if (this.world != null) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.triggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
+			}
+		}
+	}
+
+	public boolean shouldReset() {
+		// TODO
+		//  implement reset timer
+		//  make sure resets only happen when no players are in location
+		//  this could be achieved with triggered teleporter blocks
+		return this.manualReset || this.shouldAlwaysReset;
+	}
+
+	@Override
+	public void reset() {
+		this.manualReset = true;
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
+
+	// region --- getter & setter ---
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getMainEntrance() {
 		return mainEntrance;
 	}
@@ -247,34 +282,6 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 	public void setDataProvidingBlockPosOffset(BlockPos dataProvidingBlockPosOffset) {
 		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
-	}
-
-	public void trigger() {
-		this.manualReset = false;
-		if (this.world != null) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
-			if (blockEntity != this) {
-				boolean triggeredBlockResets = this.triggeredBlock.getRight();
-				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
-					resetable.reset();
-				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
-					triggerable.trigger();
-				}
-			}
-		}
-	}
-
-	public boolean shouldReset() {
-		// TODO
-		//  implement reset timer
-		//  make sure resets only happen when no players are in location
-		//  this could be achieved with triggered teleporter blocks
-		return this.manualReset || this.shouldAlwaysReset;
-	}
-
-	@Override
-	public void reset() {
-		this.manualReset = true;
 	}
 
 	public boolean getManualReset() {
@@ -332,6 +339,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	public void setInitialResetTimer(int initialResetTimer) {
 		this.initialResetTimer = initialResetTimer;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	protected void onRotate(BlockState state) {

@@ -87,6 +87,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		return this.createComponentlessNbt(registryLookup);
 	}
 
+	// region --- getter & setter ---
 	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
 		return this.triggeredBlock;
 	}
@@ -134,6 +135,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 	public void setUnlockedSound(String unlockedSound) {
 		this.unlockedSound = unlockedSound;
 	}
+	// endregion --- getter & setter ---
 
 	public boolean canTrigger(PlayerEntity playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {

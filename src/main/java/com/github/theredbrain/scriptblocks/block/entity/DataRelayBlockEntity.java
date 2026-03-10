@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -103,9 +104,11 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 			return this.dataProvidingBlockPosOffsetList.get(this.index);
 		} else if (!this.dataProvidingBlockPosOffsetList.isEmpty()) {
 			this.index = this.dataProvidingBlockPosOffsetList.size() - 1;
+			this.markDirty();
 			return this.dataProvidingBlockPosOffsetList.getLast();
 		} else {
 			this.index = 0;
+			this.markDirty();
 			return BlockPos.ORIGIN;
 		}
 	}
@@ -114,6 +117,7 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 		return this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ());
 	}
 
+	// region --- getter & setter ---
 	public List<BlockPos> getDataProvidingBlockPosOffsetList() {
 		return this.dataProvidingBlockPosOffsetList;
 	}
@@ -126,12 +130,18 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	public void setIndex(int index) {
 		this.index = index;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	public void trigger() {
 		this.index++;
 		if (this.index >= this.dataProvidingBlockPosOffsetList.size()) {
 			this.index = 0;
+		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 

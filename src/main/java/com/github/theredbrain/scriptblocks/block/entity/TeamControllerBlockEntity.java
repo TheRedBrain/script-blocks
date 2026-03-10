@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
@@ -235,6 +236,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
 				teamControllerBlockEntity.area = new Box(areaStart, areaEnd);
 				teamControllerBlockEntity.calculateAreaBox = false;
+				teamControllerBlockEntity.markDirty();
 			}
 			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient) {
 				BlockPos pvpControllerBlockPos = null;
@@ -259,7 +261,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 	}
 
-	//region --- getter & setter ---
+	// region --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -406,7 +408,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	public void setSuffixString(String suffixString) {
 		this.suffixString = suffixString;
 	}
-	//endregion --- getter & setter ---
+	// endregion --- getter & setter ---
 
 	@Override
 	public void reset() {
@@ -414,12 +416,19 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			this.team.getScoreboard().removeTeam(this.team);
 			this.team = null;
 		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override
 	public void trigger() {
 		if (this.team == null && this.world != null && !this.world.isClient) {
-			this.world.getScoreboard().addTeam(this.teamIdentifier);
+			if (this.world.getScoreboard().getTeam(this.teamIdentifier) == null) {
+				this.world.getScoreboard().addTeam(this.teamIdentifier);
+			}
 
 			this.team = this.world.getScoreboard().getTeam(this.teamIdentifier);
 			if (this.team != null) {
@@ -442,6 +451,11 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 				this.team.setCollisionRule(collisionRule != null ? collisionRule : AbstractTeam.CollisionRule.ALWAYS);
 				this.team.setColor(this.teamColor);
 			}
+		}
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 

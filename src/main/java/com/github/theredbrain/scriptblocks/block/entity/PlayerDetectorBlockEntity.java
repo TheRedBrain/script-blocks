@@ -222,6 +222,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 			if (shouldTriggerBlock) {
 				areaBlockEntity.triggerBlock();
 			}
+			areaBlockEntity.markDirty();
 		}
 	}
 
@@ -242,6 +243,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 		}
 	}
 
+	// region --- getter & setter ---
 	public boolean showArea() {
 		return showArea;
 	}
@@ -275,6 +277,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
 		this.triggeredBlock = triggeredBlock;
 	}
+	// endregion --- getter & setter ---
 
 	@Override
 	protected void onRotate(BlockState state) {
