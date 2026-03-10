@@ -42,11 +42,8 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayLecternBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.passive.FakeVillagerEntity;
-import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
@@ -57,85 +54,85 @@ public class EntityRegistry {
 	//region Script Blocks
 	public static final BlockEntityType<LootableVaultBlockEntity> LOOTABLE_VAULT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("lootable_vault_block"),
-			FabricBlockEntityTypeBuilder.create(LootableVaultBlockEntity::new, BlockRegistry.LOOTABLE_VAULT_BLOCK).build());
+			BlockEntityType.Builder.create(LootableVaultBlockEntity::new, BlockRegistry.LOOTABLE_VAULT_BLOCK).build());
 	public static final BlockEntityType<TriggeringTrialSpawnerBlockEntity> TRIGGERING_TRIAL_SPAWNER = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggering_trial_spawner_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeringTrialSpawnerBlockEntity::new, BlockRegistry.TRIGGERING_TRIAL_SPAWNER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeringTrialSpawnerBlockEntity::new, BlockRegistry.TRIGGERING_TRIAL_SPAWNER_BLOCK).build());
 	public static final BlockEntityType<AestheticDecoratedPotBlockEntity> AESTHETIC_DECORATED_POT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("aesthetic_decorated_pot"),
-			FabricBlockEntityTypeBuilder.create(AestheticDecoratedPotBlockEntity::new, BlockRegistry.AESTHETIC_DECORATED_POT).build());
+			BlockEntityType.Builder.create(AestheticDecoratedPotBlockEntity::new, BlockRegistry.AESTHETIC_DECORATED_POT).build());
 	public static final BlockEntityType<TriggeredDispenserBlockEntity> TRIGGERED_DISPENSER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_dispenser_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredDispenserBlockEntity::new, BlockRegistry.TRIGGERED_DISPENSER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredDispenserBlockEntity::new, BlockRegistry.TRIGGERED_DISPENSER_BLOCK).build());
 	public static final BlockEntityType<TriggeredBeaconBlockEntity> TRIGGERED_BEACON_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_beacon_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredBeaconBlockEntity::new, BlockRegistry.TRIGGERED_BEACON_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredBeaconBlockEntity::new, BlockRegistry.TRIGGERED_BEACON_BLOCK).build());
 	public static final BlockEntityType<TriggeredDisplayBlockEntity> TRIGGERED_DISPLAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_display_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredDisplayBlockEntity::new, BlockRegistry.TRIGGERED_DISPLAY_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredDisplayBlockEntity::new, BlockRegistry.TRIGGERED_DISPLAY_BLOCK).build());
 	public static final BlockEntityType<TriggeredDamageDealingBlockEntity> TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_damage_dealing_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredDamageDealingBlockEntity::new, BlockRegistry.TRIGGERED_DAMAGE_DEALING_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredDamageDealingBlockEntity::new, BlockRegistry.TRIGGERED_DAMAGE_DEALING_BLOCK).build());
 	public static final BlockEntityType<TriggeredEntityRemoverBlockEntity> TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_entity_remover_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredEntityRemoverBlockEntity::new, BlockRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredEntityRemoverBlockEntity::new, BlockRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK).build());
 	public static final BlockEntityType<TriggeredRNGBlockEntity> TRIGGERED_RNG_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_rng_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredRNGBlockEntity::new, BlockRegistry.TRIGGERED_RNG_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredRNGBlockEntity::new, BlockRegistry.TRIGGERED_RNG_BLOCK).build());
 	public static final BlockEntityType<InteractiveLootBlockEntity> INTERACTIVE_LOOT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("interactive_loot_block"),
-			FabricBlockEntityTypeBuilder.create(InteractiveLootBlockEntity::new, BlockRegistry.INTERACTIVE_LOOT_BLOCK).build());
+			BlockEntityType.Builder.create(InteractiveLootBlockEntity::new, BlockRegistry.INTERACTIVE_LOOT_BLOCK).build());
 	public static final BlockEntityType<TriggeredCounterBlockEntity> TRIGGERED_COUNTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_counter_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredCounterBlockEntity::new, BlockRegistry.TRIGGERED_COUNTER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredCounterBlockEntity::new, BlockRegistry.TRIGGERED_COUNTER_BLOCK).build());
 	public static final BlockEntityType<CopyDataBlockEntity> COPY_DATA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("copy_data_block"),
-			FabricBlockEntityTypeBuilder.create(CopyDataBlockEntity::new, BlockRegistry.COPY_DATA_BLOCK).build());
+			BlockEntityType.Builder.create(CopyDataBlockEntity::new, BlockRegistry.COPY_DATA_BLOCK).build());
 	public static final BlockEntityType<DataRelayBlockEntity> DATA_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_relay_block"),
-			FabricBlockEntityTypeBuilder.create(DataRelayBlockEntity::new, BlockRegistry.DATA_RELAY_BLOCK).build());
+			BlockEntityType.Builder.create(DataRelayBlockEntity::new, BlockRegistry.DATA_RELAY_BLOCK).build());
 	public static final BlockEntityType<DataSavingBlockEntity> DATA_SAVING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_saving_block"),
-			FabricBlockEntityTypeBuilder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_SAVING_BLOCK).build());
+			BlockEntityType.Builder.create(DataSavingBlockEntity::new, BlockRegistry.DATA_SAVING_BLOCK).build());
 	//	public static final BlockEntityType<DataAccessBlockEntity> DATA_ACCESS_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 //			ScriptBlocks.identifier("data_access_block"),
-//			FabricBlockEntityTypeBuilder.create(DataAccessBlockEntity::new, BlockRegistry.DATA_ACCESS_BLOCK).build());
+//			BlockEntityType.Builder.create(DataAccessBlockEntity::new, BlockRegistry.DATA_ACCESS_BLOCK).build());
 	public static final BlockEntityType<DataWritingBlockEntity> DATA_WRITING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_writing_block"),
-			FabricBlockEntityTypeBuilder.create(DataWritingBlockEntity::new, BlockRegistry.DATA_WRITING_BLOCK).build());
+			BlockEntityType.Builder.create(DataWritingBlockEntity::new, BlockRegistry.DATA_WRITING_BLOCK).build());
 	public static final BlockEntityType<DialogueBlockEntity> DIALOGUE_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("dialogue_block"),
-			FabricBlockEntityTypeBuilder.create(DialogueBlockEntity::new, BlockRegistry.DIALOGUE_BLOCK).build());
+			BlockEntityType.Builder.create(DialogueBlockEntity::new, BlockRegistry.DIALOGUE_BLOCK).build());
 	public static final BlockEntityType<ShopBlockEntity> SHOP_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("shop_block"),
-			FabricBlockEntityTypeBuilder.create(ShopBlockEntity::new, BlockRegistry.SHOP_BLOCK).build());
+			BlockEntityType.Builder.create(ShopBlockEntity::new, BlockRegistry.SHOP_BLOCK).build());
 	public static final BlockEntityType<MimicBlockEntity> MIMIC_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("mimic_block"),
-			FabricBlockEntityTypeBuilder.create(MimicBlockEntity::new, BlockRegistry.MIMIC_BLOCK).build());
+			BlockEntityType.Builder.create(MimicBlockEntity::new, BlockRegistry.MIMIC_BLOCK).build());
 	public static final BlockEntityType<PlayerDetectorBlockEntity> PLAYER_DETECTOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("player_detector_block"),
-			FabricBlockEntityTypeBuilder.create(PlayerDetectorBlockEntity::new, BlockRegistry.PLAYER_DETECTOR_BLOCK).build());
+			BlockEntityType.Builder.create(PlayerDetectorBlockEntity::new, BlockRegistry.PLAYER_DETECTOR_BLOCK).build());
 	public static final BlockEntityType<TriggeredSpawnerBlockEntity> TRIGGERED_SPAWNER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_spawner_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_SPAWNER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_SPAWNER_BLOCK).build());
 	public static final BlockEntityType<TriggeredVillagerSpawnerBlockEntity> TRIGGERED_VILLAGER_SPAWNER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_villager_spawner_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredVillagerSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredVillagerSpawnerBlockEntity::new, BlockRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK).build());
 	public static final BlockEntityType<LocationControlBlockEntity> LOCATION_CONTROL_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("location_control_block"),
-			FabricBlockEntityTypeBuilder.create(LocationControlBlockEntity::new, BlockRegistry.LOCATION_CONTROL_BLOCK).build());
+			BlockEntityType.Builder.create(LocationControlBlockEntity::new, BlockRegistry.LOCATION_CONTROL_BLOCK).build());
 	public static final BlockEntityType<HousingBlockEntity> HOUSING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("housing_block"),
-			FabricBlockEntityTypeBuilder.create(HousingBlockEntity::new, BlockRegistry.HOUSING_BLOCK).build());
+			BlockEntityType.Builder.create(HousingBlockEntity::new, BlockRegistry.HOUSING_BLOCK).build());
 	public static final BlockEntityType<TeamControllerBlockEntity> TEAM_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("team_controller_block"),
-			FabricBlockEntityTypeBuilder.create(TeamControllerBlockEntity::new, BlockRegistry.TEAM_CONTROLLER_BLOCK).build());
+			BlockEntityType.Builder.create(TeamControllerBlockEntity::new, BlockRegistry.TEAM_CONTROLLER_BLOCK).build());
 	public static final BlockEntityType<PVPControllerBlockEntity> PVP_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("pvp_controller_block"),
-			FabricBlockEntityTypeBuilder.create(PVPControllerBlockEntity::new, BlockRegistry.PVP_CONTROLLER_BLOCK).build());
+			BlockEntityType.Builder.create(PVPControllerBlockEntity::new, BlockRegistry.PVP_CONTROLLER_BLOCK).build());
 	public static final BlockEntityType<TeleporterBlockEntity> TELEPORTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("teleporter_block"),
-			FabricBlockEntityTypeBuilder.create(TeleporterBlockEntity::new,
+			BlockEntityType.Builder.create(TeleporterBlockEntity::new,
 					BlockRegistry.TELEPORTER_BLOCK,
 					BlockRegistry.TELEPORTER_OAK_DOOR,
 					BlockRegistry.TELEPORTER_IRON_DOOR,
@@ -163,13 +160,13 @@ public class EntityRegistry {
 					BlockRegistry.TELEPORTER_WARPED_TRAPDOOR).build());
 	public static final BlockEntityType<JigsawPlacerBlockEntity> STRUCTURE_PLACER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("structure_placer_block"),
-			FabricBlockEntityTypeBuilder.create(JigsawPlacerBlockEntity::new, BlockRegistry.JIGSAW_PLACER_BLOCK).build());
+			BlockEntityType.Builder.create(JigsawPlacerBlockEntity::new, BlockRegistry.JIGSAW_PLACER_BLOCK).build());
 	public static final BlockEntityType<RedstoneTriggerBlockEntity> REDSTONE_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("redstone_trigger_block"),
-			FabricBlockEntityTypeBuilder.create(RedstoneTriggerBlockEntity::new, BlockRegistry.REDSTONE_TRIGGER_BLOCK).build());
+			BlockEntityType.Builder.create(RedstoneTriggerBlockEntity::new, BlockRegistry.REDSTONE_TRIGGER_BLOCK).build());
 	public static final BlockEntityType<InteractiveTriggerBlockEntity> INTERACTIVE_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("interactive_trigger_block"),
-			FabricBlockEntityTypeBuilder.create(InteractiveTriggerBlockEntity::new,
+			BlockEntityType.Builder.create(InteractiveTriggerBlockEntity::new,
 					BlockRegistry.INTERACTIVE_TRIGGER_OAK_DOOR,
 					BlockRegistry.INTERACTIVE_TRIGGER_IRON_DOOR,
 					BlockRegistry.INTERACTIVE_TRIGGER_SPRUCE_DOOR,
@@ -214,31 +211,31 @@ public class EntityRegistry {
 			).build());
 	public static final BlockEntityType<RelayTriggerBlockEntity> RELAY_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("relay_trigger_block"),
-			FabricBlockEntityTypeBuilder.create(RelayTriggerBlockEntity::new, BlockRegistry.RELAY_TRIGGER_BLOCK).build());
+			BlockEntityType.Builder.create(RelayTriggerBlockEntity::new, BlockRegistry.RELAY_TRIGGER_BLOCK).build());
 	public static final BlockEntityType<DelayTriggerBlockEntity> DELAY_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("delay_trigger_block"),
-			FabricBlockEntityTypeBuilder.create(DelayTriggerBlockEntity::new, BlockRegistry.DELAY_TRIGGER_BLOCK).build());
+			BlockEntityType.Builder.create(DelayTriggerBlockEntity::new, BlockRegistry.DELAY_TRIGGER_BLOCK).build());
 	public static final BlockEntityType<EntranceDelegationBlockEntity> ENTRANCE_DELEGATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("entrance_delegation_block"),
-			FabricBlockEntityTypeBuilder.create(EntranceDelegationBlockEntity::new, BlockRegistry.ENTRANCE_DELEGATION_BLOCK).build());
+			BlockEntityType.Builder.create(EntranceDelegationBlockEntity::new, BlockRegistry.ENTRANCE_DELEGATION_BLOCK).build());
 	public static final BlockEntityType<AreaBlockEntity> AREA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("area_block"),
-			FabricBlockEntityTypeBuilder.create(AreaBlockEntity::new, BlockRegistry.AREA_BLOCK).build());
+			BlockEntityType.Builder.create(AreaBlockEntity::new, BlockRegistry.AREA_BLOCK).build());
 	public static final BlockEntityType<AreaFillerBlockEntity> AREA_FILLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("area_filler_block"),
-			FabricBlockEntityTypeBuilder.create(AreaFillerBlockEntity::new, BlockRegistry.AREA_FILLER_BLOCK).build());
+			BlockEntityType.Builder.create(AreaFillerBlockEntity::new, BlockRegistry.AREA_FILLER_BLOCK).build());
 	public static final BlockEntityType<BossControllerBlockEntity> BOSS_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("boss_controller_block"),
-			FabricBlockEntityTypeBuilder.create(BossControllerBlockEntity::new, BlockRegistry.BOSS_CONTROLLER_BLOCK).build());
+			BlockEntityType.Builder.create(BossControllerBlockEntity::new, BlockRegistry.BOSS_CONTROLLER_BLOCK).build());
 	public static final BlockEntityType<TriggeredRedstoneBlockEntity> TRIGGERED_REDSTONE_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_redstone_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredRedstoneBlockEntity::new, BlockRegistry.TRIGGERED_REDSTONE_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredRedstoneBlockEntity::new, BlockRegistry.TRIGGERED_REDSTONE_BLOCK).build());
 	public static final BlockEntityType<TriggeredAdvancementCheckerBlockEntity> TRIGGERED_ADVANCEMENT_CHECKER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_advancement_checker_block"),
-			FabricBlockEntityTypeBuilder.create(TriggeredAdvancementCheckerBlockEntity::new, BlockRegistry.TRIGGERED_ADVANCEMENT_CHECKER_BLOCK).build());
+			BlockEntityType.Builder.create(TriggeredAdvancementCheckerBlockEntity::new, BlockRegistry.TRIGGERED_ADVANCEMENT_CHECKER_BLOCK).build());
 	public static final BlockEntityType<UseRelayBlockEntity> USE_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("use_relay_block"),
-			FabricBlockEntityTypeBuilder.create(UseRelayBlockEntity::new,
+			BlockEntityType.Builder.create(UseRelayBlockEntity::new,
 					BlockRegistry.USE_RELAY_BLOCK,
 					BlockRegistry.USE_RELAY_ANVIL,
 					BlockRegistry.USE_RELAY_OAK_DOOR,
@@ -267,18 +264,18 @@ public class EntityRegistry {
 					BlockRegistry.USE_RELAY_WARPED_TRAPDOOR).build());
 	public static final BlockEntityType<UseRelayChestBlockEntity> USE_RELAY_CHEST_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("use_relay_chest_block"),
-			FabricBlockEntityTypeBuilder.create(UseRelayChestBlockEntity::new,
+			BlockEntityType.Builder.create(UseRelayChestBlockEntity::new,
 					BlockRegistry.USE_RELAY_CHEST,
 					BlockRegistry.LOCKED_USE_RELAY_CHEST).build());
 	public static final BlockEntityType<UseRelayLecternBlockEntity> USE_RELAY_LECTERN_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("use_relay_lectern"),
-			FabricBlockEntityTypeBuilder.create(UseRelayLecternBlockEntity::new,
+			BlockEntityType.Builder.create(UseRelayLecternBlockEntity::new,
 					BlockRegistry.USE_RELAY_LECTERN).build());
 	//endregion Script Blocks
 
 	public static final EntityType<FakeVillagerEntity> FAKE_VILLAGER_ENTITY = Registry.register(Registries.ENTITY_TYPE,
 			ScriptBlocks.identifier("fake_villager"),
-			FabricEntityTypeBuilder.create(SpawnGroup.MISC, FakeVillagerEntity::new).dimensions(EntityDimensions.changing(0.6F, 1.95F)).build());
+			EntityType.Builder.create(FakeVillagerEntity::new, SpawnGroup.MISC).dimensions(0.6F, 1.95F).build());
 
 	public static void init() {
 		registerEntityAttributes();
