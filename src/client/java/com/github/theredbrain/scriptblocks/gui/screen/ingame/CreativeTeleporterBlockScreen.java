@@ -916,13 +916,23 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			} else if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 				for (int i = this.creativeLocationsListScrollPosition; i < Math.min(this.creativeLocationsListScrollPosition + 3, this.locationsList.size()); i++) {
 					String text = this.locationsList.get(i).getLeft().getLeft();
+					String text2 = "";
+					// entrance
 					if (!this.locationsList.get(i).getLeft().getRight().isEmpty()) {
 						text = text + ", " + this.locationsList.get(i).getLeft().getRight();
 					}
+					// data
 					if (!this.locationsList.get(i).getRight().getLeft().isEmpty()) {
-						text = text + ", " + this.locationsList.get(i).getRight().getLeft() + ", " + this.locationsList.get(i).getRight().getRight();
+						text2 = this.locationsList.get(i).getRight().getLeft() + ", " + this.locationsList.get(i).getRight().getRight();
 					}
-					context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), 0xA0A0A0);
+					if (text2.isEmpty()) {
+						context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), 0xA0A0A0);
+					} else {
+						int y = 76 + ((i - this.creativeLocationsListScrollPosition) * 25);
+						context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, y - 7, 0xA0A0A0);
+						context.drawTextWithShadow(this.textRenderer, text2, this.width / 2 - 117, y + 6, 0xA0A0A0);
+
+					}
 				}
 				if (this.locationsList.size() > 3) {
 					context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 70, 8, 70);
