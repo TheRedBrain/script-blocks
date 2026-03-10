@@ -193,7 +193,25 @@ public class EntityRegistry {
 					BlockRegistry.INTERACTIVE_TRIGGER_MANGROVE_TRAPDOOR,
 					BlockRegistry.INTERACTIVE_TRIGGER_BAMBOO_TRAPDOOR,
 					BlockRegistry.INTERACTIVE_TRIGGER_CRIMSON_TRAPDOOR,
-					BlockRegistry.INTERACTIVE_TRIGGER_WARPED_TRAPDOOR).build());
+					BlockRegistry.INTERACTIVE_TRIGGER_WARPED_TRAPDOOR,
+					BlockRegistry.INTERACTIVE_TRIGGER_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_WHITE_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_ORANGE_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_MAGENTA_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_LIGHT_BLUE_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_YELLOW_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_LIME_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_PINK_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_GRAY_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_LIGHT_GRAY_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_CYAN_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_PURPLE_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_BLUE_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_BROWN_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_GREEN_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_RED_CANDLE,
+					BlockRegistry.INTERACTIVE_TRIGGER_BLACK_CANDLE
+			).build());
 	public static final BlockEntityType<RelayTriggerBlockEntity> RELAY_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("relay_trigger_block"),
 			FabricBlockEntityTypeBuilder.create(RelayTriggerBlockEntity::new, BlockRegistry.RELAY_TRIGGER_BLOCK).build());
