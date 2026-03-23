@@ -1,0 +1,14 @@
+{
+  "display": "minecraft:barrier",
+  "settings": {
+    "biome": "scriptblocks:player_locations_biome",
+    "features": false,
+    "lakes": false,
+    "layers": [
+      {
+        "block": "minecraft:air",
+        "height": 1
+      }
+    ]
+  }
+}
