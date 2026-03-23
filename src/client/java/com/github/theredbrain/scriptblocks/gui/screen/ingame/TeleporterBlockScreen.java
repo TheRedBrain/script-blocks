@@ -64,14 +64,15 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private final TeleporterBlockScreenHandler handler;
 	private TeleporterBlockEntity teleporterBlock;
 
+	private PlayerListEntry currentPlayer;
 	private PlayerListEntry currentTargetOwner;
 	private ButtonWidget openChooseTargetOwnerScreenButton;
-	private ButtonWidget confirmChoosePublicButton;
 	private ButtonWidget confirmChooseCurrentPlayerButton;
 	private ButtonWidget confirmChooseTeamMember0Button;
 	private ButtonWidget confirmChooseTeamMember1Button;
 	private ButtonWidget confirmChooseTeamMember2Button;
 	private ButtonWidget confirmChooseTeamMember3Button;
+	private ButtonWidget confirmChooseTeamMember4Button;
 	private ButtonWidget cancelChooseTargetOwnerButton;
 	private String currentTargetIdentifier;
 	private String currentTargetDisplayName;
@@ -155,9 +156,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private void chooseTargetOwner(int index) {
 		this.canLocationBeRegenerated = false;
-		if (index == -2) {
-			this.currentTargetOwner = null;
-		} else if (index == -1 && this.client != null && this.client.player != null) {
+		if (index == -1 && this.client != null && this.client.player != null) {
 			this.currentTargetOwner = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
 			this.canLocationBeRegenerated = true;
 		} else {
@@ -240,7 +239,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				this.teleporterBlock = (TeleporterBlockEntity) blockEntity;
 			}
 			if (this.client.player != null) {
-				this.currentTargetOwner = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
+				this.currentPlayer = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
+				this.currentTargetOwner = this.currentPlayer;
 				this.canLocationBeRegenerated = true;
 			}
 		}
@@ -283,12 +283,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.cancelChooseTargetIdentifierButton = this.addDrawableChild(ButtonWidget.builder(CANCEL_BUTTON_LABEL_TEXT, button -> this.cancelChooseTargetLocation()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
 
 		this.openChooseTargetOwnerScreenButton = this.addDrawableChild(ButtonWidget.builder(EDIT_BUTTON_LABEL_TEXT, button -> this.openChooseCurrentTargetOwnerScreen()).dimensions(this.x + this.backgroundWidth - 57, this.y + 71, 50, 20).build());
-		this.confirmChoosePublicButton = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(-2)).dimensions(this.x + this.backgroundWidth - 57, this.y + 20, 50, 20).build());
-		this.confirmChooseCurrentPlayerButton = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(-1)).dimensions(this.x + this.backgroundWidth - 57, this.y + 44, 50, 20).build());
-		this.confirmChooseTeamMember0Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(0)).dimensions(this.x + this.backgroundWidth - 57, this.y + 68, 50, 20).build());
-		this.confirmChooseTeamMember1Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(1)).dimensions(this.x + this.backgroundWidth - 57, this.y + 92, 50, 20).build());
-		this.confirmChooseTeamMember2Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(2)).dimensions(this.x + this.backgroundWidth - 57, this.y + 116, 50, 20).build());
-		this.confirmChooseTeamMember3Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(3)).dimensions(this.x + this.backgroundWidth - 57, this.y + 140, 50, 20).build());
+		this.confirmChooseCurrentPlayerButton = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(-1)).dimensions(this.x + this.backgroundWidth - 57, this.y + 20, 50, 20).build());
+		this.confirmChooseTeamMember0Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(0)).dimensions(this.x + this.backgroundWidth - 57, this.y + 44, 50, 20).build());
+		this.confirmChooseTeamMember1Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(1)).dimensions(this.x + this.backgroundWidth - 57, this.y + 68, 50, 20).build());
+		this.confirmChooseTeamMember2Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(2)).dimensions(this.x + this.backgroundWidth - 57, this.y + 92, 50, 20).build());
+		this.confirmChooseTeamMember3Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(3)).dimensions(this.x + this.backgroundWidth - 57, this.y + 116, 50, 20).build());
+		this.confirmChooseTeamMember4Button = this.addDrawableChild(ButtonWidget.builder(CHOOSE_BUTTON_LABEL_TEXT, button -> this.chooseTargetOwner(4)).dimensions(this.x + this.backgroundWidth - 57, this.y + 140, 50, 20).build());
 		this.cancelChooseTargetOwnerButton = this.addDrawableChild(ButtonWidget.builder(CANCEL_BUTTON_LABEL_TEXT, button -> this.cancelChooseCurrentTargetOwner()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
 
 		this.openDungeonRegenerationScreenButton = this.addDrawableChild(ButtonWidget.builder(REGENERATE_BUTTON_LABEL_TEXT, button -> this.openDungeonRegenerationConfirmScreen()).dimensions(this.x + 7, this.y + this.backgroundHeight - 51, this.backgroundWidth - 14, 20).build());
@@ -316,12 +316,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.cancelChooseTargetIdentifierButton.visible = false;
 
 		this.openChooseTargetOwnerScreenButton.visible = false;
-		this.confirmChoosePublicButton.visible = false;
 		this.confirmChooseCurrentPlayerButton.visible = false;
 		this.confirmChooseTeamMember0Button.visible = false;
 		this.confirmChooseTeamMember1Button.visible = false;
 		this.confirmChooseTeamMember2Button.visible = false;
 		this.confirmChooseTeamMember3Button.visible = false;
+		this.confirmChooseTeamMember4Button.visible = false;
 		this.cancelChooseTargetOwnerButton.visible = false;
 
 		this.openDungeonRegenerationScreenButton.visible = false;
@@ -355,25 +355,11 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 		} else if (this.showChooseTargetOwnerScreen) {
 
-			if (this.isCurrentLocationPublic) {
-				this.confirmChooseCurrentPlayerButton.setY(this.y + 44);
-				this.confirmChooseTeamMember0Button.setY(this.y + 68);
-				this.confirmChooseTeamMember1Button.setY(this.y + 92);
-				this.confirmChooseTeamMember2Button.setY(this.y + 116);
-				this.confirmChooseTeamMember3Button.setY(this.y + 140);
-				this.confirmChoosePublicButton.visible = true;
-			} else {
-				this.confirmChooseCurrentPlayerButton.setY(this.y + 20);
-				this.confirmChooseTeamMember0Button.setY(this.y + 44);
-				this.confirmChooseTeamMember1Button.setY(this.y + 68);
-				this.confirmChooseTeamMember2Button.setY(this.y + 92);
-				this.confirmChooseTeamMember3Button.setY(this.y + 116);
-			}
 			if (!this.isCurrentLocationPublic) {
 				this.confirmChooseCurrentPlayerButton.visible = true;
 
 				int index = 0;
-				for (int i = 0; i < Math.min(4, this.partyMemberList.size()); i++) {
+				for (int i = 0; i < Math.min(5, this.partyMemberList.size()); i++) {
 					if (index == 0) {
 						this.confirmChooseTeamMember0Button.visible = true;
 					} else if (index == 1) {
@@ -382,6 +368,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						this.confirmChooseTeamMember2Button.visible = true;
 					} else if (index == 3) {
 						this.confirmChooseTeamMember3Button.visible = true;
+					} else if (index == 4) {
+						this.confirmChooseTeamMember4Button.visible = true;
 					}
 					index++;
 				}
@@ -640,7 +628,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.visibleLocationsListMouseClicked = false;
 		int i;
 		int j;
-		// TODO team list
 		if (this.showChooseTargetOwnerScreen) {
 			i = this.x - 13;
 			j = this.y + 134;
@@ -663,9 +650,9 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
 		if (this.showChooseTargetOwnerScreen
-				&& this.partyMemberList.size() > 4
+				&& this.partyMemberList.size() > 5
 				&& this.partyMemberListMouseClicked) {
-			int i = this.partyMemberList.size() - 4;
+			int i = this.partyMemberList.size() - 5;
 			float f = (float) deltaY / (float) i;
 			this.partyMemberListScrollAmount = MathHelper.clamp(this.partyMemberListScrollAmount + f, 0.0f, 1.0f);
 			this.partyMemberListScrollPosition = (int) ((double) (this.partyMemberListScrollAmount * (float) i));
@@ -685,9 +672,9 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (this.showChooseTargetOwnerScreen
-				&& this.partyMemberList.size() > 4
+				&& this.partyMemberList.size() > 5
 				&& mouseX >= this.x + 7 && mouseX <= this.x + this.backgroundWidth - 61 && mouseY >= this.y + 20 && mouseY <= this.y + 112) {
-			int i = this.partyMemberList.size() - 4;
+			int i = this.partyMemberList.size() - 5;
 			float f = (float) verticalAmount / (float) i;
 			this.partyMemberListScrollAmount = MathHelper.clamp(this.partyMemberListScrollAmount - f, 0.0f, 1.0f);
 			this.partyMemberListScrollPosition = (int) ((double) (this.partyMemberListScrollAmount * (float) i));
@@ -737,16 +724,19 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		} else if (this.showChooseTargetOwnerScreen) {
 			context.drawTexture(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 
-			for (int i = this.partyMemberListScrollPosition; i < Math.min(this.partyMemberListScrollPosition + 4, this.partyMemberList.size()); i++) {
-//					context.drawText(this.textRenderer, this.partyMemberList.get(i).getLeft().getLeft(), x + 19, y + 26 + ((i - this.partyMemberListScrollPosition) * 24), 0x404040, false);
+			context.drawTexture(this.currentPlayer.getSkinTextures().texture(), x + 7, y + 26, 8, 8, 8, 8, 8, 8, 64, 64);
+			context.drawText(this.textRenderer, this.currentPlayer.getProfile().getName(), x + 19, y + 26, 0x404040, false);
 
-				context.drawTexture(this.partyMemberList.get(i).getSkinTextures().texture(), x + 7, y + 26 + ((i - this.partyMemberListScrollPosition) * 24), 8, 8, 8, 8, 8, 8, 64, 64);
-				context.drawText(this.textRenderer, this.partyMemberList.get(i).getProfile().getName(), x + 19, y + 26 + ((i - this.partyMemberListScrollPosition) * 24), 0x404040, false);
+			for (int i = this.partyMemberListScrollPosition; i < Math.min(this.partyMemberListScrollPosition + 4, this.partyMemberList.size()); i++) {
+
+				PlayerListEntry playerListEntry = this.partyMemberList.get(i);
+				context.drawTexture(playerListEntry.getSkinTextures().texture(), x + 7, y + 50 + ((i - this.partyMemberListScrollPosition) * 24), 8, 8, 8, 8, 8, 8, 64, 64);
+				context.drawText(this.textRenderer, playerListEntry.getProfile().getName(), x + 19, y + 50 + ((i - this.partyMemberListScrollPosition) * 24), 0x404040, false);
 			}
-			if (this.partyMemberList.size() > 4) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 20, 8, 92);
-				int k = (int) (83.0f * this.partyMemberListScrollAmount);
-				context.drawGuiTexture(SCROLLER_TEXTURE, x + 8, y + 20 + 1 + k, 6, 7);
+			if (this.partyMemberList.size() > 5) {
+				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 44, 8, 116);
+				int k = (int) (105.0f * this.partyMemberListScrollAmount);
+				context.drawGuiTexture(SCROLLER_TEXTURE, x + 8, y + 44 + 1 + k, 6, 7);
 			}
 		} else if (this.showRegenerationConfirmScreen) {
 			context.drawTexture(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);

@@ -280,7 +280,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TeleporterBlockEntity blockEntity) {
-		if (!blockEntity.triggerActivation() && world.getTime() % 80L == 0) {
+		if (!blockEntity.triggerActivation() && world.getTime() % 20L == 0) {
 			TeleporterBlockEntity.tryOpenScreenRemotely(world, pos, state, blockEntity);
 		}
 	}
@@ -313,7 +313,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 					playerEntity.setStatusEffect(
 							new StatusEffectInstance(
 									ScriptBlocks.PORTAL_RESISTANCE_EFFECT,
-									100,
+									40,
 									0,
 									false,
 									false,
