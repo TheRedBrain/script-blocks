@@ -175,7 +175,6 @@ if (project.hasProperty('release_type')) {
 //				requiredDependency 'fabric-api'
 //				requiredDependency 'slot-customization-api'
 //				optionalDependency 'rpg-inventory'
-//				optionalDependency 'lootables'
 //			}
 //
 //			mainArtifact(remapJar)
@@ -206,10 +205,8 @@ if (project.hasProperty('release_type')) {
 			// The type can either be `project` or `version`
 			required.project 'fzzy-config'
 			required.project 'fabric-api'
-			required.project 'dimlib'
 			required.project 'slot-customization-api'
 			optional.project 'rpg-inventory'
-			optional.project 'lootables'
 		}
 	}
 
