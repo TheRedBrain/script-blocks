@@ -1,5 +1,7 @@
 package com.github.theredbrain.scriptblocks;
 
+import com.github.theredbrain.scriptblocks.block.Resetable;
+import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
 import com.github.theredbrain.scriptblocks.compatibility.RPGInventoryCompat;
@@ -99,6 +101,15 @@ public class ScriptBlocks implements ModInitializer {
 	public static void setRPGEquipmentStack(PlayerEntity playerEntity, int index, ItemStack stack) {
 		if (isRPGInventoryLoaded) {
 			RPGInventoryCompat.setRPGEquipmentStack(playerEntity, index, stack);
+		}
+	}
+
+	public static void trigger(ServerWorld serverWorld, BlockPos blockPos, boolean resets) {
+		BlockEntity blockEntity = serverWorld.getBlockEntity(blockPos);
+		if (resets && blockEntity instanceof Resetable resetable) {
+			resetable.reset();
+		} else if (!resets && blockEntity instanceof Triggerable triggerable) {
+			triggerable.trigger();
 		}
 	}
 
