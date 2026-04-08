@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+@Deprecated
 public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateAreaBlockPacket> {
 	@Override
 	public void receive(UpdateAreaBlockPacket payload, ServerPlayNetworking.Context context) {

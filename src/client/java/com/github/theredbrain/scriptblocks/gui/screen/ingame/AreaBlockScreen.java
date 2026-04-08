@@ -22,6 +22,7 @@ import net.minecraft.util.math.Vec3i;
 import java.util.Arrays;
 import java.util.Optional;
 
+@Deprecated
 @Environment(value = EnvType.CLIENT)
 public class AreaBlockScreen extends Screen {
 	private static final Text TRIGGERED_TRUE_LABEL_TEXT = Text.translatable("gui.area_block.triggered_true_label");

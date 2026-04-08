@@ -7,6 +7,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
+@Deprecated
 public record UpdateAreaBlockPacket(
 		BlockPos areaBlockPosition,
 		boolean showArea,

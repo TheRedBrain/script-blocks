@@ -17,6 +17,7 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+@Deprecated
 @Environment(value = EnvType.CLIENT)
 public class InteractiveLootBlockScreen extends Screen {
 	private static final Text LOOT_TABLE_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.interactive_loot_block.loot_table_identifier_label");

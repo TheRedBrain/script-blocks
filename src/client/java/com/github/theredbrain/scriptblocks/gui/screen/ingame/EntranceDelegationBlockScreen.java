@@ -16,6 +16,7 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
+@Deprecated
 @Environment(value = EnvType.CLIENT)
 public class EntranceDelegationBlockScreen extends Screen {
 	private static final Text DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.entrance_delegation_block.entrance_position_offset");

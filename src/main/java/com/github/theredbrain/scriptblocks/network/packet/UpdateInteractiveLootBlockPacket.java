@@ -6,6 +6,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
 
+@Deprecated
 public record UpdateInteractiveLootBlockPacket(
 		BlockPos interactiveLootBlockPosition,
 		String lootTableIdentifierString,

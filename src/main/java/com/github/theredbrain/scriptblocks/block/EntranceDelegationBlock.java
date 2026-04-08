@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated
 public class EntranceDelegationBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<EntranceDelegationBlock> CODEC = createCodec(EntranceDelegationBlock::new);
 
