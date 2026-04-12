@@ -299,13 +299,13 @@
 	"gui.relay_trigger_block.data_identifier_label": "Checked Data",
 	"gui.relay_trigger_block.trigger_amount_label": "Trigger Amount",
 
-	"gui.relay_trigger_block.selectionMode.list": "Selection Mode: List",
-	"gui.relay_trigger_block.selectionMode.area": "Selection Mode: Area",
+	"gui.relay_trigger_block.selection_mode.list": "Selection Mode: List",
+	"gui.relay_trigger_block.selection_mode.area": "Selection Mode: Area",
 
-	"gui.relay_trigger_block.triggerMode.normal": "Mode: Normal",
-	"gui.relay_trigger_block.triggerMode.random": "Mode: Random",
-	"gui.relay_trigger_block.triggerMode.binomial": "Mode: Binomial",
-	"gui.relay_trigger_block.triggerMode.hyper_geometric": "Mode: Hyper Geometric",
+	"gui.relay_trigger_block.trigger_mode.normal": "Mode: Normal",
+	"gui.relay_trigger_block.trigger_mode.random": "Mode: Random",
+	"gui.relay_trigger_block.trigger_mode.binomial": "Mode: Binomial",
+	"gui.relay_trigger_block.trigger_mode.hyper_geometric": "Mode: Hyper Geometric",
 
 
 	"gui.pvp_controller_block.pvp_arena_settings_id_label": "PVP Arena Settings Identifier",

@@ -51,6 +51,8 @@ public class RelayTriggerBlockScreen extends Screen {
 	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
 			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
 	);
+	private static final int VISIBLE_LIST_ELEMENTS = 3;
+
 	private final RelayTriggerBlockEntity relayTriggerBlock;
 
 	private CyclingButtonWidget<RelayTriggerBlockEntity.SelectionMode> selectionModeButton;
@@ -85,7 +87,6 @@ public class RelayTriggerBlockScreen extends Screen {
 	private TextFieldWidget dataIdentifierField;
 	private TextFieldWidget triggerAmountField;
 
-	private static final int VISIBLE_LIST_ELEMENTS = 3;
 	private final List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(List.of());
 	private RelayTriggerBlockEntity.TriggerMode triggerMode;
 	private boolean isTriggerAmountDataDriven;
@@ -100,9 +101,6 @@ public class RelayTriggerBlockScreen extends Screen {
 
 	private void addNewTriggeredBlock() {
 		int chance = ItemUtils.parseInt(this.newTriggeredBlockChanceField.getText());
-//		if (chance > 100) {
-//			chance = 100;
-//		} else
 		if (chance < 0) {
 			chance = 0;
 		}
@@ -278,6 +276,11 @@ public class RelayTriggerBlockScreen extends Screen {
 		this.setInitialFocus(this.selectionModeButton);
 	}
 
+	@Override
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		this.renderInGameBackground(context);
+	}
+
 	private void updateWidgets() {
 		this.toggleShowAreaButton.visible = false;
 
@@ -375,16 +378,58 @@ public class RelayTriggerBlockScreen extends Screen {
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
+		RelayTriggerBlockEntity.SelectionMode var = this.selectionMode;
+		RelayTriggerBlockEntity.TriggerMode var1 = this.triggerMode;
+		boolean bool = this.showArea;
+		boolean bool1 = this.resetsArea;
+		boolean bool2 = this.newTriggeredBlockResets;
+		boolean bool3 = this.isTriggerAmountDataDriven;
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> list = new ArrayList<>(this.triggeredBlocks);
-		String string = this.newTriggeredBlockPositionOffsetXField.getText();
-		String string1 = this.newTriggeredBlockPositionOffsetYField.getText();
-		String string2 = this.newTriggeredBlockPositionOffsetZField.getText();
+		String string = this.areaDimensionsXField.getText();
+		String string1 = this.areaDimensionsYField.getText();
+		String string2 = this.areaDimensionsZField.getText();
+		String string3 = this.areaPositionOffsetXField.getText();
+		String string4 = this.areaPositionOffsetYField.getText();
+		String string5 = this.areaPositionOffsetZField.getText();
+		String string6 = this.newTriggeredBlockPositionOffsetXField.getText();
+		String string7 = this.newTriggeredBlockPositionOffsetYField.getText();
+		String string8 = this.newTriggeredBlockPositionOffsetZField.getText();
+		String string9 = this.newTriggeredBlockChanceField.getText();
+		String string10 = this.dataProvidingBlockPosOffsetXField.getText();
+		String string11 = this.dataProvidingBlockPosOffsetYField.getText();
+		String string12 = this.dataProvidingBlockPosOffsetZField.getText();
+		String string13 = this.dataIdentifierField.getText();
+		String string14 = this.triggerAmountField.getText();
 		this.init(client, width, height);
+		this.selectionMode = var;
+		this.triggerMode = var1;
+		this.showArea = bool;
+		this.resetsArea = bool1;
+		this.newTriggeredBlockResets = bool2;
+		this.isTriggerAmountDataDriven = bool3;
 		this.triggeredBlocks.clear();
 		this.triggeredBlocks.addAll(list);
-		this.newTriggeredBlockPositionOffsetXField.setText(string);
-		this.newTriggeredBlockPositionOffsetYField.setText(string1);
-		this.newTriggeredBlockPositionOffsetZField.setText(string2);
+		this.areaDimensionsXField.setText(string);
+		this.areaDimensionsYField.setText(string1);
+		this.areaDimensionsZField.setText(string2);
+		this.areaPositionOffsetXField.setText(string3);
+		this.areaPositionOffsetYField.setText(string4);
+		this.areaPositionOffsetZField.setText(string5);
+		this.newTriggeredBlockPositionOffsetXField.setText(string6);
+		this.newTriggeredBlockPositionOffsetYField.setText(string7);
+		this.newTriggeredBlockPositionOffsetZField.setText(string8);
+		this.newTriggeredBlockChanceField.setText(string9);
+		this.dataProvidingBlockPosOffsetXField.setText(string10);
+		this.dataProvidingBlockPosOffsetYField.setText(string11);
+		this.dataProvidingBlockPosOffsetZField.setText(string12);
+		this.dataIdentifierField.setText(string13);
+		this.triggerAmountField.setText(string14);
+		this.selectionModeButton.setValue(this.selectionMode);
+		this.cycleTriggerModeButton.setValue(this.triggerMode);
+		this.toggleShowAreaButton.setValue(this.showArea);
+		this.toggleResetsAreaButton.setValue(this.resetsArea);
+		this.toggleNewTriggeredBlockResetsButton.setValue(this.newTriggeredBlockResets);
+		this.toggleIsTriggerAmountDataDrivenButton.setValue(this.isTriggerAmountDataDriven);
 		this.updateWidgets();
 	}
 

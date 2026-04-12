@@ -10,7 +10,6 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
@@ -34,7 +33,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
 
-	private List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(List.of());
+	private final List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(List.of());
 	private TriggerMode triggerMode = TriggerMode.NORMAL;
 	private boolean isTriggerAmountDataDriven = true;
 	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
@@ -48,47 +47,43 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putString("selectionMode", this.selectionMode.asString());
+		nbt.putString("selection_mode", this.selectionMode.asString());
 
-		nbt.putBoolean("showArea", this.showArea);
+		nbt.putBoolean("show_area", this.showArea);
 
-		nbt.putBoolean("resetsArea", this.resetsArea);
+		nbt.putBoolean("resets_area", this.resetsArea);
 
-		nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-		nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-		nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
+		nbt.putInt("area_dimensions_x", this.areaDimensions.getX());
+		nbt.putInt("area_dimensions_y", this.areaDimensions.getY());
+		nbt.putInt("area_dimensions_z", this.areaDimensions.getZ());
 
-		nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-		nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-		nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
+		nbt.putInt("area_position_offset_x", this.areaPositionOffset.getX());
+		nbt.putInt("area_position_offset_y", this.areaPositionOffset.getY());
+		nbt.putInt("area_position_offset_z", this.areaPositionOffset.getZ());
 
-		nbt.putInt("triggeredBlocksSize", triggeredBlocks.size());
+		nbt.putInt("triggered_blocks_size", triggeredBlocks.size());
 		for (int i = 0; i < this.triggeredBlocks.size(); i++) {
 			BlockPos triggeredBlock = this.triggeredBlocks.get(i).left.left;
-			nbt.putInt("triggeredBlockPositionOffsetX_" + i, triggeredBlock.getX());
-			nbt.putInt("triggeredBlockPositionOffsetY_" + i, triggeredBlock.getY());
-			nbt.putInt("triggeredBlockPositionOffsetZ_" + i, triggeredBlock.getZ());
-			nbt.putBoolean("triggeredBlockResets_" + i, this.triggeredBlocks.get(i).left.right);
-			nbt.putInt("triggeredBlockChance_" + i, this.triggeredBlocks.get(i).right);
+			nbt.putInt("triggered_block_position_offset_x_" + i, triggeredBlock.getX());
+			nbt.putInt("triggered_block_position_offset_y_" + i, triggeredBlock.getY());
+			nbt.putInt("triggered_block_position_offset_z_" + i, triggeredBlock.getZ());
+			nbt.putBoolean("triggered_block_resets_" + i, this.triggeredBlocks.get(i).left.right);
+			nbt.putInt("triggered_block_chance_" + i, this.triggeredBlocks.get(i).right);
 		}
 
-		nbt.putString("triggerMode", this.triggerMode.asString());
+		nbt.putString("trigger_mode", this.triggerMode.asString());
 
-		nbt.putBoolean("isTriggerAmountDataDriven", this.isTriggerAmountDataDriven);
+		nbt.putBoolean("is_trigger_amount_data_driven", this.isTriggerAmountDataDriven);
 
 		if (this.dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
-			nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
-			nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
-			nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
+			nbt.putInt("data_providing_block_pos_offset_x", this.dataProvidingBlockPosOffset.getX());
+			nbt.putInt("data_providing_block_pos_offset_y", this.dataProvidingBlockPosOffset.getY());
+			nbt.putInt("data_providing_block_pos_offset_z", this.dataProvidingBlockPosOffset.getZ());
 		}
 
-		nbt.putString("dataIdentifier", this.dataIdentifier);
+		nbt.putString("data_identifier", this.dataIdentifier);
 
-		nbt.putInt("triggerAmount", this.triggerAmount);
+		nbt.putInt("trigger_amount", this.triggerAmount);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -96,50 +91,139 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		this.selectionMode = SelectionMode.byName(nbt.getString("selectionMode")).orElseGet(() -> SelectionMode.LIST);
-
-		this.showArea = nbt.getBoolean("showArea");
-
-		this.resetsArea = nbt.getBoolean("resetsArea");
-
-		int i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
-		int j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
-		int k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
-		this.areaDimensions = new Vec3i(i, j, k);
-
-		i = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
-		j = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
-		k = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
-		this.areaPositionOffset = new BlockPos(i, j, k);
-
-		int triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
-		this.triggeredBlocks = new ArrayList<>(List.of());
-		for (i = 0; i < triggeredBlocksSize; i++) {
-			int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX_" + i), -48, 48);
-			int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY_" + i), -48, 48);
-			int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ_" + i), -48, 48);
-			boolean bl = nbt.getBoolean("triggeredBlockResets_" + i);
-			int chance = MathHelper.clamp(nbt.getInt("triggeredBlockChance_" + i), 0, 100);
-			this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
+		if (nbt.contains("selectionMode")) {
+			this.selectionMode = SelectionMode.byName(nbt.getString("selectionMode")).orElseGet(() -> SelectionMode.LIST);
+			nbt.remove("selectionMode");
+		} else {
+			this.selectionMode = SelectionMode.byName(nbt.getString("selection_mode")).orElseGet(() -> SelectionMode.LIST);
 		}
 
-		this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElseGet(() -> TriggerMode.NORMAL);
+		if (nbt.contains("showArea")) {
+			this.showArea = nbt.getBoolean("showArea");
+			nbt.remove("showArea");
+		} else {
+			this.showArea = nbt.getBoolean("show_area");
+		}
 
-		this.isTriggerAmountDataDriven = nbt.getBoolean("isTriggerAmountDataDriven");
+		if (nbt.contains("resetsArea")) {
+			this.resetsArea = nbt.getBoolean("resetsArea");
+			nbt.remove("resetsArea");
+		} else {
+			this.resetsArea = nbt.getBoolean("resets_area");
+		}
 
-		if (nbt.contains("dataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+		int i;
+		int j;
+		int k;
+		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
+			i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
+			j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
+			k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
+			nbt.remove("areaDimensionsX");
+			nbt.remove("areaDimensionsY");
+			nbt.remove("areaDimensionsZ");
+		} else {
+			i = MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48);
+			j = MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48);
+			k = MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48);
+		}
+		this.areaDimensions = new Vec3i(i, j, k);
+
+		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
+			i = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
+			j = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
+			k = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
+			nbt.remove("areaPositionOffsetX");
+			nbt.remove("areaPositionOffsetY");
+			nbt.remove("areaPositionOffsetZ");
+		} else {
+			i = MathHelper.clamp(nbt.getInt("area_position_offset_x"), 0, 48);
+			j = MathHelper.clamp(nbt.getInt("area_position_offset_y"), 0, 48);
+			k = MathHelper.clamp(nbt.getInt("area_position_offset_z"), 0, 48);
+		}
+		this.areaPositionOffset = new BlockPos(i, j, k);
+
+		this.triggeredBlocks.clear();
+
+		int triggeredBlocksSize;
+		int x;
+		int y;
+		int z;
+		boolean bl;
+		int chance;
+
+		if (nbt.contains("triggeredBlocksSize")) {
+			triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
+			for (i = 0; i < triggeredBlocksSize; i++) {
+				x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX_" + i), -48, 48);
+				y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY_" + i), -48, 48);
+				z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ_" + i), -48, 48);
+				bl = nbt.getBoolean("triggeredBlockResets_" + i);
+				chance = MathHelper.clamp(nbt.getInt("triggeredBlockChance_" + i), 0, 100);
+				this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
+				nbt.remove("triggeredBlockPositionOffsetX_" + i);
+				nbt.remove("triggeredBlockPositionOffsetY_" + i);
+				nbt.remove("triggeredBlockPositionOffsetZ_" + i);
+				nbt.remove("triggeredBlockResets_" + i);
+				nbt.remove("triggeredBlockChance_" + i);
+			}
+			nbt.remove("triggeredBlocksSize");
+		} else {
+			triggeredBlocksSize = nbt.getInt("triggered_blocks_size");
+			for (i = 0; i < triggeredBlocksSize; i++) {
+				x = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x_" + i), -48, 48);
+				y = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y_" + i), -48, 48);
+				z = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z_" + i), -48, 48);
+				bl = nbt.getBoolean("triggered_block_resets_" + i);
+				chance = MathHelper.clamp(nbt.getInt("triggered_block_chance_" + i), 0, 100);
+				this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
+			}
+		}
+
+		if (nbt.contains("triggerMode")) {
+			this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElseGet(() -> TriggerMode.NORMAL);
+			nbt.remove("triggerMode");
+		} else {
+			this.triggerMode = TriggerMode.byName(nbt.getString("trigger_mode")).orElseGet(() -> TriggerMode.NORMAL);
+		}
+
+		if (nbt.contains("isTriggerAmountDataDriven")) {
+			this.isTriggerAmountDataDriven = nbt.getBoolean("isTriggerAmountDataDriven");
+			nbt.remove("isTriggerAmountDataDriven");
+		} else {
+			this.isTriggerAmountDataDriven = nbt.getBoolean("is_trigger_amount_data_driven");
+		}
+
+		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
 			this.dataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
 			);
+			nbt.remove("dataProvidingBlockPosOffsetX");
+			nbt.remove("dataProvidingBlockPosOffsetY");
+			nbt.remove("dataProvidingBlockPosOffsetZ");
 		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+			this.dataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_z"), -48, 48)
+			);
 		}
 
-		this.dataIdentifier = nbt.getString("dataIdentifier");
+		if (nbt.contains("dataIdentifier")) {
+			this.dataIdentifier = nbt.getString("dataIdentifier");
+			nbt.remove("dataIdentifier");
+		} else {
+			this.dataIdentifier = nbt.getString("data_identifier");
+		}
 
-		this.triggerAmount = nbt.getInt("triggerAmount");
+		if (nbt.contains("triggerAmount")) {
+			this.triggerAmount = nbt.getInt("triggerAmount");
+			nbt.remove("triggerAmount");
+		} else {
+			this.triggerAmount = nbt.getInt("trigger_amount");
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -199,7 +283,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public void setTriggeredBlocks(List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks) {
-		this.triggeredBlocks = triggeredBlocks;
+		this.triggeredBlocks.clear();
+		this.triggeredBlocks.addAll(triggeredBlocks);
 	}
 
 	public TriggerMode getTriggerMode() {
@@ -400,7 +485,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(triggeredBlock.getLeft().getLeft(), blockRotation), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
-				this.triggeredBlocks = newTriggeredBlocks;
+				this.triggeredBlocks.clear();
+				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
@@ -414,7 +500,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
-				this.triggeredBlocks = newTriggeredBlocks;
+				this.triggeredBlocks.clear();
+				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
@@ -428,7 +515,8 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.LEFT_RIGHT), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
-				this.triggeredBlocks = newTriggeredBlocks;
+				this.triggeredBlocks.clear();
+				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}
@@ -455,7 +543,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.relay_trigger_block.selectionMode." + this.name);
+			return Text.translatable("gui.relay_trigger_block.selection_mode." + this.name);
 		}
 	}
 
@@ -481,7 +569,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.relay_trigger_block.triggerMode." + this.name);
+			return Text.translatable("gui.relay_trigger_block.trigger_mode." + this.name);
 		}
 	}
 }

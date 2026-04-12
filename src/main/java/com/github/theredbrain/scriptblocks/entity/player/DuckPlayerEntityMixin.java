@@ -15,7 +15,6 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
@@ -36,13 +35,11 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEnt
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
-import com.github.theredbrain.scriptblocks.data.Dialogue;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface DuckPlayerEntityMixin {
@@ -79,7 +76,8 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock);
 
-	void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock);
+	default void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock) {
+	}
 
 	void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock);
 
@@ -101,7 +99,8 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
 
-	default void scriptblocks$openSpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {}
+	default void scriptblocks$openSpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+	}
 
 	void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
 
