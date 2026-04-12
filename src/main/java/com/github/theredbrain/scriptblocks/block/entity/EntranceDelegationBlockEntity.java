@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -30,6 +31,8 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		nbt.putDouble("delegatedEntrance_Yaw", this.delegatedEntrance.getRight().getLeft());
 		nbt.putDouble("delegatedEntrance_Pitch", this.delegatedEntrance.getRight().getRight());
 
+
+		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Entrance Delegation Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with a Spawn Point Delegation Block.", this.world != null ? this.world.getServer() : null);
 		super.writeNbt(nbt, registryLookup);
 
 	}

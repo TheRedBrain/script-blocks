@@ -176,13 +176,15 @@ public class BlockRegistry {
 
 	public static final Block USE_RELAY_LECTERN = registerBlock("use_relay_lectern", new UseRelayLecternBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
+	@Deprecated
 	public static final Block LOOTABLE_VAULT_BLOCK = registerBlock("lootable_vault_block", new LootableVaultBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.VAULT).luminance(state -> ((LootableVaultState) state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
 	public static final Block TRIGGERING_TRIAL_SPAWNER_BLOCK = registerBlock("triggering_trial_spawner_block", new TriggeringTrialSpawnerBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.TRIAL_SPAWNER).blockVision(Blocks::never).luminance(state -> ((TrialSpawnerState) state.get(TriggeringTrialSpawnerBlock.TRIAL_SPAWNER_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	//endregion Content Blocks
 
 	//region Script Blocks
-	public static final Block AREA_BLOCK = registerBlock("area_block", new AreaBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	@Deprecated
+	public static final Block AREA_BLOCK = registerBlock("area_block", new AreaBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), null);
 	public static final Block AREA_FILLER_BLOCK = registerBlock("area_filler_block", new AreaFillerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block BOSS_CONTROLLER_BLOCK = registerBlock("boss_controller_block", new BossControllerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	//	public static final Block DATA_ACCESS_BLOCK = registerBlock("data_access_block", new DataAccessBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
@@ -192,9 +194,11 @@ public class BlockRegistry {
 	public static final Block DATA_SAVING_BLOCK = registerBlock("data_saving_block", new DataSavingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DELAY_TRIGGER_BLOCK = registerBlock("delay_trigger_block", new DelayTriggerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block DIALOGUE_BLOCK = registerBlock("dialogue_block", new DialogueBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
-	public static final Block ENTRANCE_DELEGATION_BLOCK = registerBlock("entrance_delegation_block", new EntranceDelegationBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	@Deprecated
+	public static final Block ENTRANCE_DELEGATION_BLOCK = registerBlock("entrance_delegation_block", new EntranceDelegationBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), null);
 	public static final Block HOUSING_BLOCK = registerBlock("housing_block", new HousingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_LOOT_BLOCK = registerBlock("interactive_loot_block", new InteractiveLootBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	@Deprecated
+	public static final Block INTERACTIVE_LOOT_BLOCK = registerBlock("interactive_loot_block", new InteractiveLootBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), null);
 	public static final Block JIGSAW_PLACER_BLOCK = registerBlock("jigsaw_placer_block", new JigsawPlacerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block LOCATION_CONTROL_BLOCK = registerBlock("location_control_block", new LocationControlBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block MIMIC_BLOCK = registerBlock("mimic_block", new MimicBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

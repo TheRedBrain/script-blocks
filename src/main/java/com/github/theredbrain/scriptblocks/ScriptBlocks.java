@@ -167,10 +167,12 @@ public class ScriptBlocks implements ModInitializer {
 	}
 
 	public static void sendDeprecatedFeatureInfo(String message, @Nullable MinecraftServer minecraftServer) {
-		if (SERVER_CONFIG.enable_deprecated_feature_chat_message && minecraftServer != null) {
-			minecraftServer.getPlayerManager().broadcast(Text.of(message), false);
+		if (minecraftServer != null) {
+			if (SERVER_CONFIG.enable_deprecated_feature_chat_message) {
+				minecraftServer.getPlayerManager().broadcast(Text.of(message), false);
+			}
+			info(message);
 		}
-		info(message);
 	}
 
 	public static Identifier identifier(String path) {

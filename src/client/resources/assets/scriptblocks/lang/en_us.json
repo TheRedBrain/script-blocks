@@ -778,7 +778,7 @@
 	"block.scriptblocks.lootable_vault_block": "Lootable Vault (Deprecated)",
 	"block.scriptblocks.triggering_trial_spawner_block": "Triggering Trial Spawner",
 
-	"block.scriptblocks.area_block": "Area Block",
+	"block.scriptblocks.area_block": "Area Block (Deprecated)",
 	"block.scriptblocks.area_filler_block": "Area Filler Block",
 	"block.scriptblocks.boss_controller_block": "Boss Controller Block",
 	"block.scriptblocks.copy_data_block": "Copy Data Block",
@@ -788,7 +788,7 @@
 	"block.scriptblocks.data_writing_block": "Data Writing Block",
 	"block.scriptblocks.delay_trigger_block": "Delay Trigger Block",
 	"block.scriptblocks.dialogue_block": "Dialogue Block",
-	"block.scriptblocks.entrance_delegation_block": "Entrance Delegation Block",
+	"block.scriptblocks.entrance_delegation_block": "Entrance Delegation Block (Deprecated)",
 	"block.scriptblocks.housing_block": "Housing Block",
 	"block.scriptblocks.interactive_loot_block": "Interactive Loot Block (Deprecated)",
 	"block.scriptblocks.jigsaw_placer_block": "Jigsaw Placer Block",
