@@ -22,6 +22,7 @@ import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntit
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
@@ -99,6 +100,8 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
 
 	void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
+
+	default void scriptblocks$openSpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {}
 
 	void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
 

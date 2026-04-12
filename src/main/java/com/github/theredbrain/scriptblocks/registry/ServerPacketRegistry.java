@@ -64,6 +64,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateRelayTriggerBloc
 import com.github.theredbrain.scriptblocks.network.packet.UpdateRelayTriggerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateSpawnPointDelegationBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateSpawnPointDelegationBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeamControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeamControllerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockPacket;
@@ -206,6 +208,9 @@ public class ServerPacketRegistry {
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, new UpdateTriggeredAdvancementCheckerBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateSpawnPointDelegationBlockPacket.PACKET_ID, UpdateSpawnPointDelegationBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateSpawnPointDelegationBlockPacket.PACKET_ID, new UpdateSpawnPointDelegationBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateTeamControllerBlockPacket.PACKET_ID, UpdateTeamControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTeamControllerBlockPacket.PACKET_ID, new UpdateTeamControllerBlockPacketReceiver());

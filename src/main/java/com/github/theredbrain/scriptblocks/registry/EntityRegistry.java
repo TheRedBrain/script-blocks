@@ -24,6 +24,7 @@ import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntit
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
@@ -218,6 +219,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<EntranceDelegationBlockEntity> ENTRANCE_DELEGATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("entrance_delegation_block"),
 			BlockEntityType.Builder.create(EntranceDelegationBlockEntity::new, BlockRegistry.ENTRANCE_DELEGATION_BLOCK).build());
+	public static final BlockEntityType<SpawnPointDelegationBlockEntity> SPAWN_POINT_DELEGATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("spawn_point_delegation_block"),
+			BlockEntityType.Builder.create(SpawnPointDelegationBlockEntity::new, BlockRegistry.SPAWN_POINT_DELEGATION_BLOCK).build());
 	public static final BlockEntityType<AreaBlockEntity> AREA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("area_block"),
 			BlockEntityType.Builder.create(AreaBlockEntity::new, BlockRegistry.AREA_BLOCK).build());

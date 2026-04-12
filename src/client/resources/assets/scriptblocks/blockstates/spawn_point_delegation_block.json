@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/spawn_point_delegation_block"
+    }
+  }
+}
