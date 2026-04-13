@@ -28,7 +28,7 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 
 	public JigsawPlacerBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(ORIENTATION, Orientation.NORTH_UP));
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(ORIENTATION, Orientation.NORTH_UP));
 	}
 
 	public MapCodec<JigsawPlacerBlock> getCodec() {
@@ -45,7 +45,7 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
 		Direction direction = ctx.getSide();
 		Direction direction2 = direction.getAxis() == Direction.Axis.Y ? ctx.getHorizontalPlayerFacing().getOpposite() : Direction.UP;
-		return (BlockState) this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
+		return this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
 	}
 
 	@Override
@@ -70,12 +70,12 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements Operato
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return (BlockState) super.rotate(state, rotation).with(ORIENTATION, rotation.getDirectionTransformation().mapJigsawOrientation(state.get(ORIENTATION)));
+		return super.rotate(state, rotation).with(ORIENTATION, rotation.getDirectionTransformation().mapJigsawOrientation(state.get(ORIENTATION)));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		return (BlockState) super.mirror(state, mirror).with(ORIENTATION, mirror.getDirectionTransformation().mapJigsawOrientation(state.get(ORIENTATION)));
+		return super.mirror(state, mirror).with(ORIENTATION, mirror.getDirectionTransformation().mapJigsawOrientation(state.get(ORIENTATION)));
 	}
 
 }

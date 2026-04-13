@@ -279,8 +279,17 @@
 	"gui.interactive_trigger_block.unlock_sound_label": "Unlock Sound",
 
 
-	"gui.jigsaw_placer_block.first_structure_pool_string_field": "First Structure Pool String",
-	"gui.jigsaw_placer_block.second_structure_pool_string_field": "Second Structure Pool String",
+	"gui.jigsaw_placer_block.structure_pool_string_field": "Structure Pool String:",
+	"gui.jigsaw_placer_block.structure_pool_string_appendices.entry.1": "Data-Driven Appendix from Offset X: %s, Y: %s, Z: %s with ID: %s",
+	"gui.jigsaw_placer_block.structure_pool_string_appendices.entry.2": "Static Appendix: %s",
+	"gui.jigsaw_placer_block.add_new_structure_pool_string_appendix_button_label": "Add New Structure Pool String Appendix",
+	"gui.jigsaw_placer_block.new_data_block_label": "New Data Block Offset & ID",
+	"gui.jigsaw_placer_block.new_static_appendix_label": "New Static Appendix",
+	"gui.jigsaw_placer_block.appendix_offset_is_origin": "The Offset Can Not be 0, 0, 0.",
+	"gui.jigsaw_placer_block.structure_pool_string_appendix_is_duplicate": "New Appendix Is A Duplicate",
+	"gui.jigsaw_placer_block.triggered_block_label": "Block At Offset",
+	"gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.on": "Is Reset After Placement",
+	"gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.off": "Is Triggered After Placement",
 
 
 	"gui.delay_trigger_block.triggeredBlockTriggerDelay": "Trigger Delay in ticks",

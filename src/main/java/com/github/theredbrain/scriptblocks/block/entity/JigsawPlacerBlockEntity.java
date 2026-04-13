@@ -13,7 +13,6 @@ import net.minecraft.block.JigsawBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.JigsawBlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -30,23 +29,16 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, 0, 0);
 	private static final RegistryKey<StructurePool> POOL_DEFAULT = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
-	private static final String CHECKED_DATA_ID_DEFAULT = "";
-	public static final String TARGET_KEY = "target";
-	public static final String JOINT_KEY = "joint";
-	public static final String FIRST_CHECKED_DATA_ID_KEY = "first_checked_data_id";
-	public static final String SECOND_CHECKED_DATA_ID_KEY = "second_checked_data_id";
 	private Identifier target = Identifier.of("empty");
-	private String firstStructurePoolString = "";
-	private String secondStructurePoolString = "";
+	private String structurePoolString = "";
 	private JigsawBlockEntity.Joint joint = JigsawBlockEntity.Joint.ROLLABLE;
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-	private BlockPos firstDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
-	private BlockPos secondDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
-	private String firstCheckedDataId = CHECKED_DATA_ID_DEFAULT;
-	private String secondCheckedDataId = CHECKED_DATA_ID_DEFAULT;
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private final List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices = new ArrayList<>(List.of());
 
 	public JigsawPlacerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.STRUCTURE_PLACER_BLOCK_ENTITY, pos, state);
@@ -54,49 +46,25 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		nbt.putString(TARGET_KEY, this.target.toString());
+		nbt.putString("target", this.target.toString());
 
-		nbt.putString("firstStructurePoolString", this.firstStructurePoolString);
+		nbt.putString("joint", this.joint.asString());
 
-		nbt.putString("secondStructurePoolString", this.secondStructurePoolString);
+		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
+		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
+		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
+		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
 
-		nbt.putString(JOINT_KEY, this.joint.asString());
+		nbt.putString("structure_pool_string", this.structurePoolString);
 
-		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
-
-		if (this.firstDataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("firstDataProvidingBlockPosOffsetX", this.firstDataProvidingBlockPosOffset.getX());
-			nbt.putInt("firstDataProvidingBlockPosOffsetY", this.firstDataProvidingBlockPosOffset.getY());
-			nbt.putInt("firstDataProvidingBlockPosOffsetZ", this.firstDataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("firstDataProvidingBlockPosOffsetX");
-			nbt.remove("firstDataProvidingBlockPosOffsetY");
-			nbt.remove("firstDataProvidingBlockPosOffsetZ");
-		}
-
-		if (this.secondDataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("secondDataProvidingBlockPosOffsetX", this.secondDataProvidingBlockPosOffset.getX());
-			nbt.putInt("secondDataProvidingBlockPosOffsetY", this.secondDataProvidingBlockPosOffset.getY());
-			nbt.putInt("secondDataProvidingBlockPosOffsetZ", this.secondDataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("secondDataProvidingBlockPosOffsetX");
-			nbt.remove("secondDataProvidingBlockPosOffsetY");
-			nbt.remove("secondDataProvidingBlockPosOffsetZ");
-		}
-
-		if (this.firstCheckedDataId.equals(CHECKED_DATA_ID_DEFAULT)) {
-			nbt.remove(FIRST_CHECKED_DATA_ID_KEY);
-		} else {
-			nbt.putString(FIRST_CHECKED_DATA_ID_KEY, this.firstCheckedDataId);
-		}
-
-		if (this.secondCheckedDataId.equals(CHECKED_DATA_ID_DEFAULT)) {
-			nbt.remove(SECOND_CHECKED_DATA_ID_KEY);
-		} else {
-			nbt.putString(SECOND_CHECKED_DATA_ID_KEY, this.secondCheckedDataId);
+		nbt.putInt("appendices_size", structurePoolStringAppendices.size());
+		for (int i = 0; i < this.structurePoolStringAppendices.size(); i++) {
+			BlockPos appendixPositionOffset = this.structurePoolStringAppendices.get(i).getLeft();
+			nbt.putInt("appendix_position_offset_x_" + i, appendixPositionOffset.getX());
+			nbt.putInt("appendix_position_offset_y_" + i, appendixPositionOffset.getY());
+			nbt.putInt("appendix_position_offset_z_" + i, appendixPositionOffset.getZ());
+			nbt.putString("appendix_data_id_" + i, this.structurePoolStringAppendices.get(i).getRight().getLeft());
+			nbt.putString("static_appendix_" + i, this.structurePoolStringAppendices.get(i).getRight().getRight());
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -104,45 +72,92 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		this.target = Identifier.of(nbt.getString(TARGET_KEY));
 
-		this.firstStructurePoolString = nbt.getString("firstStructurePoolString");
+		if (nbt.contains("firstStructurePoolString")) {
+			this.structurePoolString = nbt.getString("firstStructurePoolString");
+			nbt.remove("firstStructurePoolString");
+		} else {
+			this.structurePoolString = nbt.getString("structure_pool_string");
+		}
 
-		this.secondStructurePoolString = nbt.getString("secondStructurePoolString");
+		this.structurePoolStringAppendices.clear();
 
-		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString(JOINT_KEY)).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
+		if (nbt.contains("firstDataProvidingBlockPosOffsetX") || nbt.contains("firstDataProvidingBlockPosOffsetY") || nbt.contains("firstDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString")) {
+			this.structurePoolStringAppendices.add(
+					new MutablePair<>(new BlockPos(
+							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetZ"), -48, 48)
+					),
+							new MutablePair<>(
+									nbt.getString("first_checked_data_id"),
+									nbt.getString("secondStructurePoolString")
+							)
+					)
+			);
+			nbt.remove("firstDataProvidingBlockPosOffsetX");
+			nbt.remove("firstDataProvidingBlockPosOffsetY");
+			nbt.remove("firstDataProvidingBlockPosOffsetZ");
+			nbt.remove("first_checked_data_id");
+			nbt.remove("secondStructurePoolString");
+		}
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("secondDataProvidingBlockPosOffsetX") || nbt.contains("secondDataProvidingBlockPosOffsetY") || nbt.contains("secondDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString")) {
+			if (nbt.getInt("secondDataProvidingBlockPosOffsetX") != 0 || nbt.getInt("secondDataProvidingBlockPosOffsetY") != 0 || nbt.getInt("secondDataProvidingBlockPosOffsetZ") != 0) {
+				this.structurePoolStringAppendices.add(
+						new MutablePair<>(new BlockPos(
+								MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetX"), -48, 48),
+								MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetY"), -48, 48),
+								MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetZ"), -48, 48)
+						),
+								new MutablePair<>(
+										nbt.getString("second_checked_data_id"),
+										""
+								)
+						)
+				);
+			}
+			nbt.remove("secondDataProvidingBlockPosOffsetX");
+			nbt.remove("secondDataProvidingBlockPosOffsetY");
+			nbt.remove("secondDataProvidingBlockPosOffsetZ");
+			nbt.remove("second_checked_data_id");
+		}
 
-		if (nbt.contains("firstDataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("firstDataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("firstDataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
-			this.firstDataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetZ"), -48, 48)
+		int appendicesSize = nbt.getInt("appendices_size");
+		for (int i = 0; i < appendicesSize; i++) {
+			this.structurePoolStringAppendices.add(
+					new MutablePair<>(
+							new BlockPos(
+									MathHelper.clamp(nbt.getInt("appendix_position_offset_x_" + i), -48, 48),
+									MathHelper.clamp(nbt.getInt("appendix_position_offset_y_" + i), -48, 48),
+									MathHelper.clamp(nbt.getInt("appendix_position_offset_z_" + i), -48, 48)
+							),
+							new MutablePair<>(
+									nbt.getString("appendix_data_id_" + i),
+									nbt.getString("static_appendix_" + i)
+							)
+					)
 			);
 		}
 
-		if (nbt.contains("secondDataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("secondDataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("secondDataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
-			this.secondDataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-		}
+		this.target = Identifier.of(nbt.getString("target"));
 
-		if (nbt.contains(FIRST_CHECKED_DATA_ID_KEY)) {
-			this.firstCheckedDataId = nbt.getString(FIRST_CHECKED_DATA_ID_KEY);
-		} else {
-			this.firstCheckedDataId = CHECKED_DATA_ID_DEFAULT;
-		}
+		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString("joint")).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
 
-		if (nbt.contains(SECOND_CHECKED_DATA_ID_KEY)) {
-			this.secondCheckedDataId = nbt.getString(SECOND_CHECKED_DATA_ID_KEY);
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
+			int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
+			int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
+			int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
+			this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
 		} else {
-			this.secondCheckedDataId = CHECKED_DATA_ID_DEFAULT;
+			int x = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48);
+			int y = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48);
+			int z = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48);
+			this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggered_block_resets"));
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -171,20 +186,21 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		return false;
 	}
 
-	public String getFirstStructurePoolString() {
-		return this.firstStructurePoolString;
+	public String getStructurePoolString() {
+		return this.structurePoolString;
 	}
 
-	public void setFirstStructurePoolString(String firstStructurePoolString) {
-		this.firstStructurePoolString = firstStructurePoolString;
+	public void setStructurePoolString(String structurePoolString) {
+		this.structurePoolString = structurePoolString;
 	}
 
-	public String getSecondStructurePoolString() {
-		return this.secondStructurePoolString;
+	public List<MutablePair<BlockPos, MutablePair<String, String>>> getStructurePoolStringAppendices() {
+		return this.structurePoolStringAppendices;
 	}
 
-	public void setSecondStructurePoolString(String secondStructurePoolString) {
-		this.secondStructurePoolString = secondStructurePoolString;
+	public void setStructurePoolStringAppendices(List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices) {
+		this.structurePoolStringAppendices.clear();
+		this.structurePoolStringAppendices.addAll(structurePoolStringAppendices);
 	}
 
 	public JigsawBlockEntity.Joint getJoint() {
@@ -201,38 +217,6 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
 		this.triggeredBlock = triggeredBlock;
-	}
-
-	public BlockPos getFirstDataProvidingBlockPosOffset() {
-		return this.firstDataProvidingBlockPosOffset;
-	}
-
-	public void setFirstDataProvidingBlockPosOffset(BlockPos firstDataProvidingBlockPosOffset) {
-		this.firstDataProvidingBlockPosOffset = firstDataProvidingBlockPosOffset;
-	}
-
-	public BlockPos getSecondDataProvidingBlockPosOffset() {
-		return this.secondDataProvidingBlockPosOffset;
-	}
-
-	public void setSecondDataProvidingBlockPosOffset(BlockPos secondDataProvidingBlockPosOffset) {
-		this.secondDataProvidingBlockPosOffset = secondDataProvidingBlockPosOffset;
-	}
-
-	public String getFirstCheckedDataId() {
-		return this.firstCheckedDataId;
-	}
-
-	public void setFirstCheckedDataId(String firstCheckedDataId) {
-		this.firstCheckedDataId = firstCheckedDataId;
-	}
-
-	public String getSecondCheckedDataId() {
-		return this.secondCheckedDataId;
-	}
-
-	public void setSecondCheckedDataId(String secondCheckedDataId) {
-		this.secondCheckedDataId = secondCheckedDataId;
 	}
 	// endregion --- getter & setter ---
 
@@ -277,26 +261,45 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 	}
 
+	// TODO rework for list
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
 				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
-				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.rotateOffsetBlockPos(this.firstDataProvidingBlockPosOffset, blockRotation);
-				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.rotateOffsetBlockPos(this.secondDataProvidingBlockPosOffset, blockRotation);
+
+				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
+				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(appendix.getLeft(), blockRotation), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getLeft())));
+				}
+				this.structurePoolStringAppendices.clear();
+				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
+
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
-				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.firstDataProvidingBlockPosOffset, BlockMirror.FRONT_BACK);
-				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.secondDataProvidingBlockPosOffset, BlockMirror.FRONT_BACK);
+
+				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
+				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.FRONT_BACK), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getLeft())));
+				}
+				this.structurePoolStringAppendices.clear();
+				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
+
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.firstDataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
-				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.secondDataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
+
+				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
+				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.LEFT_RIGHT), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getLeft())));
+				}
+				this.structurePoolStringAppendices.clear();
+				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
+
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}
 		}
@@ -305,26 +308,18 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	private RegistryKey<StructurePool> getCurrentPool(ServerWorld serverWorld) {
 		RegistryKey<StructurePool> currentPool = POOL_DEFAULT;
 
-		BlockPos firstDataBlockPos = this.firstDataProvidingBlockPosOffset;
-		BlockPos secondDataBlockPos = this.secondDataProvidingBlockPosOffset;
-		String currentPoolIdentifierString = this.firstStructurePoolString;
-		if (firstDataBlockPos != BlockPos.ORIGIN) {
-			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(firstDataBlockPos.getX(), firstDataBlockPos.getY(), firstDataBlockPos.getZ()));
-			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				currentPoolIdentifierString = currentPoolIdentifierString + providesDataBlockEntity.getData(this.firstCheckedDataId);
+		StringBuilder currentPoolIdentifierStringBuilder = new StringBuilder(this.structurePoolString);
+		for (MutablePair<BlockPos, MutablePair<String, String>> listEntry : this.structurePoolStringAppendices) {
+			if (!listEntry.getLeft().equals(BlockPos.ORIGIN)) {
+				BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(listEntry.getLeft().getX(), listEntry.getLeft().getY(), listEntry.getLeft().getZ()));
+				if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
+					currentPoolIdentifierStringBuilder.append(providesDataBlockEntity.getData(listEntry.getRight().getLeft()));
+				}
 			}
+			currentPoolIdentifierStringBuilder.append(listEntry.getRight().getRight());
 		}
-		if (!this.secondStructurePoolString.isEmpty()) {
-			currentPoolIdentifierString = currentPoolIdentifierString + this.secondStructurePoolString;
-		}
-		if (secondDataBlockPos != BlockPos.ORIGIN) {
-			BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(secondDataBlockPos.getX(), secondDataBlockPos.getY(), secondDataBlockPos.getZ()));
-			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
-				currentPoolIdentifierString = currentPoolIdentifierString + providesDataBlockEntity.getData(this.secondCheckedDataId);
-			}
-		}
-		if (!currentPoolIdentifierString.isEmpty()) {
-			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(currentPoolIdentifierString));
+		if (!currentPoolIdentifierStringBuilder.isEmpty()) {
+			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(currentPoolIdentifierStringBuilder.toString()));
 		}
 		return currentPool;
 	}

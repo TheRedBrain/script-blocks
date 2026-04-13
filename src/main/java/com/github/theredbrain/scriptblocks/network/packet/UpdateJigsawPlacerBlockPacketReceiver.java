@@ -12,6 +12,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
+import java.util.List;
+
 public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateJigsawPlacerBlockPacket> {
 	@Override
 	public void receive(UpdateJigsawPlacerBlockPacket payload, ServerPlayNetworking.Context context) {
@@ -24,17 +26,9 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 
 		BlockPos jigsawPlacerBlockPosition = payload.jigsawPlacerBlockPosition();
 
-		String firstStructurePoolString = payload.firstStructurePoolString();
+		String structurePoolString = payload.structurePoolString();
 
-		BlockPos firstDataSavingBlockPosOffset = payload.firstDataSavingBlockPosOffset();
-
-		String firstCheckedDataId = payload.firstCheckedDataId();
-
-		String secondStructurePoolString = payload.secondStructurePoolString();
-
-		BlockPos secondDataSavingBlockPosOffset = payload.secondDataSavingBlockPosOffset();
-
-		String secondCheckedDataId = payload.secondCheckedDataId();
+		List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices = payload.structurePoolStringAppendices();
 
 		String target = payload.target();
 
@@ -52,12 +46,8 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 		BlockState blockState = world.getBlockState(jigsawPlacerBlockPosition);
 
 		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity) {
-			jigsawPlacerBlockEntity.setFirstStructurePoolString(firstStructurePoolString);
-			jigsawPlacerBlockEntity.setFirstDataProvidingBlockPosOffset(firstDataSavingBlockPosOffset);
-			jigsawPlacerBlockEntity.setFirstCheckedDataId(firstCheckedDataId);
-			jigsawPlacerBlockEntity.setSecondStructurePoolString(secondStructurePoolString);
-			jigsawPlacerBlockEntity.setSecondDataProvidingBlockPosOffset(secondDataSavingBlockPosOffset);
-			jigsawPlacerBlockEntity.setSecondCheckedDataId(secondCheckedDataId);
+			jigsawPlacerBlockEntity.setStructurePoolString(structurePoolString);
+			jigsawPlacerBlockEntity.setStructurePoolStringAppendices(structurePoolStringAppendices);
 			if (!jigsawPlacerBlockEntity.setTarget(target)) {
 				serverPlayerEntity.sendMessage(Text.translatable("jigsaw_placer_block.target.invalid"), false);
 				updateSuccessful = false;

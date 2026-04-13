@@ -1,20 +1,20 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.block.entity.JigsawBlockEntity;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.MutablePair;
+
+import java.util.List;
 
 public record UpdateJigsawPlacerBlockPacket(
 		BlockPos jigsawPlacerBlockPosition,
-		String firstStructurePoolString,
-		BlockPos firstDataSavingBlockPosOffset,
-		String firstCheckedDataId,
-		String secondStructurePoolString,
-		BlockPos secondDataSavingBlockPosOffset,
-		String secondCheckedDataId,
+		String structurePoolString,
+		List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices,
 		String target,
 		JigsawBlockEntity.Joint joint,
 		BlockPos triggeredBlockPositionOffset,
@@ -27,11 +27,7 @@ public record UpdateJigsawPlacerBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_STRING_STRING),
 				registryByteBuf.readString(),
 				JigsawBlockEntity.Joint.byName(registryByteBuf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED),
 				registryByteBuf.readBlockPos(),
@@ -41,12 +37,8 @@ public record UpdateJigsawPlacerBlockPacket(
 
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.jigsawPlacerBlockPosition);
-		registryByteBuf.writeString(this.firstStructurePoolString);
-		registryByteBuf.writeBlockPos(this.firstDataSavingBlockPosOffset);
-		registryByteBuf.writeString(this.firstCheckedDataId);
-		registryByteBuf.writeString(this.secondStructurePoolString);
-		registryByteBuf.writeBlockPos(this.secondDataSavingBlockPosOffset);
-		registryByteBuf.writeString(this.secondCheckedDataId);
+		registryByteBuf.writeString(this.structurePoolString);
+		registryByteBuf.writeCollection(this.structurePoolStringAppendices, CustomPacketCodecs.MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_STRING_STRING);
 		registryByteBuf.writeString(this.target);
 		registryByteBuf.writeString(this.joint.asString());
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
