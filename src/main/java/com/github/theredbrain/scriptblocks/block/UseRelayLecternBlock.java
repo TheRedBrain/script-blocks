@@ -12,8 +12,6 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -99,6 +97,9 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 				return ActionResult.success(world.isClient);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
+				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
+					return ActionResult.PASS;
+				}
 				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
 				BlockState relayBlockState = world.getBlockState(relayBlockPos);
 				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
@@ -114,18 +115,13 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		switch ((Direction) state.get(FACING)) {
-			case NORTH:
-				return NORTH_SHAPE;
-			case SOUTH:
-				return SOUTH_SHAPE;
-			case EAST:
-				return EAST_SHAPE;
-			case WEST:
-				return WEST_SHAPE;
-			default:
-				return BASE_SHAPE;
-		}
+		return switch (state.get(FACING)) {
+			case NORTH -> NORTH_SHAPE;
+			case SOUTH -> SOUTH_SHAPE;
+			case EAST -> EAST_SHAPE;
+			case WEST -> WEST_SHAPE;
+			default -> BASE_SHAPE;
+		};
 	}
 
 	@Override
@@ -147,9 +143,9 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		if (mirror == BlockMirror.FRONT_BACK) {
-			return state.rotate(mirror.getRotation((Direction) state.get(FACING))).with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return state.rotate(mirror.getRotation((Direction) state.get(FACING))).with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
 		}
 		return state;
 	}

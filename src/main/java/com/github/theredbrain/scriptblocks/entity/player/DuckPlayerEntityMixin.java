@@ -87,9 +87,11 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity);
 
-	void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock);
+	default void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
+	}
 
-	void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock);
+	default void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock) {
+	}
 
 	void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
 

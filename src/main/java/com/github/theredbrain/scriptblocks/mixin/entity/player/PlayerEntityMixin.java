@@ -298,14 +298,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 	}
 
 	@Override
-	public void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
-	}
-
-	@Override
-	public void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock) {
-	}
-
-	@Override
 	public void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock) {
 	}
 

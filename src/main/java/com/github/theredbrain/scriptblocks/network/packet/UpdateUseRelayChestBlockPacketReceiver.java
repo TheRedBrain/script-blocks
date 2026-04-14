@@ -41,8 +41,6 @@ public class UpdateUseRelayChestBlockPacketReceiver implements ServerPlayNetwork
 
 		World world = serverPlayerEntity.getWorld();
 
-		boolean updateSuccessful = true;
-
 		BlockEntity blockEntity = world.getBlockEntity(useRelayChestBlockPosition);
 		BlockState blockState = world.getBlockState(useRelayChestBlockPosition);
 
@@ -54,13 +52,8 @@ public class UpdateUseRelayChestBlockPacketReceiver implements ServerPlayNetwork
 			useRelayChestBlockEntity.setLockedSound(lockedSound);
 			useRelayChestBlockEntity.setUnlockedMessage(unlockedMessage);
 			useRelayChestBlockEntity.setUnlockedSound(unlockedSound);
-			if (!useRelayChestBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("use_relay_block.relayBlockPositionOffset.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			}
+			useRelayChestBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			useRelayChestBlockEntity.markDirty();
 			world.updateListeners(useRelayChestBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

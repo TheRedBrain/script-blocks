@@ -51,7 +51,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 
 	public UseRelayDoorBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH)).with(OPEN, false)).with(HINGE, DoorHinge.LEFT))).with(HALF, DoubleBlockHalf.LOWER));
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(HINGE, DoorHinge.LEFT).with(HALF, DoubleBlockHalf.LOWER));
 	}
 
 	public MapCodec<UseRelayDoorBlock> getCodec() {
@@ -100,7 +100,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 		DoubleBlockHalf doubleBlockHalf = state.get(HALF);
 		if (direction.getAxis() == Direction.Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
 			if (neighborState.isOf(this) && neighborState.get(HALF) != doubleBlockHalf) {
-				return (BlockState) ((BlockState) ((BlockState) ((BlockState) state.with(FACING, neighborState.get(FACING))).with(OPEN, neighborState.get(OPEN))).with(HINGE, neighborState.get(HINGE)));
+				return state.with(FACING, neighborState.get(FACING)).with(OPEN, neighborState.get(OPEN)).with(HINGE, neighborState.get(HINGE));
 			}
 			return Blocks.AIR.getDefaultState();
 		}
@@ -139,14 +139,14 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 		World world = ctx.getWorld();
 		if (blockPos.getY() < world.getTopY() - 1 && world.getBlockState(blockPos.up()).canReplace(ctx)) {
 			boolean bl = world.isReceivingRedstonePower(blockPos) || world.isReceivingRedstonePower(blockPos.up());
-			return (BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing())).with(HINGE, this.getHinge(ctx)))).with(OPEN, bl)).with(HALF, DoubleBlockHalf.LOWER);
+			return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing()).with(HINGE, this.getHinge(ctx)).with(OPEN, bl).with(HALF, DoubleBlockHalf.LOWER);
 		}
 		return null;
 	}
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-		world.setBlockState(pos.up(), (BlockState) state.with(HALF, DoubleBlockHalf.UPPER), Block.NOTIFY_ALL);
+		world.setBlockState(pos.up(), state.with(HALF, DoubleBlockHalf.UPPER), Block.NOTIFY_ALL);
 	}
 
 	private DoorHinge getHinge(ItemPlacementContext ctx) {
@@ -188,7 +188,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			boolean bl = player.isCreativeLevelTwoOp();
 			if (player.isSneaking() && bl) {
-				state = (BlockState) state.cycle(OPEN);
+				state = state.cycle(OPEN);
 				world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 				return ActionResult.success(world.isClient);
 			}
@@ -205,11 +205,11 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 				return ActionResult.success(world.isClient);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
-				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
-				BlockState relayBlockState = world.getBlockState(relayBlockPos);
-				if (relayBlockState.isOf(this)) {
+				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
 					return ActionResult.PASS;
 				}
+				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
+				BlockState relayBlockState = world.getBlockState(relayBlockPos);
 				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
@@ -241,25 +241,8 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 		return state;
 	}
 
-//    /**
-//     * Destroys a bottom half of a tall double block (such as a plant or a door)
-//     * without dropping an item when broken in creative.
-//     *
-//     * @see Block#onBreak(World, BlockPos, BlockState, PlayerEntity)
-//     */
-//    protected static void onBreakInCreative(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-//        BlockPos blockPos;
-//        BlockState blockState;
-//        DoubleBlockHalf doubleBlockHalf = state.get(HALF);
-//        if (doubleBlockHalf == DoubleBlockHalf.UPPER && (blockState = world.getBlockState(blockPos = pos.down())).isOf(state.getBlock()) && blockState.get(HALF) == DoubleBlockHalf.LOWER) {
-//            BlockState blockState2 = blockState.getFluidState().isOf(Fluids.WATER) ? Blocks.WATER.getDefaultState() : Blocks.AIR.getDefaultState();
-//            world.setBlockState(blockPos, blockState2, Block.NOTIFY_ALL | Block.SKIP_DROPS);
-//            world.syncWorldEvent(player, WorldEvents.BLOCK_BROKEN, blockPos, Block.getRawIdFromState(blockState));
-//        }
-//    }
-
 	protected static void onBreakInCreative(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		DoubleBlockHalf doubleBlockHalf = (DoubleBlockHalf) state.get(HALF);
+		DoubleBlockHalf doubleBlockHalf = state.get(HALF);
 		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
 			BlockPos blockPos = pos.down();
 			BlockState blockState = world.getBlockState(blockPos);

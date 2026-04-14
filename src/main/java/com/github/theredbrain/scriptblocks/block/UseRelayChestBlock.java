@@ -107,7 +107,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 						if (!useRelayChestBlockEntity.getUnlockedSound().isEmpty() && !world.isClient) {
 							SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(useRelayChestBlockEntity.getUnlockedSound()));
 							if (soundEvent != null) {
-								world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+								world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
 							}
 						}
 						useRelayChestBlockEntity.tryToConsumeKeyItem(player);
@@ -120,18 +120,18 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 						if (!useRelayChestBlockEntity.getLockedSound().isEmpty() && !world.isClient) {
 							SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(useRelayChestBlockEntity.getLockedSound()));
 							if (soundEvent != null) {
-								world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+								world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
 							}
 						}
 					}
 					return ActionResult.success(world.isClient);
 				} else {
 					BlockPos relayBlockPosOffset = useRelayChestBlockEntity.getRelayBlockPositionOffset();
-					BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
-					BlockState relayBlockState = world.getBlockState(relayBlockPos);
-					if (relayBlockState.isOf(this)) {
+					if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
 						return ActionResult.PASS;
 					}
+					BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
+					BlockState relayBlockState = world.getBlockState(relayBlockPos);
 					return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
 				}
 			}
@@ -141,7 +141,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
-		if (state.get(WATERLOGGED).booleanValue()) {
+		if (state.get(WATERLOGGED)) {
 			return Fluids.WATER.getStill(false);
 		}
 		return super.getFluidState(state);
@@ -149,7 +149,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		if (state.get(WATERLOGGED).booleanValue()) {
+		if (state.get(WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 		return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
@@ -157,15 +157,15 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return state.with(FACING, rotation.rotate((Direction) state.get(FACING))).with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation));
+		return state.with(FACING, rotation.rotate(state.get(FACING))).with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		if (mirror == BlockMirror.FRONT_BACK) {
-			return state.rotate(mirror.getRotation((Direction) state.get(FACING))).with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return state.rotate(mirror.getRotation((Direction) state.get(FACING))).with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
 		}
 		return state;
 	}

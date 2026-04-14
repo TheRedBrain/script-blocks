@@ -44,6 +44,9 @@ public class UseRelayBlock extends RotatedBlockWithEntity {
 				return ActionResult.success(world.isClient);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
+				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
+					return ActionResult.PASS;
+				}
 				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
 				BlockState relayBlockState = world.getBlockState(relayBlockPos);
 				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);

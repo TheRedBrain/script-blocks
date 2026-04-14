@@ -48,7 +48,7 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 
 	public UseRelayTrapdoorBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH)).with(OPEN, false)).with(HALF, BlockHalf.BOTTOM))).with(WATERLOGGED, false));
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(HALF, BlockHalf.BOTTOM).with(WATERLOGGED, false));
 	}
 
 	public MapCodec<UseRelayTrapdoorBlock> getCodec() {
@@ -74,22 +74,15 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (!state.get(OPEN).booleanValue()) {
+		if (!state.get(OPEN)) {
 			return state.get(HALF) == BlockHalf.TOP ? OPEN_TOP_SHAPE : OPEN_BOTTOM_SHAPE;
 		}
-		switch (state.get(FACING)) {
-			default: {
-				return NORTH_SHAPE;
-			}
-			case SOUTH: {
-				return SOUTH_SHAPE;
-			}
-			case WEST: {
-				return WEST_SHAPE;
-			}
-			case EAST:
-		}
-		return EAST_SHAPE;
+		return switch (state.get(FACING)) {
+			case NORTH -> NORTH_SHAPE;
+			case SOUTH -> SOUTH_SHAPE;
+			case WEST -> WEST_SHAPE;
+			default -> EAST_SHAPE;
+		};
 	}
 
 	@Override
@@ -110,8 +103,8 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 		BlockState blockState = this.getDefaultState();
 		FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
 		Direction direction = ctx.getSide();
-		blockState = ctx.canReplaceExisting() || !direction.getAxis().isHorizontal() ? (BlockState) ((BlockState) blockState.with(FACING, ctx.getHorizontalPlayerFacing().getOpposite())).with(HALF, direction == Direction.UP ? BlockHalf.BOTTOM : BlockHalf.TOP) : (BlockState) ((BlockState) blockState.with(FACING, direction)).with(HALF, ctx.getHitPos().y - (double) ctx.getBlockPos().getY() > 0.5 ? BlockHalf.TOP : BlockHalf.BOTTOM);
-		return (BlockState) blockState.with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+		blockState = ctx.canReplaceExisting() || !direction.getAxis().isHorizontal() ? blockState.with(FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(HALF, direction == Direction.UP ? BlockHalf.BOTTOM : BlockHalf.TOP) : blockState.with(FACING, direction).with(HALF, ctx.getHitPos().y - (double) ctx.getBlockPos().getY() > 0.5 ? BlockHalf.TOP : BlockHalf.BOTTOM);
+		return blockState.with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
 	}
 
 	@Override
@@ -120,9 +113,9 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			if (player.isCreativeLevelTwoOp()) {
 				if (player.isSneaking()) {
-					state = (BlockState) state.cycle(OPEN);
+					state = state.cycle(OPEN);
 					world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
-					if (state.get(WATERLOGGED).booleanValue()) {
+					if (state.get(WATERLOGGED)) {
 						world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 					}
 					return ActionResult.success(world.isClient);
@@ -131,11 +124,11 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 				return ActionResult.success(world.isClient);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
-				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
-				BlockState relayBlockState = world.getBlockState(relayBlockPos);
-				if (relayBlockState.isOf(this)) {
+				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
 					return ActionResult.PASS;
 				}
+				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
+				BlockState relayBlockState = world.getBlockState(relayBlockPos);
 				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
@@ -144,7 +137,7 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
-		if (state.get(WATERLOGGED).booleanValue()) {
+		if (state.get(WATERLOGGED)) {
 			return Fluids.WATER.getStill(false);
 		}
 		return super.getFluidState(state);
@@ -152,7 +145,7 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		if (state.get(WATERLOGGED).booleanValue()) {
+		if (state.get(WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 		return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);

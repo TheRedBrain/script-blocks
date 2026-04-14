@@ -269,6 +269,7 @@ public class EntityRegistry {
 	public static final BlockEntityType<UseRelayChestBlockEntity> USE_RELAY_CHEST_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("use_relay_chest_block"),
 			BlockEntityType.Builder.create(UseRelayChestBlockEntity::new,
+					BlockRegistry.TRAPPED_USE_RELAY_CHEST,
 					BlockRegistry.USE_RELAY_CHEST,
 					BlockRegistry.LOCKED_USE_RELAY_CHEST).build());
 	public static final BlockEntityType<UseRelayLecternBlockEntity> USE_RELAY_LECTERN_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
