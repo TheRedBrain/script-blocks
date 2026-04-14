@@ -53,6 +53,7 @@ import net.minecraft.registry.Registry;
 public class EntityRegistry {
 
 	//region Script Blocks
+	@Deprecated
 	public static final BlockEntityType<LootableVaultBlockEntity> LOOTABLE_VAULT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("lootable_vault_block"),
 			BlockEntityType.Builder.create(LootableVaultBlockEntity::new, BlockRegistry.LOOTABLE_VAULT_BLOCK).build());
@@ -80,6 +81,7 @@ public class EntityRegistry {
 	public static final BlockEntityType<TriggeredRNGBlockEntity> TRIGGERED_RNG_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_rng_block"),
 			BlockEntityType.Builder.create(TriggeredRNGBlockEntity::new, BlockRegistry.TRIGGERED_RNG_BLOCK).build());
+	@Deprecated
 	public static final BlockEntityType<InteractiveLootBlockEntity> INTERACTIVE_LOOT_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("interactive_loot_block"),
 			BlockEntityType.Builder.create(InteractiveLootBlockEntity::new, BlockRegistry.INTERACTIVE_LOOT_BLOCK).build());
@@ -216,12 +218,14 @@ public class EntityRegistry {
 	public static final BlockEntityType<DelayTriggerBlockEntity> DELAY_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("delay_trigger_block"),
 			BlockEntityType.Builder.create(DelayTriggerBlockEntity::new, BlockRegistry.DELAY_TRIGGER_BLOCK).build());
+	@Deprecated
 	public static final BlockEntityType<EntranceDelegationBlockEntity> ENTRANCE_DELEGATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("entrance_delegation_block"),
 			BlockEntityType.Builder.create(EntranceDelegationBlockEntity::new, BlockRegistry.ENTRANCE_DELEGATION_BLOCK).build());
 	public static final BlockEntityType<SpawnPointDelegationBlockEntity> SPAWN_POINT_DELEGATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("spawn_point_delegation_block"),
 			BlockEntityType.Builder.create(SpawnPointDelegationBlockEntity::new, BlockRegistry.SPAWN_POINT_DELEGATION_BLOCK).build());
+	@Deprecated
 	public static final BlockEntityType<AreaBlockEntity> AREA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("area_block"),
 			BlockEntityType.Builder.create(AreaBlockEntity::new, BlockRegistry.AREA_BLOCK).build());

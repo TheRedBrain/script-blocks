@@ -242,11 +242,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		this.client.setScreen(new SpawnPointDelegationBlockScreen(spawnPointDelegationBlockEntity));
 	}
 
+	@Deprecated
 	@Override
 	public void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
 		this.client.setScreen(new EntranceDelegationBlockScreen(entranceDelegationBlockEntity));
 	}
 
+	@Deprecated
 	@Override
 	public void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity) {
 		this.client.setScreen(new AreaBlockScreen(areaBlockEntity));
@@ -272,6 +274,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		this.client.setScreen(new TriggeredRNGBlockScreen(triggeredRNGBlockEntity));
 	}
 
+	@Deprecated
 	@Override
 	public void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity) {
 		this.client.setScreen(new InteractiveLootBlockScreen(interactiveLootBlockEntity));

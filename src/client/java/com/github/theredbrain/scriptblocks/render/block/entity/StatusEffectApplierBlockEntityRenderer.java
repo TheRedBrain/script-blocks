@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
-// TODO clean up
+@Deprecated
 @Environment(value = EnvType.CLIENT)
 public class StatusEffectApplierBlockEntityRenderer
 		implements BlockEntityRenderer<AreaBlockEntity> {

@@ -439,8 +439,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			double pitch = this.entitySpawnOrientationPitch;
 			double yaw = this.entitySpawnOrientationYaw;
 
-			if (serverWorld.getBlockEntity(blockPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
-				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+			if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
 
 				blockPos = entrance.getLeft();
 				yaw = entrance.getRight().getLeft();

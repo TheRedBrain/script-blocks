@@ -62,6 +62,7 @@ public class ScriptBlocks implements ModInitializer {
 	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
 	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");
 
+	@Deprecated
 	public static void supplyLootableLoot(Identifier identifier, ServerWorld world, ServerPlayerEntity serverPlayerEntity, Vec3d pos, int rolls, int choices, boolean withChoice, @Nullable ItemStack itemStack) {
 		if (isLootablesLoaded) {
 			LootableCompat.supplyLootableLoot(identifier, world, serverPlayerEntity, pos, rolls, choices, withChoice, itemStack);

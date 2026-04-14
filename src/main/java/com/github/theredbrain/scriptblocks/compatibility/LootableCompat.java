@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class LootableCompat {
 
+	@Deprecated
 	public static void supplyLootableLoot(Identifier identifier, ServerWorld world, ServerPlayerEntity serverPlayerEntity, Vec3d pos, int rolls, int choices, boolean withChoice, @Nullable ItemStack itemStack) {
 		if (withChoice) {
 			LootablesApi.supplyLootWithChoices(

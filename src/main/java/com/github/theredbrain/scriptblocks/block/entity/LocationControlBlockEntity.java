@@ -252,8 +252,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 			targetOrientation = this.mainEntrance.getRight();
 		}
 
-		if (serverWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
-			return entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+		if (serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
 		}
 
 		return new MutablePair<>(targetPos, targetOrientation);

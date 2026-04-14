@@ -18,6 +18,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
+@Deprecated
 @Environment(EnvType.CLIENT)
 public class LootableVaultBlockEntityRenderer implements BlockEntityRenderer<LootableVaultBlockEntity> {
 	private final ItemRenderer itemRenderer;

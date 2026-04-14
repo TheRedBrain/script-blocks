@@ -104,9 +104,13 @@ public interface DuckPlayerEntityMixin {
 	default void scriptblocks$openSpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 	}
 
-	void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity);
+	@Deprecated
+	default void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+	}
 
-	void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity);
+	@Deprecated
+	default void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity) {
+	}
 
 	void scriptblocks$openAreaFillerBlockScreen(AreaFillerBlockEntity areaFillerBlockEntity);
 
@@ -116,7 +120,9 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$openTriggeredRNGBlockScreen(TriggeredRNGBlockEntity triggeredRNGBlockEntity);
 
-	void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity);
+	@Deprecated
+	default void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity) {
+	}
 
 	void scriptblocks$openInteractiveTriggerBlockScreen(InteractiveTriggerBlockEntity interactiveTriggerBlockEntity);
 
