@@ -57,11 +57,7 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 			));
 		}
 
-		if (nbt.contains("index")) {
-			this.index = nbt.getInt("index");
-		} else {
-			this.index = 0;
-		}
+		this.index = nbt.getInt("index");
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -105,10 +101,18 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 		} else if (!this.dataProvidingBlockPosOffsetList.isEmpty()) {
 			this.index = this.dataProvidingBlockPosOffsetList.size() - 1;
 			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 			return this.dataProvidingBlockPosOffsetList.getLast();
 		} else {
 			this.index = 0;
 			this.markDirty();
+			if (this.world != null) {
+				BlockState blockState = this.world.getBlockState(this.pos);
+				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 			return BlockPos.ORIGIN;
 		}
 	}
