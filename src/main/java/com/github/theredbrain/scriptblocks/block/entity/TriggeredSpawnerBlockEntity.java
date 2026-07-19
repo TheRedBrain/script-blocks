@@ -62,7 +62,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 	protected SpawningMode spawningMode = SpawningMode.ONCE;
 
-	protected Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	protected final Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
 	protected BlockPos useRelayBlockPositionOffset = POSITION_OFFSET_DEFAULT;
 
@@ -288,7 +288,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	public boolean setEntityAttributeModifiers(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers) {
-		this.entityAttributeModifiers = entityAttributeModifiers;
+		this.entityAttributeModifiers.clear();
+		this.entityAttributeModifiers.putAll(entityAttributeModifiers);
 		return true;
 	}
 

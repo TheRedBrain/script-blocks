@@ -70,7 +70,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private SpawnPointType spawnPointType = SpawnPointType.WORLD_SPAWN;
 
 	// locations mode
-	private List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>(List.of());
+	private final List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>(List.of());
 
 	// location mode
 	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = new MutablePair<>(new MutablePair<>("", ""), new MutablePair<>("", ""));
@@ -528,7 +528,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	public void setLocationsList(List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList) {
-		this.locationsList = locationsList;
+		this.locationsList.clear();
+		this.locationsList.addAll(locationsList);
 	}
 
 	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getLocation() {

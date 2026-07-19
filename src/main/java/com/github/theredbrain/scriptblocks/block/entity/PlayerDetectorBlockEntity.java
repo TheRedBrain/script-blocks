@@ -41,7 +41,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(TRIGGERED_BLOCK_POS_DEFAULT, false);
 
-	private ArrayList<UUID> playerList = new ArrayList<>();
+	private final ArrayList<UUID> playerList = new ArrayList<>();
 
 	public PlayerDetectorBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.PLAYER_DETECTOR_BLOCK_ENTITY, pos, state);

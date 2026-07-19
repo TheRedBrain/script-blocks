@@ -21,9 +21,9 @@ import java.util.List;
 public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueAnchor {
 
 	private BlockPos dataBlockOffset = BlockPos.ORIGIN;
-	private HashMap<String, BlockPos> dialogueUsedBlocksMap = new HashMap<>();
-	private HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocksMap = new HashMap<>();
-	private List<String> startingDialogueList = new ArrayList<>();
+	private final HashMap<String, BlockPos> dialogueUsedBlocksMap = new HashMap<>();
+	private final HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocksMap = new HashMap<>();
+	private final List<String> startingDialogueList = new ArrayList<>();
 
 	public DialogueBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.DIALOGUE_BLOCK_ENTITY, pos, state);
@@ -117,7 +117,8 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	}
 
 	public void setDialogueUsedBlocksMap(HashMap<String, BlockPos> dialogueUsedBlocks) {
-		this.dialogueUsedBlocksMap = dialogueUsedBlocks;
+		this.dialogueUsedBlocksMap.clear();
+		this.dialogueUsedBlocksMap.putAll(dialogueUsedBlocks);
 	}
 
 	public HashMap<String, MutablePair<BlockPos, Boolean>> getDialogueTriggeredBlocksMap() {
@@ -125,7 +126,8 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	}
 
 	public void setDialogueTriggeredBlocksMap(HashMap<String, MutablePair<BlockPos, Boolean>> dialogueTriggeredBlocks) {
-		this.dialogueTriggeredBlocksMap = dialogueTriggeredBlocks;
+		this.dialogueTriggeredBlocksMap.clear();
+		this.dialogueTriggeredBlocksMap.putAll(dialogueTriggeredBlocks);
 	}
 
 	public List<String> getStartingDialogueList() {
@@ -133,7 +135,8 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	}
 
 	public void setStartingDialogueList(List<String> startingDialogueList) {
-		this.startingDialogueList = startingDialogueList;
+		this.startingDialogueList.clear();
+		this.startingDialogueList.addAll(startingDialogueList);
 	}
 
 	public BlockPos getDataBlockOffset() {

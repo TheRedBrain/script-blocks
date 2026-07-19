@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
-	private HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
+	private final HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks = new HashMap<>();
 	private int counter = 0;
 
 	public TriggeredCounterBlockEntity(BlockPos pos, BlockState state) {
@@ -80,7 +80,8 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	public boolean setTriggeredBlocks(HashMap<Integer, MutablePair<BlockPos, Boolean>> triggeredBlocks) {
-		this.triggeredBlocks = triggeredBlocks;
+		this.triggeredBlocks.clear();
+		this.triggeredBlocks.putAll(triggeredBlocks);
 		return true;
 	}
 	// endregion --- getter & setter ---

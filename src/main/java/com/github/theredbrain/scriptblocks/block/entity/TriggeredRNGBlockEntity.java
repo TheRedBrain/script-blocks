@@ -48,7 +48,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	private int randomMinValue = 0;
 	private int randomMaxValue = 1;
 	private MutablePair<BlockPos, Boolean> fallbackTriggeredBlock = new MutablePair<>(FALLBACK_TRIGGERED_BLOCK_POS_DEFAULT, false);
-	private List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>();
+	private final List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>();
 
 	public TriggeredRNGBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.TRIGGERED_RNG_BLOCK_ENTITY, pos, state);
@@ -234,7 +234,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 
 		int triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
-		this.triggeredBlocks = new ArrayList<>(List.of());
+		this.triggeredBlocks.clear();
 		for (int i = 0; i < triggeredBlocksSize; i++) {
 			this.triggeredBlocks.add(
 					new MutablePair<>(
@@ -349,7 +349,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	public void setTriggeredBlocks(List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks) {
-		this.triggeredBlocks = triggeredBlocks;
+		this.triggeredBlocks.clear();
+		this.triggeredBlocks.addAll(triggeredBlocks);
 	}
 	// endregion --- getter & setter ---
 
@@ -477,7 +478,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(triggeredBlock.getLeft().getLeft(), blockRotation), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
-				this.triggeredBlocks = newTriggeredBlocks;
+				this.triggeredBlocks.clear();
+				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
@@ -493,7 +495,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
-				this.triggeredBlocks = newTriggeredBlocks;
+				this.triggeredBlocks.clear();
+				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
@@ -509,7 +512,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.LEFT_RIGHT), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
-				this.triggeredBlocks = newTriggeredBlocks;
+				this.triggeredBlocks.clear();
+				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}

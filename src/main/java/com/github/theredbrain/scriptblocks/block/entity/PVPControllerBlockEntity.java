@@ -48,12 +48,12 @@ import java.util.UUID;
 public class PVPControllerBlockEntity extends RotatedBlockEntity implements Resetable, Triggerable {
 
 	private String pvpArenaSettingsIdentifier = "";
-	private HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions = new HashMap<>(Map.of());
+	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions = new HashMap<>(Map.of());
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
 	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
 
-	private Set<String> teamSet = new HashSet<>();
-	private Set<UUID> playerUUIDSet = new HashSet<>();
+	private final Set<String> teamSet = new HashSet<>();
+	private final Set<UUID> playerUUIDSet = new HashSet<>();
 
 	private boolean matchIsActive = false;
 	private String matchDurationDataIdentifier = "";
@@ -114,7 +114,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		}
 
 		int respawnPositionsSize = nbt.getInt("respawnPositionsSize");
-		this.respawnPositions = new HashMap<>(Map.of());
+		this.respawnPositions.clear();
 		for (int i = 0; i < respawnPositionsSize; i++) {
 			String key = nbt.getString("key_" + i);
 			int respawnPositionX = nbt.getInt("respawnPosition_" + i + "_X");

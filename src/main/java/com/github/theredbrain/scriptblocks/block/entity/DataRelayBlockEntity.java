@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable, ProvidesData {
-	private List<BlockPos> dataProvidingBlockPosOffsetList = new ArrayList<>();
+	private final List<BlockPos> dataProvidingBlockPosOffsetList = new ArrayList<>();
 	private int index = 0;
 
 	public DataRelayBlockEntity(BlockPos pos, BlockState state) {
@@ -48,7 +48,7 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		int dataProvidingBlockPosOffsetListSize = nbt.getInt("dataProvidingBlockPosOffsetListSize");
-		this.dataProvidingBlockPosOffsetList = new ArrayList<>(List.of());
+		this.dataProvidingBlockPosOffsetList.clear();
 		for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
 			this.dataProvidingBlockPosOffsetList.add(new BlockPos(
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX_" + i), -48, 48),
@@ -166,7 +166,8 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 				for (BlockPos triggeredBlock : this.dataProvidingBlockPosOffsetList) {
 					newList.add(BlockRotationUtils.rotateOffsetBlockPos(triggeredBlock, blockRotation));
 				}
-				this.dataProvidingBlockPosOffsetList = newList;
+				this.dataProvidingBlockPosOffsetList.clear();
+				this.dataProvidingBlockPosOffsetList.addAll(newList);
 
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
@@ -176,7 +177,8 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 				for (BlockPos triggeredBlock : this.dataProvidingBlockPosOffsetList) {
 					newList.add(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock, BlockMirror.FRONT_BACK));
 				}
-				this.dataProvidingBlockPosOffsetList = newList;
+				this.dataProvidingBlockPosOffsetList.clear();
+				this.dataProvidingBlockPosOffsetList.addAll(newList);
 
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
@@ -186,7 +188,8 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 				for (BlockPos triggeredBlock : this.dataProvidingBlockPosOffsetList) {
 					newList.add(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock, BlockMirror.LEFT_RIGHT));
 				}
-				this.dataProvidingBlockPosOffsetList = newList;
+				this.dataProvidingBlockPosOffsetList.clear();
+				this.dataProvidingBlockPosOffsetList.addAll(newList);
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}

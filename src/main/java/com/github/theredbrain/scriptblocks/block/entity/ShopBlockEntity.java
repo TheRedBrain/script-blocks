@@ -29,7 +29,7 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	private String shopIdentifier = "";
 
 	// TODO ShopBlockEntity should implement ShopAnchor instead, which saves shopOffer uses, which are compared to maxOfferAmount
-	private List<Integer> stockCountList = new ArrayList<>();
+	private final List<Integer> stockCountList = new ArrayList<>();
 
 	public ShopBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.SHOP_BLOCK_ENTITY, pos, state);

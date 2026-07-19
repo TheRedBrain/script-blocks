@@ -38,9 +38,9 @@ import java.util.UUID;
 public class HousingBlockEntity extends RotatedBlockEntity {
 	private String ownerUuid = "";
 	private boolean isOwnerSet;
-	private List<String> coOwnerList = new ArrayList<>(List.of());
-	private List<String> trustedList = new ArrayList<>(List.of());
-	private List<String> guestList = new ArrayList<>(List.of());
+	private final List<String> coOwnerList = new ArrayList<>(List.of());
+	private final List<String> trustedList = new ArrayList<>(List.of());
+	private final List<String> guestList = new ArrayList<>(List.of());
 
 	private boolean calculateAreaBox = true;
 	private Box area = null;
@@ -250,7 +250,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	public void setCoOwnerList(List<String> coOwnerList) {
-		this.coOwnerList = coOwnerList;
+		this.coOwnerList.clear();
+		this.coOwnerList.addAll(coOwnerList);
 	}
 
 	public List<String> getTrustedList() {
@@ -258,7 +259,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	public void setTrustedList(List<String> trustedList) {
-		this.trustedList = trustedList;
+		this.trustedList.clear();
+		this.trustedList.addAll(trustedList);
 	}
 
 	public List<String> getGuestList() {
@@ -266,7 +268,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	public void setGuestList(List<String> guestList) {
-		this.guestList = guestList;
+		this.guestList.clear();
+		this.guestList.addAll(guestList);
 	}
 
 	public boolean getShowInfluenceArea() {

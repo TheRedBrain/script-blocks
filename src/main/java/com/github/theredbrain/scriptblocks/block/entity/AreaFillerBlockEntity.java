@@ -32,7 +32,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
 	private String blockIdentifierString = "";
-	private List<MutablePair<BlockPos, Vec3i>> subAreasList = new ArrayList<>();
+	private final List<MutablePair<BlockPos, Vec3i>> subAreasList = new ArrayList<>();
 
 	public AreaFillerBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.AREA_FILLER_BLOCK_ENTITY, pos, state);
@@ -133,7 +133,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 		this.areaPositionOffset = new BlockPos(l, m, n);
 
 		int subAreasListSize = nbt.getInt("subAreasListSize");
-		this.subAreasList = new ArrayList<>(List.of());
+		this.subAreasList.clear();
 		for (i = 0; i < subAreasListSize; i++) {
 			this.subAreasList.add(new MutablePair<>(new BlockPos(
 					nbt.getInt("subAreaPositionOffsetX_" + i),
@@ -215,7 +215,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 
 			// calculate sub areas
 			if (this.subAreasList.isEmpty()) {
-				this.subAreasList = splitArea(this.areaPositionOffset, this.areaDimensions, server.getGameRules().get(GameRules.COMMAND_MODIFICATION_BLOCK_LIMIT).get(), 16); // TODO maxIterations gamerule or config
+				this.subAreasList.addAll(splitArea(this.areaPositionOffset, this.areaDimensions, server.getGameRules().get(GameRules.COMMAND_MODIFICATION_BLOCK_LIMIT).get(), 16)); // TODO maxIterations gamerule or config
 				this.markDirty();
 			}
 

@@ -33,7 +33,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private static final int RESET_AREA_MAX_X_DEFAULT = 31;
 	private static final int RESET_AREA_MAX_Z_DEFAULT = 31;
 	private MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
-	private HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
+	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(TRIGGERED_BLOCK_POS_DEFAULT, false);
 	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
 
@@ -128,7 +128,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		this.mainEntrance.setRight(new MutablePair<>(mainEntrance_Yaw, mainEntrance_Pitch));
 
 		int sideEntrancesSize = nbt.getInt("sideEntrancesSize");
-		this.sideEntrances = new HashMap<>(Map.of());
+		this.sideEntrances.clear();
 		for (int i = 0; i < sideEntrancesSize; i++) {
 			String key = nbt.getString("key_" + i);
 			int sideEntranceX = nbt.getInt("sideEntrance_" + i + "_X");
