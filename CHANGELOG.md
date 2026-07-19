@@ -1,6 +1,6 @@
 # 0.0.9
 
-This update contains a lot of refactoring and general house-keeping. This includes the deprecation of several blocks. This has a variety of reasons. All deprecated blocks still function like normal, but when they are placed in the world, they will send log (and optionally chat) messages with a warning and instructions on how to best replace them. Deprecated blocks will be removed eventually (likely when the mod is updated to a new Minecraft version).
+This update marks the start of a polishing pass for the entire code base including a lot of refactoring and general house-keeping. This also includes the deprecation of several blocks. This has a variety of reasons. All deprecated blocks still function like normal, but when they are placed in the world, they will send log (and optionally chat) messages with a warning and instructions on how to best replace them. Deprecated blocks will be removed eventually.
 
 If you are using Script Blocks in a saved structure (using a Structure Block), it is recommended to resave that structure.
 
@@ -22,6 +22,7 @@ This includes:
 
 These blocks have been polished:
 - RelayTriggerBlock
+- TeamControllerBlock
 - JigsawPlacerBlock
   - including a rework of the data-driven appendices to the structure pool string, which are now a list of appendices. Existing blocks are converted automatically.
 - all "Use Relay Blocks"
@@ -29,7 +30,7 @@ These blocks have been polished:
 
 ## Additions
 
-- added "Spawn Point Delegation Block", the replacement for the deprecated "Entrance Delegation Block".
+- added "Spawn Point Delegation Block", the replacement for the deprecated "Entrance Delegation Block". Can delegate a spawn point randomly based on a list of saved positions.
 - added "Interactive Trigger Blocks" in candle form
 - added "Trapped Use Relay Chest", which replaces the deprecated "Locked Use Relay Chest". The new variant is functionally identical to the regular "Use Relay Chest", but uses the textures of the "Trapped Chest".
 - added API method for triggering/resetting a block position
@@ -37,6 +38,8 @@ These blocks have been polished:
 ## Changes
 
 - replaced "mimicDebugMode" game rule with server config option
+- small tweaks to the teleporter screen
+
 # 0.0.8
 
 ## Additions
