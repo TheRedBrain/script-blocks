@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -42,22 +41,14 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 
 		World world = serverPlayerEntity.getWorld();
 
-		boolean updateSuccessful = true;
-
 		BlockEntity blockEntity = world.getBlockEntity(teamControllerBlockPosition);
 		BlockState blockState = world.getBlockState(teamControllerBlockPosition);
 
 		if (blockEntity instanceof TeamControllerBlockEntity teamControllerBlockEntity) {
 			teamControllerBlockEntity.reset();
 			teamControllerBlockEntity.setShowArea(showArea);
-			if (!teamControllerBlockEntity.setAreaDimensions(areaDimensions)) {
-				serverPlayerEntity.sendMessage(Text.translatable("team_controller_block.areaDimensions.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!teamControllerBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("team_controller_block.areaPositionOffset.invalid"), false);
-				updateSuccessful = false;
-			}
+			teamControllerBlockEntity.setAreaDimensions(areaDimensions);
+			teamControllerBlockEntity.setAreaPositionOffset(areaPositionOffset);
 			teamControllerBlockEntity.setPVPControllerBlockPositionOffset(pvpControllerBlockPositionOffset);
 			teamControllerBlockEntity.setTeamIdentifier(teamIdentifierString);
 			teamControllerBlockEntity.setDisplayNameString(displayNameString);
@@ -70,9 +61,7 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 			teamControllerBlockEntity.setPrefixString(prefixString);
 			teamControllerBlockEntity.setSuffixString(suffixString);
 
-			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			}
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			teamControllerBlockEntity.markDirty();
 			world.updateListeners(teamControllerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}

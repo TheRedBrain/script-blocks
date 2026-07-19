@@ -62,7 +62,8 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$openHousingScreen();
 
-	void scriptblocks$openTeamControllerBlockScreen(TeamControllerBlockEntity teamControllerBlockEntity);
+	default void scriptblocks$openTeamControllerBlockScreen(TeamControllerBlockEntity teamControllerBlockEntity) {
+	}
 
 	void scriptblocks$openTriggeredBeaconBlockScreen(TriggeredBeaconBlockEntity triggeredBeaconBlockEntity);
 

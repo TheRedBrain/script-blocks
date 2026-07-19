@@ -43,6 +43,7 @@ public class TeamControllerBlockScreen extends Screen {
 	private static final Text SUFFIX_LABEL_TEXT = Text.translatable("gui.team_controller_block.suffix_label");
 	private final TeamControllerBlockEntity teamControllerBlockEntity;
 	private ScreenPage screenPage;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
 	private TextFieldWidget areaDimensionsXField;
 	private TextFieldWidget areaDimensionsYField;
@@ -102,7 +103,7 @@ public class TeamControllerBlockScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -172,12 +173,12 @@ public class TeamControllerBlockScreen extends Screen {
 		this.cycleTeamColorButton = this.addDrawableChild(ButtonWidget.builder(getTeamColorLabel(this.teamColor), (button) -> this.cycleTeamColor()).dimensions(this.width / 2 - 154, 125, 100, 20).build());
 
 		this.friendlyFire = this.teamControllerBlockEntity.friendlyFire();
-		this.toggleFriendlyFireButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(this.friendlyFire).build(this.width / 2 - 50, 125, 100, 20, Text.empty(), (button, friendlyFire) -> {
+		this.toggleFriendlyFireButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False")).initially(this.friendlyFire).omitKeyText().build(this.width / 2 - 50, 125, 100, 20, Text.empty(), (button, friendlyFire) -> {
 			this.friendlyFire = friendlyFire;
 		}));
 
 		this.showFriendlyInvisibles = this.teamControllerBlockEntity.showFriendlyInvisibles();
-		this.toggleShowFriendlyInvisiblesButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(this.showFriendlyInvisibles).build(this.width / 2 + 54, 125, 100, 20, Text.empty(), (button, showFriendlyInvisibles) -> {
+		this.toggleShowFriendlyInvisiblesButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False")).initially(this.showFriendlyInvisibles).omitKeyText().build(this.width / 2 + 54, 125, 100, 20, Text.empty(), (button, showFriendlyInvisibles) -> {
 			this.showFriendlyInvisibles = showFriendlyInvisibles;
 		}));
 
@@ -212,6 +213,16 @@ public class TeamControllerBlockScreen extends Screen {
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 219, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 219, 150, 20).build());
 		this.updateWidgets();
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
+
+	@Override
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		this.renderInGameBackground(context);
 	}
 
 	private void updateWidgets() {
@@ -292,13 +303,21 @@ public class TeamControllerBlockScreen extends Screen {
 		String string12 = this.suffixField.getText();
 		this.init(client, width, height);
 		this.screenPage = var;
+		this.cycleScreenPageButton.setValue(var);
 		this.nametagVisibility = var1;
+		this.cycleNametagVisibilityButton.setValue(var1);
 		this.deathMessageVisibility = var2;
+		this.cycleDeathMessageVisibilityButton.setValue(var2);
 		this.collisionRule = var3;
+		this.cycleCollisionRuleButton.setValue(var3);
 		this.teamColor = var4;
+		this.cycleTeamColorButton.setMessage(getTeamColorLabel(var4));
 		this.showArea = bool;
+		this.toggleShowAreaButton.setValue(bool);
 		this.friendlyFire = bool1;
+		this.toggleFriendlyFireButton.setValue(bool1);
 		this.showFriendlyInvisibles = bool2;
+		this.toggleShowFriendlyInvisiblesButton.setValue(bool2);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
