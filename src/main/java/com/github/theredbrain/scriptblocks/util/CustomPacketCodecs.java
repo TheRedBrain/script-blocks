@@ -174,4 +174,16 @@ public class CustomPacketCodecs {
 			PacketCodecs.STRING.encode(byteBuf, pairStringPairStringString.getRight().getRight());
 		}
 	};
+
+	public static final PacketCodec<ByteBuf, MutablePair<BlockPos, MutablePair<Double, Double>>> MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE = new PacketCodec<>() {
+		public MutablePair<BlockPos, MutablePair<Double, Double>> decode(ByteBuf byteBuf) {
+			return new MutablePair<>(BlockPos.PACKET_CODEC.decode(byteBuf), new MutablePair<>(PacketCodecs.DOUBLE.decode(byteBuf), PacketCodecs.DOUBLE.decode(byteBuf)));
+		}
+
+		public void encode(ByteBuf byteBuf, MutablePair<BlockPos, MutablePair<Double, Double>> pairStringPairDoubleDouble) {
+			BlockPos.PACKET_CODEC.encode(byteBuf, pairStringPairDoubleDouble.getLeft());
+			PacketCodecs.DOUBLE.encode(byteBuf, pairStringPairDoubleDouble.getRight().getLeft());
+			PacketCodecs.DOUBLE.encode(byteBuf, pairStringPairDoubleDouble.getRight().getRight());
+		}
+	};
 }

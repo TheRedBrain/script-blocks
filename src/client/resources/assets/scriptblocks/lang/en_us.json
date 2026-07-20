@@ -330,8 +330,12 @@
 	"gui.pvp_controller_block.screenPage.respawn_positions": "Respawn Positions",
 
 
-	"gui.spawn_point_delegation_block.spawn_point_position_offset": "Spawn Point Position Offset",
-	"gui.spawn_point_delegation_block.spawn_point_orientation": "Spawn Point Yaw/Pitch",
+	"gui.spawn_point_delegation_block.list.entry.1": "X: %s, Y: %s, Z: %s",
+	"gui.spawn_point_delegation_block.list.entry.2": "Yaw: %s, Pitch: %s",
+	"gui.spawn_point_delegation_block.invalid_entry_was_corrected": "Invalid entry was corrected",
+	"gui.spawn_point_delegation_block.spawn_point_already_in_list": "Spawn point is already in the list",
+	"gui.spawn_point_delegation_block.spawn_point_position_offset": "New Spawn Point Position Offset",
+	"gui.spawn_point_delegation_block.spawn_point_orientation": "New Spawn Point Yaw/Pitch",
 
 
 	"gui.team_controller_block.hide_area_label": "Hide Area",
