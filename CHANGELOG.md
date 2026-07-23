@@ -1,3 +1,9 @@
+# 0.0.10
+
+## Fixes
+
+- fixed JigsawPlacerBlock data saving
+
 # 0.0.9
 
 This update marks the start of a polishing pass for the entire code base including a lot of refactoring and general house-keeping. This also includes the deprecation of several blocks. This has a variety of reasons. All deprecated blocks still function like normal, but when they are placed in the world, they will send log (and optionally chat) messages with a warning and instructions on how to best replace them. Deprecated blocks will be removed eventually.

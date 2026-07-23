@@ -82,7 +82,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 		this.structurePoolStringAppendices.clear();
 
-		if (nbt.contains("firstDataProvidingBlockPosOffsetX") || nbt.contains("firstDataProvidingBlockPosOffsetY") || nbt.contains("firstDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString")) {
+		if (nbt.contains("firstDataProvidingBlockPosOffsetX") || nbt.contains("firstDataProvidingBlockPosOffsetY") || nbt.contains("firstDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString") || nbt.contains("secondDataProvidingBlockPosOffsetX") || nbt.contains("secondDataProvidingBlockPosOffsetY") || nbt.contains("secondDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString")) {
 			this.structurePoolStringAppendices.add(
 					new MutablePair<>(new BlockPos(
 							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
@@ -100,9 +100,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 			nbt.remove("firstDataProvidingBlockPosOffsetZ");
 			nbt.remove("first_checked_data_id");
 			nbt.remove("secondStructurePoolString");
-		}
 
-		if (nbt.contains("secondDataProvidingBlockPosOffsetX") || nbt.contains("secondDataProvidingBlockPosOffsetY") || nbt.contains("secondDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString")) {
 			if (nbt.getInt("secondDataProvidingBlockPosOffsetX") != 0 || nbt.getInt("secondDataProvidingBlockPosOffsetY") != 0 || nbt.getInt("secondDataProvidingBlockPosOffsetZ") != 0) {
 				this.structurePoolStringAppendices.add(
 						new MutablePair<>(new BlockPos(
@@ -121,23 +119,24 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 			nbt.remove("secondDataProvidingBlockPosOffsetY");
 			nbt.remove("secondDataProvidingBlockPosOffsetZ");
 			nbt.remove("second_checked_data_id");
-		}
+		} else {
 
-		int appendicesSize = nbt.getInt("appendices_size");
-		for (int i = 0; i < appendicesSize; i++) {
-			this.structurePoolStringAppendices.add(
-					new MutablePair<>(
-							new BlockPos(
-									MathHelper.clamp(nbt.getInt("appendix_position_offset_x_" + i), -48, 48),
-									MathHelper.clamp(nbt.getInt("appendix_position_offset_y_" + i), -48, 48),
-									MathHelper.clamp(nbt.getInt("appendix_position_offset_z_" + i), -48, 48)
-							),
-							new MutablePair<>(
-									nbt.getString("appendix_data_id_" + i),
-									nbt.getString("static_appendix_" + i)
-							)
-					)
-			);
+			int appendicesSize = nbt.getInt("appendices_size");
+			for (int i = 0; i < appendicesSize; i++) {
+				this.structurePoolStringAppendices.add(
+						new MutablePair<>(
+								new BlockPos(
+										MathHelper.clamp(nbt.getInt("appendix_position_offset_x_" + i), -48, 48),
+										MathHelper.clamp(nbt.getInt("appendix_position_offset_y_" + i), -48, 48),
+										MathHelper.clamp(nbt.getInt("appendix_position_offset_z_" + i), -48, 48)
+								),
+								new MutablePair<>(
+										nbt.getString("appendix_data_id_" + i),
+										nbt.getString("static_appendix_" + i)
+								)
+						)
+				);
+			}
 		}
 
 		this.target = Identifier.of(nbt.getString("target"));
