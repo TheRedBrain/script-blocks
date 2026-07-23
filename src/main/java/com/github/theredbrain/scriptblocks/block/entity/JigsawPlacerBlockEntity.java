@@ -270,7 +270,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
-					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(appendix.getLeft(), blockRotation), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getLeft())));
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(appendix.getLeft(), blockRotation), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
 				}
 				this.structurePoolStringAppendices.clear();
 				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
@@ -282,7 +282,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
-					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.FRONT_BACK), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getLeft())));
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.FRONT_BACK), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
 				}
 				this.structurePoolStringAppendices.clear();
 				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
@@ -294,7 +294,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
-					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.LEFT_RIGHT), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getLeft())));
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.LEFT_RIGHT), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
 				}
 				this.structurePoolStringAppendices.clear();
 				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
