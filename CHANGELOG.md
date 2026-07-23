@@ -1,5 +1,9 @@
 # 0.0.10
 
+## Additions
+
+- the "predefined world spawn position" (set in the server config) now respects Spawn Point Delegation Blocks
+
 ## Fixes
 
 - fixed JigsawPlacerBlock data saving

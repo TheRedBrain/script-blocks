@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.mixin.world;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
@@ -69,6 +70,10 @@ public abstract class WorldMixin implements WorldAccess {
 
 					MutablePair<BlockPos, MutablePair<Double, Double>> entrance = locationControlBlock.getTargetEntrance(serverWorld, serverConfig.world_spawn_entrance_identifier);
 					blockPos = entrance.getLeft();
+
+					if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+						blockPos = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld).getLeft();
+					}
 				}
 			}
 		}
