@@ -137,9 +137,9 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 			nbt.remove("areaPositionOffsetY");
 			nbt.remove("areaPositionOffsetZ");
 		} else {
-			i = MathHelper.clamp(nbt.getInt("area_position_offset_x"), 0, 48);
-			j = MathHelper.clamp(nbt.getInt("area_position_offset_y"), 0, 48);
-			k = MathHelper.clamp(nbt.getInt("area_position_offset_z"), 0, 48);
+			i = MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48);
+			j = MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48);
+			k = MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48);
 		}
 		this.areaPositionOffset = new BlockPos(i, j, k);
 
