@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataModificationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
@@ -43,6 +44,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.BossControllerBlock
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CopyDataBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeHousingScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.CreativeTeleporterBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataModificationBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataSavingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.DataWritingBlockScreen;
@@ -298,6 +300,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity) {
 		this.client.setScreen(new DataWritingBlockScreen(dataWritingBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openDataModificationBlockScreen(DataModificationBlockEntity dataModificationBlockEntity) {
+		this.client.setScreen(new DataModificationBlockScreen(dataModificationBlockEntity));
 	}
 
 	@Override

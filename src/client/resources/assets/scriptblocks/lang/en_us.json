@@ -119,6 +119,11 @@
 	"gui.data_provider_block.data_identifier": "Data Identifier",
 
 
+	"gui.data_modification_block.added_integer_value_label": "Added Integer Value",
+
+	"gui.data_modification_block.data_modification_mode.integer_addition": "Integer Addition",
+
+
 	"gui.data_saving_block.new_data_identifier_placeholder": "New Data Identifier",
 	"gui.data_saving_block.new_data_value_placeholder": "New Data Value",
 	"gui.data_saving_block.add_new_data_button_label": "Add/Replace Data",
@@ -800,6 +805,7 @@
 	"block.scriptblocks.boss_controller_block": "Boss Controller Block",
 	"block.scriptblocks.copy_data_block": "Copy Data Block",
 	"block.scriptblocks.data_access_block": "Data Access Block",
+	"block.scriptblocks.data_modification_block": "Data Modification Block",
 	"block.scriptblocks.data_relay_block": "Data Relay Block",
 	"block.scriptblocks.data_saving_block": "Data Saving Block",
 	"block.scriptblocks.data_writing_block": "Data Writing Block",

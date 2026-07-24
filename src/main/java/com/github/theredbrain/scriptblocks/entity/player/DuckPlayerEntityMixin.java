@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataModificationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
@@ -132,6 +133,9 @@ public interface DuckPlayerEntityMixin {
 	void scriptblocks$openCopyDataBlockScreen(CopyDataBlockEntity copyDataBlockEntity);
 
 	void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity);
+
+	default void scriptblocks$openDataModificationBlockScreen(DataModificationBlockEntity dataModificationBlockEntity) {
+	}
 
 	void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
 

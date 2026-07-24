@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.DataModificationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
@@ -91,6 +92,9 @@ public class EntityRegistry {
 	public static final BlockEntityType<CopyDataBlockEntity> COPY_DATA_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("copy_data_block"),
 			BlockEntityType.Builder.create(CopyDataBlockEntity::new, BlockRegistry.COPY_DATA_BLOCK).build());
+	public static final BlockEntityType<DataModificationBlockEntity> DATA_MODIFICATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("data_modification_block"),
+			BlockEntityType.Builder.create(DataModificationBlockEntity::new, BlockRegistry.DATA_MODIFICATION_BLOCK).build());
 	public static final BlockEntityType<DataRelayBlockEntity> DATA_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("data_relay_block"),
 			BlockEntityType.Builder.create(DataRelayBlockEntity::new, BlockRegistry.DATA_RELAY_BLOCK).build());
