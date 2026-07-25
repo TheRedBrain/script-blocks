@@ -5,6 +5,11 @@
 - the "predefined world spawn position" (set in the server config) now respects Spawn Point Delegation Blocks
 - added "Data Modification Block", has currently one function: add integer values to data when used like a "Data Relay Block"
 
+## Changes
+
+- the Teleporter Block now triggers another block before the teleport and a second block after the teleport
+  - as usual, the block position offset etc. are configurable in the block's screen
+
 ## Fixes
 
 - fixed JigsawPlacerBlock data saving

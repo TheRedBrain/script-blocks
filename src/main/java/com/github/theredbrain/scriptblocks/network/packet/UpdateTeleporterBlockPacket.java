@@ -38,6 +38,10 @@ public record UpdateTeleporterBlockPacket(
 		String entranceDataIdentifier,
 		String sendDataIdentifierDataIdentifier,
 		String sendDataValueDataIdentifier,
+		BlockPos preTeleportTriggeredBlockPositionOffset,
+		boolean preTeleportTriggeredBlockResets,
+		BlockPos postTeleportTriggeredBlockPositionOffset,
+		boolean postTeleportTriggeredBlockResets,
 		String teleporterName,
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
@@ -82,6 +86,10 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -137,6 +145,11 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeString(this.entranceDataIdentifier);
 		registryByteBuf.writeString(this.sendDataIdentifierDataIdentifier);
 		registryByteBuf.writeString(this.sendDataValueDataIdentifier);
+
+		registryByteBuf.writeBlockPos(this.preTeleportTriggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.preTeleportTriggeredBlockResets);
+		registryByteBuf.writeBlockPos(this.postTeleportTriggeredBlockPositionOffset);
+		registryByteBuf.writeBoolean(this.postTeleportTriggeredBlockResets);
 
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);

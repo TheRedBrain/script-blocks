@@ -63,6 +63,11 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		String sendDataIdentifierDataIdentifier = payload.sendDataIdentifierDataIdentifier();
 		String sendDataValueDataIdentifier = payload.sendDataValueDataIdentifier();
 
+		BlockPos preTeleportTriggeredBlockPositionOffset = payload.preTeleportTriggeredBlockPositionOffset();
+		boolean preTeleportTriggeredBlockResets = payload.preTeleportTriggeredBlockResets();
+		BlockPos postTeleportTriggeredBlockPositionOffset = payload.postTeleportTriggeredBlockPositionOffset();
+		boolean postTeleportTriggeredBlockResets = payload.postTeleportTriggeredBlockResets();
+
 		String teleporterName = payload.teleporterName();
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();
 		String currentTargetOwnerLabel = payload.currentTargetOwnerLabel();
@@ -111,6 +116,8 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setEntranceDataIdentifier(entranceDataIdentifier);
 			teleporterBlockEntity.setSendDataIdentifierDataIdentifier(sendDataIdentifierDataIdentifier);
 			teleporterBlockEntity.setSendDataValueDataIdentifier(sendDataValueDataIdentifier);
+			teleporterBlockEntity.setPreTeleportTriggeredBlock(new MutablePair<>(preTeleportTriggeredBlockPositionOffset, preTeleportTriggeredBlockResets));
+			teleporterBlockEntity.setPostTeleportTriggeredBlock(new MutablePair<>(postTeleportTriggeredBlockPositionOffset, postTeleportTriggeredBlockResets));
 			teleporterBlockEntity.setTeleporterName(teleporterName);
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);
 			teleporterBlockEntity.setCurrentTargetOwnerLabel(currentTargetOwnerLabel);

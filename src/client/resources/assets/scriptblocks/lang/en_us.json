@@ -398,7 +398,7 @@
 
 	"gui.teleporter_block.creativeScreenPage.activation": "Activation Settings",
 	"gui.teleporter_block.creativeScreenPage.teleportation_mode": "Teleportation Settings",
-	"gui.teleporter_block.creativeScreenPage.status_effect_to_decrement": "Status Effects To Decrement",
+	"gui.teleporter_block.creativeScreenPage.on_teleport_events": "On Teleport Events",
 	"gui.teleporter_block.creativeScreenPage.adventure_screen_customization": "Adventure Screen Settings",
 
 	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
@@ -455,6 +455,8 @@
 	"gui.teleporter_block.send_data_value_label": "Data Value - Provided Data Id",
 	"gui.teleporter_block.data_providing_block_pos_offset_label": "Data Providing Block Pos Offset",
 	"gui.teleporter_block.status_effects_to_decrement_tag_id_field": "Status Effects To Decrement Tag Identifier",
+	"gui.teleporter_block.pre_teleport_triggered_block_position_offset_label": "Pre Teleport Triggered Block Position Offset",
+	"gui.teleporter_block.post_teleport_triggered_block_position_offset_label": "Post Teleport Triggered Block Position Offset",
 	"gui.teleporter_block.status_effects_to_remove_tag_id_field": "Status Effects To Remove Tag Identifier",
 	"gui.teleporter_block.items_to_remove_field": "Items To Remove On Teleport",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",

@@ -68,6 +68,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text SEND_DATA_VALUE_LABEL_TEXT = Text.translatable("gui.teleporter_block.send_data_value_label");
 	private static final Text DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.teleporter_block.data_providing_block_pos_offset_label");
 
+	private static final Text PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.teleporter_block.pre_teleport_triggered_block_position_offset_label");
+	private static final Text POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.teleporter_block.post_teleport_triggered_block_position_offset_label");
+
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
 	private static final Text TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_cancel_button_button_label.on");
@@ -131,6 +134,16 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget entranceDataIdentifierField;
 	private TextFieldWidget sendDataIdentifierDataIdentifierField;
 	private TextFieldWidget sendDataValueDataIdentifierField;
+	private TextFieldWidget preTeleportTriggeredBlockPositionOffsetXField;
+	private TextFieldWidget preTeleportTriggeredBlockPositionOffsetYField;
+	private TextFieldWidget preTeleportTriggeredBlockPositionOffsetZField;
+	private CyclingButtonWidget<Boolean> preTeleportToggleTriggeredBlockResetsButton;
+	private boolean preTeleportTriggeredBlockResets;
+	private TextFieldWidget postTeleportTriggeredBlockPositionOffsetXField;
+	private TextFieldWidget postTeleportTriggeredBlockPositionOffsetYField;
+	private TextFieldWidget postTeleportTriggeredBlockPositionOffsetZField;
+	private CyclingButtonWidget<Boolean> postTeleportToggleTriggeredBlockResetsButton;
+	private boolean postTeleportTriggeredBlockResets;
 	private TextFieldWidget teleporterNameField;
 	private TextFieldWidget currentTargetOwnerLabelField;
 	private TextFieldWidget currentTargetIdentifierLabelField;
@@ -478,20 +491,54 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		// --- status effect page ---
 
-		this.statusEffectsToDecrementTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
+		this.statusEffectsToDecrementTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
 		this.statusEffectsToDecrementTagIdField.setMaxLength(128);
 		this.statusEffectsToDecrementTagIdField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
 		this.addSelectableChild(this.statusEffectsToDecrementTagIdField);
 
-		this.statusEffectsToRemoveTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
+		this.statusEffectsToRemoveTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
 		this.statusEffectsToRemoveTagIdField.setMaxLength(128);
 		this.statusEffectsToRemoveTagIdField.setText(this.teleporterBlock.getStatusEffectsToRemoveOnTeleport());
 		this.addSelectableChild(this.statusEffectsToRemoveTagIdField);
 
-		this.removedItemIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
+		this.removedItemIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
 		this.removedItemIdentifierField.setMaxLength(128);
 		this.removedItemIdentifierField.setText(this.teleporterBlock.getItemsToRemoveOnTeleport());
 		this.addSelectableChild(this.removedItemIdentifierField);
+
+		this.preTeleportTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 50, 20, Text.empty());
+		this.preTeleportTriggeredBlockPositionOffsetXField.setMaxLength(128);
+		this.preTeleportTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getX()));
+		this.addSelectableChild(this.preTeleportTriggeredBlockPositionOffsetXField);
+		this.preTeleportTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 160, 50, 20, Text.empty());
+		this.preTeleportTriggeredBlockPositionOffsetYField.setMaxLength(128);
+		this.preTeleportTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getY()));
+		this.addSelectableChild(this.preTeleportTriggeredBlockPositionOffsetYField);
+		this.preTeleportTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 160, 50, 20, Text.empty());
+		this.preTeleportTriggeredBlockPositionOffsetZField.setMaxLength(128);
+		this.preTeleportTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getZ()));
+		this.addSelectableChild(this.preTeleportTriggeredBlockPositionOffsetZField);
+		this.preTeleportTriggeredBlockResets = this.teleporterBlock.getPreTeleportTriggeredBlock().getRight();
+		this.preTeleportToggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.preTeleportTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 160, 150, 20, Text.empty(), (button, preTeleportTriggeredBlockResets) -> {
+			this.preTeleportTriggeredBlockResets = preTeleportTriggeredBlockResets;
+		}));
+
+		this.postTeleportTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 195, 50, 20, Text.empty());
+		this.postTeleportTriggeredBlockPositionOffsetXField.setMaxLength(128);
+		this.postTeleportTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getX()));
+		this.addSelectableChild(this.postTeleportTriggeredBlockPositionOffsetXField);
+		this.postTeleportTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 195, 50, 20, Text.empty());
+		this.postTeleportTriggeredBlockPositionOffsetYField.setMaxLength(128);
+		this.postTeleportTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getY()));
+		this.addSelectableChild(this.postTeleportTriggeredBlockPositionOffsetYField);
+		this.postTeleportTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 195, 50, 20, Text.empty());
+		this.postTeleportTriggeredBlockPositionOffsetZField.setMaxLength(128);
+		this.postTeleportTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getZ()));
+		this.addSelectableChild(this.postTeleportTriggeredBlockPositionOffsetZField);
+		this.postTeleportTriggeredBlockResets = this.teleporterBlock.getPostTeleportTriggeredBlock().getRight();
+		this.postTeleportToggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.postTeleportTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 195, 150, 20, Text.empty(), (button, postTeleportTriggeredBlockResets) -> {
+			this.postTeleportTriggeredBlockResets = postTeleportTriggeredBlockResets;
+		}));
 
 		// --- adventure screen customization page ---
 
@@ -537,8 +584,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			this.showCancelButton = showCancelButton;
 		}));
 
-		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 220, 150, 20).build());
+		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 220, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -610,6 +657,16 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.statusEffectsToRemoveTagIdField.setVisible(false);
 		this.removedItemIdentifierField.setVisible(false);
 
+		this.preTeleportTriggeredBlockPositionOffsetXField.setVisible(false);
+		this.preTeleportTriggeredBlockPositionOffsetYField.setVisible(false);
+		this.preTeleportTriggeredBlockPositionOffsetZField.setVisible(false);
+		this.preTeleportToggleTriggeredBlockResetsButton.visible = false;
+
+		this.postTeleportTriggeredBlockPositionOffsetXField.setVisible(false);
+		this.postTeleportTriggeredBlockPositionOffsetYField.setVisible(false);
+		this.postTeleportTriggeredBlockPositionOffsetZField.setVisible(false);
+		this.postTeleportToggleTriggeredBlockResetsButton.visible = false;
+		
 		this.teleporterNameField.setVisible(false);
 		this.currentTargetIdentifierLabelField.setVisible(false);
 		this.currentTargetOwnerLabelField.setVisible(false);
@@ -704,11 +761,21 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 				}
 			}
-		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
+		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ON_TELEPORT_EVENTS) {
 
 			this.statusEffectsToDecrementTagIdField.setVisible(true);
 			this.statusEffectsToRemoveTagIdField.setVisible(true);
 			this.removedItemIdentifierField.setVisible(true);
+
+			this.preTeleportTriggeredBlockPositionOffsetXField.setVisible(true);
+			this.preTeleportTriggeredBlockPositionOffsetYField.setVisible(true);
+			this.preTeleportTriggeredBlockPositionOffsetZField.setVisible(true);
+			this.preTeleportToggleTriggeredBlockResetsButton.visible = true;
+
+			this.postTeleportTriggeredBlockPositionOffsetXField.setVisible(true);
+			this.postTeleportTriggeredBlockPositionOffsetYField.setVisible(true);
+			this.postTeleportTriggeredBlockPositionOffsetZField.setVisible(true);
+			this.postTeleportToggleTriggeredBlockResetsButton.visible = true;
 
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
@@ -750,6 +817,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		boolean bool6 = this.canOwnerBeChosen;
 		boolean bool7 = this.triggerActivation;
 		boolean bool8 = this.showCancelButton;
+		boolean bool9 = this.preTeleportTriggeredBlockResets;
+		boolean bool10 = this.postTeleportTriggeredBlockResets;
 		String string0 = this.activationAreaDimensionsXField.getText();
 		String string1 = this.activationAreaDimensionsYField.getText();
 		String string2 = this.activationAreaDimensionsZField.getText();
@@ -780,6 +849,12 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string27 = this.locationDataField.getText();
 		String string28 = this.statusEffectsToRemoveTagIdField.getText();
 		String string29 = this.removedItemIdentifierField.getText();
+		String string30 = this.preTeleportTriggeredBlockPositionOffsetXField.getText();
+		String string31 = this.preTeleportTriggeredBlockPositionOffsetYField.getText();
+		String string32 = this.preTeleportTriggeredBlockPositionOffsetZField.getText();
+		String string33 = this.postTeleportTriggeredBlockPositionOffsetXField.getText();
+		String string34 = this.postTeleportTriggeredBlockPositionOffsetYField.getText();
+		String string35 = this.postTeleportTriggeredBlockPositionOffsetZField.getText();
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list1 = new ArrayList<>(this.locationsList);
 		this.init(client, width, height);
 		this.creativeScreenPage = var;
@@ -794,6 +869,22 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.canOwnerBeChosen = bool6;
 		this.triggerActivation = bool7;
 		this.showCancelButton = bool8;
+		this.preTeleportTriggeredBlockResets = bool9;
+		this.postTeleportTriggeredBlockResets = bool10;
+		this.creativeScreenPageButton.setValue(this.creativeScreenPage);
+		this.teleportationModeButton.setValue(this.teleportationMode);
+		this.spawnPointTypeButton.setValue(this.spawnPointType);
+		this.toggleShowActivationAreaButton.setValue(this.showActivationArea);
+		this.toggleShowAdventureScreenButton.setValue(this.showAdventureScreen);
+		this.toggleSetAccessPositionButton.setValue(this.setAccessPosition);
+		this.toggleOnlyTeleportDimensionOwnerButton.setValue(this.onlyTeleportDimensionOwner);
+		this.toggleTeleportTeamButton.setValue(this.teleportTeam);
+		this.toggleShowRegenerateButtonButton.setValue(this.showRegenerateButton);
+		this.toggleCanOwnerBeChosenButton.setValue(this.canOwnerBeChosen);
+		this.toggleTriggerActivationButton.setValue(this.triggerActivation);
+		this.toggleShowCancelButtonButton.setValue(this.showCancelButton);
+		this.preTeleportToggleTriggeredBlockResetsButton.setValue(this.preTeleportTriggeredBlockResets);
+		this.postTeleportToggleTriggeredBlockResetsButton.setValue(this.postTeleportTriggeredBlockResets);
 		this.activationAreaDimensionsXField.setText(string0);
 		this.activationAreaDimensionsYField.setText(string1);
 		this.activationAreaDimensionsZField.setText(string2);
@@ -824,6 +915,12 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.locationDataField.setText(string27);
 		this.statusEffectsToRemoveTagIdField.setText(string28);
 		this.removedItemIdentifierField.setText(string29);
+		this.preTeleportTriggeredBlockPositionOffsetXField.setText(string30);
+		this.preTeleportTriggeredBlockPositionOffsetYField.setText(string31);
+		this.preTeleportTriggeredBlockPositionOffsetZField.setText(string32);
+		this.postTeleportTriggeredBlockPositionOffsetXField.setText(string33);
+		this.postTeleportTriggeredBlockPositionOffsetYField.setText(string34);
+		this.postTeleportTriggeredBlockPositionOffsetZField.setText(string35);
 		this.locationsList.clear();
 		this.locationsList.addAll(list1);
 	}
@@ -977,16 +1074,26 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 				}
 			}
-		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.STATUS_EFFECTS_TO_DECREMENT) {
+		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ON_TELEPORT_EVENTS) {
 
-			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.statusEffectsToDecrementTagIdField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_REMOVE_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_REMOVE_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.statusEffectsToRemoveTagIdField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, ITEMS_TO_REMOVE_FIELD_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, ITEMS_TO_REMOVE_FIELD_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
 			this.removedItemIdentifierField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			this.preTeleportTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.preTeleportTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.preTeleportTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+			this.postTeleportTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.postTeleportTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.postTeleportTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ADVENTURE_SCREEN_CUSTOMIZATION) {
 
@@ -1080,6 +1187,18 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				this.entranceDataIdentifierField.getText(),
 				this.sendDataIdentifierDataIdentifierField.getText(),
 				this.sendDataValueDataIdentifierField.getText(),
+				new BlockPos(
+						ItemUtils.parseInt(this.preTeleportTriggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.preTeleportTriggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.preTeleportTriggeredBlockPositionOffsetZField.getText())
+				),
+				this.preTeleportTriggeredBlockResets,
+				new BlockPos(
+						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetZField.getText())
+				),
+				this.postTeleportTriggeredBlockResets,
 				this.teleporterNameField.getText(),
 				this.currentTargetIdentifierLabelField.getText(),
 				this.currentTargetOwnerLabelField.getText(),

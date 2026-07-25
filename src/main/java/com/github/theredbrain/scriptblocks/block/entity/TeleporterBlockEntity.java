@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
+import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
@@ -37,7 +38,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory, Triggerable {
+public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory<TeleporterBlockScreenHandler.TeleporterBlockData>, Triggerable {
 
 	private boolean calculateActivationBox = true;
 	private Box activationArea = null;
@@ -81,7 +82,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private String sendDataIdentifierDataIdentifier = "";
 	private String sendDataValueDataIdentifier = "";
 
-//	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = new MutablePair<>();
+	private MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
@@ -162,6 +164,15 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putString("entranceDataIdentifier", this.entranceDataIdentifier);
 		nbt.putString("sendDataIdentifierDataIdentifier", this.sendDataIdentifierDataIdentifier);
 		nbt.putString("sendDataValueDataIdentifier", this.sendDataValueDataIdentifier);
+
+		nbt.putInt("pre_teleport_triggered_block_position_offset_x", this.preTeleportTriggeredBlock.getLeft().getX());
+		nbt.putInt("pre_teleport_triggered_block_position_offset_y", this.preTeleportTriggeredBlock.getLeft().getY());
+		nbt.putInt("pre_teleport_triggered_block_position_offset_z", this.preTeleportTriggeredBlock.getLeft().getZ());
+		nbt.putBoolean("pre_teleport_triggered_block_resets", this.preTeleportTriggeredBlock.getRight());
+		nbt.putInt("post_teleport_triggered_block_position_offset_x", this.postTeleportTriggeredBlock.getLeft().getX());
+		nbt.putInt("post_teleport_triggered_block_position_offset_y", this.postTeleportTriggeredBlock.getLeft().getY());
+		nbt.putInt("post_teleport_triggered_block_position_offset_z", this.postTeleportTriggeredBlock.getLeft().getZ());
+		nbt.putBoolean("post_teleport_triggered_block_resets", this.postTeleportTriggeredBlock.getRight());
 
 		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
 		nbt.putString("currentTargetOwnerLabel", this.currentTargetOwnerLabel);
@@ -254,6 +265,17 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.sendDataIdentifierDataIdentifier = nbt.getString("sendDataIdentifierDataIdentifier");
 		this.sendDataValueDataIdentifier = nbt.getString("sendDataValueDataIdentifier");
 
+		this.preTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
+				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_z"), -48, 48)
+		), nbt.getBoolean("pre_teleport_triggered_block_resets"));
+		this.postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
+				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_z"), -48, 48)
+		), nbt.getBoolean("post_teleport_triggered_block_resets"));
+
 		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
 		this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
 		this.showRegenerateButton = nbt.getBoolean("showRegenerateButton");
@@ -323,6 +345,34 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 					);
 				}
 
+			}
+		}
+	}
+
+	public void preTeleportTrigger() {
+		if (this.world != null && !this.preTeleportTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.preTeleportTriggeredBlock.getLeft().getX(), this.pos.getY() + this.preTeleportTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.preTeleportTriggeredBlock.getLeft().getZ()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.preTeleportTriggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
+			}
+		}
+	}
+
+	public void postTeleportTrigger() {
+		if (this.world != null && !this.postTeleportTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.postTeleportTriggeredBlock.getLeft().getX(), this.pos.getY() + this.postTeleportTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.postTeleportTriggeredBlock.getLeft().getZ()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.postTeleportTriggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
 			}
 		}
 	}
@@ -580,6 +630,22 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.sendDataValueDataIdentifier = sendDataValueDataIdentifier;
 	}
 
+	public MutablePair<BlockPos, Boolean> getPreTeleportTriggeredBlock() {
+		return this.preTeleportTriggeredBlock;
+	}
+
+	public void setPreTeleportTriggeredBlock(MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock) {
+		this.preTeleportTriggeredBlock = preTeleportTriggeredBlock;
+	}
+
+	public MutablePair<BlockPos, Boolean> getPostTeleportTriggeredBlock() {
+		return this.postTeleportTriggeredBlock;
+	}
+
+	public void setPostTeleportTriggeredBlock(MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock) {
+		this.postTeleportTriggeredBlock = postTeleportTriggeredBlock;
+	}
+
 	public String getCurrentTargetIdentifierLabel() {
 		return this.currentTargetIdentifierLabel;
 	}
@@ -750,7 +816,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	public enum CreativeScreenPage implements StringIdentifiable {
 		ACTIVATION("activation"),
 		TELEPORTATION_MODE("teleportation_mode"),
-		STATUS_EFFECTS_TO_DECREMENT("status_effect_to_decrement"),
+		ON_TELEPORT_EVENTS("on_teleport_events"),
 		ADVENTURE_SCREEN_CUSTOMIZATION("adventure_screen_customization");
 
 		private final String name;

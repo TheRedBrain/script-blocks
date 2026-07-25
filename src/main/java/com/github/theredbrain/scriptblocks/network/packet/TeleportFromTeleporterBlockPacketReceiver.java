@@ -81,6 +81,11 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		boolean locationWasReset = false;
 		boolean targetLocationIsPublic = false;
 
+		BlockEntity blockEntity2 = serverWorld.getBlockEntity(teleportBlockPosition);
+
+		if (!(blockEntity2 instanceof TeleporterBlockEntity teleporterBlockEntity)) {
+			return;
+		}
 		if (teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
 			targetWorld = serverWorld;
 			targetPos = new BlockPos(teleportBlockPosition.getX() + directTeleportPositionOffset.getX(), teleportBlockPosition.getY() + directTeleportPositionOffset.getY(), teleportBlockPosition.getZ() + directTeleportPositionOffset.getZ());
@@ -266,6 +271,10 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 		if (targetWorld != null && targetPos != null && playerHadKeyItem) {
 
+			teleporterBlockEntity.preTeleportTrigger();
+
+			// send UUID of serverPlayerEntity
+
 			TagKey<StatusEffect> removalTag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToRemoveOnTeleport));
 			TagKey<StatusEffect> decrementingTag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToDecrementLevelOnTeleport));
 			serverPlayerEntity.fallDistance = 0;
@@ -304,6 +313,9 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					for (String playerString : team.getPlayerList()) {
 						ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
 						if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
+
+							// send UUID of teamServerPlayerEntity
+
 							teamServerPlayerEntity.fallDistance = 0;
 							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
 							if (DebuggingHelper.isTeleporterLoggingEnabled()) {
@@ -312,7 +324,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 									DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, teamServerPlayerEntity);
 								}
 							}
-							serverPlayerEntity.closeHandledScreen();
+							teamServerPlayerEntity.closeHandledScreen();
 
 							for (StatusEffectInstance statusEffectInstance : teamServerPlayerEntity.getStatusEffects().stream().toList()) {
 								RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
@@ -336,6 +348,9 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					}
 				}
 			}
+
+			teleporterBlockEntity.postTeleportTrigger();
+
 		} else {
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 				DebuggingHelper.sendDebuggingMessage("Teleport failed", serverPlayerEntity);
