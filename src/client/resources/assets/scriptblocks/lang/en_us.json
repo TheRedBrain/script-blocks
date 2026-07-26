@@ -120,8 +120,10 @@
 
 
 	"gui.data_modification_block.added_integer_value_label": "Added Integer Value",
+	"gui.data_modification_block.integer_modulus_value_label": "Integer Modulus Value",
 
 	"gui.data_modification_block.data_modification_mode.integer_addition": "Integer Addition",
+	"gui.data_modification_block.data_modification_mode.integer_modulo": "Integer Modulo",
 
 
 	"gui.data_saving_block.new_data_identifier_placeholder": "New Data Identifier",

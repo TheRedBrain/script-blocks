@@ -10,7 +10,8 @@ public record UpdateDataModificationBlockPacket(
 		BlockPos dataAccessBlockPosition,
 		BlockPos dataProvidingBlockPositionOffset,
 		String dataModificationMode,
-		int addedIntegerValue
+		int addedIntegerValue,
+		int integerModulusValue
 ) implements CustomPayload {
 	public static final Id<UpdateDataModificationBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_data_modification_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateDataModificationBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDataModificationBlockPacket::write, UpdateDataModificationBlockPacket::new);
@@ -20,6 +21,7 @@ public record UpdateDataModificationBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
+				registryByteBuf.readInt(),
 				registryByteBuf.readInt()
 		);
 	}
@@ -29,6 +31,7 @@ public record UpdateDataModificationBlockPacket(
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPositionOffset);
 		registryByteBuf.writeString(this.dataModificationMode);
 		registryByteBuf.writeInt(this.addedIntegerValue);
+		registryByteBuf.writeInt(this.integerModulusValue);
 	}
 
 	@Override

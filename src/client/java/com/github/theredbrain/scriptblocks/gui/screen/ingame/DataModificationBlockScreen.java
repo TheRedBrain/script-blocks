@@ -1,10 +1,7 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.block.entity.DataModificationBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataModificationBlockPacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateDataWritingBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,12 +21,14 @@ import net.minecraft.util.math.BlockPos;
 public class DataModificationBlockScreen extends Screen {
 	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
 	private static final Text ADDED_INTEGER_VALUE_LABEL_TEXT = Text.translatable("gui.data_modification_block.added_integer_value_label");
+	private static final Text INTEGER_MODULUS_VALUE_LABEL_TEXT = Text.translatable("gui.data_modification_block.integer_modulus_value_label");
 	private final DataModificationBlockEntity dataModificationBlockEntity;
 	private TextFieldWidget dataProvidingBlockPositionOffsetXField;
 	private TextFieldWidget dataProvidingBlockPositionOffsetYField;
 	private TextFieldWidget dataProvidingBlockPositionOffsetZField;
 	private CyclingButtonWidget<DataModificationBlockEntity.DataModificationMode> cycleDataModificationModeButton;
 	private TextFieldWidget addedIntegerValueField;
+	private TextFieldWidget integerModulusValueField;
 	private DataModificationBlockEntity.DataModificationMode dataModificationMode;
 
 	public DataModificationBlockScreen(DataModificationBlockEntity dataModificationBlockEntity) {
@@ -74,6 +73,11 @@ public class DataModificationBlockScreen extends Screen {
 		this.addedIntegerValueField.setText(Integer.toString(this.dataModificationBlockEntity.getAddedIntegerValue()));
 		this.addSelectableChild(this.addedIntegerValueField);
 
+		this.integerModulusValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
+		this.integerModulusValueField.setMaxLength(128);
+		this.integerModulusValueField.setText(Integer.toString(this.dataModificationBlockEntity.getIntegerModulusValue()));
+		this.addSelectableChild(this.integerModulusValueField);
+
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
@@ -91,6 +95,14 @@ public class DataModificationBlockScreen extends Screen {
 
 	private void updateWidgets() {
 
+		this.addedIntegerValueField.setVisible(false);
+		this.integerModulusValueField.setVisible(false);
+
+		if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_ADDITION)) {
+			this.addedIntegerValueField.setVisible(true);
+		} else if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_MODULO)) {
+			this.integerModulusValueField.setVisible(true);
+		}
 	}
 
 	@Override
@@ -119,9 +131,17 @@ public class DataModificationBlockScreen extends Screen {
 		this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, ADDED_INTEGER_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-		this.addedIntegerValueField.render(context, mouseX, mouseY, delta);
+		if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_ADDITION)) {
 
+			context.drawTextWithShadow(this.textRenderer, ADDED_INTEGER_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.addedIntegerValueField.render(context, mouseX, mouseY, delta);
+
+		} else if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_MODULO)) {
+
+			context.drawTextWithShadow(this.textRenderer, INTEGER_MODULUS_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.integerModulusValueField.render(context, mouseX, mouseY, delta);
+
+		}
 	}
 
 	@Override
@@ -138,7 +158,8 @@ public class DataModificationBlockScreen extends Screen {
 						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getText())
 				),
 				this.dataModificationMode.asString(),
-				ItemUtils.parseInt(this.addedIntegerValueField.getText())
+				ItemUtils.parseInt(this.addedIntegerValueField.getText()),
+				ItemUtils.parseInt(this.integerModulusValueField.getText())
 		));
 		return true;
 	}

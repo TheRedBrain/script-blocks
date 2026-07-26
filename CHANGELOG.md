@@ -3,7 +3,9 @@
 ## Additions
 
 - the "predefined world spawn position" (set in the server config) now respects Spawn Point Delegation Blocks
-- added "Data Modification Block", has currently one function: add integer values to data when used like a "Data Relay Block"
+- added "Data Modification Block", has currently these functions:
+  - add integer values to data when used like a "Data Relay Block"
+  - perform modulo operation on data when used like a "Data Relay Block"
 
 ## Changes
 

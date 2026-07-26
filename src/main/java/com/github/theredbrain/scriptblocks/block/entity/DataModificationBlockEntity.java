@@ -26,6 +26,7 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
 	private DataModificationMode dataModificationMode = DataModificationMode.INTEGER_ADDITION;
 	private int addedIntegerValue = 0;
+	private int integerModulusValue = 0;
 
 	public DataModificationBlockEntity(BlockPos pos, BlockState state) {
 		super(EntityRegistry.DATA_MODIFICATION_BLOCK_ENTITY, pos, state);
@@ -43,6 +44,8 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 		nbt.putString("data_modification_mode", this.dataModificationMode.asString());
 
 		nbt.putInt("added_integer_value", this.addedIntegerValue);
+
+		nbt.putInt("integer_modulus_value", this.integerModulusValue);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -63,6 +66,8 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 		this.dataModificationMode = DataModificationMode.byName(nbt.getString("data_modification_mode")).orElseGet(() -> DataModificationMode.INTEGER_ADDITION);
 
 		this.addedIntegerValue = nbt.getInt("added_integer_value");
+
+		this.integerModulusValue = nbt.getInt("integer_modulus_value");
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -99,6 +104,14 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 
 	public void setAddedIntegerValue(int addedIntegerValue) {
 		this.addedIntegerValue = addedIntegerValue;
+	}
+
+	public int getIntegerModulusValue() {
+		return this.integerModulusValue;
+	}
+
+	public void setIntegerModulusValue(int integerModulusValue) {
+		this.integerModulusValue = integerModulusValue;
 	}
 	// endregion --- getter & setter ---
 
@@ -139,6 +152,8 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 	private String modifyData(String originalData) {
 		if (this.dataModificationMode == DataModificationMode.INTEGER_ADDITION) {
 			return Integer.toString(ItemUtils.parseInt(originalData) + this.addedIntegerValue);
+		} else if (this.dataModificationMode == DataModificationMode.INTEGER_MODULO) {
+			return Integer.toString(ItemUtils.parseInt(originalData) % this.integerModulusValue);
 		} else {
 			return originalData;
 		}
@@ -174,7 +189,8 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 	}
 
 	public enum DataModificationMode implements StringIdentifiable {
-		INTEGER_ADDITION("integer_addition");
+		INTEGER_ADDITION("integer_addition"),
+		INTEGER_MODULO("integer_modulo");
 
 		private final String name;
 

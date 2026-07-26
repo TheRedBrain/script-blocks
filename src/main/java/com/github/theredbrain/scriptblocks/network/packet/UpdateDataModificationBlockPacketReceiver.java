@@ -25,6 +25,7 @@ public class UpdateDataModificationBlockPacketReceiver implements ServerPlayNetw
 		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPositionOffset();
 		DataModificationBlockEntity.DataModificationMode dataModificationMode = DataModificationBlockEntity.DataModificationMode.byName(payload.dataModificationMode()).orElse(DataModificationBlockEntity.DataModificationMode.INTEGER_ADDITION);
 		int addedIntegerValue = payload.addedIntegerValue();
+		int integerModulusValue = payload.integerModulusValue();
 
 		World world = serverPlayerEntity.getWorld();
 
@@ -35,6 +36,7 @@ public class UpdateDataModificationBlockPacketReceiver implements ServerPlayNetw
 			dataModificationBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
 			dataModificationBlockEntity.setDataModificationMode(dataModificationMode);
 			dataModificationBlockEntity.setAddedIntegerValue(addedIntegerValue);
+			dataModificationBlockEntity.setIntegerModulusValue(integerModulusValue);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			dataModificationBlockEntity.markDirty();
 			world.updateListeners(dataAccessBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
