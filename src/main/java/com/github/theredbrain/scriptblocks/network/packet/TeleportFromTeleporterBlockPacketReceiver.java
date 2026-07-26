@@ -86,6 +86,10 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		if (!(blockEntity2 instanceof TeleporterBlockEntity teleporterBlockEntity)) {
 			return;
 		}
+
+		// triggered as early as possible to allow the trigger results to influence the spawn point calculation
+		teleporterBlockEntity.preTeleportTrigger();
+
 		if (teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
 			targetWorld = serverWorld;
 			targetPos = new BlockPos(teleportBlockPosition.getX() + directTeleportPositionOffset.getX(), teleportBlockPosition.getY() + directTeleportPositionOffset.getY(), teleportBlockPosition.getZ() + directTeleportPositionOffset.getZ());
@@ -176,6 +180,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					if (!(blockEntity instanceof LocationControlBlockEntity)) {
 
+						// TODO don't execute commands, find a better way
 						String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
 
@@ -197,6 +202,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 							int resetAreaMaxX = blockPos.getX() + locationControlBlock.getResetAreaMaxX();
 							int resetAreaMaxZ = blockPos.getZ() + locationControlBlock.getResetAreaMaxZ();
 
+							// TODO don't execute a command, find a better way
 							String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
 
@@ -215,6 +221,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 //							locationControlBlock.setForceLoadRemoveTimer(5);
 
+							// TODO don't execute a command, find a better way
 							String forceLoadRemoveAllCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload remove " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
 							server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadRemoveAllCommand);
 
@@ -270,8 +277,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		}
 
 		if (targetWorld != null && targetPos != null && playerHadKeyItem) {
-
-			teleporterBlockEntity.preTeleportTrigger();
 
 			// send UUID of serverPlayerEntity
 
