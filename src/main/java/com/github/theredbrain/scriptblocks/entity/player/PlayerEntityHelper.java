@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.entity.player;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.component.type.RemovedOnTeleportComponent;
-import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -24,7 +24,7 @@ public class PlayerEntityHelper {
 			if (currentItemStack.isEmpty()) {
 				continue;
 			}
-			RemovedOnTeleportComponent removedOnTeleportDataComponent = currentItemStack.get(ItemComponentRegistry.REMOVED_ON_TELEPORT);
+			RemovedOnTeleportComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_TELEPORT);
 			if (removedOnTeleportDataComponent != null) {
 				for (String identifier : removedOnTeleportDataComponent.identifier_list()) {
 					if (Objects.equals(identifier, removedItemIdentifier)) {
@@ -37,7 +37,7 @@ public class PlayerEntityHelper {
 		PlayerInventory playerInventory = serverPlayerEntity.getInventory();
 		for (int i = 0; i < playerInventory.main.size(); i++) {
 			ItemStack currentItemStack = playerInventory.main.get(i);
-			RemovedOnTeleportComponent removedOnTeleportDataComponent = currentItemStack.get(ItemComponentRegistry.REMOVED_ON_TELEPORT);
+			RemovedOnTeleportComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_TELEPORT);
 			if (removedOnTeleportDataComponent != null) {
 				for (String identifier : removedOnTeleportDataComponent.identifier_list()) {
 					if (Objects.equals(identifier, removedItemIdentifier)) {

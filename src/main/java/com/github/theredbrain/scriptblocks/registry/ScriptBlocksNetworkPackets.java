@@ -97,7 +97,7 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayChestBlo
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
-public class ServerPacketRegistry {
+public class ScriptBlocksNetworkPackets {
 
 	public static void init() {
 

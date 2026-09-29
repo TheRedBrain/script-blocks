@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -23,7 +23,7 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	private String dataIdentifier = "";
 
 	public CopyDataBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.COPY_DATA_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.COPY_DATA_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 
-public class CustomDynamicRegistries {
+public class ScriptBlocksDynamicRegistries {
 
 	public static final RegistryKey<Registry<Boss>> BOSS_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("bosses"));
 	public static final RegistryKey<Registry<DialogueAnswer>> DIALOGUE_ANSWER_REGISTRY_KEY = RegistryKey.ofRegistry(Identifier.ofVanilla("dialogue_answers"));

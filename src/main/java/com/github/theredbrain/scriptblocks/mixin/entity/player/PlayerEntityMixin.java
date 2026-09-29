@@ -30,6 +30,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -92,7 +93,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@WrapOperation(method = "isBlockBreakingRestricted", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;isBlockBreakingRestricted()Z"))
 	public boolean scriptblocks$wrap_isBlockBreakingRestricted(GameMode instance, Operation<Boolean> original) {
-		return original.call(instance) || (!this.isCreative() && this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT));
+		return original.call(instance) || (!this.isCreative() && this.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT));
 	}
 
 	@Inject(method = "initDataTracker", at = @At("RETURN"))
@@ -189,12 +190,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements DuckPlay
 
 	@WrapMethod(method = "canModifyBlocks")
 	public boolean scriptblocks$wrap_canModifyBlocks(Operation<Boolean> original) {
-		return original.call() && !(!(this.isCreative() || this.isSpectator()) && this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT) && !this.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
+		return original.call() && !(!(this.isCreative() || this.isSpectator()) && this.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT) && !this.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE));
 	}
 
 	@WrapMethod(method = "canPlaceOn")
 	public boolean scriptblocks$wrap_canPlaceOn(BlockPos pos, Direction facing, ItemStack stack, Operation<Boolean> original) {
-		return original.call(pos, facing, stack) && !(!(this.isCreative() || this.isSpectator()) && this.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT) && !this.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
+		return original.call(pos, facing, stack) && !(!(this.isCreative() || this.isSpectator()) && this.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT) && !this.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE));
 	}
 
 	@Override

@@ -3,7 +3,8 @@ package com.github.theredbrain.scriptblocks.network.packet;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Location;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -37,7 +38,7 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 
 		ServerWorld targetWorld = null;
 		Location location = null;
-		Optional<RegistryEntry.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
+		Optional<RegistryEntry.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
 		if (optionalLocationReference.isPresent()) {
 			location = optionalLocationReference.get().value();
 		}
@@ -49,7 +50,7 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 		if (location != null) {
 
 			if (location.isPublic()) {
-				if (ScriptBlocks.SERVER_CONFIG.enable_public_locations_dimension) {
+				if (ScriptBlocksConfigs.SERVER_CONFIG.enable_public_locations_dimension) {
 					RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
 					targetWorld = server.getWorld(dimensionregistryKey);
 
@@ -89,7 +90,7 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 					locationControlBlockEntity.markDirty();
 					targetWorld.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
 
-					if (ScriptBlocks.SERVER_CONFIG.confirm_successful_location_reset) {
+					if (ScriptBlocksConfigs.SERVER_CONFIG.confirm_successful_location_reset) {
 						message = Text.translatable("hud.message.location_reset.success");
 					}
 				}

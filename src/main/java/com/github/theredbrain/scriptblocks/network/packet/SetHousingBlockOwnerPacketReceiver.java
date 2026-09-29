@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -41,13 +42,13 @@ public class SetHousingBlockOwnerPacketReceiver implements ServerPlayNetworking.
 				if (Objects.equals(owner, "")) {
 					housingBlockEntity.setIsOwnerSet(false);
 					serverPlayerEntity.sendMessage(Text.translatable("hud.message.housing_block.unclaimed_successful"), true);
-					serverPlayerEntity.removeStatusEffect(ScriptBlocks.HOUSING_OWNER_EFFECT);
+					serverPlayerEntity.removeStatusEffect(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT);
 
-					serverPlayerEntity.removeStatusEffect(ScriptBlocks.BUILDING_MODE);
+					serverPlayerEntity.removeStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE);
 				} else {
 					housingBlockEntity.setIsOwnerSet(true);
 					serverPlayerEntity.sendMessage(Text.translatable("hud.message.housing_block.claimed_successful"), true);
-					serverPlayerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
+					serverPlayerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
 				}
 			}
 			housingBlockEntity.markDirty();

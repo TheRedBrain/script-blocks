@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
 import net.minecraft.block.BlockState;
@@ -51,7 +51,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	private final List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>();
 
 	public TriggeredRNGBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_RNG_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TRIGGERED_RNG_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

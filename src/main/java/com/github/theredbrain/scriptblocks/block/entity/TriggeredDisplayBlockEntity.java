@@ -5,7 +5,7 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -172,7 +172,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	private float displayPrevPitch = 0.0F;
 
 	public TriggeredDisplayBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_DISPLAY_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TRIGGERED_DISPLAY_BLOCK_ENTITY, pos, state);
 		this.age = 0;
 	}
 

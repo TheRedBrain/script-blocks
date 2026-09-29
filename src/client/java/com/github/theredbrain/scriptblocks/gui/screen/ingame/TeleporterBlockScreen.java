@@ -8,7 +8,8 @@ import com.github.theredbrain.scriptblocks.network.DuckClientAdvancementManagerM
 import com.github.theredbrain.scriptblocks.network.packet.AddStatusEffectPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetManualResetLocationControlBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.TeleportFromTeleporterBlockPacket;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
@@ -428,7 +429,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 						Location location = null;
 						World world = this.teleporterBlock.getWorld();
 						if (world != null) {
-							Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(entry.getLeft().getLeft()));
+							Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(entry.getLeft().getLeft()));
 							if (optionalLocationReference.isPresent()) {
 								location = optionalLocationReference.get().value();
 							}
@@ -467,7 +468,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					Location location = null;
 					World world = this.teleporterBlock.getWorld();
 					if (world != null) {
-						Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(this.dataDrivenLocation.getLeft().getLeft()));
+						Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(this.dataDrivenLocation.getLeft().getLeft()));
 						if (optionalLocationReference.isPresent()) {
 							location = optionalLocationReference.get().value();
 						}
@@ -522,7 +523,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		Location location = null;
 		World world = this.teleporterBlock.getWorld();
 		if (world != null) {
-			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTargetIdentifier));
+			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTargetIdentifier));
 			if (optionalLocationReference.isPresent()) {
 				location = optionalLocationReference.get().value();
 			}
@@ -877,7 +878,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private void givePortalResistanceEffect() {
 		ClientPlayNetworking.send(new AddStatusEffectPacket(
-				Registries.STATUS_EFFECT.getId(ScriptBlocks.PORTAL_RESISTANCE_EFFECT.value()),
+				Registries.STATUS_EFFECT.getId(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT.value()),
 				40,
 				0,
 				false,

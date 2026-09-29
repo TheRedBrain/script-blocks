@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,7 +34,7 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	private String alreadyLootedSoundId = "block.chest.locked";
 
 	public InteractiveLootBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.INTERACTIVE_LOOT_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.INTERACTIVE_LOOT_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

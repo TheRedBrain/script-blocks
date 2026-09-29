@@ -2,7 +2,8 @@ package com.github.theredbrain.scriptblocks.render.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -26,12 +27,12 @@ public class MimicBlockEntityRenderer
 	public void render(MimicBlockEntity mimicBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
 		BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
 		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(mimicBlockEntity.getCurrentMimicBlockState()));
-		boolean debugRender = ScriptBlocks.SERVER_CONFIG.enable_mimic_block_debug_mode;
+		boolean debugRender = ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode;
 		ClientPlayerEntity player = MinecraftClient.getInstance().player;
 		if (player != null) {
-			debugRender = debugRender || (player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(BlockRegistry.MIMIC_BLOCK.asItem()));
+			debugRender = debugRender || (player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()));
 		}
-		blockRenderManager.renderBlock(debugRender ? BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState() : mimicBlockEntity.getCurrentMimicBlockState(), mimicBlockEntity.getPos(), mimicBlockEntity.getWorld(), matrixStack, vertexConsumer, true, Random.create());
+		blockRenderManager.renderBlock(debugRender ? ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState() : mimicBlockEntity.getCurrentMimicBlockState(), mimicBlockEntity.getPos(), mimicBlockEntity.getWorld(), matrixStack, vertexConsumer, true, Random.create());
 	}
 
 	@Override

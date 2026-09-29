@@ -55,7 +55,6 @@ import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSta
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.CandleBlock;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.Sherds;
 import net.minecraft.block.enums.NoteBlockInstrument;
@@ -72,7 +71,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
 
-public class BlockRegistry {
+public class ScriptBlocksBlocks {
 
 	//region Content Blocks
 	public static final Block AESTHETIC_DECORATED_POT = registerAestheticDecoratedPotBlock("aesthetic_decorated_pot", new AestheticDecoratedPotBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_RED).strength(10.0F, 3600000.0f).sounds(BlockSoundGroup.DECORATED_POT).pistonBehavior(PistonBehavior.DESTROY).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
@@ -242,6 +241,6 @@ public class BlockRegistry {
 		return Registry.register(Registries.BLOCK, ScriptBlocks.identifier(name), block);
 	}
 
-	public static void init() {
+	public static void bootstrap() {
 	}
 }

@@ -76,6 +76,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredVillagerSp
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayChestBlockScreen;
 import com.github.theredbrain.scriptblocks.network.message.DuckMessageHandlerMixin;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -129,15 +130,15 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 		if (optionalBlockPos.isPresent() && this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 			int currentPermissionLevel;
 
-			if (this.hasStatusEffect(ScriptBlocks.HOUSING_OWNER_EFFECT)) {
+			if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT)) {
 				currentPermissionLevel = 0;
-			} else if (this.hasStatusEffect(ScriptBlocks.HOUSING_CO_OWNER_EFFECT)) {
+			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_CO_OWNER_EFFECT)) {
 				currentPermissionLevel = 1;
-			} else if (this.hasStatusEffect(ScriptBlocks.HOUSING_TRUSTED_EFFECT)) {
+			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_TRUSTED_EFFECT)) {
 				currentPermissionLevel = 2;
-			} else if (this.hasStatusEffect(ScriptBlocks.HOUSING_GUEST_EFFECT)) {
+			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_GUEST_EFFECT)) {
 				currentPermissionLevel = 3;
-			} else if (this.hasStatusEffect(ScriptBlocks.HOUSING_STRANGER_EFFECT)) {
+			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_STRANGER_EFFECT)) {
 				currentPermissionLevel = 4;
 			} else {
 				this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);

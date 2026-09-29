@@ -2,8 +2,7 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -24,7 +23,6 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
@@ -99,14 +97,14 @@ public class LootableVaultBlock extends BlockWithEntity {
 		return world instanceof ServerWorld serverWorld
 				? validateTicker(
 				type,
-				EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY,
+				ScriptBlocksEntities.LOOTABLE_VAULT_BLOCK_ENTITY,
 				(worldx, pos, statex, blockEntity) -> LootableVaultBlockEntity.Server.tick(
 						serverWorld, pos, statex, blockEntity.getConfig(world), blockEntity.getServerData(), blockEntity.getSharedData()
 				)
 		)
 				: validateTicker(
 				type,
-				EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY,
+				ScriptBlocksEntities.LOOTABLE_VAULT_BLOCK_ENTITY,
 				(worldx, pos, statex, blockEntity) -> LootableVaultBlockEntity.Client.tick(worldx, pos, statex, blockEntity.getClientData(), blockEntity.getSharedData())
 		);
 	}

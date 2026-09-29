@@ -1,14 +1,13 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.PVPArenaSettings;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.DamageTypesRegistry;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDamageTypes;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.minecraft.block.Block;
@@ -61,7 +60,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	private int matchTicker = 0;
 
 	public PVPControllerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.PVP_CONTROLLER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.PVP_CONTROLLER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -163,7 +162,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(newPVPArenaSettingsIdentifier);
 		if (identifier != null && this.world != null) {
-			Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(CustomDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+			Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
 			if (optionalPVPArenaSettingsReference.isPresent()) {
 				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
 			}
@@ -214,7 +213,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
 		if (identifier != null && this.world != null) {
-			Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(CustomDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+			Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
 			if (optionalPVPArenaSettingsReference.isPresent()) {
 				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
 			}
@@ -285,7 +284,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 
 			Registry<DamageType> registry = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE);
 
-			DamageSource damageSource = new DamageSource(registry.entryOf(DamageTypesRegistry.PVP_WINNING_DAMAGE_TYPE));
+			DamageSource damageSource = new DamageSource(registry.entryOf(ScriptBlocksDamageTypes.PVP_WINNING_DAMAGE_TYPE));
 
 			Iterator<UUID> iterator = this.playerUUIDSet.stream().iterator();
 			while (iterator.hasNext()) {

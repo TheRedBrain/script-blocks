@@ -8,7 +8,7 @@ import net.minecraft.component.ComponentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
-public class ItemComponentRegistry {
+public class ScriptBlocksDataComponents {
 	public static final ComponentType<BlockPositionDistanceMeterComponent> BLOCK_POSITION_DISTANCE_METER = Registry.register(
 			Registries.DATA_COMPONENT_TYPE,
 			ScriptBlocks.identifier("block_position_distance_meter"),
@@ -27,6 +27,6 @@ public class ItemComponentRegistry {
 			ComponentType.<RemovedOnTeleportComponent>builder().codec(RemovedOnTeleportComponent.CODEC).packetCodec(RemovedOnTeleportComponent.PACKET_CODEC).cache().build()
 	);
 
-	public static void init() {
+	public static void bootstrap() {
 	}
 }

@@ -1,13 +1,12 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.google.common.collect.Maps;
@@ -53,7 +52,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 public class BossControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
@@ -91,7 +89,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks = new HashMap<>();
 
 	public BossControllerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.BOSS_CONTROLLER_BLOCK_ENTITY, pos, state);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -342,7 +340,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		String identifierString = bC.bossIdentifier;
 		if (!identifierString.isEmpty() && bC.world != null) {
-			Optional<RegistryEntry.Reference<Boss>> optionalBossReference = bC.world.getRegistryManager().get(CustomDynamicRegistries.BOSS_REGISTRY_KEY).getEntry(Identifier.of(identifierString));
+			Optional<RegistryEntry.Reference<Boss>> optionalBossReference = bC.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.BOSS_REGISTRY_KEY).getEntry(Identifier.of(identifierString));
 			if (optionalBossReference.isPresent()) {
 				bC.boss = optionalBossReference.get().value();
 			}

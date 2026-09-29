@@ -1,21 +1,13 @@
 package com.github.theredbrain.scriptblocks.render.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.UseRelayLecternBlock;
-import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayLecternBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.LecternBlock;
-import net.minecraft.block.entity.LecternBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.block.entity.EnchantingTableBlockEntityRenderer;
@@ -24,7 +16,6 @@ import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.random.Random;
 
 @Environment(value = EnvType.CLIENT)
 public class UseRelayLecternBlockEntityRenderer implements BlockEntityRenderer<UseRelayLecternBlockEntity> {

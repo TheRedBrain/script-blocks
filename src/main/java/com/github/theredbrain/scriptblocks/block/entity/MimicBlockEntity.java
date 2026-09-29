@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.MimicBlock;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -22,7 +22,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	private BlockPos inactiveMimicBlockPositionOffset = new BlockPos(0, -1, 0);
 
 	public MimicBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.MIMIC_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.MIMIC_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -133,8 +133,8 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	}
 
 	public BlockState getCurrentMimicBlockState() {
-		BlockState fallbackMimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
-		if (this.world != null && this.world.getBlockState(this.pos).isOf(BlockRegistry.MIMIC_BLOCK)) {
+		BlockState fallbackMimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		if (this.world != null && this.world.getBlockState(this.pos).isOf(ScriptBlocksBlocks.MIMIC_BLOCK)) {
 			BlockPos mimicBlockPos;
 			if (this.world.getBlockState(this.pos).get(MimicBlock.TRIGGERED)) {
 				mimicBlockPos = pos.add(this.activeMimicBlockPositionOffset.getX(), this.activeMimicBlockPositionOffset.getY(), this.activeMimicBlockPositionOffset.getZ());
@@ -142,7 +142,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 				mimicBlockPos = pos.add(this.inactiveMimicBlockPositionOffset.getX(), this.inactiveMimicBlockPositionOffset.getY(), this.inactiveMimicBlockPositionOffset.getZ());
 			}
 			BlockState mimicBlockState = world.getBlockState(mimicBlockPos);
-			if (!mimicBlockState.isOf(BlockRegistry.MIMIC_BLOCK)) {
+			if (!mimicBlockState.isOf(ScriptBlocksBlocks.MIMIC_BLOCK)) {
 				return mimicBlockState;
 			}
 		}

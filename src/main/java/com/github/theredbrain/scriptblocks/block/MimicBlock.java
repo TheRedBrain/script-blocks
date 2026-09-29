@@ -3,7 +3,8 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -71,7 +72,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
 			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
 		}
-		BlockState mimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		BlockPos mimicBlockPos;
 		if (state.get(TRIGGERED)) {
 			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
@@ -79,7 +80,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !(ScriptBlocks.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHolding(BlockRegistry.MIMIC_BLOCK.asItem()))) {
+		if (!blockState.isOf(this) && !(ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHolding(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()))) {
 			mimicBlockState = blockState;
 		}
 		return mimicBlockState.getBlock().getOutlineShape(mimicBlockState, world, mimicBlockPos, context);
@@ -93,7 +94,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
 			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
 		}
-		BlockState mimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		BlockPos mimicBlockPos;
 		if (state.get(TRIGGERED)) {
 			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
@@ -101,7 +102,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !(ScriptBlocks.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHolding(BlockRegistry.MIMIC_BLOCK.asItem()))) {
+		if (!blockState.isOf(this) && !(ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHolding(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()))) {
 			mimicBlockState = blockState;
 		}
 		return mimicBlockState.getBlock().getCollisionShape(mimicBlockState, world, mimicBlockPos, context);
@@ -139,7 +140,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
 			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
 		}
-		BlockState mimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		BlockPos mimicBlockPos;
 		if (state.get(TRIGGERED)) {
 			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
@@ -147,7 +148,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !ScriptBlocks.SERVER_CONFIG.enable_mimic_block_debug_mode) {
+		if (!blockState.isOf(this) && !ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode) {
 			mimicBlockState = blockState;
 		}
 		return mimicBlockState.getBlock().isTransparent(mimicBlockState, world, mimicBlockPos);

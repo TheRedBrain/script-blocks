@@ -2,25 +2,20 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -33,7 +28,6 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implements Triggerable {
 
@@ -50,7 +44,7 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	private float damageAmount = 0;
 
 	public TriggeredDamageDealingBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

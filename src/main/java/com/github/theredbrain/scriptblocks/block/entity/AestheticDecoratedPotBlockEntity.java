@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.DecoratedPotBlockEntity;
@@ -27,7 +27,7 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	private Sherds sherds;
 
 	public AestheticDecoratedPotBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.AESTHETIC_DECORATED_POT_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.AESTHETIC_DECORATED_POT_BLOCK_ENTITY, pos, state);
 		this.sherds = Sherds.DEFAULT;
 	}
 
@@ -65,13 +65,13 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	}
 
 	public ItemStack asStack() {
-		ItemStack itemStack = BlockRegistry.AESTHETIC_DECORATED_POT.asItem().getDefaultStack();
+		ItemStack itemStack = ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.asItem().getDefaultStack();
 		itemStack.applyComponentsFrom(this.createComponentMap());
 		return itemStack;
 	}
 
 	public static ItemStack getStackWith(Sherds sherds) {
-		ItemStack itemStack = BlockRegistry.AESTHETIC_DECORATED_POT.asItem().getDefaultStack();
+		ItemStack itemStack = ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.asItem().getDefaultStack();
 		itemStack.set(DataComponentTypes.POT_DECORATIONS, sherds);
 		return itemStack;
 	}

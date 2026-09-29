@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDialogueBlockPacket;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -178,7 +178,7 @@ public class DialogueBlockScreen extends Screen {
 		Dialogue newStartingDialogue = null;
 		World world = this.dialogueBlockEntity.getWorld();
 		if (world != null) {
-			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(newStartingDialogueIdentifier));
+			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(newStartingDialogueIdentifier));
 			if (optionalDialogueReference.isPresent()) {
 				newStartingDialogue = optionalDialogueReference.get().value();
 			}

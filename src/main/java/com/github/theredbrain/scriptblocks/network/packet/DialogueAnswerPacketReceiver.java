@@ -5,7 +5,7 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.entity.BlockEntity;
@@ -48,7 +48,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
 		World world = serverPlayerEntity.getWorld();
-		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
+		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();
 

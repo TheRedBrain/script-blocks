@@ -11,9 +11,9 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 
-public class ItemRegistry {
+public class ScriptBlocksItems {
 
-	public static final Item BLOCK_POSITION_DISTANCE_METER = registerItem("block_position_distance_meter", new BlockPositionDistanceMeterItem(new Item.Settings().maxCount(1).component(ItemComponentRegistry.BLOCK_POSITION_DISTANCE_METER, BlockPositionDistanceMeterComponent.DEFAULT)), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Item BLOCK_POSITION_DISTANCE_METER = registerItem("block_position_distance_meter", new BlockPositionDistanceMeterItem(new Item.Settings().maxCount(1).component(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, BlockPositionDistanceMeterComponent.DEFAULT)), ItemGroupRegistry.SCRIPT_BLOCKS);
 
 	private static Item registerItem(String name, Item item, @Nullable RegistryKey<ItemGroup> itemGroup) {
 
@@ -25,6 +25,6 @@ public class ItemRegistry {
 		return Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), item);
 	}
 
-	public static void init() {
+	public static void bootstrap() {
 	}
 }

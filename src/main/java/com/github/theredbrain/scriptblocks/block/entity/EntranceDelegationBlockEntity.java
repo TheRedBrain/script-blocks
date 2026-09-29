@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -19,7 +19,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	private MutablePair<BlockPos, MutablePair<Double, Double>> delegatedEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
 
 	public EntranceDelegationBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.ENTRANCE_DELEGATION_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.ENTRANCE_DELEGATION_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

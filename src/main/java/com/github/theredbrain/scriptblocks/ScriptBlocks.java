@@ -5,30 +5,26 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
 import com.github.theredbrain.scriptblocks.compatibility.RPGInventoryCompat;
-import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.EventsRegistry;
-import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import com.github.theredbrain.scriptblocks.registry.ItemGroupRegistry;
-import com.github.theredbrain.scriptblocks.registry.ItemRegistry;
-import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
-import com.github.theredbrain.scriptblocks.registry.ServerPacketRegistry;
-import com.github.theredbrain.scriptblocks.registry.StatusEffectsRegistry;
-import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksItems;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksNetworkPackets;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStructurePlacementTypes;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
-import me.fzzyhmstrs.fzzy_config.api.ConfigApiJava;
-import me.fzzyhmstrs.fzzy_config.api.RegisterType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -48,16 +44,6 @@ import java.util.Optional;
 public class ScriptBlocks implements ModInitializer {
 	public static final String MOD_ID = "scriptblocks";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static ServerConfig SERVER_CONFIG;
-
-	public static RegistryEntry<StatusEffect> HOUSING_OWNER_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_CO_OWNER_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_TRUSTED_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_GUEST_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_STRANGER_EFFECT;
-	public static RegistryEntry<StatusEffect> BUILDING_MODE;
-	public static RegistryEntry<StatusEffect> PORTAL_RESISTANCE_EFFECT;
-	public static RegistryEntry<StatusEffect> ADVENTURE_EFFECT;
 
 	public static final boolean isLootablesLoaded = FabricLoader.getInstance().isModLoaded("lootables");
 	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");
@@ -147,29 +133,27 @@ public class ScriptBlocks implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("This was scripted!");
 
-		// Config
-		SERVER_CONFIG = ConfigApiJava.registerAndLoadConfig(ServerConfig::new, RegisterType.BOTH);
-
 		// Packets
-		ServerPacketRegistry.init();
+		ScriptBlocksNetworkPackets.init();
 
 		// Registry
-		ItemComponentRegistry.init();
-		BlockRegistry.init();
-		EntityRegistry.init();
-		DimensionsManager.init();
+		ScriptBlocksDataComponents.bootstrap();
+		ScriptBlocksBlocks.bootstrap();
+		ScriptBlocksConfigs.bootstrap();
+		ScriptBlocksEntities.init();
+		DimensionsManager.bootstrap();
 		EventsRegistry.initializeEvents();
-		CustomDynamicRegistries.init();
-		ItemRegistry.init();
+		ScriptBlocksDynamicRegistries.init();
+		ScriptBlocksItems.bootstrap();
 		ItemGroupRegistry.init();
-		ScreenHandlerTypesRegistry.registerAll();
-		StatusEffectsRegistry.registerEffects();
-		StructurePlacementTypesRegistry.register();
+		ScriptBlocksScreenHandlerTypes.init();
+		ScriptBlocksStatusEffects.bootstrap();
+		ScriptBlocksStructurePlacementTypes.init();
 	}
 
 	public static void sendDeprecatedFeatureInfo(String message, @Nullable MinecraftServer minecraftServer) {
 		if (minecraftServer != null) {
-			if (SERVER_CONFIG.enable_deprecated_feature_chat_message) {
+			if (ScriptBlocksConfigs.SERVER_CONFIG.enable_deprecated_feature_chat_message) {
 				minecraftServer.getPlayerManager().broadcast(Text.of(message), false);
 			}
 			info(message);

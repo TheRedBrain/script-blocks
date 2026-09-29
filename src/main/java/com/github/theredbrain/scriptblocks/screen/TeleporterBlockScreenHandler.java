@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.screen;
 
-import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -43,7 +43,7 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 	}
 
 	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, boolean showCreativeTab) {
-		super(ScreenHandlerTypesRegistry.TELEPORTER_BLOCK_SCREEN_HANDLER, syncId);
+		super(ScriptBlocksScreenHandlerTypes.TELEPORTER_BLOCK_SCREEN_HANDLER, syncId);
 		// TODO
 		// set teleporterBlockBlockEntity
 		this.playerInventory = playerInventory;

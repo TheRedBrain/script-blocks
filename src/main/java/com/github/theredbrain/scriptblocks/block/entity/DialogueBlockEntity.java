@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.DialogueAnchor;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -26,7 +26,7 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	private final List<String> startingDialogueList = new ArrayList<>();
 
 	public DialogueBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.DIALOGUE_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.DIALOGUE_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

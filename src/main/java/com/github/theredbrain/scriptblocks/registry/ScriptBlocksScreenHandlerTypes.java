@@ -11,13 +11,13 @@ import net.minecraft.registry.Registry;
 import net.minecraft.resource.featuretoggle.FeatureFlags;
 import net.minecraft.screen.ScreenHandlerType;
 
-public class ScreenHandlerTypesRegistry {
+public class ScriptBlocksScreenHandlerTypes {
 	public static final ScreenHandlerType<TriggeredDispenserBlockScreenHandler> TRIGGERED_DISPENSER_BLOCK_SCREEN_HANDLER = new ScreenHandlerType<>(TriggeredDispenserBlockScreenHandler::new, FeatureFlags.VANILLA_FEATURES);
 	public static final ScreenHandlerType<DialogueScreenHandler> DIALOGUE_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(DialogueScreenHandler::new, DialogueScreenHandler.DialogueData.PACKET_CODEC);
 	public static final ScreenHandlerType<ShopScreenHandler> SHOP_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(ShopScreenHandler::new, ShopScreenHandler.ShopBlockData.PACKET_CODEC);
 	public static final ScreenHandlerType<TeleporterBlockScreenHandler> TELEPORTER_BLOCK_SCREEN_HANDLER = new ExtendedScreenHandlerType<>(TeleporterBlockScreenHandler::new, TeleporterBlockScreenHandler.TeleporterBlockData.PACKET_CODEC);
 
-	public static void registerAll() {
+	public static void init() {
 		Registry.register(Registries.SCREEN_HANDLER, ScriptBlocks.identifier("triggered_dispenser"), TRIGGERED_DISPENSER_BLOCK_SCREEN_HANDLER);
 		Registry.register(Registries.SCREEN_HANDLER, ScriptBlocks.identifier("dialogue"), DIALOGUE_SCREEN_HANDLER);
 		Registry.register(Registries.SCREEN_HANDLER, ScriptBlocks.identifier("shop"), SHOP_BLOCK_SCREEN_HANDLER);

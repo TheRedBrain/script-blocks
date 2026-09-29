@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.mixin.client.network;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.fabricmc.api.EnvType;
@@ -53,7 +54,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@WrapMethod(method = "breakBlock")
 	public boolean scriptblocks$wrap_breakBlock(BlockPos pos, Operation<Boolean> original) {
-		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 			ClientWorld world = this.client.world;
 			if (world != null) {
 				BlockState blockState = world.getBlockState(pos);
@@ -72,7 +73,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@WrapMethod(method = "attackBlock")
 	public boolean scriptblocks$wrap_attackBlock(BlockPos pos, Direction direction, Operation<Boolean> original) {
-		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) this.client.player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;
 			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
@@ -96,7 +97,7 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@WrapMethod(method = "interactBlock")
 	public ActionResult scriptblocks$wrap_interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, Operation<ActionResult> original) {
-		if ((this.gameMode.isSurvivalLike() || player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+		if ((this.gameMode.isSurvivalLike() || player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 			this.syncSelectedSlot();
 			Optional<BlockPos> optionalHousingBlockPos = ((DuckPlayerEntityMixin) player).scriptblocks$getCurrentHousingBlockPosition();
 			boolean bl = false;

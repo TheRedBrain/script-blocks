@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.logging.LogUtils;
 import net.minecraft.block.Block;
@@ -41,7 +41,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 	private TrialSpawnerLogic spawner;
 
 	public TriggeringTrialSpawnerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERING_TRIAL_SPAWNER, pos, state);
+		super(ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER, pos, state);
 		EntityDetector entityDetector = EntityDetector.SURVIVAL_PLAYERS;
 		EntityDetector.Selector selector = EntityDetector.Selector.IN_WORLD;
 		this.spawner = new TrialSpawnerLogic(this, entityDetector, selector);

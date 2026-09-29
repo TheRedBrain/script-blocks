@@ -7,8 +7,8 @@ import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSer
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSharedData;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
@@ -31,11 +31,9 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -55,7 +53,6 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -69,7 +66,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 	private String lootableVaultConfigIdentifier = "";
 
 	public LootableVaultBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.LOOTABLE_VAULT_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.LOOTABLE_VAULT_BLOCK_ENTITY, pos, state);
 	}
 
 	@Nullable
@@ -185,7 +182,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	public LootableVaultConfig getConfig(World world) {
 //		return this.config;
-		LootableVaultConfig lootableVaultConfig = world.getRegistryManager().get(CustomDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY).get(Identifier.of(this.lootableVaultConfigIdentifier));
+		LootableVaultConfig lootableVaultConfig = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY).get(Identifier.of(this.lootableVaultConfigIdentifier));
 		if (lootableVaultConfig != null) {
 			return lootableVaultConfig;
 		}

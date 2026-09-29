@@ -1,20 +1,16 @@
 package com.github.theredbrain.scriptblocks.block;
 
-import com.github.theredbrain.scriptblocks.block.entity.RotatedBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.TrialSpawnerBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.Spawner;
-import net.minecraft.block.entity.TrialSpawnerBlockEntity;
 import net.minecraft.block.enums.TrialSpawnerState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -69,12 +65,12 @@ public class TriggeringTrialSpawnerBlock extends RotatedBlockWithEntity {
 		return world instanceof ServerWorld serverWorld
 				? validateTicker(
 				type,
-				EntityRegistry.TRIGGERING_TRIAL_SPAWNER,
+				ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER,
 				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickServer(serverWorld, pos, (Boolean)statex.getOrEmpty(Properties.OMINOUS).orElse(false))
 		)
 				: validateTicker(
 				type,
-				EntityRegistry.TRIGGERING_TRIAL_SPAWNER,
+				ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER,
 				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickClient(worldx, pos, (Boolean)statex.getOrEmpty(Properties.OMINOUS).orElse(false))
 		);
 	}

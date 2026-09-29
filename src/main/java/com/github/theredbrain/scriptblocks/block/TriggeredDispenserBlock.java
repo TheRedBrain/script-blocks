@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDispenserBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.AbstractBlock;
@@ -11,7 +11,6 @@ import net.minecraft.block.dispenser.DispenserBehavior;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.DispenserBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
@@ -67,7 +66,7 @@ public class TriggeredDispenserBlock extends DispenserBlock {
 
 	@Override
 	protected void dispense(ServerWorld world, BlockState state, BlockPos pos) {
-		DispenserBlockEntity dispenserBlockEntity = (DispenserBlockEntity) world.getBlockEntity(pos, EntityRegistry.TRIGGERED_DISPENSER_BLOCK_ENTITY).orElse(null);
+		DispenserBlockEntity dispenserBlockEntity = (DispenserBlockEntity) world.getBlockEntity(pos, ScriptBlocksEntities.TRIGGERED_DISPENSER_BLOCK_ENTITY).orElse(null);
 		if (dispenserBlockEntity == null) {
 			LOGGER.warn("Ignoring dispensing attempt for Dispenser without matching block entity at {}", pos);
 		} else {

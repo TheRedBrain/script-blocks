@@ -5,7 +5,8 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.config.ServerConfig;
 import com.github.theredbrain.scriptblocks.data.Location;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -40,11 +41,11 @@ public abstract class WorldMixin implements WorldAccess {
 	public BlockPos scriptblocks$wrap_getSpawnPos(Operation<BlockPos> original) {
 
 		BlockPos blockPos = null;
-		ServerConfig serverConfig = ScriptBlocks.SERVER_CONFIG;
+		ServerConfig serverConfig = ScriptBlocksConfigs.SERVER_CONFIG;
 		if (serverConfig.use_predefined_position_for_world_spawn) {
-			List<Integer> worldSpawnXList = ScriptBlocks.SERVER_CONFIG.worldSpawnXList;
-			List<Integer> worldSpawnYList = ScriptBlocks.SERVER_CONFIG.worldSpawnYList;
-			List<Integer> worldSpawnZList = ScriptBlocks.SERVER_CONFIG.worldSpawnZList;
+			List<Integer> worldSpawnXList = ScriptBlocksConfigs.SERVER_CONFIG.worldSpawnXList;
+			List<Integer> worldSpawnYList = ScriptBlocksConfigs.SERVER_CONFIG.worldSpawnYList;
+			List<Integer> worldSpawnZList = ScriptBlocksConfigs.SERVER_CONFIG.worldSpawnZList;
 			int listSize = worldSpawnXList.size();
 			if (listSize > 0) {
 				int spawnPointIndex = this.random.nextBetweenExclusive(0, listSize);
@@ -57,7 +58,7 @@ public abstract class WorldMixin implements WorldAccess {
 		if (serverConfig.use_location_entrance_for_world_spawn && !serverConfig.world_spawn_location_identifier.isEmpty() && world instanceof ServerWorld serverWorld) {
 
 			Location location = null;
-			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = this.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(serverConfig.world_spawn_location_identifier));
+			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = this.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(serverConfig.world_spawn_location_identifier));
 
 			if (optionalLocationReference.isPresent()) {
 				location = optionalLocationReference.get().value();

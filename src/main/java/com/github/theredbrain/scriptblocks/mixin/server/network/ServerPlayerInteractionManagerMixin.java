@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.mixin.server.network;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -34,12 +35,12 @@ public abstract class ServerPlayerInteractionManagerMixin {
 
 	@WrapOperation(method = "processBlockBreakingAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;isCreative()Z"))
 	public boolean scriptblocks$wrap_isCreative(ServerPlayerInteractionManager instance, Operation<Boolean> original) {
-		return original.call(instance) || ((this.gameMode.isSurvivalLike() || this.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE));
+		return original.call(instance) || ((this.gameMode.isSurvivalLike() || this.player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE));
 	}
 
 	@WrapMethod(method = "tryBreakBlock")
 	public boolean scriptblocks$wrap_tryBreakBlock(BlockPos pos, Operation<Boolean> original) {
-		if ((this.gameMode.isSurvivalLike() || this.player.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT)) && this.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE)) {
+		if ((this.gameMode.isSurvivalLike() || this.player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 			BlockState blockState = this.world.getBlockState(pos);
 			BlockEntity blockEntity = this.world.getBlockEntity(pos);
 			Block block = blockState.getBlock();

@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -35,7 +35,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	private final List<MutablePair<BlockPos, Vec3i>> subAreasList = new ArrayList<>();
 
 	public AreaFillerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.AREA_FILLER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.AREA_FILLER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

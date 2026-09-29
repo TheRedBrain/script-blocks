@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.data.Shop;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.item.ItemStack;
@@ -27,7 +27,7 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		List<Shop.Deal> dealsList = new ArrayList<>(List.of());
 		Shop shop = null;
 		if (!shopIdentifier.isEmpty()) {
-			Optional<RegistryEntry.Reference<Shop>> optionalShopReference = serverPlayerEntity.getWorld().getRegistryManager().get(CustomDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.of(shopIdentifier));
+			Optional<RegistryEntry.Reference<Shop>> optionalShopReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.of(shopIdentifier));
 			if (optionalShopReference.isPresent()) {
 				shop = optionalShopReference.get().value();
 			}

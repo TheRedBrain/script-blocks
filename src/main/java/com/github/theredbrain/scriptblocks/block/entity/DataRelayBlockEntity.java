@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,7 +25,7 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	private int index = 0;
 
 	public DataRelayBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.DATA_RELAY_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.DATA_RELAY_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

@@ -1,9 +1,8 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.data.Shop;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
@@ -32,7 +31,7 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	private final List<Integer> stockCountList = new ArrayList<>();
 
 	public ShopBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.SHOP_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.SHOP_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -72,7 +71,7 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 		Shop shop = null;
 		Identifier identifier = Identifier.tryParse(newShopIdentifier);
 		if (identifier != null && this.world != null) {
-			Optional<RegistryEntry.Reference<Shop>> optionalShopReference = this.world.getRegistryManager().get(CustomDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(identifier);
+			Optional<RegistryEntry.Reference<Shop>> optionalShopReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(identifier);
 			if (optionalShopReference.isPresent()) {
 				shop = optionalShopReference.get().value();
 			}

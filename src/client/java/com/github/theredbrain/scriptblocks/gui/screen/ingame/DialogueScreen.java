@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -299,7 +299,7 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 			if (!answerIdentifier.isEmpty()) {
 				DialogueAnswer dialogueAnswer = null;
 				if (this.handler.world != null) {
-					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.handler.world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifier));
+					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.handler.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifier));
 					if (optionalDialogueAnswerReference.isPresent()) {
 						dialogueAnswer = optionalDialogueAnswerReference.get().value();
 					}

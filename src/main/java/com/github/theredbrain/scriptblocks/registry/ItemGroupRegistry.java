@@ -16,11 +16,11 @@ public class ItemGroupRegistry {
 
 	public static void init() {
 		Registry.register(Registries.ITEM_GROUP, DECORATIVE_SCRIPT_BLOCKS, FabricItemGroup.builder()
-				.icon(() -> new ItemStack(BlockRegistry.AESTHETIC_NETHER_PORTAL))
+				.icon(() -> new ItemStack(ScriptBlocksBlocks.AESTHETIC_NETHER_PORTAL))
 				.displayName(Text.translatable("itemGroup.scriptblocks.decorative_script_blocks"))
 				.build());
 		Registry.register(Registries.ITEM_GROUP, SCRIPT_BLOCKS, FabricItemGroup.builder()
-				.icon(() -> new ItemStack(BlockRegistry.TELEPORTER_BLOCK))
+				.icon(() -> new ItemStack(ScriptBlocksBlocks.TELEPORTER_BLOCK))
 				.displayName(Text.translatable("itemGroup.scriptblocks.script_blocks"))
 				.build());
 	}

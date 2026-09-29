@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -43,7 +43,7 @@ public class BossControllerBlock extends RotatedBlockWithEntity {
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 //        return validateTicker(type, EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
-		return validateTicker(type, EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
+		return validateTicker(type, ScriptBlocksEntities.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
 	}
 
 	@Override

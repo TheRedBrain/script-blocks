@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -54,7 +54,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	private Team team = null;
 
 	public TeamControllerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TEAM_CONTROLLER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TEAM_CONTROLLER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

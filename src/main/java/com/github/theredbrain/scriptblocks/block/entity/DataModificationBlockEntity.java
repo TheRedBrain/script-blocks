@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.minecraft.block.BlockState;
@@ -29,7 +29,7 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 	private int integerModulusValue = 0;
 
 	public DataModificationBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.DATA_MODIFICATION_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.DATA_MODIFICATION_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

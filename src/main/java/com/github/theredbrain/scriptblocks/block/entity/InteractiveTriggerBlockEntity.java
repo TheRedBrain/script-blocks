@@ -5,8 +5,8 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.component.type.InteractiveKeyComponent;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
-import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -33,7 +33,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 	private String unlockedSound = "";
 
 	public InteractiveTriggerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.INTERACTIVE_TRIGGER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.INTERACTIVE_TRIGGER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 
 	public boolean canTrigger(PlayerEntity playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {
-			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ItemComponentRegistry.INTERACTIVE_KEY);
+			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
 			if (interactiveKeyComponent != null) {
 				return interactiveKeyComponent.identifier_list().contains(Identifier.of(this.keyIdentifierString));
 			}
@@ -152,7 +152,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		if (!this.keyIdentifierString.isEmpty()) {
 			Hand hand = playerEntity.getActiveHand();
 			ItemStack stack = playerEntity.getStackInHand(hand);
-			InteractiveKeyComponent interactiveKeyComponent = stack.get(ItemComponentRegistry.INTERACTIVE_KEY);
+			InteractiveKeyComponent interactiveKeyComponent = stack.get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
 			if (interactiveKeyComponent != null) {
 				if (interactiveKeyComponent.is_consumed()) {
 					if (stack.getMaxCount() > 1) {

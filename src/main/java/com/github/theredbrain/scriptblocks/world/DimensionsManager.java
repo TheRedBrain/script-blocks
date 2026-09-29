@@ -18,7 +18,7 @@ public class DimensionsManager {
 
 	public static Identifier PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER = ScriptBlocks.identifier("public_locations_dimension");
 
-	public static void init() {
+	public static void bootstrap() {
 	}
 
 	public static void addAndSavePublicDimension(Identifier dimensionId, MinecraftServer server) {

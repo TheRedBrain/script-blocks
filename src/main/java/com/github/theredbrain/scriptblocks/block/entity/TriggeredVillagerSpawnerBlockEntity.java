@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityData;
@@ -35,7 +35,7 @@ public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEn
 	private VillagerData villagerData = DEFAULT_VILLAGER_DATA;
 
 	public TriggeredVillagerSpawnerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_VILLAGER_SPAWNER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TRIGGERED_VILLAGER_SPAWNER_BLOCK_ENTITY, pos, state);
 	}
 
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {

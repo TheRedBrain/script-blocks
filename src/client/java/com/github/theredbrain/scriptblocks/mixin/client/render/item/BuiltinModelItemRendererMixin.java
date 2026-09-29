@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.mixin.client.render.item;
 
 import com.github.theredbrain.scriptblocks.block.entity.AestheticDecoratedPotBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.item.BuiltinModelItemRenderer;
@@ -24,11 +24,11 @@ public class BuiltinModelItemRendererMixin {
 	@Final
 	private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 	@Unique
-	private final AestheticDecoratedPotBlockEntity renderDecoratedPot = new AestheticDecoratedPotBlockEntity(BlockPos.ORIGIN, BlockRegistry.AESTHETIC_DECORATED_POT.getDefaultState());
+	private final AestheticDecoratedPotBlockEntity renderDecoratedPot = new AestheticDecoratedPotBlockEntity(BlockPos.ORIGIN, ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.getDefaultState());
 
 	@Inject(method = "render(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformationMode;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("HEAD"), cancellable = true)
 	private void scriptblocks$render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay, CallbackInfo ci) {
-		if (stack.isOf(BlockRegistry.AESTHETIC_DECORATED_POT.asItem())) {
+		if (stack.isOf(ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.asItem())) {
 			renderDecoratedPot.readFrom(stack);
 			this.blockEntityRenderDispatcher.renderEntity(renderDecoratedPot, matrices, vertexConsumers, light, overlay);
 			ci.cancel();

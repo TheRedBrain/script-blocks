@@ -1,7 +1,7 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
@@ -21,7 +21,7 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 	}
 
 	public UseRelayBlockEntity(BlockPos pos, BlockState state) {
-		this(EntityRegistry.USE_RELAY_BLOCK_ENTITY, pos, state);
+		this(ScriptBlocksEntities.USE_RELAY_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

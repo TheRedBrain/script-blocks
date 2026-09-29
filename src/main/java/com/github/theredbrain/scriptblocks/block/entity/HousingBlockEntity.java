@@ -5,7 +5,8 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
 import net.minecraft.block.BlockState;
@@ -51,7 +52,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 
 	public HousingBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.HOUSING_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.HOUSING_BLOCK_ENTITY, pos, state);
 		this.isOwnerSet = false;
 	}
 
@@ -213,15 +214,15 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 				String playerName = playerEntity.getName().getString();
 				String playerUuid = playerEntity.getUuidAsString();
 				if (Objects.equals(playerUuid, housingBlockEntity.getOwnerUuid())) {
-					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
+					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT, 100, 0, true, false, false));
 				} else if (housingBlockEntity.getCoOwnerList().contains(playerName)) {
-					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_CO_OWNER_EFFECT, 100, 0, true, false, false));
+					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_CO_OWNER_EFFECT, 100, 0, true, false, false));
 				} else if (housingBlockEntity.getTrustedList().contains(playerName)) {
-					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_TRUSTED_EFFECT, 100, 0, true, false, false));
+					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_TRUSTED_EFFECT, 100, 0, true, false, false));
 				} else if (housingBlockEntity.getGuestList().contains(playerName) || (ownerTeam != null && ownerTeam.getPlayerList().contains(playerName))) {
-					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_GUEST_EFFECT, 100, 0, true, false, false));
+					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_GUEST_EFFECT, 100, 0, true, false, false));
 				} else {
-					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocks.HOUSING_STRANGER_EFFECT, 100, 0, true, false, false));
+					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_STRANGER_EFFECT, 100, 0, true, false, false));
 				}
 				((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentHousingBlockPosition(Optional.of(housingBlockEntity.pos));
 			}

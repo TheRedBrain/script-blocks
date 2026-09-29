@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -11,7 +11,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -24,7 +23,7 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 	private String newDataValue = "";
 
 	public DataWritingBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.DATA_WRITING_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.DATA_WRITING_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

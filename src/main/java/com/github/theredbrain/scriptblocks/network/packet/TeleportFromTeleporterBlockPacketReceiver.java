@@ -9,7 +9,9 @@ import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
@@ -124,7 +126,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS || teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 
 			Location location = null;
-			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
+			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
 			if (optionalLocationReference.isPresent()) {
 				location = optionalLocationReference.get().value();
 			}
@@ -134,7 +136,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			if (location != null) {
 
 				if (location.isPublic()) {
-					if (ScriptBlocks.SERVER_CONFIG.enable_public_locations_dimension) {
+					if (ScriptBlocksConfigs.SERVER_CONFIG.enable_public_locations_dimension) {
 						RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
 						targetWorld = server.getWorld(dimensionregistryKey);
 
@@ -295,7 +297,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects().stream().toList()) {
 				RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-				if (statusEffectRegistryEntry.value() == ScriptBlocks.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
+				if (statusEffectRegistryEntry.value() == ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
 					serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
 					continue;
 				}
@@ -333,7 +335,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							for (StatusEffectInstance statusEffectInstance : teamServerPlayerEntity.getStatusEffects().stream().toList()) {
 								RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-								if (statusEffectRegistryEntry.value() == ScriptBlocks.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
+								if (statusEffectRegistryEntry.value() == ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
 									teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
 									continue;
 								}

@@ -1,9 +1,8 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -38,7 +37,7 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
 
 	public TriggeredEntityRemoverBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

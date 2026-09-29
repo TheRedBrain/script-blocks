@@ -6,9 +6,9 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.UseRelayChestBlock;
 import com.github.theredbrain.scriptblocks.component.type.InteractiveKeyComponent;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
-import com.github.theredbrain.scriptblocks.registry.ItemComponentRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -37,7 +37,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 	private String unlockedSound = "";
 
 	public UseRelayChestBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.USE_RELAY_CHEST_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.USE_RELAY_CHEST_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 
 		nbt.putString("unlocked_sound", this.unlockedSound);
 
-		if (this.world != null && this.world.getBlockState(this.pos).isOf(BlockRegistry.LOCKED_USE_RELAY_CHEST)) {
+		if (this.world != null && this.world.getBlockState(this.pos).isOf(ScriptBlocksBlocks.LOCKED_USE_RELAY_CHEST)) {
 			ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated 'Locked Use Relay Chest' detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with a 'Trapped Use Relay Chest'.", this.world != null ? this.world.getServer() : null);
 		}
 
@@ -218,7 +218,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 
 	public boolean canTrigger(PlayerEntity playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {
-			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ItemComponentRegistry.INTERACTIVE_KEY);
+			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
 			if (interactiveKeyComponent != null) {
 				return interactiveKeyComponent.identifier_list().contains(Identifier.of(this.keyIdentifierString));
 			}
@@ -231,7 +231,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 		if (!this.keyIdentifierString.isEmpty()) {
 			Hand hand = playerEntity.getActiveHand();
 			ItemStack stack = playerEntity.getStackInHand(hand);
-			InteractiveKeyComponent interactiveKeyComponent = stack.get(ItemComponentRegistry.INTERACTIVE_KEY);
+			InteractiveKeyComponent interactiveKeyComponent = stack.get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
 			if (interactiveKeyComponent != null) {
 				if (interactiveKeyComponent.is_consumed()) {
 					if (stack.getMaxCount() > 1) {

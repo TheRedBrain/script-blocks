@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -58,7 +58,7 @@ public interface DialogueAnchor {
 		String unlockAdvancement;
 
 		for (String dialogueEntry : dialogueList) {
-			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueEntry));
+			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueEntry));
 			if (optionalDialogueReference.isPresent()) {
 				lockAdvancement = optionalDialogueReference.get().value().lockAdvancement();
 				unlockAdvancement = optionalDialogueReference.get().value().unlockAdvancement();
@@ -85,7 +85,7 @@ public interface DialogueAnchor {
 	}
 
 	static void openDialogueScreen(World world, MinecraftServer server, ServerPlayerEntity serverPlayerEntity, String dialogueIdentifierString, BlockPos dataBlockPos, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
-		Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueIdentifierString));
+		Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueIdentifierString));
 
 		if (optionalDialogueReference.isPresent()) {
 			Dialogue dialogue = optionalDialogueReference.get().value();
@@ -99,7 +99,7 @@ public interface DialogueAnchor {
 				if (!answerIdentifierString.isEmpty()) {
 
 					DialogueAnswer dialogueAnswer = null;
-					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifierString));
+					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifierString));
 					if (optionalDialogueAnswerReference1.isPresent()) {
 						dialogueAnswer = optionalDialogueAnswerReference1.get().value();
 					}

@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.world.gen.chunk.placement;
 
-import com.github.theredbrain.scriptblocks.registry.StructurePlacementTypesRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStructurePlacementTypes;
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -85,6 +85,6 @@ public class FixedStructurePlacement extends StructurePlacement {
 	}
 
 	public StructurePlacementType<?> getType() {
-		return StructurePlacementTypesRegistry.FIXED;
+		return ScriptBlocksStructurePlacementTypes.FIXED;
 	}
 }

@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -26,7 +26,7 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 	private int counter = 0;
 
 	public TriggeredCounterBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TRIGGERED_COUNTER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TRIGGERED_COUNTER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

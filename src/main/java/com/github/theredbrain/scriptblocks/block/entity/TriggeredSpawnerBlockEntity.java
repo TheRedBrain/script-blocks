@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -72,7 +72,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(POSITION_OFFSET_DEFAULT, false);
 
 	public TriggeredSpawnerBlockEntity(BlockPos pos, BlockState state) {
-		this(EntityRegistry.TRIGGERED_SPAWNER_BLOCK_ENTITY, pos, state);
+		this(ScriptBlocksEntities.TRIGGERED_SPAWNER_BLOCK_ENTITY, pos, state);
 	}
 
 	public TriggeredSpawnerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

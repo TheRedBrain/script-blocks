@@ -1,8 +1,8 @@
 package com.github.theredbrain.scriptblocks.screen;
 
 import com.github.theredbrain.scriptblocks.data.Dialogue;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
-import com.github.theredbrain.scriptblocks.registry.ScreenHandlerTypesRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -41,14 +41,14 @@ public class DialogueScreenHandler extends ScreenHandler {
 	}
 
 	public DialogueScreenHandler(int syncId, PlayerInventory playerInventory, String dialogueIdentifierString, BlockPos dataBlockPos, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks, List<String> unlockedAnswersList, List<String> visibleAnswersList) {
-		super(ScreenHandlerTypesRegistry.DIALOGUE_SCREEN_HANDLER, syncId);
+		super(ScriptBlocksScreenHandlerTypes.DIALOGUE_SCREEN_HANDLER, syncId);
 		this.world = playerInventory.player.getWorld();
 		this.dataBlockPos = dataBlockPos;
 		this.dialogueUsedBlocksList = dialogueUsedBlocks;
 		this.dialogueTriggeredBlocksList = dialogueTriggeredBlocks;
 		this.unlockedAnswersList = unlockedAnswersList;
 		this.visibleAnswersList = visibleAnswersList;
-		Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = this.world.getRegistryManager().get(CustomDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueIdentifierString));
+		Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueIdentifierString));
 		if (optionalDialogueReference.isPresent()) {
 			this.dialogue = optionalDialogueReference.get().value();
 			this.dialogueTextList = this.dialogue.dialogueTextList();

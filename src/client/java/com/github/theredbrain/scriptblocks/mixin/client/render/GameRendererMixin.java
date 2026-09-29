@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.mixin.client.render;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.fabricmc.api.EnvType;
@@ -26,7 +27,7 @@ public class GameRendererMixin {
 
 	@WrapOperation(method = "shouldRenderBlockOutline", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowModifyWorld:Z", opcode = Opcodes.GETFIELD))
 	private boolean shouldRenderBlockOutline(PlayerAbilities instance, Operation<Boolean> original) {
-		return original.call(instance) && (!(this.client.getCameraEntity() instanceof PlayerEntity playerEntity) || !(playerEntity.hasStatusEffect(ScriptBlocks.ADVENTURE_EFFECT) && !playerEntity.isCreative()));
+		return original.call(instance) && (!(this.client.getCameraEntity() instanceof PlayerEntity playerEntity) || !(playerEntity.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT) && !playerEntity.isCreative()));
 	}
 
 }

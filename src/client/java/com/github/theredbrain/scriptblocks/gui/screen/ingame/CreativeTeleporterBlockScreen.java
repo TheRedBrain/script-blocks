@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockPacket;
-import com.github.theredbrain.scriptblocks.registry.CustomDynamicRegistries;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import net.fabricmc.api.EnvType;
@@ -209,7 +209,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		Location location = null;
 		World world = this.teleporterBlock.getWorld();
 		if (world != null) {
-			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(CustomDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(identifier));
+			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(identifier));
 			if (optionalLocationReference.isPresent()) {
 				location = optionalLocationReference.get().value();
 			}

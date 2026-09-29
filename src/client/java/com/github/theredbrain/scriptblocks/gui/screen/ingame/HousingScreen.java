@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.network.packet.LeaveHouseFromHousingS
 import com.github.theredbrain.scriptblocks.network.packet.ResetHouseHousingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockAdventurePacket;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -271,7 +272,7 @@ public class HousingScreen extends Screen {
 
 		boolean isAdventureBuilding = false;
 		if (this.client != null && this.client.player != null) {
-			isAdventureBuilding = this.client.player.hasStatusEffect(ScriptBlocks.BUILDING_MODE);
+			isAdventureBuilding = this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE);
 		}
 		this.toggleAdventureBuildingEffectButton = this.addDrawableChild(ButtonWidget.builder(isAdventureBuilding ? TOGGLE_ADVENTURE_BUILDING_OFF_BUTTON_LABEL_TEXT : TOGGLE_ADVENTURE_BUILDING_ON_BUTTON_LABEL_TEXT, button -> this.toggleAdventureBuildingEffect()).dimensions(this.x + 7, this.y + 20, this.backgroundWidth - 14, 20).build());
 
@@ -641,7 +642,7 @@ public class HousingScreen extends Screen {
 
 	private void toggleAdventureBuildingEffect() {
 		ClientPlayNetworking.send(new AddStatusEffectPacket(
-				Registries.STATUS_EFFECT.getId(ScriptBlocks.BUILDING_MODE.value()),
+				Registries.STATUS_EFFECT.getId(ScriptBlocksStatusEffects.BUILDING_MODE.value()),
 				-1,
 				0,
 				false,

@@ -4,7 +4,7 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.minecraft.block.BlockState;
@@ -41,7 +41,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	private int triggerAmount = 1;
 
 	public RelayTriggerBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.RELAY_TRIGGER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.RELAY_TRIGGER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override

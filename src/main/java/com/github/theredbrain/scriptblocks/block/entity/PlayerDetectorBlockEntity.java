@@ -4,7 +4,8 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -44,7 +45,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 	private final ArrayList<UUID> playerList = new ArrayList<>();
 
 	public PlayerDetectorBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.PLAYER_DETECTOR_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.PLAYER_DETECTOR_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -181,7 +182,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 			List<PlayerEntity> newPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, areaBlockEntity.area);
 			List<UUID> newPLayerUuidList = new ArrayList<>();
 			for (PlayerEntity player : newPlayerList) {
-				if (!player.isCreative() || ScriptBlocks.SERVER_CONFIG.enable_creative_player_detection) {
+				if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
 					newPLayerUuidList.add(player.getUuid());
 				}
 			}

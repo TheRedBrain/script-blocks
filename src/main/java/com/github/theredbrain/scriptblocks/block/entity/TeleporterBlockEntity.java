@@ -5,8 +5,9 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.BlockRegistry;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -95,7 +96,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private String cancelTeleportButtonLabel = "gui.teleporter_block.cancel_teleport_button.label";
 
 	public TeleporterBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.TELEPORTER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.TELEPORTER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
@@ -311,7 +312,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		if (world.isClient) {
 			return;
 		}
-		if (state.isOf(BlockRegistry.TELEPORTER_BLOCK)) {
+		if (state.isOf(ScriptBlocksBlocks.TELEPORTER_BLOCK)) {
 			if (teleporterBlockEntity.calculateActivationBox || teleporterBlockEntity.activationArea == null) {
 				BlockPos activationAreaPositionOffset = teleporterBlockEntity.getActivationAreaPositionOffset();
 				Vec3i activationAreaDimensions = teleporterBlockEntity.getActivationAreaDimensions();
@@ -324,7 +325,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			String worldName = world.getRegistryKey().getValue().getPath();
 			for (PlayerEntity playerEntity : list) {
 				if (!playerEntity.isCreative()) {
-					if (!playerEntity.hasStatusEffect(ScriptBlocks.PORTAL_RESISTANCE_EFFECT)) {
+					if (!playerEntity.hasStatusEffect(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT)) {
 						if (!teleporterBlockEntity.onlyTeleportDimensionOwner || playerEntity.getUuid().toString().equals(worldName)) {
 							playerEntity.openHandledScreen(state.createScreenHandlerFactory(world, pos));
 						} else {
@@ -334,7 +335,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 					// prevents continuous opening of the screen
 					playerEntity.setStatusEffect(
 							new StatusEffectInstance(
-									ScriptBlocks.PORTAL_RESISTANCE_EFFECT,
+									ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT,
 									40,
 									0,
 									false,

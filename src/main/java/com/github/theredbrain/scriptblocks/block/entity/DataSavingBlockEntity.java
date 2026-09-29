@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
-import com.github.theredbrain.scriptblocks.registry.EntityRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -22,7 +22,7 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	private final HashMap<String, String> data = new HashMap<>(Map.of());
 
 	public DataSavingBlockEntity(BlockPos pos, BlockState state) {
-		super(EntityRegistry.DATA_SAVING_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.DATA_SAVING_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
