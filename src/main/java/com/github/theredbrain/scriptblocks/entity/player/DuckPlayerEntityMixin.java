@@ -59,35 +59,46 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$sendAnnouncement(Text announcement);
 
-	void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity);
+	default void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
+	}
 
-	void scriptblocks$openHousingScreen();
+	default void scriptblocks$openHousingScreen() {
+	}
 
 	default void scriptblocks$openTeamControllerBlockScreen(TeamControllerBlockEntity teamControllerBlockEntity) {
 	}
 
-	void scriptblocks$openTriggeredBeaconBlockScreen(TriggeredBeaconBlockEntity triggeredBeaconBlockEntity);
+	default void scriptblocks$openTriggeredBeaconBlockScreen(TriggeredBeaconBlockEntity triggeredBeaconBlockEntity) {
+	}
 
-	void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity);
+	default void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity) {
+	}
 
-	void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity);
+	default void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity) {
+	}
 
-//	void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks);
+//	default void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks);
 
-	void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock);
+	default void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock) {
+	}
 
-	void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock);
+	default void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock) {
+	}
 
 	default void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock) {
 	}
 
-	void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock);
+	default void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock) {
+	}
 
-	void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock);
+	default void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock) {
+	}
 
-	void scriptblocks$openTriggeredDisplayBlockScreen(TriggeredDisplayBlockEntity triggeredDisplayBlockEntity);
+	default void scriptblocks$openTriggeredDisplayBlockScreen(TriggeredDisplayBlockEntity triggeredDisplayBlockEntity) {
+	}
 
-	void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity);
+	default void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity) {
+	}
 
 	default void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
 	}
@@ -95,13 +106,17 @@ public interface DuckPlayerEntityMixin {
 	default void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock) {
 	}
 
-	void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock);
+	default void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock) {
+	}
 
-	void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock);
+	default void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock) {
+	}
 
-	void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock);
+	default void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock) {
+	}
 
-	void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock);
+	default void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock) {
+	}
 
 	default void scriptblocks$openSpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 	}
@@ -114,40 +129,52 @@ public interface DuckPlayerEntityMixin {
 	default void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity) {
 	}
 
-	void scriptblocks$openAreaFillerBlockScreen(AreaFillerBlockEntity areaFillerBlockEntity);
+	default void scriptblocks$openAreaFillerBlockScreen(AreaFillerBlockEntity areaFillerBlockEntity) {
+	}
 
-	void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity);
+	default void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity) {
+	}
 
-	void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock);
+	default void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock) {
+	}
 
-	void scriptblocks$openTriggeredRNGBlockScreen(TriggeredRNGBlockEntity triggeredRNGBlockEntity);
+	default void scriptblocks$openTriggeredRNGBlockScreen(TriggeredRNGBlockEntity triggeredRNGBlockEntity) {
+	}
 
 	@Deprecated
 	default void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity) {
 	}
 
-	void scriptblocks$openInteractiveTriggerBlockScreen(InteractiveTriggerBlockEntity interactiveTriggerBlockEntity);
+	default void scriptblocks$openInteractiveTriggerBlockScreen(InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
+	}
 
-//	void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity);
+//	default void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
+//	}
 
-	void scriptblocks$openCopyDataBlockScreen(CopyDataBlockEntity copyDataBlockEntity);
+	default void scriptblocks$openCopyDataBlockScreen(CopyDataBlockEntity copyDataBlockEntity) {
+	}
 
-	void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity);
+	default void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity) {
+	}
 
 	default void scriptblocks$openDataModificationBlockScreen(DataModificationBlockEntity dataModificationBlockEntity) {
 	}
 
-	void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity);
+	default void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity) {
+	}
 
-	void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity);
+	default void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity) {
+	}
 
-	void scriptblocks$openTriggeredDamageDealingBlockScreen(TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity);
+	default void scriptblocks$openTriggeredDamageDealingBlockScreen(TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
+	}
 
-	void scriptblocks$openTriggeredEntityRemoverBlockScreen(TriggeredEntityRemoverBlockEntity triggeredEntityRemoverBlockEntity);
+	default void scriptblocks$openTriggeredEntityRemoverBlockScreen(TriggeredEntityRemoverBlockEntity triggeredEntityRemoverBlockEntity) {
+	}
 
-	void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity);
+	default void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity) {
+	}
 
-	void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity);
-
-//	void scriptblocks$openLootableVaultBlockScreen(LootableVaultBlockEntity lootableVaultBlockEntity);
+	default void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity) {
+	}
 }
