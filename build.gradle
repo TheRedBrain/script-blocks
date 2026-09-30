@@ -117,6 +117,10 @@ dependencies {
 	testmodClientImplementation sourceSets.main.output
 	testmodClientImplementation sourceSets.client.output
 	testmodClientImplementation sourceSets.testmod.output
+
+	// Data Fixer
+	modImplementation "maven.modrinth:easy-data-fix:${project.easy_data_fixer_version}-fabric"
+
 }
 
 processResources {
