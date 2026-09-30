@@ -90,6 +90,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawner
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListRelayBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListRelayBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUseRelayChestBlockPacket;
@@ -219,6 +221,9 @@ public class ScriptBlocksNetworkPackets {
 
 		PayloadTypeRegistry.playC2S().register(UpdateTeamControllerBlockPacket.PACKET_ID, UpdateTeamControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTeamControllerBlockPacket.PACKET_ID, new UpdateTeamControllerBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateUUIDListRelayBlockPacket.PACKET_ID, UpdateUUIDListRelayBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateUUIDListRelayBlockPacket.PACKET_ID, new UpdateUUIDListRelayBlockPacketReceiver());
 
 		// --- teleporter packets
 

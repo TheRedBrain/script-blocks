@@ -695,7 +695,10 @@
 
 	"gui.shop_block.trade_button_label": "Trade",
 
-	
+
+	"gui.uuid_list_provider.uuid_list_provider_position_offset": "UUID List Provider Position Offset",
+
+
 	"block.scriptblocks.interactive_trigger_oak_door": "Interactive Trigger Oak Door",
 	"block.scriptblocks.interactive_trigger_iron_door": "Interactive Trigger Iron Door",
 	"block.scriptblocks.interactive_trigger_spruce_door": "Interactive Trigger Spruce Door",
@@ -841,6 +844,7 @@
 	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
 	"block.scriptblocks.use_relay_block": "Use Relay Block",
 	"block.scriptblocks.team_controller_block": "Team Controller Block",
+	"block.scriptblocks.uuid_list_relay_block": "UUID List Relay Block",
 	"block.scriptblocks.uuid_list_saving_block": "UUID List Saving Block",
 
 

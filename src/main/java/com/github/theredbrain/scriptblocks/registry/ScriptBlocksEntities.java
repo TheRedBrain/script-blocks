@@ -40,6 +40,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRedstoneBlockEn
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
@@ -285,6 +286,10 @@ public class ScriptBlocksEntities {
 			ScriptBlocks.identifier("use_relay_lectern"),
 			BlockEntityType.Builder.create(UseRelayLecternBlockEntity::new,
 					ScriptBlocksBlocks.USE_RELAY_LECTERN).build());
+	public static final BlockEntityType<UUIDListRelayBlockEntity> UUID_LIST_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("uuid_list_relay_block"),
+			BlockEntityType.Builder.create(UUIDListRelayBlockEntity::new,
+					ScriptBlocksBlocks.UUID_LIST_RELAY_BLOCK).build());
 	public static final BlockEntityType<UUIDListSavingBlockEntity> UUID_LIST_SAVING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("uuid_list_saving_block"),
 			BlockEntityType.Builder.create(UUIDListSavingBlockEntity::new,

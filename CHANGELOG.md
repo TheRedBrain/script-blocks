@@ -11,7 +11,8 @@
 
 This new category of script blocks works with lists of UUIDs, namely the UUIDs of players.
 
-- added UUID List Saving Block. This block saves a list of UUIDs. Other blocks can add to/remove from this list or read the current list.
+- added "UUID List Saving Block". This block saves a list of UUIDs. Other blocks can add to/remove from this list or read the current list.
+- added "UUID List Relay Block". Provides the same interactions as the "UUID List Saving Block", but relays them to another block at a configurable offset position instead.
 
 ## Changes
 

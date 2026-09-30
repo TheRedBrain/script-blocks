@@ -45,6 +45,7 @@ import com.github.theredbrain.scriptblocks.block.TriggeredRedstoneBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredSpawnerBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredVillagerSpawnerBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeringTrialSpawnerBlock;
+import com.github.theredbrain.scriptblocks.block.UUIDListRelayBlock;
 import com.github.theredbrain.scriptblocks.block.UUIDListSavingBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayAnvilBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayBlock;
@@ -228,6 +229,7 @@ public class ScriptBlocksBlocks {
 	public static final Block TRIGGERED_SPAWNER_BLOCK = registerBlock("triggered_spawner_block", new TriggeredSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_VILLAGER_SPAWNER_BLOCK = registerBlock("triggered_villager_spawner_block", new TriggeredVillagerSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_BLOCK = registerBlock("use_relay_block", new UseRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block UUID_LIST_RELAY_BLOCK = registerBlock("uuid_list_relay_block", new UUIDListRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block UUID_LIST_SAVING_BLOCK = registerBlock("uuid_list_saving_block", new UUIDListSavingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	//endregion Script Blocks
 
