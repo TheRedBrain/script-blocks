@@ -7,6 +7,12 @@
   - add integer values to data when used like a "Data Relay Block"
   - perform modulo operation on data when used like a "Data Relay Block"
 
+### Player List Blocks
+
+This new category of script blocks works with lists of UUIDs, namely the UUIDs of players.
+
+- added UUID List Saving Block. This block saves a list of UUIDs. Other blocks can add to/remove from this list or read the current list.
+
 ## Changes
 
 - the Teleporter Block now triggers another block before the teleport and a second block after the teleport

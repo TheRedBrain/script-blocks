@@ -841,6 +841,7 @@
 	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
 	"block.scriptblocks.use_relay_block": "Use Relay Block",
 	"block.scriptblocks.team_controller_block": "Team Controller Block",
+	"block.scriptblocks.uuid_list_saving_block": "UUID List Saving Block",
 
 
 	"gamerule.scriptBlocksDropThemself": "Script Blocks drop themself when mined in survival",
