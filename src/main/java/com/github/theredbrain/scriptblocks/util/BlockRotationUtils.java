@@ -53,7 +53,7 @@ public class BlockRotationUtils {
 		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
 			return new BlockPos(blockPos.getZ(), blockPos.getY(), -(blockPos.getX()));
 		} else {
-			return blockPos;
+			return new BlockPos(blockPos);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class BlockRotationUtils {
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
 			return new BlockPos(blockPos.getX(), blockPos.getY(), -(blockPos.getZ()));
 		} else {
-			return blockPos;
+			return new BlockPos(blockPos);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class BlockRotationUtils {
 		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
 			return new Vec3i(vec3i.getZ(), vec3i.getY(), -(vec3i.getX()));
 		} else {
-			return vec3i;
+			return new Vec3i(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 		}
 	}
 
@@ -85,7 +85,7 @@ public class BlockRotationUtils {
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
 			return new Vec3i(vec3i.getX(), vec3i.getY(), -(vec3i.getZ()));
 		} else {
-			return vec3i;
+			return new Vec3i(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 		}
 	}
 
@@ -134,7 +134,7 @@ public class BlockRotationUtils {
 		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
 			return MutablePair.of(offsetPosition.getRight(), -(offsetPosition.getLeft()));
 		} else {
-			return offsetPosition;
+			return MutablePair.of(offsetPosition.getLeft(), offsetPosition.getRight());
 		}
 	}
 
@@ -144,7 +144,7 @@ public class BlockRotationUtils {
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
 			return MutablePair.of(offsetPosition.getLeft(), -(offsetPosition.getRight()));
 		} else {
-			return offsetPosition;
+			return MutablePair.of(offsetPosition.getLeft(), offsetPosition.getRight());
 		}
 	}
 
