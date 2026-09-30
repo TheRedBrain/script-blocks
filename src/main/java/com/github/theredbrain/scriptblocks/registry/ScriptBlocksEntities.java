@@ -165,8 +165,8 @@ public class ScriptBlocksEntities {
 					ScriptBlocksBlocks.TELEPORTER_BAMBOO_TRAPDOOR,
 					ScriptBlocksBlocks.TELEPORTER_CRIMSON_TRAPDOOR,
 					ScriptBlocksBlocks.TELEPORTER_WARPED_TRAPDOOR).build());
-	public static final BlockEntityType<JigsawPlacerBlockEntity> STRUCTURE_PLACER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
-			ScriptBlocks.identifier("structure_placer_block"),
+	public static final BlockEntityType<JigsawPlacerBlockEntity> JIGSAW_PLACER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("jigsaw_placer_block"),
 			BlockEntityType.Builder.create(JigsawPlacerBlockEntity::new, ScriptBlocksBlocks.JIGSAW_PLACER_BLOCK).build());
 	public static final BlockEntityType<RedstoneTriggerBlockEntity> REDSTONE_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("redstone_trigger_block"),

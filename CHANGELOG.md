@@ -11,6 +11,7 @@
 
 - the Teleporter Block now triggers another block before the teleport and a second block after the teleport
   - as usual, the block position offset etc. are configurable in the block's screen
+- changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
 
 ## Fixes
 

@@ -15,6 +15,9 @@
   "environment": "*",
   "accessWidener": "scriptblocks.accesswidener",
   "entrypoints": {
+    "preLaunch": [
+      "com.github.theredbrain.scriptblocks.util.ScriptBlocksDataFixer"
+    ],
     "main": [
       "com.github.theredbrain.scriptblocks.ScriptBlocks"
     ],

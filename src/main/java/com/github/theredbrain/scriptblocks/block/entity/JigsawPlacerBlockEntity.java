@@ -41,7 +41,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	private final List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices = new ArrayList<>(List.of());
 
 	public JigsawPlacerBlockEntity(BlockPos pos, BlockState state) {
-		super(ScriptBlocksEntities.STRUCTURE_PLACER_BLOCK_ENTITY, pos, state);
+		super(ScriptBlocksEntities.JIGSAW_PLACER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
