@@ -7,12 +7,13 @@
   - add integer values to data when used like a "Data Relay Block"
   - perform modulo operation on data when used like a "Data Relay Block"
 
-### Player List Blocks
+### UUID List Handlers
 
 This new category of script blocks works with lists of UUIDs, namely the UUIDs of players.
 
 - added "UUID List Saving Block". This block saves a list of UUIDs. Other blocks can add to/remove from this list or read the current list.
 - added "UUID List Relay Block". Provides the same interactions as the "UUID List Saving Block", but relays them to another block at a configurable offset position instead.
+- added "Status Effect Manipulation Block". When triggered, this block applies/removes/decrements amplifier of a status effect (tag) from a list of players provided by a UUID List Handler. Alternatively, a list can be provided directly to this block instead of relying on intermediate blocks.
 
 ## Changes
 

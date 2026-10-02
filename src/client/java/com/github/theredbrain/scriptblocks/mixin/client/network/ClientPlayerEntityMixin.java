@@ -24,6 +24,7 @@ import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.StatusEffectManipulationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
@@ -64,6 +65,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.RedstoneTriggerBloc
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.RelayTriggerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.SpawnPointDelegationBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.StatusEffectManipulationBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeamControllerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredAdvancementCheckerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredBeaconBlockScreen;
@@ -338,6 +340,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity) {
 		this.client.setScreen(new PVPControllerBlockScreen(pvpControllerBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openStatusEffectManipulationBlockScreen(StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
+		this.client.setScreen(new StatusEffectManipulationBlockScreen(statusEffectManipulationBlockEntity));
 	}
 
 	@Override

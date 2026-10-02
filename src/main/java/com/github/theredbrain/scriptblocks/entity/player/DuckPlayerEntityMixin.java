@@ -23,6 +23,7 @@ import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.StatusEffectManipulationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
@@ -177,6 +178,9 @@ public interface DuckPlayerEntityMixin {
 	}
 
 	default void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity) {
+	}
+
+	default void scriptblocks$openStatusEffectManipulationBlockScreen(StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
 	}
 
 	default void scriptblocks$openUUIDListRelayBlockScreen(UUIDListRelayBlockEntity uuidListRelayBlockEntity) {

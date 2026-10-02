@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/status_effect_manipulation_block"
+    }
+  }
+}

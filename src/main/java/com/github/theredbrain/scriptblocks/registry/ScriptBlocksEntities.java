@@ -26,6 +26,7 @@ import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.StatusEffectManipulationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementCheckerBlockEntity;
@@ -139,6 +140,9 @@ public class ScriptBlocksEntities {
 	public static final BlockEntityType<PVPControllerBlockEntity> PVP_CONTROLLER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("pvp_controller_block"),
 			BlockEntityType.Builder.create(PVPControllerBlockEntity::new, ScriptBlocksBlocks.PVP_CONTROLLER_BLOCK).build());
+	public static final BlockEntityType<StatusEffectManipulationBlockEntity> STATUS_EFFECT_MANIPULATION_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("status_effect_manipulation_block"),
+			BlockEntityType.Builder.create(StatusEffectManipulationBlockEntity::new, ScriptBlocksBlocks.STATUS_EFFECT_MANIPULATION_BLOCK).build());
 	public static final BlockEntityType<TeleporterBlockEntity> TELEPORTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("teleporter_block"),
 			BlockEntityType.Builder.create(TeleporterBlockEntity::new,

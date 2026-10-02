@@ -683,6 +683,17 @@
 	"gui.triggered_block.toggle_triggered_block_resets_button_label.on": "Is Reset",
 	"gui.triggered_block.toggle_triggered_block_resets_button_label.off": "Is Triggered",
 
+
+	"gui.status_effect_manipulation_block.manipulation_mode_label": "Manipulation Mode:",
+	"gui.status_effect_manipulation_block.manipulated_effect_tag_identifier_label": "Manipulated Effects Tag ID",
+	"gui.status_effect_manipulation_block.amplifier_modification_label": "Amplifier Modification",
+	"gui.status_effect_manipulation_block.uuid_list_handler_position_offset_label": "UUID List Handler Position Offset",
+
+	"gui.status_effect_manipulation_block.mode.apply": "Apply Effect",
+	"gui.status_effect_manipulation_block.mode.remove": "Remove Effects",
+	"gui.status_effect_manipulation_block.mode.decrement_amplifier": "Decrement Effect Amplifiers",
+
+
 	"gui.triggered_block.list.entry": "Block with offset X: %s, Y: %s, Z: %s",
 	"gui.triggered_block.list.is_triggered": " is triggered",
 	"gui.triggered_block.list.is_reset": " is reset",
@@ -691,6 +702,14 @@
 	"gui.triggered_block.list.threshold": " when %s is reached",
 	"gui.triggered_block.list.chance": "Has a chance of %s percent to be ",
 	"gui.triggered_block.list.weight": "Has a weight of %s to be chosen",
+
+
+	"gui.status_effect_instance.status_effect_identifier_label": "Effect Identifier",
+	"gui.status_effect_instance.status_effect_amplifier_label": "Amplifier",
+	"gui.status_effect_instance.status_effect_duration_label": "Duration",
+	"gui.status_effect_instance.ambient_false_label": "Is Ambient:",
+	"gui.status_effect_instance.show_particles_label": "Shows Particles:",
+	"gui.status_effect_instance.show_icon_label": "Shows Icon:",
 
 
 	"gui.shop_block.trade_button_label": "Trade",
@@ -831,6 +850,7 @@
 	"block.scriptblocks.relay_trigger_block": "Relay Trigger Block",
 	"block.scriptblocks.shop_block": "Shop Block",
 	"block.scriptblocks.spawn_point_delegation_block": "Spawn Point Delegation Block",
+	"block.scriptblocks.status_effect_manipulation_block": "Status Effect Manipulation Block",
 	"block.scriptblocks.teleporter_block": "Teleporter Block",
 	"block.scriptblocks.triggered_advancement_checker_block": "Triggered Advancement Checker Block",
 	"block.scriptblocks.triggered_beacon_block": "Triggered Beacon Block",
@@ -854,6 +874,7 @@
 	"hud.message.onlyDimensionOwnerCanTeleport": "Only the dimension owner can teleport",
 	"hud.message.keyIsNeeded": "You need a key.",
 	"hud.message.script_block.update_successful": "Update successful",
+	"hud.message.script_block.no_permission": "You need to be in Creative mode with at least level 2 permissions to do this!",
 
 	"hud.message.location_reset.success": "Location was reset successfully!",
 	"hud.message.location_reset.target_world_not_found": "Location reset failed! Target world not found!",

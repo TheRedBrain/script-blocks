@@ -68,6 +68,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateSpawnPointDelegationBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateSpawnPointDelegationBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateStatusEffectManipulationBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateStatusEffectManipulationBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeamControllerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeamControllerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockPacket;
@@ -221,6 +223,9 @@ public class ScriptBlocksNetworkPackets {
 
 		PayloadTypeRegistry.playC2S().register(UpdateTeamControllerBlockPacket.PACKET_ID, UpdateTeamControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTeamControllerBlockPacket.PACKET_ID, new UpdateTeamControllerBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, UpdateStatusEffectManipulationBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, new UpdateStatusEffectManipulationBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateUUIDListRelayBlockPacket.PACKET_ID, UpdateUUIDListRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUUIDListRelayBlockPacket.PACKET_ID, new UpdateUUIDListRelayBlockPacketReceiver());
