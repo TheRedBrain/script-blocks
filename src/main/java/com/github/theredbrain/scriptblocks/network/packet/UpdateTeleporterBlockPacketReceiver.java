@@ -38,10 +38,6 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		BlockPos accessPositionOffset = payload.accessPositionOffset();
 		boolean setAccessPosition = payload.setAccessPosition();
 
-		String statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
-		String statusEffectsToRemoveOnTeleport = payload.statusEffectsToRemoveOnTeleport();
-		String itemsToRemoveOnTeleport = payload.itemsToRemoveOnTeleport();
-
 		boolean onlyTeleportDimensionOwner = payload.onlyTeleportDimensionOwner();
 		boolean teleportTeam = payload.teleportTeam();
 
@@ -65,6 +61,9 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		BlockPos preTeleportTriggeredBlockPositionOffset = payload.preTeleportTriggeredBlockPositionOffset();
 		boolean preTeleportTriggeredBlockResets = payload.preTeleportTriggeredBlockResets();
+
+		BlockPos uuidListHandlerPositionOffset = payload.uuidListHandlerPositionOffset();
+
 		BlockPos postTeleportTriggeredBlockPositionOffset = payload.postTeleportTriggeredBlockPositionOffset();
 		boolean postTeleportTriggeredBlockResets = payload.postTeleportTriggeredBlockResets();
 
@@ -93,9 +92,6 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setTriggerActivation(triggerActivation);
 			teleporterBlockEntity.setAccessPositionOffset(accessPositionOffset);
 			teleporterBlockEntity.setSetAccessPosition(setAccessPosition);
-			teleporterBlockEntity.setStatusEffectsToDecrementLevelOnTeleport(statusEffectsToDecrementLevelOnTeleport);
-			teleporterBlockEntity.setStatusEffectsToRemoveOnTeleport(statusEffectsToRemoveOnTeleport);
-			teleporterBlockEntity.setItemsToRemoveOnTeleport(itemsToRemoveOnTeleport);
 			teleporterBlockEntity.setOnlyTeleportDimensionOwner(onlyTeleportDimensionOwner);
 			teleporterBlockEntity.setTeleportTeam(teleportTeam);
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);
@@ -117,6 +113,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setSendDataIdentifierDataIdentifier(sendDataIdentifierDataIdentifier);
 			teleporterBlockEntity.setSendDataValueDataIdentifier(sendDataValueDataIdentifier);
 			teleporterBlockEntity.setPreTeleportTriggeredBlock(new MutablePair<>(preTeleportTriggeredBlockPositionOffset, preTeleportTriggeredBlockResets));
+			teleporterBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerPositionOffset);
 			teleporterBlockEntity.setPostTeleportTriggeredBlock(new MutablePair<>(postTeleportTriggeredBlockPositionOffset, postTeleportTriggeredBlockResets));
 			teleporterBlockEntity.setTeleporterName(teleporterName);
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);

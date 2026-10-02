@@ -8,6 +8,7 @@ import com.github.theredbrain.scriptblocks.compatibility.RPGInventoryCompat;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataAttachments;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.EventsRegistry;
@@ -137,6 +138,7 @@ public class ScriptBlocks implements ModInitializer {
 		ScriptBlocksNetworkPackets.init();
 
 		// Registry
+		ScriptBlocksDataAttachments.bootstrap();
 		ScriptBlocksDataComponents.bootstrap();
 		ScriptBlocksBlocks.bootstrap();
 		ScriptBlocksConfigs.bootstrap();

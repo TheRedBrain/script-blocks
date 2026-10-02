@@ -9,20 +9,9 @@ import net.minecraft.util.math.BlockPos;
 public record TeleportFromTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
 		String accessPositionDimension,
-		BlockPos accessPositionOffset,
-		boolean setAccessPosition,
-		boolean teleportTeam,
-		String teleportationMode,
-		BlockPos directTeleportPositionOffset,
-		double directTeleportOrientationYaw,
-		double directTeleportOrientationPitch,
-		String spawnPointType,
 		String targetDimensionOwnerName,
 		String targetLocation,
 		String targetLocationEntrance,
-		String statusEffectsToDecrementLevelOnTeleport,
-		String statusEffectsToRemoveOnTeleport,
-		String itemsToRemoveOnTeleport,
 		String dataId,
 		String data
 ) implements CustomPayload {
@@ -32,17 +21,6 @@ public record TeleportFromTeleporterBlockPacket(
 	public TeleportFromTeleporterBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBoolean(),
-				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -55,20 +33,9 @@ public record TeleportFromTeleporterBlockPacket(
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
 		registryByteBuf.writeString(this.accessPositionDimension);
-		registryByteBuf.writeBlockPos(this.accessPositionOffset);
-		registryByteBuf.writeBoolean(this.setAccessPosition);
-		registryByteBuf.writeBoolean(this.teleportTeam);
-		registryByteBuf.writeString(this.teleportationMode);
-		registryByteBuf.writeBlockPos(this.directTeleportPositionOffset);
-		registryByteBuf.writeDouble(this.directTeleportOrientationYaw);
-		registryByteBuf.writeDouble(this.directTeleportOrientationPitch);
-		registryByteBuf.writeString(this.spawnPointType);
 		registryByteBuf.writeString(this.targetDimensionOwnerName);
 		registryByteBuf.writeString(this.targetLocation);
 		registryByteBuf.writeString(this.targetLocationEntrance);
-		registryByteBuf.writeString(this.statusEffectsToDecrementLevelOnTeleport);
-		registryByteBuf.writeString(this.statusEffectsToRemoveOnTeleport);
-		registryByteBuf.writeString(this.itemsToRemoveOnTeleport);
 		registryByteBuf.writeString(this.dataId);
 		registryByteBuf.writeString(this.data);
 	}

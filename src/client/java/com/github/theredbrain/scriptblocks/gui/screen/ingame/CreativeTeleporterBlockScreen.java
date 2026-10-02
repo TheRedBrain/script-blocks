@@ -69,6 +69,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.teleporter_block.data_providing_block_pos_offset_label");
 
 	private static final Text PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.teleporter_block.pre_teleport_triggered_block_position_offset_label");
+	private static final Text UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.uuid_list_provider.uuid_list_provider_position_offset");
 	private static final Text POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.teleporter_block.post_teleport_triggered_block_position_offset_label");
 
 	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
@@ -77,9 +78,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private static final Text TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_cancel_button_button_label.off");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.off");
-	private static final Text STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effects_to_decrement_tag_id_field");
-	private static final Text STATUS_EFFECTS_TO_REMOVE_TAG_ID_FIELD_TEXT = Text.translatable("gui.teleporter_block.status_effects_to_remove_tag_id_field");
-	private static final Text ITEMS_TO_REMOVE_FIELD_TEXT = Text.translatable("gui.teleporter_block.items_to_remove_field");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
@@ -101,9 +99,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget accessPositionOffsetXField;
 	private TextFieldWidget accessPositionOffsetYField;
 	private TextFieldWidget accessPositionOffsetZField;
-	private TextFieldWidget statusEffectsToDecrementTagIdField;
-	private TextFieldWidget statusEffectsToRemoveTagIdField;
-	private TextFieldWidget removedItemIdentifierField;
 	private CyclingButtonWidget<Boolean> toggleSetAccessPositionButton;
 	private CyclingButtonWidget<Boolean> toggleOnlyTeleportDimensionOwnerButton;
 	private CyclingButtonWidget<Boolean> toggleTeleportTeamButton;
@@ -139,6 +134,9 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	private TextFieldWidget preTeleportTriggeredBlockPositionOffsetZField;
 	private CyclingButtonWidget<Boolean> preTeleportToggleTriggeredBlockResetsButton;
 	private boolean preTeleportTriggeredBlockResets;
+	private TextFieldWidget uuidListProviderPositionOffsetXField;
+	private TextFieldWidget uuidListProviderPositionOffsetYField;
+	private TextFieldWidget uuidListProviderPositionOffsetZField;
 	private TextFieldWidget postTeleportTriggeredBlockPositionOffsetXField;
 	private TextFieldWidget postTeleportTriggeredBlockPositionOffsetYField;
 	private TextFieldWidget postTeleportTriggeredBlockPositionOffsetZField;
@@ -203,8 +201,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	private void addLocationToList(String identifier, String entrance, String dataId, String data) {
 		Text message = Text.literal("");
-//		if (Identifier.isValid(identifier)) {
-//		Location location = LocationsRegistry.registeredLocations.get(Identifier.tryParse(identifier));
 
 		Location location = null;
 		World world = this.teleporterBlock.getWorld();
@@ -234,9 +230,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		} else {
 			message = Text.translatable("gui.teleporter_block.location_not_found");
 		}
-//		} else {
-//			message = Text.translatable("gui.invalid_identifier");
-//		}
 		if (this.client != null && this.client.player != null && !message.getString().isEmpty()) {
 			this.client.player.sendMessage(message);
 		}
@@ -395,29 +388,24 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.removeLocationButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 95, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(1)));
 		this.removeLocationButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 120, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeLocationFromLocationList(2)));
 
-//		MutablePair<MutablePair<String, String>, MutablePair<String, String>> currentLocation = this.teleporterBlock.getCurrentLocation();
 		this.newLocationIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 4 - 150, 160, 150, 20, Text.empty());
 		this.newLocationIdentifierField.setMaxLength(128);
 		this.newLocationIdentifierField.setPlaceholder(Text.translatable("gui.teleporter_block.target_identifier_field.place_holder"));
-//		this.newLocationIdentifierField.setText(currentLocation.left.left);
 		this.addSelectableChild(this.newLocationIdentifierField);
 
 		this.newLocationEntranceField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 160, 150, 20, Text.empty());
 		this.newLocationEntranceField.setMaxLength(128);
 		this.newLocationEntranceField.setPlaceholder(Text.translatable("gui.teleporter_block.target_entrance_field.place_holder"));
-//		this.newLocationEntranceField.setText(currentLocation.left.right);
 		this.addSelectableChild(this.newLocationEntranceField);
 
 		this.newDataIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 185, 100, 20, Text.empty());
 		this.newDataIdField.setMaxLength(128);
 		this.newDataIdField.setPlaceholder(Text.translatable("gui.teleporter_block.new_data_id_field.place_holder"));
-//		this.newDataIdField.setText(currentLocation.right.left);
 		this.addSelectableChild(this.newDataIdField);
 
 		this.newDataField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 185, 100, 20, Text.empty());
 		this.newDataField.setMaxLength(128);
 		this.newDataField.setPlaceholder(Text.translatable("gui.teleporter_block.new_data_field.place_holder"));
-//		this.newDataField.setText(currentLocation.right.right);
 		this.addSelectableChild(this.newDataField);
 
 		this.addNewLocationButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_LOCATION_BUTTON_LABEL_TEXT, button -> this.addLocationToList(this.newLocationIdentifierField.getText(), this.newLocationEntranceField.getText(), this.newDataIdField.getText(), this.newDataField.getText())).dimensions(this.width / 2 - 154, 185, 100, 20).build());
@@ -491,52 +479,50 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		// --- status effect page ---
 
-		this.statusEffectsToDecrementTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
-		this.statusEffectsToDecrementTagIdField.setMaxLength(128);
-		this.statusEffectsToDecrementTagIdField.setText(this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport());
-		this.addSelectableChild(this.statusEffectsToDecrementTagIdField);
-
-		this.statusEffectsToRemoveTagIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
-		this.statusEffectsToRemoveTagIdField.setMaxLength(128);
-		this.statusEffectsToRemoveTagIdField.setText(this.teleporterBlock.getStatusEffectsToRemoveOnTeleport());
-		this.addSelectableChild(this.statusEffectsToRemoveTagIdField);
-
-		this.removedItemIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
-		this.removedItemIdentifierField.setMaxLength(128);
-		this.removedItemIdentifierField.setText(this.teleporterBlock.getItemsToRemoveOnTeleport());
-		this.addSelectableChild(this.removedItemIdentifierField);
-
-		this.preTeleportTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 50, 20, Text.empty());
+		this.preTeleportTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 50, 20, Text.empty());
 		this.preTeleportTriggeredBlockPositionOffsetXField.setMaxLength(128);
 		this.preTeleportTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getX()));
 		this.addSelectableChild(this.preTeleportTriggeredBlockPositionOffsetXField);
-		this.preTeleportTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 160, 50, 20, Text.empty());
+		this.preTeleportTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 90, 50, 20, Text.empty());
 		this.preTeleportTriggeredBlockPositionOffsetYField.setMaxLength(128);
 		this.preTeleportTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getY()));
 		this.addSelectableChild(this.preTeleportTriggeredBlockPositionOffsetYField);
-		this.preTeleportTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 160, 50, 20, Text.empty());
+		this.preTeleportTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 90, 50, 20, Text.empty());
 		this.preTeleportTriggeredBlockPositionOffsetZField.setMaxLength(128);
 		this.preTeleportTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.preTeleportTriggeredBlockPositionOffsetZField);
 		this.preTeleportTriggeredBlockResets = this.teleporterBlock.getPreTeleportTriggeredBlock().getRight();
-		this.preTeleportToggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.preTeleportTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 160, 150, 20, Text.empty(), (button, preTeleportTriggeredBlockResets) -> {
+		this.preTeleportToggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.preTeleportTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 90, 150, 20, Text.empty(), (button, preTeleportTriggeredBlockResets) -> {
 			this.preTeleportTriggeredBlockResets = preTeleportTriggeredBlockResets;
 		}));
 
-		this.postTeleportTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 195, 50, 20, Text.empty());
+		this.uuidListProviderPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
+		this.uuidListProviderPositionOffsetXField.setMaxLength(128);
+		this.uuidListProviderPositionOffsetXField.setText(Integer.toString(this.teleporterBlock.getUuidListHandlerPositionOffset().getX()));
+		this.addSelectableChild(this.uuidListProviderPositionOffsetXField);
+		this.uuidListProviderPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 125, 100, 20, Text.empty());
+		this.uuidListProviderPositionOffsetYField.setMaxLength(128);
+		this.uuidListProviderPositionOffsetYField.setText(Integer.toString(this.teleporterBlock.getUuidListHandlerPositionOffset().getY()));
+		this.addSelectableChild(this.uuidListProviderPositionOffsetYField);
+		this.uuidListProviderPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 125, 100, 20, Text.empty());
+		this.uuidListProviderPositionOffsetZField.setMaxLength(128);
+		this.uuidListProviderPositionOffsetZField.setText(Integer.toString(this.teleporterBlock.getUuidListHandlerPositionOffset().getZ()));
+		this.addSelectableChild(this.uuidListProviderPositionOffsetZField);
+
+		this.postTeleportTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 50, 20, Text.empty());
 		this.postTeleportTriggeredBlockPositionOffsetXField.setMaxLength(128);
 		this.postTeleportTriggeredBlockPositionOffsetXField.setText(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getX()));
 		this.addSelectableChild(this.postTeleportTriggeredBlockPositionOffsetXField);
-		this.postTeleportTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 195, 50, 20, Text.empty());
+		this.postTeleportTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 160, 50, 20, Text.empty());
 		this.postTeleportTriggeredBlockPositionOffsetYField.setMaxLength(128);
 		this.postTeleportTriggeredBlockPositionOffsetYField.setText(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getY()));
 		this.addSelectableChild(this.postTeleportTriggeredBlockPositionOffsetYField);
-		this.postTeleportTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 195, 50, 20, Text.empty());
+		this.postTeleportTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 160, 50, 20, Text.empty());
 		this.postTeleportTriggeredBlockPositionOffsetZField.setMaxLength(128);
 		this.postTeleportTriggeredBlockPositionOffsetZField.setText(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.postTeleportTriggeredBlockPositionOffsetZField);
 		this.postTeleportTriggeredBlockResets = this.teleporterBlock.getPostTeleportTriggeredBlock().getRight();
-		this.postTeleportToggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.postTeleportTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 195, 150, 20, Text.empty(), (button, postTeleportTriggeredBlockResets) -> {
+		this.postTeleportToggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.postTeleportTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 160, 150, 20, Text.empty(), (button, postTeleportTriggeredBlockResets) -> {
 			this.postTeleportTriggeredBlockResets = postTeleportTriggeredBlockResets;
 		}));
 
@@ -653,14 +639,14 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.sendDataIdentifierDataIdentifierField.setVisible(false);
 		this.sendDataValueDataIdentifierField.setVisible(false);
 
-		this.statusEffectsToDecrementTagIdField.setVisible(false);
-		this.statusEffectsToRemoveTagIdField.setVisible(false);
-		this.removedItemIdentifierField.setVisible(false);
-
 		this.preTeleportTriggeredBlockPositionOffsetXField.setVisible(false);
 		this.preTeleportTriggeredBlockPositionOffsetYField.setVisible(false);
 		this.preTeleportTriggeredBlockPositionOffsetZField.setVisible(false);
 		this.preTeleportToggleTriggeredBlockResetsButton.visible = false;
+
+		this.uuidListProviderPositionOffsetXField.setVisible(false);
+		this.uuidListProviderPositionOffsetYField.setVisible(false);
+		this.uuidListProviderPositionOffsetZField.setVisible(false);
 
 		this.postTeleportTriggeredBlockPositionOffsetXField.setVisible(false);
 		this.postTeleportTriggeredBlockPositionOffsetYField.setVisible(false);
@@ -763,14 +749,14 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ON_TELEPORT_EVENTS) {
 
-			this.statusEffectsToDecrementTagIdField.setVisible(true);
-			this.statusEffectsToRemoveTagIdField.setVisible(true);
-			this.removedItemIdentifierField.setVisible(true);
-
 			this.preTeleportTriggeredBlockPositionOffsetXField.setVisible(true);
 			this.preTeleportTriggeredBlockPositionOffsetYField.setVisible(true);
 			this.preTeleportTriggeredBlockPositionOffsetZField.setVisible(true);
 			this.preTeleportToggleTriggeredBlockResetsButton.visible = true;
+
+			this.uuidListProviderPositionOffsetXField.setVisible(true);
+			this.uuidListProviderPositionOffsetYField.setVisible(true);
+			this.uuidListProviderPositionOffsetZField.setVisible(true);
 
 			this.postTeleportTriggeredBlockPositionOffsetXField.setVisible(true);
 			this.postTeleportTriggeredBlockPositionOffsetYField.setVisible(true);
@@ -837,7 +823,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string15 = this.newLocationEntranceField.getText();
 		String string16 = this.newDataIdField.getText();
 		String string17 = this.newDataField.getText();
-		String string18 = this.statusEffectsToDecrementTagIdField.getText();
 		String string19 = this.teleporterNameField.getText();
 		String string20 = this.currentTargetOwnerLabelField.getText();
 		String string21 = this.currentTargetIdentifierLabelField.getText();
@@ -847,14 +832,15 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		String string25 = this.locationEntranceField.getText();
 		String string26 = this.locationDataIdField.getText();
 		String string27 = this.locationDataField.getText();
-		String string28 = this.statusEffectsToRemoveTagIdField.getText();
-		String string29 = this.removedItemIdentifierField.getText();
 		String string30 = this.preTeleportTriggeredBlockPositionOffsetXField.getText();
 		String string31 = this.preTeleportTriggeredBlockPositionOffsetYField.getText();
 		String string32 = this.preTeleportTriggeredBlockPositionOffsetZField.getText();
-		String string33 = this.postTeleportTriggeredBlockPositionOffsetXField.getText();
-		String string34 = this.postTeleportTriggeredBlockPositionOffsetYField.getText();
-		String string35 = this.postTeleportTriggeredBlockPositionOffsetZField.getText();
+		String string33 = this.uuidListProviderPositionOffsetXField.getText();
+		String string34 = this.uuidListProviderPositionOffsetYField.getText();
+		String string35 = this.uuidListProviderPositionOffsetZField.getText();
+		String string36 = this.postTeleportTriggeredBlockPositionOffsetXField.getText();
+		String string37 = this.postTeleportTriggeredBlockPositionOffsetYField.getText();
+		String string38 = this.postTeleportTriggeredBlockPositionOffsetZField.getText();
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> list1 = new ArrayList<>(this.locationsList);
 		this.init(client, width, height);
 		this.creativeScreenPage = var;
@@ -903,7 +889,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.newLocationEntranceField.setText(string15);
 		this.newDataIdField.setText(string16);
 		this.newDataField.setText(string17);
-		this.statusEffectsToDecrementTagIdField.setText(string18);
 		this.teleporterNameField.setText(string19);
 		this.currentTargetOwnerLabelField.setText(string20);
 		this.currentTargetIdentifierLabelField.setText(string21);
@@ -913,14 +898,15 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.locationEntranceField.setText(string25);
 		this.locationDataIdField.setText(string26);
 		this.locationDataField.setText(string27);
-		this.statusEffectsToRemoveTagIdField.setText(string28);
-		this.removedItemIdentifierField.setText(string29);
 		this.preTeleportTriggeredBlockPositionOffsetXField.setText(string30);
 		this.preTeleportTriggeredBlockPositionOffsetYField.setText(string31);
 		this.preTeleportTriggeredBlockPositionOffsetZField.setText(string32);
-		this.postTeleportTriggeredBlockPositionOffsetXField.setText(string33);
-		this.postTeleportTriggeredBlockPositionOffsetYField.setText(string34);
-		this.postTeleportTriggeredBlockPositionOffsetZField.setText(string35);
+		this.uuidListProviderPositionOffsetXField.setText(string33);
+		this.uuidListProviderPositionOffsetYField.setText(string34);
+		this.uuidListProviderPositionOffsetZField.setText(string35);
+		this.postTeleportTriggeredBlockPositionOffsetXField.setText(string36);
+		this.postTeleportTriggeredBlockPositionOffsetYField.setText(string37);
+		this.postTeleportTriggeredBlockPositionOffsetZField.setText(string38);
 		this.locationsList.clear();
 		this.locationsList.addAll(list1);
 	}
@@ -1076,21 +1062,17 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ON_TELEPORT_EVENTS) {
 
-			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_DECREMENT_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-			this.statusEffectsToDecrementTagIdField.render(context, mouseX, mouseY, delta);
-
-			context.drawTextWithShadow(this.textRenderer, STATUS_EFFECTS_TO_REMOVE_TAG_ID_FIELD_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-			this.statusEffectsToRemoveTagIdField.render(context, mouseX, mouseY, delta);
-
-			context.drawTextWithShadow(this.textRenderer, ITEMS_TO_REMOVE_FIELD_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			this.removedItemIdentifierField.render(context, mouseX, mouseY, delta);
-
-			context.drawTextWithShadow(this.textRenderer, PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.preTeleportTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.preTeleportTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.preTeleportTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.uuidListProviderPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.uuidListProviderPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.uuidListProviderPositionOffsetZField.render(context, mouseX, mouseY, delta);
+
+			context.drawTextWithShadow(this.textRenderer, POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
 			this.postTeleportTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.postTeleportTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.postTeleportTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
@@ -1112,37 +1094,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	private void updateTeleporterBlock() {
-
-		BlockPos directTeleportPositionOffset;
-		double directTeleportPositionOffsetYaw;
-		double directTeleportPositionOffsetPitch;
-		if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
-			directTeleportPositionOffset = new BlockPos(
-					ItemUtils.parseInt(this.directTeleportPositionOffsetXField.getText()),
-					ItemUtils.parseInt(this.directTeleportPositionOffsetYField.getText()),
-					ItemUtils.parseInt(this.directTeleportPositionOffsetZField.getText())
-			);
-
-			directTeleportPositionOffsetYaw = ItemUtils.parseDouble(this.directTeleportOrientationYawField.getText());
-			directTeleportPositionOffsetPitch = ItemUtils.parseDouble(this.directTeleportOrientationPitchField.getText());
-		} else {
-			directTeleportPositionOffset = new BlockPos(0, 0, 0);
-			directTeleportPositionOffsetYaw = 0.0;
-			directTeleportPositionOffsetPitch = 0.0;
-		}
-		TeleporterBlockEntity.SpawnPointType spawnPointType;
-		if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
-
-			spawnPointType = this.spawnPointType;
-
-		} else {
-			spawnPointType = TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN;
-		}
-
-		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = new ArrayList<>();
-		if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
-			locationsList = this.locationsList;
-		}
 
 		ClientPlayNetworking.send(new UpdateTeleporterBlockPacket(
 				this.teleporterBlock.getPos(),
@@ -1166,17 +1117,18 @@ public class CreativeTeleporterBlockScreen extends Screen {
 						ItemUtils.parseInt(this.accessPositionOffsetZField.getText())
 				),
 				this.setAccessPosition,
-				this.statusEffectsToDecrementTagIdField.getText(),
-				this.statusEffectsToRemoveTagIdField.getText(),
-				this.removedItemIdentifierField.getText(),
 				this.onlyTeleportDimensionOwner,
 				this.teleportTeam,
 				this.teleportationMode.asString(),
-				directTeleportPositionOffset,
-				directTeleportPositionOffsetYaw,
-				directTeleportPositionOffsetPitch,
-				spawnPointType.asString(),
-				locationsList,
+				new BlockPos(
+						ItemUtils.parseInt(this.directTeleportPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.directTeleportPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.directTeleportPositionOffsetZField.getText())
+				),
+				ItemUtils.parseDouble(this.directTeleportOrientationYawField.getText()),
+				ItemUtils.parseDouble(this.directTeleportOrientationPitchField.getText()),
+				this.spawnPointType.asString(),
+				this.locationsList,
 				new MutablePair<>(new MutablePair<>(this.locationIdentifierField.getText(), this.locationEntranceField.getText()), new MutablePair<>(this.locationDataIdField.getText(), this.locationDataField.getText())),
 				new BlockPos(
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
@@ -1193,6 +1145,11 @@ public class CreativeTeleporterBlockScreen extends Screen {
 						ItemUtils.parseInt(this.preTeleportTriggeredBlockPositionOffsetZField.getText())
 				),
 				this.preTeleportTriggeredBlockResets,
+				new BlockPos(
+						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetZField.getText())
+				),
 				new BlockPos(
 						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetXField.getText()),
 						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetYField.getText()),

@@ -6,6 +6,8 @@
 - added "Data Modification Block", has currently these functions:
   - add integer values to data when used like a "Data Relay Block"
   - perform modulo operation on data when used like a "Data Relay Block"
+- added location cooldowns
+  - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started when the player leaves a location or dies while inside the location. 
 
 ### UUID List Handlers
 
@@ -17,8 +19,17 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 
 ## Changes
 
-- the Teleporter Block now triggers another block before the teleport and a second block after the teleport
-  - as usual, the block position offset etc. are configurable in the block's screen
+### Teleporter Block Rework
+
+The Teleporter Block has become increasingly complex. This rework extracts some behaviour into other blocks
+  - the Teleporter Block now triggers another block before the teleport and a second block after the teleport
+    - as usual, the block position offset etc. are configurable in the block's screen
+  - UUIDs of teleported players (+ their teams if this is enabled) are now sent to a UUID List Handler block
+    - as usual, the block position offset etc. are configurable in the block's screen
+  - removed status effect removal/amplifier decrementing on teleporting. This behaviour can be restored by using the new "Status Effect Manipulation Block".
+  - removed item removal on teleporting
+  - added support for location cooldowns
+  - direct block interactions now check for the "dimension owner only" setting
 - changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
 
 ## Fixes

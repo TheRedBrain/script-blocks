@@ -218,7 +218,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 					((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
 					return ActionResult.success(world.isClient);
 				} else if (!world.isClient) {
-					player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+					TeleporterBlockEntity.openNonCreativeScreen(world, player, pos, state, teleporterBlockEntity);
 					return ActionResult.CONSUME;
 				}
 			}

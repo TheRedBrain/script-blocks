@@ -853,24 +853,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		if (this.isCurrentLocationPublic) {
 			currentTargetOwnerName = "";
 		}
-//		ScriptBlocks.info("TeleportBlockScreen.teleport, currentTargetIdentifier: " + this.currentTargetIdentifier);
 		ClientPlayNetworking.send(new TeleportFromTeleporterBlockPacket(
 				this.teleporterBlock.getPos(),
 				currentWorld,
-				this.teleporterBlock.getAccessPositionOffset(),
-				this.teleporterBlock.getSetAccessPosition(),
-				this.teleporterBlock.teleportTeam(),
-				this.teleporterBlock.getTeleportationMode().asString(),
-				this.teleporterBlock.getDirectTeleportPositionOffset(),
-				this.teleporterBlock.getDirectTeleportOrientationYaw(),
-				this.teleporterBlock.getDirectTeleportOrientationPitch(),
-				this.teleporterBlock.getSpawnPointType().asString(),
 				currentTargetOwnerName,
 				this.currentTargetIdentifier,
 				this.currentTargetEntrance,
-				this.teleporterBlock.getStatusEffectsToDecrementLevelOnTeleport(),
-				this.teleporterBlock.getStatusEffectsToRemoveOnTeleport(),
-				this.teleporterBlock.getItemsToRemoveOnTeleport(),
 				this.currentTargetEntranceDataId,
 				this.currentTargetEntranceData
 		));

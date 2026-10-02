@@ -8,24 +8,21 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
+import com.github.theredbrain.scriptblocks.util.LocationCooldownsHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -35,9 +32,13 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportFromTeleporterBlockPacket> {
 	@Override
@@ -48,25 +49,11 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
 		String accessPositionDimension = payload.accessPositionDimension();
-		BlockPos accessPositionOffset = payload.accessPositionOffset();
-		boolean setAccessPosition = payload.setAccessPosition();
-
-		boolean teleportTeam = payload.teleportTeam();
-
-		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.byName(payload.teleportationMode()).orElse(TeleporterBlockEntity.TeleportationMode.DIRECT);
-
-		BlockPos directTeleportPositionOffset = payload.directTeleportPositionOffset();
-		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
-		double directTeleportOrientationPitch = payload.directTeleportOrientationPitch();
-
-		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.byName(payload.spawnPointType()).orElse(TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN);
 
 		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
 		String targetLocation = payload.targetLocation();
 		String targetLocationEntrance = payload.targetLocationEntrance();
-		String statusEffectsToDecrementLevelOnTeleport = payload.statusEffectsToDecrementLevelOnTeleport();
-		String statusEffectsToRemoveOnTeleport = payload.statusEffectsToRemoveOnTeleport();
-		String removedItemIdentifier = payload.itemsToRemoveOnTeleport();
+
 		String dataId = payload.dataId();
 		String data = payload.data();
 
@@ -82,6 +69,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		boolean playerHadKeyItem = true;
 		boolean locationWasReset = false;
 		boolean targetLocationIsPublic = false;
+		boolean locationCooldownWasUp = true;
+		String locationToCoolDown = "";
 
 		BlockEntity blockEntity2 = serverWorld.getBlockEntity(teleportBlockPosition);
 
@@ -92,11 +81,21 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		// triggered as early as possible to allow the trigger results to influence the spawn point calculation
 		teleporterBlockEntity.preTeleportTrigger();
 
+		BlockPos accessPositionOffset = teleporterBlockEntity.getAccessPositionOffset();
+		boolean setAccessPosition = teleporterBlockEntity.getSetAccessPosition();
+
+		boolean teleportTeam = teleporterBlockEntity.teleportTeam();
+
+		TeleporterBlockEntity.TeleportationMode teleportationMode = teleporterBlockEntity.getTeleportationMode();
+
+		TeleporterBlockEntity.SpawnPointType spawnPointType = teleporterBlockEntity.getSpawnPointType();
+
 		if (teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
 			targetWorld = serverWorld;
+			BlockPos directTeleportPositionOffset = teleporterBlockEntity.getDirectTeleportPositionOffset();
 			targetPos = new BlockPos(teleportBlockPosition.getX() + directTeleportPositionOffset.getX(), teleportBlockPosition.getY() + directTeleportPositionOffset.getY(), teleportBlockPosition.getZ() + directTeleportPositionOffset.getZ());
-			targetYaw = directTeleportOrientationYaw;
-			targetPitch = directTeleportOrientationPitch;
+			targetYaw = teleporterBlockEntity.getDirectTeleportOrientationYaw();
+			targetPitch = teleporterBlockEntity.getDirectTeleportOrientationPitch();
 
 			if (targetWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
@@ -182,6 +181,10 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					if (!(blockEntity instanceof LocationControlBlockEntity)) {
 
+						if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+							DebuggingHelper.sendDebuggingMessage("manually place location structure", serverPlayerEntity);
+						}
+
 						// TODO don't execute commands, find a better way
 						String forceLoadAddCommand = "execute in " + targetWorld.getRegistryKey().getValue() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
 						server.getCommandManager().executeWithPrefix(server.getCommandSource(), forceLoadAddCommand);
@@ -238,81 +241,100 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						targetYaw = entrance.getRight().getLeft();
 						targetPitch = entrance.getRight().getRight();
 
-						for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, targetLocationEntrance)) {
+						long entranceCooldown = 0;
+						long serverTime = server.getOverworld().getTime();
 
-							ItemStack keyStack = itemCost.itemStack();
-							int keyCount = keyStack.getCount();
-							PlayerInventory playerInventory = serverPlayerEntity.getInventory();
+						long currentLocationCooldown = LocationCooldownsHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
+						if (currentLocationCooldown > 0 && serverTime - currentLocationCooldown < entranceCooldown) {
+							locationCooldownWasUp = false;
+							serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown"));
+						}
 
-							for (int i = 0; i < playerInventory.size(); i++) {
-								ItemStack currentItemStack = playerInventory.getStack(i);
-								if (ItemStack.areItemsAndComponentsEqual(keyStack, currentItemStack)) {
-									ItemStack currentItemStackCopy = currentItemStack.copy();
-									int currentItemStackCount = currentItemStackCopy.getCount();
-									if (currentItemStackCount >= keyCount) {
-										currentItemStackCopy.setCount(currentItemStackCount - keyCount);
-										if (itemCost.consumeStack()) {
-											playerInventory.setStack(i, currentItemStackCopy);
+						if (teleportTeam) {
+							Team team = serverPlayerEntity.getScoreboardTeam();
+							if (team != null) {
+								for (String playerString : team.getPlayerList()) {
+									ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
+									if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
+
+										currentLocationCooldown = LocationCooldownsHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
+										if (currentLocationCooldown > 0 && serverTime - currentLocationCooldown < entranceCooldown) {
+											locationCooldownWasUp = false;
+											serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown_for_team_member", playerString));
+											teamServerPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown"));
 										}
-										keyCount = 0;
-										break;
-									} else {
-										if (itemCost.consumeStack()) {
-											playerInventory.setStack(i, ItemStack.EMPTY);
-										}
-										keyCount = keyCount - currentItemStackCount;
+
 									}
 								}
 							}
-							if (keyCount > 0) {
-								playerHadKeyItem = false;
-								break;
-							}
 						}
 
-						if (setAccessPosition && Identifier.tryParse(accessPositionDimension) != null) {
-							((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$setLocationAccessPosition(new MutablePair<>(accessPositionDimension, teleportBlockPosition.add(accessPositionOffset.getX(), accessPositionOffset.getY(), accessPositionOffset.getZ())));
+						if (locationCooldownWasUp) {
+							for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, targetLocationEntrance)) {
+
+								ItemStack keyStack = itemCost.itemStack();
+								int keyCount = keyStack.getCount();
+								PlayerInventory playerInventory = serverPlayerEntity.getInventory();
+
+								for (int i = 0; i < playerInventory.size(); i++) {
+									ItemStack currentItemStack = playerInventory.getStack(i);
+									if (ItemStack.areItemsAndComponentsEqual(keyStack, currentItemStack)) {
+										ItemStack currentItemStackCopy = currentItemStack.copy();
+										int currentItemStackCount = currentItemStackCopy.getCount();
+										if (currentItemStackCount >= keyCount) {
+											currentItemStackCopy.setCount(currentItemStackCount - keyCount);
+											if (itemCost.consumeStack()) {
+												playerInventory.setStack(i, currentItemStackCopy);
+											}
+											keyCount = 0;
+											break;
+										} else {
+											if (itemCost.consumeStack()) {
+												playerInventory.setStack(i, ItemStack.EMPTY);
+											}
+											keyCount = keyCount - currentItemStackCount;
+										}
+									}
+								}
+								if (keyCount > 0) {
+									playerHadKeyItem = false;
+									break;
+								}
+							}
+							if (playerHadKeyItem) {
+								locationToCoolDown = targetLocation;
+							}
 						}
 					}
 				}
 			}
 		}
 
-		if (targetWorld != null && targetPos != null && playerHadKeyItem) {
+		if (targetWorld != null && targetPos != null && playerHadKeyItem && locationCooldownWasUp) {
 
-			// send UUID of serverPlayerEntity
+			String validatedAccessPositionDimension = "";
+			BlockPos actualAccessPosition = null;
+			List<UUID> uuidList = new ArrayList<>();
 
-			TagKey<StatusEffect> removalTag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToRemoveOnTeleport));
-			TagKey<StatusEffect> decrementingTag = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(statusEffectsToDecrementLevelOnTeleport));
-			serverPlayerEntity.fallDistance = 0;
-			serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
-			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
-				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
-				if (!targetLocationIsPublic) {
-					DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
-				}
+			if (setAccessPosition && Identifier.tryParse(accessPositionDimension) != null) {
+				validatedAccessPositionDimension = accessPositionDimension;
+				actualAccessPosition = teleportBlockPosition.add(accessPositionOffset.getX(), accessPositionOffset.getY(), accessPositionOffset.getZ());
 			}
 
-			serverPlayerEntity.closeHandledScreen();
+			this.handleTeleport(
+					serverPlayerEntity,
+					targetWorld,
+					targetPos,
+					targetYaw,
+					targetPitch,
+					targetLocationIsPublic,
+					targetDimensionOwnerName,
+					validatedAccessPositionDimension,
+					actualAccessPosition,
+					locationToCoolDown
+			);
 
-			for (StatusEffectInstance statusEffectInstance : serverPlayerEntity.getStatusEffects().stream().toList()) {
-				RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-				if (statusEffectRegistryEntry.value() == ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
-					serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
-					continue;
-				}
-				if (statusEffectRegistryEntry.isIn(decrementingTag)) {
-					int oldAmplifier = statusEffectInstance.getAmplifier();
-					if (oldAmplifier <= 0) {
-						serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
-					} else {
-						StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-						serverPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
-						serverPlayerEntity.addStatusEffect(newStatusEffectInstance);
-					}
-				}
-			}
-			PlayerEntityHelper.removeItemsOnTeleport(serverPlayerEntity, removedItemIdentifier);
+			uuidList.add(serverPlayerEntity.getUuid());
 
 			if (teleportTeam) {
 				Team team = serverPlayerEntity.getScoreboardTeam();
@@ -321,40 +343,27 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
 						if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 
-							// send UUID of teamServerPlayerEntity
+							this.handleTeleport(
+									teamServerPlayerEntity,
+									targetWorld,
+									targetPos,
+									targetYaw,
+									targetPitch,
+									targetLocationIsPublic,
+									targetDimensionOwnerName,
+									validatedAccessPositionDimension,
+									actualAccessPosition,
+									locationToCoolDown
+							);
 
-							teamServerPlayerEntity.fallDistance = 0;
-							teamServerPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
-							if (DebuggingHelper.isTeleporterLoggingEnabled()) {
-								DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, teamServerPlayerEntity);
-								if (!targetLocationIsPublic) {
-									DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, teamServerPlayerEntity);
-								}
-							}
-							teamServerPlayerEntity.closeHandledScreen();
+							uuidList.add(teamServerPlayerEntity.getUuid());
 
-							for (StatusEffectInstance statusEffectInstance : teamServerPlayerEntity.getStatusEffects().stream().toList()) {
-								RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-								if (statusEffectRegistryEntry.value() == ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT.value() || statusEffectRegistryEntry.isIn(removalTag)) {
-									teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
-									continue;
-								}
-								if (statusEffectRegistryEntry.isIn(decrementingTag)) {
-									int oldAmplifier = statusEffectInstance.getAmplifier();
-									if (oldAmplifier <= 0) {
-										teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
-									} else {
-										StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-										teamServerPlayerEntity.removeStatusEffect(statusEffectRegistryEntry);
-										teamServerPlayerEntity.addStatusEffect(newStatusEffectInstance);
-									}
-								}
-							}
-							PlayerEntityHelper.removeItemsOnTeleport(teamServerPlayerEntity, removedItemIdentifier);
 						}
 					}
 				}
 			}
+
+			teleporterBlockEntity.sendPostTeleportUUIDList(uuidList);
 
 			teleporterBlockEntity.postTeleportTrigger();
 
@@ -374,12 +383,35 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			} else {
 				if (!playerHadKeyItem) {
 					serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.key_item_required"));
-				} else {
-					if (!locationWasGeneratedByOwner) {
-						serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_not_visited_by_owner"));
-					}
+				} else if (!locationWasGeneratedByOwner) {
+					serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_not_visited_by_owner"));
 				}
 			}
 		}
+	}
+
+	private void handleTeleport(ServerPlayerEntity serverPlayerEntity, ServerWorld targetWorld, BlockPos targetPos, double targetYaw, double targetPitch, boolean targetLocationIsPublic, String targetDimensionOwnerName, String accessPositionDimension, @Nullable BlockPos accessPosition, String locationToCoolDown) {
+
+		serverPlayerEntity.fallDistance = 0;
+		serverPlayerEntity.teleport(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(PositionFlag.class), (float) targetYaw, (float) targetPitch);
+		if (DebuggingHelper.isTeleporterLoggingEnabled()) {
+			DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.getRegistryKey().getValue() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
+			if (!targetLocationIsPublic) {
+				DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
+			}
+		}
+
+		if (!accessPositionDimension.isEmpty() && accessPosition != null) {
+			((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$setLocationAccessPosition(new MutablePair<>(accessPositionDimension, accessPosition));
+		}
+
+		if (!locationToCoolDown.isEmpty()) {
+			LocationCooldownsHelper.playerEntersLocation(serverPlayerEntity, locationToCoolDown);
+		}
+
+		serverPlayerEntity.closeHandledScreen();
+
+		serverPlayerEntity.removeStatusEffect(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT);
+
 	}
 }

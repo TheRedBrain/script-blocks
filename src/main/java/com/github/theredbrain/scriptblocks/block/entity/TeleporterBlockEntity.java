@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory<TeleporterBlockScreenHandler.TeleporterBlockData>, Triggerable {
 
@@ -53,8 +54,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private BlockPos accessPositionOffset = new BlockPos(0, 0, 0);
 	private boolean setAccessPosition = false;
 
+	@Deprecated
 	private String statusEffectsToDecrementLevelOnTeleport = "";
+	@Deprecated
 	private String statusEffectsToRemoveOnTeleport = "";
+	@Deprecated
 	private String itemsToRemoveOnTeleport = "";
 
 	private boolean onlyTeleportDimensionOwner = false;
@@ -84,6 +88,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private String sendDataValueDataIdentifier = "";
 
 	private MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private BlockPos uuidListHandlerPositionOffset = new BlockPos(0, 0, 0);
 	private MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
@@ -170,6 +175,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbt.putInt("pre_teleport_triggered_block_position_offset_y", this.preTeleportTriggeredBlock.getLeft().getY());
 		nbt.putInt("pre_teleport_triggered_block_position_offset_z", this.preTeleportTriggeredBlock.getLeft().getZ());
 		nbt.putBoolean("pre_teleport_triggered_block_resets", this.preTeleportTriggeredBlock.getRight());
+
+		nbt.putInt("uuid_list_handler_position_offset_x", this.uuidListHandlerPositionOffset.getX());
+		nbt.putInt("uuid_list_handler_position_offset_y", this.uuidListHandlerPositionOffset.getY());
+		nbt.putInt("uuid_list_handler_position_offset_z", this.uuidListHandlerPositionOffset.getZ());
+
 		nbt.putInt("post_teleport_triggered_block_position_offset_x", this.postTeleportTriggeredBlock.getLeft().getX());
 		nbt.putInt("post_teleport_triggered_block_position_offset_y", this.postTeleportTriggeredBlock.getLeft().getY());
 		nbt.putInt("post_teleport_triggered_block_position_offset_z", this.postTeleportTriggeredBlock.getLeft().getZ());
@@ -227,10 +237,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 		this.setAccessPosition = nbt.getBoolean("setAccessPosition");
 
+		// TODO deprecation warning
 		this.statusEffectsToDecrementLevelOnTeleport = nbt.getString("statusEffectsToDecrementLevelOnTeleport");
 
+		// TODO deprecation warning
 		this.statusEffectsToRemoveOnTeleport = nbt.getString("statusEffectsToRemoveOnTeleport");
 
+		// TODO deprecation warning
 		this.itemsToRemoveOnTeleport = nbt.getString("itemsToRemoveOnTeleport");
 
 		this.onlyTeleportDimensionOwner = nbt.getBoolean("onlyTeleportDimensionOwner");
@@ -271,6 +284,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_y"), -48, 48),
 				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_z"), -48, 48)
 		), nbt.getBoolean("pre_teleport_triggered_block_resets"));
+
+		this.uuidListHandlerPositionOffset = new BlockPos(
+				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z"), -48, 48)
+		);
+
 		this.postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
 				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_x"), -48, 48),
 				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_y"), -48, 48),
@@ -322,16 +342,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 				teleporterBlockEntity.calculateActivationBox = false;
 			}
 			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, teleporterBlockEntity.activationArea);
-			String worldName = world.getRegistryKey().getValue().getPath();
 			for (PlayerEntity playerEntity : list) {
 				if (!playerEntity.isCreative()) {
-					if (!playerEntity.hasStatusEffect(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT)) {
-						if (!teleporterBlockEntity.onlyTeleportDimensionOwner || playerEntity.getUuid().toString().equals(worldName)) {
-							playerEntity.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-						} else {
-							playerEntity.sendMessage(Text.translatable("hud.message.onlyDimensionOwnerCanTeleport"), true);
-						}
-					}
+					openNonCreativeScreen(world, playerEntity, pos, state, teleporterBlockEntity);
+
 					// prevents continuous opening of the screen
 					playerEntity.setStatusEffect(
 							new StatusEffectInstance(
@@ -345,7 +359,18 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 							playerEntity
 					);
 				}
+			}
+		}
+	}
 
+	public static void openNonCreativeScreen(World world, PlayerEntity player, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
+
+		if (!player.hasStatusEffect(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT)) {
+			if (!teleporterBlockEntity.onlyTeleportDimensionOwner || player.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
+				// TODO check for "prevent teleport" items
+				player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+			} else {
+				player.sendMessage(Text.translatable("hud.message.onlyDimensionOwnerCanTeleport"), true);
 			}
 		}
 	}
@@ -360,6 +385,15 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
 					triggerable.trigger();
 				}
+			}
+		}
+	}
+
+	public void sendPostTeleportUUIDList(List<UUID> uuidList) {
+		if (this.world != null && !this.uuidListHandlerPositionOffset.equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.uuidListHandlerPositionOffset.getX(), this.pos.getY() + this.uuidListHandlerPositionOffset.getY(), this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ()));
+			if (blockEntity != this && blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				handlesUUIDList.handleUUIDList(uuidList, false);
 			}
 		}
 	}
@@ -490,30 +524,6 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.setAccessPosition = setAccessPosition;
 	}
 
-	public String getStatusEffectsToDecrementLevelOnTeleport() {
-		return this.statusEffectsToDecrementLevelOnTeleport;
-	}
-
-	public void setStatusEffectsToDecrementLevelOnTeleport(String statusEffectsToDecrementLevelOnTeleport) {
-		this.statusEffectsToDecrementLevelOnTeleport = statusEffectsToDecrementLevelOnTeleport;
-	}
-
-	public String getStatusEffectsToRemoveOnTeleport() {
-		return this.statusEffectsToRemoveOnTeleport;
-	}
-
-	public void setStatusEffectsToRemoveOnTeleport(String statusEffectsToRemoveOnTeleport) {
-		this.statusEffectsToRemoveOnTeleport = statusEffectsToRemoveOnTeleport;
-	}
-
-	public String getItemsToRemoveOnTeleport() {
-		return this.itemsToRemoveOnTeleport;
-	}
-
-	public void setItemsToRemoveOnTeleport(String itemsToRemoveOnTeleport) {
-		this.itemsToRemoveOnTeleport = itemsToRemoveOnTeleport;
-	}
-
 	public boolean onlyTeleportDimensionOwner() {
 		return onlyTeleportDimensionOwner;
 	}
@@ -639,6 +649,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.preTeleportTriggeredBlock = preTeleportTriggeredBlock;
 	}
 
+	public BlockPos getUuidListHandlerPositionOffset() {
+		return this.uuidListHandlerPositionOffset;
+	}
+
+	public void setUuidListHandlerPositionOffset(BlockPos uuidListHandlerPositionOffset) {
+		this.uuidListHandlerPositionOffset = uuidListHandlerPositionOffset;
+	}
 	public MutablePair<BlockPos, Boolean> getPostTeleportTriggeredBlock() {
 		return this.postTeleportTriggeredBlock;
 	}
@@ -763,7 +780,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 	}
 
-	public static enum TeleportationMode implements StringIdentifiable {
+	public enum TeleportationMode implements StringIdentifiable {
 		DIRECT("direct"),
 		SPAWN_POINTS("spawn_points"),
 		LOCATIONS("locations"),
@@ -771,7 +788,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 		private final String name;
 
-		private TeleportationMode(String name) {
+		TeleportationMode(String name) {
 			this.name = name;
 		}
 
@@ -789,14 +806,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 	}
 
-	public static enum SpawnPointType implements StringIdentifiable {
+	public enum SpawnPointType implements StringIdentifiable {
 		WORLD_SPAWN("world_spawn"),
 		PLAYER_SPAWN("player_spawn"),
 		LOCATION_ACCESS_POSITION("location_access_position");
 
 		private final String name;
 
-		private SpawnPointType(String name) {
+		SpawnPointType(String name) {
 			this.name = name;
 		}
 

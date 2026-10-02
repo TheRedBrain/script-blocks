@@ -21,9 +21,6 @@ public record UpdateTeleporterBlockPacket(
 		boolean triggerActivation,
 		BlockPos accessPositionOffset,
 		boolean setAccessPosition,
-		String statusEffectsToDecrementLevelOnTeleport,
-		String statusEffectsToRemoveOnTeleport,
-		String itemsToRemoveOnTeleport,
 		boolean onlyTeleportDimensionOwner,
 		boolean teleportTeam,
 		String teleportationMode,
@@ -40,6 +37,7 @@ public record UpdateTeleporterBlockPacket(
 		String sendDataValueDataIdentifier,
 		BlockPos preTeleportTriggeredBlockPositionOffset,
 		boolean preTeleportTriggeredBlockResets,
+		BlockPos uuidListHandlerPositionOffset,
 		BlockPos postTeleportTriggeredBlockPositionOffset,
 		boolean postTeleportTriggeredBlockResets,
 		String teleporterName,
@@ -69,9 +67,6 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
@@ -88,6 +83,7 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
@@ -120,10 +116,6 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeBlockPos(this.accessPositionOffset);
 		registryByteBuf.writeBoolean(this.setAccessPosition);
 
-		registryByteBuf.writeString(this.statusEffectsToDecrementLevelOnTeleport);
-		registryByteBuf.writeString(this.statusEffectsToRemoveOnTeleport);
-		registryByteBuf.writeString(this.itemsToRemoveOnTeleport);
-
 		registryByteBuf.writeBoolean(this.onlyTeleportDimensionOwner);
 		registryByteBuf.writeBoolean(this.teleportTeam);
 
@@ -148,6 +140,7 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBlockPos(this.preTeleportTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.preTeleportTriggeredBlockResets);
+		registryByteBuf.writeBlockPos(this.uuidListHandlerPositionOffset);
 		registryByteBuf.writeBlockPos(this.postTeleportTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.postTeleportTriggeredBlockResets);
 
