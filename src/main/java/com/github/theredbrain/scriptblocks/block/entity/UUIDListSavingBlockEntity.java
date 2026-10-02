@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.block.ProvidesUUIDList;
+import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -9,9 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.lang3.tuple.MutablePair;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,8 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class UUIDListSavingBlockEntity extends BlockEntity implements ProvidesUUIDList {
-	private final HashMap<String, String> data = new HashMap<>(Map.of());
+public class UUIDListSavingBlockEntity extends BlockEntity implements HandlesUUIDList {
+//	private final HashMap<String, String> data = new HashMap<>(Map.of());
 	private final Set<UUID> uuidList = new HashSet<>();
 
 	public UUIDListSavingBlockEntity(BlockPos pos, BlockState state) {
@@ -64,7 +62,7 @@ public class UUIDListSavingBlockEntity extends BlockEntity implements ProvidesUU
 	}
 
 	@Override
-	public List<UUID> getUUIDList(boolean remove) {
+	public List<UUID> supplyUUIDList(boolean remove) {
 		List<UUID> list = this.uuidList.stream().toList();
 		if (remove) {
 			this.reset();
@@ -73,7 +71,7 @@ public class UUIDListSavingBlockEntity extends BlockEntity implements ProvidesUU
 	}
 
 	@Override
-	public void modifyUUIDList(List<UUID> list, boolean remove) {
+	public void handleUUIDList(List<UUID> list, boolean remove) {
 
 		if (remove) {
 			list.forEach(this.uuidList::remove);

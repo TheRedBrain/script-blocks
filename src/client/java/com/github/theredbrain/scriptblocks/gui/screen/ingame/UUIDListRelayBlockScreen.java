@@ -10,7 +10,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
@@ -45,15 +44,15 @@ public class UUIDListRelayBlockScreen extends Screen {
 	protected void init() {
 		this.uuidListProviderPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 100, 20, Text.empty());
 		this.uuidListProviderPositionOffsetXField.setMaxLength(128);
-		this.uuidListProviderPositionOffsetXField.setText(Integer.toString(this.uuidListRelayBlock.getUuidListProviderPositionOffset().getX()));
+		this.uuidListProviderPositionOffsetXField.setText(Integer.toString(this.uuidListRelayBlock.getUuidListHandlerPositionOffset().getX()));
 		this.addSelectableChild(this.uuidListProviderPositionOffsetXField);
 		this.uuidListProviderPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 80, 100, 20, Text.empty());
 		this.uuidListProviderPositionOffsetYField.setMaxLength(128);
-		this.uuidListProviderPositionOffsetYField.setText(Integer.toString(this.uuidListRelayBlock.getUuidListProviderPositionOffset().getY()));
+		this.uuidListProviderPositionOffsetYField.setText(Integer.toString(this.uuidListRelayBlock.getUuidListHandlerPositionOffset().getY()));
 		this.addSelectableChild(this.uuidListProviderPositionOffsetYField);
 		this.uuidListProviderPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 80, 100, 20, Text.empty());
 		this.uuidListProviderPositionOffsetZField.setMaxLength(128);
-		this.uuidListProviderPositionOffsetZField.setText(Integer.toString(this.uuidListRelayBlock.getUuidListProviderPositionOffset().getZ()));
+		this.uuidListProviderPositionOffsetZField.setText(Integer.toString(this.uuidListRelayBlock.getUuidListHandlerPositionOffset().getZ()));
 		this.addSelectableChild(this.uuidListProviderPositionOffsetZField);
 
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 145, 150, 20).build());

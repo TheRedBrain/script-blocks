@@ -30,7 +30,7 @@ public class UpdateUUIDListRelayBlockPacketReceiver implements ServerPlayNetwork
 		BlockState blockState = world.getBlockState(uuidListRelayBlockPosition);
 
 		if (blockEntity instanceof UUIDListRelayBlockEntity uuidListRelayBlockEntity) {
-			uuidListRelayBlockEntity.setUuidListProviderPositionOffset(uuidListProviderPositionOffset);
+			uuidListRelayBlockEntity.setUuidListHandlerPositionOffset(uuidListProviderPositionOffset);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			uuidListRelayBlockEntity.markDirty();
 			world.updateListeners(uuidListRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

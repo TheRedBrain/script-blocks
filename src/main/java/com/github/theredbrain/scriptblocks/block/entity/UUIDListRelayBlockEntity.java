@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.block.ProvidesUUIDList;
+import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements ProvidesUUIDList {
-	private BlockPos uuidListProviderPositionOffset = new BlockPos(0, 1, 0);
+public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements HandlesUUIDList {
+	private BlockPos uuidListHandlerPositionOffset = new BlockPos(0, 1, 0);
 
 	public UUIDListRelayBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.UUID_LIST_RELAY_BLOCK_ENTITY, pos, state);
@@ -28,9 +28,9 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Prov
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("uuid_list_provider_position_offset_x", this.uuidListProviderPositionOffset.getX());
-		nbt.putInt("uuid_list_provider_position_offset_y", this.uuidListProviderPositionOffset.getY());
-		nbt.putInt("uuid_list_provider_position_offset_z", this.uuidListProviderPositionOffset.getZ());
+		nbt.putInt("uuid_list_handler_position_offset_x", this.uuidListHandlerPositionOffset.getX());
+		nbt.putInt("uuid_list_handler_position_offset_y", this.uuidListHandlerPositionOffset.getY());
+		nbt.putInt("uuid_list_handler_position_offset_z", this.uuidListHandlerPositionOffset.getZ());
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -38,13 +38,11 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Prov
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int i;
-		int j;
-		int k;
-			i = MathHelper.clamp(nbt.getInt("uuid_list_provider_position_offset_x"), -48, 48);
-			j = MathHelper.clamp(nbt.getInt("uuid_list_provider_position_offset_y"), -48, 48);
-			k = MathHelper.clamp(nbt.getInt("uuid_list_provider_position_offset_z"), -48, 48);
-		this.uuidListProviderPositionOffset = new BlockPos(i, j, k);
+		this.uuidListHandlerPositionOffset = new BlockPos(
+				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z"), -48, 48)
+		);
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -59,53 +57,57 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Prov
 	}
 
 	// region --- getter & setter ---
-	public BlockPos getUuidListProviderPositionOffset() {
-		return this.uuidListProviderPositionOffset;
+	public BlockPos getUuidListHandlerPositionOffset() {
+		return this.uuidListHandlerPositionOffset;
 	}
 
-	public void setUuidListProviderPositionOffset(BlockPos uuidListProviderPositionOffset) {
-		this.uuidListProviderPositionOffset = uuidListProviderPositionOffset;
+	public void setUuidListHandlerPositionOffset(BlockPos uuidListHandlerPositionOffset) {
+		this.uuidListHandlerPositionOffset = uuidListHandlerPositionOffset;
 	}
 	// endregion --- getter & setter ---
 
+	public BlockPos getActualUUIDListHandlerPosition() {
+		return new BlockPos(this.pos.getX() + this.uuidListHandlerPositionOffset.getX(), this.pos.getY() + this.uuidListHandlerPositionOffset.getY(), this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ());
+	}
+
 	@Override
-	public List<UUID> getUUIDList(boolean remove) {
+	public List<UUID> supplyUUIDList(boolean remove) {
 		if (this.world == null) {
 			return new ArrayList<>();
 		}
-		BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.uuidListProviderPositionOffset.getX(), this.pos.getY() + this.uuidListProviderPositionOffset.getY(), this.pos.getZ() + this.uuidListProviderPositionOffset.getZ()));
+		BlockEntity blockEntity = world.getBlockEntity(this.getActualUUIDListHandlerPosition());
 		if (blockEntity == this) {
 			return new ArrayList<>();
 		}
-		if (blockEntity instanceof ProvidesUUIDList providesUUIDList) {
-			return providesUUIDList.getUUIDList(remove);
+		if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+			return handlesUUIDList.supplyUUIDList(remove);
 		}
 		return new ArrayList<>();
 	}
 
 	@Override
-	public void modifyUUIDList(List<UUID> list, boolean remove) {
+	public void handleUUIDList(List<UUID> list, boolean remove) {
 		if (this.world == null) {
 			return;
 		}
-		BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.uuidListProviderPositionOffset.getX(), this.pos.getY() + this.uuidListProviderPositionOffset.getY(), this.pos.getZ() + this.uuidListProviderPositionOffset.getZ()));
+		BlockEntity blockEntity = world.getBlockEntity(this.getActualUUIDListHandlerPosition());
 		if (blockEntity == this) {
 			return;
 		}
-		if (blockEntity instanceof ProvidesUUIDList providesUUIDList) {
-			providesUUIDList.modifyUUIDList(list, remove);
+		if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+			handlesUUIDList.handleUUIDList(list, remove);
 		}
 	}
 
 	@Override
 	public void reset() {
 		if (this.world != null) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.uuidListProviderPositionOffset.getX(), this.pos.getY() + this.uuidListProviderPositionOffset.getY(), this.pos.getZ() + this.uuidListProviderPositionOffset.getZ()));
+			BlockEntity blockEntity = world.getBlockEntity(this.getActualUUIDListHandlerPosition());
 			if (blockEntity == this) {
 				return;
 			}
-			if (blockEntity instanceof ProvidesUUIDList providesUUIDList) {
-				providesUUIDList.reset();
+			if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				handlesUUIDList.reset();
 			}
 		}
 	}
@@ -115,15 +117,15 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Prov
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
 				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
-				this.uuidListProviderPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListProviderPositionOffset, blockRotation);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerPositionOffset, blockRotation);
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
-				this.uuidListProviderPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListProviderPositionOffset, BlockMirror.FRONT_BACK);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.FRONT_BACK);
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
-				this.uuidListProviderPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListProviderPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.LEFT_RIGHT);
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}
 		}
