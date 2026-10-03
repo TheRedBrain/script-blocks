@@ -10,6 +10,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.List;
+
 public class UpdateUUIDListRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateUUIDListRelayBlockPacket> {
 	@Override
 	public void receive(UpdateUUIDListRelayBlockPacket payload, ServerPlayNetworking.Context context) {
@@ -22,7 +24,7 @@ public class UpdateUUIDListRelayBlockPacketReceiver implements ServerPlayNetwork
 
 		BlockPos uuidListRelayBlockPosition = payload.uuidListRelayBlockPosition();
 
-		BlockPos uuidListProviderPositionOffset = payload.uuidListProviderPositionOffset();
+		List<BlockPos> uuidListProviderPositionOffsets = payload.uuidListProviderPositionOffsets();
 
 		World world = serverPlayerEntity.getEntityWorld();
 
@@ -30,7 +32,7 @@ public class UpdateUUIDListRelayBlockPacketReceiver implements ServerPlayNetwork
 		BlockState blockState = world.getBlockState(uuidListRelayBlockPosition);
 
 		if (blockEntity instanceof UUIDListRelayBlockEntity uuidListRelayBlockEntity) {
-			uuidListRelayBlockEntity.setUuidListHandlerPositionOffset(uuidListProviderPositionOffset);
+			uuidListRelayBlockEntity.setUuidListHandlers(uuidListProviderPositionOffsets);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			uuidListRelayBlockEntity.markDirty();
 			world.updateListeners(uuidListRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

@@ -46,6 +46,11 @@
 	"formatting.reset": "Reset",
 
 
+	"gui.block_pos.x": "X",
+	"gui.block_pos.y": "Y",
+	"gui.block_pos.z": "Z",
+
+
 	"gui.area_block.triggered_true_label": "Triggered Override: True",
 	"gui.area_block.triggered_false_label": "Triggered Override: False",
 	"gui.area_block.hide_area_label": "Hide Area",
@@ -710,6 +715,10 @@
 
 
 	"gui.shop_block.trade_button_label": "Trade",
+
+
+	"gui.uuid_list_relay_block.list_entry": "Block with offset X: %s, Y: %s, Z: %s",
+	"gui.uuid_list_relay_block.new_uuid_list_provider_position_offset": "New UUID List Provider Position Offset",
 
 
 	"gui.uuid_list_provider.uuid_list_provider_position_offset": "UUID List Provider Position Offset",
