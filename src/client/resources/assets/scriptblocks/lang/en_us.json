@@ -515,10 +515,24 @@
 	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",
 
 
-	"gui.player_detector_block.hide_area_label": "Hide Area",
-	"gui.player_detector_block.show_area_label": "Show Area",
+	"gui.player_detector_block.enable_ticking_true_label": "Enable Ticking: True",
+	"gui.player_detector_block.enable_ticking_false_label": "Enable Ticking: False",
+	"gui.player_detector_block.show_area_true_label": "Show Area: True",
+	"gui.player_detector_block.show_area_false_label": "Show Area: False",
 	"gui.player_detector_block.area_dimensions_label": "Area Dimensions",
 	"gui.player_detector_block.area_position_offset_label": "Area Position Offset",
+
+	"gui.player_detector_block.triggered_block_on_entering_position_offset": "On Entering",
+	"gui.player_detector_block.triggered_block_on_leaving_position_offset": "On Leaving",
+	"gui.player_detector_block.triggered_block_on_triggering_position_offset": "On Triggering",
+
+	"gui.player_detector_block.uuid_list_handler_on_entering_position_offset": "On Entering",
+	"gui.player_detector_block.uuid_list_handler_on_leaving_position_offset": "On Leaving",
+	"gui.player_detector_block.uuid_list_handler_on_triggering_position_offset": "On Triggering",
+
+	"gui.player_detector_block.screenPage.area": "Area",
+	"gui.player_detector_block.screenPage.triggered_block_offsets": "Triggered Block Position Offsets",
+	"gui.player_detector_block.screenPage.uuid_list_handler_offsets": "UUID List Handler Position Offsets",
 
 
 	"gui.triggered_beacon_block.triggered_true_label": "Triggered Override: True",

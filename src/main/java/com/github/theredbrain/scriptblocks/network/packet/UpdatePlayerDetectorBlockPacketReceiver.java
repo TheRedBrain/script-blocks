@@ -22,14 +22,26 @@ public class UpdatePlayerDetectorBlockPacketReceiver implements ServerPlayNetwor
 			return;
 		}
 
+		boolean enableTicking = payload.enableTicking();
+
 		BlockPos areaBlockPosition = payload.areaBlockPosition();
 
 		boolean showArea = payload.showArea();
 		Vec3i areaDimensions = payload.areaDimensions();
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
 
-		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
-		boolean triggeredBlockResets = payload.triggeredBlockResets();
+		BlockPos onEnteringTriggeredBlockPositionOffset = payload.onEnteringTriggeredBlockPositionOffset();
+		boolean onEnteringTriggeredBlockResets = payload.onEnteringTriggeredBlockResets();
+
+		BlockPos onLeavingTriggeredBlockPositionOffset = payload.onLeavingTriggeredBlockPositionOffset();
+		boolean onLeavingTriggeredBlockResets = payload.onLeavingTriggeredBlockResets();
+
+		BlockPos onTriggeringTriggeredBlockPositionOffset = payload.onTriggeringTriggeredBlockPositionOffset();
+		boolean onTriggeringTriggeredBlockResets = payload.onTriggeringTriggeredBlockResets();
+
+		BlockPos onEnteringUUIDListHandler = payload.onEnteringUUIDListHandler();
+		BlockPos onLeavingUUIDListHandler = payload.onLeavingUUIDListHandler();
+		BlockPos onTriggeringUUIDListHandler = payload.onTriggeringUUIDListHandler();
 
 		World world = serverPlayerEntity.getWorld();
 
@@ -37,10 +49,16 @@ public class UpdatePlayerDetectorBlockPacketReceiver implements ServerPlayNetwor
 		BlockState blockState = world.getBlockState(areaBlockPosition);
 
 		if (blockEntity instanceof PlayerDetectorBlockEntity playerDetectorBlockEntity) {
+			playerDetectorBlockEntity.setEnableTicking(enableTicking);
 			playerDetectorBlockEntity.setShowArea(showArea);
 			playerDetectorBlockEntity.setAreaDimensions(areaDimensions);
 			playerDetectorBlockEntity.setAreaPositionOffset(areaPositionOffset);
-			playerDetectorBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			playerDetectorBlockEntity.setOnEnteringTriggeredBlock(new MutablePair<>(onEnteringTriggeredBlockPositionOffset, onEnteringTriggeredBlockResets));
+			playerDetectorBlockEntity.setOnLeavingTriggeredBlock(new MutablePair<>(onLeavingTriggeredBlockPositionOffset, onLeavingTriggeredBlockResets));
+			playerDetectorBlockEntity.setOnTriggeringTriggeredBlock(new MutablePair<>(onTriggeringTriggeredBlockPositionOffset, onTriggeringTriggeredBlockResets));
+			playerDetectorBlockEntity.setOnEnteringUUIDListHandler(onEnteringUUIDListHandler);
+			playerDetectorBlockEntity.setOnLeavingUUIDListHandler(onLeavingUUIDListHandler);
+			playerDetectorBlockEntity.setOnTriggeringUUIDListHandler(onTriggeringUUIDListHandler);
 
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			playerDetectorBlockEntity.markDirty();

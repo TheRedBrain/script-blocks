@@ -19,6 +19,12 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 
 ## Changes
 
+- reworked Player Detector Block
+  - now triggers a block when a player leaves the area
+  - also sends a UUID list of all entering/leaving players
+  - the ticking area check can be disabled
+  - when triggered, sends a UUID list of all players in the area and triggers a block when at least one player is in the area
+
 ### Teleporter Block Rework
 
 The Teleporter Block has become increasingly complex. This rework extracts some behaviour into other blocks

@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -11,7 +11,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -29,18 +28,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
+public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Triggerable {
 
-	private static final BlockPos AREA_POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
+	private boolean enableTicking = true;
 
-	private static final BlockPos TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 0, 0);
 	private boolean calculateAreaBox = true;
 	private Box area = null;
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
-	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
+	private BlockPos areaPositionOffset = BlockPos.ORIGIN;
 
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(TRIGGERED_BLOCK_POS_DEFAULT, false);
+	private MutablePair<BlockPos, Boolean> onEnteringTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private MutablePair<BlockPos, Boolean> onLeavingTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private MutablePair<BlockPos, Boolean> onTriggeringTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private BlockPos onEnteringUUIDListHandler = BlockPos.ORIGIN;
+	private BlockPos onLeavingUUIDListHandler = BlockPos.ORIGIN;
+	private BlockPos onTriggeringUUIDListHandler = BlockPos.ORIGIN;
 
 	private final ArrayList<UUID> playerList = new ArrayList<>();
 
@@ -51,65 +54,58 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.showArea) {
-			nbt.putBoolean("showArea", true);
-		} else {
-			nbt.remove("showArea");
-		}
+		nbt.putBoolean("enable_ticking", this.enableTicking);
+
+		nbt.putBoolean("show_area", this.showArea);
 
 		if (this.area != null) {
-			nbt.putDouble("areaMinX", this.area.minX);
-			nbt.putDouble("areaMaxX", this.area.maxX);
-			nbt.putDouble("areaMinY", this.area.minY);
-			nbt.putDouble("areaMaxY", this.area.maxY);
-			nbt.putDouble("areaMinZ", this.area.minZ);
-			nbt.putDouble("areaMaxZ", this.area.maxZ);
-		} else {
-			nbt.remove("areaMinX");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxZ");
+			nbt.putDouble("area_min_x", this.area.minX);
+			nbt.putDouble("area_max_x", this.area.maxX);
+			nbt.putDouble("area_min_y", this.area.minY);
+			nbt.putDouble("area_max_y", this.area.maxY);
+			nbt.putDouble("area_min_z", this.area.minZ);
+			nbt.putDouble("area_max_z", this.area.maxZ);
 		}
 
-		if (this.areaDimensions != Vec3i.ZERO) {
-			nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-			nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-			nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
-		} else {
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		}
+		nbt.putInt("area_dimensions_x", this.areaDimensions.getX());
+		nbt.putInt("area_dimensions_y", this.areaDimensions.getY());
+		nbt.putInt("area_dimensions_z", this.areaDimensions.getZ());
 
-		BlockPos areaPositionOffset = this.areaPositionOffset;
-		if (!areaPositionOffset.equals(AREA_POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-			nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-			nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
-		} else {
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		}
+		nbt.putInt("area_position_offset_x", this.areaPositionOffset.getX());
+		nbt.putInt("area_position_offset_y", this.areaPositionOffset.getY());
+		nbt.putInt("area_position_offset_z", this.areaPositionOffset.getZ());
 
-		if (this.triggeredBlock.getLeft() != TRIGGERED_BLOCK_POS_DEFAULT || !this.triggeredBlock.getRight()) {
-			nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
-		} else {
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		}
+		nbt.putInt("on_entering_triggered_block_position_offset_x", this.onEnteringTriggeredBlock.getLeft().getX());
+		nbt.putInt("on_entering_triggered_block_position_offset_y", this.onEnteringTriggeredBlock.getLeft().getY());
+		nbt.putInt("on_entering_triggered_block_position_offset_z", this.onEnteringTriggeredBlock.getLeft().getZ());
+		nbt.putBoolean("on_entering_triggered_block_resets", this.onEnteringTriggeredBlock.getRight());
+
+		nbt.putInt("on_leaving_triggered_block_position_offset_x", this.onLeavingTriggeredBlock.getLeft().getX());
+		nbt.putInt("on_leaving_triggered_block_position_offset_y", this.onLeavingTriggeredBlock.getLeft().getY());
+		nbt.putInt("on_leaving_triggered_block_position_offset_z", this.onLeavingTriggeredBlock.getLeft().getZ());
+		nbt.putBoolean("on_leaving_triggered_block_resets", this.onLeavingTriggeredBlock.getRight());
+
+		nbt.putInt("on_triggering_triggered_block_position_offset_x", this.onTriggeringTriggeredBlock.getLeft().getX());
+		nbt.putInt("on_triggering_triggered_block_position_offset_y", this.onTriggeringTriggeredBlock.getLeft().getY());
+		nbt.putInt("on_triggering_triggered_block_position_offset_z", this.onTriggeringTriggeredBlock.getLeft().getZ());
+		nbt.putBoolean("on_triggering_triggered_block_resets", this.onTriggeringTriggeredBlock.getRight());
+
+		nbt.putInt("on_entering_uuid_list_handler_position_offset_x", this.onEnteringUUIDListHandler.getX());
+		nbt.putInt("on_entering_uuid_list_handler_position_offset_y", this.onEnteringUUIDListHandler.getY());
+		nbt.putInt("on_entering_uuid_list_handler_position_offset_z", this.onEnteringUUIDListHandler.getZ());
+
+		nbt.putInt("on_leaving_uuid_list_handler_position_offset_x", this.onLeavingUUIDListHandler.getX());
+		nbt.putInt("on_leaving_uuid_list_handler_position_offset_y", this.onLeavingUUIDListHandler.getY());
+		nbt.putInt("on_leaving_uuid_list_handler_position_offset_z", this.onLeavingUUIDListHandler.getZ());
+
+		nbt.putInt("on_triggering_uuid_list_handler_position_offset_x", this.onTriggeringUUIDListHandler.getX());
+		nbt.putInt("on_triggering_uuid_list_handler_position_offset_y", this.onTriggeringUUIDListHandler.getY());
+		nbt.putInt("on_triggering_uuid_list_handler_position_offset_z", this.onTriggeringUUIDListHandler.getZ());
 
 		int playerListSize = playerList.size();
-		nbt.putInt("playerListSize", playerListSize);
+		nbt.putInt("player_list_size", playerListSize);
 		for (int i = 0; i < playerListSize; i++) {
-			nbt.putUuid("playerListEntry_" + i, this.playerList.get(i));
+			nbt.putUuid("player_list_entry_" + i, this.playerList.get(i));
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -119,25 +115,65 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		this.showArea = nbt.getBoolean("showArea");
+		this.enableTicking = nbt.getBoolean("enable_ticking");
 
-		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
+		if (nbt.contains("showArea")) {
+			this.showArea = nbt.getBoolean("showArea");
+			nbt.remove("showArea");
+		} else {
+			this.showArea = nbt.getBoolean("show_area");
+		}
+
+		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
 			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
+			this.calculateAreaBox = true;
+			nbt.remove("areaMinX");
+			nbt.remove("areaMinY");
+			nbt.remove("areaMinZ");
+			nbt.remove("areaMaxX");
+			nbt.remove("areaMaxY");
+			nbt.remove("areaMaxZ");
+		} else {
+			this.area = new Box(nbt.getDouble("area_min_x"), nbt.getDouble("area_min_y"), nbt.getDouble("area_min_z"), nbt.getDouble("area_max_x"), nbt.getDouble("area_max_y"), nbt.getDouble("area_max_z"));
 			this.calculateAreaBox = true;
 		}
 
-		int i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
-		int j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
-		int k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
-		this.areaDimensions = new Vec3i(i, j, k);
+		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
+			this.areaDimensions = new Vec3i(
+					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
+					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
+					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
+			);
+			nbt.remove("areaDimensionsX");
+			nbt.remove("areaDimensionsY");
+			nbt.remove("areaDimensionsZ");
+		} else {
+			this.areaDimensions = new Vec3i(
+					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
+					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
+					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
+			);
+		}
 
-		int l = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
-		int m = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
-		int n = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
-		this.areaPositionOffset = new BlockPos(l, m, n);
+		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
+			this.areaPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
+			);
+			nbt.remove("areaPositionOffsetX");
+			nbt.remove("areaPositionOffsetY");
+			nbt.remove("areaPositionOffsetZ");
+		} else {
+			this.areaPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
+			);
+		}
 
-		if (nbt.contains("triggeredBlockPositionOffsetX", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetY", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetZ", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
-			this.triggeredBlock = new MutablePair<>(
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
+			this.onEnteringTriggeredBlock = new MutablePair<>(
 					new BlockPos(
 							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
 							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
@@ -145,12 +181,72 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 					),
 					nbt.getBoolean("triggeredBlockResets")
 			);
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
+		} else {
+			this.onEnteringTriggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("on_entering_triggered_block_resets")
+			);
 		}
 
-		int playerListSize = nbt.getInt("playerListSize");
-		for (i = 0; i < playerListSize; i++) {
-			if (nbt.contains("playerListEntry_" + i)) {
-				this.playerList.add(nbt.getUuid("playerListEntry_" + i));
+		this.onLeavingTriggeredBlock = new MutablePair<>(
+				new BlockPos(
+						MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_x"), -48, 48),
+						MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_y"), -48, 48),
+						MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_z"), -48, 48)
+				),
+				nbt.getBoolean("on_leaving_triggered_block_resets")
+		);
+
+		this.onTriggeringTriggeredBlock = new MutablePair<>(
+				new BlockPos(
+						MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_x"), -48, 48),
+						MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_y"), -48, 48),
+						MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_z"), -48, 48)
+				),
+				nbt.getBoolean("on_triggering_triggered_block_resets")
+		);
+
+		this.onEnteringUUIDListHandler = new BlockPos(
+				MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_z"), -48, 48)
+		);
+
+		this.onLeavingUUIDListHandler = new BlockPos(
+				MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_z"), -48, 48)
+		);
+
+		this.onTriggeringUUIDListHandler = new BlockPos(
+				MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_x"), -48, 48),
+				MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_y"), -48, 48),
+				MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_z"), -48, 48)
+		);
+
+		if (nbt.contains("playerListSize")) {
+			int playerListSize = nbt.getInt("playerListSize");
+			for (int i = 0; i < playerListSize; i++) {
+				if (nbt.contains("playerListEntry_" + i)) {
+					this.playerList.add(nbt.getUuid("playerListEntry_" + i));
+					nbt.remove("playerListEntry_" + i);
+				}
+			}
+			nbt.remove("playerListSize");
+		} else {
+			int playerListSize = nbt.getInt("player_list_size");
+			for (int i = 0; i < playerListSize; i++) {
+				if (nbt.contains("player_list_entry_" + i)) {
+					this.playerList.add(nbt.getUuid("player_list_entry_" + i));
+				}
 			}
 		}
 
@@ -166,75 +262,71 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, PlayerDetectorBlockEntity areaBlockEntity) {
-		if (!world.isClient && world.getTime() % 20L == 0L) {
-			if (areaBlockEntity.calculateAreaBox || areaBlockEntity.area == null) {
-				BlockPos areaPositionOffset = areaBlockEntity.areaPositionOffset;
-				Vec3i areaDimensions = areaBlockEntity.areaDimensions;
+	public static void tick(World world, BlockPos pos, BlockState state, PlayerDetectorBlockEntity playerDetectorBlockEntity) {
+		if (!world.isClient() && playerDetectorBlockEntity.enableTicking() && world.getTime() % 20L == 0L) {
+			if (playerDetectorBlockEntity.calculateAreaBox || playerDetectorBlockEntity.area == null) {
+				BlockPos areaPositionOffset = playerDetectorBlockEntity.areaPositionOffset;
+				Vec3i areaDimensions = playerDetectorBlockEntity.areaDimensions;
 				Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
 				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
-				areaBlockEntity.area = new Box(areaStart, areaEnd);
-				areaBlockEntity.calculateAreaBox = false;
+				playerDetectorBlockEntity.area = new Box(areaStart, areaEnd);
+				playerDetectorBlockEntity.calculateAreaBox = false;
 			}
 
-			boolean shouldTriggerBlock = false;
-
-			List<PlayerEntity> newPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, areaBlockEntity.area);
-			List<UUID> newPLayerUuidList = new ArrayList<>();
-			for (PlayerEntity player : newPlayerList) {
+			List<PlayerEntity> newCurrentPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, playerDetectorBlockEntity.area);
+			List<UUID> enteringPlayersUuidList = new ArrayList<>();
+			List<UUID> leavingPlayersUuidList = new ArrayList<>();
+			for (PlayerEntity player : newCurrentPlayerList) {
 				if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
-					newPLayerUuidList.add(player.getUuid());
+					enteringPlayersUuidList.add(player.getUuid());
 				}
 			}
-			ArrayList<UUID> tempList = new ArrayList<>();
+			ArrayList<UUID> newCurrentPlayerUUIDList = new ArrayList<>();
 
-			Iterator<UUID> playerListIterator = areaBlockEntity.playerList.iterator();
+			Iterator<UUID> oldCurrentPlayerListIterator = playerDetectorBlockEntity.playerList.iterator();
 			PlayerEntity playerEntity;
 			UUID uuid;
 
 			// old list
-			while (playerListIterator.hasNext()) {
-				uuid = playerListIterator.next();
+			while (oldCurrentPlayerListIterator.hasNext()) {
+				uuid = oldCurrentPlayerListIterator.next();
 				playerEntity = world.getPlayerByUuid(uuid);
 
 				if (playerEntity != null) {
-					if (newPLayerUuidList.contains(uuid)) {
-						tempList.add(uuid);
-						newPLayerUuidList.remove(uuid);
+					if (enteringPlayersUuidList.contains(uuid)) {
+						newCurrentPlayerUUIDList.add(uuid);
+						enteringPlayersUuidList.remove(uuid);
+					} else {
+						leavingPlayersUuidList.add(uuid);
 					}
 				}
 			}
 
-			Iterator<UUID> newPlayerListIterator = newPLayerUuidList.iterator();
-			// new list
-			while (newPlayerListIterator.hasNext()) {
-				UUID uuid2 = newPlayerListIterator.next();
-				playerEntity = world.getPlayerByUuid(uuid2);
-
-				if (playerEntity != null) {
-					tempList.add(uuid2);
-					shouldTriggerBlock = true;
-				}
+			if (!enteringPlayersUuidList.isEmpty()) {
+				playerDetectorBlockEntity.sendPlayerUUIDListOnEntering(enteringPlayersUuidList);
+				playerDetectorBlockEntity.triggerBlockOnEntering();
+			}
+			if (!leavingPlayersUuidList.isEmpty()) {
+				playerDetectorBlockEntity.sendPlayerUUIDListOnLeaving(leavingPlayersUuidList);
+				playerDetectorBlockEntity.triggerBlockOnLeaving();
 			}
 
-			areaBlockEntity.playerList.clear();
-			areaBlockEntity.playerList.addAll(tempList);
+			playerDetectorBlockEntity.playerList.clear();
+			playerDetectorBlockEntity.playerList.addAll(newCurrentPlayerUUIDList);
 
-			if (shouldTriggerBlock) {
-				areaBlockEntity.triggerBlock();
-			}
-			areaBlockEntity.markDirty();
+			playerDetectorBlockEntity.markDirty();
 		}
 	}
 
-	private void triggerBlock() {
-		int x = this.triggeredBlock.getLeft().getX();
-		int y = this.triggeredBlock.getLeft().getY();
-		int z = this.triggeredBlock.getLeft().getZ();
-		if (this.world != null && (x != 0 || y != 0 || z != 0)) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + x, this.pos.getY() + y, this.pos.getZ() + z));
+	public static BlockPos getActualOffsetBlockPosition(BlockPos originalBlockPos, BlockPos offsetBlockPos) {
+		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
+	}
+
+	private void triggerBlockOnEntering() {
+		if (this.world != null && !this.onEnteringTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(getActualOffsetBlockPosition(this.pos, this.onEnteringTriggeredBlock.getLeft()));
 			if (blockEntity != this) {
-				boolean triggeredBlockResets = this.triggeredBlock.getRight();
+				boolean triggeredBlockResets = this.onEnteringTriggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
 					resetable.reset();
 				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
@@ -244,7 +336,70 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 		}
 	}
 
+	private void triggerBlockOnLeaving() {
+		if (this.world != null && !this.onLeavingTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(getActualOffsetBlockPosition(this.pos, this.onLeavingTriggeredBlock.getLeft()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.onLeavingTriggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
+			}
+		}
+	}
+
+	private void triggerBlockOnTriggering() {
+		if (this.world != null && !this.onTriggeringTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(getActualOffsetBlockPosition(this.pos, this.onTriggeringTriggeredBlock.getLeft()));
+			if (blockEntity != this) {
+				boolean triggeredBlockResets = this.onTriggeringTriggeredBlock.getRight();
+				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
+					resetable.reset();
+				} else if (!triggeredBlockResets && blockEntity instanceof Triggerable triggerable) {
+					triggerable.trigger();
+				}
+			}
+		}
+	}
+
+	public void sendPlayerUUIDListOnEntering(List<UUID> uuidList) {
+		if (this.world != null && !this.onEnteringUUIDListHandler.equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(getActualOffsetBlockPosition(this.pos, this.onEnteringUUIDListHandler));
+			if (blockEntity != this && blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				handlesUUIDList.handleUUIDList(uuidList, false);
+			}
+		}
+	}
+
+	public void sendPlayerUUIDListOnLeaving(List<UUID> uuidList) {
+		if (this.world != null && !this.onLeavingUUIDListHandler.equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(getActualOffsetBlockPosition(this.pos, this.onLeavingUUIDListHandler));
+			if (blockEntity != this && blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				handlesUUIDList.handleUUIDList(uuidList, false);
+			}
+		}
+	}
+
+	public void sendPlayerUUIDListOnTriggering(List<UUID> uuidList) {
+		if (this.world != null && !this.onTriggeringUUIDListHandler.equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(getActualOffsetBlockPosition(this.pos, this.onTriggeringUUIDListHandler));
+			if (blockEntity != this && blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				handlesUUIDList.handleUUIDList(uuidList, false);
+			}
+		}
+	}
+
 	// region --- getter & setter ---
+	public boolean enableTicking() {
+		return this.enableTicking;
+	}
+
+	public void setEnableTicking(boolean enableTicking) {
+		this.enableTicking = enableTicking;
+	}
+
 	public boolean showArea() {
 		return showArea;
 	}
@@ -271,14 +426,82 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 		this.calculateAreaBox = true;
 	}
 
-	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
-		return this.triggeredBlock;
+	public MutablePair<BlockPos, Boolean> getOnEnteringTriggeredBlock() {
+		return this.onEnteringTriggeredBlock;
 	}
 
-	public void setTriggeredBlock(MutablePair<BlockPos, Boolean> triggeredBlock) {
-		this.triggeredBlock = triggeredBlock;
+	public void setOnEnteringTriggeredBlock(MutablePair<BlockPos, Boolean> onEnteringTriggeredBlock) {
+		this.onEnteringTriggeredBlock = onEnteringTriggeredBlock;
 	}
+
+	public MutablePair<BlockPos, Boolean> getOnLeavingTriggeredBlock() {
+		return this.onLeavingTriggeredBlock;
+	}
+
+	public void setOnLeavingTriggeredBlock(MutablePair<BlockPos, Boolean> onLeavingTriggeredBlock) {
+		this.onLeavingTriggeredBlock = onLeavingTriggeredBlock;
+	}
+
+	public MutablePair<BlockPos, Boolean> getOnTriggeringTriggeredBlock() {
+		return this.onTriggeringTriggeredBlock;
+	}
+
+	public void setOnTriggeringTriggeredBlock(MutablePair<BlockPos, Boolean> onTriggeringTriggeredBlock) {
+		this.onTriggeringTriggeredBlock = onTriggeringTriggeredBlock;
+	}
+
+	public BlockPos getOnEnteringUUIDListHandler() {
+		return this.onEnteringUUIDListHandler;
+	}
+
+	public void setOnEnteringUUIDListHandler(BlockPos onEnteringUUIDListHandler) {
+		this.onEnteringUUIDListHandler = onEnteringUUIDListHandler;
+	}
+
+	public BlockPos getOnLeavingUUIDListHandler() {
+		return this.onLeavingUUIDListHandler;
+	}
+
+	public void setOnLeavingUUIDListHandler(BlockPos onLeavingUUIDListHandler) {
+		this.onLeavingUUIDListHandler = onLeavingUUIDListHandler;
+	}
+
+	public BlockPos getOnTriggeringUUIDListHandler() {
+		return this.onTriggeringUUIDListHandler;
+	}
+
+	public void setOnTriggeringUUIDListHandler(BlockPos onTriggeringUUIDListHandler) {
+		this.onTriggeringUUIDListHandler = onTriggeringUUIDListHandler;
+	}
+
 	// endregion --- getter & setter ---
+
+	@Override
+	public void trigger() {
+		if (this.getWorld() != null && !this.getWorld().isClient()) {
+			if (this.calculateAreaBox || this.area == null) {
+				BlockPos areaPositionOffset = this.areaPositionOffset;
+				Vec3i areaDimensions = this.areaDimensions;
+				Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
+				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
+				this.area = new Box(areaStart, areaEnd);
+				this.calculateAreaBox = false;
+			}
+
+			List<PlayerEntity> currentPlayerList = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, this.area);
+			List<UUID> currentPlayersUuidList = new ArrayList<>();
+			for (PlayerEntity player : currentPlayerList) {
+				if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
+					currentPlayersUuidList.add(player.getUuid());
+				}
+			}
+
+			if (!currentPlayersUuidList.isEmpty()) {
+				this.sendPlayerUUIDListOnTriggering(currentPlayersUuidList);
+				this.triggerBlockOnTriggering();
+			}
+		}
+	}
 
 	@Override
 	protected void onRotate(BlockState state) {
@@ -290,7 +513,13 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
+				this.onEnteringTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.onEnteringTriggeredBlock.getLeft(), blockRotation));
+				this.onLeavingTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.onLeavingTriggeredBlock.getLeft(), blockRotation));
+				this.onTriggeringTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.onTriggeringTriggeredBlock.getLeft(), blockRotation));
+
+				this.onEnteringUUIDListHandler = BlockRotationUtils.rotateOffsetBlockPos(this.onEnteringUUIDListHandler, blockRotation);
+				this.onLeavingUUIDListHandler = BlockRotationUtils.rotateOffsetBlockPos(this.onLeavingUUIDListHandler, blockRotation);
+				this.onTriggeringUUIDListHandler = BlockRotationUtils.rotateOffsetBlockPos(this.onTriggeringUUIDListHandler, blockRotation);
 
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
@@ -300,7 +529,13 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.onEnteringTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.onEnteringTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.onLeavingTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.onLeavingTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.onTriggeringTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.onTriggeringTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+
+				this.onEnteringUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onEnteringUUIDListHandler, BlockMirror.FRONT_BACK);
+				this.onLeavingUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onLeavingUUIDListHandler, BlockMirror.FRONT_BACK);
+				this.onTriggeringUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onTriggeringUUIDListHandler, BlockMirror.FRONT_BACK);
 
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
@@ -310,7 +545,13 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity {
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.onEnteringTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.onEnteringTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.onLeavingTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.onLeavingTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.onTriggeringTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.onTriggeringTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+
+				this.onEnteringUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onEnteringUUIDListHandler, BlockMirror.LEFT_RIGHT);
+				this.onLeavingUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onLeavingUUIDListHandler, BlockMirror.LEFT_RIGHT);
+				this.onTriggeringUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onTriggeringUUIDListHandler, BlockMirror.LEFT_RIGHT);
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}
