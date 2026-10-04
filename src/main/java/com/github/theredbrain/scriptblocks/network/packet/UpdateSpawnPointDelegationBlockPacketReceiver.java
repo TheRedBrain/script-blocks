@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -19,6 +20,7 @@ public class UpdateSpawnPointDelegationBlockPacketReceiver implements ServerPlay
 		ServerPlayerEntity serverPlayerEntity = context.player();
 
 		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 

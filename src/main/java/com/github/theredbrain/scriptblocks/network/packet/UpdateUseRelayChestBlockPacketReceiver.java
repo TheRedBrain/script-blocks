@@ -18,6 +18,7 @@ public class UpdateUseRelayChestBlockPacketReceiver implements ServerPlayNetwork
 		ServerPlayerEntity serverPlayerEntity = context.player();
 
 		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 

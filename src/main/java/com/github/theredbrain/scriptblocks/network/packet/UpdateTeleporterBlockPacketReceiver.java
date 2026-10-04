@@ -21,6 +21,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		ServerPlayerEntity player = context.player();
 
 		if (!player.isCreativeLevelTwoOp()) {
+			player.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 

@@ -22,6 +22,7 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 		ServerPlayerEntity serverPlayerEntity = context.player();
 
 		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
