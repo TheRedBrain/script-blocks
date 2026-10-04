@@ -29,8 +29,8 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		List<String> keyList = this.data.keySet().stream().toList();
-		int dataSize = this.data.keySet().size();
-		nbt.putInt("dataSize", dataSize);
+		int dataSize = keyList.size();
+		nbt.putInt("data_size", dataSize);
 		for (int i = 0; i < dataSize; i++) {
 			String key = keyList.get(i);
 			nbt.putString("key_" + i, key);
@@ -42,8 +42,13 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-
-		int dataSize = nbt.getInt("dataSize");
+		int dataSize;
+		if (nbt.contains("dataSize")) {
+			dataSize = nbt.getInt("dataSize");
+			nbt.remove("dataSize");
+		} else {
+			dataSize = nbt.getInt("data_size");
+		}
 		this.data.clear();
 		for (int i = 0; i < dataSize; i++) {
 			if (nbt.contains("key_" + i, NbtElement.STRING_TYPE) && nbt.contains("value_" + i, NbtElement.STRING_TYPE)) {

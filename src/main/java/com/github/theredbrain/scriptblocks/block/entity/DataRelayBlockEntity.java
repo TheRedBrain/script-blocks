@@ -31,12 +31,12 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("dataProvidingBlockPosOffsetListSize", this.dataProvidingBlockPosOffsetList.size());
+		nbt.putInt("data_providing_block_pos_offset_list_size", this.dataProvidingBlockPosOffsetList.size());
 		for (int i = 0; i < this.dataProvidingBlockPosOffsetList.size(); i++) {
 			BlockPos triggeredBlock = this.dataProvidingBlockPosOffsetList.get(i);
-			nbt.putInt("dataProvidingBlockPosOffsetX_" + i, triggeredBlock.getX());
-			nbt.putInt("dataProvidingBlockPosOffsetY_" + i, triggeredBlock.getY());
-			nbt.putInt("dataProvidingBlockPosOffsetZ_" + i, triggeredBlock.getZ());
+			nbt.putInt("data_providing_block_pos_offset_x_" + i, triggeredBlock.getX());
+			nbt.putInt("data_providing_block_pos_offset_y_" + i, triggeredBlock.getY());
+			nbt.putInt("data_providing_block_pos_offset_z_" + i, triggeredBlock.getZ());
 		}
 
 		nbt.putInt("index", this.index);
@@ -47,14 +47,26 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int dataProvidingBlockPosOffsetListSize = nbt.getInt("dataProvidingBlockPosOffsetListSize");
-		this.dataProvidingBlockPosOffsetList.clear();
-		for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
-			this.dataProvidingBlockPosOffsetList.add(new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX_" + i), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY_" + i), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ_" + i), -48, 48)
-			));
+		if (nbt.contains("dataProvidingBlockPosOffsetListSize")) {
+			int dataProvidingBlockPosOffsetListSize = nbt.getInt("dataProvidingBlockPosOffsetListSize");
+			this.dataProvidingBlockPosOffsetList.clear();
+			for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
+				this.dataProvidingBlockPosOffsetList.add(new BlockPos(
+						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX_" + i), -48, 48),
+						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY_" + i), -48, 48),
+						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ_" + i), -48, 48)
+				));
+			}
+		} else {
+			int dataProvidingBlockPosOffsetListSize = nbt.getInt("data_providing_block_pos_offset_list_size");
+			this.dataProvidingBlockPosOffsetList.clear();
+			for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
+				this.dataProvidingBlockPosOffsetList.add(new BlockPos(
+						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_x_" + i), -48, 48),
+						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_y_" + i), -48, 48),
+						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_z_" + i), -48, 48)
+				));
+			}
 		}
 
 		this.index = nbt.getInt("index");
