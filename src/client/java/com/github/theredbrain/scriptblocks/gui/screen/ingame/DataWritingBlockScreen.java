@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
@@ -17,8 +16,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 @Environment(value = EnvType.CLIENT)
-public class DataWritingBlockScreen extends Screen {
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
+public class DataWritingBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
 	private final DataWritingBlockEntity dataWritingBlock;
 	private TextFieldWidget dataProvidingBlockPositionOffsetXField;
 	private TextFieldWidget dataProvidingBlockPositionOffsetYField;
@@ -29,16 +28,6 @@ public class DataWritingBlockScreen extends Screen {
 	public DataWritingBlockScreen(DataWritingBlockEntity dataWritingBlock) {
 		super(NarratorManager.EMPTY);
 		this.dataWritingBlock = dataWritingBlock;
-	}
-
-	private void done() {
-		if (this.updateDataWritingBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -109,11 +98,7 @@ public class DataWritingBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateDataWritingBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataWritingBlockPacket(
 				this.dataWritingBlock.getPos(),
 				new BlockPos(

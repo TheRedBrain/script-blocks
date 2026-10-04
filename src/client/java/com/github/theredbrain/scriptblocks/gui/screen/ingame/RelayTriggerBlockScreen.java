@@ -30,20 +30,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class RelayTriggerBlockScreen extends Screen {
+public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.hide_area_label");
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.show_area_label");
 	private static final Text RESETS_AREA_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.resets_area_label");
 	private static final Text TRIGGERS_AREA_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.triggers_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.area_dimensions_label");
 	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.area_position_offset_label");
-	private static final Text NEW_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.newTriggeredBlockPositionOffset");
-	private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetX.placeholder");
-	private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetY.placeholder");
-	private static final Text NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.new_triggered_block_position_offset");
+	private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
+	private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
+	private static final Text NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
 	private static final Text NEW_POSITION_CHANCE_FIELD_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.new_triggered_block_chance_label");
 	private static final Text ADD_NEW_TRIGGERED_BLOCK_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_block_pos_offset");
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
 	private static final Text DATA_IDENTIFIER_FIELD_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.data_identifier_label");
 	private static final Text TRIGGER_AMOUNT_FIELD_LABEL_TEXT = Text.translatable("gui.relay_trigger_block.trigger_amount_label");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_68_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_68");
@@ -133,15 +133,6 @@ public class RelayTriggerBlockScreen extends Screen {
 		this.scrollPosition = 0;
 		this.scrollAmount = 0.0f;
 		this.updateWidgets();
-	}
-
-	private void done() {
-		this.updateRelayTriggerBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -267,7 +258,6 @@ public class RelayTriggerBlockScreen extends Screen {
 
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 154, 211, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 211, 150, 20).build());
-		this.setInitialFocus(this.newTriggeredBlockPositionOffsetXField);
 		this.updateWidgets();
 	}
 
@@ -277,11 +267,7 @@ public class RelayTriggerBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 		this.toggleShowAreaButton.visible = false;
 
 		this.areaDimensionsXField.setVisible(false);
@@ -480,37 +466,6 @@ public class RelayTriggerBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private void updateRelayTriggerBlock() {
-		ClientPlayNetworking.send(
-				new UpdateRelayTriggerBlockPacket(
-						this.relayTriggerBlock.getPos(),
-						this.selectionMode.asString(),
-						this.showArea,
-						this.resetsArea,
-						new Vec3i(
-								ItemUtils.parseInt(this.areaDimensionsXField.getText()),
-								ItemUtils.parseInt(this.areaDimensionsYField.getText()),
-								ItemUtils.parseInt(this.areaDimensionsZField.getText())
-						),
-						new BlockPos(
-								ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
-								ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
-								ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
-						),
-						this.triggeredBlocks,
-						this.triggerMode.asString(),
-						this.isTriggerAmountDataDriven,
-						new BlockPos(
-								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
-								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
-								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
-						),
-						this.dataIdentifierField.getText(),
-						ItemUtils.parseInt(this.triggerAmountField.getText())
-				)
-		);
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -585,7 +540,35 @@ public class RelayTriggerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(
+				new UpdateRelayTriggerBlockPacket(
+						this.relayTriggerBlock.getPos(),
+						this.selectionMode.asString(),
+						this.showArea,
+						this.resetsArea,
+						new Vec3i(
+								ItemUtils.parseInt(this.areaDimensionsXField.getText()),
+								ItemUtils.parseInt(this.areaDimensionsYField.getText()),
+								ItemUtils.parseInt(this.areaDimensionsZField.getText())
+						),
+						new BlockPos(
+								ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
+								ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
+								ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
+						),
+						this.triggeredBlocks,
+						this.triggerMode.asString(),
+						this.isTriggerAmountDataDriven,
+						new BlockPos(
+								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
+								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
+								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
+						),
+						this.dataIdentifierField.getText(),
+						ItemUtils.parseInt(this.triggerAmountField.getText())
+				)
+		);
+		return true;
 	}
 }

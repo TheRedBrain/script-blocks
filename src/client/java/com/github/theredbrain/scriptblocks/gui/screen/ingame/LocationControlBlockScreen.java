@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -29,23 +28,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class LocationControlBlockScreen extends Screen {
+public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.location_controller_block.main_entrance.position_offset");
 	private static final Text MAIN_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.main_entrance.orientation");
 	private static final Text REMOVE_LIST_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_screen.remove_list_entry_button_label");
 	private static final Text NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.position_offset");
 	private static final Text NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.name");
 	private static final Text NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT = Text.translatable("gui.location_controller_block.new_side_entrance.orientation");
-	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
-	private static final Text RESET_AREA_MIN_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMinX");
-	private static final Text RESET_AREA_MIN_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMinZ");
-	private static final Text RESET_AREA_MAX_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMaxX");
-	private static final Text RESET_AREA_MAX_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.resetAreaMaxZ");
+	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
+	private static final Text RESET_AREA_MIN_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.reset_area_min_x");
+	private static final Text RESET_AREA_MIN_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.reset_area_min_z");
+	private static final Text RESET_AREA_MAX_X_LABEL_TEXT = Text.translatable("gui.location_controller_block.reset_area_max_x");
+	private static final Text RESET_AREA_MAX_Z_LABEL_TEXT = Text.translatable("gui.location_controller_block.reset_area_max_z");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final LocationControlBlockEntity locationControlBlock;
-	private CyclingButtonWidget<ScreenPage> creativeScreenPageButton;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 	private TextFieldWidget mainEntrancePositionOffsetXField;
 	private TextFieldWidget mainEntrancePositionOffsetYField;
 	private TextFieldWidget mainEntrancePositionOffsetZField;
@@ -75,10 +74,8 @@ public class LocationControlBlockScreen extends Screen {
 	private TextFieldWidget resetAreaMinZField;
 	private TextFieldWidget resetAreaMaxXField;
 	private TextFieldWidget resetAreaMaxZField;
-	private ButtonWidget saveButton;
-	private ButtonWidget cancelButton;
 	private ScreenPage screenPage;
-	private List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntranceList = new ArrayList<>();
+	private final List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntranceList = new ArrayList<>();
 	private boolean shouldAlwaysReset;
 	private boolean manualReset;
 	private int scrollPosition = 0;
@@ -93,7 +90,7 @@ public class LocationControlBlockScreen extends Screen {
 
 	private void addNewSideEntrance() {
 		String newEntranceName = this.newSideEntranceNameField.getText();
-		if (newEntranceName.equals("")) {
+		if (newEntranceName.isEmpty()) {
 			return;
 		}
 		boolean bl = true;
@@ -133,16 +130,6 @@ public class LocationControlBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		if (this.updateLocationControlBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 		this.sideEntranceList.clear();
@@ -152,7 +139,7 @@ public class LocationControlBlockScreen extends Screen {
 		}
 		super.init();
 
-		this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 18, 308, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 18, 308, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -287,15 +274,19 @@ public class LocationControlBlockScreen extends Screen {
 		this.addSelectableChild(this.resetAreaMaxZField);
 
 
-		this.saveButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
 
-		this.creativeScreenPageButton.visible = false;
+	@Override
+	protected void updateWidgets() {
 
 		this.mainEntrancePositionOffsetXField.setVisible(false);
 		this.mainEntrancePositionOffsetYField.setVisible(false);
@@ -331,11 +322,6 @@ public class LocationControlBlockScreen extends Screen {
 		this.resetAreaMinZField.setVisible(false);
 		this.resetAreaMaxXField.setVisible(false);
 		this.resetAreaMaxZField.setVisible(false);
-
-		this.saveButton.visible = false;
-		this.cancelButton.visible = false;
-
-		this.creativeScreenPageButton.visible = true;
 
 		if (this.screenPage == ScreenPage.MAIN_ENTRANCE) {
 
@@ -389,10 +375,6 @@ public class LocationControlBlockScreen extends Screen {
 			this.resetAreaMaxZField.setVisible(true);
 
 		}
-
-		this.saveButton.visible = true;
-		this.cancelButton.visible = true;
-
 	}
 
 	@Override
@@ -429,11 +411,15 @@ public class LocationControlBlockScreen extends Screen {
 		this.sideEntranceList.clear();
 		this.sideEntranceList.addAll(list);
 		this.screenPage = var;
+		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.scrollPosition = number;
 		this.scrollAmount = number1;
 		this.shouldAlwaysReset = bl;
+		this.toggleShouldAlwaysResetButton.setValue(this.shouldAlwaysReset);
 		this.manualReset = bl1;
+		this.toggleManualResetButton.setValue(this.manualReset);
 		this.triggeredBlockResets = bl2;
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 		this.mainEntrancePositionOffsetXField.setText(string);
 		this.mainEntrancePositionOffsetYField.setText(string1);
 		this.mainEntrancePositionOffsetZField.setText(string2);
@@ -567,20 +553,7 @@ public class LocationControlBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		super.renderBackground(context, mouseX, mouseY, delta);
-		this.drawBackground(context, delta, mouseX, mouseY);
-	}
-
-	public void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-	}
-
-	private boolean updateLocationControlBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateLocationControlBlockPacket(
 				this.locationControlBlock.getPos(),
 				new BlockPos(
@@ -612,7 +585,7 @@ public class LocationControlBlockScreen extends Screen {
 		return true;
 	}
 
-	public static enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		MAIN_ENTRANCE("main_entrance"),
 		SIDE_ENTRANCES("side_entrances"),
 		INTERACTED_BLOCKS("interacted_blocks"),
@@ -620,7 +593,7 @@ public class LocationControlBlockScreen extends Screen {
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -634,7 +607,7 @@ public class LocationControlBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.location_controller_block.screenPage." + this.name);
+			return Text.translatable("gui.location_controller_block.screen_page." + this.name);
 		}
 	}
 }

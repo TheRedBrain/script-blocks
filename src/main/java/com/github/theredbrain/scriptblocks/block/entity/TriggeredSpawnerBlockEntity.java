@@ -533,4 +533,35 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			return Text.translatable("gui.triggered_spawner_block.spawning_mode." + this.name);
 		}
 	}
+
+	public enum VisualEntityAttributeModifierOperation implements StringIdentifiable {
+		ADD_VALUE("add_value", EntityAttributeModifier.Operation.ADD_VALUE),
+		ADD_MULTIPLIED_BASE("add_multiplied_base", EntityAttributeModifier.Operation.ADD_MULTIPLIED_BASE),
+		ADD_MULTIPLIED_TOTAL("add_multiplied_total", EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+
+		private final String name;
+		private final EntityAttributeModifier.Operation operation;
+
+		VisualEntityAttributeModifierOperation(String name, EntityAttributeModifier.Operation operation) {
+			this.name = name;
+			this.operation = operation;
+		}
+
+		@Override
+		public String asString() {
+			return this.name;
+		}
+
+		public static Optional<VisualEntityAttributeModifierOperation> byName(String name) {
+			return Arrays.stream(VisualEntityAttributeModifierOperation.values()).filter(visualEntityAttributeModifierOperation -> visualEntityAttributeModifierOperation.asString().equals(name)).findFirst();
+		}
+
+		public EntityAttributeModifier.Operation getOperation() {
+			return this.operation;
+		}
+
+		public Text asText() {
+			return Text.translatable("gui.entity_attribute_modifier.operation." + this.name);
+		}
+	}
 }

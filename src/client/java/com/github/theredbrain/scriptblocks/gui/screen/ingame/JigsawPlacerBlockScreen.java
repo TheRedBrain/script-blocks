@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class JigsawPlacerBlockScreen extends Screen {
+public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text STRUCTURE_POOL_STRING_FIELD_TEXT = Text.translatable("gui.jigsaw_placer_block.structure_pool_string_field");
 	private static final Text NEW_DATA_BLOCK_LABEL_TEXT = Text.translatable("gui.jigsaw_placer_block.new_data_block_label");
 	private static final Text NEW_STATIC_APPENDIX_LABEL_TEXT = Text.translatable("gui.jigsaw_placer_block.new_static_appendix_label");
@@ -115,16 +115,6 @@ public class JigsawPlacerBlockScreen extends Screen {
 		this.scrollPosition = 0;
 		this.scrollAmount = 0.0f;
 		this.updateWidgets();
-	}
-
-	private void done() {
-		if (this.updateJigsawPlacerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -219,11 +209,7 @@ public class JigsawPlacerBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.removeStructurePoolAppendixButton0.visible = false;
 		this.removeStructurePoolAppendixButton1.visible = false;
@@ -268,9 +254,9 @@ public class JigsawPlacerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetYField.setText(string12);
 		this.triggeredBlockPositionOffsetZField.setText(string13);
 		this.joint = joint;
-		this.jointRotationButton.setValue(joint);
+		this.jointRotationButton.setValue(this.joint);
 		this.triggeredBlockResets = bl;
-		this.toggleTriggeredBlockResetsButton.setValue(bl);
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 	}
 
 	@Override
@@ -320,23 +306,6 @@ public class JigsawPlacerBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private boolean updateJigsawPlacerBlock() {
-		ClientPlayNetworking.send(new UpdateJigsawPlacerBlockPacket(
-				this.jigsawPlacerBlock.getPos(),
-				this.structurePoolStringField.getText(),
-				this.structurePoolStringAppendices,
-				this.targetField.getText(),
-				this.joint,
-				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
-				),
-				this.triggeredBlockResets
-		));
-		return true;
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -381,7 +350,20 @@ public class JigsawPlacerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateJigsawPlacerBlockPacket(
+				this.jigsawPlacerBlock.getPos(),
+				this.structurePoolStringField.getText(),
+				this.structurePoolStringAppendices,
+				this.targetField.getText(),
+				this.joint,
+				new BlockPos(
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+				),
+				this.triggeredBlockResets
+		));
+		return true;
 	}
 }

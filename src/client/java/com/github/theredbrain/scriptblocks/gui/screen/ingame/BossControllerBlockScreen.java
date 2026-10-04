@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class BossControllerBlockScreen extends Screen {
+public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.boss_controller_block.hide_area_label");
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.boss_controller_block.show_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.boss_controller_block.area_dimensions_label");
@@ -48,7 +47,7 @@ public class BossControllerBlockScreen extends Screen {
 
 	private final BossControllerBlockEntity bossControllerBlock;
 
-	private CyclingButtonWidget<ScreenPage> screenPageButton;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 
 	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
 	private TextFieldWidget areaDimensionsXField;
@@ -84,10 +83,7 @@ public class BossControllerBlockScreen extends Screen {
 	private boolean newBossTriggeredBlockResets;
 	private ButtonWidget addBossTriggeredBlockButton;
 
-	private List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList = new ArrayList<>(List.of());
-
-	private ButtonWidget doneButton;
-	private ButtonWidget cancelButton;
+	private final List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList = new ArrayList<>(List.of());
 
 	private ScreenPage screenPage;
 
@@ -101,7 +97,7 @@ public class BossControllerBlockScreen extends Screen {
 		this.screenPage = ScreenPage.SPAWN_POSITION;
 	}
 
-	private void removeDialogueTriggeredBlockEntry(int index) {
+	private void removeBossTriggeredBlockEntry(int index) {
 		if (index + this.scrollPosition < this.bossTriggeredBlocksList.size()) {
 			this.bossTriggeredBlocksList.remove(index + this.scrollPosition);
 		}
@@ -110,10 +106,10 @@ public class BossControllerBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void addDialogueTriggeredBlockEntry() {
-		String newDialogueTriggeredBlockIdentifier = this.newBossTriggeredBlockIdentifierField.getText();
+	private void addBossTriggeredBlockEntry() {
+		String newBossTriggeredBlockIdentifier = this.newBossTriggeredBlockIdentifierField.getText();
 		for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : this.bossTriggeredBlocksList) {
-			if (entry.getLeft().equals(newDialogueTriggeredBlockIdentifier)) {
+			if (entry.getLeft().equals(newBossTriggeredBlockIdentifier)) {
 				if (this.client != null && this.client.player != null) {
 					this.client.player.sendMessage(ENTRY_ALREADY_IN_LIST_TEXT);
 				}
@@ -121,7 +117,7 @@ public class BossControllerBlockScreen extends Screen {
 			}
 		}
 		this.bossTriggeredBlocksList.add(
-				new MutablePair<>(newDialogueTriggeredBlockIdentifier,
+				new MutablePair<>(newBossTriggeredBlockIdentifier,
 						new MutablePair<>(
 								new BlockPos(
 										ItemUtils.parseInt(this.newBossTriggeredBlockPositionOffsetXField.getText()),
@@ -137,15 +133,6 @@ public class BossControllerBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		this.updateBossControllerBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 		this.bossTriggeredBlocksList.clear();
@@ -156,7 +143,7 @@ public class BossControllerBlockScreen extends Screen {
 
 		super.init();
 
-		this.screenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -245,10 +232,10 @@ public class BossControllerBlockScreen extends Screen {
 
 		// --- boss triggered blocks page ---
 
-		this.removeBossTriggeredBlockEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeDialogueTriggeredBlockEntry(0)).dimensions(this.width / 2 + 54, 42, 100, 20).build());
-		this.removeBossTriggeredBlockEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeDialogueTriggeredBlockEntry(1)).dimensions(this.width / 2 + 54, 66, 100, 20).build());
-		this.removeBossTriggeredBlockEntryButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeDialogueTriggeredBlockEntry(2)).dimensions(this.width / 2 + 54, 90, 100, 20).build());
-		this.removeBossTriggeredBlockEntryButton3 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeDialogueTriggeredBlockEntry(3)).dimensions(this.width / 2 + 54, 114, 100, 20).build());
+		this.removeBossTriggeredBlockEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeBossTriggeredBlockEntry(0)).dimensions(this.width / 2 + 54, 42, 100, 20).build());
+		this.removeBossTriggeredBlockEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeBossTriggeredBlockEntry(1)).dimensions(this.width / 2 + 54, 66, 100, 20).build());
+		this.removeBossTriggeredBlockEntryButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeBossTriggeredBlockEntry(2)).dimensions(this.width / 2 + 54, 90, 100, 20).build());
+		this.removeBossTriggeredBlockEntryButton3 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeBossTriggeredBlockEntry(3)).dimensions(this.width / 2 + 54, 114, 100, 20).build());
 
 		this.newBossTriggeredBlockIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 138, 300, 20, Text.empty());
 		this.newBossTriggeredBlockIdentifierField.setMaxLength(128);
@@ -271,17 +258,21 @@ public class BossControllerBlockScreen extends Screen {
 			this.newBossTriggeredBlockResets = triggeredBlockResets;
 		}));
 
-		this.addBossTriggeredBlockButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addDialogueTriggeredBlockEntry()).dimensions(this.width / 2 - 4 - 150, 186, 300, 20).build());
+		this.addBossTriggeredBlockButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addBossTriggeredBlockEntry()).dimensions(this.width / 2 - 4 - 150, 186, 300, 20).build());
 
-		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 212, 150, 20).build());
-		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 212, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 212, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 212, 150, 20).build());
 		this.setInitialFocus(this.entitySpawnPositionOffsetXField);
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
 
-		this.screenPageButton.visible = false;
+	@Override
+	protected void updateWidgets() {
 
 		this.toggleShowAreaButton.visible = false;
 		this.areaDimensionsXField.visible = false;
@@ -317,11 +308,6 @@ public class BossControllerBlockScreen extends Screen {
 		this.toggleNewBossTriggeredBlockResetsButton.visible = false;
 
 		this.addBossTriggeredBlockButton.visible = false;
-
-		this.doneButton.visible = false;
-		this.cancelButton.visible = false;
-
-		this.screenPageButton.visible = true;
 
 		if (this.screenPage == ScreenPage.AREA) {
 
@@ -374,9 +360,6 @@ public class BossControllerBlockScreen extends Screen {
 
 		}
 
-		this.doneButton.visible = true;
-		this.cancelButton.visible = true;
-
 		this.scrollPosition = 0;
 		this.scrollAmount = 0.0f;
 	}
@@ -384,9 +367,10 @@ public class BossControllerBlockScreen extends Screen {
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> list1 = new ArrayList<>(this.bossTriggeredBlocksList);
-		int number4 = this.scrollPosition;
-		float number5 = this.scrollAmount;
 		ScreenPage var = this.screenPage;
+		boolean bool = this.showArea;
+		boolean bool1 = this.noPlayersAroundTriggeredBlockResets;
+		boolean bool2 = this.newBossTriggeredBlockResets;
 
 		String string = this.areaDimensionsXField.getText();
 		String string1 = this.areaDimensionsYField.getText();
@@ -410,15 +394,20 @@ public class BossControllerBlockScreen extends Screen {
 		String string16 = this.noPlayersAroundTriggeredBlockPositionOffsetXField.getText();
 		String string17 = this.noPlayersAroundTriggeredBlockPositionOffsetYField.getText();
 		String string18 = this.noPlayersAroundTriggeredBlockPositionOffsetZField.getText();
-		boolean bool = this.noPlayersAroundTriggeredBlockResets;
 
 		this.init(client, width, height);
 
 		this.bossTriggeredBlocksList.clear();
 		this.bossTriggeredBlocksList.addAll(list1);
-		this.scrollPosition = number4;
-		this.scrollAmount = number5;
+
 		this.screenPage = var;
+		this.cycleScreenPageButton.setValue(this.screenPage);
+		this.showArea = bool;
+		this.toggleShowAreaButton.setValue(this.showArea);
+		this.noPlayersAroundTriggeredBlockResets = bool1;
+		this.toggleNoPlayersAroundTriggeredBlockResetsButton.setValue(this.noPlayersAroundTriggeredBlockResets);
+		this.newBossTriggeredBlockResets = bool2;
+		this.toggleNewBossTriggeredBlockResetsButton.setValue(this.newBossTriggeredBlockResets);
 
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
@@ -442,7 +431,6 @@ public class BossControllerBlockScreen extends Screen {
 		this.noPlayersAroundTriggeredBlockPositionOffsetXField.setText(string16);
 		this.noPlayersAroundTriggeredBlockPositionOffsetYField.setText(string17);
 		this.noPlayersAroundTriggeredBlockPositionOffsetZField.setText(string18);
-		this.noPlayersAroundTriggeredBlockResets = bool;
 
 		this.updateWidgets();
 	}
@@ -524,10 +512,8 @@ public class BossControllerBlockScreen extends Screen {
 				context.drawTextWithShadow(this.textRenderer, this.bossTriggeredBlocksList.get(i).getLeft() + ": " + this.bossTriggeredBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.bossTriggeredBlocksList.size() > 4) {
-//                    context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 8, 96);
 				context.drawTexture(SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 0, 0, 8, 96);
 				int k = (int) (85.0f * this.scrollAmount);
-//                    context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 42 + 1 + k, 6, 7);
 				context.drawTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 42 + 1 + k, 0, 0, 6, 7);
 			}
 			this.newBossTriggeredBlockIdentifierField.render(context, mouseX, mouseY, delta);
@@ -537,7 +523,8 @@ public class BossControllerBlockScreen extends Screen {
 		}
 	}
 
-	private void updateBossControllerBlock() {
+	@Override
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateBossControllerBlockPacket(
 				this.bossControllerBlock.getPos(),
 				this.showArea,
@@ -567,16 +554,17 @@ public class BossControllerBlockScreen extends Screen {
 				ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getText()),
 				this.bossTriggeredBlocksList
 		));
+		return true;
 	}
 
-	public static enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		AREA("area"),
 		BOSS_TRIGGERED_BLOCKS("boss_triggered_blocks"),
 		SPAWN_POSITION("spawn_position");
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -590,7 +578,7 @@ public class BossControllerBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.boss_controller_block.creativeScreenPage." + this.name);
+			return Text.translatable("gui.boss_controller_block.screen_page." + this.name);
 		}
 	}
 }

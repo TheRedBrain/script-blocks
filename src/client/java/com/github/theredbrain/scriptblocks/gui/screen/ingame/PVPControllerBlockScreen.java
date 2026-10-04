@@ -9,7 +9,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -29,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class PVPControllerBlockScreen extends Screen {
+public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text PVP_ARENA_SETTINGS_ID_LABEL_TEXT = Text.translatable("gui.pvp_controller_block.pvp_arena_settings_id_label");
 	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.pvp_controller_block.match_end_triggered_block_position_offset");
 	private static final Text DATA_PROVIDING_BLOCK_POSITION_TEXT = Text.translatable("gui.pvp_controller_block.data_providing_block_position_offset");
@@ -41,7 +40,7 @@ public class PVPControllerBlockScreen extends Screen {
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_70_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_70");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private final PVPControllerBlockEntity pvpControllerBlockEntity;
-	private CyclingButtonWidget<ScreenPage> creativeScreenPageButton;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 	private TextFieldWidget pvpArenaSettingsIdentifierField;
 	private TextFieldWidget triggeredBlockPositionOffsetXField;
 	private TextFieldWidget triggeredBlockPositionOffsetYField;
@@ -63,10 +62,8 @@ public class PVPControllerBlockScreen extends Screen {
 	private TextFieldWidget newRespawnOrientationPitchField;
 	private TextFieldWidget newRespawnPositionNameField;
 	private ButtonWidget addNewRespawnPositionButton;
-	private ButtonWidget saveButton;
-	private ButtonWidget cancelButton;
 	private ScreenPage screenPage;
-	private List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> respawnPositionsList = new ArrayList<>();
+	private final List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> respawnPositionsList = new ArrayList<>();
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
@@ -119,16 +116,6 @@ public class PVPControllerBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		if (this.updatePVPControllerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 		this.respawnPositionsList.clear();
@@ -138,7 +125,7 @@ public class PVPControllerBlockScreen extends Screen {
 		}
 		super.init();
 
-		this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 18, 308, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 18, 308, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -222,15 +209,19 @@ public class PVPControllerBlockScreen extends Screen {
 		this.addNewRespawnPositionButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.addNewSideEntrance()).dimensions(this.width / 2 - 4 - 150, 186, 308, 20).build());
 
 
-		this.saveButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
 
-		this.creativeScreenPageButton.visible = false;
+	@Override
+	protected void updateWidgets() {
 
 		this.pvpArenaSettingsIdentifierField.setVisible(false);
 
@@ -257,11 +248,6 @@ public class PVPControllerBlockScreen extends Screen {
 		this.newRespawnOrientationPitchField.setVisible(false);
 		this.newRespawnPositionNameField.setVisible(false);
 		this.addNewRespawnPositionButton.visible = false;
-
-		this.saveButton.visible = false;
-		this.cancelButton.visible = false;
-
-		this.creativeScreenPageButton.visible = true;
 
 		if (this.screenPage == ScreenPage.SETTINGS_ID) {
 
@@ -303,9 +289,6 @@ public class PVPControllerBlockScreen extends Screen {
 
 		}
 
-		this.saveButton.visible = true;
-		this.cancelButton.visible = true;
-
 	}
 
 	@Override
@@ -333,7 +316,9 @@ public class PVPControllerBlockScreen extends Screen {
 		this.respawnPositionsList.clear();
 		this.respawnPositionsList.addAll(list);
 		this.screenPage = var;
+		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.triggeredBlockResets = bl;
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 		this.scrollPosition = number;
 		this.scrollAmount = number1;
 		this.pvpArenaSettingsIdentifierField.setText(string);
@@ -450,16 +435,7 @@ public class PVPControllerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private boolean updatePVPControllerBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdatePVPControllerBlockPacket(
 				this.pvpControllerBlockEntity.getPos(),
 				this.pvpArenaSettingsIdentifierField.getText(),
@@ -480,13 +456,13 @@ public class PVPControllerBlockScreen extends Screen {
 		return true;
 	}
 
-	public static enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		SETTINGS_ID("settings_id"),
 		RESPAWN_POSITIONS("respawn_positions");
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -500,7 +476,7 @@ public class PVPControllerBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.pvp_controller_block.screenPage." + this.name);
+			return Text.translatable("gui.pvp_controller_block.screen_page." + this.name);
 		}
 	}
 }

@@ -18,9 +18,9 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
-public class MimicBlockScreen extends Screen {
-	private static final Text ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Text.translatable("gui.mimic_block.activeMimicBlockPositionOffset");
-	private static final Text INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Text.translatable("gui.mimic_block.inactiveMimicBlockPositionOffset");
+public class MimicBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Text.translatable("gui.mimic_block.active_mimic_block_position_offset");
+	private static final Text INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Text.translatable("gui.mimic_block.inactive_mimic_block_position_offset");
 	private final MimicBlockEntity mimicBlock;
 	private TextFieldWidget activeMimicBlockPositionOffsetXField;
 	private TextFieldWidget activeMimicBlockPositionOffsetYField;
@@ -32,15 +32,6 @@ public class MimicBlockScreen extends Screen {
 	public MimicBlockScreen(MimicBlockEntity mimicBlock) {
 		super(NarratorManager.EMPTY);
 		this.mimicBlock = mimicBlock;
-	}
-
-	private void done() {
-		this.updateMimicBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -67,6 +58,10 @@ public class MimicBlockScreen extends Screen {
 
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 139, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 139, 150, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.activeMimicBlockPositionOffsetXField);
 	}
 
@@ -96,22 +91,6 @@ public class MimicBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private void updateMimicBlock() {
-		ClientPlayNetworking.send(new UpdateMimicBlockPacket(
-				this.mimicBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetZField.getText())
-				),
-				new BlockPos(
-						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetZField.getText())
-				)
-		));
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -129,7 +108,20 @@ public class MimicBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateMimicBlockPacket(
+				this.mimicBlock.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetZField.getText())
+				),
+				new BlockPos(
+						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetZField.getText())
+				)
+		));
+		return true;
 	}
 }

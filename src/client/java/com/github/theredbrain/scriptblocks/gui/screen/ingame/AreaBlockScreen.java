@@ -42,7 +42,7 @@ public class AreaBlockScreen extends Screen {
 	private static final Text JOIN_MESSAGE_LABEL_TEXT = Text.translatable("gui.area_block.join_message_label");
 	private static final Text LEAVE_MESSAGE_LABEL_TEXT = Text.translatable("gui.area_block.leave_message_label");
 	private static final Text TRIGGERED_MESSAGE_LABEL_TEXT = Text.translatable("gui.area_block.triggered_message_label");
-	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
 	private static final Text PRE_TIMER_LABEL_TEXT = Text.translatable("gui.area_block.pre_timer_label");
 	private static final Text POST_TIMER_LABEL_TEXT = Text.translatable("gui.area_block.post_timer_label");
 	private final AreaBlockEntity areaBlock;

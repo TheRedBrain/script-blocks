@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -24,11 +23,11 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class TriggeredDisplayBlockScreen extends Screen {
+public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 	private final TriggeredDisplayBlockEntity triggeredDisplayBlock;
 
-	private CyclingButtonWidget<TriggeredDisplayBlockScreen.ScreenPage> screenPageButton;
+	private CyclingButtonWidget<TriggeredDisplayBlockScreen.ScreenPage> cycleScreenPageButton;
 
 	// common
 	private CyclingButtonWidget<TriggeredDisplayBlockEntity.BillboardMode> billboardModeButton;
@@ -51,9 +50,6 @@ public class TriggeredDisplayBlockScreen extends Screen {
 	private TextFieldWidget textOpacityField;
 	private TextFieldWidget textBackgroundField;
 
-	private ButtonWidget doneButton;
-	private ButtonWidget cancelButton;
-
 	private ScreenPage screenPage;
 	private TriggeredDisplayBlockEntity.BillboardMode billboardMode;
 	private TriggeredDisplayBlockEntity.DisplayMode displayMode;
@@ -64,16 +60,6 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.triggeredDisplayBlock = triggeredDisplayBlock;
 	}
 
-	private void done() {
-		if (this.updateTriggeredDisplayBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 		this.screenPage = ScreenPage.COMMON;
@@ -81,7 +67,7 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.displayMode = this.triggeredDisplayBlock.getDisplayMode();
 		this.isTriggered = this.triggeredDisplayBlock.getIsTriggered();
 
-		this.screenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -165,23 +151,19 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		this.textBackgroundField.setText(Integer.toString(this.triggeredDisplayBlock.getBackground()));
 		this.addSelectableChild(this.textBackgroundField);
 
-		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
 
 	@Override
 	protected void setInitialFocus() {
-		this.setInitialFocus(this.screenPageButton);
+		this.setInitialFocus(this.cycleScreenPageButton);
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.billboardModeButton.visible = false;
 		this.displayModeButton.visible = false;
@@ -267,7 +249,8 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		}
 	}
 
-	private boolean updateTriggeredDisplayBlock() {
+	@Override
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredDisplayBlockPacket(
 				this.triggeredDisplayBlock.getPos(),
 				this.billboardMode.asString(),
@@ -316,7 +299,7 @@ public class TriggeredDisplayBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.triggered_display_block.screenPage." + this.name);
+			return Text.translatable("gui.triggered_display_block.screen_page." + this.name);
 		}
 	}
 }

@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class UUIDListRelayBlockScreen extends Screen {
+public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.uuid_list_relay_block.new_uuid_list_provider_position_offset");
 	private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.block_pos.x");
 	private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.block_pos.y");
@@ -84,16 +83,6 @@ public class UUIDListRelayBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		if (this.updateDelayTriggerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 
@@ -132,11 +121,7 @@ public class UUIDListRelayBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.removeListEntryButton0.visible = false;
 		this.removeListEntryButton1.visible = false;
@@ -222,14 +207,6 @@ public class UUIDListRelayBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private boolean updateDelayTriggerBlock() {
-		ClientPlayNetworking.send(new UpdateUUIDListRelayBlockPacket(
-				this.uuidListRelayBlock.getPos(),
-				this.uuidListHandlers
-		));
-		return true;
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -253,7 +230,11 @@ public class UUIDListRelayBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateUUIDListRelayBlockPacket(
+				this.uuidListRelayBlock.getPos(),
+				this.uuidListHandlers
+		));
+		return true;
 	}
 }

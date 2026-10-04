@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class TeamControllerBlockScreen extends Screen {
+public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.team_controller_block.hide_area_label");
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.team_controller_block.show_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_dimensions_label");
@@ -91,14 +91,8 @@ public class TeamControllerBlockScreen extends Screen {
 		this.cycleTeamColorButton.setMessage(getTeamColorLabel(this.teamColor));
 	}
 
-	private void done() {
-		if (this.updateTeamControllerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
+	private Text getTeamColorLabel(Formatting formatting) {
+		return Text.translatable("formatting." + formatting.getName());
 	}
 
 	@Override
@@ -221,11 +215,7 @@ public class TeamControllerBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.toggleShowAreaButton.visible = false;
 		this.areaDimensionsXField.visible = false;
@@ -303,21 +293,21 @@ public class TeamControllerBlockScreen extends Screen {
 		String string12 = this.suffixField.getText();
 		this.init(client, width, height);
 		this.screenPage = var;
-		this.cycleScreenPageButton.setValue(var);
+		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.nametagVisibility = var1;
-		this.cycleNametagVisibilityButton.setValue(var1);
+		this.cycleNametagVisibilityButton.setValue(this.nametagVisibility);
 		this.deathMessageVisibility = var2;
-		this.cycleDeathMessageVisibilityButton.setValue(var2);
+		this.cycleDeathMessageVisibilityButton.setValue(this.deathMessageVisibility);
 		this.collisionRule = var3;
-		this.cycleCollisionRuleButton.setValue(var3);
+		this.cycleCollisionRuleButton.setValue(this.collisionRule);
 		this.teamColor = var4;
-		this.cycleTeamColorButton.setMessage(getTeamColorLabel(var4));
+		this.cycleTeamColorButton.setMessage(getTeamColorLabel(this.teamColor));
 		this.showArea = bool;
-		this.toggleShowAreaButton.setValue(bool);
+		this.toggleShowAreaButton.setValue(this.showArea);
 		this.friendlyFire = bool1;
-		this.toggleFriendlyFireButton.setValue(bool1);
+		this.toggleFriendlyFireButton.setValue(this.friendlyFire);
 		this.showFriendlyInvisibles = bool2;
-		this.toggleShowFriendlyInvisiblesButton.setValue(bool2);
+		this.toggleShowFriendlyInvisiblesButton.setValue(this.showFriendlyInvisibles);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
@@ -370,11 +360,7 @@ public class TeamControllerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateTeamControllerBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTeamControllerBlockPacket(
 				this.teamControllerBlockEntity.getPos(),
 				this.showArea,
@@ -407,17 +393,13 @@ public class TeamControllerBlockScreen extends Screen {
 		return true;
 	}
 
-	private Text getTeamColorLabel(Formatting formatting) {
-		return Text.translatable("formatting." + formatting.getName());
-	}
-
-	public static enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		AREA("area"),
 		TEAM("team");
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -431,7 +413,7 @@ public class TeamControllerBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.team_controller_block.screenPage." + this.name);
+			return Text.translatable("gui.team_controller_block.screen_page." + this.name);
 		}
 	}
 }

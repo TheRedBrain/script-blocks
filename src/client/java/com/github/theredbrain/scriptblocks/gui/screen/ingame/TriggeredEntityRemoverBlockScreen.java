@@ -19,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
 @Environment(value = EnvType.CLIENT)
-public class TriggeredEntityRemoverBlockScreen extends Screen {
+public class TriggeredEntityRemoverBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.triggered_entity_remover_block.hide_area_label");
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.triggered_entity_remover_block.show_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.triggered_entity_remover_block.area_dimensions_label");
@@ -36,21 +36,9 @@ public class TriggeredEntityRemoverBlockScreen extends Screen {
 	private TextFieldWidget areaPositionOffsetZField;
 	private boolean showArea;
 
-	private ButtonWidget doneButton;
-	private ButtonWidget cancelButton;
-
 	public TriggeredEntityRemoverBlockScreen(TriggeredEntityRemoverBlockEntity triggeredEntityRemoverBlock) {
 		super(NarratorManager.EMPTY);
 		this.triggeredEntityRemoverBlock = triggeredEntityRemoverBlock;
-	}
-
-	private void done() {
-		this.updateBossControllerBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -93,22 +81,27 @@ public class TriggeredEntityRemoverBlockScreen extends Screen {
 		this.areaPositionOffsetZField.setText(Integer.toString(this.triggeredEntityRemoverBlock.getAreaPositionOffset().getZ()));
 		this.addSelectableChild(this.areaPositionOffsetZField);
 
-		this.doneButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 212, 150, 20).build());
-		this.cancelButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 212, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 212, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 212, 150, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.toggleShowAreaButton);
 	}
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
-
+		boolean bool = this.showArea;
 		String string = this.areaDimensionsXField.getText();
 		String string1 = this.areaDimensionsYField.getText();
 		String string2 = this.areaDimensionsZField.getText();
 		String string3 = this.areaPositionOffsetXField.getText();
 		String string4 = this.areaPositionOffsetYField.getText();
 		String string5 = this.areaPositionOffsetZField.getText();
-
 		this.init(client, width, height);
-
+		this.showArea = bool;
+		this.toggleShowAreaButton.setValue(this.showArea);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
@@ -133,7 +126,8 @@ public class TriggeredEntityRemoverBlockScreen extends Screen {
 
 	}
 
-	private void updateBossControllerBlock() {
+	@Override
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredEntityRemoverBlockPacket(
 				this.triggeredEntityRemoverBlock.getPos(),
 				this.showArea,
@@ -148,5 +142,6 @@ public class TriggeredEntityRemoverBlockScreen extends Screen {
 						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
 				)
 		));
+		return true;
 	}
 }

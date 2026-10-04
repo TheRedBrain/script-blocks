@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -23,7 +22,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class TriggeredBeaconBlockScreen extends Screen {
+public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text TRIGGERED_TRUE_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.triggered_true_label");
 	private static final Text TRIGGERED_FALSE_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.triggered_false_label");
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.hide_area_label");
@@ -41,6 +40,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 	private static final Text SHOW_ICON_LABEL_TEXT = Text.translatable("gui.triggered_beacon_block.show_icon_label");
 	private final TriggeredBeaconBlockEntity triggeredBeaconBlock;
 	private ScreenPage screenPage;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
 	private TextFieldWidget areaDimensionsXField;
 	private TextFieldWidget areaDimensionsYField;
@@ -72,19 +72,9 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		this.screenPage = ScreenPage.AREA;
 	}
 
-	private void done() {
-		if (this.updateAreaBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
-		this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 30, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 30, 300, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -170,7 +160,13 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
+
+	@Override
+	protected void updateWidgets() {
 
 		this.toggleWasTriggeredButton.visible = false;
 
@@ -285,11 +281,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateAreaBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredBeaconBlockPacket(
 				this.triggeredBeaconBlock.getPos(),
 				this.showArea,
@@ -315,14 +307,14 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		return true;
 	}
 
-	public static enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		AREA("area"),
 		APPLIED_EFFECT("applied_effect"),
 		TRIGGER_SETTINGS("trigger_settings");
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -336,7 +328,7 @@ public class TriggeredBeaconBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.triggered_beacon_block.screenPage." + this.name);
+			return Text.translatable("gui.triggered_beacon_block.screen_page." + this.name);
 		}
 	}
 }

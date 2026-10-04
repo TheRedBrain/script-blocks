@@ -18,8 +18,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 @Environment(value = EnvType.CLIENT)
-public class DataModificationBlockScreen extends Screen {
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
+public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
 	private static final Text ADDED_INTEGER_VALUE_LABEL_TEXT = Text.translatable("gui.data_modification_block.added_integer_value_label");
 	private static final Text INTEGER_MODULUS_VALUE_LABEL_TEXT = Text.translatable("gui.data_modification_block.integer_modulus_value_label");
 	private final DataModificationBlockEntity dataModificationBlockEntity;
@@ -34,16 +34,6 @@ public class DataModificationBlockScreen extends Screen {
 	public DataModificationBlockScreen(DataModificationBlockEntity dataModificationBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.dataModificationBlockEntity = dataModificationBlockEntity;
-	}
-
-	private void done() {
-		if (this.updateDataWritingBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -89,11 +79,7 @@ public class DataModificationBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.addedIntegerValueField.setVisible(false);
 		this.integerModulusValueField.setVisible(false);
@@ -113,12 +99,12 @@ public class DataModificationBlockScreen extends Screen {
 		String string2 = this.dataProvidingBlockPositionOffsetZField.getText();
 		String string3 = this.addedIntegerValueField.getText();
 		this.init(client, width, height);
+		this.dataModificationMode = var;
+		this.cycleDataModificationModeButton.setValue(this.dataModificationMode);
 		this.dataProvidingBlockPositionOffsetXField.setText(string);
 		this.dataProvidingBlockPositionOffsetYField.setText(string1);
 		this.dataProvidingBlockPositionOffsetZField.setText(string2);
 		this.addedIntegerValueField.setText(string3);
-		this.dataModificationMode = var;
-		this.cycleDataModificationModeButton.setValue(this.dataModificationMode);
 	}
 
 	@Override
@@ -145,11 +131,7 @@ public class DataModificationBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateDataWritingBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataModificationBlockPacket(
 				this.dataModificationBlockEntity.getPos(),
 				new BlockPos(

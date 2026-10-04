@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -18,7 +17,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 @Environment(value = EnvType.CLIENT)
-public class StatusEffectManipulationBlockScreen extends Screen {
+public class StatusEffectManipulationBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text MANIPULATION_MODE_LABEL_TEXT = Text.translatable("gui.status_effect_manipulation_block.manipulation_mode_label");
 	private static final Text STATUS_EFFECT_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.status_effect_instance.status_effect_identifier_label");
 	private static final Text STATUS_EFFECT_AMPLIFIER_LABEL_TEXT = Text.translatable("gui.status_effect_instance.status_effect_amplifier_label");
@@ -54,23 +53,13 @@ public class StatusEffectManipulationBlockScreen extends Screen {
 		this.statusEffectManipulationBlock = statusEffectManipulationBlockEntity;
 	}
 
-	private void done() {
-		if (this.updateStatusEffectManipulationBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 
 		int i = this.textRenderer.getWidth(MANIPULATION_MODE_LABEL_TEXT) + 10;
 		this.manipulationMode = this.statusEffectManipulationBlock.getManipulationMode();
-		this.cycleManipulationModeButton = this.addDrawableChild(CyclingButtonWidget.builder(StatusEffectManipulationBlockEntity.ManipulationMode::asText).values((StatusEffectManipulationBlockEntity.ManipulationMode[]) StatusEffectManipulationBlockEntity.ManipulationMode.values()).initially(this.manipulationMode).omitKeyText().build(this.width / 2 - 152 + i, 20, 300 - i, 20, Text.empty(), (button, triggeredMode) -> {
-			this.manipulationMode = triggeredMode;
+		this.cycleManipulationModeButton = this.addDrawableChild(CyclingButtonWidget.builder(StatusEffectManipulationBlockEntity.ManipulationMode::asText).values((StatusEffectManipulationBlockEntity.ManipulationMode[]) StatusEffectManipulationBlockEntity.ManipulationMode.values()).initially(this.manipulationMode).omitKeyText().build(this.width / 2 - 152 + i, 20, 300 - i, 20, Text.empty(), (button, manipulationMode) -> {
+			this.manipulationMode = manipulationMode;
 			this.updateWidgets();
 		}));
 
@@ -142,11 +131,7 @@ public class StatusEffectManipulationBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.effectIdentifierField.setVisible(false);
 		this.effectAmplifierField.setVisible(false);
@@ -194,9 +179,13 @@ public class StatusEffectManipulationBlockScreen extends Screen {
 		String string4 = this.amplifierModificationField.getText();
 		this.init(client, width, height);
 		this.manipulationMode = var2;
+		this.cycleManipulationModeButton.setValue(this.manipulationMode);
 		this.effectIsAmbient = bool;
+		this.toggleEffectIsAmbientButton.setValue(this.effectIsAmbient);
 		this.effectShowsParticles = bool1;
+		this.toggleEffectShowsParticlesButton.setValue(this.effectShowsParticles);
 		this.effectShowsIcon = bool2;
+		this.toggleEffectShowsIconButton.setValue(this.effectShowsIcon);
 		this.effectIdentifierField.setText(string);
 		this.effectAmplifierField.setText(string1);
 		this.effectDurationField.setText(string2);
@@ -243,11 +232,7 @@ public class StatusEffectManipulationBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateStatusEffectManipulationBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateStatusEffectManipulationBlockPacket(
 				this.statusEffectManipulationBlock.getPos(),
 				this.manipulationMode.asString(),

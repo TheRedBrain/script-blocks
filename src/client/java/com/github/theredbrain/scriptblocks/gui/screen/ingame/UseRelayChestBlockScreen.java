@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -19,18 +18,19 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
-public class UseRelayChestBlockScreen extends Screen {
-	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+public class UseRelayChestBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
 	private static final Text KEY_IDENTIFIER_STRING_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.key_identifier_string_label");
 	private static final Text LOCKED_MESSAGE_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.locked_message_label");
 	private static final Text LOCKED_SOUND_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.locked_sound_label");
 	private static final Text UNLOCK_MESSAGE_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.unlock_message_label");
 	private static final Text UNLOCK_SOUND_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.unlock_sound_label");
-	private static final Text RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.use_relay_block.relayBlockPositionOffset");
+	private static final Text RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.use_relay_block.relay_block_position_offset");
 	private final UseRelayChestBlockEntity useRelayChestBlockEntity;
 	private TextFieldWidget triggeredBlockPositionOffsetXField;
 	private TextFieldWidget triggeredBlockPositionOffsetYField;
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
+	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
 	private TextFieldWidget keyIdentifierStringField;
 	private TextFieldWidget lockedMessageField;
@@ -44,16 +44,6 @@ public class UseRelayChestBlockScreen extends Screen {
 	public UseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.useRelayChestBlockEntity = useRelayChestBlockEntity;
-	}
-
-	private void done() {
-		if (this.updateRedstoneTriggerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -72,7 +62,7 @@ public class UseRelayChestBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetZField.setText(Integer.toString(this.useRelayChestBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.useRelayChestBlockEntity.getTriggeredBlock().getRight();
-		this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 40, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 40, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -125,11 +115,6 @@ public class UseRelayChestBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		String string2 = this.triggeredBlockPositionOffsetXField.getText();
 		String string3 = this.triggeredBlockPositionOffsetYField.getText();
@@ -156,6 +141,7 @@ public class UseRelayChestBlockScreen extends Screen {
 		this.relayBlockPositionOffsetYField.setText(string11);
 		this.relayBlockPositionOffsetZField.setText(string12);
 		this.triggeredBlockResets = bl;
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 	}
 
 	@Override
@@ -165,29 +151,6 @@ public class UseRelayChestBlockScreen extends Screen {
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	private boolean updateRedstoneTriggerBlock() {
-		ClientPlayNetworking.send(new UpdateUseRelayChestBlockPacket(
-				this.useRelayChestBlockEntity.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
-				),
-				this.triggeredBlockResets,
-				this.keyIdentifierStringField.getText(),
-				this.lockedMessageField.getText(),
-				this.lockedSoundField.getText(),
-				this.unlockedMessageField.getText(),
-				this.unlockedSoundField.getText(),
-				new BlockPos(
-						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.relayBlockPositionOffsetZField.getText())
-				)
-		));
-		return true;
 	}
 
 	@Override
@@ -222,7 +185,26 @@ public class UseRelayChestBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateUseRelayChestBlockPacket(
+				this.useRelayChestBlockEntity.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+				),
+				this.triggeredBlockResets,
+				this.keyIdentifierStringField.getText(),
+				this.lockedMessageField.getText(),
+				this.lockedSoundField.getText(),
+				this.unlockedMessageField.getText(),
+				this.unlockedSoundField.getText(),
+				new BlockPos(
+						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.relayBlockPositionOffsetZField.getText())
+				)
+		));
+		return true;
 	}
 }

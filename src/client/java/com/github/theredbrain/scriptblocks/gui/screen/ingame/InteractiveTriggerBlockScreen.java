@@ -19,8 +19,8 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
-public class InteractiveTriggerBlockScreen extends Screen {
-	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+public class InteractiveTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
 	private static final Text KEY_IDENTIFIER_STRING_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.key_identifier_string_label");
 	private static final Text LOCKED_MESSAGE_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.locked_message_label");
 	private static final Text LOCKED_SOUND_LABEL_TEXT = Text.translatable("gui.interactive_trigger_block.locked_sound_label");
@@ -30,6 +30,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 	private TextFieldWidget triggeredBlockPositionOffsetXField;
 	private TextFieldWidget triggeredBlockPositionOffsetYField;
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
+	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
 	private TextFieldWidget keyIdentifierStringField;
 	private TextFieldWidget lockedMessageField;
@@ -40,16 +41,6 @@ public class InteractiveTriggerBlockScreen extends Screen {
 	public InteractiveTriggerBlockScreen(InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.interactiveTriggerBlockEntity = interactiveTriggerBlockEntity;
-	}
-
-	private void done() {
-		if (this.updateRedstoneTriggerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -68,7 +59,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetZField.setText(Integer.toString(this.interactiveTriggerBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.interactiveTriggerBlockEntity.getTriggeredBlock().getRight();
-		this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 40, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 40, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -103,6 +94,11 @@ public class InteractiveTriggerBlockScreen extends Screen {
 	}
 
 	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.triggeredBlockPositionOffsetXField);
+	}
+
+	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		String string2 = this.triggeredBlockPositionOffsetXField.getText();
 		String string3 = this.triggeredBlockPositionOffsetYField.getText();
@@ -123,6 +119,7 @@ public class InteractiveTriggerBlockScreen extends Screen {
 		this.unlockedMessageField.setText(string8);
 		this.unlockedSoundField.setText(string9);
 		this.triggeredBlockResets = bl;
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 	}
 
 	@Override
@@ -132,24 +129,6 @@ public class InteractiveTriggerBlockScreen extends Screen {
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	private boolean updateRedstoneTriggerBlock() {
-		ClientPlayNetworking.send(new UpdateInteractiveTriggerBlockPacket(
-				this.interactiveTriggerBlockEntity.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
-				),
-				this.triggeredBlockResets,
-				this.keyIdentifierStringField.getText(),
-				this.lockedMessageField.getText(),
-				this.lockedSoundField.getText(),
-				this.unlockedMessageField.getText(),
-				this.unlockedSoundField.getText()
-		));
-		return true;
 	}
 
 	@Override
@@ -179,7 +158,21 @@ public class InteractiveTriggerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateInteractiveTriggerBlockPacket(
+				this.interactiveTriggerBlockEntity.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+				),
+				this.triggeredBlockResets,
+				this.keyIdentifierStringField.getText(),
+				this.lockedMessageField.getText(),
+				this.lockedSoundField.getText(),
+				this.unlockedMessageField.getText(),
+				this.unlockedSoundField.getText()
+		));
+		return true;
 	}
 }

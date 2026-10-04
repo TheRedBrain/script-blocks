@@ -26,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class TriggeredCounterBlockScreen extends Screen {
+public class TriggeredCounterBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text NEW_TRIGGERED_BLOCK_COUNTER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_counter_block.counter_threshold.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.newTriggeredBlockPositionOffset");
-	private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetX.placeholder");
-	private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetY.placeholder");
-	private static final Text NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POSITION_TEXT = Text.translatable("gui.triggered_block.new_triggered_block_position_offset");
+	private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
+	private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
+	private static final Text NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
 	private static final Text REMOVE_BUTTON_LABEL_TEXT = Text.translatable("gui.remove");
 	private static final Text ADD_BUTTON_LABEL_TEXT = Text.translatable("gui.add");
 	private static final Identifier TRIGGERED_BLOCKS_LIST_SCROLLER_BACKGROUND_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_116");
@@ -51,7 +51,7 @@ public class TriggeredCounterBlockScreen extends Screen {
 	private ButtonWidget addNewTriggeredBlockPositionOffsetButton;
 	private ButtonWidget saveButton;
 	private ButtonWidget cancelButton;
-	private List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = new ArrayList<>(List.of());
+	private final List<MutablePair<Integer, MutablePair<BlockPos, Boolean>>> triggeredBlocksList = new ArrayList<>(List.of());
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
@@ -98,15 +98,6 @@ public class TriggeredCounterBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		this.updateTriggeredCounterBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 		this.triggeredBlocksList.clear();
@@ -144,7 +135,13 @@ public class TriggeredCounterBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.newTriggeredBlockCounterField);
+	}
+
+	@Override
+	protected void updateWidgets() {
 		this.removeListEntryButton0.visible = false;
 		this.removeListEntryButton1.visible = false;
 		this.removeListEntryButton2.visible = false;
@@ -158,8 +155,6 @@ public class TriggeredCounterBlockScreen extends Screen {
 		this.toggleTriggeredBlockResetsButton.visible = false;
 
 		this.addNewTriggeredBlockPositionOffsetButton.visible = false;
-		this.saveButton.visible = false;
-		this.cancelButton.visible = false;
 
 		int index = 0;
 		for (int i = 0; i < Math.min(5, this.triggeredBlocksList.size()); i++) {
@@ -184,8 +179,6 @@ public class TriggeredCounterBlockScreen extends Screen {
 		this.toggleTriggeredBlockResetsButton.visible = true;
 
 		this.addNewTriggeredBlockPositionOffsetButton.visible = true;
-		this.saveButton.visible = true;
-		this.cancelButton.visible = true;
 	}
 
 	@Override
@@ -249,10 +242,6 @@ public class TriggeredCounterBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private void updateTriggeredCounterBlock() {
-		ClientPlayNetworking.send(new UpdateTriggeredCounterBlockPacket(this.triggeredCounterBlock.getPos(), this.triggeredBlocksList));
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -276,7 +265,11 @@ public class TriggeredCounterBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateTriggeredCounterBlockPacket(
+				this.triggeredCounterBlock.getPos(),
+				this.triggeredBlocksList)
+		);
+		return true;
 	}
 }

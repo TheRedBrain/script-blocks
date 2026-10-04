@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class PlayerDetectorBlockScreen extends Screen {
+public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text ENABLE_TICKING_TRUE_LABEL_TEXT = Text.translatable("gui.player_detector_block.enable_ticking_true_label");
 	private static final Text ENABLE_TICKING_FALSE_LABEL_TEXT = Text.translatable("gui.player_detector_block.enable_ticking_false_label");
 	private static final Text SHOW_AREA_LABEL_TRUE_TEXT = Text.translatable("gui.player_detector_block.show_area_true_label");
@@ -84,16 +84,6 @@ public class PlayerDetectorBlockScreen extends Screen {
 		super(NarratorManager.EMPTY);
 		this.playerDetectorBlock = playerDetectorBlock;
 		this.screenPage = ScreenPage.AREA;
-	}
-
-	private void done() {
-		if (this.updateAreaBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -250,11 +240,7 @@ public class PlayerDetectorBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.toggleEnableTickingButton.visible = false;
 		this.toggleShowAreaButton.visible = false;
@@ -378,16 +364,16 @@ public class PlayerDetectorBlockScreen extends Screen {
 		String string23 = this.uuidListHandlerOnTriggeringPositionOffsetZField.getText();
 		this.init(client, width, height);
 		this.screenPage = var;
-		this.enableTicking = bool;
-		this.showArea = bool1;
-		this.triggeredBlockOnEnteringResets = bool2;
-		this.triggeredBlockOnLeavingResets = bool3;
-		this.triggeredBlockOnTriggeringResets = bool4;
 		this.cycleScreenPageButton.setValue(this.screenPage);
+		this.enableTicking = bool;
 		this.toggleEnableTickingButton.setValue(this.enableTicking);
+		this.showArea = bool1;
 		this.toggleShowAreaButton.setValue(this.showArea);
+		this.triggeredBlockOnEnteringResets = bool2;
 		this.toggleTriggeredBlockOnEnteringResetsButton.setValue(this.triggeredBlockOnEnteringResets);
+		this.triggeredBlockOnLeavingResets = bool3;
 		this.toggleTriggeredBlockOnLeavingResetsButton.setValue(this.triggeredBlockOnLeavingResets);
+		this.triggeredBlockOnTriggeringResets = bool4;
 		this.toggleTriggeredBlockOnTriggeringResetsButton.setValue(this.triggeredBlockOnTriggeringResets);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
@@ -469,11 +455,7 @@ public class PlayerDetectorBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateAreaBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdatePlayerDetectorBlockPacket(
 				this.playerDetectorBlock.getPos(),
 				this.enableTicking,
@@ -532,7 +514,7 @@ public class PlayerDetectorBlockScreen extends Screen {
 
 		private final String name;
 
-		private ScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -546,7 +528,7 @@ public class PlayerDetectorBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.player_detector_block.screenPage." + this.name);
+			return Text.translatable("gui.player_detector_block.screen_page." + this.name);
 		}
 	}
 }

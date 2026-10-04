@@ -19,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
 @Environment(value = EnvType.CLIENT)
-public class TriggeredDamageDealingBlockScreen extends Screen {
+public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.hide_area_label");
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.show_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.area_dimensions_label");
@@ -30,7 +30,7 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 
 	private final TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity;
 
-	private boolean showArea;
+	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
 	private TextFieldWidget areaDimensionsXField;
 	private TextFieldWidget areaDimensionsYField;
 	private TextFieldWidget areaDimensionsZField;
@@ -42,18 +42,11 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 	private TextFieldWidget damageTypeIdentifierField;
 	private TextFieldWidget damageAmountField;
 
+	private boolean showArea;
+
 	public TriggeredDamageDealingBlockScreen(TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.triggeredDamageDealingBlockEntity = triggeredDamageDealingBlockEntity;
-	}
-
-	private void done() {
-		this.updateBossControllerBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -62,7 +55,7 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 		super.init();
 
 		this.showArea = this.triggeredDamageDealingBlockEntity.showArea();
-		this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -116,8 +109,13 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.toggleShowAreaButton);
+	}
 
+	@Override
+	public void resize(MinecraftClient client, int width, int height) {
+		boolean bool = this.showArea;
 		String string = this.areaDimensionsXField.getText();
 		String string1 = this.areaDimensionsYField.getText();
 		String string2 = this.areaDimensionsZField.getText();
@@ -127,9 +125,9 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 		String string6 = this.exceptionTagIdentifierField.getText();
 		String string7 = this.damageTypeIdentifierField.getText();
 		String string8 = this.damageAmountField.getText();
-
 		this.init(client, width, height);
-
+		this.showArea = bool;
+		this.toggleShowAreaButton.setValue(this.showArea);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
@@ -163,7 +161,8 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 
 	}
 
-	private void updateBossControllerBlock() {
+	@Override
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredDamageDealingBlockPacket(
 				this.triggeredDamageDealingBlockEntity.getPos(),
 				this.showArea,
@@ -181,5 +180,6 @@ public class TriggeredDamageDealingBlockScreen extends Screen {
 				this.damageTypeIdentifierField.getText(),
 				ItemUtils.parseFloat(this.damageAmountField.getText())
 		));
+		return true;
 	}
 }

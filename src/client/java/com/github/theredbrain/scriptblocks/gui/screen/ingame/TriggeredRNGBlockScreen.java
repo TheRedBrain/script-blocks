@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -30,8 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class TriggeredRNGBlockScreen extends Screen {
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.dataProvidingBlockPositionOffset");
+public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
 	private static final Text OVERRIDE_DATA_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.triggered_rng_block.override_data_identifier_label");
 	private static final Text OVERRIDE_DATA_VALUE_LABEL_TEXT = Text.translatable("gui.triggered_rng_block.override_data_value_label");
 	private static final Text OVERRIDE_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_rng_block.override_triggered_block_pos_offset");
@@ -45,12 +44,11 @@ public class TriggeredRNGBlockScreen extends Screen {
 	private static final Text RANDOM_MAX_VALUE_LABEL_TEXT = Text.translatable("gui.triggered_rng_block.random_max_value_label");
 	private static final Text FALLBACK_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_rng_block.fallback_triggered_block_pos_offset");
 
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.newTriggeredBlockPositionOffset");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetX.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetY.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_THRESHOLD_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockThreshold.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_THRESHOLD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockThreshold.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.new_triggered_block_position_offset");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_THRESHOLD_LABEL_TEXT = Text.translatable("gui.triggered_block.triggered_block_threshold.placeholder");
 	private static final Text ADD_NEW_TRIGGERED_BLOCK_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
@@ -60,7 +58,7 @@ public class TriggeredRNGBlockScreen extends Screen {
 
 	private final TriggeredRNGBlockEntity triggeredRNGBlock;
 
-	private CyclingButtonWidget<ScreenPage> screenPageButton;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 	private ScreenPage screenPage;
 
 	private TextFieldWidget dataProvidingBlockPositionOffsetXField;
@@ -142,23 +140,13 @@ public class TriggeredRNGBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		if (this.updateTriggeredRNGBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 
 		super.init();
 
 		this.screenPage = ScreenPage.MISC;
-		this.screenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -277,7 +265,6 @@ public class TriggeredRNGBlockScreen extends Screen {
 
 		this.newTriggeredBlockThresholdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 186, 150, 20, Text.empty());
 		this.newTriggeredBlockThresholdField.setMaxLength(128);
-		this.newTriggeredBlockThresholdField.setPlaceholder(NEW_TRIGGERED_BLOCK_THRESHOLD_PLACEHOLDER_TEXT);
 		this.addSelectableChild(this.newTriggeredBlockThresholdField);
 
 		this.addNewTriggeredBlockPositionOffsetButton = this.addDrawableChild(ButtonWidget.builder(ADD_NEW_TRIGGERED_BLOCK_BUTTON_LABEL_TEXT, button -> this.addNewTriggeredBlock()).dimensions(this.width / 2 + 4, 186, 150, 20).build());
@@ -290,10 +277,11 @@ public class TriggeredRNGBlockScreen extends Screen {
 
 	@Override
 	protected void setInitialFocus() {
-		this.setInitialFocus(this.screenPageButton);
+		this.setInitialFocus(this.cycleScreenPageButton);
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void updateWidgets() {
 		
 		this.dataProvidingBlockPositionOffsetXField.setVisible(false);
 		this.dataProvidingBlockPositionOffsetYField.setVisible(false);
@@ -405,11 +393,17 @@ public class TriggeredRNGBlockScreen extends Screen {
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> list = new ArrayList<>(this.triggeredBlocks);
 		this.init(client, width, height);
 		this.screenPage = var;
+		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.overrideTriggeredBlockResets = bool;
+		this.toggleOverrideTriggeredBlockResetsButton.setValue(this.overrideTriggeredBlockResets);
 		this.checksTeamAttributes = bool1;
+		this.toggleChecksTeamAttributesButton.setValue(this.checksTeamAttributes);
 		this.isAffectedByLuck = bool2;
+		this.toggleIsAffectedByLuckButton.setValue(this.isAffectedByLuck);
 		this.fallbackTriggeredBlockResets = bool3;
+		this.toggleFallbackTriggeredBlockResetsButton.setValue(this.fallbackTriggeredBlockResets);
 		this.newTriggeredBlockResets = bool4;
+		this.toggleNewTriggeredBlockResetsButton.setValue(this.newTriggeredBlockResets);
 		this.dataProvidingBlockPositionOffsetXField.setText(string);
 		this.dataProvidingBlockPositionOffsetYField.setText(string1);
 		this.dataProvidingBlockPositionOffsetZField.setText(string2);
@@ -483,38 +477,6 @@ public class TriggeredRNGBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private boolean updateTriggeredRNGBlock() {
-		ClientPlayNetworking.send(new UpdateTriggeredRNGBlockPacket(
-				this.triggeredRNGBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getText())
-				),
-				this.overrideDataIdentifierField.getText(),
-				this.overrideDataValueField.getText(),
-				new BlockPos(
-						ItemUtils.parseInt(this.overrideTriggeredBlockPosOffsetXField.getText()),
-						ItemUtils.parseInt(this.overrideTriggeredBlockPosOffsetYField.getText()),
-						ItemUtils.parseInt(this.overrideTriggeredBlockPosOffsetZField.getText())
-				),
-				this.overrideTriggeredBlockResets,
-				this.influencingAttributeIdentifierField.getText(),
-				this.checksTeamAttributes,
-				this.isAffectedByLuck,
-				ItemUtils.parseInt(this.randomMinValueField.getText()),
-				ItemUtils.parseInt(this.randomMaxValueField.getText()),
-				new BlockPos(
-						ItemUtils.parseInt(this.fallbackTriggeredBlockPosOffsetXField.getText()),
-						ItemUtils.parseInt(this.fallbackTriggeredBlockPosOffsetYField.getText()),
-						ItemUtils.parseInt(this.fallbackTriggeredBlockPosOffsetZField.getText())
-				),
-				this.fallbackTriggeredBlockResets,
-				this.triggeredBlocks
-		));
-		return true;
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -578,8 +540,36 @@ public class TriggeredRNGBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateTriggeredRNGBlockPacket(
+				this.triggeredRNGBlock.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getText())
+				),
+				this.overrideDataIdentifierField.getText(),
+				this.overrideDataValueField.getText(),
+				new BlockPos(
+						ItemUtils.parseInt(this.overrideTriggeredBlockPosOffsetXField.getText()),
+						ItemUtils.parseInt(this.overrideTriggeredBlockPosOffsetYField.getText()),
+						ItemUtils.parseInt(this.overrideTriggeredBlockPosOffsetZField.getText())
+				),
+				this.overrideTriggeredBlockResets,
+				this.influencingAttributeIdentifierField.getText(),
+				this.checksTeamAttributes,
+				this.isAffectedByLuck,
+				ItemUtils.parseInt(this.randomMinValueField.getText()),
+				ItemUtils.parseInt(this.randomMaxValueField.getText()),
+				new BlockPos(
+						ItemUtils.parseInt(this.fallbackTriggeredBlockPosOffsetXField.getText()),
+						ItemUtils.parseInt(this.fallbackTriggeredBlockPosOffsetYField.getText()),
+						ItemUtils.parseInt(this.fallbackTriggeredBlockPosOffsetZField.getText())
+				),
+				this.fallbackTriggeredBlockResets,
+				this.triggeredBlocks
+		));
+		return true;
 	}
 
 	public enum ScreenPage implements StringIdentifiable {
@@ -599,7 +589,7 @@ public class TriggeredRNGBlockScreen extends Screen {
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.triggered_rng_block.screenPage." + this.name);
+			return Text.translatable("gui.triggered_rng_block.screen_page." + this.name);
 		}
 	}
 }

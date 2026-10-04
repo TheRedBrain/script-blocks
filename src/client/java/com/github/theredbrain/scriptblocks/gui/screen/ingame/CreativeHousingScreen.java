@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.SetHousingBlockOwnerPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateHousingBlockCreativePacket;
@@ -10,38 +9,34 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class CreativeHousingScreen extends Screen {
-	private static final Text HIDE_INFLUENCE_AREA_LABEL_TEXT = Text.translatable("gui.housing_screen.hide_influence_area_label");
-	private static final Text SHOW_INFLUENCE_AREA_LABEL_TEXT = Text.translatable("gui.housing_screen.show_influence_area_label");
-	private static final Text INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.housing_screen.influence_area_dimensions_label");
-	private static final Text INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.housing_screen.influence_area_position_offset_label");
+public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text HIDE_INFLUENCE_AREA_LABEL_TEXT = Text.translatable("gui.housing_block.hide_influence_area_label");
+	private static final Text SHOW_INFLUENCE_AREA_LABEL_TEXT = Text.translatable("gui.housing_block.show_influence_area_label");
+	private static final Text INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.housing_block.influence_area_dimensions_label");
+	private static final Text INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.housing_block.influence_area_position_offset_label");
 	private static final Text RESET_OWNER_BUTTON_LABEL_TEXT = Text.translatable("gui.housing_block.reset_owner_button_label");
-	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
+	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
 	@Nullable
 	private final HousingBlockEntity housingBlockEntity;
 
-	private CyclingButtonWidget<CreativeScreenPage> creativeScreenPageButton;
-	private CyclingButtonWidget<Boolean> showRestrictBlockBreakingAreaButton;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
+	private CyclingButtonWidget<Boolean> showInfluenceAreaButton;
 	private TextFieldWidget restrictBlockBreakingAreaDimensionsXField;
 	private TextFieldWidget restrictBlockBreakingAreaDimensionsYField;
 	private TextFieldWidget restrictBlockBreakingAreaDimensionsZField;
@@ -55,54 +50,43 @@ public class CreativeHousingScreen extends Screen {
 	private boolean triggeredBlockResets;
 	private CyclingButtonWidget<HousingBlockEntity.OwnerMode> toggleOwnerModeButton;
 	private ButtonWidget resetOwnerButton;
-	private ButtonWidget saveCreativeButton;
-	private ButtonWidget cancelCreativeButton;
 
-	private CreativeScreenPage creativeScreenPage;
-	private List<String> coOwnerList = new ArrayList<>(List.of());
-	private List<String> trustedPersonsList = new ArrayList<>(List.of());
-	private List<String> guestList = new ArrayList<>(List.of());
+	private ScreenPage screenPage;
 	private boolean showInfluenceArea = false;
 	private HousingBlockEntity.OwnerMode ownerMode = HousingBlockEntity.OwnerMode.DIMENSION_OWNER;
 
 	public CreativeHousingScreen(@Nullable HousingBlockEntity housingBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.housingBlockEntity = housingBlockEntity;
-		this.creativeScreenPage = CreativeScreenPage.INFLUENCE;
+		this.screenPage = ScreenPage.INFLUENCE;
 	}
 
-	private void saveCreative() {
-		if (this.updateHousingBlockCreative()) {
-			this.close();
+	private void resetHouseOwner() {
+		if (this.housingBlockEntity != null && this.client != null && this.client.player != null) {
+			ClientPlayNetworking.send(new SetHousingBlockOwnerPacket(
+					this.housingBlockEntity.getPos(),
+					""
+			));
 		}
-	}
-
-	private void cancel() {
 		this.close();
 	}
 
 	@Override
 	protected void init() {
-		this.coOwnerList.clear();
-		this.trustedPersonsList.clear();
-		this.guestList.clear();
 		if (this.housingBlockEntity != null) {
-			this.coOwnerList.addAll(this.housingBlockEntity.getCoOwnerList());
-			this.trustedPersonsList.addAll(this.housingBlockEntity.getTrustedList());
-			this.guestList.addAll(this.housingBlockEntity.getGuestList());
 			this.showInfluenceArea = housingBlockEntity.getShowInfluenceArea();
 			this.ownerMode = housingBlockEntity.getOwnerMode();
 		}
 		super.init();
 
-		this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(CreativeScreenPage::asText).values((CreativeScreenPage[]) CreativeScreenPage.values()).initially(this.creativeScreenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, creativeScreenPage) -> {
-			this.creativeScreenPage = creativeScreenPage;
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values(ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- influence area page ---
 
-		this.showRestrictBlockBreakingAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_INFLUENCE_AREA_LABEL_TEXT, SHOW_INFLUENCE_AREA_LABEL_TEXT).initially(this.showInfluenceArea).omitKeyText().build(this.width / 2 - 153, 45, 300, 20, Text.empty(), (button, showInfluenceArea) -> {
+		this.showInfluenceAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_INFLUENCE_AREA_LABEL_TEXT, SHOW_INFLUENCE_AREA_LABEL_TEXT).initially(this.showInfluenceArea).omitKeyText().build(this.width / 2 - 153, 45, 300, 20, Text.empty(), (button, showInfluenceArea) -> {
 			this.showInfluenceArea = showInfluenceArea;
 		}));
 
@@ -163,19 +147,23 @@ public class CreativeHousingScreen extends Screen {
 			this.ownerMode = ownerMode;
 		}));
 
-		this.resetOwnerButton = this.addDrawableChild(ButtonWidget.builder(RESET_OWNER_BUTTON_LABEL_TEXT, button -> this.trySetHouseOwner(false)).dimensions(this.width / 2 - 4 - 150, 94, 300, 20).build());
+		this.resetOwnerButton = this.addDrawableChild(ButtonWidget.builder(RESET_OWNER_BUTTON_LABEL_TEXT, button -> this.resetHouseOwner()).dimensions(this.width / 2 - 4 - 150, 94, 300, 20).build());
 
-		this.saveCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.saveCreative()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
 
-		this.creativeScreenPageButton.visible = false;
+	@Override
+	protected void updateWidgets() {
 
-		this.showRestrictBlockBreakingAreaButton.visible = false;
+		this.showInfluenceAreaButton.visible = false;
 		this.restrictBlockBreakingAreaDimensionsXField.setVisible(false);
 		this.restrictBlockBreakingAreaDimensionsYField.setVisible(false);
 		this.restrictBlockBreakingAreaDimensionsZField.setVisible(false);
@@ -191,14 +179,9 @@ public class CreativeHousingScreen extends Screen {
 		this.toggleOwnerModeButton.visible = false;
 		this.resetOwnerButton.visible = false;
 
-		this.saveCreativeButton.visible = false;
-		this.cancelCreativeButton.visible = false;
+		if (this.screenPage == ScreenPage.INFLUENCE) {
 
-		this.creativeScreenPageButton.visible = true;
-
-		if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
-
-			this.showRestrictBlockBreakingAreaButton.visible = true;
+			this.showInfluenceAreaButton.visible = true;
 			this.restrictBlockBreakingAreaDimensionsXField.setVisible(true);
 			this.restrictBlockBreakingAreaDimensionsYField.setVisible(true);
 			this.restrictBlockBreakingAreaDimensionsZField.setVisible(true);
@@ -206,27 +189,25 @@ public class CreativeHousingScreen extends Screen {
 			this.restrictBlockBreakingAreaPositionOffsetYField.setVisible(true);
 			this.restrictBlockBreakingAreaPositionOffsetZField.setVisible(true);
 
-		} else if (this.creativeScreenPage == CreativeScreenPage.TRIGGERED_BLOCK) {
+		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
 
 			this.triggeredBlockPositionOffsetXField.setVisible(true);
 			this.triggeredBlockPositionOffsetYField.setVisible(true);
 			this.triggeredBlockPositionOffsetZField.setVisible(true);
 			this.toggleTriggeredBlockResetsButton.visible = true;
 
-		} else if (this.creativeScreenPage == CreativeScreenPage.OWNER) {
+		} else if (this.screenPage == ScreenPage.OWNER) {
 
 			this.toggleOwnerModeButton.visible = true;
 			this.resetOwnerButton.visible = true;
 
 		}
-
-		this.saveCreativeButton.visible = true;
-		this.cancelCreativeButton.visible = true;
 	}
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		boolean bool = this.showInfluenceArea;
+		boolean boolean1 = this.triggeredBlockResets;
 		HousingBlockEntity.OwnerMode var = this.ownerMode;
 		String string3 = this.restrictBlockBreakingAreaDimensionsXField.getText();
 		String string4 = this.restrictBlockBreakingAreaDimensionsYField.getText();
@@ -237,10 +218,13 @@ public class CreativeHousingScreen extends Screen {
 		String string9 = this.triggeredBlockPositionOffsetXField.getText();
 		String string10 = this.triggeredBlockPositionOffsetYField.getText();
 		String string11 = this.triggeredBlockPositionOffsetZField.getText();
-		boolean boolean2 = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.showInfluenceArea = bool;
+		this.showInfluenceAreaButton.setValue(this.showInfluenceArea);
+		this.triggeredBlockResets = boolean1;
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 		this.ownerMode = var;
+		this.toggleOwnerModeButton.setValue(this.ownerMode);
 		this.restrictBlockBreakingAreaDimensionsXField.setText(string3);
 		this.restrictBlockBreakingAreaDimensionsYField.setText(string4);
 		this.restrictBlockBreakingAreaDimensionsZField.setText(string5);
@@ -250,14 +234,13 @@ public class CreativeHousingScreen extends Screen {
 		this.triggeredBlockPositionOffsetXField.setText(string9);
 		this.triggeredBlockPositionOffsetYField.setText(string10);
 		this.triggeredBlockPositionOffsetZField.setText(string11);
-		this.triggeredBlockResets = boolean2;
 		this.updateWidgets();
 	}
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
-			this.saveCreative();
+			this.done();
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
@@ -268,7 +251,7 @@ public class CreativeHousingScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		if (this.creativeScreenPage == CreativeScreenPage.INFLUENCE) {
+		if (this.screenPage == ScreenPage.INFLUENCE) {
 			context.drawTextWithShadow(this.textRenderer, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 			this.restrictBlockBreakingAreaDimensionsXField.render(context, mouseX, mouseY, delta);
 			this.restrictBlockBreakingAreaDimensionsYField.render(context, mouseX, mouseY, delta);
@@ -277,7 +260,7 @@ public class CreativeHousingScreen extends Screen {
 			this.restrictBlockBreakingAreaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.restrictBlockBreakingAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.restrictBlockBreakingAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		} else if (this.creativeScreenPage == CreativeScreenPage.TRIGGERED_BLOCK) {
+		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
 			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
@@ -286,11 +269,7 @@ public class CreativeHousingScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateHousingBlockCreative() {
+	protected boolean updateBlock() {
 		BlockPos housingBlockPos = new BlockPos(0, 0, 0);
 		if (this.housingBlockEntity != null) {
 			housingBlockPos = this.housingBlockEntity.getPos();
@@ -319,24 +298,14 @@ public class CreativeHousingScreen extends Screen {
 		return true;
 	}
 
-	private void trySetHouseOwner(boolean claim) {
-		if (this.housingBlockEntity != null && this.client != null && this.client.player != null) {
-			ClientPlayNetworking.send(new SetHousingBlockOwnerPacket(
-					this.housingBlockEntity.getPos(),
-					claim ? this.client.player.getUuidAsString() : ""
-			));
-		}
-		this.close();
-	}
-
-	public static enum CreativeScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		INFLUENCE("influence"),
 		TRIGGERED_BLOCK("triggered_block"),
 		OWNER("owner");
 
 		private final String name;
 
-		private CreativeScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -345,12 +314,12 @@ public class CreativeHousingScreen extends Screen {
 			return this.name;
 		}
 
-		public static Optional<CreativeScreenPage> byName(String name) {
-			return Arrays.stream(CreativeScreenPage.values()).filter(creativeScreenPage -> creativeScreenPage.asString().equals(name)).findFirst();
+		public static Optional<ScreenPage> byName(String name) {
+			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.asString().equals(name)).findFirst();
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.housing_screen.creativeScreenPage." + this.name);
+			return Text.translatable("gui.housing_block.screen_page." + this.name);
 		}
 	}
 }

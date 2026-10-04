@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -36,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class CreativeTeleporterBlockScreen extends Screen {
+public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_ADVENTURE_SCREEN_LABEL_TEXT = Text.translatable("gui.teleporter_block.hide_adventure_screen_label");
 	private static final Text SHOW_ADVENTURE_SCREEN_LABEL_TEXT = Text.translatable("gui.teleporter_block.show_adventure_screen_label");
 	private static final Text HIDE_ACTIVATION_AREA_LABEL_TEXT = Text.translatable("gui.teleporter_block.hide_activation_area_label");
@@ -86,7 +85,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	private final TeleporterBlockEntity teleporterBlock;
 
-	private CyclingButtonWidget<TeleporterBlockEntity.CreativeScreenPage> creativeScreenPageButton;
+	private CyclingButtonWidget<TeleporterBlockEntity.CreativeScreenPage> cycleScreenPageButton;
 	private CyclingButtonWidget<Boolean> toggleShowAdventureScreenButton;
 	private CyclingButtonWidget<Boolean> toggleShowActivationAreaButton;
 	private CyclingButtonWidget<Boolean> toggleTriggerActivationButton;
@@ -179,26 +178,6 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.teleporterBlock = teleporterBlock;
 	}
 
-	private void done() {
-		this.updateTeleporterBlock();
-		this.close();
-	}
-
-	private void cancel() {
-		this.teleporterBlock.setShowActivationArea(this.showActivationArea);
-		this.teleporterBlock.setTriggerActivation(this.triggerActivation);
-		this.teleporterBlock.setShowAdventureScreen(this.showAdventureScreen);
-		this.teleporterBlock.setSetAccessPosition(this.setAccessPosition);
-		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
-		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
-		this.teleporterBlock.setShowRegenerateButton(this.showRegenerateButton);
-		this.teleporterBlock.setShowCancelButton(this.showCancelButton);
-		this.teleporterBlock.setCanOwnerBeChosen(this.canOwnerBeChosen);
-		this.teleporterBlock.setTeleportationMode(this.teleportationMode);
-		this.teleporterBlock.setSpawnPointType(this.spawnPointType);
-		this.close();
-	}
-
 	private void addLocationToList(String identifier, String entrance, String dataId, String data) {
 		Text message = Text.literal("");
 
@@ -244,6 +223,22 @@ public class CreativeTeleporterBlockScreen extends Screen {
 	}
 
 	@Override
+	protected void cancel() {
+		this.teleporterBlock.setShowActivationArea(this.showActivationArea);
+		this.teleporterBlock.setTriggerActivation(this.triggerActivation);
+		this.teleporterBlock.setShowAdventureScreen(this.showAdventureScreen);
+		this.teleporterBlock.setSetAccessPosition(this.setAccessPosition);
+		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
+		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
+		this.teleporterBlock.setShowRegenerateButton(this.showRegenerateButton);
+		this.teleporterBlock.setShowCancelButton(this.showCancelButton);
+		this.teleporterBlock.setCanOwnerBeChosen(this.canOwnerBeChosen);
+		this.teleporterBlock.setTeleportationMode(this.teleportationMode);
+		this.teleporterBlock.setSpawnPointType(this.spawnPointType);
+		this.close();
+	}
+
+	@Override
 	protected void init() {
 		this.creativeScreenPage = this.teleporterBlock.getCreativeScreenPage();
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
@@ -258,7 +253,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 		super.init();
 
-		this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(TeleporterBlockEntity.CreativeScreenPage::asText).values((TeleporterBlockEntity.CreativeScreenPage[]) TeleporterBlockEntity.CreativeScreenPage.values()).initially(this.creativeScreenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, creativeScreenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(TeleporterBlockEntity.CreativeScreenPage::asText).values((TeleporterBlockEntity.CreativeScreenPage[]) TeleporterBlockEntity.CreativeScreenPage.values()).initially(this.creativeScreenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, creativeScreenPage) -> {
 			this.creativeScreenPage = creativeScreenPage;
 			this.updateWidgets();
 		}));
@@ -578,17 +573,13 @@ public class CreativeTeleporterBlockScreen extends Screen {
 
 	@Override
 	protected void setInitialFocus() {
-		this.setInitialFocus(this.creativeScreenPageButton);
+		this.setInitialFocus(this.cycleScreenPageButton);
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
+	protected void updateWidgets() {
 
-	private void updateWidgets() {
-
-		this.creativeScreenPageButton.visible = false;
+		this.cycleScreenPageButton.visible = false;
 
 		this.toggleShowAdventureScreenButton.visible = false;
 		this.toggleShowActivationAreaButton.visible = false;
@@ -665,7 +656,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.doneButton.visible = false;
 		this.cancelButton.visible = false;
 
-		this.creativeScreenPageButton.visible = true;
+		this.cycleScreenPageButton.visible = true;
 
 		if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ACTIVATION) {
 
@@ -863,7 +854,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		this.showCancelButton = bool8;
 		this.preTeleportTriggeredBlockResets = bool9;
 		this.postTeleportTriggeredBlockResets = bool10;
-		this.creativeScreenPageButton.setValue(this.creativeScreenPage);
+		this.cycleScreenPageButton.setValue(this.creativeScreenPage);
 		this.teleportationModeButton.setValue(this.teleportationMode);
 		this.spawnPointTypeButton.setValue(this.spawnPointType);
 		this.toggleShowActivationAreaButton.setValue(this.showActivationArea);
@@ -1099,7 +1090,8 @@ public class CreativeTeleporterBlockScreen extends Screen {
 		}
 	}
 
-	private void updateTeleporterBlock() {
+	@Override
+	protected boolean updateBlock() {
 
 		ClientPlayNetworking.send(new UpdateTeleporterBlockPacket(
 				this.teleporterBlock.getPos(),
@@ -1171,11 +1163,7 @@ public class CreativeTeleporterBlockScreen extends Screen {
 				this.teleportButtonLabelField.getText(),
 				this.cancelTeleportButtonLabelField.getText()
 		));
-	}
-
-	@Override
-	public boolean shouldPause() {
-		return false;
+		return true;
 	}
 
 	public enum LocationModeScreenPage implements StringIdentifiable {

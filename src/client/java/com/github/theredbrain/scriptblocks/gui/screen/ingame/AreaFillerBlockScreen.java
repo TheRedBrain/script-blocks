@@ -19,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
 @Environment(value = EnvType.CLIENT)
-public class AreaFillerBlockScreen extends Screen {
+public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.area_block.hide_area_label");
 	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.area_block.show_area_label");
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.area_filler_block.area_dimensions_label");
@@ -27,6 +27,7 @@ public class AreaFillerBlockScreen extends Screen {
 	private static final Text BLOCK_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.area_filler_block.block_identifier_label");
 	private final AreaFillerBlockEntity areaFillerBlock;
 
+	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
 	private TextFieldWidget areaDimensionsXField;
 	private TextFieldWidget areaDimensionsYField;
 	private TextFieldWidget areaDimensionsZField;
@@ -42,21 +43,11 @@ public class AreaFillerBlockScreen extends Screen {
 		this.areaFillerBlock = areaFillerBlock;
 	}
 
-	private void done() {
-		if (this.updateAreaFillerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 
 		this.showArea = this.areaFillerBlock.showArea();
-		this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 54, 300, 20, Text.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 54, 300, 20, Text.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -101,6 +92,11 @@ public class AreaFillerBlockScreen extends Screen {
 	}
 
 	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.toggleShowAreaButton);
+	}
+
+	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		boolean bool = this.showArea;
 		String string = this.areaDimensionsXField.getText();
@@ -112,6 +108,7 @@ public class AreaFillerBlockScreen extends Screen {
 		String string6 = this.blockIdentifierField.getText();
 		this.init(client, width, height);
 		this.showArea = bool;
+		this.toggleShowAreaButton.setValue(this.showArea);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
@@ -141,11 +138,7 @@ public class AreaFillerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateAreaFillerBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateAreaFillerBlockPacket(
 				this.areaFillerBlock.getPos(),
 				this.showArea,

@@ -10,7 +10,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -27,12 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class DataRelayBlockScreen extends Screen {
+public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final int VISIBLE_LIST_ENTRIES = 6;
-	private static final Text NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.newDataProvidingBlockPositionOffset");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetX.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetY.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder");
+	private static final Text NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.new_data_providing_block_position_offset");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
+	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
 	private static final Text ADD_NEW_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_140_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_140");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
@@ -64,12 +63,12 @@ public class DataRelayBlockScreen extends Screen {
 	}
 
 	private void addNewEntry() {
-			this.dataProvidingBlockPosOffsetList.add(new BlockPos(
-					ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetXField.getText()),
-					ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetYField.getText()),
-					ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetZField.getText())
-			));
-			this.updateWidgets();
+		this.dataProvidingBlockPosOffsetList.add(new BlockPos(
+				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetXField.getText()),
+				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetYField.getText()),
+				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetZField.getText())
+		));
+		this.updateWidgets();
 	}
 
 	private void removeEntry(int index) {
@@ -77,16 +76,6 @@ public class DataRelayBlockScreen extends Screen {
 			this.dataProvidingBlockPosOffsetList.remove(index + this.scrollPosition);
 		}
 		this.updateWidgets();
-	}
-
-	private void done() {
-		if (this.updateDataRelayBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -124,7 +113,13 @@ public class DataRelayBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.newDataProvidingBlockPosOffsetXField);
+	}
+
+	@Override
+	protected void updateWidgets() {
 
 		this.removeEntryButton0.visible = false;
 		this.removeEntryButton1.visible = false;
@@ -239,11 +234,7 @@ public class DataRelayBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateDataRelayBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataRelayBlockPacket(
 				this.dataRelayBlockEntity.getPos(),
 				this.dataProvidingBlockPosOffsetList

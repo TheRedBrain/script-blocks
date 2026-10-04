@@ -11,7 +11,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -33,19 +32,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class DialogueBlockScreen extends Screen {
+public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text ADD_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Text REMOVE_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
 	private static final Text ENTRY_ALREADY_IN_LIST_TEXT = Text.translatable("gui.dialogue_block.entry_already_in_list");
-	public static final Identifier BACKGROUND_218_197_TEXTURE = ScriptBlocks.identifier("textures/gui/container/generic_218_197_background.png");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_35_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_35");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_87_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_87");
-	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_96");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
-	private DialogueBlockEntity dialogueBlockEntity;
+	private final DialogueBlockEntity dialogueBlockEntity;
 
-	private CyclingButtonWidget<CreativeScreenPage> creativeScreenPageButton;
+	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 
 	private ButtonWidget removeDialogueUsedBlockEntryButton0;
 	private ButtonWidget removeDialogueUsedBlockEntryButton1;
@@ -77,12 +73,10 @@ public class DialogueBlockScreen extends Screen {
 	private TextFieldWidget dataBlockOffsetYField;
 	private TextFieldWidget dataBlockOffsetZField;
 
-	private ButtonWidget saveCreativeButton;
-	private ButtonWidget cancelCreativeButton;
-	private CreativeScreenPage creativeScreenPage;
-	private List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
-	private List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
-	private List<String> startingDialogueList = new ArrayList<>(List.of());
+	private ScreenPage screenPage;
+	private final List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
+	private final List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList = new ArrayList<>(List.of());
+	private final List<String> startingDialogueList = new ArrayList<>(List.of());
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
@@ -90,7 +84,7 @@ public class DialogueBlockScreen extends Screen {
 	public DialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.dialogueBlockEntity = dialogueBlockEntity;
-		this.creativeScreenPage = CreativeScreenPage.STARTING_DIALOGUES;
+		this.screenPage = ScreenPage.STARTING_DIALOGUES;
 	}
 
 	private void removeDialogueUsedBlockEntry(int index) {
@@ -205,16 +199,6 @@ public class DialogueBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void saveCreative() {
-		if (this.updateDialogueBlockCreative()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 		this.dialogueUsedBlocksList.clear();
@@ -232,8 +216,8 @@ public class DialogueBlockScreen extends Screen {
 
 		super.init();
 
-		this.creativeScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(CreativeScreenPage::asText).values((CreativeScreenPage[]) CreativeScreenPage.values()).initially(this.creativeScreenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, creativeScreenPage) -> {
-			this.creativeScreenPage = creativeScreenPage;
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
@@ -318,15 +302,19 @@ public class DialogueBlockScreen extends Screen {
 		this.dataBlockOffsetZField.setText(Integer.toString(this.dialogueBlockEntity.getDataBlockOffset().getZ()));
 		this.addSelectableChild(this.dataBlockOffsetZField);
 
-		this.saveCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.saveCreative()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.cycleScreenPageButton);
+	}
 
-		this.creativeScreenPageButton.visible = false;
+	@Override
+	protected void updateWidgets() {
 
 		this.removeDialogueUsedBlockEntryButton0.visible = false;
 		this.removeDialogueUsedBlockEntryButton1.visible = false;
@@ -363,12 +351,7 @@ public class DialogueBlockScreen extends Screen {
 		this.dataBlockOffsetYField.setVisible(false);
 		this.dataBlockOffsetZField.setVisible(false);
 
-		this.saveCreativeButton.visible = false;
-		this.cancelCreativeButton.visible = false;
-
-		this.creativeScreenPageButton.visible = true;
-
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
+		if (this.screenPage == ScreenPage.DIALOGUE_USED_BLOCKS) {
 
 			int index = 0;
 			for (int i = 0; i < Math.min(4, this.dialogueUsedBlocksList.size()); i++) {
@@ -391,7 +374,7 @@ public class DialogueBlockScreen extends Screen {
 
 			this.addDialogueUsedBlockButton.visible = true;
 
-		} else if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
+		} else if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
 
 			int index = 0;
 			for (int i = 0; i < Math.min(4, this.dialogueTriggeredBlocksList.size()); i++) {
@@ -415,7 +398,7 @@ public class DialogueBlockScreen extends Screen {
 
 			this.addDialogueTriggeredBlockButton.visible = true;
 
-		} else if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES) {
+		} else if (this.screenPage == ScreenPage.STARTING_DIALOGUES) {
 
 			if (!this.startingDialogueList.isEmpty()) {
 				this.removeStartingDialogueEntryButton.visible = true; // TODO add more visible entries
@@ -425,16 +408,13 @@ public class DialogueBlockScreen extends Screen {
 
 			this.addStartingDialogueButton.visible = true;
 
-		} else if (this.creativeScreenPage == CreativeScreenPage.DATA_BLOCK_OFFSET) {
+		} else if (this.screenPage == ScreenPage.DATA_BLOCK_OFFSET) {
 
 			this.dataBlockOffsetXField.setVisible(true);
 			this.dataBlockOffsetYField.setVisible(true);
 			this.dataBlockOffsetZField.setVisible(true);
 
 		}
-
-		this.saveCreativeButton.visible = true;
-		this.cancelCreativeButton.visible = true;
 
 		this.scrollPosition = 0;
 		this.scrollAmount = 0.0f;
@@ -447,7 +427,7 @@ public class DialogueBlockScreen extends Screen {
 		List<String> list2 = new ArrayList<>(this.startingDialogueList);
 		int number4 = this.scrollPosition;
 		float number5 = this.scrollAmount;
-		CreativeScreenPage var = this.creativeScreenPage;
+		ScreenPage var = this.screenPage;
 		String string = this.newDialogueUsedBlockIdentifierField.getText();
 		String string1 = this.newDialogueUsedBlockPositionOffsetXField.getText();
 		String string2 = this.newDialogueUsedBlockPositionOffsetYField.getText();
@@ -469,7 +449,7 @@ public class DialogueBlockScreen extends Screen {
 		this.startingDialogueList.addAll(list2);
 		this.scrollPosition = number4;
 		this.scrollAmount = number5;
-		this.creativeScreenPage = var;
+		this.screenPage = var;
 		this.newDialogueUsedBlockIdentifierField.setText(string);
 		this.newDialogueUsedBlockPositionOffsetXField.setText(string1);
 		this.newDialogueUsedBlockPositionOffsetYField.setText(string2);
@@ -488,7 +468,7 @@ public class DialogueBlockScreen extends Screen {
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		this.mouseClicked = false;
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS
+		if (this.screenPage == ScreenPage.DIALOGUE_USED_BLOCKS
 				&& this.dialogueUsedBlocksList.size() > 4) {
 			int i = this.width / 2 - 153;
 			int j = 43;
@@ -496,7 +476,7 @@ public class DialogueBlockScreen extends Screen {
 				this.mouseClicked = true;
 			}
 		}
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS
+		if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS
 				&& this.dialogueTriggeredBlocksList.size() > 4) {
 			int i = this.width / 2 - 153;
 			int j = 43;
@@ -504,7 +484,7 @@ public class DialogueBlockScreen extends Screen {
 				this.mouseClicked = true;
 			}
 		}
-		if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES
+		if (this.screenPage == ScreenPage.STARTING_DIALOGUES
 				&& this.startingDialogueList.size() > 1) {
 			int i = this.width / 2 - 153;
 			int j = 72;
@@ -517,7 +497,7 @@ public class DialogueBlockScreen extends Screen {
 
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS
+		if (this.screenPage == ScreenPage.DIALOGUE_USED_BLOCKS
 				&& this.dialogueUsedBlocksList.size() > 4
 				&& this.mouseClicked) {
 			int i = this.dialogueUsedBlocksList.size() - 4;
@@ -525,7 +505,7 @@ public class DialogueBlockScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS
+		if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS
 				&& this.dialogueTriggeredBlocksList.size() > 4
 				&& this.mouseClicked) {
 			int i = this.dialogueTriggeredBlocksList.size() - 4;
@@ -533,7 +513,7 @@ public class DialogueBlockScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES
+		if (this.screenPage == ScreenPage.STARTING_DIALOGUES
 				&& this.startingDialogueList.size() > 1
 				&& this.mouseClicked) {
 			int i = this.startingDialogueList.size() - 1;
@@ -546,7 +526,7 @@ public class DialogueBlockScreen extends Screen {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS
+		if (this.screenPage == ScreenPage.DIALOGUE_USED_BLOCKS
 				&& this.dialogueUsedBlocksList.size() > 4
 				&& mouseX >= (double) (this.width / 2 - 154) && mouseX <= (double) (this.width / 2 + 50)
 				&& mouseY >= (double) (42) && mouseY <= (double) (138)) {
@@ -555,7 +535,7 @@ public class DialogueBlockScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS
+		if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS
 				&& this.dialogueTriggeredBlocksList.size() > 4
 				&& mouseX >= (double) (this.width / 2 - 154) && mouseX <= (double) (this.width / 2 + 50)
 				&& mouseY >= (double) (42) && mouseY <= (double) (138)) {
@@ -564,7 +544,7 @@ public class DialogueBlockScreen extends Screen {
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES
+		if (this.screenPage == ScreenPage.STARTING_DIALOGUES
 				&& this.startingDialogueList.size() > 1
 				&& mouseX >= (double) (this.width / 2 - 154) && mouseX <= (double) (this.width / 2 + 50)
 				&& mouseY >= (double) (71) && mouseY <= (double) (106)) {
@@ -579,7 +559,7 @@ public class DialogueBlockScreen extends Screen {
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
-			this.saveCreative();
+			this.done();
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
@@ -590,7 +570,7 @@ public class DialogueBlockScreen extends Screen {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_USED_BLOCKS) {
+		if (this.screenPage == ScreenPage.DIALOGUE_USED_BLOCKS) {
 			int x = this.dialogueUsedBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.dialogueUsedBlocksList.size()); i++) {
 				context.drawTextWithShadow(this.textRenderer, this.dialogueUsedBlocksList.get(i).getLeft() + ": " + this.dialogueUsedBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
@@ -604,7 +584,7 @@ public class DialogueBlockScreen extends Screen {
 			this.newDialogueUsedBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.newDialogueUsedBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.newDialogueUsedBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		} else if (this.creativeScreenPage == CreativeScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
+		} else if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
 			int x = this.dialogueTriggeredBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.dialogueTriggeredBlocksList.size()); i++) {
 				context.drawTextWithShadow(this.textRenderer, this.dialogueTriggeredBlocksList.get(i).getLeft() + ": " + this.dialogueTriggeredBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
@@ -618,7 +598,7 @@ public class DialogueBlockScreen extends Screen {
 			this.newDialogueTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.newDialogueTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.newDialogueTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		} else if (this.creativeScreenPage == CreativeScreenPage.STARTING_DIALOGUES) {
+		} else if (this.screenPage == ScreenPage.STARTING_DIALOGUES) {
 			int x = this.startingDialogueList.size() > 1 ? this.width / 2 - 142 : this.width / 2 - 153;
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 1, this.startingDialogueList.size()); i++) {
 				context.drawTextWithShadow(this.textRenderer, Text.translatable(this.startingDialogueList.get(i)), x, 71, 0xA0A0A0);
@@ -630,7 +610,7 @@ public class DialogueBlockScreen extends Screen {
 				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 153, 71 + 1 + k, 6, 7);
 			}
 			this.newStartingDialogueIdentifierField.render(context, mouseX, mouseY, delta);
-		} else if (this.creativeScreenPage == CreativeScreenPage.DATA_BLOCK_OFFSET) {
+		} else if (this.screenPage == ScreenPage.DATA_BLOCK_OFFSET) {
 
 //			context.drawTextWithShadow(this.textRenderer, DATA_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
 			this.dataBlockOffsetXField.render(context, mouseX, mouseY, delta);
@@ -640,11 +620,7 @@ public class DialogueBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldCloseOnEsc() {
-		return true;
-	}
-
-	private boolean updateDialogueBlockCreative() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDialogueBlockPacket(
 				this.dialogueBlockEntity.getPos(),
 				this.dialogueUsedBlocksList,
@@ -659,7 +635,7 @@ public class DialogueBlockScreen extends Screen {
 		return true;
 	}
 
-	public static enum CreativeScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringIdentifiable {
 		DATA_BLOCK_OFFSET("data_block_offset"),
 		DIALOGUE_USED_BLOCKS("dialogue_used_blocks"),
 		DIALOGUE_TRIGGERED_BLOCKS("dialogue_triggered_blocks"),
@@ -667,7 +643,7 @@ public class DialogueBlockScreen extends Screen {
 
 		private final String name;
 
-		private CreativeScreenPage(String name) {
+		ScreenPage(String name) {
 			this.name = name;
 		}
 
@@ -676,12 +652,12 @@ public class DialogueBlockScreen extends Screen {
 			return this.name;
 		}
 
-		public static Optional<CreativeScreenPage> byName(String name) {
-			return Arrays.stream(CreativeScreenPage.values()).filter(creativeScreenPage -> creativeScreenPage.asString().equals(name)).findFirst();
+		public static Optional<ScreenPage> byName(String name) {
+			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.asString().equals(name)).findFirst();
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.dialogue_screen.creativeScreenPage." + this.name);
+			return Text.translatable("gui.dialogue_screen.screen_page." + this.name);
 		}
 	}
 }

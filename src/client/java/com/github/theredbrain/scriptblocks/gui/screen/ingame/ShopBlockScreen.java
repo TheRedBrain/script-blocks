@@ -16,18 +16,13 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
-public class ShopBlockScreen extends Screen {
+public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private final ShopBlockEntity shopBlockEntity;
 	private TextFieldWidget shopIdentifierField;
 
 	public ShopBlockScreen(ShopBlockEntity shopBlockEntity) {
 		super(NarratorManager.EMPTY);
 		this.shopBlockEntity = shopBlockEntity;
-	}
-
-	private void done() {
-		this.updateShopBlock();
-		this.close();
 	}
 
 	@Override
@@ -40,7 +35,12 @@ public class ShopBlockScreen extends Screen {
 		this.addSelectableChild(this.shopIdentifierField);
 
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.close()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
+		this.setInitialFocus(this.shopIdentifierField);
 	}
 
 	@Override
@@ -67,10 +67,12 @@ public class ShopBlockScreen extends Screen {
 		this.shopIdentifierField.render(context, mouseX, mouseY, delta);
 	}
 
-	private void updateShopBlock() {
+	@Override
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateShopBlockPacket(
 				this.shopBlockEntity.getPos(),
 				this.shopIdentifierField.getText()
 		));
+		return true;
 	}
 }

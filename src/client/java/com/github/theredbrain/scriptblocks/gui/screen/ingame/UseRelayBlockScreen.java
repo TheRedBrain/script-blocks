@@ -18,8 +18,8 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
-public class UseRelayBlockScreen extends Screen {
-	private static final Text RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.use_relay_block.relayBlockPositionOffset");
+public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.use_relay_block.relay_block_position_offset");
 	private final UseRelayBlockEntity useRelayBlock;
 	private TextFieldWidget relayBlockPositionOffsetXField;
 	private TextFieldWidget relayBlockPositionOffsetYField;
@@ -28,16 +28,6 @@ public class UseRelayBlockScreen extends Screen {
 	public UseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
 		super(NarratorManager.EMPTY);
 		this.useRelayBlock = useRelayBlock;
-	}
-
-	private void done() {
-		if (this.updateUseRelayBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -64,11 +54,6 @@ public class UseRelayBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	@Override
 	public void resize(MinecraftClient client, int width, int height) {
 		String string = this.relayBlockPositionOffsetXField.getText();
 		String string1 = this.relayBlockPositionOffsetYField.getText();
@@ -88,18 +73,6 @@ public class UseRelayBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private boolean updateUseRelayBlock() {
-		ClientPlayNetworking.send(new UpdateUseRelayBlockPacket(
-				this.useRelayBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.relayBlockPositionOffsetZField.getText())
-				)
-		));
-		return true;
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -112,7 +85,15 @@ public class UseRelayBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateUseRelayBlockPacket(
+				this.useRelayBlock.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.relayBlockPositionOffsetZField.getText())
+				)
+		));
+		return true;
 	}
 }

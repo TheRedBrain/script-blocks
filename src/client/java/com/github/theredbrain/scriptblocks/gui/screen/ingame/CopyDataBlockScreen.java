@@ -1,16 +1,13 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
 import com.github.theredbrain.scriptblocks.block.entity.CopyDataBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.DataWritingBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateCopyDataBlockPacket;
-import com.github.theredbrain.scriptblocks.network.packet.UpdateDataWritingBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.util.NarratorManager;
@@ -19,7 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 @Environment(value = EnvType.CLIENT)
-public class CopyDataBlockScreen extends Screen {
+public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.copy_data_block.first_data_providing_block_position_offset");
 	private static final Text SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.copy_data_block.second_data_providing_block_position_offset");
 	private static final Text DATA_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_identifier");
@@ -35,16 +32,6 @@ public class CopyDataBlockScreen extends Screen {
 	public CopyDataBlockScreen(CopyDataBlockEntity copyDataBlock) {
 		super(NarratorManager.EMPTY);
 		this.copyDataBlock = copyDataBlock;
-	}
-
-	private void done() {
-		if (this.updateDataWritingBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -131,11 +118,7 @@ public class CopyDataBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateDataWritingBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateCopyDataBlockPacket(
 				this.copyDataBlock.getPos(),
 				new BlockPos(

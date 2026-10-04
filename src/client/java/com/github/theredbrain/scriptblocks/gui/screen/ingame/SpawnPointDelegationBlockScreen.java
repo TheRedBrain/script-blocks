@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class SpawnPointDelegationBlockScreen extends Screen {
+public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text ADD_NEW_DELEGATED_SPAWN_POINT_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Text NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.spawn_point_delegation_block.spawn_point_position_offset");
 	private static final Text NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT = Text.translatable("gui.spawn_point_delegation_block.spawn_point_orientation");
@@ -130,16 +130,6 @@ public class SpawnPointDelegationBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		if (this.updateSpawnPointDelegationBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 
@@ -185,11 +175,7 @@ public class SpawnPointDelegationBlockScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
-	}
-
-	private void updateWidgets() {
+	protected void updateWidgets() {
 
 		this.removeListEntryButton0.visible = false;
 		this.removeListEntryButton1.visible = false;
@@ -308,11 +294,7 @@ public class SpawnPointDelegationBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateSpawnPointDelegationBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateSpawnPointDelegationBlockPacket(
 				this.spawnPointDelegationBlockEntity.getPos(),
 				this.delegatedSpawnPoints

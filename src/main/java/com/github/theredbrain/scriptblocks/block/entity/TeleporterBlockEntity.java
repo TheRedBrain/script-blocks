@@ -370,7 +370,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 				// TODO check for "prevent teleport" items
 				player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
 			} else {
-				player.sendMessage(Text.translatable("hud.message.onlyDimensionOwnerCanTeleport"), true);
+				player.sendMessage(Text.translatable("hud.message.only_dimension_owner_can_teleport"), true);
 			}
 		}
 	}
@@ -656,6 +656,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	public void setUuidListHandlerPositionOffset(BlockPos uuidListHandlerPositionOffset) {
 		this.uuidListHandlerPositionOffset = uuidListHandlerPositionOffset;
 	}
+
 	public MutablePair<BlockPos, Boolean> getPostTeleportTriggeredBlock() {
 		return this.postTeleportTriggeredBlock;
 	}
@@ -737,6 +738,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		return Text.translatable(this.teleporterName);
 	}
 
+	// TODO
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
@@ -853,7 +855,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 
 		public Text asText() {
-			return Text.translatable("gui.teleporter_block.creativeScreenPage." + this.name);
+			return Text.translatable("gui.teleporter_block.creative_screen_page." + this.name);
 		}
 	}
 }

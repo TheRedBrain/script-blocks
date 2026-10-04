@@ -3,14 +3,12 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDataSavingBlockPacket;
-import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -18,7 +16,6 @@ import net.minecraft.client.util.NarratorManager;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
@@ -27,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class DataSavingBlockScreen extends Screen {
+public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final int VISIBLE_DATA_LIST_ENTRIES = 5;
 	private static final Text NEW_DATA_IDENTIFIER_PLACEHOLDER_TEXT = Text.translatable("gui.data_saving_block.new_data_identifier_placeholder");
 	private static final Text NEW_DATA_VALUE_PLACEHOLDER_TEXT = Text.translatable("gui.data_saving_block.new_data_value_placeholder");
@@ -79,16 +76,6 @@ public class DataSavingBlockScreen extends Screen {
 		this.updateWidgets();
 	}
 
-	private void done() {
-		if (this.updateDataWritingBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
-	}
-
 	@Override
 	protected void init() {
 
@@ -123,7 +110,8 @@ public class DataSavingBlockScreen extends Screen {
 		this.setInitialFocus(this.newDataIdentifierField);
 	}
 
-	private void updateWidgets() {
+	@Override
+	protected void updateWidgets() {
 
 		this.removeDataButton0.visible = false;
 		this.removeDataButton1.visible = false;
@@ -151,9 +139,12 @@ public class DataSavingBlockScreen extends Screen {
 
 	@Override
 	public void resize(MinecraftClient client, int width, int height) {
+		List<MutablePair<String, String>> list = new ArrayList<>(this.dataList);
 		String string = this.newDataIdentifierField.getText();
 		String string1 = this.newDataValueField.getText();
 		this.init(client, width, height);
+		this.dataList.clear();
+		this.dataList.addAll(list);
 		this.newDataIdentifierField.setText(string);
 		this.newDataValueField.setText(string1);
 	}
@@ -229,11 +220,7 @@ public class DataSavingBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
-	}
-
-	private boolean updateDataWritingBlock() {
+	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataSavingBlockPacket(
 				this.dataSavingBlock.getPos(),
 				this.dataList

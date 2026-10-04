@@ -74,10 +74,10 @@
 	"gui.area_block.pre_timer_label": "X = ",
 	"gui.area_block.post_timer_label": " Seconds",
 
-	"gui.area_block.screenPage.area": "Area",
-	"gui.area_block.screenPage.applied_effect": "Applied Effect",
-	"gui.area_block.screenPage.messages": "Messages",
-	"gui.area_block.screenPage.trigger_settings": "Trigger Settings",
+	"gui.area_block.screen_page.area": "Area",
+	"gui.area_block.screen_page.applied_effect": "Applied Effect",
+	"gui.area_block.screen_page.messages": "Messages",
+	"gui.area_block.screen_page.trigger_settings": "Trigger Settings",
 
 	"gui.area_block.message_mode.announcement": "Show messages as announcement.",
 	"gui.area_block.message_mode.chat": "Show messages in chat.",
@@ -102,8 +102,8 @@
 	"gui.copy_data_block.second_data_providing_block_position_offset": "Writing Data Block Position Offset",
 
 
-	"gui.data_access_block.screenPage.block_offsets": "Block Offsets",
-	"gui.data_access_block.screenPage.interaction": "Data Interaction",
+	"gui.data_access_block.screen_page.block_offsets": "Block Offsets",
+	"gui.data_access_block.screen_page.interaction": "Data Interaction",
 
 	"gui.data_access_block.data_reading_mode.lesser": "Lesser Than:",
 	"gui.data_access_block.data_reading_mode.equal": "Equal To:",
@@ -116,11 +116,8 @@
 	"gui.data_access_block.toggle_is_writing_button_label.off": "Is Reading",
 
 
-	"gui.data_provider_block.newDataProvidingBlockPositionOffset": "New Providing Data Block Position Offset",
-	"gui.data_provider_block.dataProvidingBlockPositionOffset": "Data Providing Block Position Offset",
-	"gui.data_provider_block.data_block_pos_offset": "Data Block Pos Offset",
-	"gui.data_provider_block.firstDataProvidingBlockPositionOffset": "First Data Providing Block Position Offset",
-	"gui.data_provider_block.secondDataProvidingBlockPositionOffset": "Second Data Providing Block Position Offset",
+	"gui.data_provider_block.new_data_providing_block_position_offset": "New Providing Data Block Position Offset",
+	"gui.data_provider_block.data_providing_block_position_offset": "Data Providing Block Position Offset",
 	"gui.data_provider_block.data_identifier": "Data Identifier",
 
 
@@ -187,13 +184,18 @@
 	"gui.triggered_damage_dealing_block.damage_amount_label": "Damage Amount",
 
 
-	"gui.use_relay_block.relayBlockPositionOffset": "Relay Block Position Offset",
+	"gui.use_relay_block.relay_block_position_offset": "Use Relay Block Position Offset",
 
 
-	"gui.housing_screen.creativeScreenPage.influence": "Influence Settings",
-	"gui.housing_screen.creativeScreenPage.entrance": "Entrance Settings",
-	"gui.housing_screen.creativeScreenPage.triggered_block": "Triggered Block Settings",
-	"gui.housing_screen.creativeScreenPage.owner": "Owner Settings",
+	"gui.housing_block.hide_influence_area_label": "Hide Influence Area",
+	"gui.housing_block.show_influence_area_label": "Show Influence Area",
+	"gui.housing_block.influence_area_dimensions_label": "Influence Area Dimensions",
+	"gui.housing_block.influence_area_position_offset_label": "Influence Area Position Offset",
+
+	"gui.housing_block.screen_page.influence": "Influence Settings",
+	"gui.housing_block.screen_page.entrance": "Entrance Settings",
+	"gui.housing_block.screen_page.triggered_block": "Triggered Block Settings",
+	"gui.housing_block.screen_page.owner": "Owner Settings",
 
 	"gui.housing_block.ownerMode.dimension_owner": "Dimension Owner",
 	"gui.housing_block.ownerMode.interaction": "Interaction",
@@ -234,34 +236,6 @@
 	"gui.housing_screen.add_new_guest_button.label": "Add",
 	"gui.housing_screen.add_new_guest_button.tooltip": "Add as Guest",
 	"gui.housing_screen.remove_list_entry_button_label": "Remove",
-
-	"gui.housing_screen.hide_influence_area_label": "Hide Influence Area",
-	"gui.housing_screen.show_influence_area_label": "Show Influence Area",
-	"gui.housing_screen.influence_area_dimensions_label": "Influence Area Dimensions",
-	"gui.housing_screen.influence_area_position_offset_label": "Influence Area Position Offset",
-	"gui.housing_screen.entrance_position_offset_label": "Entrance Position Offset",
-	"gui.housing_screen.entrance_orientation_label": "Entrance Orientation",
-
-	"gui.housing_screen.tabHousesList.button": "Your houses",
-	"gui.housing_screen.tabHousesList.title": "Your houses",
-	"gui.housing_screen.tabCurrentHouse.button": "Current house",
-	"gui.housing_screen.tabCurrentHouse.title.owner": "You own this house",
-	"gui.housing_screen.tabCurrentHouse.title.co_owner": "You are a co-owner of this house",
-	"gui.housing_screen.tabCurrentHouse.title.trusted": "You are trusted in this house",
-	"gui.housing_screen.tabCurrentHouse.title.guest": "You are a guest in this house",
-	"gui.housing_screen.tabCurrentHouse.title.stranger": "You are a stranger in this house",
-	"gui.housing_screen.tabCurrentHouse.toggleAdventureBuildingEffectButton.off": "Disable building",
-	"gui.housing_screen.tabCurrentHouse.toggleAdventureBuildingEffectButton.on": "Enable building",
-	"gui.housing_screen.tabCurrentHouse.editHousingButton": "Configure this house",
-	"gui.housing_screen.tabCurrentHouse.leaveCurrentHouseButton": "Leave this house",
-	"gui.housing_screen.tabEditHouse.title": "House Configuration",
-	"gui.housing_screen.tabEditHouse.coOwnerList.title": "Co Owners",
-	"gui.housing_screen.tabEditHouse.coOwnerList.title.tooltip": "Can build and interact with all blocks",
-	"gui.housing_screen.tabEditHouse.trustedList.title": "Trusted People",
-	"gui.housing_screen.tabEditHouse.trustedList.title.tooltip": "Can interact with all blocks",
-	"gui.housing_screen.tabEditHouse.guestList.title": "Guests",
-	"gui.housing_screen.tabEditHouse.guestList.title.tooltip": "Can interact with doors and food blocks",
-	"gui.housing_screen.tabEditHouse.addEntry": "Add player",
 
 
 	"gui.interactive_loot_block.loot_acquired_0": "More stuff!",
@@ -304,7 +278,7 @@
 	"gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.off": "Is Triggered After Placement",
 
 
-	"gui.delay_trigger_block.triggeredBlockTriggerDelay": "Trigger Delay in ticks",
+	"gui.delay_trigger_block.triggered_block_trigger_delay": "Trigger Delay in ticks",
 
 
 	"gui.relay_trigger_block.hide_area_label": "Hide Area",
@@ -338,8 +312,8 @@
 	"gui.pvp_controller_block.data_providing_block_position_offset": "Data Providing Block Offset",
 	"gui.pvp_controller_block.match_duration_data_identifier": "Match Duration Data Identifier",
 
-	"gui.pvp_controller_block.screenPage.settings_id": "Settings Identifier",
-	"gui.pvp_controller_block.screenPage.respawn_positions": "Respawn Positions",
+	"gui.pvp_controller_block.screen_page.settings_id": "Settings Identifier",
+	"gui.pvp_controller_block.screen_page.respawn_positions": "Respawn Positions",
 
 
 	"gui.spawn_point_delegation_block.list.entry.1": "X: %s, Y: %s, Z: %s",
@@ -367,15 +341,14 @@
 	"gui.team_controller_block.prefix_label": "Name Prefix",
 	"gui.team_controller_block.suffix_label": "Name Suffix",
 
-	"gui.team_controller_block.screenPage.area": "Area & PVP Controller Block",
-	"gui.team_controller_block.screenPage.team": "Team",
+	"gui.team_controller_block.screen_page.area": "Area & PVP Controller Block",
+	"gui.team_controller_block.screen_page.team": "Team",
 
 
 	"gui.teleporter_block.regenerate_button_label": "Regenerate Dungeon",
 	"gui.teleporter_block.regenerate_dungeon": "Do you want to regenerate this dungeon?",
 	"gui.teleporter_block.confirm_regeneration_button_label": "Yes",
 	"gui.teleporter_block.cancel_regeneration_button_label": "No",
-	"gui.teleporter_block.regenerateDimensionFailed": "Something went wrong with regenerating the dungeon. Try visiting it without regenerating.",
 
 	"gui.teleporter_block.teleporter_name_field.label": "Teleporter Name",
 	"gui.teleporter_block.teleporter_name_field.place_holder": "Teleporter Name Label",
@@ -397,16 +370,10 @@
 
 	"gui.teleporter_block.location_is_public": "This instance is public",
 
-	"gui.teleporter_block.regenerateDungeonButton": "Regenerate",
-	"gui.teleporter_block.regenerateDungeonButton.tooltip.active": "Regenerate the selected dungeon instance",
-	"gui.teleporter_block.regenerateDungeonButton.tooltip.inactive": "This instance can only be regenerated by the owner",
-	"gui.teleporter_block.updateCurrentTeleportationTargetEntryButton": "Select new instance",
-	"gui.teleporter_block.currentTeleportationTargetEntry.label": "Owner of the dungeon instance",
-
-	"gui.teleporter_block.creativeScreenPage.activation": "Activation Settings",
-	"gui.teleporter_block.creativeScreenPage.teleportation_mode": "Teleportation Settings",
-	"gui.teleporter_block.creativeScreenPage.on_teleport_events": "On Teleport Events",
-	"gui.teleporter_block.creativeScreenPage.adventure_screen_customization": "Adventure Screen Settings",
+	"gui.teleporter_block.creative_screen_page.activation": "Activation Settings",
+	"gui.teleporter_block.creative_screen_page.teleportation_mode": "Teleportation Settings",
+	"gui.teleporter_block.creative_screen_page.on_teleport_events": "On Teleport Events",
+	"gui.teleporter_block.creative_screen_page.adventure_screen_customization": "Adventure Screen Settings",
 
 	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
 	"gui.teleporter_block.show_adventure_screen_label": "Show Adventure Screen",
@@ -465,12 +432,6 @@
 	"gui.teleporter_block.post_teleport_triggered_block_position_offset_label": "Post Teleport Triggered Block Position Offset",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 
-	"gui.teleporter_block.requiredItemStackSlot.tooltip": "Item required for Teleportation",
-	"gui.teleporter_block.keyItemButton.yes": "Use Item: Yes",
-	"gui.teleporter_block.keyItemButton.no": "Use Item: No",
-	"gui.teleporter_block.teleportButtonLabel.tooltip": "Label of left Button in Adventure GUI",
-	"gui.teleporter_block.cancelTeleportButtonLabel.tooltip": "Label of right Button in Adventure GUI",
-
 	"gui.teleporter_block.location_already_in_list": "Location is already in the list",
 	"gui.teleporter_block.location_not_found": "No location with this identifier is registered",
 
@@ -486,33 +447,27 @@
 	"gui.location_controller_block.new_side_entrance.name": "Name",
 	"gui.location_controller_block.new_side_entrance.orientation": "Yaw/Pitch",
 
-	"gui.location_controller_block.resetAreaMinX": "Minimum X",
-	"gui.location_controller_block.resetAreaMinZ": "Minimum Z",
-	"gui.location_controller_block.resetAreaMaxX": "Maximum X",
-	"gui.location_controller_block.resetAreaMaxZ": "Maximum Z",
+	"gui.location_controller_block.reset_area_min_x": "Minimum X",
+	"gui.location_controller_block.reset_area_min_z": "Minimum Z",
+	"gui.location_controller_block.reset_area_max_x": "Maximum X",
+	"gui.location_controller_block.reset_area_max_z": "Maximum Z",
 
-	"gui.location_controller_block.screenPage.main_entrance": "Main Entrance",
-	"gui.location_controller_block.screenPage.side_entrances": "Side Entrances",
-	"gui.location_controller_block.screenPage.interacted_blocks": "Interacted Blocks",
-	"gui.location_controller_block.screenPage.reset_area": "Reset Area",
-
-
-	"gui.lootable_vault_block.new_lootable_vault_config_identifier_label": "Lootable Vault Config Id",
-	"gui.lootable_vault_block.cycle_is_ominous_button_label": "Change",
-	"gui.lootable_vault_block.is_ominous_label": "Is Ominous: True",
-	"gui.lootable_vault_block.is_not_ominous_label": "Is Ominous: False",
+	"gui.location_controller_block.screen_page.main_entrance": "Main Entrance",
+	"gui.location_controller_block.screen_page.side_entrances": "Side Entrances",
+	"gui.location_controller_block.screen_page.interacted_blocks": "Interacted Blocks",
+	"gui.location_controller_block.screen_page.reset_area": "Reset Area",
 
 
-	"gui.mimic_block.activeMimicBlockPositionOffset": "Active Mimic Block Position Offset",
-	"gui.mimic_block.inactiveMimicBlockPositionOffset": "Inactive Mimic Block Position Offset",
+	"gui.mimic_block.active_mimic_block_position_offset": "Active Mimic Block Position Offset",
+	"gui.mimic_block.inactive_mimic_block_position_offset": "Inactive Mimic Block Position Offset",
 
 
 	"gui.dialogue_screen.item_cost_too_high": "You don't have the required items!",
 
-	"gui.dialogue_screen.creativeScreenPage.data_block_offset": "Data Block Offset",
-	"gui.dialogue_screen.creativeScreenPage.dialogue_used_blocks": "Used Blocks",
-	"gui.dialogue_screen.creativeScreenPage.dialogue_triggered_blocks": "Triggered Blocks",
-	"gui.dialogue_screen.creativeScreenPage.starting_dialogues": "Starting Dialogues",
+	"gui.dialogue_screen.screen_page.data_block_offset": "Data Block Offset",
+	"gui.dialogue_screen.screen_page.dialogue_used_blocks": "Used Blocks",
+	"gui.dialogue_screen.screen_page.dialogue_triggered_blocks": "Triggered Blocks",
+	"gui.dialogue_screen.screen_page.starting_dialogues": "Starting Dialogues",
 
 
 	"gui.player_detector_block.enable_ticking_true_label": "Enable Ticking: True",
@@ -530,9 +485,9 @@
 	"gui.player_detector_block.uuid_list_handler_on_leaving_position_offset": "On Leaving",
 	"gui.player_detector_block.uuid_list_handler_on_triggering_position_offset": "On Triggering",
 
-	"gui.player_detector_block.screenPage.area": "Area",
-	"gui.player_detector_block.screenPage.triggered_block_offsets": "Triggered Block Position Offsets",
-	"gui.player_detector_block.screenPage.uuid_list_handler_offsets": "UUID List Handler Position Offsets",
+	"gui.player_detector_block.screen_page.area": "Area",
+	"gui.player_detector_block.screen_page.triggered_block_offsets": "Triggered Block Position Offsets",
+	"gui.player_detector_block.screen_page.uuid_list_handler_offsets": "UUID List Handler Position Offsets",
 
 
 	"gui.triggered_beacon_block.triggered_true_label": "Triggered Override: True",
@@ -555,9 +510,9 @@
 	"gui.triggered_beacon_block.triggered_mode.continuous": "Triggering enables continuous effect application.",
 	"gui.triggered_beacon_block.triggered_mode.once": "Effect gets applied once when triggered.",
 
-	"gui.triggered_beacon_block.screenPage.area": "Area",
-	"gui.triggered_beacon_block.screenPage.applied_effect": "Applied Effect",
-	"gui.triggered_beacon_block.screenPage.trigger_settings": "Trigger Setting",
+	"gui.triggered_beacon_block.screen_page.area": "Area",
+	"gui.triggered_beacon_block.screen_page.applied_effect": "Applied Effect",
+	"gui.triggered_beacon_block.screen_page.trigger_settings": "Trigger Setting",
 
 
 	"gui.triggered_display_block.toggle_is_triggered_button_label.on": "Is Triggered",
@@ -572,15 +527,15 @@
 	"gui.triggered_display_block.billboard_mode.horizontal": "Billboard: Horizontal",
 	"gui.triggered_display_block.billboard_mode.center": "Billboard: Center",
 
-	"gui.triggered_display_block.screenPage.common": "Common",
-	"gui.triggered_display_block.screenPage.block_mode": "Block Mode",
-	"gui.triggered_display_block.screenPage.item_mode": "Item Mode",
-	"gui.triggered_display_block.screenPage.text_mode": "Text Mode",
+	"gui.triggered_display_block.screen_page.common": "Common",
+	"gui.triggered_display_block.screen_page.block_mode": "Block Mode",
+	"gui.triggered_display_block.screen_page.item_mode": "Item Mode",
+	"gui.triggered_display_block.screen_page.text_mode": "Text Mode",
 
 
-	"gui.triggered_rng_block.screenPage.data_driven_override": "Override",
-	"gui.triggered_rng_block.screenPage.misc": "Misc",
-	"gui.triggered_rng_block.screenPage.triggered_blocks": "Triggered Blocks",
+	"gui.triggered_rng_block.screen_page.data_driven_override": "Override",
+	"gui.triggered_rng_block.screen_page.misc": "Misc",
+	"gui.triggered_rng_block.screen_page.triggered_blocks": "Triggered Blocks",
 
 	"gui.triggered_rng_block.override_data_identifier_label": "Checked Data Identifier",
 	"gui.triggered_rng_block.override_data_value_label": "Checked Data Value",
@@ -613,13 +568,11 @@
 	"gui.triggered_spawner_block.open_spawner_bound_entity_config_screen_button_label": "Open Spawner Bound Entity Config",
 	"gui.triggered_spawner_block.open_spawner_bound_villager_entity_config_screen_button_label": "Open Spawner Bound Villager Entity Config",
 
-	"gui.triggered_spawner_block.creativeScreenPage.misc": "Misc",
-	"gui.triggered_spawner_block.creativeScreenPage.villager_data": "Villager Data",
-	"gui.triggered_spawner_block.creativeScreenPage.entity_attribute_modifier": "Entity Attribute Modifiers",
-	"gui.triggered_spawner_block.creativeScreenPage.use_relay_block": "Use Relay Block",
-	"gui.triggered_spawner_block.creativeScreenPage.triggered_block": "Triggered Block",
-
-	"gui.triggered_spawner_block.useRelayBlockPositionOffset": "Use Relay Block Position Offset",
+	"gui.triggered_spawner_block.screen_page.misc": "Misc",
+	"gui.triggered_spawner_block.screen_page.villager_data": "Villager Data",
+	"gui.triggered_spawner_block.screen_page.entity_attribute_modifier": "Entity Attribute Modifiers",
+	"gui.triggered_spawner_block.screen_page.use_relay_block": "Use Relay Block",
+	"gui.triggered_spawner_block.screen_page.triggered_block": "Triggered Block",
 
 	"gui.triggered_spawner_block.spawning_mode.once": "Once",
 	"gui.triggered_spawner_block.spawning_mode.continuous": "Continuous",
@@ -682,19 +635,19 @@
 	"gui.boss_controller_block.entity_spawn_orientation_pitch_label": "Boss Spawn Orientation Pitch",
 	"gui.boss_controller_block.entity_spawn_orientation_yaw_label": "Boss Spawn Orientation Yaw",
 
-	"gui.boss_controller_block.creativeScreenPage.area": "Area",
-	"gui.boss_controller_block.creativeScreenPage.boss_triggered_blocks": "Boss Triggered Blocks",
-	"gui.boss_controller_block.creativeScreenPage.spawn_position": "Spawn Position",
+	"gui.boss_controller_block.screen_page.area": "Area",
+	"gui.boss_controller_block.screen_page.boss_triggered_blocks": "Boss Triggered Blocks",
+	"gui.boss_controller_block.screen_page.spawn_position": "Spawn Position",
 
 
-	"gui.triggered_block.newTriggeredBlockPositionOffset": "New Triggered Block Position Offset",
-	"gui.triggered_block.triggeredBlockPositionOffset": "Triggered Block Position Offset",
+	"gui.triggered_block.new_triggered_block_position_offset": "New Triggered Block Position Offset",
+	"gui.triggered_block.triggered_block_position_offset": "Triggered Block Position Offset",
 
-	"gui.triggered_block.triggeredBlockPositionOffsetX.placeholder": "X",
-	"gui.triggered_block.triggeredBlockPositionOffsetY.placeholder": "Y",
-	"gui.triggered_block.triggeredBlockPositionOffsetZ.placeholder": "Z",
+	"gui.triggered_block.triggered_block_position_offset_x.placeholder": "X",
+	"gui.triggered_block.triggered_block_position_offset_y.placeholder": "Y",
+	"gui.triggered_block.triggered_block_position_offset_z.placeholder": "Z",
 
-	"gui.triggered_block.triggeredBlockThreshold.placeholder": "Threshold",
+	"gui.triggered_block.triggered_block_threshold.placeholder": "Threshold",
 
 	"gui.triggered_block.toggle_triggered_block_resets_button_label.on": "Is Reset",
 	"gui.triggered_block.toggle_triggered_block_resets_button_label.off": "Is Triggered",
@@ -888,11 +841,7 @@
 	"block.scriptblocks.uuid_list_saving_block": "UUID List Saving Block",
 
 
-	"gamerule.scriptBlocksDropThemself": "Script Blocks drop themself when mined in survival",
-
-
-	"hud.message.onlyDimensionOwnerCanTeleport": "Only the dimension owner can teleport",
-	"hud.message.keyIsNeeded": "You need a key.",
+	"hud.message.only_dimension_owner_can_teleport": "Only the dimension owner can teleport",
 	"hud.message.script_block.update_successful": "Update successful",
 	"hud.message.script_block.no_permission": "You need to be in Creative mode with at least level 2 permissions to do this!",
 

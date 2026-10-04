@@ -19,9 +19,9 @@ import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
-public class DelayTriggerBlockScreen extends Screen {
-	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggeredBlockPositionOffset");
-	private static final Text TRIGGER_DELAY_LABEL_TEXT = Text.translatable("gui.delay_trigger_block.triggeredBlockTriggerDelay");
+public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
+	private static final Text TRIGGER_DELAY_LABEL_TEXT = Text.translatable("gui.delay_trigger_block.triggered_block_trigger_delay");
 	private final DelayTriggerBlockEntity delayTriggerBlock;
 	private TextFieldWidget triggeredBlockPositionOffsetXField;
 	private TextFieldWidget triggeredBlockPositionOffsetYField;
@@ -33,16 +33,6 @@ public class DelayTriggerBlockScreen extends Screen {
 	public DelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock) {
 		super(NarratorManager.EMPTY);
 		this.delayTriggerBlock = delayTriggerBlock;
-	}
-
-	private void done() {
-		if (this.updateDelayTriggerBlock()) {
-			this.close();
-		}
-	}
-
-	private void cancel() {
-		this.close();
 	}
 
 	@Override
@@ -70,6 +60,10 @@ public class DelayTriggerBlockScreen extends Screen {
 		this.addSelectableChild(this.triggerDelayField);
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 145, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 145, 150, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.triggeredBlockPositionOffsetXField);
 	}
 
@@ -78,14 +72,15 @@ public class DelayTriggerBlockScreen extends Screen {
 		String string = this.triggeredBlockPositionOffsetXField.getText();
 		String string1 = this.triggeredBlockPositionOffsetYField.getText();
 		String string2 = this.triggeredBlockPositionOffsetZField.getText();
-		boolean bl = this.triggeredBlockResets;
 		String string3 = this.triggerDelayField.getText();
+		boolean bl = this.triggeredBlockResets;
 		this.init(client, width, height);
 		this.triggeredBlockPositionOffsetXField.setText(string);
 		this.triggeredBlockPositionOffsetYField.setText(string1);
 		this.triggeredBlockPositionOffsetZField.setText(string2);
-		this.triggeredBlockResets = bl;
 		this.triggerDelayField.setText(string3);
+		this.triggeredBlockResets = bl;
+		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 	}
 
 	@Override
@@ -95,20 +90,6 @@ public class DelayTriggerBlockScreen extends Screen {
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	private boolean updateDelayTriggerBlock() {
-		ClientPlayNetworking.send(new UpdateDelayTriggerBlockPacket(
-				this.delayTriggerBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
-				),
-				this.triggeredBlockResets,
-				ItemUtils.parseInt(this.triggerDelayField.getText())
-		));
-		return true;
 	}
 
 	@Override
@@ -125,7 +106,17 @@ public class DelayTriggerBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return false;
+	protected boolean updateBlock() {
+		ClientPlayNetworking.send(new UpdateDelayTriggerBlockPacket(
+				this.delayTriggerBlock.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+				),
+				this.triggeredBlockResets,
+				ItemUtils.parseInt(this.triggerDelayField.getText())
+		));
+		return true;
 	}
 }
