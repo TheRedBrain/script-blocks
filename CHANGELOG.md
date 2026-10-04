@@ -9,6 +9,14 @@ This includes:
 
 These blocks have been polished:
 - Redstone Trigger Block
+- Area Filler Block
+- Copy Data Block
+- Data Writing Block
+- Delay Trigger Block
+- Interactive Trigger Block
+- Mimic Block
+- PVP Controller Block
+- Shop Block
 
 ## Additions
 

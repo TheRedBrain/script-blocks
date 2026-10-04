@@ -30,29 +30,14 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.triggeredBlock.getLeft().getX() != 0 || this.triggeredBlock.getLeft().getY() != 0 || this.triggeredBlock.getLeft().getZ() != 0 || this.triggeredBlock.getRight()) {
-			nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
-		} else {
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		}
+		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
+		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
+		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
+		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
 
-		if (this.triggerDelay > 0) {
-			nbt.putInt("triggerDelay", this.triggerDelay);
-		} else {
-			nbt.remove("triggerDelay");
-		}
+		nbt.putInt("trigger_delay", this.triggerDelay);
 
-		if (this.remainingTicks > 0) {
-			nbt.putInt("remainingTicks", this.remainingTicks);
-		} else {
-			nbt.remove("remainingTicks");
-		}
+		nbt.putInt("remaining_ticks", this.remainingTicks);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -60,25 +45,42 @@ public class DelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (nbt.contains("triggeredBlockPositionOffsetX") && nbt.contains("triggeredBlockPositionOffsetY") && nbt.contains("triggeredBlockPositionOffsetZ") && nbt.contains("triggeredBlockResets")) {
-			int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-			int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-			int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-			this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockResets")
+			);
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
 		} else {
-			this.triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("triggered_block_resets")
+			);
 		}
 
 		if (nbt.contains("triggerDelay")) {
 			this.triggerDelay = Math.max(0, nbt.getInt("triggerDelay"));
+			nbt.remove("triggerDelay");
 		} else {
-			this.triggerDelay = 0;
+			this.triggerDelay = Math.max(0, nbt.getInt("trigger_delay"));
 		}
 
 		if (nbt.contains("remainingTicks")) {
 			this.remainingTicks = Math.max(0, nbt.getInt("remainingTicks"));
+			nbt.remove("remainingTicks");
 		} else {
-			this.remainingTicks = 0;
+			this.remainingTicks = Math.max(0, nbt.getInt("remaining_ticks"));
 		}
 
 		super.readNbt(nbt, registryLookup);

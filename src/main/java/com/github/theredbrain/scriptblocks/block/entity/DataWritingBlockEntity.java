@@ -8,7 +8,6 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -17,8 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class DataWritingBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
-	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
 	private String dataIdentifier = "";
 	private String newDataValue = "";
 
@@ -29,27 +27,13 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.dataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
-			nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
-			nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
-		}
+		nbt.putInt("data_providing_block_position_offset_x", this.dataProvidingBlockPosOffset.getX());
+		nbt.putInt("data_providing_block_position_offset_y", this.dataProvidingBlockPosOffset.getY());
+		nbt.putInt("data_providing_block_position_offset_z", this.dataProvidingBlockPosOffset.getZ());
 
-		if (!this.dataIdentifier.isEmpty()) {
-			nbt.putString("dataIdentifier", this.dataIdentifier);
-		} else {
-			nbt.remove("dataIdentifier");
-		}
+		nbt.putString("data_identifier", this.dataIdentifier);
 
-		if (!this.newDataValue.isEmpty()) {
-			nbt.putString("newDataValue", this.newDataValue);
-		} else {
-			nbt.remove("newDataValue");
-		}
+		nbt.putString("new_data_value", this.newDataValue);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -57,26 +41,35 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (nbt.contains("dataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
 			this.dataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
 			);
+			nbt.remove("dataProvidingBlockPosOffsetX");
+			nbt.remove("dataProvidingBlockPosOffsetY");
+			nbt.remove("dataProvidingBlockPosOffsetZ");
 		} else {
-			this.dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+			this.dataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_z"), -48, 48)
+			);
 		}
 
-		if (nbt.contains("dataIdentifier", NbtElement.STRING_TYPE)) {
+		if (nbt.contains("dataIdentifier")) {
 			this.dataIdentifier = nbt.getString("dataIdentifier");
+			nbt.remove("dataIdentifier");
 		} else {
-			this.dataIdentifier = "";
+			this.dataIdentifier = nbt.getString("data_identifier");
 		}
 
-		if (nbt.contains("newDataValue", NbtElement.STRING_TYPE)) {
+		if (nbt.contains("newDataValue")) {
 			this.newDataValue = nbt.getString("newDataValue");
+			nbt.remove("newDataValue");
 		} else {
-			this.newDataValue = "";
+			this.newDataValue = nbt.getString("new_data_value");
 		}
 
 		super.readNbt(nbt, registryLookup);

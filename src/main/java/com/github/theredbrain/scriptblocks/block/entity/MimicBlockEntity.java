@@ -28,13 +28,13 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("activeMimicBlockPositionOffsetX", this.activeMimicBlockPositionOffset.getX());
-		nbt.putInt("activeMimicBlockPositionOffsetY", this.activeMimicBlockPositionOffset.getY());
-		nbt.putInt("activeMimicBlockPositionOffsetZ", this.activeMimicBlockPositionOffset.getZ());
+		nbt.putInt("active_mimic_block_position_offset_x", this.activeMimicBlockPositionOffset.getX());
+		nbt.putInt("active_mimic_block_position_offset_y", this.activeMimicBlockPositionOffset.getY());
+		nbt.putInt("active_mimic_block_position_offset_z", this.activeMimicBlockPositionOffset.getZ());
 
-		nbt.putInt("inactiveMimicBlockPositionOffsetX", this.inactiveMimicBlockPositionOffset.getX());
-		nbt.putInt("inactiveMimicBlockPositionOffsetY", this.inactiveMimicBlockPositionOffset.getY());
-		nbt.putInt("inactiveMimicBlockPositionOffsetZ", this.inactiveMimicBlockPositionOffset.getZ());
+		nbt.putInt("inactive_mimic_block_position_offset_x", this.inactiveMimicBlockPositionOffset.getX());
+		nbt.putInt("inactive_mimic_block_position_offset_y", this.inactiveMimicBlockPositionOffset.getY());
+		nbt.putInt("inactive_mimic_block_position_offset_z", this.inactiveMimicBlockPositionOffset.getZ());
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -42,15 +42,39 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int x = MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetZ"), -48, 48);
-		this.activeMimicBlockPositionOffset = new BlockPos(x, y, z);
+		if (nbt.contains("activeMimicBlockPositionOffsetX") || nbt.contains("activeMimicBlockPositionOffsetY") || nbt.contains("activeMimicBlockPositionOffsetZ")) {
+			this.activeMimicBlockPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetZ"), -48, 48)
+			);
+			nbt.remove("activeMimicBlockPositionOffsetX");
+			nbt.remove("activeMimicBlockPositionOffsetY");
+			nbt.remove("activeMimicBlockPositionOffsetZ");
+		} else {
+			this.activeMimicBlockPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_z"), -48, 48)
+			);
+		}
 
-		x = MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetZ"), -48, 48);
-		this.inactiveMimicBlockPositionOffset = new BlockPos(x, y, z);
+		if (nbt.contains("inactiveMimicBlockPositionOffsetX") || nbt.contains("inactiveMimicBlockPositionOffsetY") || nbt.contains("inactiveMimicBlockPositionOffsetZ")) {
+			this.inactiveMimicBlockPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetZ"), -48, 48)
+			);
+			nbt.remove("inactiveMimicBlockPositionOffsetX");
+			nbt.remove("inactiveMimicBlockPositionOffsetY");
+			nbt.remove("inactiveMimicBlockPositionOffsetZ");
+		} else {
+			this.activeMimicBlockPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_z"), -48, 48)
+			);
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}

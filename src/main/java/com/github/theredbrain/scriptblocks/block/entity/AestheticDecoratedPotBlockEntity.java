@@ -18,9 +18,6 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 public class AestheticDecoratedPotBlockEntity extends BlockEntity {
-	public static final String SHERDS_NBT_KEY = "sherds";
-	public static final String ITEM_NBT_KEY = "item";
-	public static final int field_46660 = 1;
 	public long lastWobbleTime;
 	@Nullable
 	public DecoratedPotBlockEntity.WobbleType lastWobbleType;

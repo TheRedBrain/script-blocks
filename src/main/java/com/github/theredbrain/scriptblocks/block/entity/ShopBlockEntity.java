@@ -37,9 +37,7 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (!this.shopIdentifier.equals("")) {
-			nbt.putString("shopName", this.shopIdentifier);
-		}
+		nbt.putString("shop_identifier", this.shopIdentifier);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -49,6 +47,9 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 
 		if (nbt.contains("shopName")) {
 			this.shopIdentifier = nbt.getString("shopName");
+			nbt.remove("shopName");
+		} else {
+			this.shopIdentifier = nbt.getString("shop_identifier");
 		}
 
 		super.readNbt(nbt, registryLookup);

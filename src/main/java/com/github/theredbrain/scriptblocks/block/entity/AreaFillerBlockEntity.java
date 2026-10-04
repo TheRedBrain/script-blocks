@@ -18,6 +18,7 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.GameRules;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -41,77 +42,41 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.showArea) {
-			nbt.putBoolean("showArea", true);
-		} else {
-			nbt.remove("showArea");
-		}
+		nbt.putBoolean("show_area", this.showArea);
 
-		if (this.areaDimensions.getX() != 0) {
-			nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-		} else {
-			nbt.remove("areaDimensionsX");
-		}
+		nbt.putInt("area_dimensions_x", this.areaDimensions.getX());
+		nbt.putInt("area_dimensions_y", this.areaDimensions.getY());
+		nbt.putInt("area_dimensions_z", this.areaDimensions.getZ());
 
-		if (this.areaDimensions.getY() != 0) {
-			nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-		} else {
-			nbt.remove("areaDimensionsY");
-		}
-
-		if (this.areaDimensions.getZ() != 0) {
-			nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
-		} else {
-			nbt.remove("areaDimensionsZ");
-		}
-
-		if (this.areaPositionOffset.getX() != 0) {
-			nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-		} else {
-			nbt.remove("areaPositionOffsetX");
-		}
-
-		if (this.areaPositionOffset.getY() != 0) {
-			nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-		} else {
-			nbt.remove("areaPositionOffsetY");
-		}
-
-		if (this.areaPositionOffset.getZ() != 0) {
-			nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
-		} else {
-			nbt.remove("areaPositionOffsetZ");
-		}
+		nbt.putInt("area_position_offset_x", this.areaPositionOffset.getX());
+		nbt.putInt("area_position_offset_y", this.areaPositionOffset.getY());
+		nbt.putInt("area_position_offset_z", this.areaPositionOffset.getZ());
 
 		if (!this.subAreasList.isEmpty()) {
-			int previousSize = nbt.getInt("subAreasListSize");
-			nbt.putInt("subAreasListSize", subAreasList.size());
+			int previousSize = nbt.getInt("sub_areas_list_size");
+			nbt.putInt("sub_areas_list_size", subAreasList.size());
 			for (int i = 0; i < Math.max(this.subAreasList.size(), previousSize); i++) {
 				if (i < this.subAreasList.size()) {
 					BlockPos areaPositionOffset = this.subAreasList.get(i).getLeft();
 					Vec3i areaDimension = this.subAreasList.get(i).getRight();
-					nbt.putInt("subAreaPositionOffsetX_" + i, areaPositionOffset.getX());
-					nbt.putInt("subAreaPositionOffsetY_" + i, areaPositionOffset.getY());
-					nbt.putInt("subAreaPositionOffsetZ_" + i, areaPositionOffset.getZ());
-					nbt.putInt("subAreaDimensionX_" + i, areaDimension.getX());
-					nbt.putInt("subAreaDimensionY_" + i, areaDimension.getY());
-					nbt.putInt("subAreaDimensionZ_" + i, areaDimension.getZ());
+					nbt.putInt("sub_area_position_offset_x_" + i, areaPositionOffset.getX());
+					nbt.putInt("sub_area_position_offset_y_" + i, areaPositionOffset.getY());
+					nbt.putInt("sub_area_position_offset_z_" + i, areaPositionOffset.getZ());
+					nbt.putInt("sub_area_dimension_x_" + i, areaDimension.getX());
+					nbt.putInt("sub_area_dimension_y_" + i, areaDimension.getY());
+					nbt.putInt("sub_area_dimension_z_" + i, areaDimension.getZ());
 				} else {
-					nbt.remove("subAreaPositionOffsetX_" + i);
-					nbt.remove("subAreaPositionOffsetY_" + i);
-					nbt.remove("subAreaPositionOffsetZ_" + i);
-					nbt.remove("subAreaDimensionX_" + i);
-					nbt.remove("subAreaDimensionY_" + i);
-					nbt.remove("subAreaDimensionZ_" + i);
+					nbt.remove("sub_area_position_offset_x_" + i);
+					nbt.remove("sub_area_position_offset_y_" + i);
+					nbt.remove("sub_area_position_offset_z_" + i);
+					nbt.remove("sub_area_dimension_x_" + i);
+					nbt.remove("sub_area_dimension_y_" + i);
+					nbt.remove("sub_area_dimension_z_" + i);
 				}
 			}
 		}
 
-		if (!this.blockIdentifierString.isEmpty()) {
-			nbt.putString("blockIdentifierString", this.blockIdentifierString);
-		} else {
-			nbt.remove("blockIdentifierString");
-		}
+		nbt.putString("block_identifier_string", this.blockIdentifierString);
 
 		super.writeNbt(nbt, registryLookup);
 
@@ -120,33 +85,90 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		this.showArea = nbt.getBoolean("showArea");
-
-		int i = Math.max(0, nbt.getInt("areaDimensionsX"));
-		int j = Math.max(0, nbt.getInt("areaDimensionsY"));
-		int k = Math.max(0, nbt.getInt("areaDimensionsZ"));
-		this.areaDimensions = new Vec3i(i, j, k);
-
-		int l = nbt.getInt("areaPositionOffsetX");
-		int m = nbt.getInt("areaPositionOffsetY");
-		int n = nbt.getInt("areaPositionOffsetZ");
-		this.areaPositionOffset = new BlockPos(l, m, n);
-
-		int subAreasListSize = nbt.getInt("subAreasListSize");
-		this.subAreasList.clear();
-		for (i = 0; i < subAreasListSize; i++) {
-			this.subAreasList.add(new MutablePair<>(new BlockPos(
-					nbt.getInt("subAreaPositionOffsetX_" + i),
-					nbt.getInt("subAreaPositionOffsetY_" + i),
-					nbt.getInt("subAreaPositionOffsetZ_" + i)
-			), new Vec3i(
-					nbt.getInt("subAreaDimensionX_" + i),
-					nbt.getInt("subAreaDimensionY_" + i),
-					nbt.getInt("subAreaDimensionZ_" + i)
-			)));
+		if (nbt.contains("showArea")) {
+			this.showArea = nbt.getBoolean("showArea");
+			nbt.remove("showArea");
+		} else {
+			this.showArea = nbt.getBoolean("show_area");
 		}
 
-		this.blockIdentifierString = nbt.getString("blockIdentifierString");
+		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
+			this.areaDimensions = new Vec3i(
+					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
+					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
+					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
+			);
+			nbt.remove("areaDimensionsX");
+			nbt.remove("areaDimensionsY");
+			nbt.remove("areaDimensionsZ");
+		} else {
+			this.areaDimensions = new Vec3i(
+					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
+					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
+					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
+			);
+		}
+
+		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
+			this.areaPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
+			);
+			nbt.remove("areaPositionOffsetX");
+			nbt.remove("areaPositionOffsetY");
+			nbt.remove("areaPositionOffsetZ");
+		} else {
+			this.areaPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
+			);
+		}
+
+		if (nbt.contains("subAreasListSize")) {
+			int subAreasListSize = nbt.getInt("subAreasListSize");
+			this.subAreasList.clear();
+			for (int i = 0; i < subAreasListSize; i++) {
+				this.subAreasList.add(new MutablePair<>(new BlockPos(
+						nbt.getInt("subAreaPositionOffsetX_" + i),
+						nbt.getInt("subAreaPositionOffsetY_" + i),
+						nbt.getInt("subAreaPositionOffsetZ_" + i)
+				), new Vec3i(
+						nbt.getInt("subAreaDimensionX_" + i),
+						nbt.getInt("subAreaDimensionY_" + i),
+						nbt.getInt("subAreaDimensionZ_" + i)
+				)));
+				nbt.remove("subAreaPositionOffsetX_" + i);
+				nbt.remove("subAreaPositionOffsetY_" + i);
+				nbt.remove("subAreaPositionOffsetZ_" + i);
+				nbt.remove("subAreaDimensionX_" + i);
+				nbt.remove("subAreaDimensionY_" + i);
+				nbt.remove("subAreaDimensionZ_" + i);
+			}
+			nbt.remove("subAreasListSize");
+		} else {
+			int subAreasListSize = nbt.getInt("sub_areas_list_size");
+			this.subAreasList.clear();
+			for (int i = 0; i < subAreasListSize; i++) {
+				this.subAreasList.add(new MutablePair<>(new BlockPos(
+						nbt.getInt("sub_area_position_offset_x_" + i),
+						nbt.getInt("sub_area_position_offset_y_" + i),
+						nbt.getInt("sub_area_position_offset_z_" + i)
+				), new Vec3i(
+						nbt.getInt("sub_area_dimension_x_" + i),
+						nbt.getInt("sub_area_dimension_y_" + i),
+						nbt.getInt("sub_area_dimension_z_" + i)
+				)));
+			}
+		}
+
+		if (nbt.contains("blockIdentifierString")) {
+			this.blockIdentifierString = nbt.getString("blockIdentifierString");
+			nbt.remove("blockIdentifierString");
+		} else {
+			this.blockIdentifierString = nbt.getString("block_identifier_string");
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}

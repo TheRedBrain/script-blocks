@@ -17,9 +17,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = BlockPos.ORIGIN;
-	private BlockPos firstDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
-	private BlockPos secondDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private BlockPos firstDataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private BlockPos secondDataProvidingBlockPosOffset = BlockPos.ORIGIN;
 	private String dataIdentifier = "";
 
 	public CopyDataBlockEntity(BlockPos pos, BlockState state) {
@@ -29,31 +28,15 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.firstDataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("firstDataProvidingBlockPosOffsetX", this.firstDataProvidingBlockPosOffset.getX());
-			nbt.putInt("firstDataProvidingBlockPosOffsetY", this.firstDataProvidingBlockPosOffset.getY());
-			nbt.putInt("firstDataProvidingBlockPosOffsetZ", this.firstDataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("firstDataProvidingBlockPosOffsetX");
-			nbt.remove("firstDataProvidingBlockPosOffsetY");
-			nbt.remove("firstDataProvidingBlockPosOffsetZ");
-		}
+		nbt.putInt("first_data_providing_block_pos_offset_x", this.firstDataProvidingBlockPosOffset.getX());
+		nbt.putInt("first_data_providing_block_pos_offset_y", this.firstDataProvidingBlockPosOffset.getY());
+		nbt.putInt("first_data_providing_block_pos_offset_z", this.firstDataProvidingBlockPosOffset.getZ());
 
-		if (this.secondDataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("secondDataProvidingBlockPosOffsetX", this.secondDataProvidingBlockPosOffset.getX());
-			nbt.putInt("secondDataProvidingBlockPosOffsetY", this.secondDataProvidingBlockPosOffset.getY());
-			nbt.putInt("secondDataProvidingBlockPosOffsetZ", this.secondDataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("secondDataProvidingBlockPosOffsetX");
-			nbt.remove("secondDataProvidingBlockPosOffsetY");
-			nbt.remove("secondDataProvidingBlockPosOffsetZ");
-		}
+		nbt.putInt("second_data_providing_block_pos_offset_x", this.secondDataProvidingBlockPosOffset.getX());
+		nbt.putInt("second_data_providing_block_pos_offset_y", this.secondDataProvidingBlockPosOffset.getY());
+		nbt.putInt("second_data_providing_block_pos_offset_z", this.secondDataProvidingBlockPosOffset.getZ());
 
-		if (!this.dataIdentifier.isEmpty()) {
-			nbt.putString("dataIdentifier", this.dataIdentifier);
-		} else {
-			nbt.remove("dataIdentifier");
-		}
+		nbt.putString("data_identifier", this.dataIdentifier);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -61,30 +44,45 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (nbt.contains("firstDataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("firstDataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("firstDataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+		if (nbt.contains("firstDataProvidingBlockPosOffsetX") && nbt.contains("firstDataProvidingBlockPosOffsetY") && nbt.contains("firstDataProvidingBlockPosOffsetZ")) {
 			this.firstDataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
 					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetZ"), -48, 48)
 			);
+			nbt.remove("firstDataProvidingBlockPosOffsetX");
+			nbt.remove("firstDataProvidingBlockPosOffsetY");
+			nbt.remove("firstDataProvidingBlockPosOffsetZ");
 		} else {
-			this.firstDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+			this.firstDataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_z"), -48, 48)
+			);
 		}
 
-		if (nbt.contains("secondDataProvidingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("secondDataProvidingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("secondDataProvidingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
+		if (nbt.contains("secondDataProvidingBlockPosOffsetX") && nbt.contains("secondDataProvidingBlockPosOffsetY") && nbt.contains("secondDataProvidingBlockPosOffsetZ")) {
 			this.secondDataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetX"), -48, 48),
 					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetZ"), -48, 48)
 			);
+			nbt.remove("secondDataProvidingBlockPosOffsetX");
+			nbt.remove("secondDataProvidingBlockPosOffsetY");
+			nbt.remove("secondDataProvidingBlockPosOffsetZ");
 		} else {
-			this.secondDataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+			this.secondDataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_z"), -48, 48)
+			);
 		}
 
-		if (nbt.contains("dataIdentifier", NbtElement.STRING_TYPE)) {
+		if (nbt.contains("dataIdentifier")) {
 			this.dataIdentifier = nbt.getString("dataIdentifier");
+			nbt.remove("dataIdentifier");
 		} else {
-			this.dataIdentifier = "";
+			this.dataIdentifier = nbt.getString("data_identifier");
 		}
 
 		super.readNbt(nbt, registryLookup);
