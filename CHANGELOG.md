@@ -1,5 +1,15 @@
 # 0.0.10
 
+## Polishing
+
+This includes:
+- block entity nbt fields were changed into "snake_case". This is happening automatically when a chunk with an already placed block is saved.
+- improvements to screens
+- small fixes and code clean up
+
+These blocks have been polished:
+- Redstone Trigger Block
+
 ## Additions
 
 - the "predefined world spawn position" (set in the server config) now respects Spawn Point Delegation Blocks

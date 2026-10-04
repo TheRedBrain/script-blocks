@@ -25,7 +25,6 @@ public class RedstoneTriggerBlockScreen extends Screen {
 	private TextFieldWidget triggeredBlockPositionOffsetXField;
 	private TextFieldWidget triggeredBlockPositionOffsetYField;
 	private TextFieldWidget triggeredBlockPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
 
 	public RedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock) {
@@ -59,13 +58,22 @@ public class RedstoneTriggerBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetZField.setText(Integer.toString(this.redstoneTriggerBlock.getTriggeredBlock().getLeft().getZ()));
 		this.addSelectableChild(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.redstoneTriggerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 115, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 115, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 145, 150, 20).build());
 		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 145, 150, 20).build());
+	}
+
+	@Override
+	protected void setInitialFocus() {
 		this.setInitialFocus(this.triggeredBlockPositionOffsetXField);
+	}
+
+	@Override
+	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+		this.renderInGameBackground(context);
 	}
 
 	@Override
@@ -90,19 +98,6 @@ public class RedstoneTriggerBlockScreen extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	private boolean updateRedstoneTriggerBlock() {
-		ClientPlayNetworking.send(new UpdateRedstoneTriggerBlockPacket(
-				this.redstoneTriggerBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
-				),
-				this.triggeredBlockResets
-		));
-		return true;
-	}
-
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 
@@ -118,4 +113,18 @@ public class RedstoneTriggerBlockScreen extends Screen {
 	public boolean shouldPause() {
 		return false;
 	}
+
+	private boolean updateRedstoneTriggerBlock() {
+		ClientPlayNetworking.send(new UpdateRedstoneTriggerBlockPacket(
+				this.redstoneTriggerBlock.getPos(),
+				new BlockPos(
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+				),
+				this.triggeredBlockResets
+		));
+		return true;
+	}
+
 }

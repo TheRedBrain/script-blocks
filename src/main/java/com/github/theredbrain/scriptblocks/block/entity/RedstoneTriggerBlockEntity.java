@@ -26,10 +26,10 @@ public class RedstoneTriggerBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
+		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
+		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
+		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -37,10 +37,29 @@ public class RedstoneTriggerBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockResets")
+			);
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
+		} else {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("triggered_block_resets")
+			);
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}
