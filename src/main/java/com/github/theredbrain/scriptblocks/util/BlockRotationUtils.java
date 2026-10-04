@@ -148,12 +148,12 @@ public class BlockRotationUtils {
 		}
 	}
 
-	public static MutablePair<BlockPos, MutablePair<Double, Double>> rotateEntrance(MutablePair<BlockPos, MutablePair<Double, Double>> entrance, BlockRotation rotation) {
-		return new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(entrance.getLeft(), rotation), new MutablePair<>(BlockRotationUtils.rotateYaw(entrance.getRight().getLeft(), rotation), entrance.getRight().getRight()));
+	public static MutablePair<BlockPos, MutablePair<Double, Double>> rotateSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, BlockRotation rotation) {
+		return new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(spawnPoint.getLeft(), rotation), new MutablePair<>(BlockRotationUtils.rotateYaw(spawnPoint.getRight().getLeft(), rotation), spawnPoint.getRight().getRight()));
 	}
 
-	public static MutablePair<BlockPos, MutablePair<Double, Double>> mirrorEntrance(MutablePair<BlockPos, MutablePair<Double, Double>> entrance, BlockMirror mirror) {
-		return new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(entrance.getLeft(), mirror), new MutablePair<>(BlockRotationUtils.mirrorYaw(entrance.getRight().getLeft(), mirror), entrance.getRight().getRight()));
+	public static MutablePair<BlockPos, MutablePair<Double, Double>> mirrorSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, BlockMirror mirror) {
+		return new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(spawnPoint.getLeft(), mirror), new MutablePair<>(BlockRotationUtils.mirrorYaw(spawnPoint.getRight().getLeft(), mirror), spawnPoint.getRight().getRight()));
 	}
 
 	public static MutablePair<BlockPos, Vec3i> rotateOffsetArea(BlockPos positionOffset, Vec3i areaDimensions, BlockRotation rotation) {

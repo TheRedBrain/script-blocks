@@ -394,7 +394,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> rotatedEntrance = BlockRotationUtils.rotateEntrance(this.respawnPositions.get(key), blockRotation);
+					MutablePair<BlockPos, MutablePair<Double, Double>> rotatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.respawnPositions.get(key), blockRotation);
 					this.respawnPositions.put(key, rotatedEntrance);
 				}
 
@@ -408,7 +408,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorEntrance(this.respawnPositions.get(key), BlockMirror.FRONT_BACK);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), BlockMirror.FRONT_BACK);
 					this.respawnPositions.put(key, mirroredEntrance);
 				}
 
@@ -422,7 +422,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorEntrance(this.respawnPositions.get(key), BlockMirror.LEFT_RIGHT);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), BlockMirror.LEFT_RIGHT);
 					this.respawnPositions.put(key, mirroredEntrance);
 				}
 

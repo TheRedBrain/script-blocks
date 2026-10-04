@@ -113,7 +113,7 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 
 				List<MutablePair<BlockPos, MutablePair<Double, Double>>> newDelegatedSpawnPoints = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
-					newDelegatedSpawnPoints.add(BlockRotationUtils.rotateEntrance(delegatedSpawnPoint, blockRotation));
+					newDelegatedSpawnPoints.add(BlockRotationUtils.rotateSpawnPoint(delegatedSpawnPoint, blockRotation));
 				}
 				this.delegatedSpawnPoints.clear();
 				this.delegatedSpawnPoints.addAll(newDelegatedSpawnPoints);
@@ -124,7 +124,7 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 
 				List<MutablePair<BlockPos, MutablePair<Double, Double>>> newDelegatedSpawnPoints = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
-					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorEntrance(delegatedSpawnPoint, BlockMirror.FRONT_BACK));
+					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorSpawnPoint(delegatedSpawnPoint, BlockMirror.FRONT_BACK));
 				}
 				this.delegatedSpawnPoints.clear();
 				this.delegatedSpawnPoints.addAll(newDelegatedSpawnPoints);
@@ -135,7 +135,7 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 
 				List<MutablePair<BlockPos, MutablePair<Double, Double>>> newDelegatedSpawnPoints = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
-					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorEntrance(delegatedSpawnPoint, BlockMirror.LEFT_RIGHT));
+					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorSpawnPoint(delegatedSpawnPoint, BlockMirror.LEFT_RIGHT));
 				}
 				this.delegatedSpawnPoints.clear();
 				this.delegatedSpawnPoints.addAll(newDelegatedSpawnPoints);

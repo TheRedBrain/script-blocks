@@ -90,17 +90,17 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
 				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
-				this.delegatedEntrance = BlockRotationUtils.rotateEntrance(this.delegatedEntrance, blockRotation);
+				this.delegatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.delegatedEntrance, blockRotation);
 
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
-				this.delegatedEntrance = BlockRotationUtils.mirrorEntrance(this.delegatedEntrance, BlockMirror.FRONT_BACK);
+				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, BlockMirror.FRONT_BACK);
 
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
-				this.delegatedEntrance = BlockRotationUtils.mirrorEntrance(this.delegatedEntrance, BlockMirror.LEFT_RIGHT);
+				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, BlockMirror.LEFT_RIGHT);
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}

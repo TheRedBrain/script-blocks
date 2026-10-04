@@ -345,13 +345,13 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
 				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
-				this.mainEntrance = BlockRotationUtils.rotateEntrance(this.mainEntrance, blockRotation);
+				this.mainEntrance = BlockRotationUtils.rotateSpawnPoint(this.mainEntrance, blockRotation);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> rotatedEntrance = BlockRotationUtils.rotateEntrance(this.sideEntrances.get(key), blockRotation);
+					MutablePair<BlockPos, MutablePair<Double, Double>> rotatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.sideEntrances.get(key), blockRotation);
 					this.sideEntrances.put(key, rotatedEntrance);
 				}
 
@@ -368,13 +368,13 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
-				this.mainEntrance = BlockRotationUtils.mirrorEntrance(this.mainEntrance, BlockMirror.FRONT_BACK);
+				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, BlockMirror.FRONT_BACK);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorEntrance(this.sideEntrances.get(key), BlockMirror.FRONT_BACK);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), BlockMirror.FRONT_BACK);
 					this.sideEntrances.put(key, mirroredEntrance);
 				}
 
@@ -391,13 +391,13 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
-				this.mainEntrance = BlockRotationUtils.mirrorEntrance(this.mainEntrance, BlockMirror.LEFT_RIGHT);
+				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, BlockMirror.LEFT_RIGHT);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorEntrance(this.sideEntrances.get(key), BlockMirror.LEFT_RIGHT);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), BlockMirror.LEFT_RIGHT);
 					this.sideEntrances.put(key, mirroredEntrance);
 				}
 
