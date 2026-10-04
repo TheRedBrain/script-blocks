@@ -678,12 +678,18 @@ public class CreativeTeleporterBlockScreen extends Screen {
 			this.activationAreaPositionOffsetXField.setVisible(true);
 			this.activationAreaPositionOffsetYField.setVisible(true);
 			this.activationAreaPositionOffsetZField.setVisible(true);
-			this.accessPositionOffsetXField.setVisible(true);
-			this.accessPositionOffsetYField.setVisible(true);
-			this.accessPositionOffsetZField.setVisible(true);
-			this.toggleSetAccessPositionButton.visible = true;
 			this.toggleOnlyTeleportDimensionOwnerButton.visible = true;
 			this.toggleTeleportTeamButton.visible = true;
+
+			if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS
+					|| this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+
+				this.accessPositionOffsetXField.setVisible(true);
+				this.accessPositionOffsetYField.setVisible(true);
+				this.accessPositionOffsetZField.setVisible(true);
+				this.toggleSetAccessPositionButton.visible = true;
+
+			}
 
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.TELEPORTATION_MODE) {
 

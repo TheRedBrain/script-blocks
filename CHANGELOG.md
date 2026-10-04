@@ -19,7 +19,10 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 
 ## Changes
 
-- reworked Player Detector Block
+- changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
+
+### Player Detector Block Rework
+
   - now triggers a block when a player leaves the area
   - also sends a UUID list of all entering/leaving players
   - the ticking area check can be disabled
@@ -36,7 +39,7 @@ The Teleporter Block has become increasingly complex. This rework extracts some 
   - removed item removal on teleporting
   - added support for location cooldowns
   - direct block interactions now check for the "dimension owner only" setting
-- changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
+  - the creative mode screen now shows the "Access Position Offset" and the corresponding button only when the teleportation mode is set to "Locations" or "Location". This is done to make clear that other modes don't set the access position.
 
 ## Fixes
 
