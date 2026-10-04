@@ -35,6 +35,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBl
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeringRespawnAnchorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
@@ -172,6 +173,9 @@ public interface DuckPlayerEntityMixin {
 	}
 
 	default void scriptblocks$openTriggeredEntityRemoverBlockScreen(TriggeredEntityRemoverBlockEntity triggeredEntityRemoverBlockEntity) {
+	}
+
+	default void scriptblocks$openTriggeringRespawnAnchorBlockScreen(TriggeringRespawnAnchorBlockEntity triggeringRespawnAnchorBlockEntity) {
 	}
 
 	default void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity) {

@@ -40,6 +40,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRedstoneBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeringRespawnAnchorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListSavingBlockEntity;
@@ -251,6 +252,9 @@ public class ScriptBlocksEntities {
 	public static final BlockEntityType<TriggeredAdvancementCheckerBlockEntity> TRIGGERED_ADVANCEMENT_CHECKER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_advancement_checker_block"),
 			BlockEntityType.Builder.create(TriggeredAdvancementCheckerBlockEntity::new, ScriptBlocksBlocks.TRIGGERED_ADVANCEMENT_CHECKER_BLOCK).build());
+	public static final BlockEntityType<TriggeringRespawnAnchorBlockEntity> TRIGGERING_RESPAWN_ANCHOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("triggering_respawn_anchor_block"),
+			BlockEntityType.Builder.create(TriggeringRespawnAnchorBlockEntity::new, ScriptBlocksBlocks.TRIGGERING_RESPAWN_ANCHOR_BLOCK).build());
 	public static final BlockEntityType<UseRelayBlockEntity> USE_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("use_relay_block"),
 			BlockEntityType.Builder.create(UseRelayBlockEntity::new,

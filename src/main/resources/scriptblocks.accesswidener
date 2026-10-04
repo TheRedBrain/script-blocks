@@ -6,3 +6,6 @@ accessible method net/minecraft/block/AbstractBlock canPathfindThrough (Lnet/min
 accessible method net/minecraft/block/AbstractBlock isTransparent (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z
 
 accessible method net/minecraft/block/AbstractBlock onUse (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;
+
+accessible class net/minecraft/server/network/ServerPlayerEntity$RespawnPos
+accessible method  net/minecraft/server/network/ServerPlayerEntity$RespawnPos <init> (Lnet/minecraft/util/math/Vec3d;F)V

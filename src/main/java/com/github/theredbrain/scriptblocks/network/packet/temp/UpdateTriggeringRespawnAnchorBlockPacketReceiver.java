@@ -1,0 +1,46 @@
+package com.github.theredbrain.scriptblocks.network.packet.temp;
+
+import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.apache.commons.lang3.tuple.MutablePair;
+
+public class UpdateTriggeringRespawnAnchorBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeringRespawnAnchorBlockPacket> {
+	@Override
+	public void receive(UpdateTriggeringRespawnAnchorBlockPacket payload, ServerPlayNetworking.Context context) {
+
+		ServerPlayerEntity serverPlayerEntity = context.player();
+
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+			return;
+		}
+
+		BlockPos redstoneTriggerBlockPosition = payload.triggeringRespawnAnchorBlockPosition();
+
+		BlockPos spawnPointPositionOffset = payload.spawnPointPositionOffset();
+		double spawnPointYaw = payload.spawnPointYaw();
+		double spawnPointPitch = payload.spawnPointPitch();
+
+		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
+		boolean triggeredBlockResets = payload.triggeredBlockResets();
+
+		World world = serverPlayerEntity.getWorld();
+
+		BlockEntity blockEntity = world.getBlockEntity(redstoneTriggerBlockPosition);
+		BlockState blockState = world.getBlockState(redstoneTriggerBlockPosition);
+
+		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
+			redstoneTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+			redstoneTriggerBlockEntity.markDirty();
+			world.updateListeners(redstoneTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+		}
+	}
+}
