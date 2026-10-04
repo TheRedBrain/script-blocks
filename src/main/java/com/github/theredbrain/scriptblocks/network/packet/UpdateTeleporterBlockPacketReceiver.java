@@ -18,7 +18,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 	@Override
 	public void receive(UpdateTeleporterBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity player = context.player();
+		ServerPlayerEntity player = context.player(); // todo rename to serverPlayerEntity
 
 		if (!player.isCreativeLevelTwoOp()) {
 			player.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
