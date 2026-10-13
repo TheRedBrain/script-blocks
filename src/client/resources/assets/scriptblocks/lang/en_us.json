@@ -140,6 +140,9 @@
 	"gui.entrance_delegation_block.entrance_orientation": "Entrance Yaw/Pitch",
 
 
+	"gui.entity_attribute_modifier.operation.add_value": "Add Value",
+	"gui.entity_attribute_modifier.operation.add_multiplied_base": "Add Multiplied Base",
+	"gui.entity_attribute_modifier.operation.add_multiplied_total": "Add Multiplied Total",
 	"gui.entity_attribute_modifier.operation.addition": "Addition",
 	"gui.entity_attribute_modifier.operation.multiply_base": "Multiply Base",
 	"gui.entity_attribute_modifier.operation.multiply_total": "Multiply Total",
@@ -560,6 +563,10 @@
 	"gui.triggered_spawner_block.spawner_bound_entity_loot_table_identifier_field_label": "Loot Table Identifier",
 
 	"gui.triggered_spawner_block.spawning_mode_label": "Spawning Mode",
+	"gui.triggered_spawner_block.is_persistent_label": "Is Persistent",
+	"gui.triggered_spawner_block.enable_spawn_effects_label": "Spawn Effects",
+	"gui.triggered_spawner_block.toggle_enable_spawn_effects_button_label.on": "Enabled",
+	"gui.triggered_spawner_block.toggle_enable_spawn_effects_button_label.off": "Disabled",
 	"gui.triggered_spawner_block.entity_mode_label": "Entity Mode",
 	"gui.triggered_spawner_block.entity_spawn_position_offset_label": "Entity Spawn Position Offset",
 	"gui.triggered_spawner_block.entity_spawn_orientation_pitch_label": "Entity Spawn Orientation Pitch",
@@ -583,9 +590,9 @@
 	"gui.triggered_spawner_block.entity_mode.spawner_bound_entity": "Spawner Bound Entity",
 	"gui.triggered_spawner_block.entity_mode.spawner_bound_villager_entity": "Spawner Bound Villager Entity",
 
-	"gui.triggered_spawner_block.new_entity_attribute_modifier_identifier_label": "Attribute Identifier",
-	"gui.triggered_spawner_block.new_entity_attribute_modifier_name_label": "Name",
-	"gui.triggered_spawner_block.new_entity_attribute_modifier_value_label": "Value",
+	"gui.triggered_spawner_block.entity_attribute_identifier_label": "Attribute Id",
+	"gui.triggered_spawner_block.entity_attribute_modifier_identifier_label": "Modifier Id",
+	"gui.triggered_spawner_block.entity_attribute_modifier_value_label": "Value",
 
 
 	"gui.triggered_villager_spawner_block.villager_type_field_label": "Villager Biome Type",

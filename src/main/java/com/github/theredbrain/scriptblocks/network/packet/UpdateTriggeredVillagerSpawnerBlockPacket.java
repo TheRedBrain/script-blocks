@@ -19,6 +19,8 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 		double entitySpawnOrientationPitch,
 		double entitySpawnOrientationYaw,
 		String spawningMode,
+		boolean isPersistent,
+		boolean enableSpawnEffects,
 		String entityTypeId,
 		VillagerData villagerData,
 		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
@@ -36,6 +38,8 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.decodeAsJson(VillagerData.CODEC),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER),
@@ -53,6 +57,9 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
 
 		registryByteBuf.writeString(this.spawningMode);
+
+		registryByteBuf.writeBoolean(this.isPersistent);
+		registryByteBuf.writeBoolean(this.enableSpawnEffects);
 
 		registryByteBuf.writeString(this.entityTypeId);
 

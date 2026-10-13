@@ -25,6 +25,8 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
@@ -44,9 +46,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,6 +60,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	protected UUID boundEntityUuid = null;
 
 	protected SpawningMode spawningMode = SpawningMode.ONCE;
+	protected boolean isPersistent = false;
+	protected boolean enableSpawnEffects = true;
 
 	protected final Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 
@@ -82,89 +83,42 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		BlockPos entitySpawnPositionOffset = this.entitySpawnPositionOffset;
-		if (!entitySpawnPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("entitySpawnPositionOffsetX", entitySpawnPositionOffset.getX());
-			nbt.putInt("entitySpawnPositionOffsetY", entitySpawnPositionOffset.getY());
-			nbt.putInt("entitySpawnPositionOffsetZ", entitySpawnPositionOffset.getZ());
-		} else {
-			nbt.remove("entitySpawnPositionOffsetX");
-			nbt.remove("entitySpawnPositionOffsetY");
-			nbt.remove("entitySpawnPositionOffsetZ");
-		}
+		nbt.put("entity_spawn_position_offset", NbtHelper.fromBlockPos(this.entitySpawnPositionOffset));
 
-		if (this.entitySpawnOrientationPitch != 0.0) {
-			nbt.putDouble("entitySpawnOrientationPitch", this.entitySpawnOrientationPitch);
-		} else {
-			nbt.remove("entitySpawnOrientationPitch");
-		}
+		nbt.putDouble("entity_spawn_orientation_pitch", this.entitySpawnOrientationPitch);
 
-		if (this.entitySpawnOrientationYaw != 0.0) {
-			nbt.putDouble("entitySpawnOrientationYaw", this.entitySpawnOrientationYaw);
-		} else {
-			nbt.remove("entitySpawnOrientationYaw");
-		}
+		nbt.putDouble("entity_spawn_orientation_yaw", this.entitySpawnOrientationYaw);
 
-		BlockPos triggeredBlockPositionOffset = this.triggeredBlock.getLeft();
-		if (!triggeredBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("triggeredBlockPositionOffsetX", triggeredBlockPositionOffset.getX());
-			nbt.putInt("triggeredBlockPositionOffsetY", triggeredBlockPositionOffset.getY());
-			nbt.putInt("triggeredBlockPositionOffsetZ", triggeredBlockPositionOffset.getZ());
-			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
-		} else {
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		}
+		nbt.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
 
-		BlockPos useRelayBlockPositionOffset = this.useRelayBlockPositionOffset;
-		if (!useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("useRelayedBlockPositionOffsetX", useRelayBlockPositionOffset.getX());
-			nbt.putInt("useRelayedBlockPositionOffsetY", useRelayBlockPositionOffset.getY());
-			nbt.putInt("useRelayedBlockPositionOffsetZ", useRelayBlockPositionOffset.getZ());
-		} else {
-			nbt.remove("useRelayedBlockPositionOffsetX");
-			nbt.remove("useRelayedBlockPositionOffsetY");
-			nbt.remove("useRelayedBlockPositionOffsetZ");
-		}
+		nbt.put("use_relay_block_position_offset", NbtHelper.fromBlockPos(this.useRelayBlockPositionOffset));
 
-		// TODO convert to an nbt element
-		List<RegistryEntry<EntityAttribute>> entityAttributeModifiersKeys = new ArrayList<>(this.entityAttributeModifiers.keySet());
-		nbt.putInt("entityAttributeModifiersKeysSize", entityAttributeModifiersKeys.size());
-		for (int i = 0; i < entityAttributeModifiersKeys.size(); i++) {
-			RegistryEntry<EntityAttribute> key = entityAttributeModifiersKeys.get(i);
-			Collection<EntityAttributeModifier> modifierCollection = this.entityAttributeModifiers.get(key);
-			nbt.putString("entityAttributeModifiers_key" + i, String.valueOf(Registries.ATTRIBUTE.getId(key.value())));
-			List<EntityAttributeModifier> modifierList = modifierCollection.stream().toList();
-			nbt.putInt("entityAttributeModifiers_modifierListSize_" + i, modifierList.size());
-			for (int j = 0; j < modifierList.size(); j++) {
-				nbt.put("entityAttributeModifiers_" + i + "_" + j, modifierList.get(j).toNbt());
+		NbtList nbtList = new NbtList();
+		for (RegistryEntry<EntityAttribute> registryEntry : this.entityAttributeModifiers.keySet()) {
+			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound.putString("attribute", String.valueOf(Registries.ATTRIBUTE.getId(registryEntry.value())));
+			NbtList modifiersList = new NbtList();
+			for (EntityAttributeModifier entityAttributeModifier : this.entityAttributeModifiers.get(registryEntry)) {
+				modifiersList.add(entityAttributeModifier.toNbt());
 			}
+			nbtCompound.put("modifiers", modifiersList);
+			nbtList.add(nbtCompound);
 		}
+		nbt.put("entity_attribute_modifiers", nbtList);
 
-		if (this.spawningMode != SpawningMode.ONCE) {
-			nbt.putString("spawningMode", this.spawningMode.asString());
-		} else {
-			nbt.remove("spawningMode");
-		}
+		nbt.putString("spawning_mode", this.spawningMode.asString());
 
-		if (this.triggered) {
-			nbt.putBoolean("triggered", true);
-		} else {
-			nbt.remove("triggered");
-		}
+		nbt.putBoolean("is_persistent", this.isPersistent);
 
-		if (!Objects.equals(this.entityTypeCompound, new NbtCompound())) {
-			nbt.put("EntityTypeCompound", this.entityTypeCompound);
-		} else {
-			nbt.remove("EntityTypeCompound");
-		}
+		nbt.putBoolean("enable_spawn_effects", this.enableSpawnEffects);
+
+		nbt.putBoolean("triggered", this.triggered);
+
+		nbt.put("entity_type_compound", this.entityTypeCompound);
 
 		if (this.boundEntityUuid != null) {
-			nbt.putUuid("boundEntityUuid", this.boundEntityUuid);
-		} else {
-			nbt.remove("boundEntityUuid");
+			nbt.putUuid("bound_entity_uuid", this.boundEntityUuid);
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -180,17 +134,34 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 					MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetZ"), -48, 48)
 			);
+			nbt.remove("entitySpawnPositionOffsetX");
+			nbt.remove("entitySpawnPositionOffsetY");
+			nbt.remove("entitySpawnPositionOffsetZ");
+		} else {
+			this.entitySpawnPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "entity_spawn_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
 		if (nbt.contains("entitySpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
 			this.entitySpawnOrientationPitch = nbt.getDouble("entitySpawnOrientationPitch");
+			nbt.remove("entitySpawnOrientationPitch");
+		} else {
+			this.entitySpawnOrientationPitch = MathHelper.clamp(nbt.getDouble("entity_spawn_orientation_pitch"), -90.0, 90.0);
 		}
 
 		if (nbt.contains("entitySpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
 			this.entitySpawnOrientationYaw = nbt.getDouble("entitySpawnOrientationYaw");
+			nbt.remove("entitySpawnOrientationYaw");
+		} else {
+			this.entitySpawnOrientationYaw = MathHelper.clamp(nbt.getDouble("entity_spawn_orientation_yaw"), -180.0, 180.0);
 		}
 
-		if (nbt.contains("triggeredBlockPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("triggeredBlockPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("triggeredBlockPositionOffsetZ", NbtElement.INT_TYPE) || nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
 			this.triggeredBlock = new MutablePair<>(
 					new BlockPos(
 							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
@@ -198,6 +169,21 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
 					),
 					nbt.getBoolean("triggeredBlockResets")
+			);
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
+		} else {
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbt, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbt.getBoolean("triggered_block_resets")
 			);
 		}
 
@@ -207,36 +193,81 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 					MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetZ"), -48, 48)
 			);
+			nbt.remove("useRelayedBlockPositionOffsetX");
+			nbt.remove("useRelayedBlockPositionOffsetY");
+			nbt.remove("useRelayedBlockPositionOffsetZ");
+		} else {
+			this.useRelayBlockPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "use_relay_block_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
 		this.entityAttributeModifiers.clear();
-		int entityAttributeModifiersKeysSize = nbt.getInt("entityAttributeModifiersKeysSize");
-		for (int i = 0; i < entityAttributeModifiersKeysSize; i++) {
-			Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE
-					.getEntry(Identifier.tryParse(nbt.getString("entityAttributeModifiers_key" + i)));
-			if (optional.isPresent()) {
-				RegistryEntry.Reference<EntityAttribute> key = optional.get();
-				int modifierListSize = nbt.getInt("entityAttributeModifiers_modifierListSize_" + i);
-				for (int j = 0; j < modifierListSize; j++) {
-					this.entityAttributeModifiers.put(key, EntityAttributeModifier.fromNbt(nbt.getCompound("entityAttributeModifiers_" + i + "_" + j)));
+		if (nbt.contains("entityAttributeModifiersKeysSize")) {
+			int entityAttributeModifiersKeysSize = nbt.getInt("entityAttributeModifiersKeysSize");
+			for (int i = 0; i < entityAttributeModifiersKeysSize; i++) {
+				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE
+						.getEntry(Identifier.tryParse(nbt.getString("entityAttributeModifiers_key" + i)));
+				if (optional.isPresent()) {
+					RegistryEntry.Reference<EntityAttribute> key = optional.get();
+					int modifierListSize = nbt.getInt("entityAttributeModifiers_modifierListSize_" + i);
+					for (int j = 0; j < modifierListSize; j++) {
+						this.entityAttributeModifiers.put(key, EntityAttributeModifier.fromNbt(nbt.getCompound("entityAttributeModifiers_" + i + "_" + j)));
+						nbt.remove("entityAttributeModifiers_" + i + "_" + j);
+					}
+				}
+				nbt.remove("entityAttributeModifiers_key" + i);
+				nbt.remove("entityAttributeModifiers_modifierListSize_" + i);
+			}
+			nbt.remove("entityAttributeModifiersKeysSize");
+		} else {
+			NbtList nbtList = nbt.getList("entity_attribute_modifiers", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				NbtCompound nbtCompound = nbtList.getCompound(i);
+				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound.getString("attribute")));
+				if (optional.isPresent()) {
+					RegistryEntry.Reference<EntityAttribute> key = optional.get();
+					NbtList modifiersList = nbtCompound.getList("modifiers", NbtElement.COMPOUND_TYPE);
+
+					for (int j = 0; j < modifiersList.size(); j++) {
+						EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(modifiersList.getCompound(j));
+						if (entityAttributeModifier != null) {
+							this.entityAttributeModifiers.put(key, entityAttributeModifier);
+						}
+					}
 				}
 			}
 		}
 
 		if (nbt.contains("spawningMode", NbtElement.STRING_TYPE)) {
 			this.spawningMode = SpawningMode.byName(nbt.getString("spawningMode")).orElseGet(() -> SpawningMode.ONCE);
+			nbt.remove("spawningMode");
+		} else {
+			this.spawningMode = SpawningMode.byName(nbt.getString("spawning_mode")).orElseGet(() -> SpawningMode.ONCE);
 		}
 
-		if (nbt.contains("triggered", NbtElement.BYTE_TYPE)) {
-			this.triggered = nbt.getBoolean("triggered");
-		}
+		this.isPersistent = nbt.getBoolean("is_persistent");
+
+		this.enableSpawnEffects = nbt.getBoolean("enable_spawn_effects");
+
+		this.triggered = nbt.getBoolean("triggered");
 
 		if (nbt.contains("EntityTypeCompound", NbtElement.COMPOUND_TYPE)) {
 			this.entityTypeCompound = nbt.getCompound("EntityTypeCompound");
+			nbt.remove("EntityTypeCompound");
+		} else {
+			this.entityTypeCompound = nbt.getCompound("entity_type_compound");
 		}
 
 		if (nbt.containsUuid("boundEntityUuid")) {
 			this.boundEntityUuid = nbt.getUuid("boundEntityUuid");
+			nbt.remove("boundEntityUuid");
+		} else if (nbt.containsUuid("bound_entity_uuid")) {
+			this.boundEntityUuid = nbt.getUuid("bound_entity_uuid");
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -257,10 +288,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		return this.entitySpawnPositionOffset;
 	}
 
-	// TODO check if input is valid
-	public boolean setEntitySpawnPositionOffset(BlockPos entitySpawnPositionOffset) {
-		this.entitySpawnPositionOffset = entitySpawnPositionOffset;
-		return true;
+	public void setEntitySpawnPositionOffset(BlockPos entitySpawnPositionOffset) {
+		this.entitySpawnPositionOffset = new BlockPos(entitySpawnPositionOffset);
 	}
 
 	public double getEntitySpawnOrientationPitch() {
@@ -287,19 +316,33 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		return this.entityAttributeModifiers;
 	}
 
-	public boolean setEntityAttributeModifiers(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers) {
+	public void setEntityAttributeModifiers(Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers) {
 		this.entityAttributeModifiers.clear();
 		this.entityAttributeModifiers.putAll(entityAttributeModifiers);
-		return true;
 	}
 
 	public SpawningMode getSpawningMode() {
 		return this.spawningMode;
 	}
 
-	public boolean setSpawningMode(SpawningMode spawningMode) {
+	public void setSpawningMode(SpawningMode spawningMode) {
 		this.spawningMode = spawningMode;
-		return true;
+	}
+
+	public boolean isPersistent() {
+		return this.isPersistent;
+	}
+
+	public void setIsPersistent(boolean isPersistent) {
+		this.isPersistent = isPersistent;
+	}
+
+	public boolean enableSpawnEffects() {
+		return this.enableSpawnEffects;
+	}
+
+	public void setEnableSpawnEffects(boolean enableSpawnEffects) {
+		this.enableSpawnEffects = enableSpawnEffects;
 	}
 
 	public String getEntityTypeId() {
@@ -408,9 +451,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	public void onBoundEntityKilled() {
-		if (this.world != null) {
+		if (this.getWorld() != null) {
 			this.boundEntityUuid = null;
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+			BlockEntity blockEntity = this.getWorld().getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.pos, this.triggeredBlock.getLeft()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.triggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -422,36 +465,36 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			if (this.spawningMode == SpawningMode.BOUND_RESPAWN) {
 				this.trigger();
 			}
-		}
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			this.markDirty();
+			BlockState blockState = this.getWorld().getBlockState(this.pos);
+			this.getWorld().updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 
 	protected boolean spawnEntity() {
-		if (this.world instanceof ServerWorld serverWorld) {
+		if (this.getWorld() instanceof ServerWorld serverWorld) {
 			Optional<EntityType<?>> optional = EntityType.fromNbt(this.entityTypeCompound);
 			if (optional.isEmpty()) {
 				return false;
 			}
-			BlockPos blockPos = this.pos.add(this.entitySpawnPositionOffset.getX(), this.entitySpawnPositionOffset.getY(), this.entitySpawnPositionOffset.getZ());
+			BlockPos blockPos = BlockRotationUtils.getActualOffsetBlockPosition(this.pos, this.entitySpawnPositionOffset);
 			double pitch = this.entitySpawnOrientationPitch;
 			double yaw = this.entitySpawnOrientationYaw;
 
 			if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
+				MutablePair<BlockPos, MutablePair<Double, Double>> targetSpawnPoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
 
-				blockPos = entrance.getLeft();
-				yaw = entrance.getRight().getLeft();
-				pitch = entrance.getRight().getRight();
+				blockPos = targetSpawnPoint.getLeft();
+				yaw = targetSpawnPoint.getRight().getLeft();
+				pitch = targetSpawnPoint.getRight().getRight();
 			}
-			double d = (double) blockPos.getX() + 0.5;
-			double e = (double) blockPos.getY();
-			double f = (double) blockPos.getZ() + 0.5;
+			double d = blockPos.getX() + 0.5;
+			double e = blockPos.getY();
+			double f = blockPos.getZ() + 0.5;
 
-			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) return false;
+			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) {
+				return false;
+			}
 			blockPos = BlockPos.ofFloored(d, e, f);
 			Entity entity2 = EntityType.loadEntityWithPassengers(this.entityTypeCompound, world, entity -> {
 				entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
@@ -463,19 +506,21 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			entity2.setBodyYaw((float) yaw);
 			entity2.setHeadYaw((float) yaw);
 			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
-			if (entity2 instanceof MobEntity) {
+			if (entity2 instanceof MobEntity mobEntity) {
 				if (this.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
-					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);
+					mobEntity.initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);
 				}
-			}
-			if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
-				return false;
-			}
-			serverWorld.syncWorldEvent(WorldEvents.SPAWNER_SPAWNS_MOB, this.pos, 0);
-			serverWorld.emitGameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
-			if (entity2 instanceof LivingEntity) {
+				if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
+					return false;
+				}
+				if (this.enableSpawnEffects) {
+					serverWorld.syncWorldEvent(WorldEvents.SPAWNER_SPAWNS_MOB, this.pos, 0);
+				}
+				serverWorld.emitGameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
 
-				this.boundEntityUuid = ((LivingEntity) entity2).getUuid();
+				this.customInit(entity2);
+
+				this.boundEntityUuid = entity2.getUuid();
 
 				if (!this.entityAttributeModifiers.isEmpty()) {
 					AttributeContainer attributeContainer = ((LivingEntity) entity2).getAttributes();
@@ -490,25 +535,29 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 						}
 					});
 				}
-				if (entity2 instanceof MobEntity mobEntity) {
-					((MobEntity) entity2).playSpawnEffects(); // TODO make optional
-
-					if (this.spawningMode == SpawningMode.BOUND || this.spawningMode == SpawningMode.BOUND_RESPAWN) {
-						mobEntity.setPersistent();
-						((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(this.pos);
-					}
-
-					if (!this.useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-						((DuckMobEntityMixin) mobEntity).scriptblocks$setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
-					}
+				if (this.isPersistent) {
+					mobEntity.setPersistent();
 				}
+				if (this.enableSpawnEffects) {
+					mobEntity.playSpawnEffects();
+				}
+				if (this.spawningMode == SpawningMode.BOUND || this.spawningMode == SpawningMode.BOUND_RESPAWN) {
+					mobEntity.setPersistent();
+					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(this.pos);
+				}
+				if (!this.useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
+					((DuckMobEntityMixin) mobEntity).scriptblocks$setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
+				}
+				return true;
 			}
-			return true;
 		}
 		return false;
 	}
 
-	public static enum SpawningMode implements StringIdentifiable {
+	protected void customInit(Entity entity) {
+	}
+
+	public enum SpawningMode implements StringIdentifiable {
 		BOUND("bound"),
 		BOUND_RESPAWN("bound_respawn"),
 		CONTINUOUS("continuous"),
@@ -516,7 +565,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 		private final String name;
 
-		private SpawningMode(String name) {
+		SpawningMode(String name) {
 			this.name = name;
 		}
 

@@ -13,9 +13,11 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -43,23 +45,30 @@ import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSettingsScreen {
+	private static final int VISIBLE_LIST_ENTRIES = 3;
 	private static final Text ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_position_offset_label");
 	private static final Text ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_pitch_label");
 	private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_spawn_orientation_yaw_label");
 	private static final Text SPAWNING_MODE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.spawning_mode_label");
+	private static final Text IS_PERSISTENT_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.is_persistent_label");
+	private static final Text ENABLE_SPAWN_EFFECTS_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.enable_spawn_effects_label");
+	private static final Text TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.toggle_enable_spawn_effects_button_label.on");
+	private static final Text TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.toggle_enable_spawn_effects_button_label.off");
 	private static final Text ENTITY_TYPE_LABEL_TEXT = Text.translatable("gui.triggered_spawner_block.entity_type_label");
 	private static final Text VILLAGER_TYPE_LABEL_TEXT = Text.translatable("gui.triggered_villager_spawner_block.villager_type_field_label");
 	private static final Text VILLAGER_PROFESSION_LABEL_TEXT = Text.translatable("gui.triggered_villager_spawner_block.villager_profession_field_label");
 	private static final Text VILLAGER_LEVEL_LABEL_TEXT = Text.translatable("gui.triggered_villager_spawner_block.villager_level_field_label");
-	private static final Text REMOVE_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
-	private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_IDENTIFIER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_identifier_label");
-	private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_NAME_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_name_label");
-	private static final Text NEW_ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.new_entity_attribute_modifier_value_label");
+	private static final Text ENTITY_ATTRIBUTE_IDENTIFIER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.entity_attribute_identifier_label");
+	private static final Text ENTITY_ATTRIBUTE_MODIFIER_IDENTIFIER_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.entity_attribute_modifier_identifier_label");
+	private static final Text ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_spawner_block.entity_attribute_modifier_value_label");
 	private static final Text USE_RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.use_relay_block.relay_block_position_offset");
 	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
 
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
+	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
+			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	);
 
 	private final TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock;
 
@@ -72,6 +81,11 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 	private CyclingButtonWidget<TriggeredSpawnerBlockEntity.SpawningMode> cycleSpawningModeButton;
 	private TriggeredSpawnerBlockEntity.SpawningMode spawningMode;
 
+	private CyclingButtonWidget<Boolean> toggleIsPersistentButton;
+	private boolean isPersistent;
+	private CyclingButtonWidget<Boolean> toggleEnableSpawnEffectsButton;
+	private boolean enableSpawnEffects;
+
 	private TextFieldWidget entityTypeIdField;
 
 	private final List<net.minecraft.village.VillagerType> villagerTypes = new ArrayList<>();
@@ -82,13 +96,13 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 	private CyclingButtonWidget<VillagerProfession> cycleVillagerProfessionButton;
 	private TextFieldWidget villagerLevelField;
 
-	private ButtonWidget removeListEntryButton0;
-	private ButtonWidget removeListEntryButton1;
-	private ButtonWidget removeListEntryButton2;
-	private TextFieldWidget newEntityAttributeModifierIdentifierField;
-	private TextFieldWidget newEntityAttributeModifierNameField;
-	private TextFieldWidget newEntityAttributeModifierValueField;
-	private CyclingButtonWidget<TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation> cycleNewEntityAttributeModifierOperationButton;
+	private ButtonWidget removeEntryButton0;
+	private ButtonWidget removeEntryButton1;
+	private ButtonWidget removeEntryButton2;
+	private TextFieldWidget entityAttributeIdentifierField;
+	private TextFieldWidget entityAttributeModifierIdentifierField;
+	private TextFieldWidget entityAttributeModifierValueField;
+	private CyclingButtonWidget<TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation> cycleEntityAttributeModifierOperationButton;
 	private ButtonWidget addNewEntityAttributeModifierButton;
 
 	private TextFieldWidget useRelayBlockPositionOffsetXField;
@@ -101,7 +115,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
 
-	List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList = new ArrayList<>();
+	private final List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList = new ArrayList<>();
 	private ScreenPage screenPage;
 	private TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation newEntityAttributeModifierOperation;
 	private int scrollPosition = 0;
@@ -115,20 +129,20 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		this.newEntityAttributeModifierOperation = TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation.ADD_VALUE;
 	}
 
-	private void deleteListEntry(int index) {
-		this.entityAttributeModifiersList.remove(index + this.scrollPosition);
-		this.scrollPosition = 0;
-		this.scrollAmount = 0.0f;
+	private void removeEntry(int index) {
+		if (index + this.scrollPosition < this.entityAttributeModifiersList.size()) {
+			this.entityAttributeModifiersList.remove(index + this.scrollPosition);
+		}
 		updateWidgets();
 	}
 
 	private void addNewEntityAttributeModifier() {
 		// TODO check for existing entries and validate fields
 		this.entityAttributeModifiersList.add(new MutablePair<>(
-				Identifier.of(this.newEntityAttributeModifierIdentifierField.getText()),
+				Identifier.of(this.entityAttributeIdentifierField.getText()),
 				new EntityAttributeModifier(
-						Identifier.of(this.newEntityAttributeModifierNameField.getText()),
-						ItemUtils.parseDouble(this.newEntityAttributeModifierValueField.getText()),
+						Identifier.of(this.entityAttributeModifierIdentifierField.getText()),
+						ItemUtils.parseDouble(this.entityAttributeModifierValueField.getText()),
 						this.newEntityAttributeModifierOperation.getOperation()
 				)
 		));
@@ -168,7 +182,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 			}
 		}
 
-		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -193,11 +207,21 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		this.addSelectableChild(this.entitySpawnOrientationYawField);
 
 		this.spawningMode = this.triggeredVillagerSpawnerBlock.getSpawningMode();
-		this.cycleSpawningModeButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredSpawnerBlockEntity.SpawningMode::asText).values((TriggeredSpawnerBlockEntity.SpawningMode[]) TriggeredSpawnerBlockEntity.SpawningMode.values()).initially(this.spawningMode).omitKeyText().build(this.width / 2 - 154, 130, 150, 20, Text.empty(), (button, spawningMode) -> {
+		this.cycleSpawningModeButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredSpawnerBlockEntity.SpawningMode::asText).values(TriggeredSpawnerBlockEntity.SpawningMode.values()).initially(this.spawningMode).omitKeyText().build(this.width / 2 - 154, 130, 100, 20, Text.empty(), (button, spawningMode) -> {
 			this.spawningMode = spawningMode;
 		}));
 
-		this.entityTypeIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 165, 300, 20, Text.empty());
+		this.isPersistent = this.triggeredVillagerSpawnerBlock.isPersistent();
+		this.toggleIsPersistentButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder().initially(this.isPersistent).omitKeyText().build(this.width / 2 - 50, 130, 100, 20, Text.empty(), (button, isPersistent) -> {
+			this.isPersistent = isPersistent;
+		}));
+
+		this.enableSpawnEffects = this.triggeredVillagerSpawnerBlock.enableSpawnEffects();
+		this.toggleEnableSpawnEffectsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT, TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT).initially(this.enableSpawnEffects).omitKeyText().build(this.width / 2 + 54, 130, 100, 20, Text.empty(), (button, enableSpawnEffects) -> {
+			this.enableSpawnEffects = enableSpawnEffects;
+		}));
+
+		this.entityTypeIdField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 165, 308, 20, Text.empty());
 		this.entityTypeIdField.setMaxLength(128);
 		this.entityTypeIdField.setText(this.triggeredVillagerSpawnerBlock.getEntityTypeId());
 		this.addSelectableChild(this.entityTypeIdField);
@@ -210,7 +234,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 
 		this.villagerType = villagerData.getType();
 		this.cycleVillagerTypeButton = this.addDrawableChild(CyclingButtonWidget.<VillagerType>builder((villagerType) -> Text.translatable("gui.triggered_villager_spawner_block.villager_type." + villagerType.toString().replaceAll(":", ".")))
-				.values(new CyclingButtonWidget.Values<VillagerType>() {
+				.values(new CyclingButtonWidget.Values<>() {
 					@Override
 					public List<VillagerType> getCurrent() {
 						return TriggeredVillagerSpawnerBlockScreen.this.villagerTypes;
@@ -223,7 +247,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 				})
 				.initially(this.villagerType)
 				.omitKeyText()
-				.build(this.width / 2 - 154, 60, 300, 20, Text.empty(), (button, villagerType) -> {
+				.build(this.width / 2 - 154, 60, 308, 20, Text.empty(), (button, villagerType) -> {
 					this.villagerType = villagerType;
 				})
 		);
@@ -231,7 +255,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 
 		this.villagerProfession = villagerData.getProfession();
 		this.cycleVillagerProfessionButton = this.addDrawableChild(CyclingButtonWidget.<VillagerProfession>builder((villagerProfession) -> Text.translatable("gui.triggered_villager_spawner_block.villager_profession." + villagerProfession.toString().replaceAll(":", ".")))
-				.values(new CyclingButtonWidget.Values<VillagerProfession>() {
+				.values(new CyclingButtonWidget.Values<>() {
 					@Override
 					public List<VillagerProfession> getCurrent() {
 						return TriggeredVillagerSpawnerBlockScreen.this.villagerProfessions;
@@ -244,33 +268,32 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 				})
 				.initially(this.villagerProfession)
 				.omitKeyText()
-				.build(this.width / 2 - 154, 95, 300, 20, Text.empty(), (button, villagerProfession) -> {
-					ScriptBlocks.info("villagerProfession: " + villagerProfession);
+				.build(this.width / 2 - 154, 95, 308, 20, Text.empty(), (button, villagerProfession) -> {
 					this.villagerProfession = villagerProfession;
 				})
 		);
 		this.addSelectableChild(this.cycleVillagerProfessionButton);
 
-		this.villagerLevelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 130, 300, 20, Text.empty());
+		this.villagerLevelField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 130, 308, 20, Text.empty());
 		this.villagerLevelField.setMaxLength(128);
 		this.villagerLevelField.setText(Integer.toString(villagerData.getLevel()));
 		this.addSelectableChild(this.villagerLevelField);
 
 		// --- entity attribute modifier page ---
 
-		this.removeListEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(0)).dimensions(this.width / 2 + 54, 47, 100, 20).build());
-		this.removeListEntryButton1 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(1)).dimensions(this.width / 2 + 54, 81, 100, 20).build());
-		this.removeListEntryButton2 = this.addDrawableChild(ButtonWidget.builder(REMOVE_BUTTON_LABEL_TEXT, button -> this.deleteListEntry(2)).dimensions(this.width / 2 + 54, 115, 100, 20).build());
-		this.newEntityAttributeModifierIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 140, 300, 20, Text.empty());
-		this.newEntityAttributeModifierIdentifierField.setPlaceholder(NEW_ENTITY_ATTRIBUTE_MODIFIER_IDENTIFIER_FIELD_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newEntityAttributeModifierIdentifierField);
-		this.newEntityAttributeModifierNameField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 300, 20, Text.empty());
-		this.newEntityAttributeModifierNameField.setPlaceholder(NEW_ENTITY_ATTRIBUTE_MODIFIER_NAME_FIELD_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newEntityAttributeModifierNameField);
-		this.newEntityAttributeModifierValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 188, 100, 20, Text.empty());
-		this.newEntityAttributeModifierValueField.setPlaceholder(NEW_ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newEntityAttributeModifierValueField);
-		this.cycleNewEntityAttributeModifierOperationButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation::asText).values(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation.values()).initially(this.newEntityAttributeModifierOperation).omitKeyText().build(this.width / 2 - 50, 188, 100, 20, Text.empty(), (button, newEntityAttributeModifierOperationButton) -> {
+		this.removeEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 47, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(0)));
+		this.removeEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 81, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(1)));
+		this.removeEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 115, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(2)));
+		this.entityAttributeIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 140, 308, 20, Text.empty());
+		this.entityAttributeIdentifierField.setPlaceholder(ENTITY_ATTRIBUTE_IDENTIFIER_FIELD_PLACEHOLDER_TEXT);
+		this.addSelectableChild(this.entityAttributeIdentifierField);
+		this.entityAttributeModifierIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 308, 20, Text.empty());
+		this.entityAttributeModifierIdentifierField.setPlaceholder(ENTITY_ATTRIBUTE_MODIFIER_IDENTIFIER_FIELD_PLACEHOLDER_TEXT);
+		this.addSelectableChild(this.entityAttributeModifierIdentifierField);
+		this.entityAttributeModifierValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 188, 100, 20, Text.empty());
+		this.entityAttributeModifierValueField.setPlaceholder(ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT);
+		this.addSelectableChild(this.entityAttributeModifierValueField);
+		this.cycleEntityAttributeModifierOperationButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation::asText).values(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation.values()).initially(this.newEntityAttributeModifierOperation).omitKeyText().build(this.width / 2 - 50, 188, 100, 20, Text.empty(), (button, newEntityAttributeModifierOperationButton) -> {
 			this.newEntityAttributeModifierOperation = newEntityAttributeModifierOperationButton;
 			this.updateWidgets();
 		}));
@@ -331,19 +354,22 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 
 		this.cycleSpawningModeButton.visible = false;
 
+		this.toggleIsPersistentButton.visible = false;
+		this.toggleEnableSpawnEffectsButton.visible = false;
+
 		this.entityTypeIdField.setVisible(false);
 
 		this.cycleVillagerTypeButton.visible = false;
 		this.cycleVillagerProfessionButton.visible = false;
 		this.villagerLevelField.setVisible(false);
 
-		this.removeListEntryButton0.visible = false;
-		this.removeListEntryButton1.visible = false;
-		this.removeListEntryButton2.visible = false;
-		this.newEntityAttributeModifierIdentifierField.setVisible(false);
-		this.newEntityAttributeModifierNameField.setVisible(false);
-		this.newEntityAttributeModifierValueField.setVisible(false);
-		this.cycleNewEntityAttributeModifierOperationButton.visible = false;
+		this.removeEntryButton0.visible = false;
+		this.removeEntryButton1.visible = false;
+		this.removeEntryButton2.visible = false;
+		this.entityAttributeIdentifierField.setVisible(false);
+		this.entityAttributeModifierIdentifierField.setVisible(false);
+		this.entityAttributeModifierValueField.setVisible(false);
+		this.cycleEntityAttributeModifierOperationButton.visible = false;
 		this.addNewEntityAttributeModifierButton.visible = false;
 
 		this.useRelayBlockPositionOffsetXField.setVisible(false);
@@ -365,6 +391,9 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 
 			this.cycleSpawningModeButton.visible = true;
 
+			this.toggleIsPersistentButton.visible = true;
+			this.toggleEnableSpawnEffectsButton.visible = true;
+
 			this.entityTypeIdField.setVisible(true);
 
 		} else if (this.screenPage == ScreenPage.VILLAGER_DATA) {
@@ -378,19 +407,19 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 			int index = 0;
 			for (int i = 0; i < Math.min(3, this.entityAttributeModifiersList.size()); i++) {
 				if (index == 0) {
-					this.removeListEntryButton0.visible = true;
+					this.removeEntryButton0.visible = true;
 				} else if (index == 1) {
-					this.removeListEntryButton1.visible = true;
+					this.removeEntryButton1.visible = true;
 				} else if (index == 2) {
-					this.removeListEntryButton2.visible = true;
+					this.removeEntryButton2.visible = true;
 				}
 				index++;
 			}
 
-			this.newEntityAttributeModifierIdentifierField.setVisible(true);
-			this.newEntityAttributeModifierNameField.setVisible(true);
-			this.newEntityAttributeModifierValueField.setVisible(true);
-			this.cycleNewEntityAttributeModifierOperationButton.visible = true;
+			this.entityAttributeIdentifierField.setVisible(true);
+			this.entityAttributeModifierIdentifierField.setVisible(true);
+			this.entityAttributeModifierValueField.setVisible(true);
+			this.cycleEntityAttributeModifierOperationButton.visible = true;
 			this.addNewEntityAttributeModifierButton.visible = true;
 
 		} else if (this.screenPage == ScreenPage.USE_RELAY_BLOCK) {
@@ -417,16 +446,16 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation var2 = this.newEntityAttributeModifierOperation;
 		VillagerType var3 = this.villagerType;
 		VillagerProfession var4 = this.villagerProfession;
-		List<MutablePair<Identifier, EntityAttributeModifier>> list = this.entityAttributeModifiersList;
+		List<MutablePair<Identifier, EntityAttributeModifier>> list = new ArrayList<>(this.entityAttributeModifiersList);
 		String string = this.entitySpawnPositionOffsetXField.getText();
 		String string1 = this.entitySpawnPositionOffsetYField.getText();
 		String string2 = this.entitySpawnPositionOffsetZField.getText();
 		String string3 = this.entitySpawnOrientationPitchField.getText();
 		String string4 = this.entitySpawnOrientationYawField.getText();
 		String string5 = this.entityTypeIdField.getText();
-		String string6 = this.newEntityAttributeModifierIdentifierField.getText();
-		String string7 = this.newEntityAttributeModifierNameField.getText();
-		String string8 = this.newEntityAttributeModifierValueField.getText();
+		String string6 = this.entityAttributeIdentifierField.getText();
+		String string7 = this.entityAttributeModifierIdentifierField.getText();
+		String string8 = this.entityAttributeModifierValueField.getText();
 		String string9 = this.useRelayBlockPositionOffsetXField.getText();
 		String string10 = this.useRelayBlockPositionOffsetYField.getText();
 		String string11 = this.useRelayBlockPositionOffsetZField.getText();
@@ -435,28 +464,30 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		String string14 = this.triggeredBlockPositionOffsetZField.getText();
 		String string15 = this.villagerLevelField.getText();
 		boolean bl = this.triggeredBlockResets;
+		boolean bl1 = this.isPersistent;
+		boolean bl2 = this.enableSpawnEffects;
 		this.init(client, width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.spawningMode = var1;
 		this.cycleSpawningModeButton.setValue(this.spawningMode);
 		this.newEntityAttributeModifierOperation = var2;
-		this.cycleNewEntityAttributeModifierOperationButton.setValue(this.newEntityAttributeModifierOperation);
+		this.cycleEntityAttributeModifierOperationButton.setValue(this.newEntityAttributeModifierOperation);
 		this.villagerType = var3;
 		this.cycleVillagerTypeButton.setValue(this.villagerType);
 		this.villagerProfession = var4;
 		this.cycleVillagerProfessionButton.setValue(this.villagerProfession);
 		this.entityAttributeModifiersList.clear();
-		this.entityAttributeModifiersList = list;
+		this.entityAttributeModifiersList.addAll(list);
 		this.entitySpawnPositionOffsetXField.setText(string);
 		this.entitySpawnPositionOffsetYField.setText(string1);
 		this.entitySpawnPositionOffsetZField.setText(string2);
 		this.entitySpawnOrientationPitchField.setText(string3);
 		this.entitySpawnOrientationYawField.setText(string4);
 		this.entityTypeIdField.setText(string5);
-		this.newEntityAttributeModifierIdentifierField.setText(string6);
-		this.newEntityAttributeModifierNameField.setText(string7);
-		this.newEntityAttributeModifierValueField.setText(string8);
+		this.entityAttributeIdentifierField.setText(string6);
+		this.entityAttributeModifierIdentifierField.setText(string7);
+		this.entityAttributeModifierValueField.setText(string8);
 		this.useRelayBlockPositionOffsetXField.setText(string9);
 		this.useRelayBlockPositionOffsetYField.setText(string10);
 		this.useRelayBlockPositionOffsetZField.setText(string11);
@@ -466,13 +497,17 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		this.villagerLevelField.setText(string15);
 		this.triggeredBlockResets = bl;
 		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
+		this.isPersistent = bl1;
+		this.toggleIsPersistentButton.setValue(this.isPersistent);
+		this.enableSpawnEffects = bl2;
+		this.toggleEnableSpawnEffectsButton.setValue(this.enableSpawnEffects);
 	}
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		this.mouseClicked = false;
 		if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER
-				&& this.entityAttributeModifiersList.size() > 3) {
+				&& this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES) {
 			int i = this.width / 2 - 152;
 			int j = 46;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 90)) {
@@ -485,9 +520,9 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
 		if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER
-				&& this.entityAttributeModifiersList.size() > 3
+				&& this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES
 				&& this.mouseClicked) {
-			int i = this.entityAttributeModifiersList.size() - 3;
+			int i = this.entityAttributeModifiersList.size() - VISIBLE_LIST_ENTRIES;
 			float f = (float) deltaY / (float) i;
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
@@ -498,10 +533,10 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER
-				&& this.entityAttributeModifiersList.size() > 3
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 50)
+				&& this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES
+				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 154)
 				&& mouseY >= 45 && mouseY <= 137) {
-			int i = this.entityAttributeModifiersList.size() - 3;
+			int i = this.entityAttributeModifiersList.size() - VISIBLE_LIST_ENTRIES;
 			float f = (float) verticalAmount / (float) i;
 			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
@@ -535,6 +570,8 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 			this.entitySpawnOrientationYawField.render(context, mouseX, mouseY, delta);
 
 			context.drawTextWithShadow(this.textRenderer, SPAWNING_MODE_LABEL_TEXT, this.width / 2 - 153, 120, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, IS_PERSISTENT_LABEL_TEXT, this.width / 2 - 49, 120, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, ENABLE_SPAWN_EFFECTS_LABEL_TEXT, this.width / 2 + 55, 120, 0xA0A0A0);
 
 			context.drawTextWithShadow(this.textRenderer, ENTITY_TYPE_LABEL_TEXT, this.width / 2 - 153, 155, 0xA0A0A0);
 			this.entityTypeIdField.render(context, mouseX, mouseY, delta);
@@ -547,21 +584,21 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 
 		} else if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
-			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.entityAttributeModifiersList.size()); i++) {
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ENTRIES, this.entityAttributeModifiersList.size()); i++) {
 				EntityAttributeModifier entityAttributeModifier = this.entityAttributeModifiersList.get(i).getRight();
 
-				context.drawTextWithShadow(this.textRenderer, this.entityAttributeModifiersList.get(i).getLeft() + ": ", this.width / 2 - 141, 46 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
-				context.drawTextWithShadow(this.textRenderer, entityAttributeModifier.value() + ", " + entityAttributeModifier.operation(), this.width / 2 - 141, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+				context.drawTextWithShadow(this.textRenderer, this.entityAttributeModifiersList.get(i).getLeft().toString(), this.width / 2 - 117, 46 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+				context.drawTextWithShadow(this.textRenderer, entityAttributeModifier.value() + ", " + entityAttributeModifier.operation(), this.width / 2 - 117, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
 			}
-			if (this.entityAttributeModifiersList.size() > 3) {
+			if (this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES) {
 				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
 				int k = (int) (83.0f * this.scrollAmount);
 				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
 			}
 
-			this.newEntityAttributeModifierIdentifierField.render(context, mouseX, mouseY, delta);
-			this.newEntityAttributeModifierNameField.render(context, mouseX, mouseY, delta);
-			this.newEntityAttributeModifierValueField.render(context, mouseX, mouseY, delta);
+			this.entityAttributeIdentifierField.render(context, mouseX, mouseY, delta);
+			this.entityAttributeModifierIdentifierField.render(context, mouseX, mouseY, delta);
+			this.entityAttributeModifierValueField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.screenPage == ScreenPage.USE_RELAY_BLOCK) {
 			context.drawTextWithShadow(this.textRenderer, USE_RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
@@ -589,9 +626,11 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 						ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getText()),
 						ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getText()),
 						this.spawningMode.asString(),
+						this.isPersistent,
+						this.enableSpawnEffects,
 						this.entityTypeIdField.getText(),
 						new VillagerData(this.villagerType, this.villagerProfession, Math.clamp(ItemUtils.parseInt(this.villagerLevelField.getText()), 1, 5)),
-						this.entityAttributeModifiersList,
+						new ArrayList<>(this.entityAttributeModifiersList),
 						new BlockPos(
 								ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
 								ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),

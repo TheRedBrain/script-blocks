@@ -9,6 +9,10 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 public class BlockRotationUtils {
 
+	public static BlockPos getActualOffsetBlockPosition(BlockPos originalBlockPos, BlockPos offsetBlockPos) {
+		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
+	}
+
 	public static int calculateNewRotatedBlockState(int currentStateValue, BlockRotation rotation) {
 		if (rotation == BlockRotation.CLOCKWISE_90) {
 			return (currentStateValue + 1) % 4;

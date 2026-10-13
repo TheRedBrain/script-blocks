@@ -42,13 +42,17 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 
 		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.byName(payload.spawningMode()).orElse(TriggeredSpawnerBlockEntity.SpawningMode.BOUND);
 
+		boolean isPersistent = payload.isPersistent();
+		boolean enableSpawnEffects = payload.enableSpawnEffects();
+
 		String entityTypeId = payload.entityTypeId();
 
 		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList = payload.entityAttributeModifiersList();
+
 		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
 		for (MutablePair<Identifier, EntityAttributeModifier> entityAttributeModifiersListEntry : entityAttributeModifiersList) {
 			Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(entityAttributeModifiersListEntry.getLeft());
-			optional.ifPresent(entityAttribute -> entityAttributeModifiers.put(entityAttribute, entityAttributeModifiersListEntry.getRight()));
+			optional.ifPresent(entityAttributeReference -> entityAttributeModifiers.put(entityAttributeReference, entityAttributeModifiersListEntry.getRight()));
 		}
 
 		BlockPos useRelayBlockPositionOffset = payload.useRelayBlockPositionOffset();
@@ -65,30 +69,23 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 
 		if (blockEntity instanceof TriggeredSpawnerBlockEntity triggeredSpawnerBlockEntity) {
 			triggeredSpawnerBlockEntity.reset();
-			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
-				updateSuccessful = false;
-			}
+			triggeredSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset);
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionPitch(entitySpawnOrientationPitch)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_spawn_orientation_pitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionYaw(entitySpawnOrientationYaw)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_spawn_orientation_yaw.invalid"), false);
 				updateSuccessful = false;
 			}
-			if (!triggeredSpawnerBlockEntity.setSpawningMode(spawningMode)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.spawningMode.invalid"), false);
-				updateSuccessful = false;
-			}
+			triggeredSpawnerBlockEntity.setSpawningMode(spawningMode);
+			triggeredSpawnerBlockEntity.setIsPersistent(isPersistent);
+			triggeredSpawnerBlockEntity.setEnableSpawnEffects(enableSpawnEffects);
 			if (!triggeredSpawnerBlockEntity.setEntityType(entityTypeId)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entityTypeId.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_type_id.invalid"), false);
 				updateSuccessful = false;
 			}
-			if (!triggeredSpawnerBlockEntity.setEntityAttributeModifiers(entityAttributeModifiers)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entityAttributeModifiers.invalid"), false);
-				updateSuccessful = false;
-			}
+			triggeredSpawnerBlockEntity.setEntityAttributeModifiers(entityAttributeModifiers);
 			triggeredSpawnerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			triggeredSpawnerBlockEntity.setUseRelayBlockPositionOffset(useRelayBlockPositionOffset);
 			if (updateSuccessful) {

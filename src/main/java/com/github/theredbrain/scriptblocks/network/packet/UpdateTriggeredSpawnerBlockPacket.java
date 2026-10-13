@@ -18,6 +18,8 @@ public record UpdateTriggeredSpawnerBlockPacket(
 		double entitySpawnOrientationPitch,
 		double entitySpawnOrientationYaw,
 		String spawningMode,
+		boolean isPersistent,
+		boolean enableSpawnEffects,
 		String entityTypeId,
 		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
 		BlockPos triggeredBlockPositionOffset,
@@ -34,6 +36,8 @@ public record UpdateTriggeredSpawnerBlockPacket(
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER),
 				registryByteBuf.readBlockPos(),
@@ -50,6 +54,9 @@ public record UpdateTriggeredSpawnerBlockPacket(
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
 
 		registryByteBuf.writeString(this.spawningMode);
+
+		registryByteBuf.writeBoolean(this.isPersistent);
+		registryByteBuf.writeBoolean(this.enableSpawnEffects);
 
 		registryByteBuf.writeString(this.entityTypeId);
 

@@ -44,6 +44,9 @@ public class UpdateTriggeredVillagerSpawnerBlockPacketReceiver implements Server
 
 		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.byName(payload.spawningMode()).orElse(TriggeredSpawnerBlockEntity.SpawningMode.BOUND);
 
+		boolean isPersistent = payload.isPersistent();
+		boolean enableSpawnEffects = payload.enableSpawnEffects();
+
 		String entityTypeId = payload.entityTypeId();
 
 		VillagerData villagerData = payload.villagerData();
@@ -69,31 +72,24 @@ public class UpdateTriggeredVillagerSpawnerBlockPacketReceiver implements Server
 
 		if (blockEntity instanceof TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlockEntity) {
 			triggeredVillagerSpawnerBlockEntity.reset();
-			if (!triggeredVillagerSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnPositionOffset.invalid"), false);
-				updateSuccessful = false;
-			}
+			triggeredVillagerSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset);
 			if (!triggeredVillagerSpawnerBlockEntity.setEntitySpawnPositionPitch(entitySpawnOrientationPitch)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationPitch.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_spawn_orientation_pitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredVillagerSpawnerBlockEntity.setEntitySpawnPositionYaw(entitySpawnOrientationYaw)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entitySpawnOrientationYaw.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_spawn_orientation_yaw.invalid"), false);
 				updateSuccessful = false;
 			}
-			if (!triggeredVillagerSpawnerBlockEntity.setSpawningMode(spawningMode)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.spawningMode.invalid"), false);
-				updateSuccessful = false;
-			}
+			triggeredVillagerSpawnerBlockEntity.setSpawningMode(spawningMode);
+			triggeredVillagerSpawnerBlockEntity.setIsPersistent(isPersistent);
+			triggeredVillagerSpawnerBlockEntity.setEnableSpawnEffects(enableSpawnEffects);
 			if (!triggeredVillagerSpawnerBlockEntity.setEntityType(entityTypeId)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entityTypeId.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_type_id.invalid"), false);
 				updateSuccessful = false;
 			}
 			triggeredVillagerSpawnerBlockEntity.setVillagerData(villagerData);
-			if (!triggeredVillagerSpawnerBlockEntity.setEntityAttributeModifiers(entityAttributeModifiers)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entityAttributeModifiers.invalid"), false);
-				updateSuccessful = false;
-			}
+			triggeredVillagerSpawnerBlockEntity.setEntityAttributeModifiers(entityAttributeModifiers);
 			triggeredVillagerSpawnerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			triggeredVillagerSpawnerBlockEntity.setUseRelayBlockPositionOffset(useRelayBlockPositionOffset);
 			if (updateSuccessful) {
