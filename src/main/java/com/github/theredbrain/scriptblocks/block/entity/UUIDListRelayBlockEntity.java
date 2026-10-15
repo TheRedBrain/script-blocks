@@ -7,6 +7,9 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -30,13 +33,13 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Hand
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("uuid_list_handlers_size", this.uuidListHandlers.size());
-		for (int i = 0; i < this.uuidListHandlers.size(); i++) {
-			BlockPos triggeredBlock = this.uuidListHandlers.get(i);
-			nbt.putInt("uuid_list_handler_position_offset_x_" + i, triggeredBlock.getX());
-			nbt.putInt("uuid_list_handler_position_offset_y_" + i, triggeredBlock.getY());
-			nbt.putInt("uuid_list_handler_position_offset_z_" + i, triggeredBlock.getZ());
+		NbtList nbtList = new NbtList();
+		for (BlockPos blockPos : this.uuidListHandlers) {
+			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(blockPos));
+			nbtList.add(nbtCompound.copy());
 		}
+		nbt.put("uuid_list_handlers", nbtList);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -44,16 +47,35 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Hand
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int x;
-		int y;
-		int z;
-		int uuidListHandlersSize = nbt.getInt("uuid_list_handlers_size");
 		this.uuidListHandlers.clear();
-		for (int i = 0; i < uuidListHandlersSize; i++) {
-			x = MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x_" + i), -48, 48);
-			y = MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y_" + i), -48, 48);
-			z = MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z_" + i), -48, 48);
-			this.uuidListHandlers.add(new BlockPos(x, y, z));
+		if (nbt.contains("uuid_list_handlers_size")) {
+			int x;
+			int y;
+			int z;
+			int uuidListHandlersSize = nbt.getInt("uuid_list_handlers_size");
+			for (int i = 0; i < uuidListHandlersSize; i++) {
+				x = MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x_" + i), -48, 48);
+				y = MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y_" + i), -48, 48);
+				z = MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z_" + i), -48, 48);
+				this.uuidListHandlers.add(new BlockPos(x, y, z));
+				nbt.remove("uuid_list_handler_position_offset_x_" + i);
+				nbt.remove("uuid_list_handler_position_offset_y_" + i);
+				nbt.remove("uuid_list_handler_position_offset_z_" + i);
+			}
+			nbt.remove("uuid_list_handlers_size");
+		} else {
+			NbtList nbtList = nbt.getList("uuid_list_handlers", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				this.uuidListHandlers.add(
+						BlockPos.max(
+								BlockPos.min(
+										NbtHelper.toBlockPos(nbtList.getCompound(i), "position_offset").orElse(BlockPos.ORIGIN),
+										new BlockPos(48, 48, 48)
+								),
+								new BlockPos(-48, -48, -48)
+						)
+				);
+			}
 		}
 
 		super.readNbt(nbt, registryLookup);

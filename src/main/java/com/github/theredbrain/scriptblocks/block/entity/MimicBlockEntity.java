@@ -10,6 +10,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -28,13 +29,9 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("active_mimic_block_position_offset_x", this.activeMimicBlockPositionOffset.getX());
-		nbt.putInt("active_mimic_block_position_offset_y", this.activeMimicBlockPositionOffset.getY());
-		nbt.putInt("active_mimic_block_position_offset_z", this.activeMimicBlockPositionOffset.getZ());
+		nbt.put("active_mimic_block_position_offset", NbtHelper.fromBlockPos(this.activeMimicBlockPositionOffset));
 
-		nbt.putInt("inactive_mimic_block_position_offset_x", this.inactiveMimicBlockPositionOffset.getX());
-		nbt.putInt("inactive_mimic_block_position_offset_y", this.inactiveMimicBlockPositionOffset.getY());
-		nbt.putInt("inactive_mimic_block_position_offset_z", this.inactiveMimicBlockPositionOffset.getZ());
+		nbt.put("inactive_mimic_block_position_offset", NbtHelper.fromBlockPos(this.inactiveMimicBlockPositionOffset));
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -51,11 +48,22 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 			nbt.remove("activeMimicBlockPositionOffsetX");
 			nbt.remove("activeMimicBlockPositionOffsetY");
 			nbt.remove("activeMimicBlockPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("active_mimic_block_position_offset_x") || nbt.contains("active_mimic_block_position_offset_y") || nbt.contains("active_mimic_block_position_offset_z")) {
 			this.activeMimicBlockPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_z"), -48, 48)
+			);
+			nbt.remove("active_mimic_block_position_offset_x");
+			nbt.remove("active_mimic_block_position_offset_y");
+			nbt.remove("active_mimic_block_position_offset_z");
+		} else {
+			this.activeMimicBlockPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "active_mimic_block_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 
@@ -68,11 +76,22 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 			nbt.remove("inactiveMimicBlockPositionOffsetX");
 			nbt.remove("inactiveMimicBlockPositionOffsetY");
 			nbt.remove("inactiveMimicBlockPositionOffsetZ");
-		} else {
-			this.activeMimicBlockPositionOffset = new BlockPos(
+		} else if (nbt.contains("inactive_mimic_block_position_offset_x") || nbt.contains("inactive_mimic_block_position_offset_y") || nbt.contains("inactive_mimic_block_position_offset_z")) {
+			this.inactiveMimicBlockPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_z"), -48, 48)
+			);
+			nbt.remove("inactive_mimic_block_position_offset_x");
+			nbt.remove("inactive_mimic_block_position_offset_y");
+			nbt.remove("inactive_mimic_block_position_offset_z");
+		} else {
+			this.inactiveMimicBlockPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "inactive_mimic_block_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 

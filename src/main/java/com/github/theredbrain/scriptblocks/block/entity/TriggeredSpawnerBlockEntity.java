@@ -83,27 +83,29 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.put("entity_spawn_position_offset", NbtHelper.fromBlockPos(this.entitySpawnPositionOffset));
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.entitySpawnPositionOffset));
+		nbtCompound.putDouble("yaw", this.entitySpawnOrientationYaw);
+		nbtCompound.putDouble("pitch", this.entitySpawnOrientationPitch);
+		nbt.put("entity_spawn", nbtCompound.copy());
 
-		nbt.putDouble("entity_spawn_orientation_pitch", this.entitySpawnOrientationPitch);
-
-		nbt.putDouble("entity_spawn_orientation_yaw", this.entitySpawnOrientationYaw);
-
-		nbt.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
-		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound.copy());
 
 		nbt.put("use_relay_block_position_offset", NbtHelper.fromBlockPos(this.useRelayBlockPositionOffset));
 
 		NbtList nbtList = new NbtList();
 		for (RegistryEntry<EntityAttribute> registryEntry : this.entityAttributeModifiers.keySet()) {
-			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound = new NbtCompound();
 			nbtCompound.putString("attribute", String.valueOf(Registries.ATTRIBUTE.getId(registryEntry.value())));
 			NbtList modifiersList = new NbtList();
 			for (EntityAttributeModifier entityAttributeModifier : this.entityAttributeModifiers.get(registryEntry)) {
 				modifiersList.add(entityAttributeModifier.toNbt());
 			}
 			nbtCompound.put("modifiers", modifiersList);
-			nbtList.add(nbtCompound);
+			nbtList.add(nbtCompound.copy());
 		}
 		nbt.put("entity_attribute_modifiers", nbtList);
 
@@ -119,6 +121,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 		if (this.boundEntityUuid != null) {
 			nbt.putUuid("bound_entity_uuid", this.boundEntityUuid);
+		} else {
+			nbt.remove("bound_entity_uuid");
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -128,6 +132,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
+		NbtCompound nbtCompound = nbt.getCompound("entity_spawn");
 		if (nbt.contains("entitySpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
 			this.entitySpawnPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetX"), -48, 48),
@@ -137,10 +142,19 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			nbt.remove("entitySpawnPositionOffsetX");
 			nbt.remove("entitySpawnPositionOffsetY");
 			nbt.remove("entitySpawnPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("entity_spawn_position_offset")) {
 			this.entitySpawnPositionOffset = BlockPos.max(
 					BlockPos.min(
 							NbtHelper.toBlockPos(nbt, "entity_spawn_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+			nbt.remove("entity_spawn_position_offset");
+		} else {
+			this.entitySpawnPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
@@ -150,15 +164,21 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		if (nbt.contains("entitySpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
 			this.entitySpawnOrientationPitch = nbt.getDouble("entitySpawnOrientationPitch");
 			nbt.remove("entitySpawnOrientationPitch");
-		} else {
+		} else if (nbt.contains("entity_spawn_orientation_pitch")) {
 			this.entitySpawnOrientationPitch = MathHelper.clamp(nbt.getDouble("entity_spawn_orientation_pitch"), -90.0, 90.0);
+			nbt.remove("entity_spawn_orientation_pitch");
+		} else {
+			this.entitySpawnOrientationPitch = MathHelper.clamp(nbtCompound.getDouble("pitch"), -90.0, 90.0);
 		}
 
 		if (nbt.contains("entitySpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
 			this.entitySpawnOrientationYaw = nbt.getDouble("entitySpawnOrientationYaw");
 			nbt.remove("entitySpawnOrientationYaw");
-		} else {
+		} else if (nbt.contains("entity_spawn_orientation_yaw")) {
 			this.entitySpawnOrientationYaw = MathHelper.clamp(nbt.getDouble("entity_spawn_orientation_yaw"), -180.0, 180.0);
+			nbt.remove("entity_spawn_orientation_yaw");
+		} else {
+			this.entitySpawnOrientationYaw = MathHelper.clamp(nbtCompound.getDouble("yaw"), -180.0, 180.0);
 		}
 
 		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
@@ -174,16 +194,30 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			nbt.remove("triggeredBlockPositionOffsetY");
 			nbt.remove("triggeredBlockPositionOffsetZ");
 			nbt.remove("triggeredBlockResets");
+		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("triggered_block_resets")
+			);
+			nbt.remove("triggered_block_position_offset_x");
+			nbt.remove("triggered_block_position_offset_y");
+			nbt.remove("triggered_block_position_offset_z");
+			nbt.remove("triggered_block_resets");
 		} else {
+			nbtCompound = nbt.getCompound("triggered_block");
 			this.triggeredBlock = new MutablePair<>(
 					BlockPos.max(
 							BlockPos.min(
-									NbtHelper.toBlockPos(nbt, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
 									new BlockPos(48, 48, 48)
 							),
 							new BlockPos(-48, -48, -48)
 					),
-					nbt.getBoolean("triggered_block_resets")
+					nbtCompound.getBoolean("resets")
 			);
 		}
 
@@ -227,7 +261,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		} else {
 			NbtList nbtList = nbt.getList("entity_attribute_modifiers", NbtElement.COMPOUND_TYPE);
 			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
+				nbtCompound = nbtList.getCompound(i);
 				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound.getString("attribute")));
 				if (optional.isPresent()) {
 					RegistryEntry.Reference<EntityAttribute> key = optional.get();
@@ -268,6 +302,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			nbt.remove("boundEntityUuid");
 		} else if (nbt.containsUuid("bound_entity_uuid")) {
 			this.boundEntityUuid = nbt.getUuid("bound_entity_uuid");
+		} else {
+			nbt.remove("boundEntityUuid");
+			nbt.remove("bound_entity_uuid");
 		}
 
 		super.readNbt(nbt, registryLookup);

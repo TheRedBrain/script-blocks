@@ -17,6 +17,9 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
@@ -68,27 +71,23 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 
 		nbt.putString("pvp_arena_settings_identifier", this.pvpArenaSettingsIdentifier);
 
-		List<String> keyList = this.respawnPositions.keySet().stream().toList();
-		int respawnPositionsSize = keyList.size();
-		nbt.putInt("respawn_positions_size", respawnPositionsSize);
-		for (int i = 0; i < respawnPositionsSize; i++) {
-			String key = keyList.get(i);
-			nbt.putString("key_" + i, key);
-			nbt.putInt("respawn_position_" + i + "_x", this.respawnPositions.get(key).getLeft().getX());
-			nbt.putInt("respawn_position_" + i + "_y", this.respawnPositions.get(key).getLeft().getY());
-			nbt.putInt("respawn_position_" + i + "_z", this.respawnPositions.get(key).getLeft().getZ());
-			nbt.putDouble("respawn_position_" + i + "_yaw", this.respawnPositions.get(key).getRight().getLeft());
-			nbt.putDouble("respawn_position_" + i + "_pitch", this.respawnPositions.get(key).getRight().getRight());
-		}
+		NbtList nbtList = new NbtList();
+		this.respawnPositions.forEach((key, entry) -> {
+			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound.putString("key", key);
+			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.respawnPositions.get(key).getLeft()));
+			nbtCompound.putDouble("yaw", this.respawnPositions.get(key).getRight().getLeft());
+			nbtCompound.putDouble("pitch", this.respawnPositions.get(key).getRight().getRight());
+			nbtList.add(nbtCompound.copy());
+		});
+		nbt.put("respawn_positions", nbtList);
 
-		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound.copy());
 
-		nbt.putInt("data_providing_block_position_offset_x", this.dataProvidingBlockPosOffset.getX());
-		nbt.putInt("data_providing_block_position_offset_y", this.dataProvidingBlockPosOffset.getY());
-		nbt.putInt("data_providing_block_position_offset_z", this.dataProvidingBlockPosOffset.getZ());
+		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
 
 		nbt.putString("match_duration_data_identifier", this.matchDurationDataIdentifier);
 
@@ -105,9 +104,9 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			this.pvpArenaSettingsIdentifier = nbt.getString("pvp_arena_settings_identifier");
 		}
 
+		this.respawnPositions.clear();
 		if (nbt.contains("respawnPositionsSize")) {
 			int respawnPositionsSize = nbt.getInt("respawnPositionsSize");
-			this.respawnPositions.clear();
 			for (int i = 0; i < respawnPositionsSize; i++) {
 				String key = nbt.getString("key_" + i);
 				int respawnPositionX = nbt.getInt("respawnPosition_" + i + "_X");
@@ -116,10 +115,16 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				double respawnPositionYaw = nbt.getDouble("respawnPosition_" + i + "_Yaw");
 				double respawnPositionPitch = nbt.getDouble("respawnPosition_" + i + "_Pitch");
 				this.respawnPositions.put(key, new MutablePair<>(new BlockPos(respawnPositionX, respawnPositionY, respawnPositionZ), new MutablePair<>(respawnPositionYaw, respawnPositionPitch)));
+				nbt.remove("key_" + i);
+				nbt.remove("respawnPosition_" + i + "_X");
+				nbt.remove("respawnPosition_" + i + "_Y");
+				nbt.remove("respawnPosition_" + i + "_Z");
+				nbt.remove("respawnPosition_" + i + "_Yaw");
+				nbt.remove("respawnPosition_" + i + "_Pitch");
 			}
-		} else {
+			nbt.remove("respawnPositionsSize");
+		} else if (nbt.contains("respawn_positions_size")) {
 			int respawnPositionsSize = nbt.getInt("respawn_positions_size");
-			this.respawnPositions.clear();
 			for (int i = 0; i < respawnPositionsSize; i++) {
 				this.respawnPositions.put(
 						nbt.getString("key_" + i),
@@ -131,6 +136,34 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 								nbt.getDouble("respawn_position_" + i + "_yaw"),
 								nbt.getDouble("respawn_position_" + i + "_pitch")
 						))
+				);
+				nbt.remove("key_" + i);
+				nbt.remove("respawn_position_" + i + "_x");
+				nbt.remove("respawn_position_" + i + "_y");
+				nbt.remove("respawn_position_" + i + "_z");
+				nbt.remove("respawn_position_" + i + "_yaw");
+				nbt.remove("respawn_position_" + i + "_pitch");
+			}
+			nbt.remove("respawn_positions_size");
+		} else {
+			NbtList nbtList = nbt.getList("respawn_positions", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				NbtCompound nbtCompound = nbtList.getCompound(i);
+				this.respawnPositions.put(
+						nbtCompound.getString("key"),
+						new MutablePair<>(
+								BlockPos.max(
+										BlockPos.min(
+												NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+												new BlockPos(48, 48, 48)
+										),
+										new BlockPos(-48, -48, -48)
+								),
+								new MutablePair<>(
+										MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
+										MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+								)
+						)
 				);
 			}
 		}
@@ -148,7 +181,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			nbt.remove("triggeredBlockPositionOffsetY");
 			nbt.remove("triggeredBlockPositionOffsetZ");
 			nbt.remove("triggeredBlockResets");
-		} else {
+		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
 			this.triggeredBlock = new MutablePair<>(
 					new BlockPos(
 							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
@@ -156,6 +189,22 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
 					),
 					nbt.getBoolean("triggered_block_resets")
+			);
+			nbt.remove("triggered_block_position_offset_x");
+			nbt.remove("triggered_block_position_offset_y");
+			nbt.remove("triggered_block_position_offset_z");
+			nbt.remove("triggered_block_resets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
 			);
 		}
 
@@ -168,11 +217,22 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 			nbt.remove("dataProvidingBlockPosOffsetX");
 			nbt.remove("dataProvidingBlockPosOffsetY");
 			nbt.remove("dataProvidingBlockPosOffsetZ");
-		} else {
+		} else if (nbt.contains("data_providing_block_position_offset_x") || nbt.contains("data_providing_block_position_offset_y") || nbt.contains("data_providing_block_position_offset_z")) {
 			this.dataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_z"), -48, 48)
+			);
+			nbt.remove("data_providing_block_position_offset_x");
+			nbt.remove("data_providing_block_position_offset_y");
+			nbt.remove("data_providing_block_position_offset_z");
+		} else {
+			this.dataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 
@@ -248,7 +308,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	public void setMatchDurationDataIdentifier(String matchDurationDataIdentifier) {
 		this.matchDurationDataIdentifier = matchDurationDataIdentifier;
 	}
-	// endregion --- getter & setter ---
+// endregion --- getter & setter ---
 
 	@Nullable
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getTeamRespawnPosition(String teamId, boolean endOfBattle) {

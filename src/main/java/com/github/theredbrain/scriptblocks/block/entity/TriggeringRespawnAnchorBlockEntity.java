@@ -12,6 +12,9 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -44,16 +47,16 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("spawn_point_x", this.spawnPoint.getLeft().getX());
-		nbt.putInt("spawn_point_y", this.spawnPoint.getLeft().getY());
-		nbt.putInt("spawn_point_z", this.spawnPoint.getLeft().getZ());
-		nbt.putDouble("spawn_point_yaw", this.spawnPoint.getRight().getLeft());
-		nbt.putDouble("spawn_point_pitch", this.spawnPoint.getRight().getRight());
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.spawnPoint.getLeft()));
+		nbtCompound.putDouble("yaw", this.spawnPoint.getRight().getLeft());
+		nbtCompound.putDouble("pitch", this.spawnPoint.getRight().getRight());
+		nbt.put("spawn_point", nbtCompound.copy());
 
-		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound);
 
 		List<UUID> list = this.uuidList.stream().toList();
 		nbt.putInt("uuid_list_size", list.size());
@@ -61,37 +64,86 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 			nbt.putUuid("uuid_" + i, list.get(i));
 		}
 
+		NbtList nbtList = new NbtList();
+		for (UUID uuid : this.uuidList) {
+			nbtList.add(NbtHelper.fromUuid(uuid));
+		}
+		nbt.put("uuid_list", nbtList);
+
 		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		this.spawnPoint = new MutablePair<>(
-				new BlockPos(
-						MathHelper.clamp(nbt.getInt("spawn_point_x"), -48, 48),
-						MathHelper.clamp(nbt.getInt("spawn_point_y"), -48, 48),
-						MathHelper.clamp(nbt.getInt("spawn_point_z"), -48, 48)
-				),
-				new MutablePair<>(
-						nbt.getDouble("spawn_point_yaw"),
-						nbt.getDouble("spawn_point_pitch"))
-		);
+		if (nbt.contains("spawn_point_x") || nbt.contains("spawn_point_y") || nbt.contains("spawn_point_z") || nbt.contains("spawn_point_yaw") || nbt.contains("spawn_point_pitch")) {
+			this.spawnPoint = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("spawn_point_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("spawn_point_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("spawn_point_z"), -48, 48)
+					),
+					new MutablePair<>(
+							nbt.getDouble("spawn_point_yaw"),
+							nbt.getDouble("spawn_point_pitch"))
+			);
+			nbt.remove("spawn_point_x");
+			nbt.remove("spawn_point_y");
+			nbt.remove("spawn_point_z");
+			nbt.remove("spawn_point_yaw");
+			nbt.remove("spawn_point_pitch");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("spawn_point");
+			this.spawnPoint = new MutablePair<>(
+					NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+					new MutablePair<>(
+							MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
+							MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+					)
+			);
+		}
 
-		this.triggeredBlock = new MutablePair<>(
-				new BlockPos(
-						MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
-						MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
-						MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
-				),
-				nbt.getBoolean("triggered_block_resets")
-		);
+		if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("triggered_block_resets")
+			);
+			nbt.remove("triggered_block_position_offset_x");
+			nbt.remove("triggered_block_position_offset_y");
+			nbt.remove("triggered_block_position_offset_z");
+			nbt.remove("triggered_block_resets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
-		int listSize = nbt.getInt("uuid_list_size");
 		this.uuidList.clear();
-		for (int i = 0; i < listSize; i++) {
-			if (nbt.containsUuid("uuid_" + i)) {
-				this.uuidList.add(nbt.getUuid("uuid_" + i));
+		if (nbt.contains("uuid_list_size")) {
+			int listSize = nbt.getInt("uuid_list_size");
+			for (int i = 0; i < listSize; i++) {
+				if (nbt.containsUuid("uuid_" + i)) {
+					this.uuidList.add(nbt.getUuid("uuid_" + i));
+				}
+				nbt.remove("uuid_" + i);
+			}
+			nbt.getBoolean("uuid_list_size");
+		} else {
+			NbtList nbtList = nbt.getList("uuid_list", NbtElement.INT_ARRAY_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				this.uuidList.add(NbtHelper.toUuid(nbtList.get(i)));
 			}
 		}
 

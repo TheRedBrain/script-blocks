@@ -9,6 +9,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
@@ -23,7 +24,7 @@ import java.util.Optional;
 
 public class DataModificationBlockEntity extends RotatedBlockEntity implements ProvidesData {
 	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
-	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
 	private DataModificationMode dataModificationMode = DataModificationMode.INTEGER_ADDITION;
 	private int addedIntegerValue = 0;
 	private int integerModulusValue = 0;
@@ -35,11 +36,7 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.dataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("data_providing_block_pos_offset_x", this.dataProvidingBlockPosOffset.getX());
-			nbt.putInt("data_providing_block_pos_offset_y", this.dataProvidingBlockPosOffset.getY());
-			nbt.putInt("data_providing_block_pos_offset_z", this.dataProvidingBlockPosOffset.getZ());
-		}
+		nbt.put("data_providing_block_pos_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
 
 		nbt.putString("data_modification_mode", this.dataModificationMode.asString());
 
@@ -59,8 +56,17 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_z"), -48, 48)
 			);
+			nbt.remove("data_providing_block_pos_offset_x");
+			nbt.remove("data_providing_block_pos_offset_y");
+			nbt.remove("data_providing_block_pos_offset_z");
 		} else {
-			this.dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+			this.dataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
 		this.dataModificationMode = DataModificationMode.byName(nbt.getString("data_modification_mode")).orElseGet(() -> DataModificationMode.INTEGER_ADDITION);

@@ -5,6 +5,9 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
@@ -27,14 +30,15 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("delegated_spawn_points_size", delegatedSpawnPoints.size());
-		for (int i = 0; i < this.delegatedSpawnPoints.size(); i++) {
-			nbt.putInt("delegated_spawn_point_x_" + i, this.delegatedSpawnPoints.get(i).getLeft().getX());
-			nbt.putInt("delegated_spawn_point_y_" + i, this.delegatedSpawnPoints.get(i).getLeft().getY());
-			nbt.putInt("delegated_spawn_point_z_" + i, this.delegatedSpawnPoints.get(i).getLeft().getZ());
-			nbt.putDouble("delegated_spawn_point_yaw_" + i, this.delegatedSpawnPoints.get(i).getRight().getLeft());
-			nbt.putDouble("delegated_spawn_point_pitch_" + i, this.delegatedSpawnPoints.get(i).getRight().getRight());
+		NbtList nbtList = new NbtList();
+		for (MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint : this.delegatedSpawnPoints) {
+			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(spawnPoint.getLeft()));
+			nbtCompound.putDouble("yaw", spawnPoint.getRight().getLeft());
+			nbtCompound.putDouble("pitch", spawnPoint.getRight().getRight());
+			nbtList.add(nbtCompound.copy());
 		}
+		nbt.put("delegated_spawn_points", nbtList);
 
 		super.writeNbt(nbt, registryLookup);
 
@@ -44,20 +48,40 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
 		this.delegatedSpawnPoints.clear();
-
-		int delegatedSpawnBlocksSize = nbt.getInt("delegated_spawn_points_size");
-		for (int i = 0; i < delegatedSpawnBlocksSize; i++) {
-			this.delegatedSpawnPoints.add(new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("delegated_spawn_point_x_" + i), -48, 48),
-							MathHelper.clamp(nbt.getInt("delegated_spawn_point_y_" + i), -48, 48),
-							MathHelper.clamp(nbt.getInt("delegated_spawn_point_z_" + i), -48, 48)
-					),
-					new MutablePair<>(
-							nbt.getDouble("delegated_spawn_point_yaw_" + i),
-							nbt.getDouble("delegated_spawn_point_pitch_" + i))
-			));
+		if (nbt.contains("delegated_spawn_points_size")) {
+			int delegatedSpawnBlocksSize = nbt.getInt("delegated_spawn_points_size");
+			for (int i = 0; i < delegatedSpawnBlocksSize; i++) {
+				this.delegatedSpawnPoints.add(new MutablePair<>(
+						new BlockPos(
+								MathHelper.clamp(nbt.getInt("delegated_spawn_point_x_" + i), -48, 48),
+								MathHelper.clamp(nbt.getInt("delegated_spawn_point_y_" + i), -48, 48),
+								MathHelper.clamp(nbt.getInt("delegated_spawn_point_z_" + i), -48, 48)
+						),
+						new MutablePair<>(
+								nbt.getDouble("delegated_spawn_point_yaw_" + i),
+								nbt.getDouble("delegated_spawn_point_pitch_" + i))
+				));
+				nbt.remove("delegated_spawn_point_x_" + i);
+				nbt.remove("delegated_spawn_point_y_" + i);
+				nbt.remove("delegated_spawn_point_z_" + i);
+				nbt.remove("delegated_spawn_point_yaw_" + i);
+				nbt.remove("delegated_spawn_point_pitch_" + i);
+			}
+			nbt.remove("delegated_spawn_points_size");
+		} else {
+			NbtList nbtList = nbt.getList("delegated_spawn_points", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				NbtCompound nbtCompound = nbtList.getCompound(i);
+				this.delegatedSpawnPoints.add(new MutablePair<>(
+						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+						new MutablePair<>(
+								MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
+								MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+						)
+				));
+			}
 		}
+
 		super.readNbt(nbt, registryLookup);
 	}
 

@@ -5,9 +5,13 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
@@ -42,39 +46,20 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putBoolean("show_area", this.showArea);
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.putBoolean("visible", this.showArea);
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
+		nbt.put("area", nbtCompound.copy());
 
-		nbt.putInt("area_dimensions_x", this.areaDimensions.getX());
-		nbt.putInt("area_dimensions_y", this.areaDimensions.getY());
-		nbt.putInt("area_dimensions_z", this.areaDimensions.getZ());
-
-		nbt.putInt("area_position_offset_x", this.areaPositionOffset.getX());
-		nbt.putInt("area_position_offset_y", this.areaPositionOffset.getY());
-		nbt.putInt("area_position_offset_z", this.areaPositionOffset.getZ());
-
-		if (!this.subAreasList.isEmpty()) {
-			int previousSize = nbt.getInt("sub_areas_list_size");
-			nbt.putInt("sub_areas_list_size", subAreasList.size());
-			for (int i = 0; i < Math.max(this.subAreasList.size(), previousSize); i++) {
-				if (i < this.subAreasList.size()) {
-					BlockPos areaPositionOffset = this.subAreasList.get(i).getLeft();
-					Vec3i areaDimension = this.subAreasList.get(i).getRight();
-					nbt.putInt("sub_area_position_offset_x_" + i, areaPositionOffset.getX());
-					nbt.putInt("sub_area_position_offset_y_" + i, areaPositionOffset.getY());
-					nbt.putInt("sub_area_position_offset_z_" + i, areaPositionOffset.getZ());
-					nbt.putInt("sub_area_dimension_x_" + i, areaDimension.getX());
-					nbt.putInt("sub_area_dimension_y_" + i, areaDimension.getY());
-					nbt.putInt("sub_area_dimension_z_" + i, areaDimension.getZ());
-				} else {
-					nbt.remove("sub_area_position_offset_x_" + i);
-					nbt.remove("sub_area_position_offset_y_" + i);
-					nbt.remove("sub_area_position_offset_z_" + i);
-					nbt.remove("sub_area_dimension_x_" + i);
-					nbt.remove("sub_area_dimension_y_" + i);
-					nbt.remove("sub_area_dimension_z_" + i);
-				}
-			}
+		NbtList nbtList = new NbtList();
+		for (MutablePair<BlockPos, Vec3i> subArea : this.subAreasList) {
+			nbtCompound = new NbtCompound();
+			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(subArea.getLeft()));
+			nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(subArea.getRight()));
+			nbtList.add(nbtCompound.copy());
 		}
+		nbt.put("sub_areas", nbtList);
 
 		nbt.putString("block_identifier_string", this.blockIdentifierString);
 
@@ -85,11 +70,15 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
+		NbtCompound nbtCompound = nbt.getCompound("area");
 		if (nbt.contains("showArea")) {
 			this.showArea = nbt.getBoolean("showArea");
 			nbt.remove("showArea");
-		} else {
+		} else if (nbt.contains("show_area")) {
 			this.showArea = nbt.getBoolean("show_area");
+			nbt.remove("show_area");
+		} else {
+			this.showArea = nbtCompound.getBoolean("visible");
 		}
 
 		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
@@ -101,12 +90,17 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 			nbt.remove("areaDimensionsX");
 			nbt.remove("areaDimensionsY");
 			nbt.remove("areaDimensionsZ");
-		} else {
+		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
 			this.areaDimensions = new Vec3i(
 					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
 					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
 					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
 			);
+			nbt.remove("area_dimensions_x");
+			nbt.remove("area_dimensions_y");
+			nbt.remove("area_dimensions_z");
+		} else {
+			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 		}
 
 		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
@@ -118,17 +112,28 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 			nbt.remove("areaPositionOffsetX");
 			nbt.remove("areaPositionOffsetY");
 			nbt.remove("areaPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
 			this.areaPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
 			);
+			nbt.remove("area_position_offset_x");
+			nbt.remove("area_position_offset_y");
+			nbt.remove("area_position_offset_z");
+		} else {
+			this.areaPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
+		this.subAreasList.clear();
 		if (nbt.contains("subAreasListSize")) {
 			int subAreasListSize = nbt.getInt("subAreasListSize");
-			this.subAreasList.clear();
 			for (int i = 0; i < subAreasListSize; i++) {
 				this.subAreasList.add(new MutablePair<>(new BlockPos(
 						nbt.getInt("subAreaPositionOffsetX_" + i),
@@ -147,9 +152,8 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 				nbt.remove("subAreaDimensionZ_" + i);
 			}
 			nbt.remove("subAreasListSize");
-		} else {
+		} else if (nbt.contains("sub_areas_list_size")) {
 			int subAreasListSize = nbt.getInt("sub_areas_list_size");
-			this.subAreasList.clear();
 			for (int i = 0; i < subAreasListSize; i++) {
 				this.subAreasList.add(new MutablePair<>(new BlockPos(
 						nbt.getInt("sub_area_position_offset_x_" + i),
@@ -160,6 +164,22 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 						nbt.getInt("sub_area_dimension_y_" + i),
 						nbt.getInt("sub_area_dimension_z_" + i)
 				)));
+				nbt.remove("sub_area_position_offset_x_" + i);
+				nbt.remove("sub_area_position_offset_y_" + i);
+				nbt.remove("sub_area_position_offset_z_" + i);
+				nbt.remove("sub_area_dimension_x_" + i);
+				nbt.remove("sub_area_dimension_y_" + i);
+				nbt.remove("sub_area_dimension_z_" + i);
+			}
+			nbt.remove("sub_areas_list_size");
+		} else {
+			NbtList nbtList = nbt.getList("sub_areas", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				nbtCompound = nbtList.getCompound(i);
+				this.subAreasList.add(new MutablePair<>(
+						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+						ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0))
+				));
 			}
 		}
 
@@ -195,22 +215,18 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 		return areaDimensions;
 	}
 
-	// TODO check if input is valid
-	public boolean setAreaDimensions(Vec3i areaDimensions) {
+	public void setAreaDimensions(Vec3i areaDimensions) {
 		this.areaDimensions = areaDimensions;
 		this.subAreasList.clear();
-		return true;
 	}
 
 	public BlockPos getAreaPositionOffset() {
 		return areaPositionOffset;
 	}
 
-	// TODO check if input is valid
-	public boolean setAreaPositionOffset(BlockPos areaPositionOffset) {
+	public void setAreaPositionOffset(BlockPos areaPositionOffset) {
 		this.areaPositionOffset = areaPositionOffset;
 		this.subAreasList.clear();
-		return true;
 	}
 
 	public String getBlockIdentifierString() {

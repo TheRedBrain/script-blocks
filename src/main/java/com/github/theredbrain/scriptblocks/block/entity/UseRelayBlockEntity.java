@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -14,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class UseRelayBlockEntity extends RotatedBlockEntity {
-	private BlockPos relayBlockPositionOffset = BlockPos.ORIGIN;
+	protected BlockPos relayBlockPositionOffset = BlockPos.ORIGIN;
 
 	public UseRelayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
@@ -27,9 +28,7 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("relay_block_position_offset_x", this.relayBlockPositionOffset.getX());
-		nbt.putInt("relay_block_position_offset_y", this.relayBlockPositionOffset.getY());
-		nbt.putInt("relay_block_position_offset_z", this.relayBlockPositionOffset.getZ());
+		nbt.put("relay_block_position_offset", NbtHelper.fromBlockPos(this.relayBlockPositionOffset));
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -45,11 +44,22 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 			nbt.remove("relayBlockPositionOffsetX");
 			nbt.remove("relayBlockPositionOffsetY");
 			nbt.remove("relayBlockPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("relay_block_position_offset_x") || nbt.contains("relay_block_position_offset_y") || nbt.contains("relay_block_position_offset_z")) {
 			this.relayBlockPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("relay_block_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("relay_block_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("relay_block_position_offset_z"), -48, 48)
+			);
+			nbt.remove("relay_block_position_offset_x");
+			nbt.remove("relay_block_position_offset_y");
+			nbt.remove("relay_block_position_offset_z");
+		} else {
+			this.relayBlockPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "relay_block_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 
@@ -71,11 +81,7 @@ public class UseRelayBlockEntity extends RotatedBlockEntity {
 	}
 
 	public void setRelayBlockPositionOffset(BlockPos relayBlockPositionOffset) {
-		this.relayBlockPositionOffset = new BlockPos(
-				MathHelper.clamp(relayBlockPositionOffset.getX(), -48, 48),
-				MathHelper.clamp(relayBlockPositionOffset.getY(), -48, 48),
-				MathHelper.clamp(relayBlockPositionOffset.getZ(), -48, 48)
-		);
+		this.relayBlockPositionOffset = new BlockPos(relayBlockPositionOffset);
 	}
 	// endregion --- getter & setter ---
 

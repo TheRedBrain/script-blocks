@@ -8,7 +8,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -28,13 +28,9 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("first_data_providing_block_pos_offset_x", this.firstDataProvidingBlockPosOffset.getX());
-		nbt.putInt("first_data_providing_block_pos_offset_y", this.firstDataProvidingBlockPosOffset.getY());
-		nbt.putInt("first_data_providing_block_pos_offset_z", this.firstDataProvidingBlockPosOffset.getZ());
+		nbt.put("first_data_providing_block_pos_offset", NbtHelper.fromBlockPos(this.firstDataProvidingBlockPosOffset));
 
-		nbt.putInt("second_data_providing_block_pos_offset_x", this.secondDataProvidingBlockPosOffset.getX());
-		nbt.putInt("second_data_providing_block_pos_offset_y", this.secondDataProvidingBlockPosOffset.getY());
-		nbt.putInt("second_data_providing_block_pos_offset_z", this.secondDataProvidingBlockPosOffset.getZ());
+		nbt.put("second_data_providing_block_pos_offset", NbtHelper.fromBlockPos(this.secondDataProvidingBlockPosOffset));
 
 		nbt.putString("data_identifier", this.dataIdentifier);
 
@@ -53,11 +49,22 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 			nbt.remove("firstDataProvidingBlockPosOffsetX");
 			nbt.remove("firstDataProvidingBlockPosOffsetY");
 			nbt.remove("firstDataProvidingBlockPosOffsetZ");
-		} else {
+		} else if (nbt.contains("first_data_providing_block_pos_offset_x") && nbt.contains("first_data_providing_block_pos_offset_y") && nbt.contains("first_data_providing_block_pos_offset_z")) {
 			this.firstDataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_z"), -48, 48)
+			);
+			nbt.remove("first_data_providing_block_pos_offset_x");
+			nbt.remove("first_data_providing_block_pos_offset_y");
+			nbt.remove("first_data_providing_block_pos_offset_z");
+		} else {
+			this.firstDataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "first_data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 
@@ -70,11 +77,22 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 			nbt.remove("secondDataProvidingBlockPosOffsetX");
 			nbt.remove("secondDataProvidingBlockPosOffsetY");
 			nbt.remove("secondDataProvidingBlockPosOffsetZ");
-		} else {
+		} else if (nbt.contains("second_data_providing_block_pos_offset_x") && nbt.contains("second_data_providing_block_pos_offset_y") && nbt.contains("second_data_providing_block_pos_offset_z")) {
 			this.secondDataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_z"), -48, 48)
+			);
+			nbt.remove("second_data_providing_block_pos_offset_x");
+			nbt.remove("second_data_providing_block_pos_offset_y");
+			nbt.remove("second_data_providing_block_pos_offset_z");
+		} else {
+			this.secondDataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "second_data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 

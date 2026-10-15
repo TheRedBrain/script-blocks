@@ -7,8 +7,8 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.UseRelayChestBlock;
 import com.github.theredbrain.scriptblocks.component.type.InteractiveKeyComponent;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -16,7 +16,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -26,9 +26,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Resetable {
+public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Resetable {
 
-	private BlockPos relayBlockPositionOffset = BlockPos.ORIGIN;
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
 	private String keyIdentifierString = "";
 	private String lockedMessage = "";
@@ -43,14 +42,10 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("relay_block_position_offset_x", this.relayBlockPositionOffset.getX());
-		nbt.putInt("relay_block_position_offset_y", this.relayBlockPositionOffset.getY());
-		nbt.putInt("relay_block_position_offset_z", this.relayBlockPositionOffset.getZ());
-
-		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound);
 
 		nbt.putString("key_identifier_string", this.keyIdentifierString);
 
@@ -72,39 +67,44 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (nbt.contains("relayBlockPositionOffsetX") || nbt.contains("relayBlockPositionOffsetY") || nbt.contains("relayBlockPositionOffsetZ")) {
-			this.relayBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("relayBlockPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("relayBlockPositionOffsetX");
-			nbt.remove("relayBlockPositionOffsetY");
-			nbt.remove("relayBlockPositionOffsetZ");
-		} else {
-			this.relayBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("relay_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("relay_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("relay_block_position_offset_z"), -48, 48)
-			);
-		}
-
 		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.triggeredBlock = new MutablePair<>(new BlockPos(
-					MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-			), nbt.getBoolean("triggeredBlockResets"));
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockResets")
+			);
 			nbt.remove("triggeredBlockPositionOffsetX");
 			nbt.remove("triggeredBlockPositionOffsetY");
 			nbt.remove("triggeredBlockPositionOffsetZ");
 			nbt.remove("triggeredBlockResets");
+		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("triggered_block_resets")
+			);
+			nbt.remove("triggered_block_position_offset_x");
+			nbt.remove("triggered_block_position_offset_y");
+			nbt.remove("triggered_block_position_offset_z");
+			nbt.remove("triggered_block_resets");
 		} else {
-			this.triggeredBlock = new MutablePair<>(new BlockPos(
-					MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
-			), nbt.getBoolean("triggered_block_resets"));
+			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
 		}
 
 		if (nbt.contains("keyIdentifierString")) {
@@ -145,28 +145,7 @@ public class UseRelayChestBlockEntity extends RotatedBlockEntity implements Rese
 		super.readNbt(nbt, registryLookup);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
-	}
-
-	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
-	}
-
 	// region --- getter & setter ---
-	public BlockPos getRelayBlockPositionOffset() {
-		return this.relayBlockPositionOffset;
-	}
-
-	public void setRelayBlockPositionOffset(BlockPos relayBlockPositionOffset) {
-		this.relayBlockPositionOffset = new BlockPos(
-				MathHelper.clamp(relayBlockPositionOffset.getX(), -48, 48),
-				MathHelper.clamp(relayBlockPositionOffset.getY(), -48, 48),
-				MathHelper.clamp(relayBlockPositionOffset.getZ(), -48, 48)
-		);
-	}
-
 	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
 		return this.triggeredBlock;
 	}

@@ -8,6 +8,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -27,9 +28,7 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("data_providing_block_position_offset_x", this.dataProvidingBlockPosOffset.getX());
-		nbt.putInt("data_providing_block_position_offset_y", this.dataProvidingBlockPosOffset.getY());
-		nbt.putInt("data_providing_block_position_offset_z", this.dataProvidingBlockPosOffset.getZ());
+		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
 
 		nbt.putString("data_identifier", this.dataIdentifier);
 
@@ -50,11 +49,22 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 			nbt.remove("dataProvidingBlockPosOffsetX");
 			nbt.remove("dataProvidingBlockPosOffsetY");
 			nbt.remove("dataProvidingBlockPosOffsetZ");
-		} else {
+		} else if (nbt.contains("data_providing_block_position_offset_x") || nbt.contains("data_providing_block_position_offset_y") || nbt.contains("data_providing_block_position_offset_z")) {
 			this.dataProvidingBlockPosOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_z"), -48, 48)
+			);
+			nbt.remove("data_providing_block_position_offset_x");
+			nbt.remove("data_providing_block_position_offset_y");
+			nbt.remove("data_providing_block_position_offset_z");
+		} else {
+			this.dataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 

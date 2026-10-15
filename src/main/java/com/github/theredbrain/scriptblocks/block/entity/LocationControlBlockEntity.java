@@ -10,6 +10,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
@@ -25,16 +27,14 @@ import java.util.List;
 import java.util.Map;
 
 public class LocationControlBlockEntity extends RotatedBlockEntity implements Resetable {
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, 1, 0);
-	private static final BlockPos TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 2, 0);
 	private static final int RESET_AREA_MIN_X_DEFAULT = -16;
 	private static final int RESET_AREA_MIN_Z_DEFAULT = -16;
 	private static final int RESET_AREA_MAX_X_DEFAULT = 31;
 	private static final int RESET_AREA_MAX_Z_DEFAULT = 31;
 	private MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
 	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(TRIGGERED_BLOCK_POS_DEFAULT, false);
-	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
 
 	public LocationControlBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.LOCATION_CONTROL_BLOCK_ENTITY, pos, state);
@@ -52,65 +52,43 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("mainEntrance_X", this.mainEntrance.getLeft().getX());
-		nbt.putInt("mainEntrance_Y", this.mainEntrance.getLeft().getY());
-		nbt.putInt("mainEntrance_Z", this.mainEntrance.getLeft().getZ());
-		nbt.putDouble("mainEntrance_Yaw", this.mainEntrance.getRight().getLeft());
-		nbt.putDouble("mainEntrance_Pitch", this.mainEntrance.getRight().getRight());
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.mainEntrance.getLeft()));
+		nbtCompound.putDouble("yaw", this.mainEntrance.getRight().getLeft());
+		nbtCompound.putDouble("pitch", this.mainEntrance.getRight().getRight());
+		nbt.put("main_entrance", nbtCompound.copy());
 
-		List<String> keyList = this.sideEntrances.keySet().stream().toList();
-		int sideEntrancesSize = this.sideEntrances.keySet().size();
-		nbt.putInt("sideEntrancesSize", sideEntrancesSize);
-		for (int i = 0; i < sideEntrancesSize; i++) {
-			String key = keyList.get(i);
-			nbt.putString("key_" + i, key);
-			nbt.putInt("sideEntrance_" + i + "_X", this.sideEntrances.get(key).getLeft().getX());
-			nbt.putInt("sideEntrance_" + i + "_Y", this.sideEntrances.get(key).getLeft().getY());
-			nbt.putInt("sideEntrance_" + i + "_Z", this.sideEntrances.get(key).getLeft().getZ());
-			nbt.putDouble("sideEntrance_" + i + "_Yaw", this.sideEntrances.get(key).getRight().getLeft());
-			nbt.putDouble("sideEntrance_" + i + "_Pitch", this.sideEntrances.get(key).getRight().getRight());
-		}
+		NbtList nbtList = new NbtList();
+		this.sideEntrances.forEach((key, value) -> {
+			NbtCompound nbtCompound1 = new NbtCompound();
+			nbtCompound1.putString("key", key);
+			nbtCompound1.put("position_offset", NbtHelper.fromBlockPos(value.getLeft()));
+			nbtCompound1.putDouble("yaw", value.getRight().getLeft());
+			nbtCompound1.putDouble("pitch", value.getRight().getRight());
+			nbtList.add(nbtCompound1.copy());
+		});
+		nbt.put("side_entrances", nbtList);
 
-		if (this.triggeredBlock.getLeft() != TRIGGERED_BLOCK_POS_DEFAULT || !this.triggeredBlock.getRight()) {
-			nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
-		} else {
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		}
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound.copy());
 
-		if (this.dataProvidingBlockPosOffset != DATA_PROVIDING_BLOCK_POS_DEFAULT) {
-			nbt.putInt("dataProvingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
-			nbt.putInt("dataProvingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
-			nbt.putInt("dataProvingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
-		} else {
-			nbt.remove("dataProvingBlockPosOffsetX");
-			nbt.remove("dataProvingBlockPosOffsetY");
-			nbt.remove("dataProvingBlockPosOffsetZ");
-		}
+		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
 
-		nbt.putBoolean("manualReset", this.manualReset);
+		nbt.putBoolean("manual_reset", this.manualReset);
 
-		nbt.putBoolean("shouldAlwaysReset", this.shouldAlwaysReset);
+		nbt.putBoolean("should_always_reset", this.shouldAlwaysReset);
 
-		nbt.putInt("initialResetTimer", this.initialResetTimer);
+		nbt.putInt("initial_reset_timer", this.initialResetTimer);
 
-		if (this.resetAreaMinX != RESET_AREA_MIN_X_DEFAULT) {
-			nbt.putInt("resetAreaMinX", this.resetAreaMinX);
-		}
-		if (this.resetAreaMinZ != RESET_AREA_MIN_Z_DEFAULT) {
-			nbt.putInt("resetAreaMinZ", this.resetAreaMinZ);
-		}
-		if (this.resetAreaMaxX != RESET_AREA_MAX_X_DEFAULT) {
-			nbt.putInt("resetAreaMaxX", this.resetAreaMaxX);
-		}
-		if (this.resetAreaMaxZ != RESET_AREA_MAX_Z_DEFAULT) {
-			nbt.putInt("resetAreaMaxZ", this.resetAreaMaxZ);
-		}
+		nbt.putInt("reset_area_min_x", this.resetAreaMinX);
+
+		nbt.putInt("reset_area_min_z", this.resetAreaMinZ);
+
+		nbt.putInt("reset_area_max_x", this.resetAreaMaxX);
+
+		nbt.putInt("reset_area_max_z", this.resetAreaMaxZ);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -118,27 +96,74 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int mainEntrance_X = nbt.getInt("mainEntrance_X");
-		int mainEntrance_Y = nbt.getInt("mainEntrance_Y");
-		int mainEntrance_Z = nbt.getInt("mainEntrance_Z");
-		this.mainEntrance.setLeft(new BlockPos(mainEntrance_X, mainEntrance_Y, mainEntrance_Z));
-		double mainEntrance_Yaw = nbt.getDouble("mainEntrance_Yaw");
-		double mainEntrance_Pitch = nbt.getDouble("mainEntrance_Pitch");
-		this.mainEntrance.setRight(new MutablePair<>(mainEntrance_Yaw, mainEntrance_Pitch));
-
-		int sideEntrancesSize = nbt.getInt("sideEntrancesSize");
-		this.sideEntrances.clear();
-		for (int i = 0; i < sideEntrancesSize; i++) {
-			String key = nbt.getString("key_" + i);
-			int sideEntranceX = nbt.getInt("sideEntrance_" + i + "_X");
-			int sideEntranceY = nbt.getInt("sideEntrance_" + i + "_Y");
-			int sideEntranceZ = nbt.getInt("sideEntrance_" + i + "_Z");
-			double sideEntranceYaw = nbt.getDouble("sideEntrance_" + i + "_Yaw");
-			double sideEntrancePitch = nbt.getDouble("sideEntrance_" + i + "_Pitch");
-			this.sideEntrances.put(key, new MutablePair<>(new BlockPos(sideEntranceX, sideEntranceY, sideEntranceZ), new MutablePair<>(sideEntranceYaw, sideEntrancePitch)));
+		if (nbt.contains("mainEntrance_X") || nbt.contains("mainEntrance_Y") || nbt.contains("mainEntrance_Z") || nbt.contains("mainEntrance_Yaw") || nbt.contains("mainEntrance_Pitch")) {
+			this.mainEntrance = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("mainEntrance_X"), -48, 48),
+							MathHelper.clamp(nbt.getInt("mainEntrance_Y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("mainEntrance_Z"), -48, 48)
+					),
+					new MutablePair<>(
+							nbt.getDouble("mainEntrance_Yaw"),
+							nbt.getDouble("mainEntrance_Pitch"))
+			);
+			nbt.remove("mainEntrance_X");
+			nbt.remove("mainEntrance_Y");
+			nbt.remove("mainEntrance_Z");
+			nbt.remove("mainEntrance_Yaw");
+			nbt.remove("mainEntrance_Pitch");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("main_entrance");
+			this.mainEntrance = new MutablePair<>(
+					NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+					new MutablePair<>(
+							MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
+							MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+					)
+			);
 		}
 
-		if (nbt.contains("triggeredBlockPositionOffsetX", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetY", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetZ", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
+		this.sideEntrances.clear();
+		if (nbt.contains("sideEntrancesSize")) {
+			int delegatedSpawnBlocksSize = nbt.getInt("sideEntrancesSize");
+			for (int i = 0; i < delegatedSpawnBlocksSize; i++) {
+				this.sideEntrances.put(
+						nbt.getString("key_" + i),
+						new MutablePair<>(
+								new BlockPos(
+										MathHelper.clamp(nbt.getInt("sideEntrance_" + i + "_X"), -48, 48),
+										MathHelper.clamp(nbt.getInt("sideEntrance_" + i + "_Y"), -48, 48),
+										MathHelper.clamp(nbt.getInt("sideEntrance_" + i + "_Z"), -48, 48)
+								),
+								new MutablePair<>(
+										nbt.getDouble("sideEntrance_" + i + "_Yaw"),
+										nbt.getDouble("sideEntrance_" + i + "_Pitch"))
+						));
+				nbt.remove("key_" + i);
+				nbt.remove("sideEntrance_" + i + "_X");
+				nbt.remove("sideEntrance_" + i + "_Y");
+				nbt.remove("sideEntrance_" + i + "_Z");
+				nbt.remove("sideEntrance_" + i + "_Yaw");
+				nbt.remove("sideEntrance_" + i + "_Pitch");
+			}
+			nbt.remove("sideEntrancesSize");
+		} else {
+			NbtList nbtList = nbt.getList("side_entrances", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				NbtCompound nbtCompound = nbtList.getCompound(i);
+				this.sideEntrances.put(
+						nbtCompound.getString("key"),
+						new MutablePair<>(
+								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+								new MutablePair<>(
+										MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
+										MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+								)
+						));
+			}
+		}
+
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
 			this.triggeredBlock = new MutablePair<>(
 					new BlockPos(
 							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
@@ -147,41 +172,92 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 					),
 					nbt.getBoolean("triggeredBlockResets")
 			);
-		}
-
-		if (nbt.contains("dataProvingBlockPosOffsetX", NbtElement.INT_TYPE) && nbt.contains("dataProvingBlockPosOffsetY", NbtElement.INT_TYPE) && nbt.contains("dataProvingBlockPosOffsetZ", NbtElement.INT_TYPE)) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvingBlockPosOffsetZ"), -48, 48)
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
 			);
 		}
 
-		this.manualReset = nbt.getBoolean("manualReset");
+		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
+			this.dataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
+			);
+			nbt.remove("dataProvidingBlockPosOffsetX");
+			nbt.remove("dataProvidingBlockPosOffsetY");
+			nbt.remove("dataProvidingBlockPosOffsetZ");
+		} else {
+			this.dataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
 
-		this.shouldAlwaysReset = nbt.getBoolean("shouldAlwaysReset");
+		if (nbt.contains("manualReset")) {
+			this.manualReset = nbt.getBoolean("manualReset");
+			nbt.remove("manualReset");
+		} else {
+			this.manualReset = nbt.getBoolean("manual_reset");
+		}
 
-		this.initialResetTimer = nbt.contains("initialResetTimer", NbtElement.INT_TYPE) ? nbt.getInt("initialResetTimer") : -1;
+		if (nbt.contains("shouldAlwaysReset")) {
+			this.shouldAlwaysReset = nbt.getBoolean("shouldAlwaysReset");
+			nbt.remove("shouldAlwaysReset");
+		} else {
+			this.shouldAlwaysReset = nbt.getBoolean("should_always_reset");
+		}
+
+		if (nbt.contains("initialResetTimer")) {
+			this.initialResetTimer = nbt.getInt("initialResetTimer");
+			nbt.remove("initialResetTimer");
+		} else if (nbt.contains("initial_reset_timer")) {
+			this.initialResetTimer = nbt.getInt("initial_reset_timer");
+			nbt.remove("initial_reset_timer");
+		} else {
+			this.initialResetTimer = -1;
+		}
 
 		if (nbt.contains("resetAreaMinX")) {
 			this.resetAreaMinX = nbt.getInt("resetAreaMinX");
+			nbt.remove("resetAreaMinX");
 		} else {
-			this.resetAreaMinX = RESET_AREA_MIN_X_DEFAULT;
+			this.resetAreaMinX = nbt.getInt("reset_area_min_x");
 		}
+
 		if (nbt.contains("resetAreaMinZ")) {
 			this.resetAreaMinZ = nbt.getInt("resetAreaMinZ");
+			nbt.remove("resetAreaMinZ");
 		} else {
-			this.resetAreaMinZ = RESET_AREA_MIN_Z_DEFAULT;
+			this.resetAreaMinZ = nbt.getInt("reset_area_min_z");
 		}
+
 		if (nbt.contains("resetAreaMaxX")) {
 			this.resetAreaMaxX = nbt.getInt("resetAreaMaxX");
+			nbt.remove("resetAreaMaxX");
 		} else {
-			this.resetAreaMaxX = RESET_AREA_MAX_X_DEFAULT;
+			this.resetAreaMaxX = nbt.getInt("reset_area_max_x");
 		}
 		if (nbt.contains("resetAreaMaxZ")) {
 			this.resetAreaMaxZ = nbt.getInt("resetAreaMaxZ");
+			nbt.remove("resetAreaMaxZ");
 		} else {
-			this.resetAreaMaxZ = RESET_AREA_MAX_Z_DEFAULT;
+			this.resetAreaMaxZ = nbt.getInt("reset_area_max_z");
 		}
 
 		super.readNbt(nbt, registryLookup);

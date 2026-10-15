@@ -10,6 +10,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -31,13 +34,13 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("data_providing_block_pos_offset_list_size", this.dataProvidingBlockPosOffsetList.size());
-		for (int i = 0; i < this.dataProvidingBlockPosOffsetList.size(); i++) {
-			BlockPos triggeredBlock = this.dataProvidingBlockPosOffsetList.get(i);
-			nbt.putInt("data_providing_block_pos_offset_x_" + i, triggeredBlock.getX());
-			nbt.putInt("data_providing_block_pos_offset_y_" + i, triggeredBlock.getY());
-			nbt.putInt("data_providing_block_pos_offset_z_" + i, triggeredBlock.getZ());
+		NbtList nbtList = new NbtList();
+		for (BlockPos blockPos : this.dataProvidingBlockPosOffsetList) {
+			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(blockPos));
+			nbtList.add(nbtCompound);
 		}
+		nbt.put("data_providing_blocks", nbtList);
 
 		nbt.putInt("index", this.index);
 
@@ -47,25 +50,45 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
+		this.dataProvidingBlockPosOffsetList.clear();
 		if (nbt.contains("dataProvidingBlockPosOffsetListSize")) {
 			int dataProvidingBlockPosOffsetListSize = nbt.getInt("dataProvidingBlockPosOffsetListSize");
-			this.dataProvidingBlockPosOffsetList.clear();
 			for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
 				this.dataProvidingBlockPosOffsetList.add(new BlockPos(
 						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX_" + i), -48, 48),
 						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY_" + i), -48, 48),
 						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ_" + i), -48, 48)
 				));
+				nbt.remove("dataProvidingBlockPosOffsetX_" + i);
+				nbt.remove("dataProvidingBlockPosOffsetY_" + i);
+				nbt.remove("dataProvidingBlockPosOffsetZ_" + i);
 			}
-		} else {
+			nbt.remove("dataProvidingBlockPosOffsetListSize");
+		} else if (nbt.contains("data_providing_block_pos_offset_list_size")) {
 			int dataProvidingBlockPosOffsetListSize = nbt.getInt("data_providing_block_pos_offset_list_size");
-			this.dataProvidingBlockPosOffsetList.clear();
 			for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
 				this.dataProvidingBlockPosOffsetList.add(new BlockPos(
 						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_x_" + i), -48, 48),
 						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_y_" + i), -48, 48),
 						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_z_" + i), -48, 48)
 				));
+				nbt.remove("data_providing_block_pos_offset_x_" + i);
+				nbt.remove("data_providing_block_pos_offset_y_" + i);
+				nbt.remove("data_providing_block_pos_offset_z_" + i);
+			}
+			nbt.remove("data_providing_block_pos_offset_list_size");
+		} else {
+			NbtList nbtList = nbt.getList("data_providing_blocks", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				this.dataProvidingBlockPosOffsetList.add(
+						BlockPos.max(
+								BlockPos.min(
+										NbtHelper.toBlockPos(nbtList.getCompound(i), "position_offset").orElse(BlockPos.ORIGIN),
+										new BlockPos(48, 48, 48)
+								),
+								new BlockPos(-48, -48, -48)
+						)
+				);
 			}
 		}
 

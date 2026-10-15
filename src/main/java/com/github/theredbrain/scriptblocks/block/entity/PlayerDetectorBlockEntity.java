@@ -7,10 +7,14 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -56,57 +60,35 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 
 		nbt.putBoolean("enable_ticking", this.enableTicking);
 
-		nbt.putBoolean("show_area", this.showArea);
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.putBoolean("visible", this.showArea);
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
+		nbt.put("area", nbtCompound.copy());
 
-		if (this.area != null) {
-			nbt.putDouble("area_min_x", this.area.minX);
-			nbt.putDouble("area_max_x", this.area.maxX);
-			nbt.putDouble("area_min_y", this.area.minY);
-			nbt.putDouble("area_max_y", this.area.maxY);
-			nbt.putDouble("area_min_z", this.area.minZ);
-			nbt.putDouble("area_max_z", this.area.maxZ);
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onEnteringTriggeredBlock.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.onEnteringTriggeredBlock.getRight());
+		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onEnteringUUIDListHandler));
+		nbt.put("on_entering", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onLeavingTriggeredBlock.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.onLeavingTriggeredBlock.getRight());
+		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onLeavingUUIDListHandler));
+		nbt.put("on_leaving", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onTriggeringTriggeredBlock.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.onTriggeringTriggeredBlock.getRight());
+		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onTriggeringUUIDListHandler));
+		nbt.put("on_triggering", nbtCompound);
+
+		NbtList nbtList = new NbtList();
+		for (UUID uuid : this.playerList) {
+			nbtList.add(NbtHelper.fromUuid(uuid));
 		}
-
-		nbt.putInt("area_dimensions_x", this.areaDimensions.getX());
-		nbt.putInt("area_dimensions_y", this.areaDimensions.getY());
-		nbt.putInt("area_dimensions_z", this.areaDimensions.getZ());
-
-		nbt.putInt("area_position_offset_x", this.areaPositionOffset.getX());
-		nbt.putInt("area_position_offset_y", this.areaPositionOffset.getY());
-		nbt.putInt("area_position_offset_z", this.areaPositionOffset.getZ());
-
-		nbt.putInt("on_entering_triggered_block_position_offset_x", this.onEnteringTriggeredBlock.getLeft().getX());
-		nbt.putInt("on_entering_triggered_block_position_offset_y", this.onEnteringTriggeredBlock.getLeft().getY());
-		nbt.putInt("on_entering_triggered_block_position_offset_z", this.onEnteringTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("on_entering_triggered_block_resets", this.onEnteringTriggeredBlock.getRight());
-
-		nbt.putInt("on_leaving_triggered_block_position_offset_x", this.onLeavingTriggeredBlock.getLeft().getX());
-		nbt.putInt("on_leaving_triggered_block_position_offset_y", this.onLeavingTriggeredBlock.getLeft().getY());
-		nbt.putInt("on_leaving_triggered_block_position_offset_z", this.onLeavingTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("on_leaving_triggered_block_resets", this.onLeavingTriggeredBlock.getRight());
-
-		nbt.putInt("on_triggering_triggered_block_position_offset_x", this.onTriggeringTriggeredBlock.getLeft().getX());
-		nbt.putInt("on_triggering_triggered_block_position_offset_y", this.onTriggeringTriggeredBlock.getLeft().getY());
-		nbt.putInt("on_triggering_triggered_block_position_offset_z", this.onTriggeringTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("on_triggering_triggered_block_resets", this.onTriggeringTriggeredBlock.getRight());
-
-		nbt.putInt("on_entering_uuid_list_handler_position_offset_x", this.onEnteringUUIDListHandler.getX());
-		nbt.putInt("on_entering_uuid_list_handler_position_offset_y", this.onEnteringUUIDListHandler.getY());
-		nbt.putInt("on_entering_uuid_list_handler_position_offset_z", this.onEnteringUUIDListHandler.getZ());
-
-		nbt.putInt("on_leaving_uuid_list_handler_position_offset_x", this.onLeavingUUIDListHandler.getX());
-		nbt.putInt("on_leaving_uuid_list_handler_position_offset_y", this.onLeavingUUIDListHandler.getY());
-		nbt.putInt("on_leaving_uuid_list_handler_position_offset_z", this.onLeavingUUIDListHandler.getZ());
-
-		nbt.putInt("on_triggering_uuid_list_handler_position_offset_x", this.onTriggeringUUIDListHandler.getX());
-		nbt.putInt("on_triggering_uuid_list_handler_position_offset_y", this.onTriggeringUUIDListHandler.getY());
-		nbt.putInt("on_triggering_uuid_list_handler_position_offset_z", this.onTriggeringUUIDListHandler.getZ());
-
-		int playerListSize = playerList.size();
-		nbt.putInt("player_list_size", playerListSize);
-		for (int i = 0; i < playerListSize; i++) {
-			nbt.putUuid("player_list_entry_" + i, this.playerList.get(i));
-		}
+		nbt.put("player_list", nbtList);
 
 		super.writeNbt(nbt, registryLookup);
 
@@ -117,11 +99,15 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 
 		this.enableTicking = nbt.getBoolean("enable_ticking");
 
+		NbtCompound nbtCompound = nbt.getCompound("area");
 		if (nbt.contains("showArea")) {
 			this.showArea = nbt.getBoolean("showArea");
 			nbt.remove("showArea");
-		} else {
+		} else if (nbt.contains("show_area")) {
 			this.showArea = nbt.getBoolean("show_area");
+			nbt.remove("show_area");
+		} else {
+			this.showArea = nbtCompound.getBoolean("visible");
 		}
 
 		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
@@ -133,9 +119,15 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaMaxX");
 			nbt.remove("areaMaxY");
 			nbt.remove("areaMaxZ");
-		} else {
+		} else if (nbt.contains("area_min_x") || nbt.contains("area_min_y") || nbt.contains("area_min_z") || nbt.contains("area_max_x") || nbt.contains("area_max_y") || nbt.contains("area_max_z")) {
 			this.area = new Box(nbt.getDouble("area_min_x"), nbt.getDouble("area_min_y"), nbt.getDouble("area_min_z"), nbt.getDouble("area_max_x"), nbt.getDouble("area_max_y"), nbt.getDouble("area_max_z"));
 			this.calculateAreaBox = true;
+			nbt.remove("area_min_x");
+			nbt.remove("area_min_y");
+			nbt.remove("area_min_z");
+			nbt.remove("area_max_x");
+			nbt.remove("area_max_y");
+			nbt.remove("area_max_z");
 		}
 
 		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
@@ -147,12 +139,17 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaDimensionsX");
 			nbt.remove("areaDimensionsY");
 			nbt.remove("areaDimensionsZ");
-		} else {
+		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
 			this.areaDimensions = new Vec3i(
 					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
 					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
 					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
 			);
+			nbt.remove("area_dimensions_x");
+			nbt.remove("area_dimensions_y");
+			nbt.remove("area_dimensions_z");
+		} else {
+			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 		}
 
 		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
@@ -164,14 +161,26 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaPositionOffsetX");
 			nbt.remove("areaPositionOffsetY");
 			nbt.remove("areaPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
 			this.areaPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
 			);
+			nbt.remove("area_position_offset_x");
+			nbt.remove("area_position_offset_y");
+			nbt.remove("area_position_offset_z");
+		} else {
+			this.areaPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
+		nbtCompound = nbt.getCompound("on_entering");
 		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
 			this.onEnteringTriggeredBlock = new MutablePair<>(
 					new BlockPos(
@@ -185,7 +194,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("triggeredBlockPositionOffsetY");
 			nbt.remove("triggeredBlockPositionOffsetZ");
 			nbt.remove("triggeredBlockResets");
-		} else {
+		} else if (nbt.contains("on_entering_triggered_block_position_offset_x") || nbt.contains("on_entering_triggered_block_position_offset_y") || nbt.contains("on_entering_triggered_block_position_offset_z")) {
 			this.onEnteringTriggeredBlock = new MutablePair<>(
 					new BlockPos(
 							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_x"), -48, 48),
@@ -194,44 +203,135 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 					),
 					nbt.getBoolean("on_entering_triggered_block_resets")
 			);
+			nbt.remove("on_entering_triggered_block_position_offset_x");
+			nbt.remove("on_entering_triggered_block_position_offset_y");
+			nbt.remove("on_entering_triggered_block_position_offset_z");
+			nbt.remove("on_entering_triggered_block_resets");
+		} else {
+			this.onEnteringTriggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("triggered_block_resets")
+			);
 		}
 
-		this.onLeavingTriggeredBlock = new MutablePair<>(
-				new BlockPos(
-						MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_x"), -48, 48),
-						MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_y"), -48, 48),
-						MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_z"), -48, 48)
-				),
-				nbt.getBoolean("on_leaving_triggered_block_resets")
-		);
+		if (nbt.contains("on_entering_uuid_list_handler_position_offset_x") || nbt.contains("on_entering_uuid_list_handler_position_offset_y") || nbt.contains("on_entering_uuid_list_handler_position_offset_z")) {
+			this.onEnteringUUIDListHandler = new BlockPos(
+					MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_z"), -48, 48)
+			);
+			nbt.remove("on_entering_uuid_list_handler_position_offset_x");
+			nbt.remove("on_entering_uuid_list_handler_position_offset_y");
+			nbt.remove("on_entering_uuid_list_handler_position_offset_z");
+		} else {
+			this.onEnteringUUIDListHandler = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
 
-		this.onTriggeringTriggeredBlock = new MutablePair<>(
-				new BlockPos(
-						MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_x"), -48, 48),
-						MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_y"), -48, 48),
-						MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_z"), -48, 48)
-				),
-				nbt.getBoolean("on_triggering_triggered_block_resets")
-		);
 
-		this.onEnteringUUIDListHandler = new BlockPos(
-				MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_x"), -48, 48),
-				MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_y"), -48, 48),
-				MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_z"), -48, 48)
-		);
+		nbtCompound = nbt.getCompound("on_leaving");
+		if (nbt.contains("on_leaving_triggered_block_position_offset_x") || nbt.contains("on_leaving_triggered_block_position_offset_y") || nbt.contains("on_leaving_triggered_block_position_offset_z")) {
+			this.onLeavingTriggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("on_leaving_triggered_block_resets")
+			);
+			nbt.remove("on_leaving_triggered_block_position_offset_x");
+			nbt.remove("on_leaving_triggered_block_position_offset_y");
+			nbt.remove("on_leaving_triggered_block_position_offset_z");
+		} else {
+			this.onLeavingTriggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("triggered_block_resets")
+			);
+		}
 
-		this.onLeavingUUIDListHandler = new BlockPos(
-				MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_x"), -48, 48),
-				MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_y"), -48, 48),
-				MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_z"), -48, 48)
-		);
+		if (nbt.contains("on_leaving_uuid_list_handler_position_offset_x") || nbt.contains("on_leaving_uuid_list_handler_position_offset_y") || nbt.contains("on_leaving_uuid_list_handler_position_offset_z")) {
+			this.onLeavingUUIDListHandler = new BlockPos(
+					MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_z"), -48, 48)
+			);
+			nbt.remove("on_leaving_uuid_list_handler_position_offset_x");
+			nbt.remove("on_leaving_uuid_list_handler_position_offset_y");
+			nbt.remove("on_leaving_uuid_list_handler_position_offset_z");
+		} else {
+			this.onLeavingUUIDListHandler = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
 
-		this.onTriggeringUUIDListHandler = new BlockPos(
-				MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_x"), -48, 48),
-				MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_y"), -48, 48),
-				MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_z"), -48, 48)
-		);
 
+		nbtCompound = nbt.getCompound("on_triggering");
+		if (nbt.contains("on_triggering_triggered_block_position_offset_x") || nbt.contains("on_triggering_triggered_block_position_offset_y") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("on_triggering_triggered_block_position_offset_z")) {
+			this.onTriggeringTriggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("on_triggering_triggered_block_resets")
+			);
+			nbt.remove("on_triggering_triggered_block_position_offset_x");
+			nbt.remove("on_triggering_triggered_block_position_offset_y");
+			nbt.remove("on_triggering_triggered_block_position_offset_z");
+		} else {
+			this.onTriggeringTriggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("triggered_block_resets")
+			);
+		}
+
+		if (nbt.contains("on_triggering_uuid_list_handler_position_offset_x") || nbt.contains("on_triggering_uuid_list_handler_position_offset_y") || nbt.contains("on_triggering_uuid_list_handler_position_offset_z")) {
+			this.onTriggeringUUIDListHandler = new BlockPos(
+					MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_z"), -48, 48)
+			);
+			nbt.remove("on_triggering_uuid_list_handler_position_offset_x");
+			nbt.remove("on_triggering_uuid_list_handler_position_offset_y");
+			nbt.remove("on_triggering_uuid_list_handler_position_offset_z");
+		} else {
+			this.onTriggeringUUIDListHandler = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
+
+		this.playerList.clear();
 		if (nbt.contains("playerListSize")) {
 			int playerListSize = nbt.getInt("playerListSize");
 			for (int i = 0; i < playerListSize; i++) {
@@ -241,12 +341,19 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 				}
 			}
 			nbt.remove("playerListSize");
-		} else {
+		} else if (nbt.contains("player_list_size")) {
 			int playerListSize = nbt.getInt("player_list_size");
 			for (int i = 0; i < playerListSize; i++) {
 				if (nbt.contains("player_list_entry_" + i)) {
 					this.playerList.add(nbt.getUuid("player_list_entry_" + i));
 				}
+				nbt.remove("player_list_entry_" + i);
+			}
+			nbt.remove("player_list_size");
+		} else {
+			NbtList nbtList = nbt.getList("player_list", NbtElement.INT_ARRAY_TYPE);
+			for (NbtElement nbtElement : nbtList) {
+				this.playerList.add(NbtHelper.toUuid(nbtElement));
 			}
 		}
 

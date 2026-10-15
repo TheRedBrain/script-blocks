@@ -4,12 +4,14 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -43,48 +45,11 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.showArea) {
-			nbt.putBoolean("showArea", true);
-		} else {
-			nbt.remove("showArea");
-		}
-
-		if (this.area != null) {
-			nbt.putDouble("areaMinX", this.area.minX);
-			nbt.putDouble("areaMaxX", this.area.maxX);
-			nbt.putDouble("areaMinY", this.area.minY);
-			nbt.putDouble("areaMaxY", this.area.maxY);
-			nbt.putDouble("areaMinZ", this.area.minZ);
-			nbt.putDouble("areaMaxZ", this.area.maxZ);
-		} else {
-			nbt.remove("areaMinX");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxZ");
-		}
-
-		if (this.areaDimensions != Vec3i.ZERO) {
-			nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-			nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-			nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
-		} else {
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		}
-
-		BlockPos areaPositionOffset = this.areaPositionOffset;
-		if (!areaPositionOffset.equals(AREA_POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-			nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-			nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
-		} else {
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		}
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.putBoolean("visible", this.showArea);
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
+		nbt.put("area", nbtCompound);
 
 		super.writeNbt(nbt, registryLookup);
 
@@ -93,37 +58,55 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (nbt.contains("showArea", NbtElement.BYTE_TYPE)) {
+		NbtCompound nbtCompound = nbt.getCompound("area");
+		if (nbt.contains("showArea")) {
 			this.showArea = nbt.getBoolean("showArea");
+			nbt.remove("showArea");
 		} else {
-			this.showArea = false;
+			this.showArea = nbtCompound.getBoolean("visible");
 		}
 
-		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
+		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
 			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
 			this.calculateAreaBox = true;
-		} else {
-			this.area = null;
+			nbt.remove("areaMinX");
+			nbt.remove("areaMinY");
+			nbt.remove("areaMinZ");
+			nbt.remove("areaMaxX");
+			nbt.remove("areaMaxY");
+			nbt.remove("areaMaxZ");
 		}
 
-		if (nbt.contains("areaDimensionsX", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsY", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsZ", NbtElement.INT_TYPE)) {
+		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
 			this.areaDimensions = new Vec3i(
 					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
 					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
 					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
 			);
+			nbt.remove("areaDimensionsX");
+			nbt.remove("areaDimensionsY");
+			nbt.remove("areaDimensionsZ");
 		} else {
-			this.areaDimensions = Vec3i.ZERO;
+			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 		}
 
-		if (nbt.contains("areaPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetZ", NbtElement.INT_TYPE)) {
+		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
 			this.areaPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
 					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
 			);
+			nbt.remove("areaPositionOffsetX");
+			nbt.remove("areaPositionOffsetY");
+			nbt.remove("areaPositionOffsetZ");
 		} else {
-			this.areaPositionOffset = AREA_POSITION_OFFSET_DEFAULT;
+			this.areaPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
 		super.readNbt(nbt, registryLookup);

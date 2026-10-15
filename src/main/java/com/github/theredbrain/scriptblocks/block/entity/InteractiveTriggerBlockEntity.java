@@ -14,6 +14,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -39,10 +40,10 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putInt("triggered_block_position_offset_x", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggered_block_position_offset_y", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggered_block_position_offset_z", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggered_block_resets", this.triggeredBlock.getRight());
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound.copy());
 
 		nbt.putString("key_identifier_string", this.keyIdentifierString);
 
@@ -73,7 +74,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 			nbt.remove("triggeredBlockPositionOffsetY");
 			nbt.remove("triggeredBlockPositionOffsetZ");
 			nbt.remove("triggeredBlockResets");
-		} else {
+		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
 			this.triggeredBlock = new MutablePair<>(
 					new BlockPos(
 							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
@@ -81,6 +82,21 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
 					),
 					nbt.getBoolean("triggered_block_resets")
+			);
+			nbt.remove("triggered_block_position_offset_x");
+			nbt.remove("triggered_block_position_offset_y");
+			nbt.remove("triggered_block_position_offset_z");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
 			);
 		}
 

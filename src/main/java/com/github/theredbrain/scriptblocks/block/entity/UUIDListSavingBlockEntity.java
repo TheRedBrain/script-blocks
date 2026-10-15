@@ -6,19 +6,20 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class UUIDListSavingBlockEntity extends BlockEntity implements HandlesUUIDList {
-//	private final HashMap<String, String> data = new HashMap<>(Map.of());
+
 	private final Set<UUID> uuidList = new HashSet<>();
 
 	public UUIDListSavingBlockEntity(BlockPos pos, BlockState state) {
@@ -28,11 +29,11 @@ public class UUIDListSavingBlockEntity extends BlockEntity implements HandlesUUI
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		List<UUID> list = this.uuidList.stream().toList();
-		nbt.putInt("uuid_list_size", list.size());
-		for (int i = 0; i < list.size(); i++) {
-			nbt.putUuid("uuid_" + i, list.get(i));
+		NbtList nbtList = new NbtList();
+		for (UUID uuid : this.uuidList) {
+			nbtList.add(NbtHelper.fromUuid(uuid));
 		}
+		nbt.put("uuid_list", nbtList);
 
 		super.writeNbt(nbt, registryLookup);
 	}
@@ -40,11 +41,20 @@ public class UUIDListSavingBlockEntity extends BlockEntity implements HandlesUUI
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int listSize = nbt.getInt("uuid_list_size");
 		this.uuidList.clear();
-		for (int i = 0; i < listSize; i++) {
-			if (nbt.containsUuid("uuid_" + i)) {
-				this.uuidList.add(nbt.getUuid("uuid_" + i));
+		if (nbt.contains("uuid_list_size")) {
+			int listSize = nbt.getInt("uuid_list_size");
+			for (int i = 0; i < listSize; i++) {
+				if (nbt.containsUuid("uuid_" + i)) {
+					this.uuidList.add(nbt.getUuid("uuid_" + i));
+				}
+				nbt.remove("uuid_" + i);
+			}
+			nbt.remove("uuid_list_size");
+		} else {
+			NbtList nbtList = nbt.getList("uuid_list", NbtElement.INT_ARRAY_TYPE);
+			for (NbtElement nbtElement : nbtList) {
+				this.uuidList.add(NbtHelper.toUuid(nbtElement));
 			}
 		}
 

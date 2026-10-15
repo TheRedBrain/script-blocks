@@ -9,6 +9,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.BlockMirror;
@@ -31,16 +34,16 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		List<Integer> triggeredBlocksKeys = new ArrayList<>(this.triggeredBlocks.keySet());
-		nbt.putInt("triggeredBlocksKeysSize", triggeredBlocksKeys.size());
-		for (int i = 0; i < triggeredBlocksKeys.size(); i++) {
-			int key = triggeredBlocksKeys.get(i);
-			nbt.putInt("triggeredBlocks_key_" + i, key);
-			nbt.putInt("triggeredBlocks_entry_X_" + i, this.triggeredBlocks.get(key).getLeft().getX());
-			nbt.putInt("triggeredBlocks_entry_Y_" + i, this.triggeredBlocks.get(key).getLeft().getY());
-			nbt.putInt("triggeredBlocks_entry_Z_" + i, this.triggeredBlocks.get(key).getLeft().getZ());
-			nbt.putBoolean("triggeredBlocks_entry_resets_" + i, this.triggeredBlocks.get(key).getRight());
-		}
+
+		NbtList nbtList = new NbtList();
+		this.triggeredBlocks.forEach((key, entry) -> {
+			NbtCompound nbtCompound = new NbtCompound();
+			nbtCompound.putInt("key", key);
+			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(entry.getLeft()));
+			nbtCompound.putBoolean("resets", entry.getRight());
+			nbtList.add(nbtCompound);
+		});
+		nbt.put("triggered_blocks", nbtList);
 
 		nbt.putInt("counter", this.counter);
 
@@ -49,15 +52,36 @@ public class TriggeredCounterBlockEntity extends RotatedBlockEntity implements T
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+
 		this.triggeredBlocks.clear();
-		int triggeredBlocksKeysSize = nbt.getInt("triggeredBlocksKeysSize");
-		for (int i = 0; i < triggeredBlocksKeysSize; i++) {
-			this.triggeredBlocks.put(nbt.getInt("triggeredBlocks_key_" + i), new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_X_" + i), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Y_" + i), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Z_" + i), -48, 48)
-					), nbt.getBoolean("triggeredBlocks_entry_resets_" + i)));
+		if (nbt.contains("triggeredBlocksKeysSize")) {
+			int triggeredBlocksKeysSize = nbt.getInt("triggeredBlocksKeysSize");
+			for (int i = 0; i < triggeredBlocksKeysSize; i++) {
+				this.triggeredBlocks.put(nbt.getInt("triggeredBlocks_key_" + i), new MutablePair<>(
+						new BlockPos(
+								MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_X_" + i), -48, 48),
+								MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Y_" + i), -48, 48),
+								MathHelper.clamp(nbt.getInt("triggeredBlocks_entry_Z_" + i), -48, 48)
+						), nbt.getBoolean("triggeredBlocks_entry_resets_" + i)));
+				nbt.remove("triggeredBlocks_key_" + i);
+				nbt.remove("triggeredBlocks_entry_X_" + i);
+				nbt.remove("triggeredBlocks_entry_Y_" + i);
+				nbt.remove("triggeredBlocks_entry_Z_" + i);
+				nbt.remove("triggeredBlocks_entry_resets_" + i);
+			}
+			nbt.remove("triggeredBlocksKeysSize");
+		} else {
+			NbtList nbtList = nbt.getList("triggered_blocks", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				NbtCompound nbtCompound = nbtList.getCompound(i);
+				this.triggeredBlocks.put(
+						nbtCompound.getInt("key"),
+						new MutablePair<>(
+								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+								nbtCompound.getBoolean("resets")
+						)
+				);
+			}
 		}
 
 		this.counter = nbt.getInt("counter");

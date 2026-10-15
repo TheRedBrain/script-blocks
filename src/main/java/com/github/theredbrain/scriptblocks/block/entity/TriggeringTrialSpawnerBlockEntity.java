@@ -16,6 +16,7 @@ import net.minecraft.block.spawner.EntityDetector;
 import net.minecraft.block.spawner.TrialSpawnerLogic;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
@@ -36,7 +37,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 	private MutablePair<BlockPos, Boolean> triggeredBlockOnWaitingForReward = new MutablePair<>(new BlockPos(0, 0, 0), false);
 	private MutablePair<BlockPos, Boolean> triggeredBlockOnReward = new MutablePair<>(new BlockPos(0, 0, 0), false);
 	private MutablePair<BlockPos, Boolean> triggeredBlockOnCooldown = new MutablePair<>(new BlockPos(0, 0, 0), false);
-	
+
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private TrialSpawnerLogic spawner;
 
@@ -48,37 +49,212 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 	}
 
 	@Override
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlockOnInactive.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.triggeredBlockOnInactive.getRight());
+		nbt.put("on_inactive", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlockOnWaitingForPlayers.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.triggeredBlockOnWaitingForPlayers.getRight());
+		nbt.put("on_waiting_for_players", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlockOnActive.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.triggeredBlockOnActive.getRight());
+		nbt.put("on_active", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlockOnWaitingForReward.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.triggeredBlockOnWaitingForReward.getRight());
+		nbt.put("on_waiting_for_reward", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlockOnReward.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.triggeredBlockOnReward.getRight());
+		nbt.put("on_reward", nbtCompound.copy());
+
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.triggeredBlockOnCooldown.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.triggeredBlockOnCooldown.getRight());
+		nbt.put("on_cooldown", nbtCompound);
+
+		this.spawner
+				.codec()
+				.encodeStart(NbtOps.INSTANCE, this.spawner)
+				.ifSuccess(nbtx -> nbt.copyFrom((NbtCompound) nbtx))
+				.ifError(error -> LOGGER.warn("Failed to encode TrialSpawner {}", error.message()));
+
+		super.writeNbt(nbt, registryLookup);
+
+	}
+
+	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockOnInactivePositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockOnInactivePositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockOnInactivePositionOffsetZ"), -48, 48);
-		this.triggeredBlockOnInactive = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnInactiveResets"));
+		if (nbt.contains("triggeredBlockOnInactivePositionOffsetX") || nbt.contains("triggeredBlockOnInactivePositionOffsetY") || nbt.contains("triggeredBlockOnInactivePositionOffsetZ") || nbt.contains("triggeredBlockOnInactiveResets")) {
+			this.triggeredBlockOnInactive = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnInactivePositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnInactivePositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnInactivePositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockOnInactiveResets")
+			);
+			nbt.remove("triggeredBlockOnInactivePositionOffsetX");
+			nbt.remove("triggeredBlockOnInactivePositionOffsetY");
+			nbt.remove("triggeredBlockOnInactivePositionOffsetZ");
+			nbt.remove("triggeredBlockOnInactiveResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("on_inactive");
+			this.triggeredBlockOnInactive = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
-		x = MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForPlayersPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForPlayersPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForPlayersPositionOffsetZ"), -48, 48);
-		this.triggeredBlockOnWaitingForPlayers = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnWaitingForPlayersResets"));
+		if (nbt.contains("triggeredBlockOnWaitingForPlayersPositionOffsetX") || nbt.contains("triggeredBlockOnWaitingForPlayersPositionOffsetY") || nbt.contains("triggeredBlockOnWaitingForPlayersPositionOffsetZ") || nbt.contains("triggeredBlockOnWaitingForPlayersResets")) {
+			this.triggeredBlockOnWaitingForPlayers = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForPlayersPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForPlayersPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForPlayersPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockOnWaitingForPlayersResets")
+			);
+			nbt.remove("triggeredBlockOnWaitingForPlayersPositionOffsetX");
+			nbt.remove("triggeredBlockOnWaitingForPlayersPositionOffsetY");
+			nbt.remove("triggeredBlockOnWaitingForPlayersPositionOffsetZ");
+			nbt.remove("triggeredBlockOnWaitingForPlayersResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("on_waiting_for_players");
+			this.triggeredBlockOnWaitingForPlayers = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
-		x = MathHelper.clamp(nbt.getInt("triggeredBlockOnActivePositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("triggeredBlockOnActivePositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("triggeredBlockOnActivePositionOffsetZ"), -48, 48);
-		this.triggeredBlockOnActive = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnActiveResets"));
+		if (nbt.contains("triggeredBlockOnActivePositionOffsetX") || nbt.contains("triggeredBlockOnActivePositionOffsetY") || nbt.contains("triggeredBlockOnActivePositionOffsetZ") || nbt.contains("triggeredBlockOnActiveResets")) {
+			this.triggeredBlockOnActive = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnActivePositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnActivePositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnActivePositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockOnActiveResets")
+			);
+			nbt.remove("triggeredBlockOnActivePositionOffsetX");
+			nbt.remove("triggeredBlockOnActivePositionOffsetY");
+			nbt.remove("triggeredBlockOnActivePositionOffsetZ");
+			nbt.remove("triggeredBlockOnActiveResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("on_active");
+			this.triggeredBlockOnActive = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
-		x = MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForRewardPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForRewardPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForRewardPositionOffsetZ"), -48, 48);
-		this.triggeredBlockOnWaitingForReward = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnWaitingForRewardResets"));
+		if (nbt.contains("triggeredBlockOnWaitingForRewardPositionOffsetX") || nbt.contains("triggeredBlockOnWaitingForRewardPositionOffsetY") || nbt.contains("triggeredBlockOnWaitingForRewardPositionOffsetZ") || nbt.contains("triggeredBlockOnWaitingForRewardResets")) {
+			this.triggeredBlockOnWaitingForReward = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForRewardPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForRewardPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnWaitingForRewardPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockOnWaitingForRewardResets")
+			);
+			nbt.remove("triggeredBlockOnWaitingForRewardPositionOffsetX");
+			nbt.remove("triggeredBlockOnWaitingForRewardPositionOffsetY");
+			nbt.remove("triggeredBlockOnWaitingForRewardPositionOffsetZ");
+			nbt.remove("triggeredBlockOnWaitingForRewardResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("on_waiting_for_reward");
+			this.triggeredBlockOnWaitingForReward = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
-		x = MathHelper.clamp(nbt.getInt("triggeredBlockOnRewardPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("triggeredBlockOnRewardPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("triggeredBlockOnRewardPositionOffsetZ"), -48, 48);
-		this.triggeredBlockOnReward = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnRewardResets"));
+		if (nbt.contains("triggeredBlockOnRewardPositionOffsetX") || nbt.contains("triggeredBlockOnRewardPositionOffsetY") || nbt.contains("triggeredBlockOnRewardPositionOffsetZ") || nbt.contains("triggeredBlockOnRewardResets")) {
+			this.triggeredBlockOnReward = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnRewardPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnRewardPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnRewardPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockOnRewardResets")
+			);
+			nbt.remove("triggeredBlockOnRewardPositionOffsetX");
+			nbt.remove("triggeredBlockOnRewardPositionOffsetY");
+			nbt.remove("triggeredBlockOnRewardPositionOffsetZ");
+			nbt.remove("triggeredBlockOnRewardResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("on_reward");
+			this.triggeredBlockOnReward = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
-		x = MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetZ"), -48, 48);
-		this.triggeredBlockOnCooldown = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockOnCooldownResets"));
+		if (nbt.contains("triggeredBlockOnCooldownPositionOffsetX") || nbt.contains("triggeredBlockOnCooldownPositionOffsetY") || nbt.contains("triggeredBlockOnCooldownPositionOffsetZ") || nbt.contains("triggeredBlockOnCooldownResets")) {
+			this.triggeredBlockOnCooldown = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockOnCooldownPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockOnCooldownResets")
+			);
+			nbt.remove("triggeredBlockOnCooldownPositionOffsetX");
+			nbt.remove("triggeredBlockOnCooldownPositionOffsetY");
+			nbt.remove("triggeredBlockOnCooldownPositionOffsetZ");
+			nbt.remove("triggeredBlockOnCooldownResets");
+		} else {
+			NbtCompound nbtCompound = nbt.getCompound("on_cooldown");
+			this.triggeredBlockOnCooldown = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
 		if (nbt.contains("normal_config")) {
 			NbtCompound nbtCompound = nbt.getCompound("normal_config").copy();
@@ -91,49 +267,6 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 		}
 
 		super.readNbt(nbt, registryLookup);
-
-	}
-
-	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-
-		nbt.putInt("triggeredBlockOnInactivePositionOffsetX", this.triggeredBlockOnInactive.getLeft().getX());
-		nbt.putInt("triggeredBlockOnInactivePositionOffsetY", this.triggeredBlockOnInactive.getLeft().getY());
-		nbt.putInt("triggeredBlockOnInactivePositionOffsetZ", this.triggeredBlockOnInactive.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockOnInactiveResets", this.triggeredBlockOnInactive.getRight());
-
-		nbt.putInt("triggeredBlockOnWaitingForPlayersPositionOffsetX", this.triggeredBlockOnWaitingForPlayers.getLeft().getX());
-		nbt.putInt("triggeredBlockOnWaitingForPlayersPositionOffsetY", this.triggeredBlockOnWaitingForPlayers.getLeft().getY());
-		nbt.putInt("triggeredBlockOnWaitingForPlayersPositionOffsetZ", this.triggeredBlockOnWaitingForPlayers.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockOnWaitingForPlayersResets", this.triggeredBlockOnWaitingForPlayers.getRight());
-
-		nbt.putInt("triggeredBlockOnActivePositionOffsetX", this.triggeredBlockOnActive.getLeft().getX());
-		nbt.putInt("triggeredBlockOnActivePositionOffsetY", this.triggeredBlockOnActive.getLeft().getY());
-		nbt.putInt("triggeredBlockOnActivePositionOffsetZ", this.triggeredBlockOnActive.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockOnActiveResets", this.triggeredBlockOnActive.getRight());
-
-		nbt.putInt("triggeredBlockOnWaitingForRewardPositionOffsetX", this.triggeredBlockOnWaitingForReward.getLeft().getX());
-		nbt.putInt("triggeredBlockOnWaitingForRewardPositionOffsetY", this.triggeredBlockOnWaitingForReward.getLeft().getY());
-		nbt.putInt("triggeredBlockOnWaitingForRewardPositionOffsetZ", this.triggeredBlockOnWaitingForReward.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockOnWaitingForRewardResets", this.triggeredBlockOnWaitingForReward.getRight());
-
-		nbt.putInt("triggeredBlockOnRewardPositionOffsetX", this.triggeredBlockOnReward.getLeft().getX());
-		nbt.putInt("triggeredBlockOnRewardPositionOffsetY", this.triggeredBlockOnReward.getLeft().getY());
-		nbt.putInt("triggeredBlockOnRewardPositionOffsetZ", this.triggeredBlockOnReward.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockOnRewardResets", this.triggeredBlockOnReward.getRight());
-
-		nbt.putInt("triggeredBlockOnCooldownPositionOffsetX", this.triggeredBlockOnCooldown.getLeft().getX());
-		nbt.putInt("triggeredBlockOnCooldownPositionOffsetY", this.triggeredBlockOnCooldown.getLeft().getY());
-		nbt.putInt("triggeredBlockOnCooldownPositionOffsetZ", this.triggeredBlockOnCooldown.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockOnCooldownResets", this.triggeredBlockOnCooldown.getRight());
-
-		this.spawner
-				.codec()
-				.encodeStart(NbtOps.INSTANCE, this.spawner)
-				.ifSuccess(nbtx -> nbt.copyFrom((NbtCompound)nbtx))
-				.ifError(error -> LOGGER.warn("Failed to encode TrialSpawner {}", error.message()));
-
-		super.writeNbt(nbt, registryLookup);
 
 	}
 
@@ -170,7 +303,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 
 	@Override
 	public void setSpawnerState(World world, TrialSpawnerState spawnerState) {
-		switch(spawnerState) {
+		switch (spawnerState) {
 			case TrialSpawnerState.INACTIVE -> this.triggerOnInactive();
 			case TrialSpawnerState.WAITING_FOR_PLAYERS -> this.triggerOnWaitingForPlayers();
 			case TrialSpawnerState.ACTIVE -> this.triggerOnActive();
@@ -203,7 +336,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 			}
 		}
 	}
-	
+
 	private void triggerOnWaitingForPlayers() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlockOnWaitingForPlayers.getLeft().getX(), this.pos.getY() + this.triggeredBlockOnWaitingForPlayers.getLeft().getY(), this.pos.getZ() + this.triggeredBlockOnWaitingForPlayers.getLeft().getZ()));
@@ -217,7 +350,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 			}
 		}
 	}
-	
+
 	private void triggerOnActive() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlockOnActive.getLeft().getX(), this.pos.getY() + this.triggeredBlockOnActive.getLeft().getY(), this.pos.getZ() + this.triggeredBlockOnActive.getLeft().getZ()));
@@ -231,7 +364,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 			}
 		}
 	}
-	
+
 	private void triggerOnWaitingForReward() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlockOnWaitingForReward.getLeft().getX(), this.pos.getY() + this.triggeredBlockOnWaitingForReward.getLeft().getY(), this.pos.getZ() + this.triggeredBlockOnWaitingForReward.getLeft().getZ()));
@@ -245,7 +378,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 			}
 		}
 	}
-	
+
 	private void triggerOnReward() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlockOnReward.getLeft().getX(), this.pos.getY() + this.triggeredBlockOnReward.getLeft().getY(), this.pos.getZ() + this.triggeredBlockOnReward.getLeft().getZ()));
@@ -259,7 +392,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 			}
 		}
 	}
-	
+
 	private void triggerOnCooldown() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlockOnCooldown.getLeft().getX(), this.pos.getY() + this.triggeredBlockOnCooldown.getLeft().getY(), this.pos.getZ() + this.triggeredBlockOnCooldown.getLeft().getZ()));
@@ -273,7 +406,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 			}
 		}
 	}
-	
+
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
