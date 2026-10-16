@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -8,12 +7,17 @@ import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.scoreboard.Team;
@@ -56,113 +60,207 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		this.isOwnerSet = false;
 	}
 
+	// TODO
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		nbt.putString("ownerUuid", this.ownerUuid);
-		nbt.putBoolean("isOwnerSet", isOwnerSet);
 
-		int coOwnerListSize = coOwnerList.size();
-		nbt.putInt("coOwnerListSize", coOwnerListSize);
-		for (int i = 0; i < coOwnerListSize; i++) {
-			nbt.putString("coOwnerListEntry" + i, this.coOwnerList.get(i));
+		nbt.putString("owner_uuid", this.ownerUuid);
+
+		nbt.putBoolean("is_owner_set", isOwnerSet);
+
+		NbtList nbtList = new NbtList();
+		for (String entry : this.coOwnerList) {
+			nbtList.add(NbtString.of(entry));
 		}
+		nbt.put("co_owners", nbtList.copy());
 
-		int trustedListSize = trustedList.size();
-		nbt.putInt("trustedListSize", trustedListSize);
-		for (int i = 0; i < trustedListSize; i++) {
-			nbt.putString("trustedListEntry" + i, this.trustedList.get(i));
+		nbtList = new NbtList();
+		for (String entry : this.trustedList) {
+			nbtList.add(NbtString.of(entry));
 		}
+		nbt.put("trusted_people", nbtList.copy());
 
-		int guestListSize = guestList.size();
-		nbt.putInt("guestListSize", guestListSize);
-		for (int i = 0; i < guestListSize; i++) {
-			nbt.putString("guestListEntry" + i, this.guestList.get(i));
+		nbtList = new NbtList();
+		for (String entry : this.guestList) {
+			nbtList.add(NbtString.of(entry));
 		}
+		nbt.put("guests", nbtList);
 
-		if (this.area != null) {
-			nbt.putDouble("areaMinX", this.area.minX);
-			nbt.putDouble("areaMaxX", this.area.maxX);
-			nbt.putDouble("areaMinY", this.area.minY);
-			nbt.putDouble("areaMaxY", this.area.maxY);
-			nbt.putDouble("areaMinZ", this.area.minZ);
-			nbt.putDouble("areaMaxZ", this.area.maxZ);
-		} else {
-			nbt.remove("areaMinX");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxZ");
-		}
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.putBoolean("visible", this.showInfluenceArea);
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.influenceAreaPositionOffset));
+		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.influenceAreaDimensions));
+		nbt.put("influence_area", nbtCompound.copy());
 
-		nbt.putBoolean("showInfluenceArea", this.showInfluenceArea);
+		nbt.putString("owner_mode", this.ownerMode.asString());
 
-		nbt.putInt("influenceAreaDimensionsX", this.influenceAreaDimensions.getX());
-		nbt.putInt("influenceAreaDimensionsY", this.influenceAreaDimensions.getY());
-		nbt.putInt("influenceAreaDimensionsZ", this.influenceAreaDimensions.getZ());
-
-		nbt.putInt("influenceAreaPositionOffsetX", this.influenceAreaPositionOffset.getX());
-		nbt.putInt("influenceAreaPositionOffsetY", this.influenceAreaPositionOffset.getY());
-		nbt.putInt("influenceAreaPositionOffsetZ", this.influenceAreaPositionOffset.getZ());
-
-		nbt.putString("ownerMode", this.ownerMode.asString());
-
-		nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-		nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-		nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-		nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
+		nbt.put("triggered_block", nbtCompound);
 
 		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		this.ownerUuid = nbt.getString("ownerUuid");
-		this.isOwnerSet = nbt.getBoolean("isOwnerSet");
 
-		int coOwnerListSize = nbt.getInt("coOwnerListSize");
+		if (nbt.contains("ownerUuid")) {
+			this.ownerUuid = nbt.getString("ownerUuid");
+			nbt.remove("ownerUuid");
+		} else {
+			this.ownerUuid = nbt.getString("owner_uuid");
+		}
+
+		if (nbt.contains("isOwnerSet")) {
+			this.isOwnerSet = nbt.getBoolean("isOwnerSet");
+			nbt.remove("isOwnerSet");
+		} else {
+			this.isOwnerSet = nbt.getBoolean("is_owner_set");
+		}
+
 		this.coOwnerList.clear();
-		for (int i = 0; i < coOwnerListSize; i++) {
-			this.coOwnerList.add(nbt.getString("coOwnerListEntry" + i));
+		if (nbt.contains("coOwnerListSize")) {
+			int coOwnerListSize = nbt.getInt("coOwnerListSize");
+			for (int i = 0; i < coOwnerListSize; i++) {
+				this.coOwnerList.add(nbt.getString("coOwnerListEntry" + i));
+				nbt.remove("coOwnerListEntry" + i);
+			}
+			nbt.remove("coOwnerListSize");
+		} else {
+			NbtList nbtList = nbt.getList("co_owners", NbtElement.STRING_TYPE);
+			for (NbtElement nbtElement : nbtList) {
+				this.coOwnerList.add(nbtElement.asString());
+			}
 		}
 
-		int trustedListSize = nbt.getInt("trustedListSize");
 		this.trustedList.clear();
-		for (int i = 0; i < trustedListSize; i++) {
-			this.trustedList.add(nbt.getString("trustedListEntry" + i));
+		if (nbt.contains("trustedListSize")) {
+			int trustedListSize = nbt.getInt("trustedListSize");
+			for (int i = 0; i < trustedListSize; i++) {
+				this.trustedList.add(nbt.getString("trustedListEntry" + i));
+				nbt.remove("trustedListEntry" + i);
+			}
+			nbt.remove("trustedListSize");
+		} else {
+			NbtList nbtList = nbt.getList("trusted_people", NbtElement.STRING_TYPE);
+			for (NbtElement nbtElement : nbtList) {
+				this.trustedList.add(nbtElement.asString());
+			}
 		}
 
-		int guestListSize = nbt.getInt("guestListSize");
 		this.guestList.clear();
-		for (int i = 0; i < guestListSize; i++) {
-			this.guestList.add(nbt.getString("guestListEntry" + i));
+		if (nbt.contains("guestListSize")) {
+			int guestListSize = nbt.getInt("guestListSize");
+			for (int i = 0; i < guestListSize; i++) {
+				this.guestList.add(nbt.getString("guestListEntry" + i));
+				nbt.remove("guestListEntry" + i);
+			}
+			nbt.remove("guestListSize");
+		} else {
+			NbtList nbtList = nbt.getList("guests", NbtElement.STRING_TYPE);
+			for (NbtElement nbtElement : nbtList) {
+				this.guestList.add(nbtElement.asString());
+			}
 		}
 
-		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
+		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
 			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
 			this.calculateAreaBox = true;
-		} else {
-			this.area = null;
+			nbt.remove("areaMinX");
+			nbt.remove("areaMinY");
+			nbt.remove("areaMinZ");
+			nbt.remove("areaMaxX");
+			nbt.remove("areaMaxY");
+			nbt.remove("areaMaxZ");
 		}
 
-		this.showInfluenceArea = nbt.getBoolean("showInfluenceArea");
+		NbtCompound nbtCompound = nbt.getCompound("influence_area");
+		if (nbt.contains("showInfluenceArea")) {
+			this.showInfluenceArea = nbt.getBoolean("showInfluenceArea");
+			nbt.remove("showInfluenceArea");
+		} else {
+			this.showInfluenceArea = nbtCompound.getBoolean("visible");
+		}
 
-		int i = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsX"), 0, 48);
-		int j = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsY"), 0, 48);
-		int k = MathHelper.clamp(nbt.getInt("influenceAreaDimensionsZ"), 0, 48);
-		this.influenceAreaDimensions = new Vec3i(i, j, k);
+		if (nbt.contains("influenceAreaDimensionsX") || nbt.contains("influenceAreaDimensionsY") || nbt.contains("influenceAreaDimensionsZ")) {
+			this.influenceAreaDimensions = new Vec3i(
+					MathHelper.clamp(nbt.getInt("influenceAreaDimensionsX"), 0, 48),
+					MathHelper.clamp(nbt.getInt("influenceAreaDimensionsY"), 0, 48),
+					MathHelper.clamp(nbt.getInt("influenceAreaDimensionsZ"), 0, 48)
+			);
+			nbt.remove("influenceAreaDimensionsX");
+			nbt.remove("influenceAreaDimensionsY");
+			nbt.remove("influenceAreaDimensionsZ");
+		} else {
+			this.influenceAreaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
+		}
 
-		int l = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetX"), -48, 48);
-		int m = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetY"), -48, 48);
-		int n = MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetZ"), -48, 48);
-		this.influenceAreaPositionOffset = new BlockPos(l, m, n);
+		if (nbt.contains("influenceAreaPositionOffsetX") || nbt.contains("influenceAreaPositionOffsetY") || nbt.contains("influenceAreaPositionOffsetZ")) {
+			this.influenceAreaPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetZ"), -48, 48)
+			);
+			nbt.remove("influenceAreaPositionOffsetX");
+			nbt.remove("influenceAreaPositionOffsetY");
+			nbt.remove("influenceAreaPositionOffsetZ");
+		} else {
+			this.influenceAreaPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
 
-		this.ownerMode = OwnerMode.byName(nbt.getString("ownerMode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
+		if (nbt.contains("ownerMode")) {
+			this.ownerMode = OwnerMode.byName(nbt.getString("ownerMode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
+			nbt.remove("ownerMode");
+		} else {
+			this.ownerMode = OwnerMode.byName(nbt.getString("owner_mode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
+		}
 
-		int x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48);
-		this.triggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("triggeredBlockResets"));
+		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("triggeredBlockResets")
+			);
+			nbt.remove("triggeredBlockPositionOffsetX");
+			nbt.remove("triggeredBlockPositionOffsetY");
+			nbt.remove("triggeredBlockPositionOffsetZ");
+			nbt.remove("triggeredBlockResets");
+		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
+			this.triggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
+							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
+					),
+					nbt.getBoolean("triggered_block_resets")
+			);
+			nbt.remove("triggered_block_position_offset_x");
+			nbt.remove("triggered_block_position_offset_y");
+			nbt.remove("triggered_block_position_offset_z");
+			nbt.remove("triggered_block_resets");
+		} else {
+			nbtCompound = nbt.getCompound("triggered_block");
+			this.triggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
+			);
+		}
 
 		super.readNbt(nbt, registryLookup);
 	}
@@ -205,11 +303,11 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 				housingBlockEntity.markDirty();
 			}
 			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, housingBlockEntity.area);
-			Iterator var11 = list.iterator();
+			Iterator<PlayerEntity> var11 = list.iterator();
 
 			PlayerEntity playerEntity;
 			while (var11.hasNext()) {
-				playerEntity = (PlayerEntity) var11.next();
+				playerEntity = var11.next();
 
 				String playerName = playerEntity.getName().getString();
 				String playerUuid = playerEntity.getUuidAsString();
@@ -277,29 +375,24 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		return this.showInfluenceArea;
 	}
 
-	public boolean setShowInfluenceArea(boolean showInfluenceArea) {
+	public void setShowInfluenceArea(boolean showInfluenceArea) {
 		this.showInfluenceArea = showInfluenceArea;
-		return true;
 	}
 
 	public Vec3i getInfluenceAreaDimensions() {
 		return this.influenceAreaDimensions;
 	}
 
-	// TODO check if input is valid
-	public boolean setInfluenceAreaDimensions(Vec3i influenceAreaDimensions) {
-		this.influenceAreaDimensions = influenceAreaDimensions;
-		return true;
+	public void setInfluenceAreaDimensions(Vec3i influenceAreaDimensions) {
+		this.influenceAreaDimensions = new BlockPos(influenceAreaDimensions);
 	}
 
 	public BlockPos getRestrictBlockBreakingAreaPositionOffset() {
 		return this.influenceAreaPositionOffset;
 	}
 
-	// TODO check if input is valid
-	public boolean setRestrictBlockBreakingAreaPositionOffset(BlockPos influenceAreaPositionOffset) {
-		this.influenceAreaPositionOffset = influenceAreaPositionOffset;
-		return true;
+	public void setRestrictBlockBreakingAreaPositionOffset(BlockPos influenceAreaPositionOffset) {
+		this.influenceAreaPositionOffset = new BlockPos(influenceAreaPositionOffset);
 	}
 
 	public MutablePair<BlockPos, Boolean> getTriggeredBlock() {
@@ -314,9 +407,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		return this.ownerMode;
 	}
 
-	public boolean setOwnerMode(OwnerMode ownerMode) {
+	public void setOwnerMode(OwnerMode ownerMode) {
 		this.ownerMode = ownerMode;
-		return true;
 	}
 
 	public boolean isOwnerSet() {
@@ -391,13 +483,13 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		}
 	}
 
-	public static enum OwnerMode implements StringIdentifiable {
+	public enum OwnerMode implements StringIdentifiable {
 		DIMENSION_OWNER("dimension_owner"),
 		INTERACTION("interaction");
 
 		private final String name;
 
-		private OwnerMode(String name) {
+		OwnerMode(String name) {
 			this.name = name;
 		}
 

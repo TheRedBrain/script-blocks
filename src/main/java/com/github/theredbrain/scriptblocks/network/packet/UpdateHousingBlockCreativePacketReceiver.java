@@ -36,33 +36,17 @@ public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetwo
 
 		World world = serverPlayerEntity.getWorld();
 
-		boolean updateSuccessful = true;
-
 		BlockEntity blockEntity = world.getBlockEntity(housingBlockPosition);
 		BlockState blockState = world.getBlockState(housingBlockPosition);
 
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 
-			if (!housingBlockEntity.setShowInfluenceArea(showRestrictBlockBreakingArea)) {
-				serverPlayerEntity.sendMessage(Text.translatable("housing_block.showRestrictBlockBreakingArea.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!housingBlockEntity.setInfluenceAreaDimensions(restrictBlockBreakingAreaDimensions)) {
-				serverPlayerEntity.sendMessage(Text.translatable("housing_block.restrictBlockBreakingAreaDimensions.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!housingBlockEntity.setRestrictBlockBreakingAreaPositionOffset(restrictBlockBreakingAreaPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("housing_block.restrictBlockBreakingAreaPositionOffset.invalid"), false);
-				updateSuccessful = false;
-			}
+			housingBlockEntity.setShowInfluenceArea(showRestrictBlockBreakingArea);
+			housingBlockEntity.setInfluenceAreaDimensions(restrictBlockBreakingAreaDimensions);
+			housingBlockEntity.setRestrictBlockBreakingAreaPositionOffset(restrictBlockBreakingAreaPositionOffset);
 			housingBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			if (!housingBlockEntity.setOwnerMode(ownerMode)) {
-				serverPlayerEntity.sendMessage(Text.translatable("housing_block.ownerMode.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			}
+			housingBlockEntity.setOwnerMode(ownerMode);
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			housingBlockEntity.markDirty();
 			world.updateListeners(housingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}
