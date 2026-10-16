@@ -52,6 +52,7 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
   - also sends a UUID list of all entering/leaving players
   - the ticking area check can be disabled
   - when triggered, sends a UUID list of all players in the area and triggers a block when at least one player is in the area
+  - is now a UUID List Handler, providing the players currently in its area
 
 ### Team Controller Block Rework
 

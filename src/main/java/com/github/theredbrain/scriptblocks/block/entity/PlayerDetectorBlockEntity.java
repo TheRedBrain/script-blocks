@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Triggerable {
+public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
 	private boolean enableTicking = true;
 
@@ -585,29 +585,65 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Tri
 
 	@Override
 	public void trigger() {
-		if (this.getWorld() != null && !this.getWorld().isClient()) {
-			if (this.calculateAreaBox || this.area == null) {
-				BlockPos areaPositionOffset = this.areaPositionOffset;
-				Vec3i areaDimensions = this.areaDimensions;
-				Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
-				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
-				this.area = new Box(areaStart, areaEnd);
-				this.calculateAreaBox = false;
-			}
+		if (this.getWorld() != null) {
+			return;
+		}
+		if (this.calculateAreaBox || this.area == null) {
+			BlockPos areaPositionOffset = this.areaPositionOffset;
+			Vec3i areaDimensions = this.areaDimensions;
+			Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
+			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
+			this.area = new Box(areaStart, areaEnd);
+			this.calculateAreaBox = false;
+		}
 
-			List<PlayerEntity> currentPlayerList = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, this.area);
-			List<UUID> currentPlayersUuidList = new ArrayList<>();
-			for (PlayerEntity player : currentPlayerList) {
-				if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
-					currentPlayersUuidList.add(player.getUuid());
-				}
-			}
-
-			if (!currentPlayersUuidList.isEmpty()) {
-				this.sendPlayerUUIDListOnTriggering(currentPlayersUuidList);
-				this.triggerBlockOnTriggering();
+		List<PlayerEntity> currentPlayerList = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, this.area);
+		List<UUID> currentPlayersUuidList = new ArrayList<>();
+		for (PlayerEntity player : currentPlayerList) {
+			if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
+				currentPlayersUuidList.add(player.getUuid());
 			}
 		}
+
+		if (!currentPlayersUuidList.isEmpty()) {
+			this.sendPlayerUUIDListOnTriggering(currentPlayersUuidList);
+			this.triggerBlockOnTriggering();
+		}
+	}
+
+	@Override
+	public List<UUID> supplyUUIDList(boolean remove) {
+		if (this.getWorld() == null) {
+			return new ArrayList<>();
+		}
+
+		if (this.calculateAreaBox || this.area == null) {
+			BlockPos areaPositionOffset = this.areaPositionOffset;
+			Vec3i areaDimensions = this.areaDimensions;
+			Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
+			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
+			this.area = new Box(areaStart, areaEnd);
+			this.calculateAreaBox = false;
+		}
+
+		List<PlayerEntity> currentPlayerList = this.getWorld().getNonSpectatingEntities(PlayerEntity.class, this.area);
+		List<UUID> currentPlayersUuidList = new ArrayList<>();
+		for (PlayerEntity player : currentPlayerList) {
+			if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
+				currentPlayersUuidList.add(player.getUuid());
+			}
+		}
+
+		return currentPlayersUuidList;
+	}
+
+	@Override
+	public void handleUUIDList(List<UUID> list, boolean remove) {
+
+	}
+
+	@Override
+	public void reset() {
 	}
 
 	@Override
