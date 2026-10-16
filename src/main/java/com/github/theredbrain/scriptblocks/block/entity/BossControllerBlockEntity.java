@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -24,9 +25,10 @@ import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
@@ -36,10 +38,7 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
 import net.minecraft.world.event.GameEvent;
@@ -49,13 +48,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public class BossControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
-
-	private static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 1, 0);
 
 	private long globalTimer = 0;
 	private long phaseTimer = 0;
@@ -69,24 +65,22 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	private NbtCompound entityTypeCompound = new NbtCompound();
 
-	// set via GUI
-	private boolean calculateAreaBox = true;
-	private Box area = null;
-	private boolean showArea = false;
-	private Vec3i areaDimensions = Vec3i.ZERO;
-	private BlockPos areaPositionOffset = POSITION_OFFSET_DEFAULT;
+	private BlockPos uuidListHandlerBlockPositionOffset = BlockPos.ORIGIN;
 
-	MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 
 	private String bossIdentifier = "";
 
-	private BlockPos bossSpawnPositionOffset = POSITION_OFFSET_DEFAULT;
+	private BlockPos bossSpawnPositionOffset = BlockPos.ORIGIN;
 	private double bossSpawnOrientationPitch = 0.0;
 	private double bossSpawnOrientationYaw = 0.0;
 
-	Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+	protected boolean isPersistent = false;
+	protected boolean enableSpawnEffects = true;
 
-	private HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks = new HashMap<>();
+	private final Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+
+	private final HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks = new HashMap<>();
 
 	public BossControllerBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.BOSS_CONTROLLER_BLOCK_ENTITY, pos, state);
@@ -104,105 +98,41 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (this.showArea) {
-			nbt.putBoolean("showArea", true);
-		} else {
-			nbt.remove("showArea");
-		}
+		nbt.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.uuidListHandlerBlockPositionOffset));
 
-		if (this.area != null) {
-			nbt.putDouble("areaMinX", this.area.minX);
-			nbt.putDouble("areaMaxX", this.area.maxX);
-			nbt.putDouble("areaMinY", this.area.minY);
-			nbt.putDouble("areaMaxY", this.area.maxY);
-			nbt.putDouble("areaMinZ", this.area.minZ);
-			nbt.putDouble("areaMaxZ", this.area.maxZ);
-		} else {
-			nbt.remove("areaMinX");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxZ");
-		}
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.noPlayersAroundTriggeredBlock.getLeft()));
+		nbtCompound.putBoolean("resets", this.noPlayersAroundTriggeredBlock.getRight());
+		nbt.put("triggered_block_on_no_players", nbtCompound.copy());
 
-		if (this.areaDimensions != Vec3i.ZERO) {
-			nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
-			nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
-			nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
-		} else {
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		}
+		nbt.putString("boss_identifier", this.bossIdentifier);
 
-		BlockPos areaPositionOffset = this.areaPositionOffset;
-		if (!areaPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
-			nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
-			nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
-		} else {
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		}
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.bossSpawnPositionOffset));
+		nbtCompound.putDouble("yaw", this.bossSpawnOrientationYaw);
+		nbtCompound.putDouble("pitch", this.bossSpawnOrientationPitch);
+		nbt.put("boss_spawn_point", nbtCompound.copy());
 
-		nbt.putInt("noPlayersAroundTriggeredBlockPositionOffsetX", this.noPlayersAroundTriggeredBlock.getLeft().getX());
-		nbt.putInt("noPlayersAroundTriggeredBlockPositionOffsetY", this.noPlayersAroundTriggeredBlock.getLeft().getY());
-		nbt.putInt("noPlayersAroundTriggeredBlockPositionOffsetZ", this.noPlayersAroundTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("noPlayersAroundTriggeredBlockResets", this.noPlayersAroundTriggeredBlock.getRight());
+		nbt.putBoolean("is_persistent", this.isPersistent);
 
-		if (this.bossIdentifier != null) {
-			nbt.putString("bossIdentifier", this.bossIdentifier);
-		} else {
-			nbt.remove("bossIdentifier");
-		}
+		nbt.putBoolean("enable_spawn_effects", this.enableSpawnEffects);
 
-		BlockPos bossSpawnPositionOffset = this.bossSpawnPositionOffset;
-		if (!bossSpawnPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-			nbt.putInt("bossSpawnPositionOffsetX", this.bossSpawnPositionOffset.getX());
-			nbt.putInt("bossSpawnPositionOffsetY", this.bossSpawnPositionOffset.getY());
-			nbt.putInt("bossSpawnPositionOffsetZ", this.bossSpawnPositionOffset.getZ());
-		} else {
-			nbt.remove("bossSpawnPositionOffsetX");
-			nbt.remove("bossSpawnPositionOffsetY");
-			nbt.remove("bossSpawnPositionOffsetZ");
-		}
+		NbtList nbtList = new NbtList();
+		this.bossTriggeredBlocks.forEach((key, entry) -> {
+			NbtCompound nbtCompound1 = new NbtCompound();
+			nbtCompound1.putString("key", key);
+			nbtCompound1.put("position_offset", NbtHelper.fromBlockPos(entry.getLeft()));
+			nbtCompound1.putBoolean("resets", entry.getRight());
+			nbtList.add(nbtCompound1.copy());
+		});
+		nbt.put("boss_triggered_blocks", nbtList);
 
-		if (this.bossSpawnOrientationPitch != 0.0) {
-			nbt.putDouble("bossSpawnOrientationPitch", this.bossSpawnOrientationPitch);
-		} else {
-			nbt.remove("bossSpawnOrientationPitch");
-		}
-
-		if (this.bossSpawnOrientationYaw != 0.0) {
-			nbt.putDouble("bossSpawnOrientationYaw", this.bossSpawnOrientationYaw);
-		} else {
-			nbt.remove("bossSpawnOrientationYaw8");
-		}
-
-		// TODO convert to an nbt element
-		List<String> bossTriggeredBlocksKeys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
-		nbt.putInt("bossTriggeredBlocksKeysSize", bossTriggeredBlocksKeys.size());
-		for (int i = 0; i < bossTriggeredBlocksKeys.size(); i++) {
-			String key = bossTriggeredBlocksKeys.get(i);
-			nbt.putString("bossTriggeredBlocks_key_" + i, key);
-			nbt.putInt("bossTriggeredBlocks_entry_X_" + i, this.bossTriggeredBlocks.get(key).getLeft().getX());
-			nbt.putInt("bossTriggeredBlocks_entry_Y_" + i, this.bossTriggeredBlocks.get(key).getLeft().getY());
-			nbt.putInt("bossTriggeredBlocks_entry_Z_" + i, this.bossTriggeredBlocks.get(key).getLeft().getZ());
-			nbt.putBoolean("bossTriggeredBlocks_entry_resets_" + i, this.bossTriggeredBlocks.get(key).getRight());
-		}
-
-		if (!Objects.equals(this.entityTypeCompound, new NbtCompound())) {
-			nbt.put("EntityTypeCompound", this.entityTypeCompound);
-		} else {
-			nbt.remove("EntityTypeCompound");
-		}
+		nbt.put("entity_type_compound", this.entityTypeCompound);
 
 		if (this.bossEntityUuid != null) {
-			nbt.putUuid("bossEntityUuid", this.bossEntityUuid);
+			nbt.putUuid("boss_entity_uuid", this.bossEntityUuid);
 		} else {
-			nbt.remove("bossEntityUuid");
+			nbt.remove("boss_entity_uuid");
 		}
 
 		super.writeNbt(nbt, registryLookup);
@@ -212,94 +142,132 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		if (nbt.contains("showArea", NbtElement.BYTE_TYPE)) {
-			this.showArea = nbt.getBoolean("showArea");
-		} else {
-			this.showArea = false;
-		}
+		this.uuidListHandlerBlockPositionOffset = BlockPos.max(
+				BlockPos.min(
+						NbtHelper.toBlockPos(nbt, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
-			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
-			this.calculateAreaBox = true;
-		} else {
-			this.area = null;
-		}
-
-		if (nbt.contains("areaDimensionsX", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsY", NbtElement.INT_TYPE) || nbt.contains("areaDimensionsZ", NbtElement.INT_TYPE)) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
+		if (nbt.contains("noPlayersAroundTriggeredBlockPositionOffsetX") || nbt.contains("noPlayersAroundTriggeredBlockPositionOffsetY") || nbt.contains("noPlayersAroundTriggeredBlockPositionOffsetZ") || nbt.contains("noPlayersAroundTriggeredBlockResets")) {
+			this.noPlayersAroundTriggeredBlock = new MutablePair<>(
+					new BlockPos(
+							MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetX"), -48, 48),
+							MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetY"), -48, 48),
+							MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetZ"), -48, 48)
+					),
+					nbt.getBoolean("noPlayersAroundTriggeredBlockResets")
 			);
+			nbt.remove("noPlayersAroundTriggeredBlockPositionOffsetX");
+			nbt.remove("noPlayersAroundTriggeredBlockPositionOffsetY");
+			nbt.remove("noPlayersAroundTriggeredBlockPositionOffsetZ");
+			nbt.remove("noPlayersAroundTriggeredBlockResets");
 		} else {
-			this.areaDimensions = Vec3i.ZERO;
-		}
-
-		if (nbt.contains("areaPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("areaPositionOffsetZ", NbtElement.INT_TYPE)) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
+			NbtCompound nbtCompound = nbt.getCompound("triggered_block_on_no_players");
+			this.noPlayersAroundTriggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("resets")
 			);
-		} else {
-			this.areaPositionOffset = POSITION_OFFSET_DEFAULT;
 		}
 
-		int x = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.noPlayersAroundTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("noPlayersAroundTriggeredBlockResets"));
-
-		if (nbt.contains("bossIdentifier", NbtElement.STRING_TYPE)) {
+		if (nbt.contains("bossIdentifier")) {
 			this.bossIdentifier = nbt.getString("bossIdentifier");
+			nbt.remove("bossIdentifier");
 		} else {
-			this.bossIdentifier = "";
+			this.bossIdentifier = nbt.getString("boss_identifier");
 		}
 
-		if (nbt.contains("bossSpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("bossSpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("bossSpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
+		NbtCompound nbtCompound = nbt.getCompound("boss_spawn_point");
+		if (nbt.contains("bossSpawnPositionOffsetX") || nbt.contains("bossSpawnPositionOffsetY") || nbt.contains("bossSpawnPositionOffsetZ")) {
 			this.bossSpawnPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetX"), -48, 48),
 					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetY"), -48, 48),
 					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetZ"), -48, 48)
 			);
+			nbt.remove("bossSpawnPositionOffsetX");
+			nbt.remove("bossSpawnPositionOffsetY");
+			nbt.remove("bossSpawnPositionOffsetZ");
 		} else {
-			this.bossSpawnPositionOffset = POSITION_OFFSET_DEFAULT;
+			this.bossSpawnPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
+
+		this.isPersistent = nbt.getBoolean("is_persistent");
+
+		this.enableSpawnEffects = nbt.getBoolean("enable_spawn_effects");
 
 		if (nbt.contains("bossSpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
 			this.bossSpawnOrientationPitch = nbt.getDouble("bossSpawnOrientationPitch");
+			nbt.remove("bossSpawnOrientationPitch");
 		} else {
-			this.bossSpawnOrientationPitch = 0.0;
+			this.bossSpawnOrientationPitch = MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90);
 		}
 
 		if (nbt.contains("bossSpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
 			this.bossSpawnOrientationYaw = nbt.getDouble("bossSpawnOrientationYaw");
+			nbt.remove("bossSpawnOrientationYaw");
 		} else {
-			this.bossSpawnOrientationYaw = 0.0;
+			this.bossSpawnOrientationYaw = MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180);
 		}
 
 		this.bossTriggeredBlocks.clear();
-		// TODO convert to an nbt element
-		int bossTriggeredBlocksKeysSize = nbt.getInt("bossTriggeredBlocksKeysSize");
-		for (int b = 0; b < bossTriggeredBlocksKeysSize; b++) {
-			this.bossTriggeredBlocks.put(nbt.getString("bossTriggeredBlocks_key_" + b), new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_X_" + b), -48, 48),
-							MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_Y_" + b), -48, 48),
-							MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_Z_" + b), -48, 48)
-					), nbt.getBoolean("bossTriggeredBlocks_entry_resets_" + b)));
+		if (nbt.contains("bossTriggeredBlocksKeysSize")) {
+			int bossTriggeredBlocksKeysSize = nbt.getInt("bossTriggeredBlocksKeysSize");
+			for (int b = 0; b < bossTriggeredBlocksKeysSize; b++) {
+				this.bossTriggeredBlocks.put(nbt.getString("bossTriggeredBlocks_key_" + b), new MutablePair<>(
+						new BlockPos(
+								MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_X_" + b), -48, 48),
+								MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_Y_" + b), -48, 48),
+								MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_Z_" + b), -48, 48)
+						), nbt.getBoolean("bossTriggeredBlocks_entry_resets_" + b)));
+				nbt.remove("bossTriggeredBlocks_key_" + b);
+				nbt.remove("bossTriggeredBlocks_entry_X_" + b);
+				nbt.remove("bossTriggeredBlocks_entry_Y_" + b);
+				nbt.remove("bossTriggeredBlocks_entry_Z_" + b);
+				nbt.remove("bossTriggeredBlocks_entry_resets_" + b);
+			}
+			nbt.remove("bossTriggeredBlocksKeysSize");
+		} else {
+			NbtList nbtList = nbt.getList("boss_triggered_blocks", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				nbtCompound = nbtList.getCompound(i);
+				this.bossTriggeredBlocks.put(
+						nbtCompound.getString("key"),
+						new MutablePair<>(
+								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+								nbtCompound.getBoolean("resets")
+						)
+				);
+			}
 		}
 
 		if (nbt.contains("EntityTypeCompound", NbtElement.COMPOUND_TYPE)) {
 			this.entityTypeCompound = nbt.getCompound("EntityTypeCompound");
 		} else {
-			this.entityTypeCompound = new NbtCompound();
+			this.entityTypeCompound = nbt.getCompound("entity_type_compound");
 		}
 
 		if (nbt.containsUuid("bossEntityUuid")) {
 			this.bossEntityUuid = nbt.getUuid("bossEntityUuid");
+			nbt.remove("bossEntityUuid");
+		} else if (nbt.containsUuid("boss_entity_uuid")) {
+			this.bossEntityUuid = nbt.getUuid("boss_entity_uuid");
 		} else {
 			this.bossEntityUuid = null;
+			nbt.remove("bossEntityUuid");
+			nbt.remove("boss_entity_uuid");
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -330,6 +298,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				}
 			}
 			bC.markDirty();
+			if (bC.world != null) {
+				BlockState blockState = bC.world.getBlockState(bC.pos);
+				bC.world.updateListeners(bC.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 		}
 	}
 
@@ -362,6 +334,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 		}
 		bC.markDirty();
+		if (bC.world != null) {
+			BlockState blockState = bC.world.getBlockState(bC.pos);
+			bC.world.updateListeners(bC.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	private static void advancePhase(BossControllerBlockEntity bC) {
@@ -384,6 +360,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		}
 		bC.markDirty();
+		if (bC.world != null) {
+			BlockState blockState = bC.world.getBlockState(bC.pos);
+			bC.world.updateListeners(bC.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	private static void endBattle(BossControllerBlockEntity bC) {
@@ -397,6 +377,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			bC.bossEntityUuid = null;
 		}
 		bC.markDirty();
+		if (bC.world != null) {
+			BlockState blockState = bC.world.getBlockState(bC.pos);
+			bC.world.updateListeners(bC.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	private static void startPhase(BossControllerBlockEntity bC) {
@@ -404,7 +388,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		DebuggingHelper.sendBossControllerLogMessage("startPhase", null);
 
-		bC.entityAttributeModifiers = getEntityAttributeModifiers(bC.currentPhase);
+		bC.entityAttributeModifiers.clear();
+		bC.entityAttributeModifiers.putAll(getEntityAttributeModifiers(bC.currentPhase));
 
 		// trigger block
 		String triggeredBlock = phase.triggeredBlockAtStart();
@@ -457,6 +442,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 		}
 		bC.markDirty();
+		if (bC.world != null) {
+			BlockState blockState = bC.world.getBlockState(bC.pos);
+			bC.world.updateListeners(bC.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	private static void endPhase(BossControllerBlockEntity bC, boolean removeAttributeModifiers) {
@@ -557,13 +546,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				yaw = entrance.getRight().getLeft();
 				pitch = entrance.getRight().getRight();
 			}
-			double d = (double) blockPos.getX() + 0.5;
-			double e = (double) blockPos.getY();
-			double f = (double) blockPos.getZ() + 0.5;
+			double d = blockPos.getX() + 0.5;
+			double e = blockPos.getY();
+			double f = blockPos.getZ() + 0.5;
 
 			if (!serverWorld.isSpaceEmpty(optional.get().getSpawnBox(d, e, f))) {
 
 				DebuggingHelper.sendBossControllerLogMessage("not enough space for spawning boss entity", null);
+
 				return false;
 			}
 			blockPos = BlockPos.ofFloored(d, e, f);
@@ -577,32 +567,38 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			entity2.setBodyYaw((float) yaw);
 			entity2.setHeadYaw((float) yaw);
 			entity2.refreshPositionAndAngles(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
-			if (entity2 instanceof MobEntity) {
+			if (entity2 instanceof MobEntity mobEntity) {
 				if (bC.entityTypeCompound.contains("id", NbtElement.STRING_TYPE)) {
-					((MobEntity) entity2).initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);
+					mobEntity.initialize(serverWorld, serverWorld.getLocalDifficulty(entity2.getBlockPos()), SpawnReason.SPAWNER, null);
 				}
-			}
-			if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
-				return false;
-			}
-			serverWorld.syncWorldEvent(WorldEvents.SPAWNER_SPAWNS_MOB, bC.pos, 0);
-			serverWorld.emitGameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
-			if (entity2 instanceof LivingEntity) {
+				if (!serverWorld.spawnNewEntityAndPassengers(entity2)) {
+					return false;
+				}
+				if (bC.enableSpawnEffects) {
+					serverWorld.syncWorldEvent(WorldEvents.SPAWNER_SPAWNS_MOB, bC.pos, 0);
+				}
+				serverWorld.emitGameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
 
-				bC.bossEntityUuid = ((LivingEntity) entity2).getUuid();
-				if (entity2 instanceof MobEntity mobEntity) {
-					mobEntity.playSpawnEffects(); // TODO make optional
-
+				bC.bossEntityUuid = entity2.getUuid();
+				if (bC.isPersistent) {
 					mobEntity.setPersistent();
-					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.pos);
 				}
+				if (bC.enableSpawnEffects) {
+					mobEntity.playSpawnEffects();
+				}
+
+				mobEntity.setPersistent();
+				((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.pos);
 			}
 			bC.markDirty();
+			if (bC.world != null) {
+				BlockState blockState = bC.world.getBlockState(bC.pos);
+				bC.world.updateListeners(bC.pos, blockState, blockState, Block.NOTIFY_ALL);
+			}
 			return true;
 		}
 		return false;
 	}
-
 	//endregion Boss Battle Logic
 
 	@Override
@@ -643,94 +639,15 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public boolean noPlayersPresentInArea() {
-		if (this.calculateAreaBox || this.area == null) {
-			BlockPos areaPositionOffset = this.areaPositionOffset;
-			Vec3i areaDimensions = this.areaDimensions;
-			Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
-			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
-			this.area = new Box(areaStart, areaEnd);
-			this.calculateAreaBox = false;
-			this.markDirty();
-		}
 		if (this.world != null) {
-			return this.world.getNonSpectatingEntities(PlayerEntity.class, this.area).isEmpty();
+			BlockPos uuidListHandlerBlockPos = new BlockPos(this.pos.getX() + this.uuidListHandlerBlockPositionOffset.getX(), this.pos.getY() + this.uuidListHandlerBlockPositionOffset.getY(), this.pos.getZ() + this.uuidListHandlerBlockPositionOffset.getZ());
+
+			BlockEntity blockEntity = world.getBlockEntity(uuidListHandlerBlockPos);
+			if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				return handlesUUIDList.supplyUUIDList(false).isEmpty();
+			}
 		}
 		return false;
-	}
-
-	@Override
-	public void trigger() {
-		if (this.boss != null && this.currentPhase != null && this.currentPhase.triggerEndsPhase()) {
-			advancePhase(this);
-		}
-		if (this.currentPhase == null && this.currentPhaseId == -1) {
-			startBattle(this);
-		}
-	}
-
-	@Override
-	protected void onRotate(BlockState state) {
-		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
-
-				this.bossSpawnPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.bossSpawnPositionOffset, blockRotation);
-				this.bossSpawnOrientationYaw = BlockRotationUtils.rotateYaw(this.bossSpawnOrientationYaw, blockRotation);
-
-				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), blockRotation));
-
-				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
-				for (String key : keys) {
-					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
-					oldBlockPos.setLeft(BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos.getLeft(), blockRotation));
-					this.bossTriggeredBlocks.put(key, oldBlockPos);
-				}
-
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
-				this.areaPositionOffset = offsetArea.getLeft();
-				this.areaDimensions = offsetArea.getRight();
-
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
-			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
-				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.FRONT_BACK);
-				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, BlockMirror.FRONT_BACK);
-
-				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
-
-				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
-				for (String key : keys) {
-					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
-					oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.FRONT_BACK));
-					this.bossTriggeredBlocks.put(key, oldBlockPos);
-				}
-
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
-				this.areaPositionOffset = offsetArea.getLeft();
-				this.areaDimensions = offsetArea.getRight();
-
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
-			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
-				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, BlockMirror.LEFT_RIGHT);
-
-				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-
-				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
-				for (String key : keys) {
-					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
-					oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.LEFT_RIGHT));
-					this.bossTriggeredBlocks.put(key, oldBlockPos);
-				}
-
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
-				this.areaPositionOffset = offsetArea.getLeft();
-				this.areaDimensions = offsetArea.getRight();
-
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
-			}
-		}
 	}
 
 	public String getEntityTypeId() {
@@ -751,34 +668,18 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	// endregion --- getter & setter ---
-	public boolean showArea() {
-		return showArea;
+	public BlockPos getUUIDListHandlerBlockPositionOffset() {
+		return this.uuidListHandlerBlockPositionOffset;
 	}
 
-	public void setShowArea(boolean showArea) {
-		this.showArea = showArea;
-	}
-
-	public Vec3i getAreaDimensions() {
-		return areaDimensions;
-	}
-
-	// TODO check if input is valid
-	public boolean setAreaDimensions(Vec3i areaDimensions) {
-		this.areaDimensions = areaDimensions;
-		this.calculateAreaBox = true;
-		return true;
-	}
-
-	public BlockPos getAreaPositionOffset() {
-		return areaPositionOffset;
-	}
-
-	// TODO check if input is valid
-	public boolean setAreaPositionOffset(BlockPos areaPositionOffset) {
-		this.areaPositionOffset = areaPositionOffset;
-		this.calculateAreaBox = true;
-		return true;
+	public void setUUIDListHandlerBlockPositionOffset(BlockPos uuidListHandlerBlockPositionOffset) {
+		this.uuidListHandlerBlockPositionOffset = BlockPos.max(
+				BlockPos.min(
+						uuidListHandlerBlockPositionOffset,
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 	}
 
 	public MutablePair<BlockPos, Boolean> getNoPlayersAroundTriggeredBlock() {
@@ -786,39 +687,64 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public void setNoPlayersAroundTriggeredBlock(MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock) {
-		this.noPlayersAroundTriggeredBlock = noPlayersAroundTriggeredBlock;
+		this.noPlayersAroundTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								noPlayersAroundTriggeredBlock.getLeft(),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				noPlayersAroundTriggeredBlock.getRight()
+		);
 	}
 
 	public BlockPos getBossSpawnPositionOffset() {
 		return this.bossSpawnPositionOffset;
 	}
 
-	// TODO check if input is valid
-	public boolean setBossSpawnPositionOffset(BlockPos bossSpawnPositionOffset) {
-		this.bossSpawnPositionOffset = bossSpawnPositionOffset;
-		return true;
+	public void setBossSpawnPositionOffset(BlockPos bossSpawnPositionOffset) {
+		this.bossSpawnPositionOffset = BlockPos.max(
+				BlockPos.min(
+						bossSpawnPositionOffset,
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 	}
 
 	public double getBossSpawnOrientationPitch() {
 		return bossSpawnOrientationPitch;
 	}
 
-	// TODO check if input is valid
-	public boolean setBossSpawnPositionPitch(double bossSpawnPositionPitch) {
-		this.bossSpawnOrientationPitch = bossSpawnPositionPitch;
-		return true;
+	public void setBossSpawnPositionPitch(double bossSpawnPositionPitch) {
+		this.bossSpawnOrientationPitch = MathHelper.clamp(bossSpawnPositionPitch, -90, 90);
+		;
 	}
 
 	public double getBossSpawnOrientationYaw() {
 		return bossSpawnOrientationYaw;
 	}
 
-	// TODO check if input is valid
-	public boolean setBossSpawnPositionYaw(double bossSpawnPositionYaw) {
-		this.bossSpawnOrientationYaw = bossSpawnPositionYaw;
-		return true;
+	public void setBossSpawnPositionYaw(double bossSpawnPositionYaw) {
+		this.bossSpawnOrientationYaw = MathHelper.clamp(bossSpawnPositionYaw, -180, 180);
 	}
 
+	public boolean isPersistent() {
+		return this.isPersistent;
+	}
+
+	public void setIsPersistent(boolean isPersistent) {
+		this.isPersistent = isPersistent;
+	}
+
+	public boolean enableSpawnEffects() {
+		return this.enableSpawnEffects;
+	}
+
+	public void setEnableSpawnEffects(boolean enableSpawnEffects) {
+		this.enableSpawnEffects = enableSpawnEffects;
+	}
 
 	public String getBossIdentifier() {
 		return this.bossIdentifier;
@@ -832,11 +758,79 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		return this.bossTriggeredBlocks;
 	}
 
-	// TODO check if input is valid
-	public boolean setBossTriggeredBlocks(HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks) {
-		this.bossTriggeredBlocks = bossTriggeredBlocks;
-		return true;
+	public void setBossTriggeredBlocks(HashMap<String, MutablePair<BlockPos, Boolean>> bossTriggeredBlocks) {
+		this.bossTriggeredBlocks.clear();
+		this.bossTriggeredBlocks.putAll(bossTriggeredBlocks);
 	}
 	// endregion --- getter & setter ---
+
+	@Override
+	public void trigger() {
+		if (this.boss != null && this.currentPhase != null && this.currentPhase.triggerEndsPhase()) {
+			advancePhase(this);
+		}
+		if (this.currentPhase == null && this.currentPhaseId == -1) {
+			startBattle(this);
+		}
+	}
+
+	@Override
+	protected void onRotate(BlockState state) {
+		if (state.getBlock() instanceof RotatedBlockWithEntity) {
+			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+
+				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, blockRotation);
+
+				this.bossSpawnPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.bossSpawnPositionOffset, blockRotation);
+				this.bossSpawnOrientationYaw = BlockRotationUtils.rotateYaw(this.bossSpawnOrientationYaw, blockRotation);
+
+				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), blockRotation));
+
+				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
+				for (String key : keys) {
+					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
+					oldBlockPos.setLeft(BlockRotationUtils.rotateOffsetBlockPos(oldBlockPos.getLeft(), blockRotation));
+					this.bossTriggeredBlocks.put(key, oldBlockPos);
+				}
+
+				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+			}
+			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, BlockMirror.FRONT_BACK);
+
+				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.FRONT_BACK);
+				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, BlockMirror.FRONT_BACK);
+
+				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+
+				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
+				for (String key : keys) {
+					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
+					oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.FRONT_BACK));
+					this.bossTriggeredBlocks.put(key, oldBlockPos);
+				}
+
+				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+			}
+			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, BlockMirror.LEFT_RIGHT);
+
+				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, BlockMirror.LEFT_RIGHT);
+
+				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+
+				List<String> keys = new ArrayList<>(this.bossTriggeredBlocks.keySet());
+				for (String key : keys) {
+					MutablePair<BlockPos, Boolean> oldBlockPos = this.bossTriggeredBlocks.get(key);
+					oldBlockPos.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(oldBlockPos.getLeft(), BlockMirror.LEFT_RIGHT));
+					this.bossTriggeredBlocks.put(key, oldBlockPos);
+				}
+
+				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+			}
+		}
+	}
 
 }

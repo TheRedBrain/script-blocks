@@ -19,7 +19,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -29,10 +28,7 @@ import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.boss_controller_block.hide_area_label");
-	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.boss_controller_block.show_area_label");
-	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.boss_controller_block.area_dimensions_label");
-	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.boss_controller_block.area_position_offset_label");
+	private static final Text UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.uuid_list_provider.uuid_list_provider_position_offset");
 	private static final Text NO_PLAYERS_AROUND_TRIGGERED_BLOCK_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.boss_controller_block.no_players_around_triggered_block_position_offset_label");
 	private static final Text ADD_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
 	private static final Text REMOVE_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.remove");
@@ -41,6 +37,10 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	private static final Text ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.boss_controller_block.entity_spawn_position_offset_label");
 	private static final Text ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT = Text.translatable("gui.boss_controller_block.entity_spawn_orientation_pitch_label");
 	private static final Text ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT = Text.translatable("gui.boss_controller_block.entity_spawn_orientation_yaw_label");
+	private static final Text IS_PERSISTENT_LABEL_TEXT = Text.translatable("gui.boss_controller_block.is_persistent_label");
+	private static final Text ENABLE_SPAWN_EFFECTS_LABEL_TEXT = Text.translatable("gui.boss_controller_block.enable_spawn_effects_label");
+	private static final Text TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT = Text.translatable("gui.boss_controller_block.toggle_enable_spawn_effects_button_label.on");
+	private static final Text TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT = Text.translatable("gui.boss_controller_block.toggle_enable_spawn_effects_button_label.off");
 
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_96_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_96");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
@@ -49,14 +49,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
 
-	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
-	private TextFieldWidget areaDimensionsXField;
-	private TextFieldWidget areaDimensionsYField;
-	private TextFieldWidget areaDimensionsZField;
-	private TextFieldWidget areaPositionOffsetXField;
-	private TextFieldWidget areaPositionOffsetYField;
-	private TextFieldWidget areaPositionOffsetZField;
-	private boolean showArea;
+	private TextFieldWidget uuidListHandlerBlockPositionOffsetXField;
+	private TextFieldWidget uuidListHandlerBlockPositionOffsetYField;
+	private TextFieldWidget uuidListHandlerBlockPositionOffsetZField;
 
 	private TextFieldWidget noPlayersAroundTriggeredBlockPositionOffsetXField;
 	private TextFieldWidget noPlayersAroundTriggeredBlockPositionOffsetYField;
@@ -70,6 +65,11 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	private TextFieldWidget entitySpawnPositionOffsetZField;
 	private TextFieldWidget entitySpawnOrientationPitchField;
 	private TextFieldWidget entitySpawnOrientationYawField;
+
+	private CyclingButtonWidget<Boolean> toggleIsPersistentButton;
+	private CyclingButtonWidget<Boolean> toggleEnableSpawnEffectsButton;
+	private boolean isPersistent;
+	private boolean enableSpawnEffects;
 
 	private ButtonWidget removeBossTriggeredBlockEntryButton0;
 	private ButtonWidget removeBossTriggeredBlockEntryButton1;
@@ -148,42 +148,22 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 			this.updateWidgets();
 		}));
 
-		// --- arena area page ---
+		// --- players page ---
 
-		this.showArea = this.bossControllerBlock.showArea();
-		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 54, 300, 20, Text.empty(), (button, showArea) -> {
-			this.showArea = showArea;
-		}));
+		this.uuidListHandlerBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 124, 100, 20, Text.empty());
+		this.uuidListHandlerBlockPositionOffsetXField.setMaxLength(128);
+		this.uuidListHandlerBlockPositionOffsetXField.setText(Integer.toString(this.bossControllerBlock.getUUIDListHandlerBlockPositionOffset().getX()));
+		this.addSelectableChild(this.uuidListHandlerBlockPositionOffsetXField);
 
-		this.areaDimensionsXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 89, 100, 20, Text.empty());
-		this.areaDimensionsXField.setMaxLength(128);
-		this.areaDimensionsXField.setText(Integer.toString(this.bossControllerBlock.getAreaDimensions().getX()));
-		this.addSelectableChild(this.areaDimensionsXField);
+		this.uuidListHandlerBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 124, 100, 20, Text.empty());
+		this.uuidListHandlerBlockPositionOffsetYField.setMaxLength(128);
+		this.uuidListHandlerBlockPositionOffsetYField.setText(Integer.toString(this.bossControllerBlock.getUUIDListHandlerBlockPositionOffset().getY()));
+		this.addSelectableChild(this.uuidListHandlerBlockPositionOffsetYField);
 
-		this.areaDimensionsYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 89, 100, 20, Text.empty());
-		this.areaDimensionsYField.setMaxLength(128);
-		this.areaDimensionsYField.setText(Integer.toString(this.bossControllerBlock.getAreaDimensions().getY()));
-		this.addSelectableChild(this.areaDimensionsYField);
-
-		this.areaDimensionsZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 89, 100, 20, Text.empty());
-		this.areaDimensionsZField.setMaxLength(128);
-		this.areaDimensionsZField.setText(Integer.toString(this.bossControllerBlock.getAreaDimensions().getZ()));
-		this.addSelectableChild(this.areaDimensionsZField);
-
-		this.areaPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 124, 100, 20, Text.empty());
-		this.areaPositionOffsetXField.setMaxLength(128);
-		this.areaPositionOffsetXField.setText(Integer.toString(this.bossControllerBlock.getAreaPositionOffset().getX()));
-		this.addSelectableChild(this.areaPositionOffsetXField);
-
-		this.areaPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 124, 100, 20, Text.empty());
-		this.areaPositionOffsetYField.setMaxLength(128);
-		this.areaPositionOffsetYField.setText(Integer.toString(this.bossControllerBlock.getAreaPositionOffset().getY()));
-		this.addSelectableChild(this.areaPositionOffsetYField);
-
-		this.areaPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 124, 100, 20, Text.empty());
-		this.areaPositionOffsetZField.setMaxLength(128);
-		this.areaPositionOffsetZField.setText(Integer.toString(this.bossControllerBlock.getAreaPositionOffset().getZ()));
-		this.addSelectableChild(this.areaPositionOffsetZField);
+		this.uuidListHandlerBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 124, 100, 20, Text.empty());
+		this.uuidListHandlerBlockPositionOffsetZField.setMaxLength(128);
+		this.uuidListHandlerBlockPositionOffsetZField.setText(Integer.toString(this.bossControllerBlock.getUUIDListHandlerBlockPositionOffset().getZ()));
+		this.addSelectableChild(this.uuidListHandlerBlockPositionOffsetZField);
 
 		MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = this.bossControllerBlock.getNoPlayersAroundTriggeredBlock();
 		this.noPlayersAroundTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 159, 50, 20, Text.empty());
@@ -230,6 +210,16 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.entitySpawnOrientationYawField.setText(Double.toString(this.bossControllerBlock.getBossSpawnOrientationYaw()));
 		this.addSelectableChild(this.entitySpawnOrientationYawField);
 
+		this.isPersistent = this.bossControllerBlock.isPersistent();
+		this.toggleIsPersistentButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder().initially(this.isPersistent).omitKeyText().build(this.width / 2 - 154, 160, 150, 20, Text.empty(), (button, isPersistent) -> {
+			this.isPersistent = isPersistent;
+		}));
+
+		this.enableSpawnEffects = this.bossControllerBlock.enableSpawnEffects();
+		this.toggleEnableSpawnEffectsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT, TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT).initially(this.enableSpawnEffects).omitKeyText().build(this.width / 2 + 4, 160, 150, 20, Text.empty(), (button, enableSpawnEffects) -> {
+			this.enableSpawnEffects = enableSpawnEffects;
+		}));
+
 		// --- boss triggered blocks page ---
 
 		this.removeBossTriggeredBlockEntryButton0 = this.addDrawableChild(ButtonWidget.builder(REMOVE_ENTRY_BUTTON_LABEL_TEXT, button -> this.removeBossTriggeredBlockEntry(0)).dimensions(this.width / 2 + 54, 42, 100, 20).build());
@@ -274,13 +264,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	@Override
 	protected void updateWidgets() {
 
-		this.toggleShowAreaButton.visible = false;
-		this.areaDimensionsXField.visible = false;
-		this.areaDimensionsYField.visible = false;
-		this.areaDimensionsZField.visible = false;
-		this.areaPositionOffsetXField.visible = false;
-		this.areaPositionOffsetYField.visible = false;
-		this.areaPositionOffsetZField.visible = false;
+		this.uuidListHandlerBlockPositionOffsetXField.setVisible(false);
+		this.uuidListHandlerBlockPositionOffsetYField.setVisible(false);
+		this.uuidListHandlerBlockPositionOffsetZField.setVisible(false);
 
 		this.noPlayersAroundTriggeredBlockPositionOffsetXField.setVisible(false);
 		this.noPlayersAroundTriggeredBlockPositionOffsetYField.setVisible(false);
@@ -294,6 +280,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.entitySpawnPositionOffsetZField.setVisible(false);
 		this.entitySpawnOrientationPitchField.setVisible(false);
 		this.entitySpawnOrientationYawField.setVisible(false);
+
+		this.toggleIsPersistentButton.visible = false;
+		this.toggleEnableSpawnEffectsButton.visible = false;
 
 
 		this.removeBossTriggeredBlockEntryButton0.visible = false;
@@ -309,15 +298,11 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 		this.addBossTriggeredBlockButton.visible = false;
 
-		if (this.screenPage == ScreenPage.AREA) {
+		if (this.screenPage == ScreenPage.PLAYERS) {
 
-			this.toggleShowAreaButton.visible = true;
-			this.areaDimensionsXField.visible = true;
-			this.areaDimensionsYField.visible = true;
-			this.areaDimensionsZField.visible = true;
-			this.areaPositionOffsetXField.visible = true;
-			this.areaPositionOffsetYField.visible = true;
-			this.areaPositionOffsetZField.visible = true;
+			this.uuidListHandlerBlockPositionOffsetXField.setVisible(true);
+			this.uuidListHandlerBlockPositionOffsetYField.setVisible(true);
+			this.uuidListHandlerBlockPositionOffsetZField.setVisible(true);
 
 			this.noPlayersAroundTriggeredBlockPositionOffsetXField.setVisible(true);
 			this.noPlayersAroundTriggeredBlockPositionOffsetYField.setVisible(true);
@@ -358,6 +343,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 			this.entitySpawnOrientationPitchField.setVisible(true);
 			this.entitySpawnOrientationYawField.setVisible(true);
 
+			this.toggleIsPersistentButton.visible = true;
+			this.toggleEnableSpawnEffectsButton.visible = true;
+
 		}
 
 		this.scrollPosition = 0;
@@ -368,16 +356,14 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	public void resize(MinecraftClient client, int width, int height) {
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> list1 = new ArrayList<>(this.bossTriggeredBlocksList);
 		ScreenPage var = this.screenPage;
-		boolean bool = this.showArea;
-		boolean bool1 = this.noPlayersAroundTriggeredBlockResets;
-		boolean bool2 = this.newBossTriggeredBlockResets;
+		boolean bool = this.noPlayersAroundTriggeredBlockResets;
+		boolean bool1 = this.newBossTriggeredBlockResets;
+		boolean bool2 = this.isPersistent;
+		boolean bool3 = this.enableSpawnEffects;
 
-		String string = this.areaDimensionsXField.getText();
-		String string1 = this.areaDimensionsYField.getText();
-		String string2 = this.areaDimensionsZField.getText();
-		String string3 = this.areaPositionOffsetXField.getText();
-		String string4 = this.areaPositionOffsetYField.getText();
-		String string5 = this.areaPositionOffsetZField.getText();
+		String string3 = this.uuidListHandlerBlockPositionOffsetXField.getText();
+		String string4 = this.uuidListHandlerBlockPositionOffsetYField.getText();
+		String string5 = this.uuidListHandlerBlockPositionOffsetZField.getText();
 
 		String string6 = this.bossIdentifierField.getText();
 		String string7 = this.entitySpawnPositionOffsetXField.getText();
@@ -402,19 +388,18 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
-		this.showArea = bool;
-		this.toggleShowAreaButton.setValue(this.showArea);
-		this.noPlayersAroundTriggeredBlockResets = bool1;
+		this.noPlayersAroundTriggeredBlockResets = bool;
 		this.toggleNoPlayersAroundTriggeredBlockResetsButton.setValue(this.noPlayersAroundTriggeredBlockResets);
-		this.newBossTriggeredBlockResets = bool2;
+		this.newBossTriggeredBlockResets = bool1;
 		this.toggleNewBossTriggeredBlockResetsButton.setValue(this.newBossTriggeredBlockResets);
+		this.isPersistent = bool2;
+		this.toggleIsPersistentButton.setValue(this.isPersistent);
+		this.enableSpawnEffects = bool3;
+		this.toggleEnableSpawnEffectsButton.setValue(this.enableSpawnEffects);
 
-		this.areaDimensionsXField.setText(string);
-		this.areaDimensionsYField.setText(string1);
-		this.areaDimensionsZField.setText(string2);
-		this.areaPositionOffsetXField.setText(string3);
-		this.areaPositionOffsetYField.setText(string4);
-		this.areaPositionOffsetZField.setText(string5);
+		this.uuidListHandlerBlockPositionOffsetXField.setText(string3);
+		this.uuidListHandlerBlockPositionOffsetYField.setText(string4);
+		this.uuidListHandlerBlockPositionOffsetZField.setText(string5);
 
 		this.bossIdentifierField.setText(string6);
 		this.entitySpawnPositionOffsetXField.setText(string7);
@@ -480,15 +465,11 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 		super.render(context, mouseX, mouseY, delta);
 
-		if (this.screenPage == ScreenPage.AREA) {
-			context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
-			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
-			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		if (this.screenPage == ScreenPage.PLAYERS) {
+			context.drawTextWithShadow(this.textRenderer, UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+			this.uuidListHandlerBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
+			this.uuidListHandlerBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
+			this.uuidListHandlerBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 			context.drawTextWithShadow(this.textRenderer, NO_PLAYERS_AROUND_TRIGGERED_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
 			this.noPlayersAroundTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.noPlayersAroundTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
@@ -506,6 +487,8 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 			this.entitySpawnOrientationPitchField.render(context, mouseX, mouseY, delta);
 			context.drawTextWithShadow(this.textRenderer, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 + 5, 115, 0xA0A0A0);
 			this.entitySpawnOrientationYawField.render(context, mouseX, mouseY, delta);
+			context.drawTextWithShadow(this.textRenderer, IS_PERSISTENT_LABEL_TEXT, this.width / 2 - 152, 150, 0xA0A0A0);
+			context.drawTextWithShadow(this.textRenderer, ENABLE_SPAWN_EFFECTS_LABEL_TEXT, this.width / 2 + 6, 150, 0xA0A0A0);
 		} else if (this.screenPage == ScreenPage.BOSS_TRIGGERED_BLOCKS) {
 			int x = this.bossTriggeredBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.bossTriggeredBlocksList.size()); i++) {
@@ -527,16 +510,10 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateBossControllerBlockPacket(
 				this.bossControllerBlock.getPos(),
-				this.showArea,
-				new Vec3i(
-						ItemUtils.parseInt(this.areaDimensionsXField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsYField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsZField.getText())
-				),
 				new BlockPos(
-						ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.uuidListHandlerBlockPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.uuidListHandlerBlockPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.uuidListHandlerBlockPositionOffsetZField.getText())
 				),
 				new BlockPos(
 						ItemUtils.parseInt(this.noPlayersAroundTriggeredBlockPositionOffsetXField.getText()),
@@ -552,13 +529,15 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 				),
 				ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getText()),
 				ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getText()),
+				this.isPersistent,
+				this.enableSpawnEffects,
 				this.bossTriggeredBlocksList
 		));
 		return true;
 	}
 
 	public enum ScreenPage implements StringIdentifiable {
-		AREA("area"),
+		PLAYERS("players"),
 		BOSS_TRIGGERED_BLOCKS("boss_triggered_blocks"),
 		SPAWN_POSITION("spawn_position");
 

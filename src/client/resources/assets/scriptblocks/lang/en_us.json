@@ -633,17 +633,17 @@
 	"gui.triggered_villager_spawner_block.villager_level": "Level: %s",
 
 
-	"gui.boss_controller_block.hide_area_label": "Hide Area",
-	"gui.boss_controller_block.show_area_label": "Show Area",
-	"gui.boss_controller_block.area_dimensions_label": "Area Dimensions",
-	"gui.boss_controller_block.area_position_offset_label": "Area Position Offset",
 	"gui.boss_controller_block.no_players_around_triggered_block_position_offset_label": "Block to trigger when no players are around",
 	"gui.boss_controller_block.boss_identifier_label": "Boss Identifier",
 	"gui.boss_controller_block.entity_spawn_position_offset_label": "Boss Spawn Position Offset",
 	"gui.boss_controller_block.entity_spawn_orientation_pitch_label": "Boss Spawn Orientation Pitch",
 	"gui.boss_controller_block.entity_spawn_orientation_yaw_label": "Boss Spawn Orientation Yaw",
+	"gui.boss_controller_block.is_persistent_label": "Is Persistent",
+	"gui.boss_controller_block.enable_spawn_effects_label": "Spawn Effects",
+	"gui.boss_controller_block.toggle_enable_spawn_effects_button_label.on": "Enabled",
+	"gui.boss_controller_block.toggle_enable_spawn_effects_button_label.off": "Disabled",
 
-	"gui.boss_controller_block.screen_page.area": "Area",
+	"gui.boss_controller_block.screen_page.players": "Players",
 	"gui.boss_controller_block.screen_page.boss_triggered_blocks": "Boss Triggered Blocks",
 	"gui.boss_controller_block.screen_page.spawn_position": "Spawn Position",
 

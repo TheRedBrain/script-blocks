@@ -39,6 +39,12 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 
 - changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
 
+### Boss Controller Block Rework
+
+  - no longer defines an area
+    - now gets the players engaged with the fight from a UUID List Handler
+  - added block settings to toggle spawn effects and persistent boss entities
+
 ### Player Detector Block Rework
 
   - now triggers a block when a player leaves the area
