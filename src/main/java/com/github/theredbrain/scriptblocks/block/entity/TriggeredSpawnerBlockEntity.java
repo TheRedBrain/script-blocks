@@ -585,6 +585,11 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 				if (!this.useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
 					((DuckMobEntityMixin) mobEntity).scriptblocks$setUseRelayBlockPos(this.pos.add(this.useRelayBlockPositionOffset));
 				}
+				this.markDirty();
+				if (this.world != null) {
+					BlockState blockState = this.world.getBlockState(this.pos);
+					this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+				}
 				return true;
 			}
 		}

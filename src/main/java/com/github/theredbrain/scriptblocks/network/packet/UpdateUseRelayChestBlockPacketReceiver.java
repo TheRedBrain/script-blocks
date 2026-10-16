@@ -47,7 +47,7 @@ public class UpdateUseRelayChestBlockPacketReceiver implements ServerPlayNetwork
 
 		if (blockEntity instanceof UseRelayChestBlockEntity useRelayChestBlockEntity) {
 			useRelayChestBlockEntity.reset();
-			useRelayChestBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			useRelayChestBlockEntity.setTriggeredBlock(new MutablePair<>(new BlockPos(triggeredBlockPositionOffset), triggeredBlockResets));
 			useRelayChestBlockEntity.setKeyIdentifierString(keyItemTag);
 			useRelayChestBlockEntity.setLockedMessage(lockedMessage);
 			useRelayChestBlockEntity.setLockedSound(lockedSound);

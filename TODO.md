@@ -38,8 +38,6 @@
         - triggered damage dealing block
         - triggered beacon block
         - teleporter block
-            - which players get selected for the screen opening attempt
-                - keep the existing checks for creative mode and the status effect
             - item predicate for items that should be removed on teleport
 
 - Triggered Entity Checker Block (new)
@@ -113,9 +111,6 @@ Teleporter Block~~
 - some sort of localised environment attributes provider
     - similar to Lithostitched structure environment attributes, but in an area defined by a block entity
 
-- Triggered Spawner Block
-    - "is_persistent" boolean field
-    - "play_spawn_effects" boolean field
 
 - Triggering Respawn Anchor Block (new)
     - takes a list of Player UUIDs, binds their respawn position to it (if remove boolean is true, remove the spawnpoint

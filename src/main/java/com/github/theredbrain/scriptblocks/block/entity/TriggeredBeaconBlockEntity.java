@@ -422,13 +422,13 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		}
 	}
 
-	public static enum TriggeredMode implements StringIdentifiable {
+	public enum TriggeredMode implements StringIdentifiable {
 		CONTINUOUS("continuous"),
 		ONCE("once");
 
 		private final String name;
 
-		private TriggeredMode(String name) {
+		TriggeredMode(String name) {
 			this.name = name;
 		}
 

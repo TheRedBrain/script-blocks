@@ -26,6 +26,7 @@ These blocks have been polished:
   - perform modulo operation on data when used like a "Data Relay Block"
 - added location cooldowns
   - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started when the player leaves a location or dies while inside the location. 
+- added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
 
 ### UUID List Handlers
 

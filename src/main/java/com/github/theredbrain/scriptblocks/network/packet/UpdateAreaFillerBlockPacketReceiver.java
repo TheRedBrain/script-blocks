@@ -39,14 +39,8 @@ public class UpdateAreaFillerBlockPacketReceiver implements ServerPlayNetworking
 
 		if (blockEntity instanceof AreaFillerBlockEntity areaFillerBlockEntity) {
 			areaFillerBlockEntity.setShowArea(showArea);
-			if (!areaFillerBlockEntity.setAreaDimensions(areaDimensions)) {
-				serverPlayerEntity.sendMessage(Text.translatable("area_filler_block.areaDimensions.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!areaFillerBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("area_filler_block.areaPositionOffset.invalid"), false);
-				updateSuccessful = false;
-			}
+			areaFillerBlockEntity.setAreaDimensions(areaDimensions);
+			areaFillerBlockEntity.setAreaPositionOffset(areaPositionOffset);
 			if (!areaFillerBlockEntity.setBlockIdentifierString(blockIdentifier)) {
 				serverPlayerEntity.sendMessage(Text.translatable("area_filler_block.blockIdentifier.invalid"), false);
 				updateSuccessful = false;
