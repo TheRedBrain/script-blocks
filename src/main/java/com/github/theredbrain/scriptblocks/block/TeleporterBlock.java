@@ -34,12 +34,6 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorB
 	}
 
 	@Override
-	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return validateTicker(type, ScriptBlocksEntities.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
-	}
-
-	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
@@ -48,10 +42,9 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorB
 				return ActionResult.success(world.isClient);
 			} else if (!world.isClient) {
 				TeleporterBlockEntity.openNonCreativeScreen(world, player, pos, state, teleporterBlockEntity);
-				return ActionResult.CONSUME;
 			}
 		}
-		return ActionResult.PASS;
+		return ActionResult.CONSUME;
 	}
 
 	@Override

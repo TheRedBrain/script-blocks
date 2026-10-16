@@ -411,7 +411,5 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 		serverPlayerEntity.closeHandledScreen();
 
-		serverPlayerEntity.removeStatusEffect(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT);
-
 	}
 }

@@ -128,8 +128,7 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 
 	@Override
 	public ItemStack quickMove(PlayerEntity player, int slot) {
-		// TODO
-		return null;
+		return ItemStack.EMPTY;
 	}
 
 	@Override

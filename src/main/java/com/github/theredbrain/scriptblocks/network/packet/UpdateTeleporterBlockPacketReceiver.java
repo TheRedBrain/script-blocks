@@ -8,7 +8,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
@@ -27,14 +26,10 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
-		boolean showActivationArea = payload.showActivationArea();
 		TeleporterBlockEntity.CreativeScreenPage creativeScreenPage = TeleporterBlockEntity.CreativeScreenPage.byName(payload.creativeScreenPage()).orElse(TeleporterBlockEntity.CreativeScreenPage.ACTIVATION);
 		boolean showAdventureScreen = payload.showAdventureScreen();
 
-		Vec3i activationAreaDimensions = payload.activationAreaDimensions();
-		BlockPos activationAreaPositionOffset = payload.activationAreaPositionOffset();
-
-		boolean triggerActivation = payload.triggerActivation();
+		BlockPos uuidListHandlerBlockPositionOffset = payload.uuidListHandlerBlockPositionOffset();
 
 		BlockPos accessPositionOffset = payload.accessPositionOffset();
 		boolean setAccessPosition = payload.setAccessPosition();
@@ -87,10 +82,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			teleporterBlockEntity.setShowAdventureScreen(showAdventureScreen);
 			teleporterBlockEntity.setCreativeScreenPage(creativeScreenPage);
-			teleporterBlockEntity.setShowActivationArea(showActivationArea);
-			teleporterBlockEntity.setActivationAreaDimensions(activationAreaDimensions);
-			teleporterBlockEntity.setActivationAreaPositionOffset(activationAreaPositionOffset);
-			teleporterBlockEntity.setTriggerActivation(triggerActivation);
+			teleporterBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerBlockPositionOffset);
 			teleporterBlockEntity.setAccessPositionOffset(accessPositionOffset);
 			teleporterBlockEntity.setSetAccessPosition(setAccessPosition);
 			teleporterBlockEntity.setOnlyTeleportDimensionOwner(onlyTeleportDimensionOwner);
@@ -109,12 +101,12 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setLocationsList(locationsList);
 			teleporterBlockEntity.setLocation(location);
 			teleporterBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
-			teleporterBlockEntity.setLocationDataIdentifier(locationDataIdentifier);
-			teleporterBlockEntity.setEntranceDataIdentifier(entranceDataIdentifier);
-			teleporterBlockEntity.setSendDataIdentifierDataIdentifier(sendDataIdentifierDataIdentifier);
-			teleporterBlockEntity.setSendDataValueDataIdentifier(sendDataValueDataIdentifier);
+			teleporterBlockEntity.setLocationAppendix(locationDataIdentifier);
+			teleporterBlockEntity.setEntranceAppendix(entranceDataIdentifier);
+			teleporterBlockEntity.setSentDataIdentifierAppendix(sendDataIdentifierDataIdentifier);
+			teleporterBlockEntity.setSentDataValueAppendix(sendDataValueDataIdentifier);
 			teleporterBlockEntity.setPreTeleportTriggeredBlock(new MutablePair<>(preTeleportTriggeredBlockPositionOffset, preTeleportTriggeredBlockResets));
-			teleporterBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerPositionOffset);
+			teleporterBlockEntity.setOnTeleportUUIDListHandlerPositionOffset(uuidListHandlerPositionOffset);
 			teleporterBlockEntity.setPostTeleportTriggeredBlock(new MutablePair<>(postTeleportTriggeredBlockPositionOffset, postTeleportTriggeredBlockResets));
 			teleporterBlockEntity.setTeleporterName(teleporterName);
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);

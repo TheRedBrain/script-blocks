@@ -55,7 +55,7 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 
 	public TeleporterTrapdoorBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH)).with(OPEN, false)).with(HALF, BlockHalf.BOTTOM))).with(WATERLOGGED, false));
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(HALF, BlockHalf.BOTTOM).with(WATERLOGGED, false));
 	}
 
 	public MapCodec<TeleporterTrapdoorBlock> getCodec() {
@@ -66,12 +66,6 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
 		return new TeleporterBlockEntity(pos, state);
-	}
-
-	@Override
-	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return validateTicker(type, ScriptBlocksEntities.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
 	}
 
 	@Override
@@ -144,8 +138,8 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 		BlockState blockState = this.getDefaultState();
 		FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
 		Direction direction = ctx.getSide();
-		blockState = ctx.canReplaceExisting() || !direction.getAxis().isHorizontal() ? (BlockState) ((BlockState) blockState.with(FACING, ctx.getHorizontalPlayerFacing().getOpposite())).with(HALF, direction == Direction.UP ? BlockHalf.BOTTOM : BlockHalf.TOP) : (BlockState) ((BlockState) blockState.with(FACING, direction)).with(HALF, ctx.getHitPos().y - (double) ctx.getBlockPos().getY() > 0.5 ? BlockHalf.TOP : BlockHalf.BOTTOM);
-		return (BlockState) blockState.with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+		blockState = ctx.canReplaceExisting() || !direction.getAxis().isHorizontal() ? blockState.with(FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(HALF, direction == Direction.UP ? BlockHalf.BOTTOM : BlockHalf.TOP) : (BlockState) ((BlockState) blockState.with(FACING, direction)).with(HALF, ctx.getHitPos().y - (double) ctx.getBlockPos().getY() > 0.5 ? BlockHalf.TOP : BlockHalf.BOTTOM);
+		return blockState.with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
 	}
 
 	@Override
@@ -154,7 +148,7 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			if (player.isCreativeLevelTwoOp()) {
 				if (player.isSneaking()) {
-					state = (BlockState) state.cycle(OPEN);
+					state = state.cycle(OPEN);
 					world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
 					if (state.get(WATERLOGGED).booleanValue()) {
 						world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
@@ -165,10 +159,9 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 				return ActionResult.success(world.isClient);
 			} else if (!world.isClient) {
 				TeleporterBlockEntity.openNonCreativeScreen(world, player, pos, state, teleporterBlockEntity);
-				return ActionResult.CONSUME;
 			}
 		}
-		return ActionResult.PASS;
+		return ActionResult.CONSUME;
 	}
 
 	@Override

@@ -15,7 +15,6 @@ public class ScriptBlocksStatusEffects {
 	public static RegistryEntry<StatusEffect> HOUSING_GUEST_EFFECT;
 	public static RegistryEntry<StatusEffect> HOUSING_STRANGER_EFFECT;
 	public static RegistryEntry<StatusEffect> BUILDING_MODE;
-	public static RegistryEntry<StatusEffect> PORTAL_RESISTANCE_EFFECT;
 	public static RegistryEntry<StatusEffect> ADVENTURE_EFFECT;
 
 	public static final StatusEffect HOUSING_OWNER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
@@ -25,7 +24,6 @@ public class ScriptBlocksStatusEffects {
 	public static final StatusEffect HOUSING_STRANGER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
 
 	public static final StatusEffect BUILDING_MODE_INSTANCE = new ScriptBlocksStatusEffect();
-	public static final StatusEffect PORTAL_RESISTANCE_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
 	public static final StatusEffect ADVENTURE_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
 
 	public static void bootstrap() {
@@ -39,7 +37,6 @@ public class ScriptBlocksStatusEffects {
 		HOUSING_GUEST_EFFECT = register("housing_guest_effect", HOUSING_GUEST_EFFECT_INSTANCE);
 		HOUSING_STRANGER_EFFECT = register("housing_stranger_effect", HOUSING_STRANGER_EFFECT_INSTANCE);
 		BUILDING_MODE = register("building_mode", BUILDING_MODE_INSTANCE);
-		PORTAL_RESISTANCE_EFFECT = register("portal_resistance_effect", PORTAL_RESISTANCE_EFFECT_INSTANCE);
 		ADVENTURE_EFFECT = register("adventure", ADVENTURE_EFFECT_INSTANCE);
 	}
 

@@ -378,8 +378,8 @@
 	"gui.teleporter_block.creative_screen_page.on_teleport_events": "On Teleport Events",
 	"gui.teleporter_block.creative_screen_page.adventure_screen_customization": "Adventure Screen Settings",
 
-	"gui.teleporter_block.hide_adventure_screen_label": "Hide Adventure Screen",
-	"gui.teleporter_block.show_adventure_screen_label": "Show Adventure Screen",
+	"gui.teleporter_block.show_adventure_screen_label.false": "Show Adventure Screen: False",
+	"gui.teleporter_block.show_adventure_screen_label.true": "Show Adventure Screen: True",
 	"gui.teleporter_block.hide_activation_area_label": "Hide Activation Area",
 	"gui.teleporter_block.show_activation_area_label": "Show Activation Area",
 	"gui.teleporter_block.trigger_activation_label": "Trigger Activation",
@@ -432,6 +432,7 @@
 	"gui.teleporter_block.send_data_value_label": "Data Value - Provided Data Id",
 	"gui.teleporter_block.data_providing_block_pos_offset_label": "Data Providing Block Pos Offset",
 	"gui.teleporter_block.pre_teleport_triggered_block_position_offset_label": "Pre Teleport Triggered Block Position Offset",
+	"gui.teleporter_block.on_teleport_uuid_list_provider_position_offset": "On Teleport UUID List Provider Position Offset",
 	"gui.teleporter_block.post_teleport_triggered_block_position_offset_label": "Post Teleport Triggered Block Position Offset",
 	"gui.teleporter_block.consume_key_itemstack_label": "Consume Key Itemstack",
 

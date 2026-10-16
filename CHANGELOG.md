@@ -49,6 +49,9 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 ### Teleporter Block Rework
 
 The Teleporter Block has become increasingly complex. This rework extracts some behaviour into other blocks
+  - the Teleporter Block is no longer ticking and no longer defines an area. The "Portal Resistance" status effect is no longer used amd was removed
+    - When triggered, the Teleporter Block now gets a UUID list from a UUID List Handler.
+    - The Teleporter Block is now a UUID List Handler, when it receives a UUID list, the corresponding players are teleported/the teleporter screen opens.
   - the Teleporter Block now triggers another block before the teleport and a second block after the teleport
     - as usual, the block position offset etc. are configurable in the block's screen
   - UUIDs of teleported players (+ their teams if this is enabled) are now sent to a UUID List Handler block

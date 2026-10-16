@@ -2,7 +2,6 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.AbstractBlock;
@@ -13,8 +12,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.enums.DoorHinge;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.ItemEntity;
@@ -31,7 +28,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -60,7 +56,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 
 	public TeleporterDoorBlock(AbstractBlock.Settings settings) {
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(ROTATED, 0)).with(X_MIRRORED, false)).with(Z_MIRRORED, false)).with(FACING, Direction.NORTH)).with(OPEN, false)).with(HINGE, DoorHinge.LEFT)).with(HALF, DoubleBlockHalf.LOWER));
+		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(HINGE, DoorHinge.LEFT).with(HALF, DoubleBlockHalf.LOWER));
 	}
 
 	public MapCodec<TeleporterDoorBlock> getCodec() {
@@ -71,15 +67,9 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		return new TeleporterBlockEntity(pos, state);
 	}
 
-	@Override
-	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return validateTicker(type, ScriptBlocksEntities.TELEPORTER_BLOCK_ENTITY, TeleporterBlockEntity::tick);
-	}
-
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(new Property[]{HALF, FACING, OPEN, HINGE});
+		builder.add(HALF, FACING, OPEN, HINGE);
 	}
 
 	public BlockRenderType getRenderType(BlockState state) {
@@ -87,7 +77,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		Direction direction = (Direction) state.get(FACING);
+		Direction direction = state.get(FACING);
 		boolean bl = !(Boolean) state.get(OPEN);
 		boolean bl2 = state.get(HINGE) == DoorHinge.RIGHT;
 		switch (direction) {
@@ -107,9 +97,9 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		DoubleBlockHalf doubleBlockHalf = (DoubleBlockHalf) state.get(HALF);
+		DoubleBlockHalf doubleBlockHalf = state.get(HALF);
 		if (direction.getAxis() == Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
-			return neighborState.isOf(this) && neighborState.get(HALF) != doubleBlockHalf ? (BlockState) ((BlockState) ((BlockState) state.with(FACING, (Direction) neighborState.get(FACING))).with(OPEN, (Boolean) neighborState.get(OPEN))).with(HINGE, (DoorHinge) neighborState.get(HINGE)) : Blocks.AIR.getDefaultState();
+			return neighborState.isOf(this) && neighborState.get(HALF) != doubleBlockHalf ? state.with(FACING, neighborState.get(FACING)).with(OPEN, neighborState.get(OPEN)).with(HINGE, neighborState.get(HINGE)) : Blocks.AIR.getDefaultState();
 		} else {
 			return doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
 		}
@@ -143,7 +133,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		switch (type) {
 			case LAND:
 			case AIR:
-				return (Boolean) state.get(OPEN);
+				return state.get(OPEN);
 			case WATER:
 				return false;
 			default:
@@ -156,14 +146,14 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		World world = ctx.getWorld();
 		if (blockPos.getY() < world.getTopY() - 1 && world.getBlockState(blockPos.up()).canReplace(ctx)) {
 			boolean bl = world.isReceivingRedstonePower(blockPos) || world.isReceivingRedstonePower(blockPos.up());
-			return (BlockState) ((BlockState) ((BlockState) ((BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing())).with(HINGE, this.getHinge(ctx))).with(OPEN, bl)).with(HALF, DoubleBlockHalf.LOWER);
+			return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing()).with(HINGE, this.getHinge(ctx)).with(OPEN, bl).with(HALF, DoubleBlockHalf.LOWER);
 		} else {
 			return null;
 		}
 	}
 
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-		world.setBlockState(pos.up(), (BlockState) state.with(HALF, DoubleBlockHalf.UPPER), 3);
+		world.setBlockState(pos.up(), state.with(HALF, DoubleBlockHalf.UPPER), 3);
 	}
 
 	private DoorHinge getHinge(ItemPlacementContext ctx) {
@@ -205,7 +195,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			boolean bl = player.isCreativeLevelTwoOp();
 			if (player.isSneaking() && bl) {
-				state = (BlockState) state.cycle(OPEN);
+				state = state.cycle(OPEN);
 				world.setBlockState(pos, state, 10);
 				return ActionResult.success(world.isClient);
 			} else {
@@ -219,11 +209,10 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 					return ActionResult.success(world.isClient);
 				} else if (!world.isClient) {
 					TeleporterBlockEntity.openNonCreativeScreen(world, player, pos, state, teleporterBlockEntity);
-					return ActionResult.CONSUME;
 				}
 			}
 		}
-		return ActionResult.PASS;
+		return ActionResult.CONSUME;
 	}
 
 	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
@@ -233,19 +222,19 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return (BlockState) super.rotate(state, rotation).with(FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState((Direction) state.get(FACING), rotation));
+		return super.rotate(state, rotation).with(FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(FACING), rotation));
 	}
 
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		if (mirror == BlockMirror.FRONT_BACK) {
-			return (BlockState) ((BlockState) super.mirror(state, mirror).with(FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState((Direction) state.get(FACING), mirror.getRotation((Direction) state.get(FACING))))).cycle(HINGE);
+			return super.mirror(state, mirror).with(FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(FACING), mirror.getRotation(state.get(FACING)))).cycle(HINGE);
 		} else {
-			return mirror == BlockMirror.LEFT_RIGHT ? (BlockState) ((BlockState) super.mirror(state, mirror).with(FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState((Direction) state.get(FACING), mirror.getRotation((Direction) state.get(FACING))))).cycle(HINGE) : state;
+			return mirror == BlockMirror.LEFT_RIGHT ? super.mirror(state, mirror).with(FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(FACING), mirror.getRotation(state.get(FACING)))).cycle(HINGE) : state;
 		}
 	}
 
 	protected static void onBreakInCreative(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		DoubleBlockHalf doubleBlockHalf = (DoubleBlockHalf) state.get(HALF);
+		DoubleBlockHalf doubleBlockHalf = state.get(HALF);
 		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
 			BlockPos blockPos = pos.down();
 			BlockState blockState = world.getBlockState(blockPos);

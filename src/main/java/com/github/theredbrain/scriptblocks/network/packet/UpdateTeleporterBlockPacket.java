@@ -13,12 +13,9 @@ import java.util.List;
 
 public record UpdateTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
-		boolean showActivationArea,
 		String creativeScreenPage,
 		boolean showAdventureScreen,
-		Vec3i activationAreaDimensions,
-		BlockPos activationAreaPositionOffset,
-		boolean triggerActivation,
+		BlockPos uuidListHandlerBlockPositionOffset,
 		BlockPos accessPositionOffset,
 		boolean setAccessPosition,
 		boolean onlyTeleportDimensionOwner,
@@ -55,16 +52,9 @@ public record UpdateTeleporterBlockPacket(
 	public UpdateTeleporterBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
-				new Vec3i(
-						registryByteBuf.readInt(),
-						registryByteBuf.readInt(),
-						registryByteBuf.readInt()
-				),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
@@ -100,18 +90,11 @@ public record UpdateTeleporterBlockPacket(
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
 
-		registryByteBuf.writeBoolean(this.showActivationArea);
-
 		registryByteBuf.writeString(this.creativeScreenPage);
 
 		registryByteBuf.writeBoolean(this.showAdventureScreen);
 
-		registryByteBuf.writeInt(this.activationAreaDimensions.getX());
-		registryByteBuf.writeInt(this.activationAreaDimensions.getY());
-		registryByteBuf.writeInt(this.activationAreaDimensions.getZ());
-		registryByteBuf.writeBlockPos(this.activationAreaPositionOffset);
-
-		registryByteBuf.writeBoolean(this.triggerActivation);
+		registryByteBuf.writeBlockPos(this.uuidListHandlerBlockPositionOffset);
 
 		registryByteBuf.writeBlockPos(this.accessPositionOffset);
 		registryByteBuf.writeBoolean(this.setAccessPosition);

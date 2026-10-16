@@ -228,7 +228,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	@Override
 	public void close() {
-		this.givePortalResistanceEffect();
 		super.close();
 	}
 
@@ -862,17 +861,5 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				this.currentTargetEntranceDataId,
 				this.currentTargetEntranceData
 		));
-	}
-
-	private void givePortalResistanceEffect() {
-		ClientPlayNetworking.send(new AddStatusEffectPacket(
-				Registries.STATUS_EFFECT.getId(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT.value()),
-				40,
-				0,
-				false,
-				false,
-				false,
-				false)
-		);
 	}
 }

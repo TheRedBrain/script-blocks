@@ -5,18 +5,18 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
@@ -26,10 +26,7 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
@@ -40,26 +37,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory<TeleporterBlockScreenHandler.TeleporterBlockData>, Triggerable {
+public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory<TeleporterBlockScreenHandler.TeleporterBlockData>, HandlesUUIDList, Triggerable {
 
-	private boolean calculateActivationBox = true;
-	private Box activationArea = null;
 	private boolean showAdventureScreen = true;
-	private boolean showActivationArea = false;
-	private Vec3i activationAreaDimensions = Vec3i.ZERO;
-	private BlockPos activationAreaPositionOffset = new BlockPos(0, 1, 0);
+	private BlockPos uuidListHandlerPositionOffset = BlockPos.ORIGIN;
 
-	private boolean triggerActivation = false;
-
-	private BlockPos accessPositionOffset = new BlockPos(0, 0, 0);
+	private BlockPos accessPositionOffset = BlockPos.ORIGIN;
 	private boolean setAccessPosition = false;
-
-	@Deprecated
-	private String statusEffectsToDecrementLevelOnTeleport = "";
-	@Deprecated
-	private String statusEffectsToRemoveOnTeleport = "";
-	@Deprecated
-	private String itemsToRemoveOnTeleport = "";
 
 	private boolean onlyTeleportDimensionOwner = false;
 	private boolean teleportTeam = false;
@@ -68,7 +52,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private TeleportationMode teleportationMode = TeleportationMode.DIRECT;
 
 	// direct teleportation mode
-	private BlockPos directTeleportPositionOffset = new BlockPos(0, 0, 0);
+	private BlockPos directTeleportPositionOffset = BlockPos.ORIGIN;
 	private double directTeleportOrientationYaw = 0.0;
 	private double directTeleportOrientationPitch = 0.0;
 
@@ -81,15 +65,16 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	// location mode
 	private MutablePair<MutablePair<String, String>, MutablePair<String, String>> location = new MutablePair<>(new MutablePair<>("", ""), new MutablePair<>("", ""));
 
-	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
-	private String locationDataIdentifier = "";
-	private String entranceDataIdentifier = "";
-	private String sendDataIdentifierDataIdentifier = "";
-	private String sendDataValueDataIdentifier = "";
+	private String locationAppendix = "";
+	private String entranceAppendix = "";
+	private String sentDataIdentifierAppendix = "";
+	private String sentDataValueAppendix = "";
 
-	private MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
-	private BlockPos uuidListHandlerPositionOffset = new BlockPos(0, 0, 0);
-	private MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+
+	private MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private BlockPos onTeleportUUIDListHandlerPositionOffset = BlockPos.ORIGIN;
+	private MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
 
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
@@ -106,208 +91,414 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		nbt.putString("teleporterName", this.teleporterName);
 
-		nbt.putBoolean("showAdventureScreen", this.showAdventureScreen);
+		nbt.putString("screen_page", this.creativeScreenPage.asString());
 
-		nbt.putString("creativeScreenPage", this.creativeScreenPage.asString());
+		nbt.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.uuidListHandlerPositionOffset));
 
-		nbt.putBoolean("showActivationArea", this.showActivationArea);
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.accessPositionOffset));
+		nbtCompound.putBoolean("is_enabled", this.setAccessPosition);
+		nbt.put("location_access", nbtCompound.copy());
 
-		nbt.putInt("activationAreaDimensionsX", this.activationAreaDimensions.getX());
-		nbt.putInt("activationAreaDimensionsY", this.activationAreaDimensions.getY());
-		nbt.putInt("activationAreaDimensionsZ", this.activationAreaDimensions.getZ());
+		nbt.putBoolean("only_teleport_dimension_owner", this.onlyTeleportDimensionOwner);
 
-		nbt.putInt("activationAreaPositionOffsetX", this.activationAreaPositionOffset.getX());
-		nbt.putInt("activationAreaPositionOffsetY", this.activationAreaPositionOffset.getY());
-		nbt.putInt("activationAreaPositionOffsetZ", this.activationAreaPositionOffset.getZ());
+		nbt.putBoolean("teleport_team", this.teleportTeam);
 
-		nbt.putBoolean("triggerActivation", this.triggerActivation);
+		nbt.putString("teleportation_mode", this.teleportationMode.asString());
 
-		nbt.putInt("accessPositionOffsetX", this.accessPositionOffset.getX());
-		nbt.putInt("accessPositionOffsetY", this.accessPositionOffset.getY());
-		nbt.putInt("accessPositionOffsetZ", this.accessPositionOffset.getZ());
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.directTeleportPositionOffset));
+		nbtCompound.putDouble("yaw", this.directTeleportOrientationYaw);
+		nbtCompound.putDouble("pitch", this.directTeleportOrientationPitch);
+		nbt.put("direct_teleport", nbtCompound.copy());
 
-		nbt.putBoolean("setAccessPosition", this.setAccessPosition);
+		nbt.putString("spawn_point_type", this.spawnPointType.asString());
 
-		nbt.putString("statusEffectsToDecrementLevelOnTeleport", this.statusEffectsToDecrementLevelOnTeleport);
-
-		nbt.putString("statusEffectsToRemoveOnTeleport", this.statusEffectsToRemoveOnTeleport);
-
-		nbt.putString("itemsToRemoveOnTeleport", this.itemsToRemoveOnTeleport);
-
-		nbt.putBoolean("onlyTeleportDimensionOwner", this.onlyTeleportDimensionOwner);
-
-		nbt.putBoolean("teleportTeam", this.teleportTeam);
-
-		nbt.putString("teleportationMode", this.teleportationMode.asString());
-
-		nbt.putInt("directTeleportPositionOffsetX", this.directTeleportPositionOffset.getX());
-		nbt.putInt("directTeleportPositionOffsetY", this.directTeleportPositionOffset.getY());
-		nbt.putInt("directTeleportPositionOffsetZ", this.directTeleportPositionOffset.getZ());
-		nbt.putDouble("directTeleportPositionOffsetYaw", this.directTeleportOrientationYaw);
-		nbt.putDouble("directTeleportPositionOffsetPitch", this.directTeleportOrientationPitch);
-
-		nbt.putString("spawnPointType", this.spawnPointType.asString());
-
-		nbt.putInt("locationsListSize", this.locationsList.size());
-
-		for (int i = 0; i < this.locationsList.size(); i++) {
-			nbt.putString("locationsListIdentifier_" + i, this.locationsList.get(i).getLeft().getLeft());
-			nbt.putString("locationsListEntrance_" + i, this.locationsList.get(i).getLeft().getRight());
-			nbt.putString("locationsListDataId_" + i, this.locationsList.get(i).getRight().getLeft());
-			nbt.putString("locationsListData_" + i, this.locationsList.get(i).getRight().getRight());
+		NbtList nbtList = new NbtList();
+		for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> location : this.locationsList) {
+			nbtCompound = new NbtCompound();
+			nbtCompound.putString("identifier", location.getLeft().getLeft());
+			nbtCompound.putString("entrance", location.getLeft().getRight());
+			nbtCompound.putString("sent_data_id", location.getRight().getLeft());
+			nbtCompound.putString("sent_data", location.getRight().getRight());
+			nbtList.add(nbtCompound.copy());
 		}
+		nbt.put("locations", nbtList);
 
-		nbt.putString("locationIdentifier", this.location.getLeft().getLeft());
-		nbt.putString("locationEntrance", this.location.getLeft().getRight());
-		nbt.putString("locationDataId", this.location.getRight().getLeft());
-		nbt.putString("locationData", this.location.getRight().getRight());
-		nbt.putInt("dataProvidingBlockPosOffsetX", this.dataProvidingBlockPosOffset.getX());
-		nbt.putInt("dataProvidingBlockPosOffsetY", this.dataProvidingBlockPosOffset.getY());
-		nbt.putInt("dataProvidingBlockPosOffsetZ", this.dataProvidingBlockPosOffset.getZ());
-		nbt.putString("locationDataIdentifier", this.locationDataIdentifier);
-		nbt.putString("entranceDataIdentifier", this.entranceDataIdentifier);
-		nbt.putString("sendDataIdentifierDataIdentifier", this.sendDataIdentifierDataIdentifier);
-		nbt.putString("sendDataValueDataIdentifier", this.sendDataValueDataIdentifier);
+		nbtCompound = new NbtCompound();
+		nbtCompound.putString("identifier", this.location.getLeft().getLeft());
+		nbtCompound.putString("entrance", this.location.getLeft().getRight());
+		nbtCompound.putString("sent_data_id", this.location.getRight().getLeft());
+		nbtCompound.putString("sent_data", this.location.getRight().getRight());
+		nbtCompound.putString("identifier_appendix", this.locationAppendix);
+		nbtCompound.putString("entrance_appendix", this.entranceAppendix);
+		nbtCompound.putString("sent_data_id_appendix", this.sentDataIdentifierAppendix);
+		nbtCompound.putString("sent_data_appendix", this.sentDataValueAppendix);
+		nbt.put("location", nbtCompound.copy());
 
-		nbt.putInt("pre_teleport_triggered_block_position_offset_x", this.preTeleportTriggeredBlock.getLeft().getX());
-		nbt.putInt("pre_teleport_triggered_block_position_offset_y", this.preTeleportTriggeredBlock.getLeft().getY());
-		nbt.putInt("pre_teleport_triggered_block_position_offset_z", this.preTeleportTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("pre_teleport_triggered_block_resets", this.preTeleportTriggeredBlock.getRight());
+		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
 
-		nbt.putInt("uuid_list_handler_position_offset_x", this.uuidListHandlerPositionOffset.getX());
-		nbt.putInt("uuid_list_handler_position_offset_y", this.uuidListHandlerPositionOffset.getY());
-		nbt.putInt("uuid_list_handler_position_offset_z", this.uuidListHandlerPositionOffset.getZ());
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.preTeleportTriggeredBlock.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.preTeleportTriggeredBlock.getRight());
+		nbt.put("pre_teleport", nbtCompound.copy());
 
-		nbt.putInt("post_teleport_triggered_block_position_offset_x", this.postTeleportTriggeredBlock.getLeft().getX());
-		nbt.putInt("post_teleport_triggered_block_position_offset_y", this.postTeleportTriggeredBlock.getLeft().getY());
-		nbt.putInt("post_teleport_triggered_block_position_offset_z", this.postTeleportTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("post_teleport_triggered_block_resets", this.postTeleportTriggeredBlock.getRight());
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onTeleportUUIDListHandlerPositionOffset));
+		nbt.put("on_teleport", nbtCompound.copy());
 
-		nbt.putString("currentTargetIdentifierLabel", this.currentTargetIdentifierLabel);
-		nbt.putString("currentTargetOwnerLabel", this.currentTargetOwnerLabel);
-		nbt.putBoolean("showRegenerateButton", this.showRegenerateButton);
-		nbt.putBoolean("showCancelButton", this.showCancelButton);
-		nbt.putBoolean("canOwnerBeChosen", this.canOwnerBeChosen);
-		nbt.putString("teleportButtonLabel", this.teleportButtonLabel);
-		nbt.putString("cancelTeleportButtonLabel", this.cancelTeleportButtonLabel);
+		nbtCompound = new NbtCompound();
+		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.postTeleportTriggeredBlock.getLeft()));
+		nbtCompound.putBoolean("triggered_block_resets", this.postTeleportTriggeredBlock.getRight());
+		nbt.put("post_teleport", nbtCompound.copy());
 
-		if (this.activationArea != null) {
-			nbt.putDouble("activationAreaMinX", this.activationArea.minX);
-			nbt.putDouble("activationAreaMaxX", this.activationArea.maxX);
-			nbt.putDouble("activationAreaMinY", this.activationArea.minY);
-			nbt.putDouble("activationAreaMaxY", this.activationArea.maxY);
-			nbt.putDouble("activationAreaMinZ", this.activationArea.minZ);
-			nbt.putDouble("activationAreaMaxZ", this.activationArea.maxZ);
-		}
+		nbtCompound = new NbtCompound();
+		nbtCompound.putBoolean("show_adventure_screen", this.showAdventureScreen);
+		nbtCompound.putString("teleporter_name", this.teleporterName);
+		nbtCompound.putString("current_target_identifier_label", this.currentTargetIdentifierLabel);
+		nbtCompound.putString("current_target_owner_label", this.currentTargetOwnerLabel);
+		nbtCompound.putBoolean("show_regenerate_button", this.showRegenerateButton);
+		nbtCompound.putBoolean("show_cancel_button", this.showCancelButton);
+		nbtCompound.putBoolean("can_owner_be_chosen", this.canOwnerBeChosen);
+		nbtCompound.putString("teleport_button_label", this.teleportButtonLabel);
+		nbtCompound.putString("cancel_teleport_button_label", this.cancelTeleportButtonLabel);
+		nbt.put("gameplay_screen", nbtCompound.copy());
 
 		super.writeNbt(nbt, registryLookup);
 	}
 
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		this.teleporterName = nbt.getString("teleporterName");
 
-		this.showAdventureScreen = nbt.getBoolean("showAdventureScreen");
-
-		this.creativeScreenPage = CreativeScreenPage.byName(nbt.getString("creativeScreenPage")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
-
-		this.showActivationArea = nbt.getBoolean("showActivationArea");
-
-		this.activationAreaDimensions = new Vec3i(
-				MathHelper.clamp(nbt.getInt("activationAreaDimensionsX"), 0, 48),
-				MathHelper.clamp(nbt.getInt("activationAreaDimensionsY"), 0, 48),
-				MathHelper.clamp(nbt.getInt("activationAreaDimensionsZ"), 0, 48)
-		);
-
-		this.activationAreaPositionOffset = new BlockPos(
-				MathHelper.clamp(nbt.getInt("activationAreaPositionOffsetX"), -48, 48),
-				MathHelper.clamp(nbt.getInt("activationAreaPositionOffsetY"), -48, 48),
-				MathHelper.clamp(nbt.getInt("activationAreaPositionOffsetZ"), -48, 48)
-		);
-
-		this.triggerActivation = nbt.getBoolean("triggerActivation");
-
-		this.accessPositionOffset = new BlockPos(
-				MathHelper.clamp(nbt.getInt("accessPositionOffsetX"), -48, 48),
-				MathHelper.clamp(nbt.getInt("accessPositionOffsetY"), -48, 48),
-				MathHelper.clamp(nbt.getInt("accessPositionOffsetZ"), -48, 48)
-		);
-
-		this.setAccessPosition = nbt.getBoolean("setAccessPosition");
-
-		// TODO deprecation warning
-		this.statusEffectsToDecrementLevelOnTeleport = nbt.getString("statusEffectsToDecrementLevelOnTeleport");
-
-		// TODO deprecation warning
-		this.statusEffectsToRemoveOnTeleport = nbt.getString("statusEffectsToRemoveOnTeleport");
-
-		// TODO deprecation warning
-		this.itemsToRemoveOnTeleport = nbt.getString("itemsToRemoveOnTeleport");
-
-		this.onlyTeleportDimensionOwner = nbt.getBoolean("onlyTeleportDimensionOwner");
-
-		this.teleportTeam = nbt.getBoolean("teleportTeam");
-
-		this.teleportationMode = TeleportationMode.byName(nbt.getString("teleportationMode")).orElseGet(() -> TeleportationMode.DIRECT);
-
-		this.directTeleportPositionOffset = new BlockPos(
-				nbt.getInt("directTeleportPositionOffsetX"),
-				nbt.getInt("directTeleportPositionOffsetY"),
-				nbt.getInt("directTeleportPositionOffsetZ")
-		);
-		this.directTeleportOrientationYaw = nbt.getDouble("directTeleportPositionOffsetYaw");
-		this.directTeleportOrientationPitch = nbt.getDouble("directTeleportPositionOffsetPitch");
-
-		this.spawnPointType = SpawnPointType.byName(nbt.getString("spawnPointType")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
-
-		int locationsListSize = nbt.getInt("locationsListSize");
-		this.locationsList.clear();
-		for (int p = 0; p < locationsListSize; p++) {
-			this.locationsList.add(new MutablePair<>(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)), new MutablePair<>(nbt.getString("locationsListDataId_" + p), nbt.getString("locationsListData_" + p))));
+		if (nbt.contains("creativeScreenPage")) {
+			this.creativeScreenPage = CreativeScreenPage.byName(nbt.getString("creativeScreenPage")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
+			nbt.remove("creativeScreenPage");
+		} else {
+			this.creativeScreenPage = CreativeScreenPage.byName(nbt.getString("screen_page")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
 		}
 
-		this.location = new MutablePair<>(new MutablePair<>(nbt.getString("locationIdentifier"), nbt.getString("locationEntrance")), new MutablePair<>(nbt.getString("locationDataId"), nbt.getString("locationData")));
-		this.dataProvidingBlockPosOffset = new BlockPos(
-				nbt.getInt("dataProvidingBlockPosOffsetX"),
-				nbt.getInt("dataProvidingBlockPosOffsetY"),
-				nbt.getInt("dataProvidingBlockPosOffsetZ")
-		);
-		this.locationDataIdentifier = nbt.getString("locationDataIdentifier");
-		this.entranceDataIdentifier = nbt.getString("entranceDataIdentifier");
-		this.sendDataIdentifierDataIdentifier = nbt.getString("sendDataIdentifierDataIdentifier");
-		this.sendDataValueDataIdentifier = nbt.getString("sendDataValueDataIdentifier");
-
-		this.preTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
-				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_x"), -48, 48),
-				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_y"), -48, 48),
-				MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_z"), -48, 48)
-		), nbt.getBoolean("pre_teleport_triggered_block_resets"));
-
-		this.uuidListHandlerPositionOffset = new BlockPos(
-				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x"), -48, 48),
-				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y"), -48, 48),
-				MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z"), -48, 48)
+		this.uuidListHandlerPositionOffset = BlockPos.max(
+				BlockPos.min(
+						NbtHelper.toBlockPos(nbt, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
 		);
 
-		this.postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
-				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_x"), -48, 48),
-				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_y"), -48, 48),
-				MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_z"), -48, 48)
-		), nbt.getBoolean("post_teleport_triggered_block_resets"));
+		NbtCompound nbtCompound = nbt.getCompound("location_access");
+		if (nbt.contains("accessPositionOffsetX") || nbt.contains("accessPositionOffsetY") || nbt.contains("accessPositionOffsetZ")) {
+			this.accessPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("accessPositionOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("accessPositionOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("accessPositionOffsetZ"), -48, 48)
+			);
+		} else {
+			this.accessPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
 
-		this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
-		this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
-		this.showRegenerateButton = nbt.getBoolean("showRegenerateButton");
-		this.showCancelButton = nbt.getBoolean("showCancelButton");
-		this.canOwnerBeChosen = nbt.getBoolean("canOwnerBeChosen");
-		this.teleportButtonLabel = nbt.getString("teleportButtonLabel");
-		this.cancelTeleportButtonLabel = nbt.getString("cancelTeleportButtonLabel");
+		if (nbt.contains("setAccessPosition")) {
+			this.setAccessPosition = nbt.getBoolean("setAccessPosition");
+			nbt.remove("setAccessPosition");
+		} else {
+			this.setAccessPosition = nbtCompound.getBoolean("is_enabled");
+		}
 
-		if (nbt.contains("activationAreaMinX") && nbt.contains("activationAreaMinY") && nbt.contains("activationAreaMinZ") && nbt.contains("activationAreaMaxX") && nbt.contains("activationAreaMaxY") && nbt.contains("activationAreaMaxZ")) {
-			this.activationArea = new Box(nbt.getDouble("activationAreaMinX"), nbt.getDouble("activationAreaMinY"), nbt.getDouble("activationAreaMinZ"), nbt.getDouble("activationAreaMaxX"), nbt.getDouble("activationAreaMaxY"), nbt.getDouble("activationAreaMaxZ"));
-			this.calculateActivationBox = true;
+		if (nbt.contains("onlyTeleportDimensionOwner")) {
+			this.onlyTeleportDimensionOwner = nbt.getBoolean("onlyTeleportDimensionOwner");
+			nbt.remove("onlyTeleportDimensionOwner");
+		} else {
+			this.onlyTeleportDimensionOwner = nbt.getBoolean("only_teleport_dimension_owner");
+		}
+
+		if (nbt.contains("teleportTeam")) {
+			this.teleportTeam = nbt.getBoolean("teleportTeam");
+			nbt.remove("teleportTeam");
+		} else {
+			this.teleportTeam = nbt.getBoolean("teleport_team");
+		}
+
+		if (nbt.contains("teleportationMode")) {
+			this.teleportationMode = TeleportationMode.byName(nbt.getString("teleportationMode")).orElseGet(() -> TeleportationMode.DIRECT);
+			nbt.remove("teleportationMode");
+		} else {
+			this.teleportationMode = TeleportationMode.byName(nbt.getString("teleportation_mode")).orElseGet(() -> TeleportationMode.DIRECT);
+		}
+
+		nbtCompound = nbt.getCompound("direct_teleport");
+		if (nbt.contains("directTeleportPositionOffsetX") || nbt.contains("directTeleportPositionOffsetY") || nbt.contains("directTeleportPositionOffsetZ")) {
+			this.directTeleportPositionOffset = new BlockPos(
+					nbt.getInt("directTeleportPositionOffsetX"),
+					nbt.getInt("directTeleportPositionOffsetY"),
+					nbt.getInt("directTeleportPositionOffsetZ")
+			);
+			nbt.remove("directTeleportPositionOffsetX");
+			nbt.remove("directTeleportPositionOffsetY");
+			nbt.remove("directTeleportPositionOffsetZ");
+		} else {
+			this.directTeleportPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
+
+		if (nbt.contains("directTeleportPositionOffsetYaw")) {
+			this.directTeleportOrientationYaw = nbt.getDouble("directTeleportPositionOffsetYaw");
+			nbt.remove("directTeleportPositionOffsetYaw");
+		} else {
+			this.directTeleportOrientationYaw = nbtCompound.getDouble("yaw");
+		}
+
+		if (nbt.contains("directTeleportPositionOffsetPitch")) {
+			this.directTeleportOrientationPitch = nbt.getDouble("directTeleportPositionOffsetPitch");
+			nbt.remove("directTeleportPositionOffsetPitch");
+		} else {
+			this.directTeleportOrientationPitch = nbtCompound.getDouble("pitch");
+		}
+
+		if (nbt.contains("spawnPointType")) {
+			this.spawnPointType = SpawnPointType.byName(nbt.getString("spawnPointType")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
+			nbt.remove("spawnPointType");
+		} else {
+			this.spawnPointType = SpawnPointType.byName(nbt.getString("spawn_point_type")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
+		}
+
+		this.locationsList.clear();
+		if (nbt.contains("locationsListSize")) {
+			int locationsListSize = nbt.getInt("locationsListSize");
+			for (int p = 0; p < locationsListSize; p++) {
+				this.locationsList.add(new MutablePair<>(new MutablePair<>(nbt.getString("locationsListIdentifier_" + p), nbt.getString("locationsListEntrance_" + p)), new MutablePair<>(nbt.getString("locationsListDataId_" + p), nbt.getString("locationsListData_" + p))));
+				nbt.remove("locationsListIdentifier_" + p);
+				nbt.remove("locationsListEntrance_" + p);
+				nbt.remove("locationsListDataId_" + p);
+				nbt.remove("locationsListData_" + p);
+			}
+			nbt.remove("locationsListSize");
+		} else {
+			NbtList nbtList = nbt.getList("triggered_blocks", NbtElement.COMPOUND_TYPE);
+			for (int i = 0; i < nbtList.size(); i++) {
+				nbtCompound = nbtList.getCompound(i);
+				this.locationsList.add(
+						new MutablePair<>(
+								new MutablePair<>(
+										nbtCompound.getString("identifier"),
+										nbtCompound.getString("entrance")
+								),
+								new MutablePair<>(
+										nbtCompound.getString("sent_data_id"),
+										nbtCompound.getString("sent_data")
+								)
+						)
+				);
+			}
+		}
+
+		nbtCompound = nbt.getCompound("location");
+		if (nbt.contains("locationIdentifier") || nbt.contains("locationEntrance") || nbt.contains("locationDataId") || nbt.contains("locationData")) {
+			this.location = new MutablePair<>(new MutablePair<>(nbt.getString("locationIdentifier"), nbt.getString("locationEntrance")), new MutablePair<>(nbt.getString("locationDataId"), nbt.getString("locationData")));
+			nbt.remove("locationIdentifier");
+			nbt.remove("locationEntrance");
+			nbt.remove("locationDataId");
+			nbt.remove("locationData");
+		} else {
+			this.location = new MutablePair<>(
+					new MutablePair<>(
+							nbtCompound.getString("identifier"),
+							nbtCompound.getString("entrance")
+					),
+					new MutablePair<>(
+							nbtCompound.getString("sent_data_id"),
+							nbtCompound.getString("sent_data")
+					)
+			);
+		}
+
+		if (nbt.contains("locationDataIdentifier")) {
+			this.locationAppendix = nbt.getString("locationDataIdentifier");
+			nbt.remove("directTeleportPositionOffsetZ");
+		} else {
+			this.sentDataValueAppendix = nbtCompound.getString("identifier_appendix");
+		}
+
+		if (nbt.contains("entranceDataIdentifier")) {
+			this.entranceAppendix = nbt.getString("entranceDataIdentifier");
+			nbt.remove("directTeleportPositionOffsetZ");
+		} else {
+			this.sentDataValueAppendix = nbtCompound.getString("entrance_appendix");
+		}
+
+		if (nbt.contains("sendDataIdentifierDataIdentifier")) {
+			this.sentDataIdentifierAppendix = nbt.getString("sendDataIdentifierDataIdentifier");
+			nbt.remove("directTeleportPositionOffsetZ");
+		} else {
+			this.sentDataValueAppendix = nbtCompound.getString("sent_data_id_appendix");
+		}
+
+		if (nbt.contains("sendDataValueDataIdentifier")) {
+			this.sentDataValueAppendix = nbt.getString("sendDataValueDataIdentifier");
+			nbt.remove("directTeleportPositionOffsetZ");
+		} else {
+			this.sentDataValueAppendix = nbtCompound.getString("sent_data_appendix");
+		}
+
+		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
+			this.dataProvidingBlockPosOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
+					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
+			);
+			nbt.remove("dataProvidingBlockPosOffsetX");
+			nbt.remove("dataProvidingBlockPosOffsetY");
+			nbt.remove("dataProvidingBlockPosOffsetZ");
+		} else {
+			this.dataProvidingBlockPosOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
+
+		if (nbt.contains("pre_teleport_triggered_block_position_offset_x") || nbt.contains("pre_teleport_triggered_block_position_offset_y") || nbt.contains("pre_teleport_triggered_block_position_offset_z") || nbt.contains("pre_teleport_triggered_block_resets")) {
+			this.preTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
+					MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("pre_teleport_triggered_block_position_offset_z"), -48, 48)
+			), nbt.getBoolean("pre_teleport_triggered_block_resets"));
+			nbt.remove("pre_teleport_triggered_block_position_offset_x");
+			nbt.remove("pre_teleport_triggered_block_position_offset_y");
+			nbt.remove("pre_teleport_triggered_block_position_offset_z");
+			nbt.remove("pre_teleport_triggered_block_resets");
+		} else {
+			nbtCompound = nbt.getCompound("pre_teleport");
+			this.preTeleportTriggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("triggered_block_resets")
+			);
+		}
+
+		if (nbt.contains("uuid_list_handler_position_offset_x") || nbt.contains("uuid_list_handler_position_offset_y") || nbt.contains("uuid_list_handler_position_offset_z")) {
+			this.onTeleportUUIDListHandlerPositionOffset = new BlockPos(
+					MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z"), -48, 48)
+			);
+			nbt.remove("uuid_list_handler_position_offset_x");
+			nbt.remove("uuid_list_handler_position_offset_y");
+			nbt.remove("uuid_list_handler_position_offset_z");
+		} else {
+			nbtCompound = nbt.getCompound("on_teleport");
+			this.onTeleportUUIDListHandlerPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
+		}
+
+		if (nbt.contains("post_teleport_triggered_block_position_offset_x") || nbt.contains("post_teleport_triggered_block_position_offset_y") || nbt.contains("post_teleport_triggered_block_position_offset_z") || nbt.contains("post_teleport_triggered_block_resets")) {
+			this.postTeleportTriggeredBlock = new MutablePair<>(new BlockPos(
+					MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_x"), -48, 48),
+					MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_y"), -48, 48),
+					MathHelper.clamp(nbt.getInt("post_teleport_triggered_block_position_offset_z"), -48, 48)
+			), nbt.getBoolean("post_teleport_triggered_block_resets"));
+			nbt.remove("post_teleport_triggered_block_position_offset_x");
+			nbt.remove("post_teleport_triggered_block_position_offset_y");
+			nbt.remove("post_teleport_triggered_block_position_offset_z");
+			nbt.remove("post_teleport_triggered_block_resets");
+		} else {
+			nbtCompound = nbt.getCompound("post_teleport");
+			this.postTeleportTriggeredBlock = new MutablePair<>(
+					BlockPos.max(
+							BlockPos.min(
+									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					),
+					nbtCompound.getBoolean("triggered_block_resets")
+			);
+		}
+
+		nbtCompound = nbt.getCompound("gameplay_screen");
+		if (nbt.contains("showAdventureScreen")) {
+			this.showAdventureScreen = nbt.getBoolean("showAdventureScreen");
+			nbt.remove("showAdventureScreen");
+		} else {
+			this.showAdventureScreen = nbtCompound.getBoolean("show_adventure_screen");
+		}
+
+		if (nbt.contains("teleporterName")) {
+			this.teleporterName = nbt.getString("teleporterName");
+			nbt.remove("teleporterName");
+		} else {
+			this.teleporterName = nbtCompound.getString("teleporter_name");
+		}
+
+		if (nbt.contains("currentTargetIdentifierLabel")) {
+			this.currentTargetIdentifierLabel = nbt.getString("currentTargetIdentifierLabel");
+			nbt.remove("currentTargetIdentifierLabel");
+		} else {
+			this.currentTargetIdentifierLabel = nbtCompound.getString("current_target_identifier_label");
+		}
+
+		if (nbt.contains("currentTargetOwnerLabel")) {
+			this.currentTargetOwnerLabel = nbt.getString("currentTargetOwnerLabel");
+			nbt.remove("currentTargetOwnerLabel");
+		} else {
+			this.currentTargetOwnerLabel = nbtCompound.getString("current_target_owner_label");
+		}
+
+		if (nbt.contains("showRegenerateButton")) {
+			this.showRegenerateButton = nbt.getBoolean("showRegenerateButton");
+			nbt.remove("showRegenerateButton");
+		} else {
+			this.showRegenerateButton = nbtCompound.getBoolean("show_regenerate_button");
+		}
+
+		if (nbt.contains("showCancelButton")) {
+			this.showCancelButton = nbt.getBoolean("showCancelButton");
+			nbt.remove("showCancelButton");
+		} else {
+			this.showCancelButton = nbtCompound.getBoolean("show_cancel_button");
+		}
+
+		if (nbt.contains("canOwnerBeChosen")) {
+			this.canOwnerBeChosen = nbt.getBoolean("canOwnerBeChosen");
+			nbt.remove("canOwnerBeChosen");
+		} else {
+			this.canOwnerBeChosen = nbtCompound.getBoolean("can_owner_be_chosen");
+		}
+
+		if (nbt.contains("teleportButtonLabel")) {
+			this.teleportButtonLabel = nbt.getString("teleportButtonLabel");
+			nbt.remove("teleportButtonLabel");
+		} else {
+			this.teleportButtonLabel = nbtCompound.getString("teleport_button_label");
+		}
+
+		if (nbt.contains("cancelTeleportButtonLabel")) {
+			this.cancelTeleportButtonLabel = nbt.getString("cancelTeleportButtonLabel");
+			nbt.remove("cancelTeleportButtonLabel");
+		} else {
+			this.cancelTeleportButtonLabel = nbtCompound.getString("cancel_teleport_button_label");
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -322,56 +513,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, TeleporterBlockEntity blockEntity) {
-		if (!blockEntity.triggerActivation() && world.getTime() % 20L == 0) {
-			TeleporterBlockEntity.tryOpenScreenRemotely(world, pos, state, blockEntity);
-		}
-	}
-
-	private static void tryOpenScreenRemotely(World world, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
-		if (world.isClient) {
-			return;
-		}
-		if (state.isOf(ScriptBlocksBlocks.TELEPORTER_BLOCK)) {
-			if (teleporterBlockEntity.calculateActivationBox || teleporterBlockEntity.activationArea == null) {
-				BlockPos activationAreaPositionOffset = teleporterBlockEntity.getActivationAreaPositionOffset();
-				Vec3i activationAreaDimensions = teleporterBlockEntity.getActivationAreaDimensions();
-				Vec3d activationAreaStart = new Vec3d(pos.getX() + activationAreaPositionOffset.getX(), pos.getY() + activationAreaPositionOffset.getY(), pos.getZ() + activationAreaPositionOffset.getZ());
-				Vec3d activationAreaEnd = new Vec3d(activationAreaStart.getX() + activationAreaDimensions.getX(), activationAreaStart.getY() + activationAreaDimensions.getY(), activationAreaStart.getZ() + activationAreaDimensions.getZ());
-				teleporterBlockEntity.activationArea = new Box(activationAreaStart, activationAreaEnd);
-				teleporterBlockEntity.calculateActivationBox = false;
-			}
-			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, teleporterBlockEntity.activationArea);
-			for (PlayerEntity playerEntity : list) {
-				if (!playerEntity.isCreative()) {
-					openNonCreativeScreen(world, playerEntity, pos, state, teleporterBlockEntity);
-
-					// prevents continuous opening of the screen
-					playerEntity.setStatusEffect(
-							new StatusEffectInstance(
-									ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT,
-									40,
-									0,
-									false,
-									false,
-									false
-							),
-							playerEntity
-					);
-				}
-			}
-		}
-	}
-
 	public static void openNonCreativeScreen(World world, PlayerEntity player, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
 
-		if (!player.hasStatusEffect(ScriptBlocksStatusEffects.PORTAL_RESISTANCE_EFFECT)) {
-			if (!teleporterBlockEntity.onlyTeleportDimensionOwner || player.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
-				// TODO check for "prevent teleport" items
-				player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-			} else {
-				player.sendMessage(Text.translatable("hud.message.only_dimension_owner_can_teleport"), true);
-			}
+		if (!teleporterBlockEntity.onlyTeleportDimensionOwner || player.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
+			// TODO check for "prevent teleport" items
+			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+		} else {
+			player.sendMessage(Text.translatable("hud.message.only_dimension_owner_can_teleport"), true);
 		}
 	}
 
@@ -390,8 +538,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	}
 
 	public void sendPostTeleportUUIDList(List<UUID> uuidList) {
-		if (this.world != null && !this.uuidListHandlerPositionOffset.equals(BlockPos.ORIGIN)) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.uuidListHandlerPositionOffset.getX(), this.pos.getY() + this.uuidListHandlerPositionOffset.getY(), this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ()));
+		if (this.world != null && !this.onTeleportUUIDListHandlerPositionOffset.equals(BlockPos.ORIGIN)) {
+			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.onTeleportUUIDListHandlerPositionOffset.getX(), this.pos.getY() + this.onTeleportUUIDListHandlerPositionOffset.getY(), this.pos.getZ() + this.onTeleportUUIDListHandlerPositionOffset.getZ()));
 			if (blockEntity != this && blockEntity instanceof HandlesUUIDList handlesUUIDList) {
 				handlesUUIDList.handleUUIDList(uuidList, false);
 			}
@@ -412,29 +560,71 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 	}
 
+	private List<UUID> getUUIDListFromHandler() {
+		if (this.world != null) {
+
+			BlockEntity blockEntity = world.getBlockEntity(
+					new BlockPos(
+							this.pos.getX() + this.uuidListHandlerPositionOffset.getX(),
+							this.pos.getY() + this.uuidListHandlerPositionOffset.getY(),
+							this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ()
+					)
+			);
+			if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
+				return handlesUUIDList.supplyUUIDList(false);
+			}
+		}
+		return List.of();
+	}
+
 	@Override
 	public void trigger() {
-		World world = this.world;
-		if (world != null && this.triggerActivation) {
-			tryOpenScreenRemotely(world, this.pos, world.getBlockState(this.pos), this);
+		if (this.world != null) {
+			this.getUUIDListFromHandler().forEach((uuid) -> {
+				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
+				if (playerEntity != null && !playerEntity.isCreative()) {
+					openNonCreativeScreen(this.world, playerEntity, this.pos, this.world.getBlockState(this.pos), this);
+				}
+			});
 		}
+	}
+
+	@Override
+	public List<UUID> supplyUUIDList(boolean remove) {
+		return List.of();
+	}
+
+	@Override
+	public void handleUUIDList(List<UUID> list, boolean remove) {
+		if (this.world != null) {
+			list.forEach((uuid) -> {
+				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
+				if (playerEntity != null && !playerEntity.isCreative()) {
+					openNonCreativeScreen(this.world, playerEntity, this.pos, this.world.getBlockState(this.pos), this);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void reset() {
 	}
 
 	public MutablePair<MutablePair<String, String>, MutablePair<String, String>> getDataDrivenLocation() {
 
 		String locationString = this.location.getLeft().getLeft();
 		String entranceString = this.location.getLeft().getRight();
-		String dataIdString = this.location.getRight().getLeft() + this.sendDataIdentifierDataIdentifier;
-		String dataValueString = this.location.getRight().getRight() + this.sendDataValueDataIdentifier;
+		String dataIdString = this.location.getRight().getLeft() + this.sentDataIdentifierAppendix;
+		String dataValueString = this.location.getRight().getRight() + this.sentDataValueAppendix;
 
 		BlockPos dataProvidingBlockPosOffset = this.dataProvidingBlockPosOffset;
 		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
 			BlockEntity blockEntity = this.world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
 			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
-				locationString = locationString + providesDataBlockEntity.getData(this.locationDataIdentifier);
-				entranceString = entranceString + providesDataBlockEntity.getData(this.entranceDataIdentifier);
-				dataIdString = dataIdString + providesDataBlockEntity.getData(this.sendDataIdentifierDataIdentifier);
-				dataValueString = dataValueString + providesDataBlockEntity.getData(this.sendDataValueDataIdentifier);
+				locationString = locationString + providesDataBlockEntity.getData(this.locationAppendix);
+				entranceString = entranceString + providesDataBlockEntity.getData(this.entranceAppendix);
+				dataIdString = dataIdString + providesDataBlockEntity.getData(this.sentDataIdentifierAppendix);
+				dataValueString = dataValueString + providesDataBlockEntity.getData(this.sentDataValueAppendix);
 			}
 		}
 
@@ -470,38 +660,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.creativeScreenPage = creativeScreenPage;
 	}
 
-	public boolean getShowActivationArea() {
-		return showActivationArea;
+	public BlockPos getUuidListHandlerPositionOffset() {
+		return uuidListHandlerPositionOffset;
 	}
 
-	public void setShowActivationArea(boolean showActivationArea) {
-		this.showActivationArea = showActivationArea;
-	}
-
-	public Vec3i getActivationAreaDimensions() {
-		return activationAreaDimensions;
-	}
-
-	public void setActivationAreaDimensions(Vec3i activationAreaDimensions) {
-		this.activationAreaDimensions = activationAreaDimensions;
-		this.calculateActivationBox = true;
-	}
-
-	public BlockPos getActivationAreaPositionOffset() {
-		return activationAreaPositionOffset;
-	}
-
-	public void setActivationAreaPositionOffset(BlockPos activationAreaPositionOffset) {
-		this.activationAreaPositionOffset = activationAreaPositionOffset;
-		this.calculateActivationBox = true;
-	}
-
-	public boolean triggerActivation() {
-		return this.triggerActivation;
-	}
-
-	public void setTriggerActivation(boolean triggerActivation) {
-		this.triggerActivation = triggerActivation;
+	public void setUuidListHandlerPositionOffset(BlockPos uuidListHandlerPositionOffset) {
+		this.uuidListHandlerPositionOffset = uuidListHandlerPositionOffset;
 	}
 
 	public BlockPos getAccessPositionOffset() {
@@ -609,36 +773,36 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.dataProvidingBlockPosOffset = dataProvidingBlockPosOffset;
 	}
 
-	public String getLocationDataIdentifier() {
-		return this.locationDataIdentifier;
+	public String getLocationAppendix() {
+		return this.locationAppendix;
 	}
 
-	public void setLocationDataIdentifier(String locationDataIdentifier) {
-		this.locationDataIdentifier = locationDataIdentifier;
+	public void setLocationAppendix(String locationAppendix) {
+		this.locationAppendix = locationAppendix;
 	}
 
-	public String getEntranceDataIdentifier() {
-		return this.entranceDataIdentifier;
+	public String getEntranceAppendix() {
+		return this.entranceAppendix;
 	}
 
-	public void setEntranceDataIdentifier(String entranceDataIdentifier) {
-		this.entranceDataIdentifier = entranceDataIdentifier;
+	public void setEntranceAppendix(String entranceAppendix) {
+		this.entranceAppendix = entranceAppendix;
 	}
 
-	public String getSendDataIdentifierDataIdentifier() {
-		return this.sendDataIdentifierDataIdentifier;
+	public String getSentDataIdentifierAppendix() {
+		return this.sentDataIdentifierAppendix;
 	}
 
-	public void setSendDataIdentifierDataIdentifier(String sendDataIdentifierDataIdentifier) {
-		this.sendDataIdentifierDataIdentifier = sendDataIdentifierDataIdentifier;
+	public void setSentDataIdentifierAppendix(String sentDataIdentifierAppendix) {
+		this.sentDataIdentifierAppendix = sentDataIdentifierAppendix;
 	}
 
-	public String getSendDataValueDataIdentifier() {
-		return this.sendDataValueDataIdentifier;
+	public String getSentDataValueAppendix() {
+		return this.sentDataValueAppendix;
 	}
 
-	public void setSendDataValueDataIdentifier(String sendDataValueDataIdentifier) {
-		this.sendDataValueDataIdentifier = sendDataValueDataIdentifier;
+	public void setSentDataValueAppendix(String sentDataValueAppendix) {
+		this.sentDataValueAppendix = sentDataValueAppendix;
 	}
 
 	public MutablePair<BlockPos, Boolean> getPreTeleportTriggeredBlock() {
@@ -649,12 +813,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.preTeleportTriggeredBlock = preTeleportTriggeredBlock;
 	}
 
-	public BlockPos getUuidListHandlerPositionOffset() {
-		return this.uuidListHandlerPositionOffset;
+	public BlockPos getOnTeleportUUIDListHandlerPositionOffset() {
+		return this.onTeleportUUIDListHandlerPositionOffset;
 	}
 
-	public void setUuidListHandlerPositionOffset(BlockPos uuidListHandlerPositionOffset) {
-		this.uuidListHandlerPositionOffset = uuidListHandlerPositionOffset;
+	public void setOnTeleportUUIDListHandlerPositionOffset(BlockPos onTeleportUUIDListHandlerPositionOffset) {
+		this.onTeleportUUIDListHandlerPositionOffset = onTeleportUUIDListHandlerPositionOffset;
 	}
 
 	public MutablePair<BlockPos, Boolean> getPostTeleportTriggeredBlock() {
@@ -738,44 +902,40 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		return Text.translatable(this.teleporterName);
 	}
 
-	// TODO
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
 				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerPositionOffset, blockRotation);
+
 				this.accessPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.accessPositionOffset, blockRotation);
+
 				this.directTeleportPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.directTeleportPositionOffset, blockRotation);
-
 				this.directTeleportOrientationYaw = BlockRotationUtils.rotateYaw(this.directTeleportOrientationYaw, blockRotation);
-
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.activationAreaPositionOffset, this.activationAreaDimensions, blockRotation);
-				this.activationAreaPositionOffset = offsetArea.getLeft();
-				this.activationAreaDimensions = offsetArea.getRight();
 
 				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
 			}
 			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.FRONT_BACK);
+
 				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, BlockMirror.FRONT_BACK);
+
 				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, BlockMirror.FRONT_BACK);
-
 				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, BlockMirror.FRONT_BACK);
-
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.activationAreaPositionOffset, this.activationAreaDimensions, BlockMirror.FRONT_BACK);
-				this.activationAreaPositionOffset = offsetArea.getLeft();
-				this.activationAreaDimensions = offsetArea.getRight();
 
 				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
 			}
 			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.LEFT_RIGHT);
+
 				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, BlockMirror.LEFT_RIGHT);
+
 				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, BlockMirror.LEFT_RIGHT);
-
 				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, BlockMirror.LEFT_RIGHT);
-
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.activationAreaPositionOffset, this.activationAreaDimensions, BlockMirror.LEFT_RIGHT);
-				this.activationAreaPositionOffset = offsetArea.getLeft();
-				this.activationAreaDimensions = offsetArea.getRight();
 
 				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
 			}
