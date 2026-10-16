@@ -9,6 +9,7 @@ import net.minecraft.util.math.Vec3i;
 
 public record UpdateTeamControllerBlockPacket(
 		BlockPos teamControllerBlockPosition,
+		boolean enableTicking,
 		boolean showArea,
 		Vec3i areaDimensions,
 		BlockPos areaPositionOffset,
@@ -30,6 +31,7 @@ public record UpdateTeamControllerBlockPacket(
 	public UpdateTeamControllerBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
 						registryByteBuf.readInt(),
@@ -53,6 +55,7 @@ public record UpdateTeamControllerBlockPacket(
 
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teamControllerBlockPosition);
+		registryByteBuf.writeBoolean(this.enableTicking);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeInt(this.areaDimensions.getX());
 		registryByteBuf.writeInt(this.areaDimensions.getY());

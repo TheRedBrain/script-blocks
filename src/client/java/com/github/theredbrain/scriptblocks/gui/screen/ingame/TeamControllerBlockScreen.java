@@ -31,6 +31,8 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_dimensions_label");
 	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_position_offset_label");
 	private static final Text PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.pvp_controller_block_position_offset_label");
+	private static final Text ENABLE_TICKING_TRUE_LABEL_TEXT = Text.translatable("gui.team_controller_block.enable_ticking_true_label");
+	private static final Text ENABLE_TICKING_FALSE_LABEL_TEXT = Text.translatable("gui.team_controller_block.enable_ticking_false_label");
 	private static final Text TEAM_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_identifier_label");
 	private static final Text DISPLAY_NAME_LABEL_TEXT = Text.translatable("gui.team_controller_block.display_name_label");
 	private static final Text TEAM_COLOR_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_color_label");
@@ -55,6 +57,8 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	private TextFieldWidget pvpControllerBlockPositionOffsetXField;
 	private TextFieldWidget pvpControllerBlockPositionOffsetYField;
 	private TextFieldWidget pvpControllerBlockPositionOffsetZField;
+	private CyclingButtonWidget<Boolean> toggleEnableTickingButton;
+	private boolean enableTicking;
 
 	private TextFieldWidget teamIdentifierField;
 	private TextFieldWidget displayNameField;
@@ -152,6 +156,11 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.pvpControllerBlockPositionOffsetZField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getZ()));
 		this.addSelectableChild(this.pvpControllerBlockPositionOffsetZField);
 
+		this.enableTicking = this.teamControllerBlockEntity.enableTicking();
+		this.toggleEnableTickingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT).initially(this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, enableTicking) -> {
+			this.enableTicking = enableTicking;
+		}));
+
 
 		this.teamIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
 		this.teamIdentifierField.setMaxLength(128);
@@ -227,6 +236,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.pvpControllerBlockPositionOffsetXField.setVisible(false);
 		this.pvpControllerBlockPositionOffsetYField.setVisible(false);
 		this.pvpControllerBlockPositionOffsetZField.setVisible(false);
+		this.toggleEnableTickingButton.visible = false;
 
 		this.teamIdentifierField.setVisible(false);
 		this.displayNameField.setVisible(false);
@@ -251,6 +261,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 			this.pvpControllerBlockPositionOffsetXField.setVisible(true);
 			this.pvpControllerBlockPositionOffsetYField.setVisible(true);
 			this.pvpControllerBlockPositionOffsetZField.setVisible(true);
+			this.toggleEnableTickingButton.visible = true;
 
 		} else if (this.screenPage == ScreenPage.TEAM) {
 
@@ -278,6 +289,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		boolean bool = this.showArea;
 		boolean bool1 = this.friendlyFire;
 		boolean bool2 = this.showFriendlyInvisibles;
+		boolean bool3 = this.enableTicking;
 		String string = this.areaDimensionsXField.getText();
 		String string1 = this.areaDimensionsYField.getText();
 		String string2 = this.areaDimensionsZField.getText();
@@ -308,6 +320,8 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.toggleFriendlyFireButton.setValue(this.friendlyFire);
 		this.showFriendlyInvisibles = bool2;
 		this.toggleShowFriendlyInvisiblesButton.setValue(this.showFriendlyInvisibles);
+		this.enableTicking = bool3;
+		this.toggleEnableTickingButton.setValue(this.enableTicking);
 		this.areaDimensionsXField.setText(string);
 		this.areaDimensionsYField.setText(string1);
 		this.areaDimensionsZField.setText(string2);
@@ -363,6 +377,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTeamControllerBlockPacket(
 				this.teamControllerBlockEntity.getPos(),
+				this.enableTicking,
 				this.showArea,
 				new Vec3i(
 						ItemUtils.parseInt(this.areaDimensionsXField.getText()),

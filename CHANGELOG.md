@@ -53,6 +53,12 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
   - the ticking area check can be disabled
   - when triggered, sends a UUID list of all players in the area and triggers a block when at least one player is in the area
 
+### Team Controller Block Rework
+
+- is now a UUID List Handler
+  - when provided a list, the corresponding players are added to the current team
+- block ticking can now be disabled
+
 ### Teleporter Block Rework
 
 The Teleporter Block has become increasingly complex. This rework extracts some behaviour into other blocks

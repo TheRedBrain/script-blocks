@@ -1,17 +1,20 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.scoreboard.AbstractTeam;
@@ -30,8 +33,11 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public class TeamControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
+public class TeamControllerBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
+
+	private boolean enableTicking = true;
 
 	private boolean calculateAreaBox = true;
 	private Box area = null;
@@ -60,48 +66,37 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
-		nbt.putBoolean("show_area", this.showArea);
+		nbt.putBoolean("enable_ticking", this.enableTicking);
 
-		if (this.area != null) {
-			nbt.putDouble("area_min_x", this.area.minX);
-			nbt.putDouble("area_min_y", this.area.minY);
-			nbt.putDouble("area_min_z", this.area.minZ);
-			nbt.putDouble("area_max_x", this.area.maxX);
-			nbt.putDouble("area_max_y", this.area.maxY);
-			nbt.putDouble("area_max_z", this.area.maxZ);
-		}
+		NbtCompound nbtCompound = new NbtCompound();
+		nbtCompound.putBoolean("visible", this.showArea);
+		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
+		nbt.put("area", nbtCompound.copy());
 
-		nbt.putInt("area_dimensions_x", this.areaDimensions.getX());
-		nbt.putInt("area_dimensions_y", this.areaDimensions.getY());
-		nbt.putInt("area_dimensions_z", this.areaDimensions.getZ());
+		nbt.put("pvp_controller_block_position_offset", NbtHelper.fromBlockPos(this.pvpControllerBlockPositionOffset));
 
-		nbt.putInt("area_position_offset_x", this.areaPositionOffset.getX());
-		nbt.putInt("area_position_offset_y", this.areaPositionOffset.getY());
-		nbt.putInt("area_position_offset_z", this.areaPositionOffset.getZ());
+		nbtCompound = new NbtCompound();
+		nbtCompound.putString("identifier", this.teamIdentifier);
 
-		nbt.putInt("pvp_controller_block_position_offset_x", this.pvpControllerBlockPositionOffset.getX());
-		nbt.putInt("pvp_controller_block_position_offset_y", this.pvpControllerBlockPositionOffset.getY());
-		nbt.putInt("pvp_controller_block_position_offset_z", this.pvpControllerBlockPositionOffset.getZ());
+		nbtCompound.putString("display_name_string", this.displayNameString);
 
-		nbt.putString("team_identifier", this.teamIdentifier);
+		nbtCompound.putInt("color_index", this.getTeamColorIndex());
 
-		nbt.putString("display_name_string", this.displayNameString);
+		nbtCompound.putBoolean("friendly_fire", this.friendlyFire);
 
-		nbt.putInt("team_color_index", this.getTeamColorIndex());
+		nbtCompound.putBoolean("show_friendly_invisibles", this.showFriendlyInvisibles);
 
-		nbt.putBoolean("friendly_fire", this.friendlyFire);
+		nbtCompound.putString("nametag_visibility", this.nametagVisibility);
 
-		nbt.putBoolean("show_friendly_invisibles", this.showFriendlyInvisibles);
+		nbtCompound.putString("death_message_visibility", this.deathMessageVisibility);
 
-		nbt.putString("nametag_visibility", this.nametagVisibility);
+		nbtCompound.putString("collision_rule", this.collisionRule);
 
-		nbt.putString("death_message_visibility", this.deathMessageVisibility);
+		nbtCompound.putString("prefix_string", this.prefixString);
 
-		nbt.putString("collision_rule", this.collisionRule);
-
-		nbt.putString("prefix_string", this.prefixString);
-
-		nbt.putString("suffix_string", this.suffixString);
+		nbtCompound.putString("suffix_string", this.suffixString);
+		nbt.put("team_settings", nbtCompound.copy());
 
 		super.writeNbt(nbt, registryLookup);
 
@@ -110,39 +105,38 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	@Override
 	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 
+		this.enableTicking = nbt.getBoolean("enable_ticking");
+
+		NbtCompound nbtCompound = nbt.getCompound("area");
 		if (nbt.contains("showArea")) {
 			this.showArea = nbt.getBoolean("showArea");
 			nbt.remove("showArea");
-		} else {
+		} else if (nbt.contains("show_area")) {
 			this.showArea = nbt.getBoolean("show_area");
+			nbt.remove("show_area");
+		} else {
+			this.showArea = nbtCompound.getBoolean("visible");
 		}
 
 		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
-			this.area = new Box(
-					nbt.getDouble("areaMinX"),
-					nbt.getDouble("areaMinY"),
-					nbt.getDouble("areaMinZ"),
-					nbt.getDouble("areaMaxX"),
-					nbt.getDouble("areaMaxY"),
-					nbt.getDouble("areaMaxZ")
-			);
+			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
+			this.calculateAreaBox = true;
 			nbt.remove("areaMinX");
 			nbt.remove("areaMinY");
 			nbt.remove("areaMinZ");
 			nbt.remove("areaMaxX");
 			nbt.remove("areaMaxY");
 			nbt.remove("areaMaxZ");
-		} else {
-			this.area = new Box(
-					nbt.getDouble("area_min_x"),
-					nbt.getDouble("area_min_y"),
-					nbt.getDouble("area_min_z"),
-					nbt.getDouble("area_max_x"),
-					nbt.getDouble("area_max_y"),
-					nbt.getDouble("area_max_z")
-			);
+		} else if (nbt.contains("area_min_x") || nbt.contains("area_min_y") || nbt.contains("area_min_z") || nbt.contains("area_max_x") || nbt.contains("area_max_y") || nbt.contains("area_max_z")) {
+			this.area = new Box(nbt.getDouble("area_min_x"), nbt.getDouble("area_min_y"), nbt.getDouble("area_min_z"), nbt.getDouble("area_max_x"), nbt.getDouble("area_max_y"), nbt.getDouble("area_max_z"));
+			this.calculateAreaBox = true;
+			nbt.remove("area_min_x");
+			nbt.remove("area_min_y");
+			nbt.remove("area_min_z");
+			nbt.remove("area_max_x");
+			nbt.remove("area_max_y");
+			nbt.remove("area_max_z");
 		}
-		this.calculateAreaBox = true;
 
 		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
 			this.areaDimensions = new Vec3i(
@@ -153,12 +147,17 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaDimensionsX");
 			nbt.remove("areaDimensionsY");
 			nbt.remove("areaDimensionsZ");
-		} else {
+		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
 			this.areaDimensions = new Vec3i(
 					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
 					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
 					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
 			);
+			nbt.remove("area_dimensions_x");
+			nbt.remove("area_dimensions_y");
+			nbt.remove("area_dimensions_z");
+		} else {
+			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 		}
 
 		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
@@ -170,11 +169,22 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("areaPositionOffsetX");
 			nbt.remove("areaPositionOffsetY");
 			nbt.remove("areaPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
 			this.areaPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
+			);
+			nbt.remove("area_position_offset_x");
+			nbt.remove("area_position_offset_y");
+			nbt.remove("area_position_offset_z");
+		} else {
+			this.areaPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
 			);
 		}
 
@@ -187,83 +197,125 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 			nbt.remove("pvpControllerBlockPositionOffsetX");
 			nbt.remove("pvpControllerBlockPositionOffsetY");
 			nbt.remove("pvpControllerBlockPositionOffsetZ");
-		} else {
+		} else if (nbt.contains("pvp_controller_block_position_offset_x") || nbt.contains("pvp_controller_block_position_offset_y") || nbt.contains("pvp_controller_block_position_offset_z")) {
 			this.pvpControllerBlockPositionOffset = new BlockPos(
 					MathHelper.clamp(nbt.getInt("pvp_controller_block_position_offset_x"), -48, 48),
 					MathHelper.clamp(nbt.getInt("pvp_controller_block_position_offset_y"), -48, 48),
 					MathHelper.clamp(nbt.getInt("pvp_controller_block_position_offset_z"), -48, 48)
 			);
+			nbt.remove("pvp_controller_block_position_offset_x");
+			nbt.remove("pvp_controller_block_position_offset_y");
+			nbt.remove("pvp_controller_block_position_offset_z");
+		} else {
+			this.pvpControllerBlockPositionOffset = BlockPos.max(
+					BlockPos.min(
+							NbtHelper.toBlockPos(nbtCompound, "pvp_controller_block_position_offset").orElse(BlockPos.ORIGIN),
+							new BlockPos(48, 48, 48)
+					),
+					new BlockPos(-48, -48, -48)
+			);
 		}
 
+		nbtCompound = nbt.getCompound("team_settings");
 		if (nbt.contains("teamIdentifier")) {
 			this.teamIdentifier = nbt.getString("teamIdentifier");
 			nbt.remove("teamIdentifier");
-		} else {
+		} else if (nbt.contains("team_identifier")) {
 			this.teamIdentifier = nbt.getString("team_identifier");
+			nbt.remove("team_identifier");
+		} else {
+			this.teamIdentifier = nbtCompound.getString("identifier");
 		}
 
 		if (nbt.contains("displayNameString")) {
 			this.displayNameString = nbt.getString("displayNameString");
 			nbt.remove("displayNameString");
-		} else {
+		} else if (nbt.contains("display_name_string")) {
 			this.displayNameString = nbt.getString("display_name_string");
+			nbt.remove("display_name_string");
+		} else {
+			this.displayNameString = nbtCompound.getString("display_name_string");
 		}
 
 
 		if (nbt.contains("teamColorIndex")) {
 			this.setTeamColor(nbt.getInt("teamColorIndex"));
 			nbt.remove("teamColorIndex");
-		} else {
+		} else if (nbt.contains("team_color_index")) {
 			this.setTeamColor(nbt.getInt("team_color_index"));
+			nbt.remove("team_color_index");
+		} else {
+			this.setTeamColor(nbtCompound.getInt("color_index"));
 		}
 
 		if (nbt.contains("friendlyFire")) {
 			this.friendlyFire = nbt.getBoolean("friendlyFire");
 			nbt.remove("friendlyFire");
-		} else {
+		} else if (nbt.contains("friendly_fire")) {
 			this.friendlyFire = nbt.getBoolean("friendly_fire");
+			nbt.remove("friendly_fire");
+		} else {
+			this.friendlyFire = nbtCompound.getBoolean("friendly_fire");
 		}
 
 		if (nbt.contains("showFriendlyInvisibles")) {
 			this.showFriendlyInvisibles = nbt.getBoolean("showFriendlyInvisibles");
 			nbt.remove("showFriendlyInvisibles");
-		} else {
+		} else if (nbt.contains("show_friendly_invisibles")) {
 			this.showFriendlyInvisibles = nbt.getBoolean("show_friendly_invisibles");
+			nbt.remove("show_friendly_invisibles");
+		} else {
+			this.showFriendlyInvisibles = nbtCompound.getBoolean("show_friendly_invisibles");
 		}
 
 		if (nbt.contains("nametagVisibility")) {
 			this.nametagVisibility = nbt.getString("nametagVisibility");
 			nbt.remove("nametagVisibility");
-		} else {
+		} else if (nbt.contains("nametag_visibility")) {
 			this.nametagVisibility = nbt.getString("nametag_visibility");
+			nbt.remove("nametag_visibility");
+		} else {
+			this.nametagVisibility = nbtCompound.getString("nametag_visibility");
 		}
 
 		if (nbt.contains("deathMessageVisibility")) {
 			this.deathMessageVisibility = nbt.getString("deathMessageVisibility");
 			nbt.remove("deathMessageVisibility");
-		} else {
+		} else if (nbt.contains("death_message_visibility")) {
 			this.deathMessageVisibility = nbt.getString("death_message_visibility");
+			nbt.remove("death_message_visibility");
+		} else {
+			this.deathMessageVisibility = nbtCompound.getString("death_message_visibility");
 		}
 
 		if (nbt.contains("collisionRule")) {
 			this.collisionRule = nbt.getString("collisionRule");
 			nbt.remove("collisionRule");
-		} else {
+		} else if (nbt.contains("collision_rule")) {
 			this.collisionRule = nbt.getString("collision_rule");
+			nbt.remove("collision_rule");
+		} else {
+			this.collisionRule = nbtCompound.getString("collision_rule");
 		}
 
 		if (nbt.contains("prefixString")) {
 			this.prefixString = nbt.getString("prefixString");
 			nbt.remove("prefixString");
-		} else {
+		} else if (nbt.contains("prefix_string")) {
 			this.prefixString = nbt.getString("prefix_string");
+			nbt.remove("prefix_string");
+		} else {
+			this.prefixString = nbtCompound.getString("prefix_string");
 		}
 
 		if (nbt.contains("suffixString")) {
 			this.suffixString = nbt.getString("suffixString");
 			nbt.remove("suffixString");
-		} else {
+		} else if (nbt.contains("suffix_string")) {
 			this.suffixString = nbt.getString("suffix_string");
+			nbt.remove("suffix_string");
+		} else {
+			this.suffixString = nbtCompound.getString("suffix_string");
 		}
 
 		super.readNbt(nbt, registryLookup);
@@ -280,7 +332,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TeamControllerBlockEntity teamControllerBlockEntity) {
-		if (!world.isClient && world.getTime() % 80L == 0L) {
+		if (!world.isClient && teamControllerBlockEntity.enableTicking && world.getTime() % 80L == 0L) {
 			if (teamControllerBlockEntity.calculateAreaBox || teamControllerBlockEntity.area == null) {
 				BlockPos areaPositionOffset = teamControllerBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = teamControllerBlockEntity.areaDimensions;
@@ -314,6 +366,14 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	// region --- getter & setter ---
+	public boolean enableTicking() {
+		return this.enableTicking;
+	}
+
+	public void setEnableTicking(boolean enableTicking) {
+		this.enableTicking = enableTicking;
+	}
+
 	public boolean showArea() {
 		return showArea;
 	}
@@ -457,6 +517,37 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Tri
 		this.suffixString = suffixString;
 	}
 	// endregion --- getter & setter ---
+
+	@Override
+	public List<UUID> supplyUUIDList(boolean remove) {
+		return List.of();
+	}
+
+	@Override
+	public void handleUUIDList(List<UUID> list, boolean remove) {
+		if (this.world != null && !this.world.isClient() && this.team != null) {
+			list.forEach((uuid) -> {
+				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
+				if (playerEntity != null) {
+					BlockPos pvpControllerBlockPos = null;
+					PVPControllerBlockEntity pvpControllerBlockEntity = null;
+					if (this.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
+						BlockPos pvpControllerBlockPositionOffset = this.pvpControllerBlockPositionOffset;
+						pvpControllerBlockPos = this.pos.add(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
+						BlockEntity blockEntity = this.world.getBlockEntity(pvpControllerBlockPos);
+						if (blockEntity instanceof PVPControllerBlockEntity) {
+							pvpControllerBlockEntity = (PVPControllerBlockEntity) blockEntity;
+						}
+					}
+					this.world.getScoreboard().addScoreHolderToTeam(playerEntity.getNameForScoreboard(), this.team);
+					if (pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
+						((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
+						pvpControllerBlockEntity.addPlayerAndTeam(this.team, playerEntity);
+					}
+				}
+			});
+		}
+	}
 
 	@Override
 	public void reset() {

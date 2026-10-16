@@ -24,6 +24,7 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 
 		BlockPos teamControllerBlockPosition = payload.teamControllerBlockPosition();
 
+		boolean enableTicking = payload.enableTicking();
 		boolean showArea = payload.showArea();
 		Vec3i areaDimensions = payload.areaDimensions();
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
@@ -47,6 +48,7 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 
 		if (blockEntity instanceof TeamControllerBlockEntity teamControllerBlockEntity) {
 			teamControllerBlockEntity.reset();
+			teamControllerBlockEntity.setEnableTicking(enableTicking);
 			teamControllerBlockEntity.setShowArea(showArea);
 			teamControllerBlockEntity.setAreaDimensions(areaDimensions);
 			teamControllerBlockEntity.setAreaPositionOffset(areaPositionOffset);
