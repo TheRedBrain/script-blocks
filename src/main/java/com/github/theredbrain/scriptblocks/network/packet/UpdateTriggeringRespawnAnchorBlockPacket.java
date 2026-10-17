@@ -1,4 +1,4 @@
-package com.github.theredbrain.scriptblocks.network.packet.temp;
+package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.network.RegistryByteBuf;
@@ -12,7 +12,8 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 		double spawnPointYaw,
 		double spawnPointPitch,
 		BlockPos triggeredBlockPositionOffset,
-		boolean triggeredBlockResets
+		boolean triggeredBlockResets,
+		boolean sendMessage
 ) implements CustomPayload {
 	public static final Id<UpdateTriggeringRespawnAnchorBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggering_respawn_anchor_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdateTriggeringRespawnAnchorBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeringRespawnAnchorBlockPacket::write, UpdateTriggeringRespawnAnchorBlockPacket::new);
@@ -24,6 +25,7 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readBlockPos(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean()
 		);
 	}
@@ -35,6 +37,7 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 		registryByteBuf.writeDouble(this.spawnPointPitch);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
+		registryByteBuf.writeBoolean(this.sendMessage);
 	}
 
 	@Override

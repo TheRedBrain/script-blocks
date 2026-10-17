@@ -689,6 +689,14 @@
 	"gui.triggered_block.list.weight": "Has a weight of %s to be chosen",
 
 
+	"gui.triggering_respawn_anchor_block.spawn_position_offset_label": "Spawn Position Offset",
+	"gui.triggering_respawn_anchor_block.spawn_orientation_yaw_label": "Spawn Orientation Yaw",
+	"gui.triggering_respawn_anchor_block.spawn_orientation_pitch_label": "Spawn Orientation Pitch",
+	"gui.triggering_respawn_anchor_block.send_message_label": "Send Message:",
+	"gui.triggering_respawn_anchor_block.toggle_send_message_button_label.true": "Enabled",
+	"gui.triggering_respawn_anchor_block.toggle_send_message_button_label.false": "Disabled",
+
+
 	"gui.status_effect_instance.status_effect_identifier_label": "Effect Identifier",
 	"gui.status_effect_instance.status_effect_amplifier_label": "Amplifier",
 	"gui.status_effect_instance.status_effect_duration_label": "Duration",
@@ -862,8 +870,10 @@
 	"block.scriptblocks.triggered_rng_block": "Triggered RNG Block",
 	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
 	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
+	"block.scriptblocks.triggering_respawn_anchor_block": "Triggering Respawn Anchor Block",
 	"block.scriptblocks.use_relay_block": "Use Relay Block",
 	"block.scriptblocks.team_controller_block": "Team Controller Block",
+	"block.scriptblocks.uuid_list_messaging_block": "UUID List Messaging Block",
 	"block.scriptblocks.uuid_list_relay_block": "UUID List Relay Block",
 	"block.scriptblocks.uuid_list_saving_block": "UUID List Saving Block",
 

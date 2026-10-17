@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.mixin.client.network;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
@@ -36,6 +35,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBl
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeringRespawnAnchorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
@@ -77,6 +77,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredEntityRemo
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredVillagerSpawnerBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeringRespawnAnchorBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListMessagingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
@@ -352,6 +353,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openStatusEffectManipulationBlockScreen(StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
 		this.client.setScreen(new StatusEffectManipulationBlockScreen(statusEffectManipulationBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openUUIDListMessagingBlockScreen(UUIDListMessagingBlockEntity uuidListMessagingBlockEntity) {
+		this.client.setScreen(new UUIDListMessagingBlockScreen(uuidListMessagingBlockEntity));
 	}
 
 	@Override

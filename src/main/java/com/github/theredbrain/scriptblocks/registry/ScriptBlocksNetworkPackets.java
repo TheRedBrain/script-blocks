@@ -92,6 +92,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawner
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeringRespawnAnchorBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeringRespawnAnchorBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListMessagingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListMessagingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListRelayBlockPacket;
@@ -228,6 +230,9 @@ public class ScriptBlocksNetworkPackets {
 
 		PayloadTypeRegistry.playC2S().register(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, UpdateStatusEffectManipulationBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, new UpdateStatusEffectManipulationBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, UpdateTriggeringRespawnAnchorBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, new UpdateTriggeringRespawnAnchorBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateUUIDListMessagingBlockPacket.PACKET_ID, UpdateUUIDListMessagingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUUIDListMessagingBlockPacket.PACKET_ID, new UpdateUUIDListMessagingBlockPacketReceiver());

@@ -1,6 +1,6 @@
-package com.github.theredbrain.scriptblocks.network.packet.temp;
+package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeringRespawnAnchorBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,7 +22,7 @@ public class UpdateTriggeringRespawnAnchorBlockPacketReceiver implements ServerP
 			return;
 		}
 
-		BlockPos redstoneTriggerBlockPosition = payload.triggeringRespawnAnchorBlockPosition();
+		BlockPos triggeringRespawnAnchorBlockPosition = payload.triggeringRespawnAnchorBlockPosition();
 
 		BlockPos spawnPointPositionOffset = payload.spawnPointPositionOffset();
 		double spawnPointYaw = payload.spawnPointYaw();
@@ -31,16 +31,21 @@ public class UpdateTriggeringRespawnAnchorBlockPacketReceiver implements ServerP
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
+		boolean sendMessage = payload.sendMessage();
+
 		World world = serverPlayerEntity.getWorld();
 
-		BlockEntity blockEntity = world.getBlockEntity(redstoneTriggerBlockPosition);
-		BlockState blockState = world.getBlockState(redstoneTriggerBlockPosition);
+		BlockEntity blockEntity = world.getBlockEntity(triggeringRespawnAnchorBlockPosition);
+		BlockState blockState = world.getBlockState(triggeringRespawnAnchorBlockPosition);
 
-		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
-			redstoneTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+		if (blockEntity instanceof TriggeringRespawnAnchorBlockEntity triggeringRespawnAnchorBlockEntity) {
+			triggeringRespawnAnchorBlockEntity.reset();
+			triggeringRespawnAnchorBlockEntity.setSpawnPoint(new MutablePair<>(new BlockPos(spawnPointPositionOffset), new MutablePair<>(spawnPointYaw, spawnPointPitch)));
+			triggeringRespawnAnchorBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
+			triggeringRespawnAnchorBlockEntity.setSendMessage(sendMessage);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			redstoneTriggerBlockEntity.markDirty();
-			world.updateListeners(redstoneTriggerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			triggeringRespawnAnchorBlockEntity.markDirty();
+			world.updateListeners(triggeringRespawnAnchorBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
 		}
 	}
 }

@@ -47,7 +47,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Du
 			boolean bl2 = blockState2.getBlock().canMobSpawnInside(blockState2);
 			if (bl && bl2) {
 				triggeringRespawnAnchorBlockEntity.trigger();
-				return Optional.of(new ServerPlayerEntity.RespawnPos(new Vec3d((double) spawnPoint.getLeft().getX() + 0.5, (double) spawnPoint.getLeft().getY() + 0.1, (double) spawnPoint.getLeft().getZ() + 0.5), (float) spawnPoint.getRight().getRight().doubleValue()));
+				return Optional.of(new ServerPlayerEntity.RespawnPos(new Vec3d((double) spawnPoint.getLeft().getX() + 0.5, (double) spawnPoint.getLeft().getY() + 0.1, (double) spawnPoint.getLeft().getZ() + 0.5), (float) spawnPoint.getRight().getLeft().doubleValue()));
 			}
 		}
 		return original.call(world, pos, spawnAngle, spawnForced, alive);
