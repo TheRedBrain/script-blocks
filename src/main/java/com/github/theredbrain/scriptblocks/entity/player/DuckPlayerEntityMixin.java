@@ -32,6 +32,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEnt
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
@@ -185,6 +186,9 @@ public interface DuckPlayerEntityMixin {
 	}
 
 	default void scriptblocks$openStatusEffectManipulationBlockScreen(StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
+	}
+
+	default void scriptblocks$openUUIDListMessagingBlockScreen(UUIDListMessagingBlockEntity uuidListMessagingBlockEntity) {
 	}
 
 	default void scriptblocks$openUUIDListRelayBlockScreen(UUIDListRelayBlockEntity uuidListRelayBlockEntity) {

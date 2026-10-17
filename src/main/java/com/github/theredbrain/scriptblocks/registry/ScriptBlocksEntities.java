@@ -36,6 +36,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBl
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDispenserBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRedstoneBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
@@ -249,6 +250,9 @@ public class ScriptBlocksEntities {
 	public static final BlockEntityType<TriggeredRedstoneBlockEntity> TRIGGERED_REDSTONE_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_redstone_block"),
 			BlockEntityType.Builder.create(TriggeredRedstoneBlockEntity::new, ScriptBlocksBlocks.TRIGGERED_REDSTONE_BLOCK).build());
+	public static final BlockEntityType<UUIDListMessagingBlockEntity> UUID_LIST_MESSAGING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("uuid_list_messaging_block"),
+			BlockEntityType.Builder.create(UUIDListMessagingBlockEntity::new, ScriptBlocksBlocks.UUID_LIST_MESSAGING_BLOCK).build());
 	public static final BlockEntityType<TriggeredAdvancementCheckerBlockEntity> TRIGGERED_ADVANCEMENT_CHECKER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggered_advancement_checker_block"),
 			BlockEntityType.Builder.create(TriggeredAdvancementCheckerBlockEntity::new, ScriptBlocksBlocks.TRIGGERED_ADVANCEMENT_CHECKER_BLOCK).build());

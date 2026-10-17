@@ -700,6 +700,17 @@
 	"gui.shop_block.trade_button_label": "Trade",
 
 
+	"gui.uuid_list_messaging_block.message_localisation_string_label": "Message Localisation String",
+	"gui.uuid_list_messaging_block.subtitle_localisation_string_label": "Subtitle Localisation String",
+	"gui.uuid_list_messaging_block.title_fade_in_label": "Title Fade In",
+	"gui.uuid_list_messaging_block.title_stay_label": "Title Stay",
+	"gui.uuid_list_messaging_block.title_fade_out_label": "Title Fade Out",
+
+	"gui.uuid_list_messaging_block.message_mode.chat": "Message Mode: Chat",
+	"gui.uuid_list_messaging_block.message_mode.overlay": "Message Mode: Overlay",
+	"gui.uuid_list_messaging_block.message_mode.title": "Message Mode: Title",
+
+
 	"gui.uuid_list_relay_block.list_entry": "Block with offset X: %s, Y: %s, Z: %s",
 	"gui.uuid_list_relay_block.new_uuid_list_provider_position_offset": "New UUID List Provider Position Offset",
 

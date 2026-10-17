@@ -27,6 +27,7 @@ These blocks have been polished:
 - added location cooldowns
   - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started when the player leaves a location or dies while inside the location. 
 - added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
+- added UUID List Messaging Block, sends a configurable message to all players in a received UUID List. The message can be displayed in chat, as overlay or as title.
 
 ### UUID List Handlers
 

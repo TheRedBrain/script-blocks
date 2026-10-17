@@ -41,6 +41,7 @@ import com.github.theredbrain.scriptblocks.block.TriggeredDamageDealingBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDispenserBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDisplayBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredEntityRemoverBlock;
+import com.github.theredbrain.scriptblocks.block.UUIDListMessagingBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRNGBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRedstoneBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredSpawnerBlock;
@@ -227,6 +228,7 @@ public class ScriptBlocksBlocks {
 	public static final Block TRIGGERED_DISPENSER_BLOCK = registerBlock("triggered_dispenser_block", new TriggeredDispenserBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_DISPLAY_BLOCK = registerBlock("triggered_display_block", new TriggeredDisplayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_ENTITY_REMOVER_BLOCK = registerBlock("triggered_entity_remover_block", new TriggeredEntityRemoverBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block UUID_LIST_MESSAGING_BLOCK = registerBlock("uuid_list_messaging_block", new UUIDListMessagingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_REDSTONE_BLOCK = registerBlock("triggered_redstone_block", new TriggeredRedstoneBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_RNG_BLOCK = registerBlock("triggered_rng_block", new TriggeredRNGBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_SPAWNER_BLOCK = registerBlock("triggered_spawner_block", new TriggeredSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
