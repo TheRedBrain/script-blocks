@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
@@ -8,6 +9,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -28,7 +30,6 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -380,31 +381,29 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 				playerDetectorBlockEntity.calculateAreaBox = false;
 			}
 
-			List<PlayerEntity> newCurrentPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, playerDetectorBlockEntity.area);
-			List<UUID> enteringPlayersUuidList = new ArrayList<>();
-			List<UUID> leavingPlayersUuidList = new ArrayList<>();
-			for (PlayerEntity player : newCurrentPlayerList) {
+			List<PlayerEntity> detectedPlayerList = world.getNonSpectatingEntities(PlayerEntity.class, playerDetectorBlockEntity.area);
+			List<UUID> detectedPlayersUuidList = new ArrayList<>();
+			for (PlayerEntity player : detectedPlayerList) {
 				if (!player.isCreative() || ScriptBlocksConfigs.SERVER_CONFIG.enable_creative_player_detection) {
-					enteringPlayersUuidList.add(player.getUuid());
+					detectedPlayersUuidList.add(player.getUuid());
 				}
 			}
 			ArrayList<UUID> newCurrentPlayerUUIDList = new ArrayList<>();
+			List<UUID> enteringPlayersUuidList = new ArrayList<>();
+			List<UUID> leavingPlayersUuidList = new ArrayList<>(playerDetectorBlockEntity.playerList);
 
-			Iterator<UUID> oldCurrentPlayerListIterator = playerDetectorBlockEntity.playerList.iterator();
 			PlayerEntity playerEntity;
-			UUID uuid;
 
-			// old list
-			while (oldCurrentPlayerListIterator.hasNext()) {
-				uuid = oldCurrentPlayerListIterator.next();
+			for (UUID uuid : detectedPlayersUuidList) {
 				playerEntity = world.getPlayerByUuid(uuid);
 
 				if (playerEntity != null) {
-					if (enteringPlayersUuidList.contains(uuid)) {
+					if (playerDetectorBlockEntity.playerList.contains(uuid)) {
 						newCurrentPlayerUUIDList.add(uuid);
-						enteringPlayersUuidList.remove(uuid);
+						leavingPlayersUuidList.remove(uuid);
 					} else {
-						leavingPlayersUuidList.add(uuid);
+						enteringPlayersUuidList.add(uuid);
+						newCurrentPlayerUUIDList.add(uuid);
 					}
 				}
 			}
@@ -422,6 +421,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 			playerDetectorBlockEntity.playerList.addAll(newCurrentPlayerUUIDList);
 
 			playerDetectorBlockEntity.markDirty();
+			world.updateListeners(pos, state, state, Block.NOTIFY_ALL);
 		}
 	}
 
