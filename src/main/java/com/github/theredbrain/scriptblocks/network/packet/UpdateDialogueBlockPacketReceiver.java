@@ -52,10 +52,10 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
 
-			dialogueBlockEntity.setDialogueUsedBlocksMap(dialogueUsedBlocksMap);
-			dialogueBlockEntity.setDialogueTriggeredBlocksMap(dialogueTriggeredBlocksMap);
+			dialogueBlockEntity.setUseRelayBlocks(dialogueUsedBlocksMap);
+			dialogueBlockEntity.setTriggeredBlocks(dialogueTriggeredBlocksMap);
 			dialogueBlockEntity.setStartingDialogueList(startingDialogueList);
-			dialogueBlockEntity.setDataBlockOffset(dataBlockOffset);
+			dialogueBlockEntity.setDataProvidingBlockPosOffset(dataBlockOffset);
 			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			dialogueBlockEntity.markDirty();
 			world.updateListeners(dialogueBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

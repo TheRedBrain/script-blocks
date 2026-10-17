@@ -134,6 +134,12 @@
 
 
 	"gui.dialogue_block.entry_already_in_list": "Entry already in list",
+	"gui.dialogue_block.empty_identifier": "Identifier is required",
+	"gui.dialogue_block.identifier_placeholder": "Identifier",
+	"gui.dialogue_block.used_blocks_list.entry": "'%s' uses block with offset X: %s, Y: %s, Z: %s",
+	"gui.dialogue_block.triggered_blocks_list.entry": "'%s' %s block with offset X: %s, Y: %s, Z: %s",
+	"gui.dialogue_block.triggered_blocks_list.resets": "resets",
+	"gui.dialogue_block.triggered_blocks_list.triggers": "triggers",
 
 
 	"gui.entrance_delegation_block.entrance_position_offset": "Entrance Position Offset",
