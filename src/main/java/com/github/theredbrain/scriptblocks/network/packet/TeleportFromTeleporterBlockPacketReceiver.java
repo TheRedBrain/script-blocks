@@ -7,11 +7,10 @@ import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBloc
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
-import com.github.theredbrain.scriptblocks.util.LocationCooldownsHelper;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -105,12 +104,12 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			}
 
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
-			MutablePair<String, BlockPos> location_access_pos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getLocationAccessPosition();
+			MutablePair<String, BlockPos> location_access_pos = DataAttachmentHelper.getCurrentLocationAccess(serverPlayerEntity);
 			if (spawnPointType == TeleporterBlockEntity.SpawnPointType.LOCATION_ACCESS_POSITION && location_access_pos != null) {
 				targetWorld = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(location_access_pos.getLeft())));
 				targetPos = location_access_pos.getRight();
 				if (targetWorld != null && targetPos != null) {
-					((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$setLocationAccessPosition(null);
+					DataAttachmentHelper.setCurrentLocationAccess(serverPlayerEntity, null);
 				}
 			} else if (spawnPointType == TeleporterBlockEntity.SpawnPointType.PLAYER_SPAWN) {
 				targetWorld = server.getWorld(serverPlayerEntity.getSpawnPointDimension());
@@ -243,7 +242,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						long entranceCooldown = 0;
 						long serverTime = server.getOverworld().getTime();
 
-						long currentLocationCooldown = LocationCooldownsHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
+						long currentLocationCooldown = DataAttachmentHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
 						if (currentLocationCooldown > 0 && serverTime - currentLocationCooldown < entranceCooldown) {
 							locationCooldownWasUp = false;
 							serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown"));
@@ -256,7 +255,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 									ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
 									if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 
-										currentLocationCooldown = LocationCooldownsHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
+										currentLocationCooldown = DataAttachmentHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
 										if (currentLocationCooldown > 0 && serverTime - currentLocationCooldown < entranceCooldown) {
 											locationCooldownWasUp = false;
 											serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown_for_team_member", playerString));
@@ -401,11 +400,11 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		}
 
 		if (!accessPositionDimension.isEmpty() && accessPosition != null) {
-			((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$setLocationAccessPosition(new MutablePair<>(accessPositionDimension, accessPosition));
+			DataAttachmentHelper.setCurrentLocationAccess(serverPlayerEntity, new MutablePair<>(accessPositionDimension, accessPosition));
 		}
 
 		if (!locationToCoolDown.isEmpty()) {
-			LocationCooldownsHelper.playerEntersLocation(serverPlayerEntity, locationToCoolDown);
+			DataAttachmentHelper.playerEntersLocation(serverPlayerEntity, locationToCoolDown);
 		}
 
 		serverPlayerEntity.closeHandledScreen();

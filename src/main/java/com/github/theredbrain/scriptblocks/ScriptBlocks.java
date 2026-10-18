@@ -5,7 +5,6 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.compatibility.LootableCompat;
 import com.github.theredbrain.scriptblocks.compatibility.RPGInventoryCompat;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.EventsRegistry;
 import com.github.theredbrain.scriptblocks.registry.ItemGroupRegistry;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
@@ -19,6 +18,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksNetworkPackets;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStructurePlacementTypes;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -59,7 +59,7 @@ public class ScriptBlocks implements ModInitializer {
 	}
 
 	public static void setCurrentPVPControllerBlockPosition(PlayerEntity playerEntity, Optional<BlockPos> currentPVPControllerBlockPosition) {
-		((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(currentPVPControllerBlockPosition);
+		DataAttachmentHelper.setCurrentPVPControllerBlockPosition(playerEntity, currentPVPControllerBlockPosition);
 	}
 
 	public static void addPlayerAndTeamToPVPControllerBlock(Team team, PlayerEntity playerEntity, ServerWorld serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
@@ -103,7 +103,7 @@ public class ScriptBlocks implements ModInitializer {
 
 	@Nullable
 	public static MutablePair<RegistryKey<World>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(Team team, ServerPlayerEntity serverPlayerEntity, boolean endOfBattle) {
-		Optional<BlockPos> optionalBlockPos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getCurrentPVPControllerBlockPosition();
+		Optional<BlockPos> optionalBlockPos = DataAttachmentHelper.getCurrentPVPControllerBlockPosition(serverPlayerEntity);
 		World world = serverPlayerEntity.getWorld();
 		if (optionalBlockPos.isPresent() && team != null && world instanceof ServerWorld serverWorld) {
 			String teamId = team.getName();

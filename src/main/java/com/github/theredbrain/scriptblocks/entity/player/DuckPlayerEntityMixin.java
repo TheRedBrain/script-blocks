@@ -50,18 +50,6 @@ import java.util.Optional;
 
 public interface DuckPlayerEntityMixin {
 
-	Optional<BlockPos> scriptblocks$getCurrentHousingBlockPosition();
-
-	void scriptblocks$setCurrentHousingBlockPosition(Optional<BlockPos> currentHousingBlockPosition);
-
-	@Nullable MutablePair<String, BlockPos> scriptblocks$getLocationAccessPosition();
-
-	void scriptblocks$setLocationAccessPosition(@Nullable MutablePair<String, BlockPos> locationAccessPosition);
-
-	Optional<BlockPos> scriptblocks$getCurrentPVPControllerBlockPosition();
-
-	void scriptblocks$setCurrentPVPControllerBlockPosition(Optional<BlockPos> currentPVPControllerBlockPosition);
-
 	default void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
 	}
 

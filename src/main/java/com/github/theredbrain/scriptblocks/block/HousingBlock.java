@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -53,7 +54,7 @@ public class HousingBlock extends RotatedBlockWithEntity {
 			if (player.isCreativeLevelTwoOp()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeHousingScreen(housingBlockEntity);
 			} else {
-				((DuckPlayerEntityMixin) player).scriptblocks$setCurrentHousingBlockPosition(Optional.of(housingBlockEntity.getPos()));
+				DataAttachmentHelper.setCurrentHousingBlockPosition(player, Optional.of(housingBlockEntity.getPos()));
 				((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
 			}
 			return ActionResult.success(world.isClient);

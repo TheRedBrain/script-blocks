@@ -3,10 +3,10 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
@@ -323,7 +323,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 				} else {
 					playerEntity.addStatusEffect(new StatusEffectInstance(ScriptBlocksStatusEffects.HOUSING_STRANGER_EFFECT, 100, 0, true, false, false));
 				}
-				((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentHousingBlockPosition(Optional.of(housingBlockEntity.pos));
+				DataAttachmentHelper.setCurrentHousingBlockPosition(playerEntity, Optional.of(housingBlockEntity.getPos()));
 			}
 		}
 	}

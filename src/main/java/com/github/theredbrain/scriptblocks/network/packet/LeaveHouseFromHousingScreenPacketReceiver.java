@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.registry.RegistryKey;
@@ -21,12 +21,12 @@ public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetw
 		MinecraftServer server = serverPlayerEntity.server;
 		ServerWorld targetWorld = null;
 		BlockPos targetPos = null;
-		MutablePair<String, BlockPos> location_access_pos = ((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$getLocationAccessPosition();
+		MutablePair<String, BlockPos> location_access_pos = DataAttachmentHelper.getCurrentLocationAccess(serverPlayerEntity);
 		if (location_access_pos != null) {
 			targetWorld = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier.of(location_access_pos.getLeft())));
 			targetPos = location_access_pos.getRight();
 			if (targetWorld != null && targetPos != null) {
-				((DuckPlayerEntityMixin) serverPlayerEntity).scriptblocks$setLocationAccessPosition(null);
+				DataAttachmentHelper.setCurrentLocationAccess(serverPlayerEntity, null);
 			}
 		} else {
 			targetWorld = server.getWorld(serverPlayerEntity.getSpawnPointDimension());

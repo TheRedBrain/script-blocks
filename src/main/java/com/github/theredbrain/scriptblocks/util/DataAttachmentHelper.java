@@ -1,8 +1,15 @@
 package com.github.theredbrain.scriptblocks.util;
 
 import com.github.theredbrain.scriptblocks.data.LocationCooldowns;
+import com.github.theredbrain.scriptblocks.data.OptionalBlockPosition;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataAttachments;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class DataAttachmentHelper {
 
@@ -12,6 +19,85 @@ public class DataAttachmentHelper {
 
 	public static void setLocationCooldowns(PlayerEntity playerEntity, LocationCooldowns locationCooldowns) {
 		playerEntity.setAttached(ScriptBlocksDataAttachments.LOCATION_COOLDOWNS, locationCooldowns);
+	}
+
+	public static Optional<BlockPos> getCurrentHousingBlockPosition(PlayerEntity playerEntity) {
+		return playerEntity.getAttachedOrElse(ScriptBlocksDataAttachments.CURRENT_HOUSING_BLOCK_POS, OptionalBlockPosition.DEFAULT).optionalBlockPos();
+	}
+
+	public static void setCurrentHousingBlockPosition(PlayerEntity playerEntity, Optional<BlockPos> optionalBlockPosition) {
+		playerEntity.setAttached(ScriptBlocksDataAttachments.CURRENT_HOUSING_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
+	}
+
+	public static Optional<BlockPos> getCurrentLocationAccessBlockPosition(PlayerEntity playerEntity) {
+		return playerEntity.getAttachedOrElse(ScriptBlocksDataAttachments.CURRENT_LOCATION_ACCESS_BLOCK_POS, OptionalBlockPosition.DEFAULT).optionalBlockPos();
+	}
+
+	public static void setCurrentLocationAccessBlockPosition(PlayerEntity playerEntity, Optional<BlockPos> optionalBlockPosition) {
+		playerEntity.setAttached(ScriptBlocksDataAttachments.CURRENT_LOCATION_ACCESS_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
+	}
+
+	public static String getCurrentLocationAccessDimension(PlayerEntity playerEntity) {
+		return playerEntity.getAttachedOrElse(ScriptBlocksDataAttachments.CURRENT_LOCATION_ACCESS_DIMENSION, "");
+	}
+
+	public static void setCurrentLocationAccessDimension(PlayerEntity playerEntity, String string) {
+		playerEntity.setAttached(ScriptBlocksDataAttachments.CURRENT_LOCATION_ACCESS_DIMENSION, string);
+	}
+
+	public static Optional<BlockPos> getCurrentPVPControllerBlockPosition(PlayerEntity playerEntity) {
+		return playerEntity.getAttachedOrElse(ScriptBlocksDataAttachments.CURRENT_PVP_CONTROLLER_BLOCK_POS, OptionalBlockPosition.DEFAULT).optionalBlockPos();
+	}
+
+	public static void setCurrentPVPControllerBlockPosition(PlayerEntity playerEntity, Optional<BlockPos> optionalBlockPosition) {
+		playerEntity.setAttached(ScriptBlocksDataAttachments.CURRENT_PVP_CONTROLLER_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
+	}
+
+	public static void playerEntersLocation(PlayerEntity player, String locationIdentifier) {
+		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
+		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
+		cooldowns.put(locationIdentifier, (long) -1);
+		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
+	}
+
+	public static void playerDies(PlayerEntity player, long currentTime) {
+		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
+		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
+		cooldowns.replaceAll((key, value) -> value == (long) -1 ? currentTime : value);
+		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
+	}
+
+	public static void playerLeavesLocation(PlayerEntity player, String locationIdentifier, long currentTime) {
+		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
+		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
+		cooldowns.put(locationIdentifier, currentTime);
+		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
+	}
+
+	public static long getCurrentLocationCooldown(PlayerEntity player, String locationIdentifier) {
+		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
+		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, (long) 0);
+	}
+
+	@Nullable
+	public static MutablePair<String, BlockPos> getCurrentLocationAccess(PlayerEntity player) {
+		Optional<BlockPos> optionalBlockPos = getCurrentLocationAccessBlockPosition(player);
+		String string = getCurrentLocationAccessDimension(player);
+		if (string.isEmpty() || optionalBlockPos.isEmpty()) {
+			return null;
+		} else {
+			return new MutablePair<>(string, optionalBlockPos.get());
+		}
+	}
+
+	public static void setCurrentLocationAccess(PlayerEntity player, @Nullable MutablePair<String, BlockPos> locationAccessPosition) {
+		if (locationAccessPosition == null) {
+			setCurrentLocationAccessBlockPosition(player, Optional.empty());
+			setCurrentLocationAccessDimension(player, "");
+		} else {
+			setCurrentLocationAccessBlockPosition(player, Optional.of(locationAccessPosition.right));
+			setCurrentLocationAccessDimension(player, locationAccessPosition.left);
+		}
 	}
 
 }

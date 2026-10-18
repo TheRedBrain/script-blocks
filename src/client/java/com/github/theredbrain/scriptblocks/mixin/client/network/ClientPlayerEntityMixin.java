@@ -85,6 +85,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListRelayBlockS
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayChestBlockScreen;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -128,7 +129,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
 	@Override
 	public void scriptblocks$openHousingScreen() {
-		Optional<BlockPos> optionalBlockPos = this.scriptblocks$getCurrentHousingBlockPosition();
+		Optional<BlockPos> optionalBlockPos = DataAttachmentHelper.getCurrentHousingBlockPosition(this);
 		if (optionalBlockPos.isPresent() && this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 			int currentPermissionLevel;
 

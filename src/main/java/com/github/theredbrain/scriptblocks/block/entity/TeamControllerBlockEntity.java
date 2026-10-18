@@ -3,9 +3,9 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.Block;
@@ -358,7 +358,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 				for (LivingEntity livingEntity : livingEntityList) {
 					teamControllerBlockEntity.world.getScoreboard().addScoreHolderToTeam(livingEntity.getNameForScoreboard(), teamControllerBlockEntity.team);
 					if (livingEntity instanceof PlayerEntity playerEntity && pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
-						((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
+						DataAttachmentHelper.setCurrentPVPControllerBlockPosition(playerEntity, Optional.of(pvpControllerBlockPos));
 						pvpControllerBlockEntity.addPlayerAndTeam(teamControllerBlockEntity.team, playerEntity);
 					}
 				}
@@ -542,7 +542,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 					}
 					this.world.getScoreboard().addScoreHolderToTeam(playerEntity.getNameForScoreboard(), this.team);
 					if (pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
-						((DuckPlayerEntityMixin) playerEntity).scriptblocks$setCurrentPVPControllerBlockPosition(Optional.of(pvpControllerBlockPos));
+						DataAttachmentHelper.setCurrentPVPControllerBlockPosition(playerEntity, Optional.of(pvpControllerBlockPos));
 						pvpControllerBlockEntity.addPlayerAndTeam(this.team, playerEntity);
 					}
 				}
