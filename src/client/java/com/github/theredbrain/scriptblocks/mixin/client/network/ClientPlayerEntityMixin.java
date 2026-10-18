@@ -36,6 +36,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringRespawnAnchorBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TwoAreasPlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
@@ -78,6 +79,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredRNGBlockSc
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredVillagerSpawnerBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeringRespawnAnchorBlockScreen;
+import com.github.theredbrain.scriptblocks.gui.screen.ingame.TwoAreasPlayerDetectorBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListMessagingBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
@@ -343,6 +345,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity) {
 		this.client.setScreen(new PlayerDetectorBlockScreen(playerDetectorBlockEntity));
+	}
+
+	@Override
+	public void scriptblocks$openTwoAreasPlayerDetectorBlockScreen(TwoAreasPlayerDetectorBlockEntity twoAreasPlayerDetectorBlockEntity) {
+		this.client.setScreen(new TwoAreasPlayerDetectorBlockScreen(twoAreasPlayerDetectorBlockEntity));
 	}
 
 	@Override

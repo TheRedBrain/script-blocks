@@ -4,10 +4,10 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDispenserBlockScreen;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ClientPacketRegistry;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.render.block.entity.AestheticDecoratedPotBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.AreaFillerBlockEntityRenderer;
@@ -22,6 +22,7 @@ import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredBeaconBl
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDamageDealingBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredDisplayBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.TriggeredEntityRemoverBlockEntityRenderer;
+import com.github.theredbrain.scriptblocks.render.block.entity.TwoAreasPlayerDetectorBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.UseRelayLecternBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.renderer.FakeVillagerEntityRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -35,12 +36,9 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 
 @Environment(value = EnvType.CLIENT)
 public class ScriptBlocksClient implements ClientModInitializer {
-//	public static ClientConfig CLIENT_CONFIG;
 
 	@Override
 	public void onInitializeClient() {
-//		// Config
-//		CLIENT_CONFIG = ConfigApiJava.registerAndLoadConfig(ClientConfig::new, RegisterType.CLIENT);
 
 		// Packets
 		ClientPacketRegistry.init();
@@ -127,6 +125,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockEntityRendererFactories.register(ScriptBlocksEntities.TRIGGERED_BEACON_BLOCK_ENTITY, TriggeredBeaconBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(ScriptBlocksEntities.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(ScriptBlocksEntities.LOOTABLE_VAULT_BLOCK_ENTITY, LootableVaultBlockEntityRenderer::new);
+		BlockEntityRendererFactories.register(ScriptBlocksEntities.TWO_AREAS_PLAYER_DETECTOR_BLOCK_ENTITY, TwoAreasPlayerDetectorBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(ScriptBlocksEntities.USE_RELAY_LECTERN_BLOCK_ENTITY, UseRelayLecternBlockEntityRenderer::new);
 		BlockEntityRendererFactories.register(ScriptBlocksEntities.TEAM_CONTROLLER_BLOCK_ENTITY, TeamControllerBlockEntityRenderer::new);
 	}

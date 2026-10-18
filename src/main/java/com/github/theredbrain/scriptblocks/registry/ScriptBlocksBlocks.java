@@ -41,6 +41,7 @@ import com.github.theredbrain.scriptblocks.block.TriggeredDamageDealingBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDispenserBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredDisplayBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredEntityRemoverBlock;
+import com.github.theredbrain.scriptblocks.block.TwoAreasPlayerDetectorBlock;
 import com.github.theredbrain.scriptblocks.block.UUIDListMessagingBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRNGBlock;
 import com.github.theredbrain.scriptblocks.block.TriggeredRedstoneBlock;
@@ -234,6 +235,7 @@ public class ScriptBlocksBlocks {
 	public static final Block TRIGGERED_SPAWNER_BLOCK = registerBlock("triggered_spawner_block", new TriggeredSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERED_VILLAGER_SPAWNER_BLOCK = registerBlock("triggered_villager_spawner_block", new TriggeredVillagerSpawnerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block TRIGGERING_RESPAWN_ANCHOR_BLOCK = registerBlock("triggering_respawn_anchor_block", new TriggeringRespawnAnchorBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
+	public static final Block TWO_AREAS_PLAYER_DETECTOR_BLOCK = registerBlock("two_areas_player_detector_block", new TwoAreasPlayerDetectorBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing().nonOpaque()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block USE_RELAY_BLOCK = registerBlock("use_relay_block", new UseRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block UUID_LIST_RELAY_BLOCK = registerBlock("uuid_list_relay_block", new UUIDListRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block UUID_LIST_SAVING_BLOCK = registerBlock("uuid_list_saving_block", new UUIDListSavingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);

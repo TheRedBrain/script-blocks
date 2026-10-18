@@ -36,6 +36,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBl
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDispenserBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.TwoAreasPlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredRedstoneBlockEntity;
@@ -259,6 +260,9 @@ public class ScriptBlocksEntities {
 	public static final BlockEntityType<TriggeringRespawnAnchorBlockEntity> TRIGGERING_RESPAWN_ANCHOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("triggering_respawn_anchor_block"),
 			BlockEntityType.Builder.create(TriggeringRespawnAnchorBlockEntity::new, ScriptBlocksBlocks.TRIGGERING_RESPAWN_ANCHOR_BLOCK).build());
+	public static final BlockEntityType<TwoAreasPlayerDetectorBlockEntity> TWO_AREAS_PLAYER_DETECTOR_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("two_areas_player_detector_block"),
+			BlockEntityType.Builder.create(TwoAreasPlayerDetectorBlockEntity::new, ScriptBlocksBlocks.TWO_AREAS_PLAYER_DETECTOR_BLOCK).build());
 	public static final BlockEntityType<UseRelayBlockEntity> USE_RELAY_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("use_relay_block"),
 			BlockEntityType.Builder.create(UseRelayBlockEntity::new,

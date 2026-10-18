@@ -94,6 +94,8 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillage
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeredVillagerSpawnerBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeringRespawnAnchorBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateTriggeringRespawnAnchorBlockPacketReceiver;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTwoAreasPlayerDetectorBlockPacket;
+import com.github.theredbrain.scriptblocks.network.packet.UpdateTwoAreasPlayerDetectorBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListMessagingBlockPacket;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListMessagingBlockPacketReceiver;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateUUIDListRelayBlockPacket;
@@ -233,6 +235,9 @@ public class ScriptBlocksNetworkPackets {
 
 		PayloadTypeRegistry.playC2S().register(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, UpdateTriggeringRespawnAnchorBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, new UpdateTriggeringRespawnAnchorBlockPacketReceiver());
+
+		PayloadTypeRegistry.playC2S().register(UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_ID, UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_ID, new UpdateTwoAreasPlayerDetectorBlockPacketReceiver());
 
 		PayloadTypeRegistry.playC2S().register(UpdateUUIDListMessagingBlockPacket.PACKET_ID, UpdateUUIDListMessagingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUUIDListMessagingBlockPacket.PACKET_ID, new UpdateUUIDListMessagingBlockPacketReceiver());

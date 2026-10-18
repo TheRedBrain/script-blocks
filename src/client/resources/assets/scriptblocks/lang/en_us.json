@@ -502,6 +502,26 @@
 	"gui.player_detector_block.screen_page.uuid_list_handler_offsets": "UUID List Handler Position Offsets",
 
 
+
+	"gui.two_areas_player_detector_block.show_first_area_true_label": "Show First Area: True",
+	"gui.two_areas_player_detector_block.show_first_area_false_label": "Show First Area: False",
+	"gui.two_areas_player_detector_block.show_second_area_true_label": "Show Second Area: True",
+	"gui.two_areas_player_detector_block.show_second_area_false_label": "Show Second Area: False",
+	"gui.two_areas_player_detector_block.first_area_dimensions_label": "First Area Dimensions",
+	"gui.two_areas_player_detector_block.first_area_position_offset_label": "First Area Position Offset",
+	"gui.two_areas_player_detector_block.second_area_dimensions_label": "Second Area Dimensions",
+	"gui.two_areas_player_detector_block.second_area_position_offset_label": "Second Area Position Offset",
+
+	"gui.two_areas_player_detector_block.on_entering_first_area_triggered_block_position_offset": "On Entering First Area Triggered Block",
+	"gui.two_areas_player_detector_block.on_entering_second_area_triggered_block_position_offset": "On Entering Second Area Triggered Block",
+
+	"gui.two_areas_player_detector_block.on_entering_first_area_uuid_list_handler_position_offset": "On Entering First Area UUID List Handler",
+	"gui.two_areas_player_detector_block.on_entering_second_area_uuid_list_handler_position_offset": "On Entering Second Area UUID List Handler",
+
+	"gui.two_areas_player_detector_block.screen_page.area": "Area",
+	"gui.two_areas_player_detector_block.screen_page.events": "Events",
+
+
 	"gui.triggered_beacon_block.triggered_true_label": "Triggered Override: True",
 	"gui.triggered_beacon_block.triggered_false_label": "Triggered Override: False",
 	"gui.triggered_beacon_block.hide_area_label": "Hide Area",
@@ -871,6 +891,7 @@
 	"block.scriptblocks.triggered_spawner_block": "Triggered Spawner Block",
 	"block.scriptblocks.triggered_villager_spawner_block": "Triggered Villager Spawner Block",
 	"block.scriptblocks.triggering_respawn_anchor_block": "Triggering Respawn Anchor Block",
+	"block.scriptblocks.two_areas_player_detector_block": "Two Areas Player Detector Block",
 	"block.scriptblocks.use_relay_block": "Use Relay Block",
 	"block.scriptblocks.team_controller_block": "Team Controller Block",
 	"block.scriptblocks.uuid_list_messaging_block": "UUID List Messaging Block",
