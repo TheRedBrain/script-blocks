@@ -816,6 +816,9 @@
 	"block.scriptblocks.interactive_trigger_red_soul_candle": "Interactive Trigger Red Soul Candle",
 	"block.scriptblocks.interactive_trigger_black_soul_candle": "Interactive Trigger Black Soul Candle",
 
+	"block.scriptblocks.interactive_trigger_torch": "Interactive Trigger Torch",
+	"block.scriptblocks.interactive_trigger_soul_torch": "Interactive Trigger Soul Torch",
+
 	"block.scriptblocks.triggered_dispenser_block": "Triggered Dispenser",
 	"block.scriptblocks.aesthetic_decorated_pot": "Aesthetic Decorated Pot",
 	"block.scriptblocks.aesthetic_nether_portal": "Aesthetic Nether Portal",

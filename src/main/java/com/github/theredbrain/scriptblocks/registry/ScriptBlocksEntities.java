@@ -240,7 +240,11 @@ public class ScriptBlocksEntities {
 					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BROWN_SOUL_CANDLE,
 					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_GREEN_SOUL_CANDLE,
 					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_RED_SOUL_CANDLE,
-					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BLACK_SOUL_CANDLE
+					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BLACK_SOUL_CANDLE,
+					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_TORCH,
+					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WALL_TORCH,
+					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_TORCH,
+					ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_WALL_TORCH
 			).build());
 	public static final BlockEntityType<RelayTriggerBlockEntity> RELAY_TRIGGER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("relay_trigger_block"),

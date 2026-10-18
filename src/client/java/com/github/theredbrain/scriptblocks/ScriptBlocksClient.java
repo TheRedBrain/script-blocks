@@ -156,6 +156,11 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_WEATHERED_COPPER_TRAPDOOR, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_OXIDIZED_COPPER_TRAPDOOR, renderLayer);
 
+		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_TORCH, renderLayer);
+		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WALL_TORCH, renderLayer);
+		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_TORCH, renderLayer);
+		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_WALL_TORCH, renderLayer);
+
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TRIGGERED_SPAWNER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TRIGGERED_VILLAGER_SPAWNER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.BOSS_CONTROLLER_BLOCK, renderLayer);

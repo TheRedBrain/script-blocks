@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=true": {
+      "model": "minecraft:block/soul_torch"
+    },
+    "lit=false": {
+      "model": "scriptblocks:block/unlit_soul_torch"
+    }
+  }
+}

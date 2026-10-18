@@ -18,7 +18,9 @@ import com.github.theredbrain.scriptblocks.block.HousingBlock;
 import com.github.theredbrain.scriptblocks.block.InteractiveLootBlock;
 import com.github.theredbrain.scriptblocks.block.InteractiveTriggerCandleBlock;
 import com.github.theredbrain.scriptblocks.block.InteractiveTriggerDoorBlock;
+import com.github.theredbrain.scriptblocks.block.InteractiveTriggerTorchBlock;
 import com.github.theredbrain.scriptblocks.block.InteractiveTriggerTrapdoorBlock;
+import com.github.theredbrain.scriptblocks.block.InteractiveTriggerWallTorchBlock;
 import com.github.theredbrain.scriptblocks.block.JigsawPlacerBlock;
 import com.github.theredbrain.scriptblocks.block.LocationControlBlock;
 import com.github.theredbrain.scriptblocks.block.LootableVaultBlock;
@@ -60,7 +62,6 @@ import com.github.theredbrain.scriptblocks.block.UseRelayTrapdoorBlock;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.AbstractCandleBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -86,8 +87,10 @@ import java.util.List;
 import java.util.function.ToIntFunction;
 
 public class ScriptBlocksBlocks {
-	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_REGULAR_CANDLES = state -> state.get(AbstractCandleBlock.LIT) ? 3 * (Integer) state.get(Properties.CANDLES) : 0;
-	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_SOUL_CANDLES = state -> state.get(AbstractCandleBlock.LIT) ? 2 * (Integer) state.get(Properties.CANDLES) : 0;
+	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_REGULAR_CANDLES = state -> state.get(Properties.LIT) ? 3 * (Integer) state.get(Properties.CANDLES) : 0;
+	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_SOUL_CANDLES = state -> state.get(Properties.LIT) ? 2 * (Integer) state.get(Properties.CANDLES) : 0;
+	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_REGULAR_TORCHES = state -> state.get(Properties.LIT) ? 14 : 0;
+	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_SOUL_TORCHES = state -> state.get(Properties.LIT) ? 10 : 0;
 
 	//region Content Blocks
 	public static final Block AESTHETIC_DECORATED_POT = registerAestheticDecoratedPotBlock("aesthetic_decorated_pot", new AestheticDecoratedPotBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_RED).strength(10.0F, 3600000.0f).sounds(BlockSoundGroup.DECORATED_POT).pistonBehavior(PistonBehavior.DESTROY).nonOpaque()), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
@@ -197,6 +200,10 @@ public class ScriptBlocksBlocks {
 	public static final Block INTERACTIVE_TRIGGER_RED_SOUL_CANDLE = registerBlock("interactive_trigger_red_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.RED, STATE_TO_LUMINANCE_SOUL_CANDLES), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
 	public static final Block INTERACTIVE_TRIGGER_BLACK_SOUL_CANDLE = registerBlock("interactive_trigger_black_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.BLACK, STATE_TO_LUMINANCE_SOUL_CANDLES), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
 
+	public static final Block INTERACTIVE_TRIGGER_TORCH = registerBlockWithoutItem("interactive_trigger_torch", new InteractiveTriggerTorchBlock(ParticleTypes.FLAME, AbstractBlock.Settings.create().noCollision().luminance(state -> 14).sounds(BlockSoundGroup.WOOD).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
+	public static final Block INTERACTIVE_TRIGGER_WALL_TORCH = registerBlockWithoutItem("interactive_trigger_wall_torch", new InteractiveTriggerWallTorchBlock(ParticleTypes.FLAME, AbstractBlock.Settings.create().noCollision().luminance(state -> 14).sounds(BlockSoundGroup.WOOD).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
+	public static final Block INTERACTIVE_TRIGGER_SOUL_TORCH = registerBlockWithoutItem("interactive_trigger_soul_torch", new InteractiveTriggerTorchBlock(ParticleTypes.SOUL_FIRE_FLAME, AbstractBlock.Settings.create().noCollision().luminance(STATE_TO_LUMINANCE_REGULAR_TORCHES).sounds(BlockSoundGroup.WOOD).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
+	public static final Block INTERACTIVE_TRIGGER_SOUL_WALL_TORCH = registerBlockWithoutItem("interactive_trigger_soul_wall_torch", new InteractiveTriggerWallTorchBlock(ParticleTypes.SOUL_FIRE_FLAME, AbstractBlock.Settings.create().noCollision().luminance(STATE_TO_LUMINANCE_SOUL_TORCHES).sounds(BlockSoundGroup.WOOD).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
 
 	public static final Block USE_RELAY_ANVIL = registerBlock("use_relay_anvil", new UseRelayAnvilBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
 
@@ -314,6 +321,10 @@ public class ScriptBlocksBlocks {
 		for (RegistryKey<ItemGroup> itemGroup : itemGroupList) {
 			ItemGroupEvents.modifyEntriesEvent(itemGroup).register(content -> content.add(block));
 		}
+		return Registry.register(Registries.BLOCK, ScriptBlocks.identifier(name), block);
+	}
+
+	private static Block registerBlockWithoutItem(String name, Block block) {
 		return Registry.register(Registries.BLOCK, ScriptBlocks.identifier(name), block);
 	}
 

@@ -32,6 +32,7 @@ These blocks have been polished:
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
 - added Interactive Trigger Soul Candle blocks, in 17 variants. These are functionally identical to the existing Interactive Trigger Candle blocks, but display soul flame particles and have a lower luminance.
+- added Interactive Trigger (Soul) Torch blocks.
 
 ### UUID List Handlers
 

@@ -1,0 +1,167 @@
+package com.github.theredbrain.scriptblocks.block;
+
+import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.HorizontalFacingBlock;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.state.property.Properties;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+
+public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlock {
+	public static final MapCodec<InteractiveTriggerWallTorchBlock> CODEC = RecordCodecBuilder.mapCodec(
+			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), createSettingsCodec()).apply(instance, InteractiveTriggerWallTorchBlock::new)
+	);
+	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
+	private static final Map<Direction, VoxelShape> BOUNDING_SHAPES = Maps.newEnumMap(
+			ImmutableMap.of(
+					Direction.NORTH,
+					Block.createCuboidShape(5.5, 3.0, 11.0, 10.5, 13.0, 16.0),
+					Direction.SOUTH,
+					Block.createCuboidShape(5.5, 3.0, 0.0, 10.5, 13.0, 5.0),
+					Direction.WEST,
+					Block.createCuboidShape(11.0, 3.0, 5.5, 16.0, 13.0, 10.5),
+					Direction.EAST,
+					Block.createCuboidShape(0.0, 3.0, 5.5, 5.0, 13.0, 10.5)
+			)
+	);
+
+	public InteractiveTriggerWallTorchBlock(SimpleParticleType particle, Settings settings) {
+		super(particle, settings);
+		this.setDefaultState(
+				this.stateManager.getDefaultState().with(X_MIRRORED, false).with(Z_MIRRORED, false).with(Properties.LIT, true).with(TRIGGERED, false)
+		);
+	}
+
+	@Override
+	protected MapCodec<InteractiveTriggerWallTorchBlock> getCodec() {
+		return CODEC;
+	}
+
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		super.appendProperties(builder);
+		builder.add(FACING);
+	}
+
+	@Override
+	public String getTranslationKey() {
+		return this.asItem().getTranslationKey();
+	}
+
+	@Override
+	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+		return getBoundingShape(state);
+	}
+
+	public static VoxelShape getBoundingShape(BlockState state) {
+		return BOUNDING_SHAPES.get(state.get(FACING));
+	}
+
+	@Override
+	protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
+		return canPlaceAt(world, pos, state.get(FACING));
+	}
+
+	public static boolean canPlaceAt(WorldView world, BlockPos pos, Direction facing) {
+		BlockPos blockPos = pos.offset(facing.getOpposite());
+		BlockState blockState = world.getBlockState(blockPos);
+		return blockState.isSideSolidFullSquare(world, blockPos, facing);
+	}
+
+	@Nullable
+	@Override
+	public BlockState getPlacementState(ItemPlacementContext ctx) {
+		BlockState blockState = this.getDefaultState();
+		WorldView worldView = ctx.getWorld();
+		BlockPos blockPos = ctx.getBlockPos();
+		Direction[] directions = ctx.getPlacementDirections();
+
+		for (Direction direction : directions) {
+			if (direction.getAxis().isHorizontal()) {
+				Direction direction2 = direction.getOpposite();
+				blockState = blockState.with(FACING, direction2);
+				if (blockState.canPlaceAt(worldView, blockPos)) {
+					return blockState;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	protected BlockState getStateForNeighborUpdate(
+			BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos
+	) {
+		return direction.getOpposite() == state.get(FACING) && !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : state;
+	}
+
+	@Override
+	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+		if (state.get(Properties.LIT)) {
+			Direction direction = state.get(FACING);
+			double d = (double) pos.getX() + 0.5;
+			double e = (double) pos.getY() + 0.7;
+			double f = (double) pos.getZ() + 0.5;
+			double g = 0.22;
+			double h = 0.27;
+			Direction direction2 = direction.getOpposite();
+			world.addParticle(ParticleTypes.SMOKE, d + h * (double) direction2.getOffsetX(), e + g, f + h * (double) direction2.getOffsetZ(), 0.0, 0.0, 0.0);
+			world.addParticle(this.particle, d + h * (double) direction2.getOffsetX(), e + g, f + h * (double) direction2.getOffsetZ(), 0.0, 0.0, 0.0);
+		}
+	}
+
+	@Override
+	public void trigger(BlockState state, World world, BlockPos pos) {
+		boolean newLitState = state.get(Properties.LIT);
+		if (!state.get(TRIGGERED)) {
+			newLitState = !newLitState;
+		}
+		if (!newLitState) {
+			if (state.getBlock() instanceof InteractiveTriggerTorchBlock) {
+				Direction direction = state.get(FACING).getOpposite();
+				world.addParticle(ParticleTypes.SMOKE, pos.getX() + 0.5 + 0.27 * (double) direction.getOffsetX(), pos.getY() + 0.7 + 0.22, pos.getZ() + 0.5 + 0.27 * (double) direction.getOffsetZ(), 0.0, 0.0, 0.0);
+			}
+		}
+		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, true);
+		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
+	}
+
+	@Override
+	public BlockState rotate(BlockState state, BlockRotation rotation) {
+		return state.with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation)).with(FACING, rotation.rotate(state.get(FACING)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState state, BlockMirror mirror) {
+		if (mirror == BlockMirror.FRONT_BACK) {
+			return state.with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED)).rotate(mirror.getRotation(state.get(FACING)));
+		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+			return state.with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED)).rotate(mirror.getRotation(state.get(FACING)));
+		}
+		return state;
+	}
+}
