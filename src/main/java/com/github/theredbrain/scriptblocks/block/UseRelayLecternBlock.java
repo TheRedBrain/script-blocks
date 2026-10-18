@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayLecternBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -31,8 +32,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<UseRelayLecternBlock> CODEC = createCodec(UseRelayLecternBlock::new);
-	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
-	public static final BooleanProperty HAS_BOOK = Properties.HAS_BOOK;
 	public static final VoxelShape BOTTOM_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 	public static final VoxelShape MIDDLE_SHAPE = Block.createCuboidShape(4.0, 2.0, 4.0, 12.0, 14.0, 12.0);
 	public static final VoxelShape BASE_SHAPE = VoxelShapes.union(BOTTOM_SHAPE, MIDDLE_SHAPE);
@@ -65,7 +64,13 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 
 	public UseRelayLecternBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(HAS_BOOK, false));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(ScriptBlocksBlockProperties.ROTATED, 0)
+				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
+				.with(Properties.HAS_BOOK, false)
+		);
 	}
 
 	public MapCodec<UseRelayLecternBlock> getCodec() {
@@ -85,7 +90,7 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
+		return this.getDefaultState().with(HorizontalFacingBlock.FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 
 	@Override
@@ -115,7 +120,7 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return switch (state.get(FACING)) {
+		return switch (state.get(HorizontalFacingBlock.FACING)) {
 			case NORTH -> NORTH_SHAPE;
 			case SOUTH -> SOUTH_SHAPE;
 			case EAST -> EAST_SHAPE;
@@ -132,20 +137,20 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(FACING, HAS_BOOK);
+		builder.add(HorizontalFacingBlock.FACING, Properties.HAS_BOOK);
 	}
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(FACING, rotation.rotate(state.get(FACING)));
+		return super.rotate(state, rotation).with(HorizontalFacingBlock.FACING, rotation.rotate(state.get(HorizontalFacingBlock.FACING)));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		if (mirror == BlockMirror.FRONT_BACK) {
-			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.X_MIRRORED, !state.get(ScriptBlocksBlockProperties.X_MIRRORED));
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.Z_MIRRORED, !state.get(ScriptBlocksBlockProperties.Z_MIRRORED));
 		}
 		return state;
 	}

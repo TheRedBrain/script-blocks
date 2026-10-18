@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.block;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -13,7 +13,6 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,11 +25,14 @@ import org.jetbrains.annotations.Nullable;
 public class MimicBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<MimicBlock> CODEC = createCodec(MimicBlock::new);
 
-	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
-
 	public MimicBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(ScriptBlocksBlockProperties.ROTATED, 0)
+				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.with(Properties.TRIGGERED, false)
+		);
 	}
 
 	public MapCodec<MimicBlock> getCodec() {
@@ -40,7 +42,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(TRIGGERED);
+		builder.add(Properties.TRIGGERED);
 	}
 
 	@Nullable
@@ -74,7 +76,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 		}
 		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		BlockPos mimicBlockPos;
-		if (state.get(TRIGGERED)) {
+		if (state.get(Properties.TRIGGERED)) {
 			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 		} else {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
@@ -96,7 +98,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 		}
 		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		BlockPos mimicBlockPos;
-		if (state.get(TRIGGERED)) {
+		if (state.get(Properties.TRIGGERED)) {
 			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 		} else {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
@@ -120,7 +122,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 //		}
 //		BlockState mimicBlockState = BlockRegistry.MIMIC_FALLBACK_BLOCK.getDefaultState();
 //		BlockPos mimicBlockPos;
-//		if (state.get(TRIGGERED)) {
+//		if (state.get(Properties.TRIGGERED)) {
 //			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 //		} else {
 //			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
@@ -142,7 +144,7 @@ public class MimicBlock extends RotatedBlockWithEntity {
 		}
 		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		BlockPos mimicBlockPos;
-		if (state.get(TRIGGERED)) {
+		if (state.get(Properties.TRIGGERED)) {
 			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 		} else {
 			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());

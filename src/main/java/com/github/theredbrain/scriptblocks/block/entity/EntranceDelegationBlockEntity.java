@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -88,21 +89,21 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.delegatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.delegatedEntrance, blockRotation);
 
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, BlockMirror.FRONT_BACK);
 
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, BlockMirror.LEFT_RIGHT);
 
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

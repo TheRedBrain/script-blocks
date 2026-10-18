@@ -10,6 +10,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EquipmentSlot;
@@ -18,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
@@ -245,21 +247,21 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.relayBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.relayBlockPositionOffset, blockRotation);
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.FRONT_BACK);
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.LEFT_RIGHT);
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
@@ -269,7 +271,7 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 		if (this.world != null) {
 			BlockEntity blockEntity = this.world.getBlockEntity(this.pos);
 			if (blockEntity != null && blockEntity.getCachedState().getBlock() instanceof UseRelayChestBlock) {
-				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(UseRelayChestBlock.OPEN, false));
+				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(Properties.OPEN, false));
 			}
 		}
 	}

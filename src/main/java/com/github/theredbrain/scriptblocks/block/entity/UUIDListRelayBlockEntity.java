@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -161,8 +162,8 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Hand
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				List<BlockPos> newUuidListHandlers = new ArrayList<>();
 				for (BlockPos uuidListHandler : this.uuidListHandlers) {
@@ -171,9 +172,9 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Hand
 				this.uuidListHandlers.clear();
 				this.uuidListHandlers.addAll(newUuidListHandlers);
 
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
 				List<BlockPos> newUuidListHandlers = new ArrayList<>();
 				for (BlockPos uuidListHandler : this.uuidListHandlers) {
@@ -182,9 +183,9 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Hand
 				this.uuidListHandlers.clear();
 				this.uuidListHandlers.addAll(newUuidListHandlers);
 
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
 				List<BlockPos> newUuidListHandlers = new ArrayList<>();
 				for (BlockPos uuidListHandler : this.uuidListHandlers) {
@@ -193,7 +194,7 @@ public class UUIDListRelayBlockEntity extends RotatedBlockEntity implements Hand
 				this.uuidListHandlers.clear();
 				this.uuidListHandlers.addAll(newUuidListHandlers);
 
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

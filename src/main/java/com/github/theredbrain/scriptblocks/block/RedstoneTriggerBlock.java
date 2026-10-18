@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -10,7 +11,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -21,11 +21,15 @@ import org.jetbrains.annotations.Nullable;
 
 public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<RedstoneTriggerBlock> CODEC = createCodec(RedstoneTriggerBlock::new);
-	public static final BooleanProperty TRIGGERED = Properties.TRIGGERED;
 
 	public RedstoneTriggerBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(TRIGGERED, false));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(ScriptBlocksBlockProperties.ROTATED, 0)
+				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.with(Properties.TRIGGERED, false)
+		);
 	}
 
 	public MapCodec<RedstoneTriggerBlock> getCodec() {
@@ -35,7 +39,7 @@ public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(TRIGGERED);
+		builder.add(Properties.TRIGGERED);
 	}
 
 	@Nullable
@@ -62,12 +66,12 @@ public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
 	@Override
 	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
 		boolean bl = world.isReceivingRedstonePower(pos) || world.isReceivingRedstonePower(pos.up());
-		boolean bl2 = state.get(TRIGGERED);
+		boolean bl2 = state.get(Properties.TRIGGERED);
 		if (bl && !bl2) {
 			world.scheduleBlockTick(pos, this, 4);
-			world.setBlockState(pos, (BlockState) state.with(TRIGGERED, true), Block.NO_REDRAW);
+			world.setBlockState(pos, state.with(Properties.TRIGGERED, true), Block.NO_REDRAW);
 		} else if (!bl && bl2) {
-			world.setBlockState(pos, (BlockState) state.with(TRIGGERED, false), Block.NO_REDRAW);
+			world.setBlockState(pos, state.with(Properties.TRIGGERED, false), Block.NO_REDRAW);
 		}
 	}
 

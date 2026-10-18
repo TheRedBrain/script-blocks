@@ -21,7 +21,6 @@ public class StatusEffectManipulationBlock extends BlockWithEntity {
 
 	public StatusEffectManipulationBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState());
 	}
 
 	public MapCodec<StatusEffectManipulationBlock> getCodec() {

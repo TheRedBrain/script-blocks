@@ -10,6 +10,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistrie
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -777,8 +778,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, blockRotation);
 
@@ -794,9 +795,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					this.bossTriggeredBlocks.put(key, oldBlockPos);
 				}
 
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, BlockMirror.FRONT_BACK);
 
 				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.FRONT_BACK);
@@ -811,9 +812,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					this.bossTriggeredBlocks.put(key, oldBlockPos);
 				}
 
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, BlockMirror.LEFT_RIGHT);
 
 				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, BlockMirror.LEFT_RIGHT);
@@ -828,7 +829,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					this.bossTriggeredBlocks.put(key, oldBlockPos);
 				}
 
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

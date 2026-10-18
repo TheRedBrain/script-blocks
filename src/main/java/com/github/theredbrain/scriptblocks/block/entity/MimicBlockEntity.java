@@ -7,12 +7,14 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -136,21 +138,21 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.activeMimicBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.activeMimicBlockPositionOffset, blockRotation);
 				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.inactiveMimicBlockPositionOffset, blockRotation);
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.activeMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.activeMimicBlockPositionOffset, BlockMirror.FRONT_BACK);
 				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.inactiveMimicBlockPositionOffset, BlockMirror.FRONT_BACK);
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.activeMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.activeMimicBlockPositionOffset, BlockMirror.LEFT_RIGHT);
 				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.inactiveMimicBlockPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
@@ -160,7 +162,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		if (this.world != null) {
 			BlockEntity blockEntity = this.world.getBlockEntity(this.pos);
 			if (blockEntity != null && blockEntity.getCachedState().getBlock() instanceof MimicBlock) {
-				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(MimicBlock.TRIGGERED, false));
+				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(Properties.TRIGGERED, false));
 			}
 		}
 	}
@@ -170,7 +172,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		if (this.world != null) {
 			BlockEntity blockEntity = this.world.getBlockEntity(this.pos);
 			if (blockEntity != null && blockEntity.getCachedState().getBlock() instanceof MimicBlock) {
-				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(MimicBlock.TRIGGERED, true));
+				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(Properties.TRIGGERED, true));
 			}
 		}
 	}
@@ -179,7 +181,7 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 		BlockState fallbackMimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
 		if (this.world != null && this.world.getBlockState(this.pos).isOf(ScriptBlocksBlocks.MIMIC_BLOCK)) {
 			BlockPos mimicBlockPos;
-			if (this.world.getBlockState(this.pos).get(MimicBlock.TRIGGERED)) {
+			if (this.world.getBlockState(this.pos).get(Properties.TRIGGERED)) {
 				mimicBlockPos = pos.add(this.activeMimicBlockPositionOffset.getX(), this.activeMimicBlockPositionOffset.getY(), this.activeMimicBlockPositionOffset.getZ());
 			} else {
 				mimicBlockPos = pos.add(this.inactiveMimicBlockPositionOffset.getX(), this.inactiveMimicBlockPositionOffset.getY(), this.inactiveMimicBlockPositionOffset.getZ());

@@ -18,7 +18,6 @@ public class DataRelayBlock extends RotatedBlockWithEntity {
 
 	public DataRelayBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState());
 	}
 
 	public MapCodec<DataRelayBlock> getCodec() {

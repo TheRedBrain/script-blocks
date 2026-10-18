@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -29,8 +30,6 @@ import java.util.List;
 
 public class TriggeringTrialSpawnerBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<TriggeringTrialSpawnerBlock> CODEC = createCodec(TriggeringTrialSpawnerBlock::new);
-	public static final EnumProperty<TrialSpawnerState> TRIAL_SPAWNER_STATE = Properties.TRIAL_SPAWNER_STATE;
-	public static final BooleanProperty OMINOUS = Properties.OMINOUS;
 
 	@Override
 	public MapCodec<TriggeringTrialSpawnerBlock> getCodec() {
@@ -39,13 +38,19 @@ public class TriggeringTrialSpawnerBlock extends RotatedBlockWithEntity {
 
 	public TriggeringTrialSpawnerBlock(AbstractBlock.Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(TRIAL_SPAWNER_STATE, TrialSpawnerState.INACTIVE).with(OMINOUS, false));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(ScriptBlocksBlockProperties.ROTATED, 0)
+				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.with(Properties.TRIAL_SPAWNER_STATE, TrialSpawnerState.INACTIVE)
+				.with(Properties.OMINOUS, false)
+		);
 	}
 
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(TRIAL_SPAWNER_STATE, OMINOUS);
+		builder.add(Properties.TRIAL_SPAWNER_STATE, Properties.OMINOUS);
 	}
 
 	@Override

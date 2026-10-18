@@ -18,7 +18,6 @@ public class TriggeredRNGBlock extends RotatedBlockWithEntity {
 
 	public TriggeredRNGBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false));
 	}
 
 	public MapCodec<TriggeredRNGBlock> getCodec() {

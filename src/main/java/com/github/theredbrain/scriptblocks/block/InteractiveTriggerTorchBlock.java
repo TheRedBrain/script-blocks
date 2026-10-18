@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,7 +13,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -37,8 +37,6 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), createSettingsCodec()).apply(instance, InteractiveTriggerTorchBlock::new)
 	);
 
-	public static final BooleanProperty TRIGGERED = BooleanProperty.of("triggered");
-
 	protected static final VoxelShape SHAPE = Block.createCuboidShape(6.0, 0.0, 6.0, 10.0, 10.0, 10.0);
 
 	protected final SimpleParticleType particle;
@@ -46,7 +44,12 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 	public InteractiveTriggerTorchBlock(SimpleParticleType particle, Settings settings) {
 		super(settings);
 		this.setDefaultState(
-				this.stateManager.getDefaultState().with(X_MIRRORED, false).with(Z_MIRRORED, false).with(Properties.LIT, true).with(TRIGGERED, false)
+				this.stateManager.getDefaultState()
+						.with(ScriptBlocksBlockProperties.ROTATED, 0)
+						.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+						.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+						.with(Properties.LIT, true)
+						.with(Properties.TRIGGERED, false)
 		);
 		this.particle = particle;
 	}
@@ -84,7 +87,7 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(Properties.CANDLES, Properties.LIT, TRIGGERED);
+		builder.add(Properties.CANDLES, Properties.LIT, Properties.TRIGGERED);
 	}
 
 	@Override
@@ -100,19 +103,19 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 
 	@Override
 	public void creativeSneakingInteraction(BlockState state, World world, BlockPos pos) {
-		state = state.cycle(Properties.LIT).with(TRIGGERED, false);
+		state = state.cycle(Properties.LIT).with(Properties.TRIGGERED, false);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 
 	@Override
 	public boolean canTrigger(BlockState state) {
-		return !state.get(TRIGGERED);
+		return !state.get(Properties.TRIGGERED);
 	}
 
 	@Override
 	public void trigger(BlockState state, World world, BlockPos pos) {
 		boolean newLitState = state.get(Properties.LIT);
-		if (!state.get(TRIGGERED)) {
+		if (!state.get(Properties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
 		if (!newLitState) {
@@ -120,17 +123,17 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 				world.addParticle(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 0.0, 0.1, 0.0);
 			}
 		}
-		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, true);
+		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, true);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 
 	@Override
 	public void reset(BlockState state, World world, BlockPos pos) {
 		boolean newLitState = state.get(Properties.LIT);
-		if (state.get(TRIGGERED)) {
+		if (state.get(Properties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
-		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, false);
+		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, false);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 

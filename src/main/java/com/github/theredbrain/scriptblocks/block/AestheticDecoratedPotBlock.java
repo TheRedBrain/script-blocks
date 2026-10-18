@@ -26,8 +26,6 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -51,9 +49,6 @@ import java.util.stream.Stream;
 public class AestheticDecoratedPotBlock extends BlockWithEntity implements Waterloggable {
 	public static final MapCodec<AestheticDecoratedPotBlock> CODEC = createCodec(AestheticDecoratedPotBlock::new);
 	private static final VoxelShape SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
-	private static final DirectionProperty FACING = Properties.HORIZONTAL_FACING;
-	public static final BooleanProperty CRACKED = Properties.CRACKED;
-	private static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
 	@Override
 	public MapCodec<AestheticDecoratedPotBlock> getCodec() {
@@ -63,7 +58,10 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 	public AestheticDecoratedPotBlock(AbstractBlock.Settings settings) {
 		super(settings);
 		this.setDefaultState(
-				this.stateManager.getDefaultState().with(FACING, Direction.NORTH).with(WATERLOGGED, Boolean.valueOf(false)).with(CRACKED, Boolean.valueOf(false))
+				this.stateManager.getDefaultState()
+						.with(Properties.HORIZONTAL_FACING, Direction.NORTH)
+						.with(Properties.WATERLOGGED, Boolean.FALSE)
+						.with(Properties.CRACKED, Boolean.FALSE)
 		);
 	}
 
@@ -71,7 +69,7 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 	protected BlockState getStateForNeighborUpdate(
 			BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos
 	) {
-		if ((Boolean) state.get(WATERLOGGED)) {
+		if (state.get(Properties.WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 
@@ -82,9 +80,9 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
 		FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
 		return this.getDefaultState()
-				.with(FACING, ctx.getHorizontalPlayerFacing())
-				.with(WATERLOGGED, Boolean.valueOf(fluidState.getFluid() == Fluids.WATER))
-				.with(CRACKED, Boolean.valueOf(false));
+				.with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing())
+				.with(Properties.WATERLOGGED, fluidState.getFluid() == Fluids.WATER)
+				.with(Properties.CRACKED, Boolean.FALSE);
 	}
 
 	@Override
@@ -111,7 +109,7 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(FACING, WATERLOGGED, CRACKED);
+		builder.add(Properties.HORIZONTAL_FACING, Properties.WATERLOGGED, Properties.CRACKED);
 	}
 
 	@Nullable
@@ -122,7 +120,7 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 
 	@Override
 	protected FluidState getFluidState(BlockState state) {
-		return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+		return state.get(Properties.WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
 	}
 
 	@Override
@@ -132,7 +130,7 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 		if (!sherds.equals(Sherds.DEFAULT)) {
 			tooltip.add(ScreenTexts.EMPTY);
 			Stream.of(sherds.front(), sherds.left(), sherds.right(), sherds.back())
-					.forEach(sherd -> tooltip.add(new ItemStack((ItemConvertible) sherd.orElse(Items.BRICK), 1).getName().copyContentOnly().formatted(Formatting.GRAY)));
+					.forEach(sherd -> tooltip.add(new ItemStack(sherd.orElse(Items.BRICK), 1).getName().copyContentOnly().formatted(Formatting.GRAY)));
 		}
 	}
 
@@ -145,11 +143,11 @@ public class AestheticDecoratedPotBlock extends BlockWithEntity implements Water
 
 	@Override
 	protected BlockState rotate(BlockState state, BlockRotation rotation) {
-		return state.with(FACING, rotation.rotate(state.get(FACING)));
+		return state.with(Properties.HORIZONTAL_FACING, rotation.rotate(state.get(Properties.HORIZONTAL_FACING)));
 	}
 
 	@Override
 	protected BlockState mirror(BlockState state, BlockMirror mirror) {
-		return state.rotate(mirror.getRotation(state.get(FACING)));
+		return state.rotate(mirror.getRotation(state.get(Properties.HORIZONTAL_FACING)));
 	}
 }

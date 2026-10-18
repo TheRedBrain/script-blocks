@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
@@ -34,7 +35,6 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	public static final MapCodec<InteractiveTriggerWallTorchBlock> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), createSettingsCodec()).apply(instance, InteractiveTriggerWallTorchBlock::new)
 	);
-	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	private static final Map<Direction, VoxelShape> BOUNDING_SHAPES = Maps.newEnumMap(
 			ImmutableMap.of(
 					Direction.NORTH,
@@ -51,7 +51,12 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	public InteractiveTriggerWallTorchBlock(SimpleParticleType particle, Settings settings) {
 		super(particle, settings);
 		this.setDefaultState(
-				this.stateManager.getDefaultState().with(X_MIRRORED, false).with(Z_MIRRORED, false).with(Properties.LIT, true).with(TRIGGERED, false)
+				this.stateManager.getDefaultState()
+						.with(ScriptBlocksBlockProperties.ROTATED, 0)
+						.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+						.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+						.with(Properties.LIT, true)
+						.with(Properties.TRIGGERED, false)
 		);
 	}
 
@@ -63,7 +68,7 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(FACING);
+		builder.add(HorizontalFacingBlock.FACING);
 	}
 
 	@Override
@@ -77,12 +82,12 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	}
 
 	public static VoxelShape getBoundingShape(BlockState state) {
-		return BOUNDING_SHAPES.get(state.get(FACING));
+		return BOUNDING_SHAPES.get(state.get(HorizontalFacingBlock.FACING));
 	}
 
 	@Override
 	protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-		return canPlaceAt(world, pos, state.get(FACING));
+		return canPlaceAt(world, pos, state.get(HorizontalFacingBlock.FACING));
 	}
 
 	public static boolean canPlaceAt(WorldView world, BlockPos pos, Direction facing) {
@@ -102,7 +107,7 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 		for (Direction direction : directions) {
 			if (direction.getAxis().isHorizontal()) {
 				Direction direction2 = direction.getOpposite();
-				blockState = blockState.with(FACING, direction2);
+				blockState = blockState.with(HorizontalFacingBlock.FACING, direction2);
 				if (blockState.canPlaceAt(worldView, blockPos)) {
 					return blockState;
 				}
@@ -116,13 +121,13 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	protected BlockState getStateForNeighborUpdate(
 			BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos
 	) {
-		return direction.getOpposite() == state.get(FACING) && !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : state;
+		return direction.getOpposite() == state.get(HorizontalFacingBlock.FACING) && !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : state;
 	}
 
 	@Override
 	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
 		if (state.get(Properties.LIT)) {
-			Direction direction = state.get(FACING);
+			Direction direction = state.get(HorizontalFacingBlock.FACING);
 			double d = (double) pos.getX() + 0.5;
 			double e = (double) pos.getY() + 0.7;
 			double f = (double) pos.getZ() + 0.5;
@@ -137,30 +142,30 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	@Override
 	public void trigger(BlockState state, World world, BlockPos pos) {
 		boolean newLitState = state.get(Properties.LIT);
-		if (!state.get(TRIGGERED)) {
+		if (!state.get(Properties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
 		if (!newLitState) {
 			if (state.getBlock() instanceof InteractiveTriggerTorchBlock) {
-				Direction direction = state.get(FACING).getOpposite();
+				Direction direction = state.get(HorizontalFacingBlock.FACING).getOpposite();
 				world.addParticle(ParticleTypes.SMOKE, pos.getX() + 0.5 + 0.27 * (double) direction.getOffsetX(), pos.getY() + 0.7 + 0.22, pos.getZ() + 0.5 + 0.27 * (double) direction.getOffsetZ(), 0.0, 0.0, 0.0);
 			}
 		}
-		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, true);
+		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, true);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return state.with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation)).with(FACING, rotation.rotate(state.get(FACING)));
+		return state.with(ScriptBlocksBlockProperties.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(ScriptBlocksBlockProperties.ROTATED), rotation)).with(HorizontalFacingBlock.FACING, rotation.rotate(state.get(HorizontalFacingBlock.FACING)));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		if (mirror == BlockMirror.FRONT_BACK) {
-			return state.with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED)).rotate(mirror.getRotation(state.get(FACING)));
+			return state.with(ScriptBlocksBlockProperties.X_MIRRORED, !state.get(ScriptBlocksBlockProperties.X_MIRRORED)).rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING)));
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return state.with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED)).rotate(mirror.getRotation(state.get(FACING)));
+			return state.with(ScriptBlocksBlockProperties.Z_MIRRORED, !state.get(ScriptBlocksBlockProperties.Z_MIRRORED)).rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING)));
 		}
 		return state;
 	}

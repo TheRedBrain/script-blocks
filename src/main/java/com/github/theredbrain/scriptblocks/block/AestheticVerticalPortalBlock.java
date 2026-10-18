@@ -11,7 +11,6 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -25,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class AestheticVerticalPortalBlock extends Block {
 	public static final MapCodec<AestheticVerticalPortalBlock> CODEC = createCodec(AestheticVerticalPortalBlock::new);
-	public static final EnumProperty<Direction.Axis> AXIS = Properties.HORIZONTAL_AXIS;
 	protected static final VoxelShape X_SHAPE = Block.createCuboidShape(0.0, 0.0, 6.0, 16.0, 16.0, 10.0);
 	protected static final VoxelShape Z_SHAPE = Block.createCuboidShape(6.0, 0.0, 0.0, 10.0, 16.0, 16.0);
 	protected static final VoxelShape EMPTY_SHAPE = VoxelShapes.empty();
@@ -47,13 +45,15 @@ public class AestheticVerticalPortalBlock extends Block {
 		super(settings);
 		this.particleEffect = particleEffect;
 		this.soundEvent = soundEvent;
-		this.setDefaultState(this.stateManager.getDefaultState().with(AXIS, Direction.Axis.X));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(Properties.HORIZONTAL_AXIS, Direction.Axis.X)
+		);
 	}
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		if (context.isHolding(this.asItem()) || (context instanceof EntityShapeContext entityShapeContext && entityShapeContext.getEntity() instanceof PlayerEntity playerEntity && playerEntity.isCreative())) {
-			switch ((Direction.Axis) state.get(AXIS)) {
+			switch (state.get(Properties.HORIZONTAL_AXIS)) {
 				case Z:
 					return Z_SHAPE;
 				case X:
@@ -67,7 +67,7 @@ public class AestheticVerticalPortalBlock extends Block {
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(AXIS, ctx.getHorizontalPlayerFacing().rotateYClockwise().getAxis());
+		return this.getDefaultState().with(Properties.HORIZONTAL_AXIS, ctx.getHorizontalPlayerFacing().rotateYClockwise().getAxis());
 	}
 
 	@Override
@@ -112,11 +112,11 @@ public class AestheticVerticalPortalBlock extends Block {
 		switch (rotation) {
 			case COUNTERCLOCKWISE_90:
 			case CLOCKWISE_90:
-				switch ((Direction.Axis) state.get(AXIS)) {
+				switch (state.get(Properties.HORIZONTAL_AXIS)) {
 					case Z:
-						return state.with(AXIS, Direction.Axis.X);
+						return state.with(Properties.HORIZONTAL_AXIS, Direction.Axis.X);
 					case X:
-						return state.with(AXIS, Direction.Axis.Z);
+						return state.with(Properties.HORIZONTAL_AXIS, Direction.Axis.Z);
 					default:
 						return state;
 				}
@@ -127,6 +127,6 @@ public class AestheticVerticalPortalBlock extends Block {
 
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(AXIS);
+		builder.add(Properties.HORIZONTAL_AXIS);
 	}
 }

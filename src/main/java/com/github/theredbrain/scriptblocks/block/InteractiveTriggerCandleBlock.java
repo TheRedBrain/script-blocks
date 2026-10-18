@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -21,7 +22,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -50,7 +50,6 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	public static final MapCodec<InteractiveTriggerCandleBlock> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), createSettingsCodec()).apply(instance, InteractiveTriggerCandleBlock::new)
 	);
-	public static final BooleanProperty TRIGGERED = BooleanProperty.of("triggered");
 	private static final Int2ObjectMap<List<Vec3d>> CANDLES_TO_PARTICLE_OFFSETS = Util.make(
 			() -> {
 				Int2ObjectMap<List<Vec3d>> int2ObjectMap = new Int2ObjectOpenHashMap<>();
@@ -74,7 +73,14 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	public InteractiveTriggerCandleBlock(SimpleParticleType particle, Settings settings) {
 		super(settings);
 		this.setDefaultState(
-				this.stateManager.getDefaultState().with(X_MIRRORED, false).with(Z_MIRRORED, false).with(Properties.CANDLES, 1).with(Properties.LIT, false).with(Properties.WATERLOGGED, false).with(TRIGGERED, false)
+				this.stateManager.getDefaultState()
+						.with(ScriptBlocksBlockProperties.ROTATED, 0)
+						.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+						.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+						.with(Properties.CANDLES, 1)
+						.with(Properties.LIT, false)
+						.with(Properties.WATERLOGGED, false)
+						.with(Properties.TRIGGERED, false)
 		);
 		this.particle = particle;
 	}
@@ -135,7 +141,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(Properties.CANDLES, Properties.LIT, Properties.WATERLOGGED, TRIGGERED);
+		builder.add(Properties.CANDLES, Properties.LIT, Properties.WATERLOGGED, Properties.TRIGGERED);
 	}
 
 	@Override
@@ -210,7 +216,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 
 	@Override
 	public void creativeSneakingInteraction(BlockState state, World world, BlockPos pos) {
-		state = state.cycle(Properties.LIT).with(TRIGGERED, false);
+		state = state.cycle(Properties.LIT).with(Properties.TRIGGERED, false);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 		if (state.get(Properties.WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
@@ -219,13 +225,13 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 
 	@Override
 	public boolean canTrigger(BlockState state) {
-		return !state.get(TRIGGERED);
+		return !state.get(Properties.TRIGGERED);
 	}
 
 	@Override
 	public void trigger(BlockState state, World world, BlockPos pos) {
 		boolean newLitState = state.get(Properties.LIT);
-		if (!state.get(TRIGGERED)) {
+		if (!state.get(Properties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
 		if (!newLitState) {
@@ -239,17 +245,17 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 						);
 			}
 		}
-		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, true);
+		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, true);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 
 	@Override
 	public void reset(BlockState state, World world, BlockPos pos) {
 		boolean newLitState = state.get(Properties.LIT);
-		if (state.get(TRIGGERED)) {
+		if (state.get(Properties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
-		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, false);
+		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, false);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 

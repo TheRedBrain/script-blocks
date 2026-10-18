@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -38,15 +39,19 @@ import org.jetbrains.annotations.Nullable;
 
 public class UseRelayChestBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<UseRelayChestBlock> CODEC = createCodec(UseRelayChestBlock::new);
-	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
-	public static final BooleanProperty OPEN = Properties.OPEN;
-	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	protected static final VoxelShape CLOSED_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
 	protected static final VoxelShape OPENED_SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 10.0, 15.0);
 
 	public UseRelayChestBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH).with(OPEN, false).with(WATERLOGGED, false));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(ScriptBlocksBlockProperties.ROTATED, 0)
+				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
+				.with(Properties.OPEN, false)
+				.with(Properties.WATERLOGGED, false)
+		);
 	}
 
 	public MapCodec<UseRelayChestBlock> getCodec() {
@@ -62,7 +67,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(FACING, OPEN, WATERLOGGED);
+		builder.add(HorizontalFacingBlock.FACING, Properties.OPEN, Properties.WATERLOGGED);
 	}
 
 	@Override
@@ -72,7 +77,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (state.get(OPEN)) {
+		if (state.get(Properties.OPEN)) {
 			return OPENED_SHAPE;
 		} else {
 			return CLOSED_SHAPE;
@@ -88,7 +93,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
 		FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
 		Direction direction = ctx.getHorizontalPlayerFacing().getOpposite();
-		return this.getDefaultState().with(FACING, direction).with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+		return this.getDefaultState().with(HorizontalFacingBlock.FACING, direction).with(Properties.WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
 	}
 
 	@Override
@@ -99,7 +104,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayChestBlockScreen(useRelayChestBlockEntity);
 				return ActionResult.success(world.isClient);
 			} else {
-				if (!state.get(OPEN)) {
+				if (!state.get(Properties.OPEN)) {
 					if (useRelayChestBlockEntity.canTrigger(player)) {
 						if (!useRelayChestBlockEntity.getUnlockedMessage().isEmpty() && !world.isClient) {
 							player.sendMessage(Text.translatable(useRelayChestBlockEntity.getUnlockedMessage()), true);
@@ -111,7 +116,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 							}
 						}
 						useRelayChestBlockEntity.tryToConsumeKeyItem(player);
-						world.setBlockState(pos, state.with(OPEN, true), Block.NOTIFY_LISTENERS);
+						world.setBlockState(pos, state.with(Properties.OPEN, true), Block.NOTIFY_LISTENERS);
 						useRelayChestBlockEntity.trigger();
 					} else {
 						if (!useRelayChestBlockEntity.getLockedMessage().isEmpty() && !world.isClient) {
@@ -141,7 +146,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
-		if (state.get(WATERLOGGED)) {
+		if (state.get(Properties.WATERLOGGED)) {
 			return Fluids.WATER.getStill(false);
 		}
 		return super.getFluidState(state);
@@ -149,7 +154,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		if (state.get(WATERLOGGED)) {
+		if (state.get(Properties.WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 		return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
@@ -157,15 +162,15 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return state.with(FACING, rotation.rotate(state.get(FACING))).with(RotatedBlockWithEntity.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(RotatedBlockWithEntity.ROTATED), rotation));
+		return state.with(HorizontalFacingBlock.FACING, rotation.rotate(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.ROTATED, BlockRotationUtils.calculateNewRotatedBlockState(state.get(ScriptBlocksBlockProperties.ROTATED), rotation));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror) {
 		if (mirror == BlockMirror.FRONT_BACK) {
-			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.X_MIRRORED, !state.get(RotatedBlockWithEntity.X_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.X_MIRRORED, !state.get(ScriptBlocksBlockProperties.X_MIRRORED));
 		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return state.rotate(mirror.getRotation(state.get(FACING))).with(RotatedBlockWithEntity.Z_MIRRORED, !state.get(RotatedBlockWithEntity.Z_MIRRORED));
+			return state.rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.Z_MIRRORED, !state.get(ScriptBlocksBlockProperties.Z_MIRRORED));
 		}
 		return state;
 	}

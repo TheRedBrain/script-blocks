@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.logging.LogUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -410,33 +411,33 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.triggeredBlockOnInactive.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlockOnInactive.getLeft(), blockRotation));
 				this.triggeredBlockOnWaitingForPlayers.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlockOnWaitingForPlayers.getLeft(), blockRotation));
 				this.triggeredBlockOnActive.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlockOnActive.getLeft(), blockRotation));
 				this.triggeredBlockOnWaitingForReward.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlockOnWaitingForReward.getLeft(), blockRotation));
 				this.triggeredBlockOnReward.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlockOnReward.getLeft(), blockRotation));
 				this.triggeredBlockOnCooldown.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlockOnCooldown.getLeft(), blockRotation));
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.triggeredBlockOnInactive.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnInactive.getLeft(), BlockMirror.FRONT_BACK));
 				this.triggeredBlockOnWaitingForPlayers.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnWaitingForPlayers.getLeft(), BlockMirror.FRONT_BACK));
 				this.triggeredBlockOnActive.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnActive.getLeft(), BlockMirror.FRONT_BACK));
 				this.triggeredBlockOnWaitingForReward.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnWaitingForReward.getLeft(), BlockMirror.FRONT_BACK));
 				this.triggeredBlockOnReward.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnReward.getLeft(), BlockMirror.FRONT_BACK));
 				this.triggeredBlockOnCooldown.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnCooldown.getLeft(), BlockMirror.FRONT_BACK));
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.triggeredBlockOnInactive.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnInactive.getLeft(), BlockMirror.LEFT_RIGHT));
 				this.triggeredBlockOnWaitingForPlayers.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnWaitingForPlayers.getLeft(), BlockMirror.LEFT_RIGHT));
 				this.triggeredBlockOnActive.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnActive.getLeft(), BlockMirror.LEFT_RIGHT));
 				this.triggeredBlockOnWaitingForReward.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnWaitingForReward.getLeft(), BlockMirror.LEFT_RIGHT));
 				this.triggeredBlockOnReward.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnReward.getLeft(), BlockMirror.LEFT_RIGHT));
 				this.triggeredBlockOnCooldown.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlockOnCooldown.getLeft(), BlockMirror.LEFT_RIGHT));
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

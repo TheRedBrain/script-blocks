@@ -8,6 +8,7 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -650,8 +651,8 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
 				this.areaPositionOffset = offsetArea.getLeft();
@@ -665,9 +666,9 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 				this.onLeavingUUIDListHandler = BlockRotationUtils.rotateOffsetBlockPos(this.onLeavingUUIDListHandler, blockRotation);
 				this.onTriggeringUUIDListHandler = BlockRotationUtils.rotateOffsetBlockPos(this.onTriggeringUUIDListHandler, blockRotation);
 
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
 				this.areaPositionOffset = offsetArea.getLeft();
@@ -681,9 +682,9 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 				this.onLeavingUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onLeavingUUIDListHandler, BlockMirror.FRONT_BACK);
 				this.onTriggeringUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onTriggeringUUIDListHandler, BlockMirror.FRONT_BACK);
 
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
 				this.areaPositionOffset = offsetArea.getLeft();
@@ -697,7 +698,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 				this.onLeavingUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onLeavingUUIDListHandler, BlockMirror.LEFT_RIGHT);
 				this.onTriggeringUUIDListHandler = BlockRotationUtils.mirrorOffsetBlockPos(this.onTriggeringUUIDListHandler, BlockMirror.LEFT_RIGHT);
 
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

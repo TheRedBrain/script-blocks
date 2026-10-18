@@ -251,7 +251,7 @@ public class ScriptBlocksBlocks {
 	@Deprecated
 	public static final Block LOOTABLE_VAULT_BLOCK = registerBlock("lootable_vault_block", new LootableVaultBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.VAULT).luminance(state -> ((LootableVaultState) state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
 
-	public static final Block TRIGGERING_TRIAL_SPAWNER_BLOCK = registerBlock("triggering_trial_spawner_block", new TriggeringTrialSpawnerBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.TRIAL_SPAWNER).blockVision(Blocks::never).luminance(state -> ((TrialSpawnerState) state.get(TriggeringTrialSpawnerBlock.TRIAL_SPAWNER_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
+	public static final Block TRIGGERING_TRIAL_SPAWNER_BLOCK = registerBlock("triggering_trial_spawner_block", new TriggeringTrialSpawnerBlock(Block.Settings.create().mapColor(MapColor.STONE_GRAY).instrument(NoteBlockInstrument.BASEDRUM).strength(50.0F).nonOpaque().sounds(BlockSoundGroup.TRIAL_SPAWNER).blockVision(Blocks::never).luminance(state -> ((TrialSpawnerState) state.get(Properties.TRIAL_SPAWNER_STATE)).getLuminance()).blockVision(Blocks::never).dropsNothing()), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
 	//endregion Content Blocks
 
 	//region Script Blocks

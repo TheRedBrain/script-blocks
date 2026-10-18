@@ -318,8 +318,8 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //	@Override
 //	protected void onRotate(BlockState state) {
 //		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-//			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-//				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+//			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+//				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 //
 //				this.dataProvidingBlockPosOffset = BlockRotationUtils.rotateOffsetBlockPos(this.dataProvidingBlockPosOffset, blockRotation);
 //
@@ -327,9 +327,9 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //
 //				this.secondTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.secondTriggeredBlock.getLeft(), blockRotation));
 //
-//				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+//				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 //			}
-//			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+//			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 //
 //				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, BlockMirror.FRONT_BACK);
 //
@@ -337,9 +337,9 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //
 //				this.secondTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.secondTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
 //
-//				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+//				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 //			}
-//			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+//			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 //
 //				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
 //
@@ -347,7 +347,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //
 //				this.secondTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.secondTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
 //
-//				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+//				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 //			}
 //		}
 //	}

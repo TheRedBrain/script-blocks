@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -419,8 +420,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(RotatedBlockWithEntity.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(RotatedBlockWithEntity.ROTATED), this.rotated);
+			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.mainEntrance = BlockRotationUtils.rotateSpawnPoint(this.mainEntrance, blockRotation);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
@@ -441,9 +442,9 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				this.resetAreaMaxX = resetAreaMax.getX();
 				this.resetAreaMaxZ = resetAreaMax.getZ();
 
-				this.rotated = state.get(RotatedBlockWithEntity.ROTATED);
+				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(RotatedBlockWithEntity.X_MIRRORED) != this.x_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, BlockMirror.FRONT_BACK);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
@@ -464,9 +465,9 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				this.resetAreaMaxX = resetAreaMax.getX();
 				this.resetAreaMaxZ = resetAreaMax.getZ();
 
-				this.x_mirrored = state.get(RotatedBlockWithEntity.X_MIRRORED);
+				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(RotatedBlockWithEntity.Z_MIRRORED) != this.z_mirrored) {
+			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, BlockMirror.LEFT_RIGHT);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
@@ -487,7 +488,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				this.resetAreaMaxX = resetAreaMax.getX();
 				this.resetAreaMaxZ = resetAreaMax.getZ();
 
-				this.z_mirrored = state.get(RotatedBlockWithEntity.Z_MIRRORED);
+				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

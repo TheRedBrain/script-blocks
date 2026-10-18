@@ -42,7 +42,6 @@ public class BossControllerBlock extends RotatedBlockWithEntity {
 	@Override
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-//        return validateTicker(type, EntityRegistry.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
 		return validateTicker(type, ScriptBlocksEntities.BOSS_CONTROLLER_BLOCK_ENTITY, BossControllerBlockEntity::tick);
 	}
 

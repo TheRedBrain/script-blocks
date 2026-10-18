@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
+import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -27,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 	public static final MapCodec<UseRelayAnvilBlock> CODEC = createCodec(UseRelayAnvilBlock::new);
-	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	private static final VoxelShape BASE_SHAPE = Block.createCuboidShape(2.0, 0.0, 2.0, 14.0, 4.0, 14.0);
 	private static final VoxelShape X_STEP_SHAPE = Block.createCuboidShape(3.0, 4.0, 4.0, 13.0, 5.0, 12.0);
 	private static final VoxelShape X_STEM_SHAPE = Block.createCuboidShape(4.0, 5.0, 6.0, 12.0, 10.0, 10.0);
@@ -40,11 +40,22 @@ public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 
 	public UseRelayAnvilBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(ROTATED, 0).with(X_MIRRORED, false).with(Z_MIRRORED, false).with(FACING, Direction.NORTH));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(ScriptBlocksBlockProperties.ROTATED, 0)
+				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
+		);
 	}
 
 	public MapCodec<UseRelayAnvilBlock> getCodec() {
 		return CODEC;
+	}
+
+	@Override
+	public void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+		super.appendProperties(builder);
+		builder.add(HorizontalFacingBlock.FACING);
 	}
 
 	@Nullable
@@ -60,7 +71,7 @@ public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().rotateYClockwise());
+		return this.getDefaultState().with(HorizontalFacingBlock.FACING, ctx.getHorizontalPlayerFacing().rotateYClockwise());
 	}
 
 	@Override
@@ -85,19 +96,13 @@ public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		Direction direction = state.get(FACING);
+		Direction direction = state.get(HorizontalFacingBlock.FACING);
 		return direction.getAxis() == Direction.Axis.X ? X_AXIS_SHAPE : Z_AXIS_SHAPE;
 	}
 
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(FACING, rotation.rotate(state.get(FACING)));
-	}
-
-	@Override
-	public void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(FACING);
+		return super.rotate(state, rotation).with(HorizontalFacingBlock.FACING, rotation.rotate(state.get(HorizontalFacingBlock.FACING)));
 	}
 
 	@Override

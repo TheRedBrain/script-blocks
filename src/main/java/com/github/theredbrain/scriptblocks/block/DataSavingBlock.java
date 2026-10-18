@@ -19,7 +19,6 @@ public class DataSavingBlock extends BlockWithEntity {
 
 	public DataSavingBlock(Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState());
 	}
 
 	public MapCodec<DataSavingBlock> getCodec() {
