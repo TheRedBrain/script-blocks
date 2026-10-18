@@ -27,8 +27,6 @@ These blocks have been polished:
 - added location cooldowns
   - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started when the player leaves a location or dies while inside the location. 
 - added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
-- added UUID List Messaging Block, sends a configurable message to all players in a received UUID List. The message can be displayed in chat, as overlay or as title.
-- added Triggering Respawn Anchor Block, sets the respawn position of all players in a received UUID List. When a player respawns, another block is triggered.
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
 - added Interactive Trigger Soul Candle blocks, in 17 variants. These are functionally identical to the existing Interactive Trigger Candle blocks, but display soul flame particles and have a lower luminance.
@@ -40,7 +38,10 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 
 - added "UUID List Saving Block". This block saves a list of UUIDs. Other blocks can add to/remove from this list or read the current list.
 - added "UUID List Relay Block". Provides the same interactions as the "UUID List Saving Block", but relays them to another block at a configurable offset position instead.
+- added Two Areas Player Detector Block, triggers a block and sends a UUID list when a player enters a configured area, but only if the player was in another configured area before. When the direction is reversed, another block is triggered/receives the UUID list.
 - added "Status Effect Manipulation Block". When triggered, this block applies/removes/decrements amplifier of a status effect (tag) from a list of players provided by a UUID List Handler. Alternatively, a list can be provided directly to this block instead of relying on intermediate blocks.
+- added UUID List Messaging Block, sends a configurable message to all players in a received UUID List. The message can be displayed in chat, as overlay or as title.
+- added Triggering Respawn Anchor Block, sets the respawn position of all players in a received UUID List. When a player respawns, another block is triggered.
 
 ## Changes
 

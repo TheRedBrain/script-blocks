@@ -18,6 +18,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
@@ -65,12 +66,13 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 					if (!interactiveTriggerBlockEntity.getUnlockedSound().isEmpty() && !world.isClient) {
 						SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(interactiveTriggerBlockEntity.getUnlockedSound()));
 						if (soundEvent != null) {
-							world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+							world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
 						}
 					}
 					interactiveTriggerBlockEntity.tryToConsumeKeyItem(player);
 					interactiveTriggerBlockEntity.trigger();
 					trigger(state, world, pos);
+					world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 				} else {
 					if (!interactiveTriggerBlockEntity.getLockedMessage().isEmpty() && !world.isClient) {
 						player.sendMessage(Text.translatable(interactiveTriggerBlockEntity.getLockedMessage()), true);
@@ -78,7 +80,7 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 					if (!interactiveTriggerBlockEntity.getLockedSound().isEmpty() && !world.isClient) {
 						SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(interactiveTriggerBlockEntity.getLockedSound()));
 						if (soundEvent != null) {
-							world.playSound((PlayerEntity) null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+							world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
 						}
 					}
 				}

@@ -216,6 +216,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 				triggeredBeaconBlockEntity.area = new Box(areaStart, areaEnd);
 				triggeredBeaconBlockEntity.calculateAreaBox = false;
 				triggeredBeaconBlockEntity.markDirty();
+				world.updateListeners(pos, state, state, Block.NOTIFY_ALL);
 			}
 			if (triggeredBeaconBlockEntity.triggeredMode == TriggeredMode.CONTINUOUS && triggeredBeaconBlockEntity.triggered) {
 				triggeredBeaconBlockEntity.applyStatusEffect(world);

@@ -341,6 +341,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 				teamControllerBlockEntity.area = new Box(areaStart, areaEnd);
 				teamControllerBlockEntity.calculateAreaBox = false;
 				teamControllerBlockEntity.markDirty();
+				world.updateListeners(pos, state, state, Block.NOTIFY_ALL);
 			}
 			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient) {
 				BlockPos pvpControllerBlockPos = null;

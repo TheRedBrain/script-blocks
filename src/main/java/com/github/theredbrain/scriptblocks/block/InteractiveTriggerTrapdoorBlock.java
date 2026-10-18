@@ -56,7 +56,7 @@ public class InteractiveTriggerTrapdoorBlock extends InteractiveTriggerBlock {
 
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (!state.get(OPEN).booleanValue()) {
+		if (!state.get(OPEN)) {
 			return state.get(HALF) == BlockHalf.TOP ? OPEN_TOP_SHAPE : OPEN_BOTTOM_SHAPE;
 		}
 		switch (state.get(FACING)) {
@@ -93,7 +93,7 @@ public class InteractiveTriggerTrapdoorBlock extends InteractiveTriggerBlock {
 		FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
 		Direction direction = ctx.getSide();
 		blockState = ctx.canReplaceExisting() || !direction.getAxis().isHorizontal() ? (BlockState) ((BlockState) blockState.with(FACING, ctx.getHorizontalPlayerFacing().getOpposite())).with(HALF, direction == Direction.UP ? BlockHalf.BOTTOM : BlockHalf.TOP) : (BlockState) ((BlockState) blockState.with(FACING, direction)).with(HALF, ctx.getHitPos().y - (double) ctx.getBlockPos().getY() > 0.5 ? BlockHalf.TOP : BlockHalf.BOTTOM);
-		return (BlockState) blockState.with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+		return blockState.with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class InteractiveTriggerTrapdoorBlock extends InteractiveTriggerBlock {
 
 	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		if (state.get(WATERLOGGED).booleanValue()) {
+		if (state.get(WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 		return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
@@ -129,7 +129,7 @@ public class InteractiveTriggerTrapdoorBlock extends InteractiveTriggerBlock {
 
 	@Override
 	public void creativeSneakingInteraction(BlockState state, World world, BlockPos pos) {
-		state = (BlockState) state.cycle(OPEN);
+		state = state.cycle(OPEN);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 		if (state.get(WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));

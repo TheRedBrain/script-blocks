@@ -7,11 +7,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.block.AbstractCandleBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.block.TorchBlock;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
@@ -20,12 +18,10 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -40,7 +36,6 @@ import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.ToIntFunction;
 
 public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock implements Waterloggable {
 	protected static final MapCodec<SimpleParticleType> PARTICLE_TYPE_CODEC = Registries.PARTICLE_TYPE
@@ -55,11 +50,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	public static final MapCodec<InteractiveTriggerCandleBlock> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), createSettingsCodec()).apply(instance, InteractiveTriggerCandleBlock::new)
 	);
-//	public static final IntProperty CANDLES = Properties.CANDLES;
-//	public static final BooleanProperty LIT = AbstractCandleBlock.LIT;
-	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	public static final BooleanProperty TRIGGERED = BooleanProperty.of("triggered");
-//	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE = state -> state.get(LIT) ? 3 * (Integer)state.get(CANDLES) : 0;
 	private static final Int2ObjectMap<List<Vec3d>> CANDLES_TO_PARTICLE_OFFSETS = Util.make(
 			() -> {
 				Int2ObjectMap<List<Vec3d>> int2ObjectMap = new Int2ObjectOpenHashMap<>();
@@ -83,7 +74,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	public InteractiveTriggerCandleBlock(SimpleParticleType particle, Settings settings) {
 		super(settings);
 		this.setDefaultState(
-				this.stateManager.getDefaultState().with(X_MIRRORED, false).with(Z_MIRRORED, false).with(Properties.CANDLES, 1).with(AbstractCandleBlock.LIT, false).with(WATERLOGGED, false).with(TRIGGERED, false)
+				this.stateManager.getDefaultState().with(X_MIRRORED, false).with(Z_MIRRORED, false).with(Properties.CANDLES, 1).with(Properties.LIT, false).with(Properties.WATERLOGGED, false).with(TRIGGERED, false)
 		);
 		this.particle = particle;
 	}
@@ -107,7 +98,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 		} else {
 			FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
 			boolean bl = fluidState.getFluid() == Fluids.WATER;
-			return super.getPlacementState(ctx).with(WATERLOGGED, bl);
+			return super.getPlacementState(ctx).with(Properties.WATERLOGGED, bl);
 		}
 	}
 
@@ -115,7 +106,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	protected BlockState getStateForNeighborUpdate(
 			BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos
 	) {
-		if (state.get(WATERLOGGED)) {
+		if (state.get(Properties.WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 
@@ -124,7 +115,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 
 	@Override
 	protected FluidState getFluidState(BlockState state) {
-		return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+		return state.get(Properties.WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
 	}
 
 	@Override
@@ -144,14 +135,14 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
-		builder.add(Properties.CANDLES, AbstractCandleBlock.LIT, WATERLOGGED, TRIGGERED);
+		builder.add(Properties.CANDLES, Properties.LIT, Properties.WATERLOGGED, TRIGGERED);
 	}
 
 	@Override
 	public boolean tryFillWithFluid(WorldAccess world, BlockPos pos, BlockState state, FluidState fluidState) {
-		if (!(Boolean)state.get(WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
-			BlockState blockState = state.with(WATERLOGGED, Boolean.TRUE);
-			if (state.get(AbstractCandleBlock.LIT)) {
+		if (!(Boolean) state.get(Properties.WATERLOGGED) && fluidState.getFluid() == Fluids.WATER) {
+			BlockState blockState = state.with(Properties.WATERLOGGED, Boolean.TRUE);
+			if (state.get(Properties.LIT)) {
 				extinguish(null, blockState, world, pos);
 			} else {
 				world.setBlockState(pos, blockState, Block.NOTIFY_ALL);
@@ -164,21 +155,15 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 		}
 	}
 
-	public static boolean canBeLit(BlockState state) {
-		return state.isIn(BlockTags.CANDLES, statex -> statex.contains(AbstractCandleBlock.LIT) && statex.contains(WATERLOGGED))
-				&& !(Boolean)state.get(AbstractCandleBlock.LIT)
-				&& !(Boolean)state.get(WATERLOGGED);
-	}
-
 	private Iterable<Vec3d> getParticleOffsets(BlockState state) {
-		return (Iterable<Vec3d>)CANDLES_TO_PARTICLE_OFFSETS.get(((Integer)state.get(Properties.CANDLES)).intValue());
+		return CANDLES_TO_PARTICLE_OFFSETS.get(state.get(Properties.CANDLES).intValue());
 	}
 
 	@Override
 	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-		if ((Boolean)state.get(AbstractCandleBlock.LIT)) {
+		if (state.get(Properties.LIT)) {
 			this.getParticleOffsets(state)
-					.forEach(offset -> spawnCandleParticles(world, offset.add((double)pos.getX(), (double)pos.getY(), (double)pos.getZ()), random));
+					.forEach(offset -> spawnCandleParticles(world, offset.add((double) pos.getX(), (double) pos.getY(), (double) pos.getZ()), random));
 		}
 	}
 
@@ -206,11 +191,11 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	public static void extinguish(@Nullable PlayerEntity player, BlockState state, WorldAccess world, BlockPos pos) {
 		setLit(world, state, pos, false);
 		if (state.getBlock() instanceof InteractiveTriggerCandleBlock) {
-			((InteractiveTriggerCandleBlock)state.getBlock())
+			((InteractiveTriggerCandleBlock) state.getBlock())
 					.getParticleOffsets(state)
 					.forEach(
 							offset -> world.addParticle(
-									ParticleTypes.SMOKE, (double)pos.getX() + offset.getX(), (double)pos.getY() + offset.getY(), (double)pos.getZ() + offset.getZ(), 0.0, 0.1F, 0.0
+									ParticleTypes.SMOKE, (double) pos.getX() + offset.getX(), (double) pos.getY() + offset.getY(), (double) pos.getZ() + offset.getZ(), 0.0, 0.1F, 0.0
 							)
 					);
 		}
@@ -220,14 +205,14 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 	}
 
 	private static void setLit(WorldAccess world, BlockState state, BlockPos pos, boolean lit) {
-		world.setBlockState(pos, state.with(AbstractCandleBlock.LIT, lit), Block.NOTIFY_ALL_AND_REDRAW);
+		world.setBlockState(pos, state.with(Properties.LIT, lit), Block.NOTIFY_ALL_AND_REDRAW);
 	}
 
 	@Override
 	public void creativeSneakingInteraction(BlockState state, World world, BlockPos pos) {
-		state = (BlockState) state.cycle(AbstractCandleBlock.LIT).with(TRIGGERED, false);
+		state = state.cycle(Properties.LIT).with(TRIGGERED, false);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
-		if (state.get(WATERLOGGED)) {
+		if (state.get(Properties.WATERLOGGED)) {
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 		}
 	}
@@ -239,21 +224,32 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 
 	@Override
 	public void trigger(BlockState state, World world, BlockPos pos) {
-		boolean newLitState = state.get(AbstractCandleBlock.LIT);
+		boolean newLitState = state.get(Properties.LIT);
 		if (!state.get(TRIGGERED)) {
 			newLitState = !newLitState;
 		}
-		state = state.with(AbstractCandleBlock.LIT, newLitState).with(TRIGGERED, true);
+		if (!newLitState) {
+			if (state.getBlock() instanceof InteractiveTriggerCandleBlock) {
+				((InteractiveTriggerCandleBlock) state.getBlock())
+						.getParticleOffsets(state)
+						.forEach(
+								offset -> world.addParticle(
+										ParticleTypes.SMOKE, (double) pos.getX() + offset.getX(), (double) pos.getY() + offset.getY(), (double) pos.getZ() + offset.getZ(), 0.0, 0.1F, 0.0
+								)
+						);
+			}
+		}
+		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, true);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 
 	@Override
 	public void reset(BlockState state, World world, BlockPos pos) {
-		boolean newLitState = state.get(AbstractCandleBlock.LIT);
+		boolean newLitState = state.get(Properties.LIT);
 		if (state.get(TRIGGERED)) {
 			newLitState = !newLitState;
 		}
-		state = state.with(AbstractCandleBlock.LIT, newLitState).with(TRIGGERED, false);
+		state = state.with(Properties.LIT, newLitState).with(TRIGGERED, false);
 		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 	}
 

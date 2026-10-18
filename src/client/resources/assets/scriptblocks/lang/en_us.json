@@ -894,7 +894,7 @@
 	"block.scriptblocks.use_relay_weathered_copper_trapdoor": "Use Relay Weathered Copper Trapdoor",
 
 	"block.scriptblocks.use_relay_chest": "Use Relay Chest",
-	"block.scriptblocks.locked_use_relay_chest": "Locked Use Relay Chest",
+	"block.scriptblocks.trapped_use_relay_chest": "Trapped Use Relay Chest",
 
 	"block.scriptblocks.lootable_vault_block": "Lootable Vault (Deprecated)",
 	"block.scriptblocks.triggering_trial_spawner_block": "Triggering Trial Spawner",
