@@ -68,13 +68,13 @@ public record LootableVaultConfig(
 //				withChoice,
 //				activationRange,
 //				deactivationRange//,
-////				ItemStack.EMPTY,
-////				overrideLootTableToDisplay,
-////				DEFAULT.playerDetector(),
-////				DEFAULT.entitySelector()
+
+	/// /				ItemStack.EMPTY,
+	/// /				overrideLootTableToDisplay,
+	/// /				DEFAULT.playerDetector(),
+	/// /				DEFAULT.entitySelector()
 //		);
 //	}
-
 	private DataResult<LootableVaultConfig> validate() {
 		return this.activationRange > this.deactivationRange
 				? DataResult.error(() -> "Activation range must (" + this.activationRange + ") be less or equal to deactivation range (" + this.deactivationRange + ")")

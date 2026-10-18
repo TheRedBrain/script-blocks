@@ -68,11 +68,11 @@ public class DialogueScreenHandler extends ScreenHandler {
 	}
 
 	public int getDialogueTextsStartingIndex() {
-		return Math.max(0,Math.min(7, this.dialogueTextsStartingIndex));
+		return Math.max(0, Math.min(7, this.dialogueTextsStartingIndex));
 	}
 
 	public int getAnswersStartingIndex() {
-		return Math.max(0,Math.min(7, this.answersStartingIndex));
+		return Math.max(0, Math.min(7, this.answersStartingIndex));
 	}
 
 	public record DialogueData(

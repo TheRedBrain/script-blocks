@@ -17,7 +17,7 @@ public interface HandlesUUIDList extends Resetable {
 	 * Handles a list of UUIDs. The list can be added or removed by the handler.
 	 * This action is typically called by other blocks.
 	 *
-	 * @param list The UUID list
+	 * @param list   The UUID list
 	 * @param remove Whether the list is added or removed by the handler.
 	 */
 	void handleUUIDList(List<UUID> list, boolean remove);

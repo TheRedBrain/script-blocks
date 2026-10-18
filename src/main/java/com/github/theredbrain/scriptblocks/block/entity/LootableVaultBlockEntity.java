@@ -357,7 +357,8 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //					boolean lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice());
 
 //					List<ItemStack> list = generateLoot(world, config, pos, player);
-					/*if (*/ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), world, serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice(), stack);/*) {
+					/*if (*/
+					ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), world, serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice(), stack);/*) {
 						ScriptBlocks.info("loot supplied");
 						player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
 						stack.decrementUnlessCreative(config.keyItem().getCount(), player);

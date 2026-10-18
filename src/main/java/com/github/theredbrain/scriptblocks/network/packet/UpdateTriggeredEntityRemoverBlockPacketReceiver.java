@@ -10,10 +10,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.HashMap;
-import java.util.List;
 
 public class UpdateTriggeredEntityRemoverBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredEntityRemoverBlockPacket> {
 

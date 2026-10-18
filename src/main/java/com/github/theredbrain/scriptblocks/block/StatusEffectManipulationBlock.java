@@ -1,8 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.StatusEffectManipulationBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.UUIDListSavingBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;

@@ -275,44 +275,44 @@ package com.github.theredbrain.scriptblocks.block.entity;
 //
 //	@Override
 //	public void trigger() {
-////		if (this.world != null) {
-////			String worldName = this.world.getRegistryKey().getValue().getPath();
-////			MinecraftServer server = this.world.getServer();
-////			BlockPos dataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
-////
-////			BlockEntity blockEntity = world.getBlockEntity(dataProviderBlockPos);
-////			if (blockEntity instanceof ProvidesData providesDataEntity) {
-////				if (this.isWriting) {
-////					providesDataEntity.setData(this.dataIdentifier, this.newDataValue);
-////				} else {
-////					int currentValue = providesDataEntity.getData(this.dataIdentifier);
-////					boolean bl = (this.dataReadingMode == DataReadingMode.LESSER && currentValue < this.comparedDataValue) || (this.dataReadingMode == DataReadingMode.GREATER && currentValue > this.comparedDataValue) || (this.dataReadingMode == DataReadingMode.EQUAL && currentValue == this.comparedDataValue);
-////					BlockPos triggeredBlockPos = BlockPos.ORIGIN;
-////					boolean triggeredBlockResets = false;
-////					if (bl) {
-////						if (this.firstTriggeredBlock.getLeft() != BlockPos.ORIGIN) {
-////							triggeredBlockPos = new BlockPos(this.pos.getX() + this.firstTriggeredBlock.getLeft().getX(), this.pos.getY() + this.firstTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.firstTriggeredBlock.getLeft().getZ());
-////							triggeredBlockResets = this.firstTriggeredBlock.getRight();
-////						}
-////					} else {
-////						if (this.secondTriggeredBlock.getLeft() != BlockPos.ORIGIN) {
-////							triggeredBlockPos = new BlockPos(this.pos.getX() + this.secondTriggeredBlock.getLeft().getX(), this.pos.getY() + this.secondTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.secondTriggeredBlock.getLeft().getZ());
-////							triggeredBlockResets = this.secondTriggeredBlock.getRight();
-////						}
-////					}
-////					if (triggeredBlockPos != BlockPos.ORIGIN) {
-////						BlockEntity blockEntity1 = world.getBlockEntity(triggeredBlockPos);
-////						if (blockEntity1 != this) {
-////							if (triggeredBlockResets && blockEntity1 instanceof Resetable resetable) {
-////								resetable.reset();
-////							} else if (!triggeredBlockResets && blockEntity1 instanceof Triggerable triggerable) {
-////								triggerable.trigger();
-////							}
-////						}
-////					}
-////				}
-////			}
-////		}
+/// /		if (this.world != null) {
+/// /			String worldName = this.world.getRegistryKey().getValue().getPath();
+/// /			MinecraftServer server = this.world.getServer();
+/// /			BlockPos dataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
+/// /
+/// /			BlockEntity blockEntity = world.getBlockEntity(dataProviderBlockPos);
+/// /			if (blockEntity instanceof ProvidesData providesDataEntity) {
+/// /				if (this.isWriting) {
+/// /					providesDataEntity.setData(this.dataIdentifier, this.newDataValue);
+/// /				} else {
+/// /					int currentValue = providesDataEntity.getData(this.dataIdentifier);
+/// /					boolean bl = (this.dataReadingMode == DataReadingMode.LESSER && currentValue < this.comparedDataValue) || (this.dataReadingMode == DataReadingMode.GREATER && currentValue > this.comparedDataValue) || (this.dataReadingMode == DataReadingMode.EQUAL && currentValue == this.comparedDataValue);
+/// /					BlockPos triggeredBlockPos = BlockPos.ORIGIN;
+/// /					boolean triggeredBlockResets = false;
+/// /					if (bl) {
+/// /						if (this.firstTriggeredBlock.getLeft() != BlockPos.ORIGIN) {
+/// /							triggeredBlockPos = new BlockPos(this.pos.getX() + this.firstTriggeredBlock.getLeft().getX(), this.pos.getY() + this.firstTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.firstTriggeredBlock.getLeft().getZ());
+/// /							triggeredBlockResets = this.firstTriggeredBlock.getRight();
+/// /						}
+/// /					} else {
+/// /						if (this.secondTriggeredBlock.getLeft() != BlockPos.ORIGIN) {
+/// /							triggeredBlockPos = new BlockPos(this.pos.getX() + this.secondTriggeredBlock.getLeft().getX(), this.pos.getY() + this.secondTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.secondTriggeredBlock.getLeft().getZ());
+/// /							triggeredBlockResets = this.secondTriggeredBlock.getRight();
+/// /						}
+/// /					}
+/// /					if (triggeredBlockPos != BlockPos.ORIGIN) {
+/// /						BlockEntity blockEntity1 = world.getBlockEntity(triggeredBlockPos);
+/// /						if (blockEntity1 != this) {
+/// /							if (triggeredBlockResets && blockEntity1 instanceof Resetable resetable) {
+/// /								resetable.reset();
+/// /							} else if (!triggeredBlockResets && blockEntity1 instanceof Triggerable triggerable) {
+/// /								triggerable.trigger();
+/// /							}
+/// /						}
+/// /					}
+/// /				}
+/// /			}
+/// /		}
 //	}
 //
 //	@Override

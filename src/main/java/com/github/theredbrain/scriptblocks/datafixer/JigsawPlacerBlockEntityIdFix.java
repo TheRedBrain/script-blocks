@@ -24,15 +24,15 @@ public class JigsawPlacerBlockEntityIdFix extends DataFix {
 	public TypeRewriteRule makeRule() {
 		Type<?> type = this.getInputSchema().getType(TypeReferences.ITEM_STACK);
 		Type<?> type2 = this.getOutputSchema().getType(TypeReferences.ITEM_STACK);
-		TaggedChoice.TaggedChoiceType<String> taggedChoiceType = (TaggedChoice.TaggedChoiceType<String>)this.getInputSchema().findChoiceType(TypeReferences.BLOCK_ENTITY);
-		TaggedChoice.TaggedChoiceType<String> taggedChoiceType2 = (TaggedChoice.TaggedChoiceType<String>)this.getOutputSchema().findChoiceType(TypeReferences.BLOCK_ENTITY);
+		TaggedChoice.TaggedChoiceType<String> taggedChoiceType = (TaggedChoice.TaggedChoiceType<String>) this.getInputSchema().findChoiceType(TypeReferences.BLOCK_ENTITY);
+		TaggedChoice.TaggedChoiceType<String> taggedChoiceType2 = (TaggedChoice.TaggedChoiceType<String>) this.getOutputSchema().findChoiceType(TypeReferences.BLOCK_ENTITY);
 		return TypeRewriteRule.seq(
 				this.convertUnchecked("item stack block entity name hook converter", type, type2),
 				this.fixTypeEverywhere(
 						"JigsawPlacerBlockEntityIdFix",
 						taggedChoiceType,
 						taggedChoiceType2,
-						dynamicOps -> pair -> pair.mapFirst(oldName -> (String)RENAMED_BLOCK_ENTITIES.getOrDefault(oldName, oldName))
+						dynamicOps -> pair -> pair.mapFirst(oldName -> (String) RENAMED_BLOCK_ENTITIES.getOrDefault(oldName, oldName))
 				)
 		);
 	}

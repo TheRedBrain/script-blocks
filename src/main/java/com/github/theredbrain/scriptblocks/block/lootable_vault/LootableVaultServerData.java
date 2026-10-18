@@ -3,16 +3,11 @@ package com.github.theredbrain.scriptblocks.block.lootable_vault;
 import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Uuids;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 

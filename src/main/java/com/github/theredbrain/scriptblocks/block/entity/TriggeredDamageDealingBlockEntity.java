@@ -12,7 +12,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registry;
@@ -129,14 +128,14 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		}
 
 		if (nbt.contains("damageTypeIdentifierString")) {
-		this.damageTypeIdentifierString = nbt.getString("damageTypeIdentifierString");
+			this.damageTypeIdentifierString = nbt.getString("damageTypeIdentifierString");
 			nbt.remove("damageTypeIdentifierString");
 		} else {
 			this.damageTypeIdentifierString = nbt.getString("damage_type_identifier_string");
 		}
 
 		if (nbt.contains("damageAmount")) {
-		this.damageAmount = nbt.getFloat("damageAmount");
+			this.damageAmount = nbt.getFloat("damageAmount");
 			nbt.remove("damageAmount");
 		} else {
 			this.damageAmount = nbt.getFloat("damage_amount");

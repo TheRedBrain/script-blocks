@@ -9,5 +9,6 @@ public class ScriptBlocksConfigs {
 	public static ServerConfig SERVER_CONFIG = ConfigApiJava.registerAndLoadConfig(ServerConfig::new);
 
 	//Init function would be called in ModInitializer or some other entrypoint. Not strictly necessary if loading on-reference is ok.
-	public static void bootstrap() {}
+	public static void bootstrap() {
+	}
 }

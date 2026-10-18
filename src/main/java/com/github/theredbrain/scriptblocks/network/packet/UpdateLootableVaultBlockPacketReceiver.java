@@ -48,7 +48,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 //
 //		if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity && blockState.isOf(BlockRegistry.LOOTABLE_VAULT_BLOCK)) {
 //
-////			world.setBlockState(lootableVaultBlockPosition, blockState.with(LootableVaultBlock.OMINOUS, payload.isOminous()));
+/// /			world.setBlockState(lootableVaultBlockPosition, blockState.with(LootableVaultBlock.OMINOUS, payload.isOminous()));
 //
 //			lootableVaultBlockEntity.setConfig(config);
 //

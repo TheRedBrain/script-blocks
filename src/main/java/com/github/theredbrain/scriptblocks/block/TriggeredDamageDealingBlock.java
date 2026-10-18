@@ -1,7 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockRenderType;

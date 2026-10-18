@@ -18,7 +18,7 @@ public record UpdatePVPControllerBlockPacket(
 		boolean triggeredBlockResets,
 		BlockPos dataProvidingBlockPositionOffset,
 		String matchDurationDataIdentifier
-		) implements CustomPayload {
+) implements CustomPayload {
 	public static final Id<UpdatePVPControllerBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_pvp_controller_block"));
 	public static final PacketCodec<RegistryByteBuf, UpdatePVPControllerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdatePVPControllerBlockPacket::write, UpdatePVPControllerBlockPacket::new);
 
@@ -31,7 +31,7 @@ public record UpdatePVPControllerBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString()
-				);
+		);
 	}
 
 	private void write(RegistryByteBuf registryByteBuf) {

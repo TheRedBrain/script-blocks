@@ -36,7 +36,7 @@ public class TriggeredVillagerSpawnerBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlockEntity) {
 			if (player.isCreativeLevelTwoOp()) {
-				((DuckPlayerEntityMixin)player).scriptblocks$openTriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlockEntity);
+				((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlockEntity);
 				return ActionResult.success(world.isClient);
 			}
 		}

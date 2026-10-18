@@ -18,8 +18,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -71,12 +69,12 @@ public class TriggeringTrialSpawnerBlock extends RotatedBlockWithEntity {
 				? validateTicker(
 				type,
 				ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER,
-				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickServer(serverWorld, pos, (Boolean)statex.getOrEmpty(Properties.OMINOUS).orElse(false))
+				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickServer(serverWorld, pos, (Boolean) statex.getOrEmpty(Properties.OMINOUS).orElse(false))
 		)
 				: validateTicker(
 				type,
 				ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER,
-				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickClient(worldx, pos, (Boolean)statex.getOrEmpty(Properties.OMINOUS).orElse(false))
+				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickClient(worldx, pos, (Boolean) statex.getOrEmpty(Properties.OMINOUS).orElse(false))
 		);
 	}
 
