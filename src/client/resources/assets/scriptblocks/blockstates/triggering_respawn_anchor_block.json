@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/triggering_respawn_anchor_block"
+    }
+  }
+}
