@@ -84,7 +84,6 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListMessagingBl
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UUIDListRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.UseRelayChestBlockScreen;
-import com.github.theredbrain.scriptblocks.network.message.DuckMessageHandlerMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStatusEffects;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
@@ -123,15 +122,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	}
 
 	@Override
-	public void scriptblocks$sendAnnouncement(Text announcement) {
-		((DuckMessageHandlerMixin) this.client.getMessageHandler()).scriptblocks$onAnnouncement(announcement);
-	}
-
-	@Override
 	public void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
 		this.client.setScreen(new CreativeHousingScreen(housingBlockEntity));
 	}
-
 
 	@Override
 	public void scriptblocks$openHousingScreen() {

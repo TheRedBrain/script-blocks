@@ -413,7 +413,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 						if (!areaBlockEntity.playerList2.contains(uuid)) {
 							if (!areaBlockEntity.leaveMessage.isEmpty()) {
 								if (areaBlockEntity.messageMode == MessageMode.ANNOUNCEMENT) {
-									((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.leaveMessage));
+//									((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.leaveMessage));
 								} else {
 									playerEntity.sendMessage(Text.translatable(areaBlockEntity.leaveMessage), areaBlockEntity.messageMode == MessageMode.OVERLAY);
 								}
@@ -465,7 +465,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 					}
 					if (!areaBlockEntity.joinMessage.isEmpty()) {
 						if (areaBlockEntity.messageMode == MessageMode.ANNOUNCEMENT) {
-							((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.joinMessage));
+//							((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.joinMessage));
 						} else {
 							playerEntity.sendMessage(Text.translatable(areaBlockEntity.joinMessage), areaBlockEntity.messageMode == MessageMode.OVERLAY);
 						}
@@ -520,7 +520,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			List<PlayerEntity> list = world.getNonSpectatingEntities(PlayerEntity.class, this.area);
 			for (PlayerEntity playerEntity : list) {
 				if (this.messageMode == MessageMode.ANNOUNCEMENT) {
-					((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(message));
+//					((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(message));
 				} else {
 					playerEntity.sendMessage(Text.translatable(message), this.messageMode == MessageMode.OVERLAY);
 				}

@@ -4,7 +4,6 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDispenserBlockScreen;
-import com.github.theredbrain.scriptblocks.registry.ClientPacketRegistry;
 import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
@@ -39,9 +38,6 @@ public class ScriptBlocksClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-
-		// Packets
-		ClientPacketRegistry.init();
 
 		// Registry
 		registerEntityRenderer();

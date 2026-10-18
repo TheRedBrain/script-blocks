@@ -29,11 +29,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity implements Du
 		super(world, pos, yaw, gameProfile);
 	}
 
-	@Override
-	public void scriptblocks$sendAnnouncement(Text announcement) {
-		ServerPlayNetworking.send((ServerPlayerEntity) (Object) this, new SendAnnouncementPacket(announcement));
-	}
-
 	@WrapMethod(method = "findRespawnPosition(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;FZZ)Ljava/util/Optional;")
 	private static Optional<ServerPlayerEntity.RespawnPos> scriptblocks$wrap_findRespawnPosition(ServerWorld world, BlockPos pos, float spawnAngle, boolean spawnForced, boolean alive, Operation<Optional<ServerPlayerEntity.RespawnPos>> original) {
 

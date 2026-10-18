@@ -62,8 +62,6 @@ public interface DuckPlayerEntityMixin {
 
 	void scriptblocks$setCurrentPVPControllerBlockPosition(Optional<BlockPos> currentPVPControllerBlockPosition);
 
-	void scriptblocks$sendAnnouncement(Text announcement);
-
 	default void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
 	}
 
