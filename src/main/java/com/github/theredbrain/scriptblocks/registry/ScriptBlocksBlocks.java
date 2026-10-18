@@ -59,7 +59,9 @@ import com.github.theredbrain.scriptblocks.block.UseRelayLecternBlock;
 import com.github.theredbrain.scriptblocks.block.UseRelayTrapdoorBlock;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.block.AbstractCandleBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.entity.Sherds;
@@ -71,13 +73,19 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.state.property.Properties;
+
+import java.util.function.ToIntFunction;
 
 public class ScriptBlocksBlocks {
+	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_REGULAR_CANDLES = state -> state.get(AbstractCandleBlock.LIT) ? 3 * (Integer)state.get(Properties.CANDLES) : 0;
+	public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE_SOUL_CANDLES = state -> state.get(AbstractCandleBlock.LIT) ? 2 * (Integer)state.get(Properties.CANDLES) : 0;
 
 	//region Content Blocks
 	public static final Block AESTHETIC_DECORATED_POT = registerAestheticDecoratedPotBlock("aesthetic_decorated_pot", new AestheticDecoratedPotBlock(Block.Settings.create().mapColor(MapColor.TERRACOTTA_RED).strength(10.0F, 3600000.0f).sounds(BlockSoundGroup.DECORATED_POT).pistonBehavior(PistonBehavior.DESTROY).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
@@ -151,23 +159,41 @@ public class ScriptBlocksBlocks {
 	public static final Block INTERACTIVE_TRIGGER_WEATHERED_COPPER_TRAPDOOR = registerBlock("interactive_trigger_weathered_copper_trapdoor", new InteractiveTriggerTrapdoorBlock(Block.Settings.create().mapColor(MapColor.DARK_AQUA).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 	public static final Block INTERACTIVE_TRIGGER_OXIDIZED_COPPER_TRAPDOOR = registerBlock("interactive_trigger_oxidized_copper_trapdoor", new InteractiveTriggerTrapdoorBlock(Block.Settings.create().mapColor(MapColor.TEAL).strength(10.0F, 3600000.0f).nonOpaque()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
-	public static final Block INTERACTIVE_TRIGGER_CANDLE = registerBlock("interactive_trigger_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.PALE_YELLOW).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_WHITE_CANDLE = registerBlock("interactive_trigger_white_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.WHITE_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_ORANGE_CANDLE = registerBlock("interactive_trigger_orange_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.ORANGE).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_MAGENTA_CANDLE = registerBlock("interactive_trigger_magenta_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.MAGENTA).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_LIGHT_BLUE_CANDLE = registerBlock("interactive_trigger_light_blue_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.LIGHT_BLUE).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_YELLOW_CANDLE = registerBlock("interactive_trigger_yellow_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.YELLOW).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_LIME_CANDLE = registerBlock("interactive_trigger_lime_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.LIME).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_PINK_CANDLE = registerBlock("interactive_trigger_pink_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.PINK).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_GRAY_CANDLE = registerBlock("interactive_trigger_gray_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_LIGHT_GRAY_CANDLE = registerBlock("interactive_trigger_light_gray_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_CYAN_CANDLE = registerBlock("interactive_trigger_cyan_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.CYAN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_PURPLE_CANDLE = registerBlock("interactive_trigger_purple_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.PURPLE).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_BLUE_CANDLE = registerBlock("interactive_trigger_blue_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.BLUE).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_BROWN_CANDLE = registerBlock("interactive_trigger_brown_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.BROWN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_GREEN_CANDLE = registerBlock("interactive_trigger_green_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.GREEN).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_RED_CANDLE = registerBlock("interactive_trigger_red_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.RED).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
-	public static final Block INTERACTIVE_TRIGGER_BLACK_CANDLE = registerBlock("interactive_trigger_black_candle", new InteractiveTriggerCandleBlock(Block.Settings.create().mapColor(MapColor.BLACK).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(InteractiveTriggerCandleBlock.STATE_TO_LUMINANCE)), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_CANDLE = registerBlock("interactive_trigger_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.PALE_YELLOW, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_WHITE_CANDLE = registerBlock("interactive_trigger_white_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.WHITE_GRAY, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_ORANGE_CANDLE = registerBlock("interactive_trigger_orange_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.ORANGE, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_MAGENTA_CANDLE = registerBlock("interactive_trigger_magenta_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.MAGENTA, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_LIGHT_BLUE_CANDLE = registerBlock("interactive_trigger_light_blue_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.LIGHT_BLUE, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_YELLOW_CANDLE = registerBlock("interactive_trigger_yellow_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.YELLOW, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_LIME_CANDLE = registerBlock("interactive_trigger_lime_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.LIME, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_PINK_CANDLE = registerBlock("interactive_trigger_pink_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.PINK, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_GRAY_CANDLE = registerBlock("interactive_trigger_gray_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.GRAY, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_LIGHT_GRAY_CANDLE = registerBlock("interactive_trigger_light_gray_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.LIGHT_GRAY, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_CYAN_CANDLE = registerBlock("interactive_trigger_cyan_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.CYAN, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_PURPLE_CANDLE = registerBlock("interactive_trigger_purple_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.PURPLE, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_BLUE_CANDLE = registerBlock("interactive_trigger_blue_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.BLUE, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_BROWN_CANDLE = registerBlock("interactive_trigger_brown_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.BROWN, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_GREEN_CANDLE = registerBlock("interactive_trigger_green_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.GREEN, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_RED_CANDLE = registerBlock("interactive_trigger_red_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.RED, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_BLACK_CANDLE = registerBlock("interactive_trigger_black_candle", interactiveTriggerCandle(ParticleTypes.FLAME, MapColor.BLACK, STATE_TO_LUMINANCE_REGULAR_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+
+	public static final Block INTERACTIVE_TRIGGER_SOUL_CANDLE = registerBlock("interactive_trigger_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.PALE_YELLOW, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_WHITE_SOUL_CANDLE = registerBlock("interactive_trigger_white_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.WHITE_GRAY, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_ORANGE_SOUL_CANDLE = registerBlock("interactive_trigger_orange_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.ORANGE, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_MAGENTA_SOUL_CANDLE = registerBlock("interactive_trigger_magenta_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.MAGENTA, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_LIGHT_BLUE_SOUL_CANDLE = registerBlock("interactive_trigger_light_blue_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.LIGHT_BLUE, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_YELLOW_SOUL_CANDLE = registerBlock("interactive_trigger_yellow_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.YELLOW, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_LIME_SOUL_CANDLE = registerBlock("interactive_trigger_lime_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.LIME, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_PINK_SOUL_CANDLE = registerBlock("interactive_trigger_pink_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.PINK, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_GRAY_SOUL_CANDLE = registerBlock("interactive_trigger_gray_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.GRAY, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_LIGHT_GRAY_SOUL_CANDLE = registerBlock("interactive_trigger_light_gray_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.LIGHT_GRAY, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_CYAN_SOUL_CANDLE = registerBlock("interactive_trigger_cyan_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.CYAN, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_PURPLE_SOUL_CANDLE = registerBlock("interactive_trigger_purple_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.PURPLE, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_BLUE_SOUL_CANDLE = registerBlock("interactive_trigger_blue_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.BLUE, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_BROWN_SOUL_CANDLE = registerBlock("interactive_trigger_brown_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.BROWN, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_GREEN_SOUL_CANDLE = registerBlock("interactive_trigger_green_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.GREEN, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_RED_SOUL_CANDLE = registerBlock("interactive_trigger_red_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.RED, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
+	public static final Block INTERACTIVE_TRIGGER_BLACK_SOUL_CANDLE = registerBlock("interactive_trigger_black_soul_candle", interactiveTriggerCandle(ParticleTypes.SOUL_FIRE_FLAME, MapColor.BLACK, STATE_TO_LUMINANCE_SOUL_CANDLES), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
 	public static final Block USE_RELAY_ANVIL = registerBlock("use_relay_anvil", new UseRelayAnvilBlock(Block.Settings.create().mapColor(MapColor.IRON_GRAY).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing()), ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS);
 
@@ -267,6 +293,10 @@ public class ScriptBlocksBlocks {
 	public static final Block UUID_LIST_RELAY_BLOCK = registerBlock("uuid_list_relay_block", new UUIDListRelayBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	public static final Block UUID_LIST_SAVING_BLOCK = registerBlock("uuid_list_saving_block", new UUIDListSavingBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), ItemGroupRegistry.SCRIPT_BLOCKS);
 	//endregion Script Blocks
+
+	private static InteractiveTriggerCandleBlock interactiveTriggerCandle(SimpleParticleType flameParticle, MapColor mapColor, ToIntFunction<BlockState> luminance) {
+		return new InteractiveTriggerCandleBlock(flameParticle, Block.Settings.create().mapColor(mapColor).requiresTool().strength(-1.0f, 3600000.0f).nonOpaque().dropsNothing().luminance(luminance));
+	}
 
 	private static Block registerAestheticDecoratedPotBlock(String name, Block block, RegistryKey<ItemGroup> itemGroup) {
 		Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), new BlockItem(block, new Item.Settings().component(DataComponentTypes.POT_DECORATIONS, Sherds.DEFAULT)));

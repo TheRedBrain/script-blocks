@@ -31,6 +31,7 @@ These blocks have been polished:
 - added Triggering Respawn Anchor Block, sets the respawn position of all players in a received UUID List. When a player respawns, another block is triggered.
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
+- added Interactive Trigger Soul Candle blocks, in 17 variants. These are functionally identical to the existing Interactive Trigger Candle blocks, but display soul flame particles and have a lower luminance.
 
 ### UUID List Handlers
 
