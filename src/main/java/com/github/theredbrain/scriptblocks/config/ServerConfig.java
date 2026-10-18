@@ -44,6 +44,8 @@ public class ServerConfig extends Config {
 	@Comment("Enables 'Player Detector Block' to detect creative mode players.")
 	public boolean enable_creative_player_detection = false;
 
+	public long player_detector_block_tick_interval = 20L;
+
 	public long two_areas_player_detector_block_tick_interval = 20L;
 
 	public boolean enable_mimic_block_debug_mode = false;

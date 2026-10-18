@@ -29,6 +29,7 @@ These blocks have been polished:
 - added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
 - added UUID List Messaging Block, sends a configurable message to all players in a received UUID List. The message can be displayed in chat, as overlay or as title.
 - added Triggering Respawn Anchor Block, sets the respawn position of all players in a received UUID List. When a player respawns, another block is triggered.
+- added server config option for the tick interval of the Player Detector Block
 
 ### UUID List Handlers
 

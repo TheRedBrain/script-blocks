@@ -371,7 +371,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, PlayerDetectorBlockEntity playerDetectorBlockEntity) {
-		if (!world.isClient() && playerDetectorBlockEntity.enableTicking() && world.getTime() % 20L == 0L) {
+		if (!world.isClient() && playerDetectorBlockEntity.enableTicking() && world.getTime() % Math.max(1L, ScriptBlocksConfigs.SERVER_CONFIG.player_detector_block_tick_interval) == 0L) {
 			if (playerDetectorBlockEntity.calculateAreaBox || playerDetectorBlockEntity.area == null) {
 				BlockPos areaPositionOffset = playerDetectorBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = playerDetectorBlockEntity.areaDimensions;
@@ -644,6 +644,7 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 
 	@Override
 	public void reset() {
+		// TODO ?
 	}
 
 	@Override
