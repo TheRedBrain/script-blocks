@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.render.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocksClient;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

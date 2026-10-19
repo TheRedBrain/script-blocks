@@ -5,7 +5,6 @@
   "client": [
     "network.ClientPlayerEntityMixin",
     "network.ClientPlayerInteractionManagerMixin",
-    "network.message.MessageHandlerMixin",
     "render.GameRendererMixin",
     "render.item.BuiltinModelItemRendererMixin"
   ],

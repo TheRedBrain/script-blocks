@@ -150,7 +150,7 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
-		
+
 		// --- data driven override ---
 
 		this.dataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 100, 20, Text.empty());
@@ -194,7 +194,7 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 		}));
 
 		// --- misc ---
-		
+
 		this.influencingAttributeIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
 		this.influencingAttributeIdentifierField.setMaxLength(128);
 		this.influencingAttributeIdentifierField.setText(this.triggeredRNGBlock.getInfluencingAttributeIdentifierString());
@@ -282,7 +282,7 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 
 	@Override
 	protected void updateWidgets() {
-		
+
 		this.dataProvidingBlockPositionOffsetXField.setVisible(false);
 		this.dataProvidingBlockPositionOffsetYField.setVisible(false);
 		this.dataProvidingBlockPositionOffsetZField.setVisible(false);
@@ -500,7 +500,7 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 			this.overrideTriggeredBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
 			this.overrideTriggeredBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
 
-		} else if (this.screenPage == ScreenPage.MISC){
+		} else if (this.screenPage == ScreenPage.MISC) {
 
 			context.drawTextWithShadow(this.textRenderer, INFLUENCING_ATTRIBUTE_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.influencingAttributeIdentifierField.render(context, mouseX, mouseY, delta);
@@ -516,7 +516,7 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 			this.fallbackTriggeredBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
 			this.fallbackTriggeredBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
 
-		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCKS){
+		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCKS) {
 
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.triggeredBlocks.size()); i++) {
 				MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock = this.triggeredBlocks.get(i);

@@ -4,8 +4,6 @@ import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultClientData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.entity.VaultBlockEntity;
-import net.minecraft.block.vault.VaultClientData;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;

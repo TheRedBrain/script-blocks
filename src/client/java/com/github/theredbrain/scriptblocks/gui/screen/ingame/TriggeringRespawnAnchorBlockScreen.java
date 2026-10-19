@@ -16,8 +16,6 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
-
 @Environment(value = EnvType.CLIENT)
 public class TriggeringRespawnAnchorBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final Text ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggering_respawn_anchor_block.spawn_position_offset_label");

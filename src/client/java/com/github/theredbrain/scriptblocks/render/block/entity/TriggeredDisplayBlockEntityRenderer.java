@@ -30,6 +30,7 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 	private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 	protected float shadowRadius;
 	protected float shadowOpacity = 1.0F;
+
 	public TriggeredDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
 		this.textRenderer = ctx.getTextRenderer();
 		this.blockEntityRenderDispatcher = ctx.getRenderDispatcher();
@@ -108,11 +109,11 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 		boolean bl2 = (b & TriggeredDisplayBlockEntity.DEFAULT_BACKGROUND_FLAG) != 0;
 		boolean bl3 = (b & TriggeredDisplayBlockEntity.SHADOW_FLAG) != 0;
 		TriggeredDisplayBlockEntity.TextAlignment textAlignment = TriggeredDisplayBlockEntity.getAlignment(b);
-		byte c = (byte)data.textOpacity().lerp(lerpProgress);
+		byte c = (byte) data.textOpacity().lerp(lerpProgress);
 		int j;
 		if (bl2) {
 			float g = MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F);
-			j = (int)(g * 255.0F) << 24;
+			j = (int) (g * 255.0F) << 24;
 		} else {
 			j = data.backgroundColor().lerp(lerpProgress);
 		}
@@ -125,20 +126,20 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 		int k = 9 + 1;
 		int l = textLines.width();
 		int m = textLines.lines().size() * k;
-		matrix4f.translate(1.0F - (float)l / 2.0F, (float)(-m), 0.0F);
+		matrix4f.translate(1.0F - (float) l / 2.0F, (float) (-m), 0.0F);
 		if (j != 0) {
 			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(bl ? RenderLayer.getTextBackgroundSeeThrough() : RenderLayer.getTextBackground());
 			vertexConsumer.vertex(matrix4f, -1.0F, -1.0F, 0.0F).color(j).light(brightness);
-			vertexConsumer.vertex(matrix4f, -1.0F, (float)m, 0.0F).color(j).light(brightness);
-			vertexConsumer.vertex(matrix4f, (float)l, (float)m, 0.0F).color(j).light(brightness);
-			vertexConsumer.vertex(matrix4f, (float)l, -1.0F, 0.0F).color(j).light(brightness);
+			vertexConsumer.vertex(matrix4f, -1.0F, (float) m, 0.0F).color(j).light(brightness);
+			vertexConsumer.vertex(matrix4f, (float) l, (float) m, 0.0F).color(j).light(brightness);
+			vertexConsumer.vertex(matrix4f, (float) l, -1.0F, 0.0F).color(j).light(brightness);
 		}
 
 		for (TriggeredDisplayBlockEntity.TextLine textLine : textLines.lines()) {
 			float h = switch (textAlignment) {
 				case LEFT -> 0.0F;
-				case RIGHT -> (float)(l - textLine.width());
-				case CENTER -> (float)l / 2.0F - (float)textLine.width() / 2.0F;
+				case RIGHT -> (float) (l - textLine.width());
+				case CENTER -> (float) l / 2.0F - (float) textLine.width() / 2.0F;
 				default -> throw new MatchException(null, null);
 			};
 			this.textRenderer
@@ -154,7 +155,7 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 							0,
 							brightness
 					);
-			g += (float)k;
+			g += (float) k;
 		}
 	}
 
@@ -176,10 +177,14 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 		Camera camera = this.blockEntityRenderDispatcher.camera;
 
 		return switch (renderState.billboardConstraints()) {
-			case FIXED -> rotation.rotationYXZ((float) (-Math.PI / 180.0) * lerpYaw(entity, yaw), (float) (Math.PI / 180.0) * lerpPitch(entity, yaw), 0.0F);
-			case HORIZONTAL -> rotation.rotationYXZ((float) (-Math.PI / 180.0) * lerpYaw(entity, yaw), (float) (Math.PI / 180.0) * getNegatedPitch(camera), 0.0F);
-			case VERTICAL -> rotation.rotationYXZ((float) (-Math.PI / 180.0) * getBackwardsYaw(camera), (float) (Math.PI / 180.0) * lerpPitch(entity, yaw), 0.0F);
-			case CENTER -> rotation.rotationYXZ((float) (-Math.PI / 180.0) * getBackwardsYaw(camera), (float) (Math.PI / 180.0) * getNegatedPitch(camera), 0.0F);
+			case FIXED ->
+					rotation.rotationYXZ((float) (-Math.PI / 180.0) * lerpYaw(entity, yaw), (float) (Math.PI / 180.0) * lerpPitch(entity, yaw), 0.0F);
+			case HORIZONTAL ->
+					rotation.rotationYXZ((float) (-Math.PI / 180.0) * lerpYaw(entity, yaw), (float) (Math.PI / 180.0) * getNegatedPitch(camera), 0.0F);
+			case VERTICAL ->
+					rotation.rotationYXZ((float) (-Math.PI / 180.0) * getBackwardsYaw(camera), (float) (Math.PI / 180.0) * lerpPitch(entity, yaw), 0.0F);
+			case CENTER ->
+					rotation.rotationYXZ((float) (-Math.PI / 180.0) * getBackwardsYaw(camera), (float) (Math.PI / 180.0) * getNegatedPitch(camera), 0.0F);
 			default -> throw new MatchException(null, null);
 		};
 	}
