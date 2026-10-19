@@ -9,9 +9,11 @@ import net.minecraft.util.math.Vec3i;
 
 public record UpdateTriggeredDamageDealingBlockPacket(
 		BlockPos triggeredDamageDealingBlockPosition,
+		String selectionMode,
 		boolean showArea,
 		Vec3i areaDimensions,
 		BlockPos areaPositionOffset,
+		BlockPos uuidListHandlerPositionOffset,
 		String exceptionTagIdentifierString,
 		String damageTypeIdentifierString,
 		float damageAmount
@@ -22,12 +24,14 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 	public UpdateTriggeredDamageDealingBlockPacket(RegistryByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
+				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
 						registryByteBuf.readInt(),
 						registryByteBuf.readInt(),
 						registryByteBuf.readInt()
 				),
+				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
@@ -37,12 +41,13 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredDamageDealingBlockPosition);
-
+		registryByteBuf.writeString(this.selectionMode);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeInt(this.areaDimensions.getX());
 		registryByteBuf.writeInt(this.areaDimensions.getY());
 		registryByteBuf.writeInt(this.areaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.areaPositionOffset);
+		registryByteBuf.writeBlockPos(this.uuidListHandlerPositionOffset);
 		registryByteBuf.writeString(this.exceptionTagIdentifierString);
 		registryByteBuf.writeString(this.damageTypeIdentifierString);
 		registryByteBuf.writeFloat(this.damageAmount);

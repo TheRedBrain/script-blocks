@@ -184,13 +184,17 @@
 
 
 
-	"gui.triggered_damage_dealing_block.hide_area_label": "Hide Area",
-	"gui.triggered_damage_dealing_block.show_area_label": "Show Area",
+	"gui.triggered_damage_dealing_block.show_area_true_label": "Show Area: True",
+	"gui.triggered_damage_dealing_block.show_area_false_label": "Show Area: False",
 	"gui.triggered_damage_dealing_block.area_dimensions_label": "Area Dimensions",
 	"gui.triggered_damage_dealing_block.area_position_offset_label": "Area Position Offset",
 	"gui.triggered_damage_dealing_block.exception_tag_identifier_label": "Exception Entity Tag",
 	"gui.triggered_damage_dealing_block.damage_type_identifier_label": "Damage Type Identifier",
-	"gui.triggered_damage_dealing_block.damage_amount_label": "Damage Amount",
+	"gui.triggered_damage_dealing_block.damage_amount_label": "Amount",
+	"gui.triggered_damage_dealing_block.cycle_selection_mode_button.tooltip": "When triggered, damages either all players in the provided UUID list or all entities in the defined area.",
+
+	"gui.triggered_damage_dealing_block.selection_mode.area": "Selection: Area",
+	"gui.triggered_damage_dealing_block.selection_mode.uuid_list": "Selection: List",
 
 
 	"gui.use_relay_block.relay_block_position_offset": "Use Relay Block Position Offset",

@@ -83,6 +83,12 @@ The Teleporter Block has become increasingly complex. This rework extracts some 
   - direct block interactions now check for the "dimension owner only" setting
   - the creative mode screen now shows the "Access Position Offset" and the corresponding button only when the teleportation mode is set to "Locations" or "Location". This is done to make clear that other modes don't set the access position.
 
+### Triggered Damage Dealing Block Rework
+
+- is now a UUID List Handler
+  - when provided a list, the corresponding players are getting damaged
+- when getting triggered, damages either all entities in the configured area or all players in the provided UUID list, depending on a new block setting
+
 ## Fixes
 
 - fixed JigsawPlacerBlock data saving

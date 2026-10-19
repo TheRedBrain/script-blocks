@@ -25,9 +25,13 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 
 		BlockPos triggeredDamageDealingBlockPosition = payload.triggeredDamageDealingBlockPosition();
 
+		TriggeredDamageDealingBlockEntity.SelectionMode selectionMode = TriggeredDamageDealingBlockEntity.SelectionMode.byName(payload.selectionMode()).orElse(TriggeredDamageDealingBlockEntity.SelectionMode.AREA);
+
 		boolean showArea = payload.showArea();
 		Vec3i areaDimensions = payload.areaDimensions();
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
+
+		BlockPos uuidListHandlerPositionOffset = payload.uuidListHandlerPositionOffset();
 
 		String exceptionTagIdentifierString = payload.exceptionTagIdentifierString();
 		String damageTypeIdentifierString = payload.damageTypeIdentifierString();
@@ -39,9 +43,11 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 		BlockState blockState = world.getBlockState(triggeredDamageDealingBlockPosition);
 
 		if (blockEntity instanceof TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
+			triggeredDamageDealingBlockEntity.setSelectionMode(selectionMode);
 			triggeredDamageDealingBlockEntity.setShowArea(showArea);
 			triggeredDamageDealingBlockEntity.setAreaDimensions(areaDimensions);
 			triggeredDamageDealingBlockEntity.setAreaPositionOffset(areaPositionOffset);
+			triggeredDamageDealingBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerPositionOffset);
 			triggeredDamageDealingBlockEntity.setExceptionTagIdentifierString(exceptionTagIdentifierString);
 			triggeredDamageDealingBlockEntity.setDamageTypeIdentifierString(damageTypeIdentifierString);
 			triggeredDamageDealingBlockEntity.setDamageAmount(damageAmount);
