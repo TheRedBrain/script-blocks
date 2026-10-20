@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.data.LocationCooldowns;
 import com.github.theredbrain.scriptblocks.data.OptionalBlockPosition;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataAttachments;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
@@ -53,30 +54,36 @@ public class DataAttachmentHelper {
 		playerEntity.setAttached(ScriptBlocksDataAttachments.CURRENT_PVP_CONTROLLER_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
 	}
 
-	public static void playerEntersLocation(PlayerEntity player, String locationIdentifier) {
+	public static void playerEntersLocation(ServerPlayerEntity player, String locationIdentifier) {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
 		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
-		cooldowns.put(locationIdentifier, (long) -1);
+		cooldowns.put(locationIdentifier, -1L);
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
 
-	public static void playerDies(PlayerEntity player, long currentTime) {
+	public static void playerDies(ServerPlayerEntity player) {
+		if (player.getServer() == null) {
+			return;
+		}
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
 		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
-		cooldowns.replaceAll((key, value) -> value == (long) -1 ? currentTime : value);
+		cooldowns.replaceAll((key, value) -> value == -1L ? player.getServer().getOverworld().getTime() : value);
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
 
-	public static void playerLeavesLocation(PlayerEntity player, String locationIdentifier, long currentTime) {
+	public static void playerLeavesLocation(ServerPlayerEntity player, String locationIdentifier) {
+		if (player.getServer() == null) {
+			return;
+		}
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
 		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
-		cooldowns.put(locationIdentifier, currentTime);
+		cooldowns.put(locationIdentifier, player.getServer().getOverworld().getTime());
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
 
-	public static long getCurrentLocationCooldown(PlayerEntity player, String locationIdentifier) {
+	public static long getCurrentLocationCooldown(ServerPlayerEntity player, String locationIdentifier) {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
-		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, (long) 0);
+		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, 0L);
 	}
 
 	@Nullable

@@ -46,6 +46,7 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 ## Changes
 
 - changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
+- fields in all custom data files were changed from "camelCase" to "snake_case".
 
 ### Boss Controller Block Rework
 

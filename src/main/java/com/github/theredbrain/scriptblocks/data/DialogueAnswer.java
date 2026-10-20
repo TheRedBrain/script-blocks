@@ -13,8 +13,8 @@ public record DialogueAnswer(
 ) {
 
 	public static final Codec<DialogueAnswer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.STRING.optionalFieldOf("answerText", "").forGetter(x -> x.answerText),
-			Codec.STRING.listOf().optionalFieldOf("responseDialogues", null).forGetter(x -> x.responseDialogues),
+			Codec.STRING.optionalFieldOf("answer_text", "").forGetter(x -> x.answerText),
+			Codec.STRING.listOf().optionalFieldOf("response_dialogues", null).forGetter(x -> x.responseDialogues),
 			Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 			Results.CODEC.fieldOf("results").forGetter(x -> x.results)
 	).apply(instance, DialogueAnswer::new));
@@ -42,13 +42,13 @@ public record DialogueAnswer(
 	) {
 
 		public static final Codec<Availability> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
-				Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
-				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("unlockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
-				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("lockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
-				Codec.BOOL.optionalFieldOf("showLockedAnswer", true).forGetter(x -> x.showLockedAnswer),
-				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("itemCosts", List.of()).forGetter(x -> x.itemCosts),
-				Codec.BOOL.optionalFieldOf("showUnaffordableAnswer", true).forGetter(x -> x.showUnaffordableAnswer)
+				Codec.STRING.optionalFieldOf("unlock_advancement", null).forGetter(x -> x.unlockAdvancement),
+				Codec.STRING.optionalFieldOf("lock_advancement", null).forGetter(x -> x.lockAdvancement),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("unlock_data_check", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("lock_data_check", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
+				Codec.BOOL.optionalFieldOf("show_locked_answer", true).forGetter(x -> x.showLockedAnswer),
+				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("item_costs", List.of()).forGetter(x -> x.itemCosts),
+				Codec.BOOL.optionalFieldOf("show_unaffordable_answer", true).forGetter(x -> x.showUnaffordableAnswer)
 		).apply(instance, Availability::new));
 
 		public Availability(
@@ -80,12 +80,12 @@ public record DialogueAnswer(
 	) {
 
 		public static final Codec<Results> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.STRING.optionalFieldOf("grantedAdvancement", null).forGetter(x -> x.grantedAdvancement),
-				Codec.STRING.optionalFieldOf("criterionName", null).forGetter(x -> x.criterionName),
-				Codec.STRING.optionalFieldOf("lootTable", null).forGetter(x -> x.lootTable),
-				Codec.STRING.optionalFieldOf("usedBlock", "").forGetter(x -> x.usedBlock),
-				Codec.STRING.optionalFieldOf("triggeredBlock", "").forGetter(x -> x.triggeredBlock),
-				Codec.STRING.optionalFieldOf("overlayMessage", "").forGetter(x -> x.overlayMessage)
+				Codec.STRING.optionalFieldOf("granted_advancement", null).forGetter(x -> x.grantedAdvancement),
+				Codec.STRING.optionalFieldOf("criterion_name", null).forGetter(x -> x.criterionName),
+				Codec.STRING.optionalFieldOf("loot_table", null).forGetter(x -> x.lootTable),
+				Codec.STRING.optionalFieldOf("used_block", "").forGetter(x -> x.usedBlock),
+				Codec.STRING.optionalFieldOf("triggered_block", "").forGetter(x -> x.triggeredBlock),
+				Codec.STRING.optionalFieldOf("overlay_message", "").forGetter(x -> x.overlayMessage)
 		).apply(instance, Results::new));
 
 		public Results(

@@ -14,9 +14,9 @@ public record Boss(
 ) {
 
 	public static final Codec<Boss> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.STRING.optionalFieldOf("bossEntityTypeId", "").forGetter(x -> x.bossEntityTypeId),
-			Codec.BOOL.optionalFieldOf("discardEntityAtEnd", true).forGetter(x -> x.discardEntityAtEnd),
-			Codec.BOOL.optionalFieldOf("triggersBlockWhenNoPlayersAround", false).forGetter(x -> x.triggersBlockWhenNoPlayersAround),
+			Codec.STRING.optionalFieldOf("boss_entity_type_id", "").forGetter(x -> x.bossEntityTypeId),
+			Codec.BOOL.optionalFieldOf("discard_entity_at_end", true).forGetter(x -> x.discardEntityAtEnd),
+			Codec.BOOL.optionalFieldOf("triggers_block_when_no_players_around", false).forGetter(x -> x.triggersBlockWhenNoPlayersAround),
 			Phase.CODEC.listOf().optionalFieldOf("phases", List.of()).forGetter(x -> x.phases)
 	).apply(instance, Boss::new));
 
@@ -44,14 +44,14 @@ public record Boss(
 	) {
 
 		public static final Codec<Phase> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.INT.optionalFieldOf("bossHealthThreshold", 0).forGetter(x -> x.bossHealthThreshold),
-				Codec.INT.optionalFieldOf("globalTimerThreshold", 0).forGetter(x -> x.globalTimerThreshold),
-				Codec.INT.optionalFieldOf("phaseTimerThreshold", 0).forGetter(x -> x.phaseTimerThreshold),
-				Codec.BOOL.optionalFieldOf("triggerEndsPhase", false).forGetter(x -> x.triggerEndsPhase),
-				Codec.FLOAT.optionalFieldOf("newHealthRatio", 0.0F).forGetter(x -> x.newHealthRatio),
-				AttributeModifierEntry.CODEC.listOf().optionalFieldOf("entityAttributeModifiers", List.of()).forGetter(x -> x.entityAttributeModifiers),
-				Codec.STRING.optionalFieldOf("triggeredBlockAtStart", "").forGetter(x -> x.triggeredBlockAtStart),
-				Codec.STRING.optionalFieldOf("triggeredBlockAtEnd", "").forGetter(x -> x.triggeredBlockAtEnd)
+				Codec.INT.optionalFieldOf("boss_health_threshold", 0).forGetter(x -> x.bossHealthThreshold),
+				Codec.INT.optionalFieldOf("global_timer_threshold", 0).forGetter(x -> x.globalTimerThreshold),
+				Codec.INT.optionalFieldOf("phase_timer_threshold", 0).forGetter(x -> x.phaseTimerThreshold),
+				Codec.BOOL.optionalFieldOf("trigger_ends_phase", false).forGetter(x -> x.triggerEndsPhase),
+				Codec.FLOAT.optionalFieldOf("new_health_ratio", 0.0F).forGetter(x -> x.newHealthRatio),
+				AttributeModifierEntry.CODEC.listOf().optionalFieldOf("entity_attribute_modifiers", List.of()).forGetter(x -> x.entityAttributeModifiers),
+				Codec.STRING.optionalFieldOf("triggered_block_at_start", "").forGetter(x -> x.triggeredBlockAtStart),
+				Codec.STRING.optionalFieldOf("triggered_block_at_end", "").forGetter(x -> x.triggeredBlockAtEnd)
 		).apply(instance, Phase::new));
 
 		public Phase(
@@ -82,7 +82,7 @@ public record Boss(
 		) {
 
 			public static final Codec<Boss.Phase.AttributeModifierEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-					Codec.STRING.fieldOf("attributeIdentifier").forGetter(x -> x.attributeIdentifier),
+					Codec.STRING.fieldOf("attribute_identifier").forGetter(x -> x.attributeIdentifier),
 					Codec.STRING.fieldOf("id").forGetter(x -> x.id),
 					Codec.DOUBLE.fieldOf("amount").forGetter(x -> x.amount),
 					Codec.STRING.fieldOf("operation").forGetter(x -> x.operation)

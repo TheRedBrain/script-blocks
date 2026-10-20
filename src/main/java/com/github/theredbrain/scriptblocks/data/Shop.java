@@ -23,9 +23,9 @@ public record Shop(
 	}
 
 	public static final Codec<Shop> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.STRING.optionalFieldOf("shopTitle", "").forGetter(x -> x.shopTitle),
-			Codec.STRING.optionalFieldOf("offersTitle", "").forGetter(x -> x.offersTitle),
-			Deal.CODEC.listOf().optionalFieldOf("dealList", List.of()).forGetter(x -> x.dealList)
+			Codec.STRING.optionalFieldOf("shop_title", "").forGetter(x -> x.shopTitle),
+			Codec.STRING.optionalFieldOf("offers_title", "").forGetter(x -> x.offersTitle),
+			Deal.CODEC.listOf().optionalFieldOf("deal_list", List.of()).forGetter(x -> x.dealList)
 	).apply(instance, Shop::new));
 
 	public record Deal(
@@ -40,10 +40,10 @@ public record Shop(
 		public static final Codec<Deal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				ItemStack.VALIDATED_CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
 				ItemStack.VALIDATED_CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
-				Codec.INT.optionalFieldOf("maxStockCount", 1).forGetter(x -> x.maxStockCount),
-				Codec.STRING.optionalFieldOf("unlockAdvancement", "").forGetter(x -> x.unlockAdvancement),
-				Codec.STRING.optionalFieldOf("lockAdvancement", "").forGetter(x -> x.lockAdvancement),
-				Codec.BOOL.optionalFieldOf("showLockedDeal", true).forGetter(x -> x.showLockedDeal)
+				Codec.INT.optionalFieldOf("max_stock_count", 1).forGetter(x -> x.maxStockCount),
+				Codec.STRING.optionalFieldOf("unlock_advancement", "").forGetter(x -> x.unlockAdvancement),
+				Codec.STRING.optionalFieldOf("lock_advancement", "").forGetter(x -> x.lockAdvancement),
+				Codec.BOOL.optionalFieldOf("show_locked_deal", true).forGetter(x -> x.showLockedDeal)
 		).apply(instance, Deal::new));
 
 		public Deal(

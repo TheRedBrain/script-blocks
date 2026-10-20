@@ -19,11 +19,11 @@ public record Location(
 ) {
 
 	public static final Codec<Location> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			BlockPos.CODEC.optionalFieldOf("controlBlockPos", BlockPos.ORIGIN).forGetter(x -> x.controlBlockPos),
-			Codec.STRING.optionalFieldOf("structureIdentifier", "").forGetter(x -> x.structureIdentifier),
-			Codec.STRING.optionalFieldOf("displayName", "").forGetter(x -> x.displayName),
-			Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner),
-			Codec.BOOL.optionalFieldOf("isPublic", true).forGetter(x -> x.isPublic),
+			BlockPos.CODEC.optionalFieldOf("control_block_pos", BlockPos.ORIGIN).forGetter(x -> x.controlBlockPos),
+			Codec.STRING.optionalFieldOf("structure_identifier", "").forGetter(x -> x.structureIdentifier),
+			Codec.STRING.optionalFieldOf("display_name", "").forGetter(x -> x.displayName),
+			Codec.BOOL.optionalFieldOf("show_location_owner", true).forGetter(x -> x.showLocationOwner),
+			Codec.BOOL.optionalFieldOf("is_public", true).forGetter(x -> x.isPublic),
 			Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 			Codec.unboundedMap(Codec.STRING, SideEntrance.CODEC).optionalFieldOf("side_entrances", new HashMap<>()).forGetter(x -> x.side_entrances)
 	).apply(instance, Location::new));
@@ -55,8 +55,8 @@ public record Location(
 
 		public static final Codec<SideEntrance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Codec.STRING.optionalFieldOf("name", "").forGetter(x -> x.name),
-				Codec.BOOL.optionalFieldOf("showLocationOwner", true).forGetter(x -> x.showLocationOwner),
-				Codec.BOOL.optionalFieldOf("isEntranceNameShownFirst", true).forGetter(x -> x.isEntranceNameShownFirst),
+				Codec.BOOL.optionalFieldOf("show_location_owner", true).forGetter(x -> x.showLocationOwner),
+				Codec.BOOL.optionalFieldOf("is_entrance_name_shown_first", true).forGetter(x -> x.isEntranceNameShownFirst),
 				Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability)
 		).apply(instance, SideEntrance::new));
 
@@ -80,17 +80,19 @@ public record Location(
 			CommonDataStructures.DataCheck lockDataCheck,
 			boolean showLockedLocation,
 			List<CommonDataStructures.ItemCost> itemCosts,
-			boolean showUnaffordableLocation
+			boolean showUnaffordableLocation,
+			long cooldown
 	) {
 
 		public static final Codec<Location.Availability> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.STRING.optionalFieldOf("unlockAdvancement", null).forGetter(x -> x.unlockAdvancement),
-				Codec.STRING.optionalFieldOf("lockAdvancement", null).forGetter(x -> x.lockAdvancement),
-				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("unlockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
-				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("lockDataCheck", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
-				Codec.BOOL.optionalFieldOf("showLockedLocation", true).forGetter(x -> x.showLockedLocation),
-				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("itemCosts", List.of()).forGetter(x -> x.itemCosts),
-				Codec.BOOL.optionalFieldOf("showUnaffordableLocation", true).forGetter(x -> x.showUnaffordableLocation)
+				Codec.STRING.optionalFieldOf("unlock_advancement", null).forGetter(x -> x.unlockAdvancement),
+				Codec.STRING.optionalFieldOf("lock_advancement", null).forGetter(x -> x.lockAdvancement),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("unlock_data_check", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.unlockDataCheck),
+				CommonDataStructures.DataCheck.CODEC.optionalFieldOf("lock_data_check", CommonDataStructures.DataCheck.DEFAULT).forGetter(x -> x.lockDataCheck),
+				Codec.BOOL.optionalFieldOf("show_locked_location", true).forGetter(x -> x.showLockedLocation),
+				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("item_costs", List.of()).forGetter(x -> x.itemCosts),
+				Codec.BOOL.optionalFieldOf("show_unaffordable_location", true).forGetter(x -> x.showUnaffordableLocation),
+				Codec.LONG.optionalFieldOf("cooldown", 0L).forGetter(x -> x.cooldown)
 		).apply(instance, Location.Availability::new));
 
 		public Availability(
@@ -100,7 +102,8 @@ public record Location(
 				CommonDataStructures.DataCheck lockDataCheck,
 				boolean showLockedLocation,
 				List<CommonDataStructures.ItemCost> itemCosts,
-				boolean showUnaffordableLocation
+				boolean showUnaffordableLocation,
+				long cooldown
 		) {
 			this.unlockAdvancement = unlockAdvancement != null ? unlockAdvancement : "";
 			this.lockAdvancement = lockAdvancement != null ? lockAdvancement : "";
@@ -109,6 +112,7 @@ public record Location(
 			this.showLockedLocation = showLockedLocation;
 			this.itemCosts = itemCosts != null ? itemCosts : List.of();
 			this.showUnaffordableLocation = showUnaffordableLocation;
+			this.cooldown = Math.max(0L, cooldown);
 		}
 	}
 

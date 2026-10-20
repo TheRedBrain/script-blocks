@@ -2,12 +2,17 @@ package com.github.theredbrain.scriptblocks.util;
 
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class LocationUtils {
 	public static BlockPos getControlBlockPosForLocation(Location location) {
@@ -109,6 +114,34 @@ public class LocationUtils {
 			}
 		}
 		return itemCostList;
+	}
+
+	public static long getRemainingCooldownForEntrance(ServerPlayerEntity serverPlayerEntity, String locationIdentifier, String entrance) {
+
+		Location location = null;
+		Optional<RegistryEntry.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(locationIdentifier));
+		if (optionalLocationReference.isPresent()) {
+			location = optionalLocationReference.get().value();
+		}
+		long cooldown = 0L;
+		if (location == null) {
+			return cooldown;
+		}
+		if (serverPlayerEntity.getServer() == null) {
+			return cooldown;
+		}
+		if (entrance.isEmpty()) {
+			cooldown = location.availability().cooldown();
+		}
+		if (location.side_entrances() != null) {
+			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
+			if (sideEntrance != null) {
+				cooldown = sideEntrance.availability().cooldown();
+			}
+		}
+		long currentTime = serverPlayerEntity.getServer().getOverworld().getTime();
+		long currentLocationCooldownStart = DataAttachmentHelper.getCurrentLocationCooldown(serverPlayerEntity, locationIdentifier);
+		return Math.max(0, cooldown - currentTime - currentLocationCooldownStart);
 	}
 
 	public static boolean hasEntrance(Location location, String entrance) {

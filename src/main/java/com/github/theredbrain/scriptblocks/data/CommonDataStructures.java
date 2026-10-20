@@ -14,9 +14,9 @@ public class CommonDataStructures {
 
 		public static final DataCheck DEFAULT = new DataCheck("", "", 0);
 		public static final Codec<DataCheck> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				Codec.STRING.fieldOf("dataIdentifier").forGetter(x -> x.dataIdentifier),
-				Codec.STRING.fieldOf("dataValue").forGetter(x -> x.dataValue),
-				Codec.INT.fieldOf("comparisonMode").forGetter(x -> x.comparisonMode)
+				Codec.STRING.fieldOf("data_identifier").forGetter(x -> x.dataIdentifier),
+				Codec.STRING.fieldOf("data_value").forGetter(x -> x.dataValue),
+				Codec.INT.fieldOf("comparison_mode").forGetter(x -> x.comparisonMode)
 		).apply(instance, DataCheck::new));
 
 		public DataCheck(
@@ -44,8 +44,8 @@ public class CommonDataStructures {
 	) {
 
 		public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ItemStack.VALIDATED_CODEC.fieldOf("itemStack").forGetter(x -> x.itemStack),
-				Codec.BOOL.optionalFieldOf("consumeStack", true).forGetter(x -> x.consumeStack)
+				ItemStack.VALIDATED_CODEC.fieldOf("item_stack").forGetter(x -> x.itemStack),
+				Codec.BOOL.optionalFieldOf("consume_stack", true).forGetter(x -> x.consumeStack)
 		).apply(instance, ItemCost::new));
 
 		public ItemCost(
