@@ -26,22 +26,27 @@ public class ScriptBlocksDataAttachments {
 	static {
 		LOCATION_COOLDOWNS = AttachmentRegistry.create(ScriptBlocks.identifier("location_cooldowns"), builder -> builder
 				.persistent(LocationCooldowns.CODEC)
+				.copyOnDeath()
 				.syncWith(LocationCooldowns.PACKET_CODEC, AttachmentSyncPredicate.all())
 		);
 		CURRENT_HOUSING_BLOCK_POS = AttachmentRegistry.create(ScriptBlocks.identifier("current_housing_block_pos"), builder -> builder
 				.persistent(OptionalBlockPosition.CODEC)
+				.copyOnDeath()
 				.syncWith(OptionalBlockPosition.PACKET_CODEC, AttachmentSyncPredicate.all())
 		);
 		CURRENT_LOCATION_ACCESS_BLOCK_POS = AttachmentRegistry.create(ScriptBlocks.identifier("current_location_access_block_pos"), builder -> builder
 				.persistent(OptionalBlockPosition.CODEC)
+				.copyOnDeath()
 				.syncWith(OptionalBlockPosition.PACKET_CODEC, AttachmentSyncPredicate.all())
 		);
 		CURRENT_LOCATION_ACCESS_DIMENSION = AttachmentRegistry.create(ScriptBlocks.identifier("current_location_access_dimension"), builder -> builder
 				.persistent(Codec.STRING)
+				.copyOnDeath()
 				.syncWith(PacketCodecs.STRING, AttachmentSyncPredicate.all())
 		);
 		CURRENT_PVP_CONTROLLER_BLOCK_POS = AttachmentRegistry.create(ScriptBlocks.identifier("current_pvp_controller_block_pos"), builder -> builder
 				.persistent(OptionalBlockPosition.CODEC)
+				.copyOnDeath()
 				.syncWith(OptionalBlockPosition.PACKET_CODEC, AttachmentSyncPredicate.all())
 		);
 	}

@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,7 +57,7 @@ public class DataAttachmentHelper {
 
 	public static void playerEntersLocation(ServerPlayerEntity player, String locationIdentifier) {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
-		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
+		Map<String, Long> cooldowns = new HashMap<>(locationCooldowns.cooldowns());
 		cooldowns.put(locationIdentifier, -1L);
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
@@ -66,7 +67,7 @@ public class DataAttachmentHelper {
 			return;
 		}
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
-		Map<String, Long> cooldowns = locationCooldowns.cooldowns();
+		Map<String, Long> cooldowns = new HashMap<>(locationCooldowns.cooldowns());
 		cooldowns.replaceAll((key, value) -> value == -1L ? player.getServer().getOverworld().getTime() : value);
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
@@ -81,7 +82,7 @@ public class DataAttachmentHelper {
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
 
-	public static long getCurrentLocationCooldown(ServerPlayerEntity player, String locationIdentifier) {
+	public static long getCurrentLocationCooldown(PlayerEntity player, String locationIdentifier) {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
 		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, 0L);
 	}
