@@ -97,6 +97,21 @@ public class LocationUtils {
 		return itemCostList;
 	}
 
+	public static List<CommonDataStructures.ItemCost> getResetCostForEntrance(Location location, String entrance) {
+
+		List<CommonDataStructures.ItemCost> resetItemCostList = new ArrayList<>();
+		if (entrance.isEmpty()) {
+			resetItemCostList = location.resetItemCosts();
+		}
+		if (location.side_entrances() != null) {
+			Location.SideEntrance sideEntrance = location.side_entrances().get(entrance);
+			if (sideEntrance != null) {
+				resetItemCostList = sideEntrance.resetItemCosts();
+			}
+		}
+		return resetItemCostList;
+	}
+
 	public static long getRemainingCooldownForEntrance(ServerPlayerEntity serverPlayerEntity, String locationIdentifier, String entrance) {
 
 		Location location = null;

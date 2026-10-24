@@ -109,7 +109,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private boolean partyMemberListMouseClicked = false;
 	private boolean visibleLocationsListMouseClicked = false;
 
-	private boolean canLocationBeRegenerated = false;
+	private boolean canLocationBeRegenerated = true;
 	private boolean isCurrentLocationUnlocked;
 	private boolean areCurrentLocationKeysPresent;
 	private boolean isCurrentLocationPublic;
@@ -141,10 +141,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	private void chooseTargetOwner(int index) {
-		this.canLocationBeRegenerated = false;
 		if (index == -1 && this.client != null && this.client.player != null) {
 			this.currentTargetOwner = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
-			this.canLocationBeRegenerated = this.currentTarget.allowRegeneration();
 		} else {
 			this.currentTargetOwner = this.partyMemberList.get(this.partyMemberListScrollPosition + index);
 		}
@@ -227,7 +225,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			if (this.client.player != null) {
 				this.currentPlayer = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
 				this.currentTargetOwner = this.currentPlayer;
-				this.canLocationBeRegenerated = true;
 			}
 		}
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
@@ -264,7 +261,6 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				return;
 			}
 		}
-		this.canLocationBeRegenerated = this.currentTarget.allowRegeneration();
 
 		this.setBackgroundDimensions();
 
@@ -431,26 +427,48 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				inventory.setStack(k, itemStack.copy());
 			}
 			this.areCurrentLocationKeysPresent = true;
-				for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, this.currentTarget.entrance())) {
-					ItemStack currentKeyItemStack = itemCost.itemStack();
-					int keyCount = currentKeyItemStack.getCount();
-					for (int j = 0; j < inventory.size(); j++) {
-						ItemStack itemStack = inventory.getStack(j);
-						if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
-							int stackCount = inventory.getStack(j).getCount();
-							if (stackCount >= keyCount) {
-								inventory.removeStack(j, keyCount);
-								keyCount = 0;
-								break;
-							} else {
-								inventory.setStack(j, ItemStack.EMPTY);
-								keyCount = keyCount - stackCount;
-							}
+			for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, this.currentTarget.entrance())) {
+				ItemStack currentKeyItemStack = itemCost.itemStack();
+				int keyCount = currentKeyItemStack.getCount();
+				for (int j = 0; j < inventory.size(); j++) {
+					ItemStack itemStack = inventory.getStack(j);
+					if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
+						int stackCount = inventory.getStack(j).getCount();
+						if (stackCount >= keyCount) {
+							inventory.removeStack(j, keyCount);
+							keyCount = 0;
+							break;
+						} else {
+							inventory.setStack(j, ItemStack.EMPTY);
+							keyCount = keyCount - stackCount;
 						}
 					}
-					if (keyCount > 0) {
-						this.areCurrentLocationKeysPresent = false;
+				}
+				if (keyCount > 0) {
+					this.areCurrentLocationKeysPresent = false;
+				}
+			}
+			this.canLocationBeRegenerated = true;
+			for (CommonDataStructures.ItemCost regenerationItemCost : LocationUtils.getResetCostForEntrance(location, this.currentTarget.entrance())) {
+				ItemStack currentKeyItemStack = regenerationItemCost.itemStack();
+				int keyCount = currentKeyItemStack.getCount();
+				for (int j = 0; j < inventory.size(); j++) {
+					ItemStack itemStack = inventory.getStack(j);
+					if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
+						int stackCount = inventory.getStack(j).getCount();
+						if (stackCount >= keyCount) {
+							inventory.removeStack(j, keyCount);
+							keyCount = 0;
+							break;
+						} else {
+							inventory.setStack(j, ItemStack.EMPTY);
+							keyCount = keyCount - stackCount;
+						}
 					}
+				}
+				if (keyCount > 0) {
+					this.canLocationBeRegenerated = false;
+				}
 			}
 		}
 	}
@@ -706,6 +724,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			ClientPlayNetworking.send(new SetManualResetLocationControlBlockPacket(
 					currentTargetOwnerName,
 					this.currentTarget.identifier(),
+					this.currentTarget.entrance(),
+					true,
 					true
 			));
 		}

@@ -27,6 +27,7 @@ These blocks have been polished:
 - added location cooldowns
   - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started automatically when the player dies while in a location or manually via the LocationCooldownStarterBlock.
 - added Location Cooldown Starter Block, this block starts the cooldown for all active locations of all players in a provided UUID List
+- added location reset item cost, defined by location (entrance)
 - added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)

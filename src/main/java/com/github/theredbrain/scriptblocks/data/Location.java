@@ -6,6 +6,7 @@ import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.entity.LootContextPredicate;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ public record Location(
 		boolean showLocationOwner,
 		boolean isPublic,
 		boolean allowRegeneration,
+		List<CommonDataStructures.ItemCost> resetItemCosts,
 		Location.Availability availability,
 		Map<String, SideEntrance> side_entrances
 ) {
@@ -29,6 +31,7 @@ public record Location(
 			Codec.BOOL.optionalFieldOf("show_location_owner", true).forGetter(x -> x.showLocationOwner),
 			Codec.BOOL.optionalFieldOf("is_public", true).forGetter(x -> x.isPublic),
 			Codec.BOOL.optionalFieldOf("allow_regeneration", true).forGetter(x -> x.allowRegeneration),
+			CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("reset_item_costs", List.of()).forGetter(x -> x.resetItemCosts),
 			Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability),
 			Codec.unboundedMap(Codec.STRING, SideEntrance.CODEC).optionalFieldOf("side_entrances", new HashMap<>()).forGetter(x -> x.side_entrances)
 	).apply(instance, Location::new));
@@ -40,6 +43,7 @@ public record Location(
 			boolean showLocationOwner,
 			boolean isPublic,
 			boolean allowRegeneration,
+			List<CommonDataStructures.ItemCost> resetItemCosts,
 			Location.Availability availability,
 			Map<String, SideEntrance> side_entrances
 	) {
@@ -50,7 +54,8 @@ public record Location(
 		this.showLocationOwner = showLocationOwner;
 		this.isPublic = isPublic;
 		this.allowRegeneration = allowRegeneration;
-		this.side_entrances = side_entrances != null ? side_entrances : new HashMap<>();
+		this.resetItemCosts = resetItemCosts != null ? new ArrayList<>(resetItemCosts) : List.of();
+		this.side_entrances = side_entrances != null ? new HashMap<>(side_entrances) : new HashMap<>();
 	}
 
 	public record SideEntrance(
@@ -58,6 +63,7 @@ public record Location(
 			boolean showLocationOwner,
 			boolean isEntranceNameShownFirst,
 			boolean allowRegeneration,
+			List<CommonDataStructures.ItemCost> resetItemCosts,
 			Location.Availability availability
 	) {
 
@@ -66,6 +72,7 @@ public record Location(
 				Codec.BOOL.optionalFieldOf("show_location_owner", true).forGetter(x -> x.showLocationOwner),
 				Codec.BOOL.optionalFieldOf("is_entrance_name_shown_first", true).forGetter(x -> x.isEntranceNameShownFirst),
 				Codec.BOOL.optionalFieldOf("allow_regeneration", true).forGetter(x -> x.allowRegeneration),
+				CommonDataStructures.ItemCost.CODEC.listOf().optionalFieldOf("reset_item_costs", List.of()).forGetter(x -> x.resetItemCosts),
 				Location.Availability.CODEC.fieldOf("availability").forGetter(x -> x.availability)
 		).apply(instance, SideEntrance::new));
 
@@ -74,12 +81,14 @@ public record Location(
 				boolean showLocationOwner,
 				boolean isEntranceNameShownFirst,
 				boolean allowRegeneration,
+				List<CommonDataStructures.ItemCost> resetItemCosts,
 				Location.Availability availability
 		) {
 			this.name = name != null ? name : "";
 			this.showLocationOwner = showLocationOwner;
 			this.isEntranceNameShownFirst = isEntranceNameShownFirst;
 			this.allowRegeneration = allowRegeneration;
+			this.resetItemCosts = resetItemCosts != null ? new ArrayList<>(resetItemCosts) : List.of();
 			this.availability = availability;
 		}
 	}
@@ -117,7 +126,7 @@ public record Location(
 			this.unlockDataCheck = unlockDataCheck != null ? unlockDataCheck : CommonDataStructures.DataCheck.DEFAULT;
 			this.lockDataCheck = lockDataCheck != null ? lockDataCheck : CommonDataStructures.DataCheck.DEFAULT;
 			this.showLockedLocation = showLockedLocation;
-			this.itemCosts = itemCosts != null ? itemCosts : List.of();
+			this.itemCosts = itemCosts != null ? new ArrayList<>(itemCosts) : List.of();
 			this.showUnaffordableLocation = showUnaffordableLocation;
 			this.cooldown = Math.max(0L, cooldown);
 		}

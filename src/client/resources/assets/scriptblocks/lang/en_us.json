@@ -960,8 +960,11 @@
 	"hud.message.script_block.no_permission": "You need to be in Creative mode with at least level 2 permissions to do this!",
 
 	"hud.message.location_reset.success": "Location was reset successfully!",
+	"hud.message.location_reset.player_location_not_owned": "Only the owner can reset a location!",
 	"hud.message.location_reset.target_world_not_found": "Location reset failed! Target world not found!",
+	"hud.message.location_reset.reset_cost_not_paid": "Location reset failed! Reset cost not paid!",
 	"hud.message.location_reset.location_not_found": "Location reset failed! Location not found!",
+	"hud.message.location_reset.location_control_block_missing": "Location reset failed! Location Control Block missing!",
 
 	"hud.message.housing_block.owner_uuid_invalid": "Invalid player UUID. This should not happen",
 	"hud.message.housing_block.unclaimed_successful": "House unclaimed successfully",

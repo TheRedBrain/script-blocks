@@ -8,6 +8,8 @@ import net.minecraft.network.packet.CustomPayload;
 public record SetManualResetLocationControlBlockPacket(
 		String targetDimensionOwnerName,
 		String targetLocation,
+		String targetEntrance,
+		boolean checkForResetCost,
 		boolean manualReset
 ) implements CustomPayload {
 	public static final CustomPayload.Id<SetManualResetLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("set_manual_reset_location_control_block"));
@@ -17,6 +19,8 @@ public record SetManualResetLocationControlBlockPacket(
 		this(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean()
 		);
 	}
@@ -24,6 +28,8 @@ public record SetManualResetLocationControlBlockPacket(
 	private void write(RegistryByteBuf registryByteBuf) {
 		registryByteBuf.writeString(this.targetDimensionOwnerName);
 		registryByteBuf.writeString(this.targetLocation);
+		registryByteBuf.writeString(this.targetEntrance);
+		registryByteBuf.writeBoolean(this.checkForResetCost);
 		registryByteBuf.writeBoolean(this.manualReset);
 	}
 
