@@ -15,7 +15,7 @@ public class ServerConfig extends Config {
 		super(ScriptBlocks.identifier("server"));
 	}
 
-	public boolean enable_public_locations_dimension = true;
+	public boolean enable_public_locations_dimension = false;
 	@Comment("""
 			World Spawn is chosen randomly from the following lists.
 			It is recommended to set the gamerule 'spawnRadius' to 0.
