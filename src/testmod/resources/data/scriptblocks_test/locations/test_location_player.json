@@ -1,29 +1,30 @@
 {
-  "controlBlockPos": [
+  "control_block_pos": [
     0,
     -63,
     0
   ],
-  "structureIdentifier": "scriptblocks_test:test_location_player",
-  "displayName": "Test Location Player",
+  "structure_identifier": "scriptblocks_test:test_location_player",
+  "display_name": "Test Location Player",
   "availability": {
-    "unlockAdvancement": "",
-    "lockAdvancement": "",
-    "unlockDataCheck": {
-      "dataIdentifier": "",
-      "dataValue": "",
-      "comparisonMode": 0
+    "unlock_predicate": [],
+    "unlock_data_check": {
+      "data_identifier": "",
+      "data_value": "",
+      "comparison_mode": 0
     },
-    "lockDataCheck": {
-      "dataIdentifier": "",
-      "dataValue": "",
-      "comparisonMode": 0
+    "lock_data_check": {
+      "data_identifier": "",
+      "data_value": "",
+      "comparison_mode": 0
     },
-    "showLockedLocation": true,
-    "itemCosts": [],
-    "showUnaffordableLocation": false
+    "show_locked_location": true,
+    "item_costs": [],
+    "show_unaffordable_location": false,
+    "cooldown": 1800
   },
-  "showLocationOwner": true,
-  "isPublic": false,
+  "show_location_owner": true,
+  "is_public": false,
+  "allow_regeneration": true,
   "side_entrances": {}
 }

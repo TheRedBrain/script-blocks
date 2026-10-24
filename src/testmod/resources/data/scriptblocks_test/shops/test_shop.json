@@ -1,7 +1,7 @@
 {
-  "shopTitle": "Test Shop",
-  "offersTitle": "Test Shop Offers",
-  "dealList": [
+  "shop_title": "Test Shop",
+  "offers_title": "Test Shop Offers",
+  "deal_list": [
     {
       "offer": [
         {
@@ -15,9 +15,9 @@
           "count": 2
         }
       ],
-      "maxStockCount": 1,
-      "unlockAdvancement": "",
-      "lockAdvancement": ""
+      "max_stock_count": 1,
+      "unlock_advancement": "",
+      "lock_advancement": ""
     }
   ]
 }

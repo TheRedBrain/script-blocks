@@ -1,8 +1,8 @@
 {
-    "dialogueTextList": [
+    "dialogue_text_list": [
     ],
-    "dialogueTextsStartingIndex": 0,
-    "answerList": [
+    "dialogue_texts_starting_index": 0,
+    "answer_list": [
         "scriptblocks_test:test_dialogue/answer_0",
         "scriptblocks_test:test_dialogue/answer_1",
         "scriptblocks_test:test_dialogue/answer_2",
@@ -14,8 +14,8 @@
         "scriptblocks_test:test_dialogue/answer_8",
         "scriptblocks_test:test_dialogue/answer_9"
     ],
-    "answersStartingIndex": 0,
-    "unlockAdvancement": "",
-    "lockAdvancement": "",
+    "answers_starting_index": 0,
+    "unlock_advancement": "",
+    "lock_advancement": "",
     "cancellable": true
 }

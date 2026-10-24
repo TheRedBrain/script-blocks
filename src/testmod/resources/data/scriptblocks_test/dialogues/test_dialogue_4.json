@@ -1,18 +1,18 @@
 {
-    "dialogueTextList": [
+    "dialogue_text_list": [
         "dialogues.test_dialogue.line_3",
         "",
         "dialogues.test_dialogue.line_6"
     ],
-    "dialogueTextsStartingIndex": 0,
-    "answerList": [
+    "dialogue_texts_starting_index": 0,
+    "answer_list": [
         "scriptblocks_test:test_dialogue/answer_0",
         "",
         "scriptblocks_test:test_dialogue/answer_2",
         "scriptblocks_test:test_dialogue/answer_3"
     ],
-    "answersStartingIndex": 4,
-    "unlockAdvancement": "",
-    "lockAdvancement": "",
+    "answers_starting_index": 4,
+    "unlock_advancement": "",
+    "lock_advancement": "",
     "cancellable": true
 }
