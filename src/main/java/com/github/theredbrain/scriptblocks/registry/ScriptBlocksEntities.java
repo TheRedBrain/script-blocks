@@ -18,6 +18,7 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEnti
 import com.github.theredbrain.scriptblocks.block.entity.InteractiveTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
+import com.github.theredbrain.scriptblocks.block.entity.LocationCooldownStarterBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
@@ -134,6 +135,9 @@ public class ScriptBlocksEntities {
 	public static final BlockEntityType<LocationControlBlockEntity> LOCATION_CONTROL_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("location_control_block"),
 			BlockEntityType.Builder.create(LocationControlBlockEntity::new, ScriptBlocksBlocks.LOCATION_CONTROL_BLOCK).build());
+	public static final BlockEntityType<LocationCooldownStarterBlockEntity> LOCATION_COOLDOWN_STARTER_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
+			ScriptBlocks.identifier("location_cooldown_starter_block"),
+			BlockEntityType.Builder.create(LocationCooldownStarterBlockEntity::new, ScriptBlocksBlocks.LOCATION_COOLDOWN_STARTER_BLOCK).build());
 	public static final BlockEntityType<HousingBlockEntity> HOUSING_BLOCK_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE,
 			ScriptBlocks.identifier("housing_block"),
 			BlockEntityType.Builder.create(HousingBlockEntity::new, ScriptBlocksBlocks.HOUSING_BLOCK).build());

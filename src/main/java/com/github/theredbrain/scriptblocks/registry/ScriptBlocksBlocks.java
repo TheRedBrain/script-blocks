@@ -23,6 +23,7 @@ import com.github.theredbrain.scriptblocks.block.InteractiveTriggerTrapdoorBlock
 import com.github.theredbrain.scriptblocks.block.InteractiveTriggerWallTorchBlock;
 import com.github.theredbrain.scriptblocks.block.JigsawPlacerBlock;
 import com.github.theredbrain.scriptblocks.block.LocationControlBlock;
+import com.github.theredbrain.scriptblocks.block.LocationCooldownStarterBlock;
 import com.github.theredbrain.scriptblocks.block.LootableVaultBlock;
 import com.github.theredbrain.scriptblocks.block.MimicBlock;
 import com.github.theredbrain.scriptblocks.block.PVPControllerBlock;
@@ -274,6 +275,7 @@ public class ScriptBlocksBlocks {
 	public static final Block INTERACTIVE_LOOT_BLOCK = registerBlock("interactive_loot_block", new InteractiveLootBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), List.of());
 	public static final Block JIGSAW_PLACER_BLOCK = registerBlock("jigsaw_placer_block", new JigsawPlacerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));
 	public static final Block LOCATION_CONTROL_BLOCK = registerBlock("location_control_block", new LocationControlBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));
+	public static final Block LOCATION_COOLDOWN_STARTER_BLOCK = registerBlock("location_cooldown_starter_block", new LocationCooldownStarterBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));
 	public static final Block MIMIC_BLOCK = registerBlock("mimic_block", new MimicBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));
 	public static final Block MIMIC_FALLBACK_BLOCK = Registry.register(Registries.BLOCK, ScriptBlocks.identifier("mimic_fallback_block"), new Block(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()));
 	public static final Block REDSTONE_TRIGGER_BLOCK = registerBlock("redstone_trigger_block", new RedstoneTriggerBlock(Block.Settings.create().mapColor(MapColor.LIGHT_GRAY).requiresTool().strength(-1.0f, 3600000.0f).dropsNothing()), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));

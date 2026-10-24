@@ -33,13 +33,12 @@ public record UpdateTeleporterBlockPacket(
 		String sendDataValueDataIdentifier,
 		BlockPos preTeleportTriggeredBlockPositionOffset,
 		boolean preTeleportTriggeredBlockResets,
-		BlockPos uuidListHandlerPositionOffset,
+		BlockPos onTeleportUUIDListHandlerPositionOffset,
 		BlockPos postTeleportTriggeredBlockPositionOffset,
 		boolean postTeleportTriggeredBlockResets,
 		String teleporterName,
 		String currentTargetIdentifierLabel,
 		String currentTargetOwnerLabel,
-		boolean showRegenerateButton,
 		boolean showCancelButton,
 		boolean canOwnerBeChosen,
 		String teleportButtonLabel,
@@ -78,7 +77,6 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
-				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
@@ -122,14 +120,13 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBlockPos(this.preTeleportTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.preTeleportTriggeredBlockResets);
-		registryByteBuf.writeBlockPos(this.uuidListHandlerPositionOffset);
+		registryByteBuf.writeBlockPos(this.onTeleportUUIDListHandlerPositionOffset);
 		registryByteBuf.writeBlockPos(this.postTeleportTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.postTeleportTriggeredBlockResets);
 
 		registryByteBuf.writeString(this.teleporterName);
 		registryByteBuf.writeString(this.currentTargetIdentifierLabel);
 		registryByteBuf.writeString(this.currentTargetOwnerLabel);
-		registryByteBuf.writeBoolean(this.showRegenerateButton);
 		registryByteBuf.writeBoolean(this.showCancelButton);
 		registryByteBuf.writeBoolean(this.canOwnerBeChosen);
 		registryByteBuf.writeString(this.teleportButtonLabel);

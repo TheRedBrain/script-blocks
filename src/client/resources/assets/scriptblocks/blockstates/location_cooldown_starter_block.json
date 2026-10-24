@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "scriptblocks:block/location_cooldown_starter_block"
+    }
+  }
+}

@@ -24,6 +24,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
@@ -209,8 +210,8 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 				} else if (bl) {
 					((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
 					return ActionResult.success(world.isClient);
-				} else if (!world.isClient) {
-					TeleporterBlockEntity.openNonCreativeScreen(world, player, pos, state, teleporterBlockEntity);
+				} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+					TeleporterBlockEntity.openNonCreativeScreen(world, serverPlayerEntity, pos, state, teleporterBlockEntity);
 				}
 			}
 		}

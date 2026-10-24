@@ -25,7 +25,8 @@ These blocks have been polished:
   - add integer values to data when used like a "Data Relay Block"
   - perform modulo operation on data when used like a "Data Relay Block"
 - added location cooldowns
-  - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started when the player leaves a location or dies while inside the location. 
+  - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started automatically when the player dies while in a location or manually via the LocationCooldownStarterBlock.
+- added Location Cooldown Starter Block, this block starts the cooldown for all active locations of all players in a provided UUID List
 - added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
@@ -47,6 +48,7 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 
 - changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
 - fields in all custom data files were changed from "camelCase" to "snake_case".
+- replaced "(un)lock_advancement" fields with "unlock_predicate" field for locations and location entrances
 
 ### Boss Controller Block Rework
 
@@ -83,6 +85,9 @@ The Teleporter Block has become increasingly complex. This rework extracts some 
   - added support for location cooldowns
   - direct block interactions now check for the "dimension owner only" setting
   - the creative mode screen now shows the "Access Position Offset" and the corresponding button only when the teleportation mode is set to "Locations" or "Location". This is done to make clear that other modes don't set the access position.
+  - removed show_regenerate_button field from Teleporter Block Entity
+  - added allow_regeneration field to locations and location entrances
+  - several improvements to the teleporter screen
 
 ### Triggered Damage Dealing Block Rework
 

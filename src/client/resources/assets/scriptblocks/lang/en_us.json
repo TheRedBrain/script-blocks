@@ -376,6 +376,7 @@
 	"gui.teleporter_block.new_data_id_field.place_holder": "Data ID",
 	"gui.teleporter_block.new_data_field.place_holder": "Data",
 	"gui.teleporter_block.teleport_button.label": "Teleport",
+	"gui.teleporter_block.teleport_button.cooldown_label": "Cooldown: %s",
 	"gui.teleporter_block.teleport_button.place_holder": "Teleport Button Label",
 	"gui.teleporter_block.cancel_teleport_button.label": "Cancel Teleport",
 	"gui.teleporter_block.cancel_teleport_button.place_holder": "Cancel Teleport Button Label",
@@ -384,6 +385,13 @@
 	"gui.teleporter_block.key_item_is_required": "is required.",
 
 	"gui.teleporter_block.location_is_public": "This instance is public",
+
+	"gui.teleporter_block.location_on_cooldown": "%s is on cooldown!",
+	"gui.teleporter_block.location_on_cooldown_for_team_member": "%s is on cooldown for %s!",
+	"gui.teleporter_block.cooldown_message": "Cooldown: %s",
+	"gui.teleporter_block.cooldown_seconds": "%ss",
+	"gui.teleporter_block.cooldown_minutes": "%sm %ss",
+	"gui.teleporter_block.cooldown_hours": "%sh %sm %ss",
 
 	"gui.teleporter_block.creative_screen_page.activation": "Activation Settings",
 	"gui.teleporter_block.creative_screen_page.teleportation_mode": "Teleportation Settings",
@@ -405,8 +413,6 @@
 	"gui.teleporter_block.toggle_only_teleport_dimension_owner_button_label.off": "Dimension Owner Only: Off",
 	"gui.teleporter_block.toggle_teleport_team_button_label.on": "Teleport Team: On",
 	"gui.teleporter_block.toggle_teleport_team_button_label.off": "Teleport Team: Off",
-	"gui.teleporter_block.toggle_show_regenerate_button_button_label.on": "Show Regenerate Button: On",
-	"gui.teleporter_block.toggle_show_regenerate_button_button_label.off": "Show Regenerate Button: Off",
 	"gui.teleporter_block.toggle_show_cancel_button_button_label.on": "Show Cancel Button: On",
 	"gui.teleporter_block.toggle_show_cancel_button_button_label.off": "Show Cancel Button: Off",
 	"gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on": "Can Owner Be Chosen: True",
@@ -919,6 +925,7 @@
 	"block.scriptblocks.interactive_loot_block": "Interactive Loot Block (Deprecated)",
 	"block.scriptblocks.jigsaw_placer_block": "Jigsaw Placer Block",
 	"block.scriptblocks.location_control_block": "Location Control Block",
+	"block.scriptblocks.location_cooldown_starter_block": "Location Cooldown Starter Block",
 	"block.scriptblocks.mimic_block": "Mimic Block",
 	"block.scriptblocks.mimic_fallback_block": "Mimic Fallback Block",
 	"block.scriptblocks.player_detector_block": "Player Detector Block",

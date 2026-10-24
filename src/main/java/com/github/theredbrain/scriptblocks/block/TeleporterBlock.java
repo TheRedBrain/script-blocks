@@ -8,6 +8,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.OperatorBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -36,8 +37,8 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements OperatorB
 			if (player.isCreativeLevelTwoOp()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
 				return ActionResult.success(world.isClient);
-			} else if (!world.isClient) {
-				TeleporterBlockEntity.openNonCreativeScreen(world, player, pos, state, teleporterBlockEntity);
+			} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+				TeleporterBlockEntity.openNonCreativeScreen(world, serverPlayerEntity, pos, state, teleporterBlockEntity);
 			}
 		}
 		return ActionResult.CONSUME;

@@ -17,10 +17,10 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 	@Override
 	public void receive(UpdateTeleporterBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity player = context.player(); // todo rename to serverPlayerEntity
+		ServerPlayerEntity serverPlayerEntity = context.player();
 
-		if (!player.isCreativeLevelTwoOp()) {
-			player.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -58,7 +58,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		BlockPos preTeleportTriggeredBlockPositionOffset = payload.preTeleportTriggeredBlockPositionOffset();
 		boolean preTeleportTriggeredBlockResets = payload.preTeleportTriggeredBlockResets();
 
-		BlockPos uuidListHandlerPositionOffset = payload.uuidListHandlerPositionOffset();
+		BlockPos onTeleportUUIDListHandlerPositionOffset = payload.onTeleportUUIDListHandlerPositionOffset();
 
 		BlockPos postTeleportTriggeredBlockPositionOffset = payload.postTeleportTriggeredBlockPositionOffset();
 		boolean postTeleportTriggeredBlockResets = payload.postTeleportTriggeredBlockResets();
@@ -66,13 +66,12 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		String teleporterName = payload.teleporterName();
 		String currentTargetIdentifierLabel = payload.currentTargetIdentifierLabel();
 		String currentTargetOwnerLabel = payload.currentTargetOwnerLabel();
-		boolean showRegenerateButton = payload.showRegenerateButton();
 		boolean showCancelButton = payload.showCancelButton();
 		boolean canOwnerBeChosen = payload.canOwnerBeChosen();
 		String teleportButtonLabel = payload.teleportButtonLabel();
 		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
 
-		World world = player.getWorld();
+		World world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -90,11 +89,11 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);
 			teleporterBlockEntity.setDirectTeleportPositionOffset(directTeleportPositionOffset);
 			if (!teleporterBlockEntity.setDirectTeleportOrientationYaw(directTeleportOrientationYaw)) {
-				player.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!teleporterBlockEntity.setDirectTeleportOrientationPitch(directTeleportOrientationPitch)) {
-				player.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
+				serverPlayerEntity.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			teleporterBlockEntity.setSpawnPointType(spawnPointType);
@@ -106,19 +105,18 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setSentDataIdentifierAppendix(sendDataIdentifierDataIdentifier);
 			teleporterBlockEntity.setSentDataValueAppendix(sendDataValueDataIdentifier);
 			teleporterBlockEntity.setPreTeleportTriggeredBlock(new MutablePair<>(preTeleportTriggeredBlockPositionOffset, preTeleportTriggeredBlockResets));
-			teleporterBlockEntity.setOnTeleportUUIDListHandlerPositionOffset(uuidListHandlerPositionOffset);
+			teleporterBlockEntity.setOnTeleportUUIDListHandlerPositionOffset(onTeleportUUIDListHandlerPositionOffset);
 			teleporterBlockEntity.setPostTeleportTriggeredBlock(new MutablePair<>(postTeleportTriggeredBlockPositionOffset, postTeleportTriggeredBlockResets));
 			teleporterBlockEntity.setTeleporterName(teleporterName);
 			teleporterBlockEntity.setCurrentTargetIdentifierLabel(currentTargetIdentifierLabel);
 			teleporterBlockEntity.setCurrentTargetOwnerLabel(currentTargetOwnerLabel);
-			teleporterBlockEntity.setShowRegenerateButton(showRegenerateButton);
 			teleporterBlockEntity.setShowCancelButton(showCancelButton);
 			teleporterBlockEntity.setCanOwnerBeChosen(canOwnerBeChosen);
 			teleporterBlockEntity.setTeleportButtonLabel(teleportButtonLabel);
 			teleporterBlockEntity.setCancelTeleportButtonLabel(cancelTeleportButtonLabel);
 
 			if (updateSuccessful) {
-				player.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
 			}
 			teleporterBlockEntity.markDirty();
 			world.updateListeners(teleportBlockPosition, blockState, blockState, Block.NOTIFY_ALL);

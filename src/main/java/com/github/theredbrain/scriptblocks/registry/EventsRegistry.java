@@ -1,16 +1,15 @@
 package com.github.theredbrain.scriptblocks.registry;
 
-import com.github.theredbrain.scriptblocks.network.packet.SendAnnouncementPacket;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 public class EventsRegistry {
 	public static void initializeEvents() {
-
-		// Config stage
-
-		// Play stage
-
-		PayloadTypeRegistry.playS2C().register(SendAnnouncementPacket.PACKET_ID, SendAnnouncementPacket.PACKET_CODEC);
-
+		ServerLivingEntityEvents.AFTER_DEATH.register((livingEntity, damageSource) -> {
+			if (livingEntity instanceof ServerPlayerEntity serverPlayerEntity) {
+				DataAttachmentHelper.setActiveLocationCooldowns(serverPlayerEntity);
+			}
+		});
 	}
 }

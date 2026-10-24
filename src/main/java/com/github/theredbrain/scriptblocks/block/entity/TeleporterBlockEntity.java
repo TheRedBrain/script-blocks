@@ -5,9 +5,13 @@ import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
+import com.github.theredbrain.scriptblocks.data.Location;
+import com.github.theredbrain.scriptblocks.data.VisibleLocation;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.block.BlockState;
@@ -20,11 +24,14 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -38,7 +45,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class TeleporterBlockEntity extends RotatedBlockEntity implements ExtendedScreenHandlerFactory<TeleporterBlockScreenHandler.TeleporterBlockData>, HandlesUUIDList, Triggerable {
+public class TeleporterBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
 	private boolean showAdventureScreen = true;
 	private BlockPos uuidListHandlerPositionOffset = BlockPos.ORIGIN;
@@ -80,7 +87,6 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
 	private String currentTargetIdentifierLabel = "gui.teleporter_block.target_identifier_field.label";
-	private boolean showRegenerateButton = true;
 	private boolean showCancelButton = true;
 	private boolean canOwnerBeChosen = true;
 	private String teleportButtonLabel = "gui.teleporter_block.teleport_button.label";
@@ -159,7 +165,6 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		nbtCompound.putString("teleporter_name", this.teleporterName);
 		nbtCompound.putString("current_target_identifier_label", this.currentTargetIdentifierLabel);
 		nbtCompound.putString("current_target_owner_label", this.currentTargetOwnerLabel);
-		nbtCompound.putBoolean("show_regenerate_button", this.showRegenerateButton);
 		nbtCompound.putBoolean("show_cancel_button", this.showCancelButton);
 		nbtCompound.putBoolean("can_owner_be_chosen", this.canOwnerBeChosen);
 		nbtCompound.putString("teleport_button_label", this.teleportButtonLabel);
@@ -285,7 +290,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 			}
 			nbt.remove("locationsListSize");
 		} else {
-			NbtList nbtList = nbt.getList("triggered_blocks", NbtElement.COMPOUND_TYPE);
+			NbtList nbtList = nbt.getList("locations", NbtElement.COMPOUND_TYPE);
 			for (int i = 0; i < nbtList.size(); i++) {
 				nbtCompound = nbtList.getCompound(i);
 				this.locationsList.add(
@@ -468,10 +473,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		}
 
 		if (nbt.contains("showRegenerateButton")) {
-			this.showRegenerateButton = nbt.getBoolean("showRegenerateButton");
 			nbt.remove("showRegenerateButton");
-		} else {
-			this.showRegenerateButton = nbtCompound.getBoolean("show_regenerate_button");
+		} else if (nbt.contains("show_regenerate_button")) {
+			nbt.remove("show_regenerate_button");
 		}
 
 		if (nbt.contains("showCancelButton")) {
@@ -514,14 +518,84 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		return this.createComponentlessNbt(registryLookup);
 	}
 
-	public static void openNonCreativeScreen(World world, PlayerEntity player, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
+	public static void openNonCreativeScreen(World world, ServerPlayerEntity serverPlayerEntity, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
 
-		if (!teleporterBlockEntity.onlyTeleportDimensionOwner || player.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
-			// TODO check for "prevent teleport" items
-			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-		} else {
-			player.sendMessage(Text.translatable("hud.message.only_dimension_owner_can_teleport"), true);
+		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
+			serverPlayerEntity.sendMessage(Text.translatable("hud.message.only_dimension_owner_can_teleport"), true);
+			return;
 		}
+		// TODO check for "prevent teleport" items
+
+		List<VisibleLocation> visibleLocationsList = new ArrayList<>();
+
+		// check locationsList for visible / unlocked locations
+		if (teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS || teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+
+			if (teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+				for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : teleporterBlockEntity.locationsList) {
+
+					Location location = null;
+					if (world != null) {
+						Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(entry.getLeft().getLeft()));
+						if (optionalLocationReference.isPresent()) {
+							location = optionalLocationReference.get().value();
+						}
+					}
+					if (location != null) {
+						String entranceDisplayName = LocationUtils.getEntranceDisplayName(location, entry.getLeft().getRight());
+						boolean isEntranceNameShownFirst = LocationUtils.isEntranceNameShownFirst(location, entry.getLeft().getRight());
+						boolean allowRegeneration = LocationUtils.allowRegeneration(location, entry.getLeft().getRight());
+						if (LocationUtils.isLocationEntranceUnlocked(serverPlayerEntity, location, entry.getLeft().getRight())) {
+							visibleLocationsList.add(new VisibleLocation(entry.getLeft().getLeft(), entry.getLeft().getRight(), location.displayName(), entranceDisplayName, isEntranceNameShownFirst, entry.getRight().getLeft(), entry.getRight().getRight(), true, allowRegeneration/*, Math.max(0L, cooldownStart), Math.max(0L, cooldownLength)*/));
+						} else if (LocationUtils.showLockedLocationForEntrance(location, entry.getLeft().getRight())) {
+							visibleLocationsList.add(new VisibleLocation(entry.getLeft().getLeft(), entry.getLeft().getRight(), location.displayName(), entranceDisplayName, isEntranceNameShownFirst, entry.getRight().getLeft(), entry.getRight().getRight(), false, allowRegeneration/*, Math.max(0L, cooldownStart), Math.max(0L, cooldownLength)*/));
+						}
+					}
+				}
+			} else if (teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+				MutablePair<MutablePair<String, String>, MutablePair<String, String>> dataDrivenLocation = teleporterBlockEntity.getDataDrivenLocation();
+				Location location = null;
+				if (world != null) {
+					Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(dataDrivenLocation.getLeft().getLeft()));
+					if (optionalLocationReference.isPresent()) {
+						location = optionalLocationReference.get().value();
+					}
+				}
+				if (location != null) {
+					String entranceDisplayName = LocationUtils.getEntranceDisplayName(location, dataDrivenLocation.getLeft().getRight());
+					boolean isEntranceNameShownFirst = LocationUtils.isEntranceNameShownFirst(location, dataDrivenLocation.getLeft().getRight());
+					boolean allowRegeneration = LocationUtils.allowRegeneration(location, dataDrivenLocation.getLeft().getRight());
+					if (LocationUtils.isLocationEntranceUnlocked(serverPlayerEntity, location, dataDrivenLocation.getLeft().getRight())) {
+						visibleLocationsList.add(new VisibleLocation(dataDrivenLocation.getLeft().getLeft(), dataDrivenLocation.getLeft().getRight(), location.displayName(), entranceDisplayName, isEntranceNameShownFirst, dataDrivenLocation.getRight().getLeft(), dataDrivenLocation.getRight().getRight(), true, allowRegeneration/*, Math.max(0L, cooldownStart), Math.max(0L, cooldownLength)*/));
+					} else if (LocationUtils.showLockedLocationForEntrance(location, dataDrivenLocation.getLeft().getRight())) {
+						visibleLocationsList.add(new VisibleLocation(dataDrivenLocation.getLeft().getLeft(), dataDrivenLocation.getLeft().getRight(), location.displayName(), entranceDisplayName, isEntranceNameShownFirst, dataDrivenLocation.getRight().getLeft(), dataDrivenLocation.getRight().getRight(), false, allowRegeneration/*, Math.max(0L, cooldownStart), Math.max(0L, cooldownLength)*/));
+					}
+				}
+			}
+		}
+
+		serverPlayerEntity.openHandledScreen(new ExtendedScreenHandlerFactory<>() {
+
+			@Override
+			public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayerEntity player) {
+				return new TeleporterBlockScreenHandler.TeleporterBlockData(
+						teleporterBlockEntity.pos,
+						visibleLocationsList
+				);
+			}
+
+			@Override
+			public Text getDisplayName() {
+				return Text.translatable(teleporterBlockEntity.teleporterName);
+			}
+
+			@Nullable
+			@Override
+			public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+				return new TeleporterBlockScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(teleporterBlockEntity.world, teleporterBlockEntity.pos), teleporterBlockEntity.pos, visibleLocationsList);
+			}
+
+		});
 	}
 
 	public void preTeleportTrigger() {
@@ -583,8 +657,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		if (this.world != null) {
 			this.getUUIDListFromHandler().forEach((uuid) -> {
 				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
-				if (playerEntity != null && !playerEntity.isCreative()) {
-					openNonCreativeScreen(this.world, playerEntity, this.pos, this.world.getBlockState(this.pos), this);
+				if (playerEntity instanceof ServerPlayerEntity serverPlayerEntity && !playerEntity.isCreative()) {
+					openNonCreativeScreen(this.world, serverPlayerEntity, this.pos, this.world.getBlockState(this.pos), this);
 				}
 			});
 		}
@@ -600,8 +674,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		if (this.world != null) {
 			list.forEach((uuid) -> {
 				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
-				if (playerEntity != null && !playerEntity.isCreative()) {
-					openNonCreativeScreen(this.world, playerEntity, this.pos, this.world.getBlockState(this.pos), this);
+				if (playerEntity instanceof ServerPlayerEntity serverPlayerEntity && !playerEntity.isCreative()) {
+					openNonCreativeScreen(this.world, serverPlayerEntity, this.pos, this.world.getBlockState(this.pos), this);
 				}
 			});
 		}
@@ -846,14 +920,6 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 		this.currentTargetOwnerLabel = currentTargetOwnerLabel;
 	}
 
-	public boolean showRegenerateButton() {
-		return this.showRegenerateButton;
-	}
-
-	public void setShowRegenerateButton(boolean showRegenerateButton) {
-		this.showRegenerateButton = showRegenerateButton;
-	}
-
 	public boolean showCancelButton() {
 		return this.showCancelButton;
 	}
@@ -888,22 +954,6 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 	// endregion --- getter & setter ---
 
 	@Override
-	public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayerEntity player) {
-		return new TeleporterBlockScreenHandler.TeleporterBlockData(this.pos);
-	}
-
-	@Nullable
-	@Override
-	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-		return new TeleporterBlockScreenHandler(syncId, playerInventory, player.isCreativeLevelTwoOp());
-	}
-
-	@Override
-	public Text getDisplayName() {
-		return Text.translatable(this.teleporterName);
-	}
-
-	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
@@ -916,6 +966,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 				this.directTeleportPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.directTeleportPositionOffset, blockRotation);
 				this.directTeleportOrientationYaw = BlockRotationUtils.rotateYaw(this.directTeleportOrientationYaw, blockRotation);
 
+				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, blockRotation);
+				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+
 				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
 			}
 			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
@@ -927,6 +981,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, BlockMirror.FRONT_BACK);
 				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, BlockMirror.FRONT_BACK);
 
+				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, BlockMirror.FRONT_BACK);
+				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+
 				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
 			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
@@ -937,6 +995,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Extende
 
 				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, BlockMirror.LEFT_RIGHT);
 				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, BlockMirror.LEFT_RIGHT);
+
+				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
 
 				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}

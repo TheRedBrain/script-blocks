@@ -1,6 +1,9 @@
 package com.github.theredbrain.scriptblocks.screen;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.data.VisibleLocation;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
+import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -8,13 +11,19 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.screen.Property;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TeleporterBlockScreenHandler extends ScreenHandler {
 
+	private final ScreenHandlerContext context;
 	private PlayerInventory playerInventory;
 	private Inventory inventory = new SimpleInventory(9) {
 		@Override
@@ -31,29 +40,30 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 	};
 //    private TeleporterBlockBlockEntity teleporterBlockBlockEntity;
 
-	private BlockPos blockPos;
+	private final BlockPos blockPos;
 
-	private boolean showCreativeTab;
+	private final List<VisibleLocation> visibleLocationsList;
+
 	private final int requiredKeyItemStackSlotX = 66;
 	private final int requiredKeyItemStackSlotY = 148;
+	private final Property currentLocationListIndex = Property.create();
+	private final Property currentLocationCooldown = Property.create();
 
 	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, TeleporterBlockData data) {
-		this(syncId, playerInventory, playerInventory.player.isCreativeLevelTwoOp());
-		this.blockPos = data.blockPos();
+		this(syncId, playerInventory, ScreenHandlerContext.EMPTY, data.blockPos(), data.visibleLocationsList);
 	}
 
-	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, boolean showCreativeTab) {
+	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, BlockPos blockPos, List<VisibleLocation> visibleLocationsList) {
 		super(ScriptBlocksScreenHandlerTypes.TELEPORTER_BLOCK_SCREEN_HANDLER, syncId);
-		// TODO
-		// set teleporterBlockBlockEntity
 		this.playerInventory = playerInventory;
-		this.blockPos = BlockPos.ORIGIN;
-		this.showCreativeTab = showCreativeTab;
+		this.blockPos = blockPos;
+		this.visibleLocationsList = new ArrayList<>(visibleLocationsList);
+		this.context = context;
 
 		int i;
 		// hotbar
 		for (i = 0; i < 9; ++i) {
-			this.addSlot(new Slot(playerInventory, i, 8 + i * 18, showCreativeTab ? 273 : 273/*TODO*/)/* {
+			this.addSlot(new Slot(playerInventory, i, 8 + i * 18, /*showCreativeTab ? 273 : */273/*TODO*/)/* {
 
                 @Override
                 public boolean canInsert(ItemStack stack) {
@@ -61,10 +71,13 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
                 }
             }*/);
 		}
+		this.addProperty(this.currentLocationListIndex).set(0);
+		this.addProperty(this.currentLocationCooldown).set(0);
+//		this.addProperty(this.currentCooldownMax).set(0);
 		// main inventory
 		for (i = 0; i < 3; ++i) {
 			for (int j = 0; j < 9; ++j) {
-				this.addSlot(new Slot(playerInventory, j + (i + 1) * 9, 8 + j * 18, (showCreativeTab ? 215 : 215)/*TODO*/ + i * 18));
+				this.addSlot(new Slot(playerInventory, j + (i + 1) * 9, 8 + j * 18, (/*showCreativeTab ? 215 : */215)/*TODO*/ + i * 18));
 			}
 		}
 		// keyItemStackSlot
@@ -122,8 +135,43 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 		return playerInventory;
 	}
 
-	public boolean getShowCreativeTab() {
-		return this.showCreativeTab;
+	public int getCurrentLocationListIndex() {
+		return this.currentLocationListIndex.get();
+	}
+
+	public int getCurrentLocationCooldown() {
+		return this.currentLocationCooldown.get();
+	}
+
+
+	public List<VisibleLocation> getVisibleLocationsList() {
+		return this.visibleLocationsList;
+	}
+
+	@Override
+	public boolean onButtonClick(PlayerEntity player, int id) {
+		if (id == -1) {
+			this.updateRemainingCooldown(player);
+			return true;
+		} else if (id >= 0 && id < this.visibleLocationsList.size()) {
+			this.context.run((world, pos) -> {
+			this.setProperty(0, id);
+			this.sendContentUpdates();
+			});
+			return true;
+		}
+		return false;
+	}
+
+	private void updateRemainingCooldown(PlayerEntity player) {
+		this.context.run((world, pos) -> {
+			if (this.currentLocationListIndex.get() < this.visibleLocationsList.size() && player instanceof ServerPlayerEntity serverPlayerEntity) {
+				VisibleLocation currentLocation = this.visibleLocationsList.get(this.currentLocationListIndex.get());
+				int remainingCooldown = (int) LocationUtils.getRemainingCooldownForEntrance(serverPlayerEntity, currentLocation.identifier(), currentLocation.entrance());
+				this.setProperty(1, remainingCooldown);
+				this.sendContentUpdates();
+			}
+		});
 	}
 
 	@Override
@@ -150,17 +198,22 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 	}
 
 	public record TeleporterBlockData(
-			BlockPos blockPos
+			BlockPos blockPos,
+			List<VisibleLocation> visibleLocationsList
 	) {
 
 		public static final PacketCodec<RegistryByteBuf, TeleporterBlockData> PACKET_CODEC = PacketCodec.of(TeleporterBlockData::write, TeleporterBlockData::new);
 
 		public TeleporterBlockData(RegistryByteBuf registryByteBuf) {
-			this(registryByteBuf.readBlockPos());
+			this(
+					registryByteBuf.readBlockPos(),
+					registryByteBuf.readList(VisibleLocation.PACKET_CODEC)
+			);
 		}
 
 		private void write(RegistryByteBuf registryByteBuf) {
 			registryByteBuf.writeBlockPos(blockPos);
+			registryByteBuf.writeCollection(this.visibleLocationsList, VisibleLocation.PACKET_CODEC);
 		}
 	}
 

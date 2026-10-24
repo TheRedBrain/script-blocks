@@ -62,7 +62,7 @@ public class DataAttachmentHelper {
 		setLocationCooldowns(player, new LocationCooldowns(cooldowns));
 	}
 
-	public static void playerDies(ServerPlayerEntity player) {
+	public static void setActiveLocationCooldowns(ServerPlayerEntity player) {
 		if (player.getServer() == null) {
 			return;
 		}
@@ -84,7 +84,7 @@ public class DataAttachmentHelper {
 
 	public static long getCurrentLocationCooldown(PlayerEntity player, String locationIdentifier) {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
-		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, 0L);
+		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, -2L);
 	}
 
 	@Nullable

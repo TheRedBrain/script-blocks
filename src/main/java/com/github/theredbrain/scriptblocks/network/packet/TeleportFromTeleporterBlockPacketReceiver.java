@@ -239,13 +239,11 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						targetYaw = entrance.getRight().getLeft();
 						targetPitch = entrance.getRight().getRight();
 
-						long entranceCooldown = 0;
-						long serverTime = server.getOverworld().getTime();
-
-						long currentLocationCooldown = DataAttachmentHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
-						if (currentLocationCooldown > 0 && serverTime - currentLocationCooldown < entranceCooldown) {
+						long remainingCooldown = LocationUtils.getRemainingCooldownForEntrance(serverPlayerEntity, targetLocation, targetLocationEntrance);
+						if (remainingCooldown > 0) {
 							locationCooldownWasUp = false;
-							serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown"));
+							serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown", location.displayName()));
+							serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.cooldown_message", LocationUtils.getCooldownText(remainingCooldown)));
 						}
 
 						if (teleportTeam) {
@@ -255,11 +253,12 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 									ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
 									if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 
-										currentLocationCooldown = DataAttachmentHelper.getCurrentLocationCooldown(serverPlayerEntity, targetLocation);
-										if (currentLocationCooldown > 0 && serverTime - currentLocationCooldown < entranceCooldown) {
+										remainingCooldown = LocationUtils.getRemainingCooldownForEntrance(teamServerPlayerEntity, targetLocation, targetLocationEntrance);
+										if (remainingCooldown > 0) {
 											locationCooldownWasUp = false;
-											serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown_for_team_member", playerString));
-											teamServerPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown"));
+											serverPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown_for_team_member", location.displayName(), playerString));
+											teamServerPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.location_on_cooldown", location.displayName()));
+											teamServerPlayerEntity.sendMessage(Text.translatable("gui.teleporter_block.cooldown_message", LocationUtils.getCooldownText(remainingCooldown)));
 										}
 
 									}

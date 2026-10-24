@@ -65,8 +65,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 	private static final Text SHOW_ADVENTURE_SCREEN_FALSE_LABEL_TEXT = Text.translatable("gui.teleporter_block.show_adventure_screen_label.false");
 	private static final Text SHOW_ADVENTURE_SCREEN_TRUE_LABEL_TEXT = Text.translatable("gui.teleporter_block.show_adventure_screen_label.true");
-	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.on");
-	private static final Text TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_regenerate_button_button_label.off");
 	private static final Text TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_show_cancel_button_button_label.on");
 	private static final Text TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF = Text.translatable("gui.teleporter_block.toggle_show_cancel_button_button_label.off");
 	private static final Text TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON = Text.translatable("gui.teleporter_block.toggle_can_owner_be_chosen_button_label.on");
@@ -133,7 +131,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 	private TextFieldWidget teleporterNameField;
 	private TextFieldWidget currentTargetOwnerLabelField;
 	private TextFieldWidget currentTargetIdentifierLabelField;
-	private CyclingButtonWidget<Boolean> toggleShowRegenerateButtonButton;
 	private CyclingButtonWidget<Boolean> toggleCanOwnerBeChosenButton;
 	private CyclingButtonWidget<Boolean> toggleShowCancelButtonButton;
 	private TextFieldWidget teleportButtonLabelField;
@@ -145,7 +142,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 	private boolean setAccessPosition;
 	private boolean onlyTeleportDimensionOwner;
 	private boolean teleportTeam;
-	private boolean showRegenerateButton;
 	private boolean showCancelButton;
 	private boolean canOwnerBeChosen;
 
@@ -213,7 +209,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.teleporterBlock.setSetAccessPosition(this.setAccessPosition);
 		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
 		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
-		this.teleporterBlock.setShowRegenerateButton(this.showRegenerateButton);
 		this.teleporterBlock.setShowCancelButton(this.showCancelButton);
 		this.teleporterBlock.setCanOwnerBeChosen(this.canOwnerBeChosen);
 		this.teleporterBlock.setTeleportationMode(this.teleportationMode);
@@ -227,7 +222,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.locationsList.addAll(this.teleporterBlock.getLocationsList());
 		this.showAdventureScreen = this.teleporterBlock.getShowAdventureScreen();
 		this.teleportationMode = this.teleporterBlock.getTeleportationMode();
-		this.showRegenerateButton = this.teleporterBlock.showRegenerateButton();
 		this.showCancelButton = this.teleporterBlock.showCancelButton();
 		this.canOwnerBeChosen = this.teleporterBlock.canOwnerBeChosen();
 		this.locationModeScreenPage = LocationModeScreenPage.PAGE_1;
@@ -498,10 +492,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.currentTargetIdentifierLabelField.setText(this.teleporterBlock.getCurrentTargetIdentifierLabel());
 		this.addSelectableChild(this.currentTargetIdentifierLabelField);
 
-		this.toggleShowRegenerateButtonButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_REGENERATE_BUTTON_BUTTON_LABEL_TEXT_OFF).initially(this.showRegenerateButton).omitKeyText().build(this.width / 2 - 154, 140, 150, 20, Text.empty(), (button, showRegenerateButton) -> {
-			this.showRegenerateButton = showRegenerateButton;
-		}));
-
 		this.toggleCanOwnerBeChosenButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON, TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF).initially(this.canOwnerBeChosen).omitKeyText().build(this.width / 2 + 4, 140, 150, 20, Text.empty(), (button, canOwnerBeChosen) -> {
 			this.canOwnerBeChosen = canOwnerBeChosen;
 		}));
@@ -597,7 +587,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.teleporterNameField.setVisible(false);
 		this.currentTargetIdentifierLabelField.setVisible(false);
 		this.currentTargetOwnerLabelField.setVisible(false);
-		this.toggleShowRegenerateButtonButton.visible = false;
 		this.toggleCanOwnerBeChosenButton.visible = false;
 		this.toggleShowCancelButtonButton.visible = false;
 		this.teleportButtonLabelField.setVisible(false);
@@ -710,7 +699,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 			if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 				this.currentTargetIdentifierLabelField.setVisible(true);
 				this.currentTargetOwnerLabelField.setVisible(true);
-				this.toggleShowRegenerateButtonButton.visible = true;
 				this.toggleCanOwnerBeChosenButton.visible = true;
 			}
 
@@ -735,7 +723,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		boolean bool2 = this.setAccessPosition;
 		boolean bool3 = this.onlyTeleportDimensionOwner;
 		boolean bool4 = this.teleportTeam;
-		boolean bool5 = this.showRegenerateButton;
 		boolean bool6 = this.canOwnerBeChosen;
 		boolean bool8 = this.showCancelButton;
 		boolean bool9 = this.preTeleportTriggeredBlockResets;
@@ -782,7 +769,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.setAccessPosition = bool2;
 		this.onlyTeleportDimensionOwner = bool3;
 		this.teleportTeam = bool4;
-		this.showRegenerateButton = bool5;
 		this.canOwnerBeChosen = bool6;
 		this.showCancelButton = bool8;
 		this.preTeleportTriggeredBlockResets = bool9;
@@ -794,7 +780,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.toggleSetAccessPositionButton.setValue(this.setAccessPosition);
 		this.toggleOnlyTeleportDimensionOwnerButton.setValue(this.onlyTeleportDimensionOwner);
 		this.toggleTeleportTeamButton.setValue(this.teleportTeam);
-		this.toggleShowRegenerateButtonButton.setValue(this.showRegenerateButton);
 		this.toggleCanOwnerBeChosenButton.setValue(this.canOwnerBeChosen);
 		this.toggleShowCancelButtonButton.setValue(this.showCancelButton);
 		this.preTeleportToggleTriggeredBlockResetsButton.setValue(this.preTeleportTriggeredBlockResets);
@@ -1046,7 +1031,7 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 				ItemUtils.parseDouble(this.directTeleportOrientationYawField.getText()),
 				ItemUtils.parseDouble(this.directTeleportOrientationPitchField.getText()),
 				this.spawnPointType.asString(),
-				this.locationsList,
+				new ArrayList<>(this.locationsList),
 				new MutablePair<>(new MutablePair<>(this.locationIdentifierField.getText(), this.locationEntranceField.getText()), new MutablePair<>(this.locationDataIdField.getText(), this.locationDataField.getText())),
 				new BlockPos(
 						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
@@ -1064,9 +1049,9 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 				),
 				this.preTeleportTriggeredBlockResets,
 				new BlockPos(
-						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.onTeleportUUIDListHandlerPositionOffsetXField.getText()),
+						ItemUtils.parseInt(this.onTeleportUUIDListHandlerPositionOffsetYField.getText()),
+						ItemUtils.parseInt(this.onTeleportUUIDListHandlerPositionOffsetZField.getText())
 				),
 				new BlockPos(
 						ItemUtils.parseInt(this.postTeleportTriggeredBlockPositionOffsetXField.getText()),
@@ -1077,7 +1062,6 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 				this.teleporterNameField.getText(),
 				this.currentTargetIdentifierLabelField.getText(),
 				this.currentTargetOwnerLabelField.getText(),
-				this.showRegenerateButton,
 				this.showCancelButton,
 				this.canOwnerBeChosen,
 				this.teleportButtonLabelField.getText(),
