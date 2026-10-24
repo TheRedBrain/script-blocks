@@ -118,8 +118,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 			this.mainEntrance = new MutablePair<>(
 					NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
 					new MutablePair<>(
-							MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
-							MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+							MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
+							MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
 					)
 			);
 		}
@@ -157,8 +157,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 						new MutablePair<>(
 								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
 								new MutablePair<>(
-										MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
-										MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+										MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
+										MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
 								)
 						));
 			}

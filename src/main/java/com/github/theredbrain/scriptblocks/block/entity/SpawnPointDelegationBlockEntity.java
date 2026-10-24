@@ -76,8 +76,8 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 				this.delegatedSpawnPoints.add(new MutablePair<>(
 						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
 						new MutablePair<>(
-								MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, -180),
-								MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, -90)
+								MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
+								MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
 						)
 				));
 			}
