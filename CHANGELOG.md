@@ -1,22 +1,8 @@
 # 0.0.10
 
-## Polishing
+This update finishes the polishing pass started in the last update, at least for now. Some features require an update to modern Minecraft versions, which is the focus of the next update.
 
-This includes:
-- block entity nbt fields were changed into "snake_case". This is happening automatically when a chunk with an already placed block is saved.
-- improvements to screens
-- small fixes and code clean up
-
-These blocks have been polished:
-- Redstone Trigger Block
-- Area Filler Block
-- Copy Data Block
-- Data Writing Block
-- Delay Trigger Block
-- Interactive Trigger Block
-- Mimic Block
-- PVP Controller Block
-- Shop Block
+All deprecated blocks still function like normal, but when they are placed in the world, they will send log (and optionally chat) messages with a warning and instructions on how to best replace them. Deprecated blocks will be removed eventually.
 
 ## Additions
 
