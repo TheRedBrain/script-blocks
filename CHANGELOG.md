@@ -32,7 +32,8 @@ These blocks have been polished:
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
 - added Interactive Trigger Soul Candle blocks, in 17 variants. These are functionally identical to the existing Interactive Trigger Candle blocks, but display soul flame particles and have a lower luminance.
-- added Interactive Trigger (Soul) Torch blocks.
+- added Interactive Trigger (Soul) Torch blocks
+- added "scriptblocks:prevent_interactions" data component, containing a list of strings. Some blocks can define a string. If the interacting player has at least one item with the component and the block given string is in the list, the player can't interact with that block.
 
 ### UUID List Handlers
 
@@ -50,6 +51,7 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 - changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
 - fields in all custom data files were changed from "camelCase" to "snake_case".
 - replaced "(un)lock_advancement" fields with "unlock_predicate" field for locations and location entrances
+- renamed "scriptblocks:removed_on_teleport" data component to "scriptblocks:removed_on_interactions"
 
 ### Boss Controller Block Rework
 

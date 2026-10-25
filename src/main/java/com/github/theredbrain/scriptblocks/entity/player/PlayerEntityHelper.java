@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.entity.player;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.component.type.PreventInteractionsDataComponent;
 import com.github.theredbrain.scriptblocks.component.type.RemovedOnInteractionsDataComponent;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import net.minecraft.entity.EquipmentSlot;
@@ -15,6 +16,7 @@ public class PlayerEntityHelper {
 
 	private static final int EXCLUSIVE_EQUIPMENT_SLOT_AMOUNT = 20;
 
+	// TODO rework into dedicated ItemRemoverBlock
 	public static void removeItemsOnTeleport(ServerPlayerEntity serverPlayerEntity, String removedItemIdentifier) {
 		if (removedItemIdentifier.isEmpty()) {
 			return;
@@ -24,7 +26,7 @@ public class PlayerEntityHelper {
 			if (currentItemStack.isEmpty()) {
 				continue;
 			}
-			RemovedOnInteractionsDataComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_TELEPORT);
+			RemovedOnInteractionsDataComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_INTERACTIONS);
 			if (removedOnTeleportDataComponent != null) {
 				for (String identifier : removedOnTeleportDataComponent.identifier_list()) {
 					if (Objects.equals(identifier, removedItemIdentifier)) {
@@ -36,8 +38,8 @@ public class PlayerEntityHelper {
 
 		PlayerInventory playerInventory = serverPlayerEntity.getInventory();
 		for (int i = 0; i < playerInventory.main.size(); i++) {
-			ItemStack currentItemStack = playerInventory.main.get(i);
-			RemovedOnInteractionsDataComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_TELEPORT);
+			ItemStack currentItemStack = playerInventory.main.get(i).copy();
+			RemovedOnInteractionsDataComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_INTERACTIONS);
 			if (removedOnTeleportDataComponent != null) {
 				for (String identifier : removedOnTeleportDataComponent.identifier_list()) {
 					if (Objects.equals(identifier, removedItemIdentifier)) {
@@ -46,6 +48,40 @@ public class PlayerEntityHelper {
 				}
 			}
 		}
+	}
+
+	public static boolean allowInteractions(PlayerEntity playerEntity, String preventingItemIdentifier) {
+		if (preventingItemIdentifier.isEmpty()) {
+			return true;
+		}
+		for (int i = 0; i < EXCLUSIVE_EQUIPMENT_SLOT_AMOUNT; i++) {
+			ItemStack currentItemStack = getEquipmentStack(playerEntity, i);
+			if (currentItemStack.isEmpty()) {
+				continue;
+			}
+			PreventInteractionsDataComponent preventInteractionsDataComponent = currentItemStack.get(ScriptBlocksDataComponents.PREVENT_INTERACTIONS);
+			if (preventInteractionsDataComponent != null) {
+				for (String identifier : preventInteractionsDataComponent.identifier_list()) {
+					if (Objects.equals(identifier, preventingItemIdentifier)) {
+						return false;
+					}
+				}
+			}
+		}
+
+		PlayerInventory playerInventory = playerEntity.getInventory();
+		for (int i = 0; i < playerInventory.main.size(); i++) {
+			ItemStack currentItemStack = playerInventory.main.get(i).copy();
+			PreventInteractionsDataComponent preventInteractionsDataComponent = currentItemStack.get(ScriptBlocksDataComponents.PREVENT_INTERACTIONS);
+			if (preventInteractionsDataComponent != null) {
+				for (String identifier : preventInteractionsDataComponent.identifier_list()) {
+					if (Objects.equals(identifier, preventingItemIdentifier)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	private static ItemStack getEquipmentStack(PlayerEntity playerEntity, int index) {
