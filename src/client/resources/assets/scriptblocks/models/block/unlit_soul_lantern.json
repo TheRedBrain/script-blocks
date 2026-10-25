@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/template_lantern",
+  "textures": {
+    "lantern": "scriptblocks:block/unlit_soul_lantern"
+  }
+}

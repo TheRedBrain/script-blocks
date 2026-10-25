@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "hanging=false,lit=false": {
+      "model": "scriptblocks:block/unlit_soul_lantern"
+    },
+    "hanging=true,lit=false": {
+      "model": "scriptblocks:block/unlit_soul_lantern_hanging"
+    },
+    "hanging=false,lit=true": {
+      "model": "minecraft:block/soul_lantern"
+    },
+    "hanging=true,lit=true": {
+      "model": "minecraft:block/soul_lantern_hanging"
+    }
+  }
+}
