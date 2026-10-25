@@ -29,12 +29,17 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		TeleporterBlockEntity.CreativeScreenPage creativeScreenPage = TeleporterBlockEntity.CreativeScreenPage.byName(payload.creativeScreenPage()).orElse(TeleporterBlockEntity.CreativeScreenPage.ACTIVATION);
 		boolean showAdventureScreen = payload.showAdventureScreen();
 
+		String preventInteractionIdentifierString = payload.preventInteractionIdentifierString();
+		String interactionPreventedMessage = payload.interactionPreventedMessage();
+
 		BlockPos uuidListHandlerBlockPositionOffset = payload.uuidListHandlerBlockPositionOffset();
 
 		BlockPos accessPositionOffset = payload.accessPositionOffset();
 		boolean setAccessPosition = payload.setAccessPosition();
 
 		boolean onlyTeleportDimensionOwner = payload.onlyTeleportDimensionOwner();
+		String onlyDimensionOwnerCanTeleportMessage = payload.onlyDimensionOwnerCanTeleportMessage();
+
 		boolean teleportTeam = payload.teleportTeam();
 
 		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.byName(payload.teleportationMode()).orElse(TeleporterBlockEntity.TeleportationMode.DIRECT);
@@ -81,10 +86,13 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			teleporterBlockEntity.setShowAdventureScreen(showAdventureScreen);
 			teleporterBlockEntity.setCreativeScreenPage(creativeScreenPage);
+			teleporterBlockEntity.setPreventInteractionIdentifierString(preventInteractionIdentifierString);
+			teleporterBlockEntity.setInteractionPreventedMessage(interactionPreventedMessage);
 			teleporterBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerBlockPositionOffset);
 			teleporterBlockEntity.setAccessPositionOffset(accessPositionOffset);
 			teleporterBlockEntity.setSetAccessPosition(setAccessPosition);
 			teleporterBlockEntity.setOnlyTeleportDimensionOwner(onlyTeleportDimensionOwner);
+			teleporterBlockEntity.setOnlyDimensionOwnerCanTeleportMessage(onlyDimensionOwnerCanTeleportMessage);
 			teleporterBlockEntity.setTeleportTeam(teleportTeam);
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);
 			teleporterBlockEntity.setDirectTeleportPositionOffset(directTeleportPositionOffset);

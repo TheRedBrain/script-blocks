@@ -14,10 +14,13 @@ public record UpdateTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
 		String creativeScreenPage,
 		boolean showAdventureScreen,
+		String preventInteractionIdentifierString,
+		String interactionPreventedMessage,
 		BlockPos uuidListHandlerBlockPositionOffset,
 		BlockPos accessPositionOffset,
 		boolean setAccessPosition,
 		boolean onlyTeleportDimensionOwner,
+		String onlyDimensionOwnerCanTeleportMessage,
 		boolean teleportTeam,
 		String teleportationMode,
 		BlockPos directTeleportPositionOffset,
@@ -52,10 +55,13 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
+				registryByteBuf.readString(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readString(),
 				registryByteBuf.readBlockPos(),
@@ -91,12 +97,17 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBoolean(this.showAdventureScreen);
 
+		registryByteBuf.writeString(this.preventInteractionIdentifierString);
+		registryByteBuf.writeString(this.interactionPreventedMessage);
+
 		registryByteBuf.writeBlockPos(this.uuidListHandlerBlockPositionOffset);
 
 		registryByteBuf.writeBlockPos(this.accessPositionOffset);
 		registryByteBuf.writeBoolean(this.setAccessPosition);
 
 		registryByteBuf.writeBoolean(this.onlyTeleportDimensionOwner);
+		registryByteBuf.writeString(this.onlyDimensionOwnerCanTeleportMessage);
+
 		registryByteBuf.writeBoolean(this.teleportTeam);
 
 		registryByteBuf.writeString(this.teleportationMode);

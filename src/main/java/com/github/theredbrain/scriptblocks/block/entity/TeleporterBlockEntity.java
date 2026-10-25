@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.data.VisibleLocation;
+import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
@@ -48,12 +49,18 @@ import java.util.UUID;
 public class TeleporterBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
 	private boolean showAdventureScreen = true;
+
+	private String preventInteractionIdentifierString = "";
+	private String interactionPreventedMessage = "";
+
 	private BlockPos uuidListHandlerPositionOffset = BlockPos.ORIGIN;
 
 	private BlockPos accessPositionOffset = BlockPos.ORIGIN;
 	private boolean setAccessPosition = false;
 
 	private boolean onlyTeleportDimensionOwner = false;
+	private String onlyDimensionOwnerCanTeleportMessage = "hud.message.only_dimension_owner_can_teleport";
+
 	private boolean teleportTeam = false;
 
 	private CreativeScreenPage creativeScreenPage = CreativeScreenPage.ACTIVATION;
@@ -101,6 +108,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		nbt.putString("screen_page", this.creativeScreenPage.asString());
 
+		nbt.putString("prevent_interaction_identifier_string", this.preventInteractionIdentifierString);
+
+		nbt.putString("interaction_prevented_message", this.interactionPreventedMessage);
+
 		nbt.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.uuidListHandlerPositionOffset));
 
 		NbtCompound nbtCompound = new NbtCompound();
@@ -109,6 +120,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		nbt.put("location_access", nbtCompound.copy());
 
 		nbt.putBoolean("only_teleport_dimension_owner", this.onlyTeleportDimensionOwner);
+
+		nbt.putString("only_dimension_owner_can_teleport_message", this.onlyDimensionOwnerCanTeleportMessage);
 
 		nbt.putBoolean("teleport_team", this.teleportTeam);
 
@@ -184,6 +197,10 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			this.creativeScreenPage = CreativeScreenPage.byName(nbt.getString("screen_page")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
 		}
 
+		this.preventInteractionIdentifierString = nbt.getString("prevent_interaction_identifier_string");
+
+		this.interactionPreventedMessage = nbt.getString("interaction_prevented_message");
+
 		this.uuidListHandlerPositionOffset = BlockPos.max(
 				BlockPos.min(
 						NbtHelper.toBlockPos(nbt, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
@@ -221,6 +238,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			nbt.remove("onlyTeleportDimensionOwner");
 		} else {
 			this.onlyTeleportDimensionOwner = nbt.getBoolean("only_teleport_dimension_owner");
+		}
+
+		if (nbt.contains("only_dimension_owner_can_teleport_message")) {
+			this.onlyDimensionOwnerCanTeleportMessage = nbt.getString("only_dimension_owner_can_teleport_message");
+		} else {
+			this.onlyDimensionOwnerCanTeleportMessage = "hud.message.only_dimension_owner_can_teleport";
 		}
 
 		if (nbt.contains("teleportTeam")) {
@@ -521,10 +544,18 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	public static void openNonCreativeScreen(World world, ServerPlayerEntity serverPlayerEntity, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
 
 		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.only_dimension_owner_can_teleport"), true);
+			if (!teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage().isEmpty()) {
+				serverPlayerEntity.sendMessage(Text.translatable(teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage()), true);
+			}
 			return;
 		}
-		// TODO check for "prevent teleport" items
+
+		if (!teleporterBlockEntity.getPreventInteractionIdentifierString().isEmpty() && !PlayerEntityHelper.allowInteractions(serverPlayerEntity, teleporterBlockEntity.getPreventInteractionIdentifierString())) {
+			if (!teleporterBlockEntity.getInteractionPreventedMessage().isEmpty()) {
+				serverPlayerEntity.sendMessage(Text.translatable(teleporterBlockEntity.getInteractionPreventedMessage()), true);
+			}
+			return;
+		}
 
 		List<VisibleLocation> visibleLocationsList = new ArrayList<>();
 
@@ -736,15 +767,31 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public BlockPos getUuidListHandlerPositionOffset() {
-		return uuidListHandlerPositionOffset;
+		return this.uuidListHandlerPositionOffset;
 	}
 
 	public void setUuidListHandlerPositionOffset(BlockPos uuidListHandlerPositionOffset) {
 		this.uuidListHandlerPositionOffset = uuidListHandlerPositionOffset;
 	}
 
+	public String getPreventInteractionIdentifierString() {
+		return this.preventInteractionIdentifierString;
+	}
+
+	public void setPreventInteractionIdentifierString(String preventInteractionIdentifierString) {
+		this.preventInteractionIdentifierString = preventInteractionIdentifierString;
+	}
+
+	public String getInteractionPreventedMessage() {
+		return this.interactionPreventedMessage;
+	}
+
+	public void setInteractionPreventedMessage(String interactionPreventedMessage) {
+		this.interactionPreventedMessage = interactionPreventedMessage;
+	}
+
 	public BlockPos getAccessPositionOffset() {
-		return accessPositionOffset;
+		return this.accessPositionOffset;
 	}
 
 	public void setAccessPositionOffset(BlockPos accessPositionOffset) {
@@ -756,7 +803,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	 * Has an effect only in some modes
 	 */
 	public boolean getSetAccessPosition() {
-		return setAccessPosition;
+		return this.setAccessPosition;
 	}
 
 	public void setSetAccessPosition(boolean setAccessPosition) {
@@ -764,15 +811,23 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public boolean onlyTeleportDimensionOwner() {
-		return onlyTeleportDimensionOwner;
+		return this.onlyTeleportDimensionOwner;
 	}
 
 	public void setOnlyTeleportDimensionOwner(boolean onlyTeleportDimensionOwner) {
 		this.onlyTeleportDimensionOwner = onlyTeleportDimensionOwner;
 	}
 
+	public String getOnlyDimensionOwnerCanTeleportMessage() {
+		return this.onlyDimensionOwnerCanTeleportMessage;
+	}
+
+	public void setOnlyDimensionOwnerCanTeleportMessage(String onlyDimensionOwnerCanTeleportMessage) {
+		this.onlyDimensionOwnerCanTeleportMessage = onlyDimensionOwnerCanTeleportMessage;
+	}
+
 	public boolean teleportTeam() {
-		return teleportTeam;
+		return this.teleportTeam;
 	}
 
 	public void setTeleportTeam(boolean teleportTeam) {
@@ -780,7 +835,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public TeleportationMode getTeleportationMode() {
-		return teleportationMode;
+		return this.teleportationMode;
 	}
 
 	public void setTeleportationMode(TeleportationMode teleportationMode) {
@@ -788,7 +843,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public BlockPos getDirectTeleportPositionOffset() {
-		return directTeleportPositionOffset;
+		return this.directTeleportPositionOffset;
 	}
 
 	public void setDirectTeleportPositionOffset(BlockPos directTeleportPositionOffset) {
@@ -796,7 +851,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public double getDirectTeleportOrientationYaw() {
-		return directTeleportOrientationYaw;
+		return this.directTeleportOrientationYaw;
 	}
 
 	// TODO check if input is valid
@@ -806,7 +861,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public double getDirectTeleportOrientationPitch() {
-		return directTeleportOrientationPitch;
+		return this.directTeleportOrientationPitch;
 	}
 
 	// TODO check if input is valid
@@ -816,7 +871,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public SpawnPointType getSpawnPointType() {
-		return spawnPointType;
+		return this.spawnPointType;
 	}
 
 	public void setSpawnPointType(SpawnPointType spawnPointType) {

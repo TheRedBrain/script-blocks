@@ -28,6 +28,7 @@ These blocks have been polished:
   - location entrances can define a cooldown which prevents players from entering a location using that entrance. The cooldown for a location is started automatically when the player dies while in a location or manually via the LocationCooldownStarterBlock.
 - added Location Cooldown Starter Block, this block starts the cooldown for all active locations of all players in a provided UUID List
 - added location reset item cost, defined by location (entrance)
+- added allow_regeneration boolean field to locations and location entrances. This enables the Location Reset button in the teleporter screen.
 - added block settings to toggle spawn effects and persistent entities to triggered (Villager) Spawner Blocks
 - added server config option for the tick interval of the Player Detector Block
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
@@ -91,7 +92,8 @@ The Teleporter Block has become increasingly complex. This rework extracts some 
   - direct block interactions now check for the "dimension owner only" setting
   - the creative mode screen now shows the "Access Position Offset" and the corresponding button only when the teleportation mode is set to "Locations" or "Location". This is done to make clear that other modes don't set the access position.
   - removed show_regenerate_button field from Teleporter Block Entity
-  - added allow_regeneration field to locations and location entrances
+  - added only_dimension_owner_can_teleport_message field to Teleporter Block Entity. This defines the message shown when only_teleport_dimension_owner is set to true and the player is not the dimension owner.
+  - Teleporter Block now checks for items with the "scriptblocks:prevent_interactions" data component. The new prevent_interaction_identifier_string field defines the exact string to compare with the component. The new interaction_prevented_message field defines the message shown when the interaction is denied.
   - several improvements to the teleporter screen
 
 ### Triggered Damage Dealing Block Rework
