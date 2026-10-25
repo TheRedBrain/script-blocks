@@ -34,6 +34,7 @@ These blocks have been polished:
 - added copper variants for the Script Blocks (trap)doors (Interactive Trigger, Teleporter, Use Relay)
 - added Interactive Trigger Soul Candle blocks, in 17 variants. These are functionally identical to the existing Interactive Trigger Candle blocks, but display soul flame particles and have a lower luminance.
 - added Interactive Trigger (Soul) Torch blocks
+- added Interactive Trigger (Soul) Lantern blocks
 - added "scriptblocks:prevent_interactions" data component, containing a list of strings. Some blocks can define a string. If the interacting player has at least one item with the component and the block given string is in the list, the player can't interact with that block.
 
 ### UUID List Handlers

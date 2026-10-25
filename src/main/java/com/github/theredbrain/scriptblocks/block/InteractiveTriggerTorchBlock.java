@@ -59,13 +59,7 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 		return CODEC;
 	}
 
-	@Override
-	protected boolean canReplace(BlockState state, ItemPlacementContext context) {
-		return !context.shouldCancelInteraction() && context.getStack().getItem() == this.asItem() && state.get(Properties.CANDLES) < 4
-				|| super.canReplace(state, context);
-	}
-
-	@Override
+	@Override // TODO allow floating torches?
 	protected BlockState getStateForNeighborUpdate(
 			BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos
 	) {
