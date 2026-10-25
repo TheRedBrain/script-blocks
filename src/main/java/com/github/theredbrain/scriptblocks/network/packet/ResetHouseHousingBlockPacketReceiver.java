@@ -19,7 +19,6 @@ public class ResetHouseHousingBlockPacketReceiver implements ServerPlayNetworkin
 
 		BlockEntity blockEntity = world.getBlockEntity(housingBlockPosition);
 
-		// TODO teleport all serverPlayerEntitys inside to their spawn?
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 			housingBlockEntity.trigger();
 		}

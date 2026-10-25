@@ -61,7 +61,6 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 		this.isOwnerSet = false;
 	}
 
-	// TODO
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
 

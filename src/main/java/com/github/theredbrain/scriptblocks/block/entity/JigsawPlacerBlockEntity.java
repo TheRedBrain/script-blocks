@@ -315,7 +315,6 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 	}
 
-	// TODO rework for list
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {

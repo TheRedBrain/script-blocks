@@ -644,7 +644,14 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 
 	@Override
 	public void reset() {
-		// TODO ?
+		this.playerList.clear();
+		this.area = null;
+		this.calculateAreaBox = true;
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override

@@ -417,7 +417,17 @@ public class TwoAreasPlayerDetectorBlockEntity extends RotatedBlockEntity implem
 
 	@Override
 	public void reset() {
-		// TODO ?
+		this.firstPlayerList.clear();
+		this.secondPlayerList.clear();
+		this.firstArea = null;
+		this.secondArea = null;
+		this.calculateFirstAreaBox = true;
+		this.calculateSecondAreaBox = true;
+		this.markDirty();
+		if (this.world != null) {
+			BlockState blockState = this.world.getBlockState(this.pos);
+			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		}
 	}
 
 	@Override
