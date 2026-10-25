@@ -51,7 +51,17 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 				((DuckPlayerEntityMixin) player).scriptblocks$openInteractiveTriggerBlockScreen(interactiveTriggerBlockEntity);
 				return ActionResult.success(world.isClient);
 			} else {
-				if (canTrigger(state) && interactiveTriggerBlockEntity.canTrigger(player)) {
+				if (interactiveTriggerBlockEntity.isInteractionPrevented(player)) {
+					if (!interactiveTriggerBlockEntity.getInteractionPreventedMessage().isEmpty() && !world.isClient) {
+						player.sendMessage(Text.translatable(interactiveTriggerBlockEntity.getInteractionPreventedMessage()), true);
+					}
+					if (!interactiveTriggerBlockEntity.getInteractionPreventedSound().isEmpty() && !world.isClient) {
+						SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(interactiveTriggerBlockEntity.getInteractionPreventedSound()));
+						if (soundEvent != null) {
+							world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+						}
+					}
+				} else if (canTrigger(state) && interactiveTriggerBlockEntity.canTrigger(player)) {
 					if (!interactiveTriggerBlockEntity.getUnlockedMessage().isEmpty() && !world.isClient) {
 						player.sendMessage(Text.translatable(interactiveTriggerBlockEntity.getUnlockedMessage()), true);
 					}
@@ -62,7 +72,7 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 						}
 					}
 					interactiveTriggerBlockEntity.tryToConsumeKeyItem(player);
-					interactiveTriggerBlockEntity.trigger();
+					interactiveTriggerBlockEntity.triggeredOnInteraction();
 					trigger(state, world, pos);
 					world.emitGameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 				} else {

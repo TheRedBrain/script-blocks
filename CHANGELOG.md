@@ -51,6 +51,8 @@ This new category of script blocks works with lists of UUIDs, namely the UUIDs o
 - changed id of "Jigsaw Placer Block" block entity from "scriptblocks:structure_placer_block" to "scriptblocks:jigsaw_placer_block". This happens automagically for already placed blocks using data fixers with help of the "Easy Data Fixer" mod.
 - fields in all custom data files were changed from "camelCase" to "snake_case".
 - replaced "(un)lock_advancement" fields with "unlock_predicate" field for locations and location entrances
+- all Interactive Trigger Block variants can now be triggered by other blocks
+- all Interactive Trigger Block variants now check for items with the "scriptblocks:prevent_interactions" data component
 - renamed "scriptblocks:removed_on_teleport" data component to "scriptblocks:removed_on_interactions"
 
 ### Boss Controller Block Rework

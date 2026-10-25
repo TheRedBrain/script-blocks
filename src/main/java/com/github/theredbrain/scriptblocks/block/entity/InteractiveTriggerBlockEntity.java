@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.component.type.InteractiveKeyComponent;
+import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -17,7 +18,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
@@ -26,9 +30,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements Resetable {
+public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(new BlockPos(0, 0, 0), false);
 	private String keyIdentifierString = "";
+	private String preventInteractionIdentifierString = "";
+	private String interactionPreventedMessage = "";
+	private String interactionPreventedSound = "";
 	private String lockedMessage = "";
 	private String lockedSound = "";
 	private String unlockedMessage = "";
@@ -45,6 +52,12 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
 		nbt.put("triggered_block", nbtCompound.copy());
+
+		nbt.putString("prevent_interaction_identifier_string", this.preventInteractionIdentifierString);
+
+		nbt.putString("interaction_prevented_message", this.interactionPreventedMessage);
+
+		nbt.putString("interaction_prevented_sound", this.interactionPreventedSound);
 
 		nbt.putString("key_identifier_string", this.keyIdentifierString);
 
@@ -100,6 +113,12 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 					nbtCompound.getBoolean("resets")
 			);
 		}
+
+		this.preventInteractionIdentifierString = nbt.getString("prevent_interaction_identifier_string");
+
+		this.interactionPreventedMessage = nbt.getString("interaction_prevented_message");
+
+		this.interactionPreventedSound = nbt.getString("interaction_prevented_sound");
 
 		if (nbt.contains("keyIdentifierString")) {
 			this.keyIdentifierString = nbt.getString("keyIdentifierString");
@@ -157,6 +176,30 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		this.triggeredBlock = triggeredBlock;
 	}
 
+	public String getPreventInteractionIdentifierString() {
+		return this.preventInteractionIdentifierString;
+	}
+
+	public void setPreventInteractionIdentifierString(String preventInteractionIdentifierString) {
+		this.preventInteractionIdentifierString = preventInteractionIdentifierString;
+	}
+
+	public String getInteractionPreventedMessage() {
+		return this.interactionPreventedMessage;
+	}
+
+	public void setInteractionPreventedMessage(String interactionPreventedMessage) {
+		this.interactionPreventedMessage = interactionPreventedMessage;
+	}
+
+	public String getInteractionPreventedSound() {
+		return this.interactionPreventedSound;
+	}
+
+	public void setInteractionPreventedSound(String interactionPreventedSound) {
+		this.interactionPreventedSound = interactionPreventedSound;
+	}
+
 	public String getKeyIdentifierString() {
 		return this.keyIdentifierString;
 	}
@@ -198,6 +241,10 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 	}
 	// endregion --- getter & setter ---
 
+	public boolean isInteractionPrevented(PlayerEntity playerEntity) {
+		return this.preventInteractionIdentifierString.isEmpty() || PlayerEntityHelper.allowInteractions(playerEntity, this.preventInteractionIdentifierString);
+	}
+
 	public boolean canTrigger(PlayerEntity playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {
 			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
@@ -231,7 +278,7 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 		}
 	}
 
-	public void trigger() {
+	public void triggeredOnInteraction() {
 		if (this.world != null) {
 			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
@@ -260,6 +307,22 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
 				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+			}
+		}
+	}
+
+	@Override
+	public void trigger() {
+		if (this.world != null) {
+			BlockState state = this.world.getBlockState(this.pos);
+			if (state.getBlock() instanceof InteractiveTriggerBlock interactiveTriggerBlock) {
+				if (!this.getUnlockedSound().isEmpty() && !this.world.isClient()) {
+					SoundEvent soundEvent = Registries.SOUND_EVENT.get(Identifier.of(this.getUnlockedSound()));
+					if (soundEvent != null) {
+						this.world.playSound(null, (double) this.pos.getX() + 0.5, (double) this.pos.getY() + 0.5, (double) this.pos.getZ() + 0.5, soundEvent, SoundCategory.BLOCKS, 0.5F, this.world.random.nextFloat() * 0.1F + 0.9F);
+					}
+				}
+				interactiveTriggerBlock.trigger(state, this.world, this.pos);
 			}
 		}
 	}

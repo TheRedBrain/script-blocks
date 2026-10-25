@@ -28,7 +28,13 @@ public class UpdateInteractiveTriggerBlockPacketReceiver implements ServerPlayNe
 
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		String keyItemTag = payload.keyItemTag();
+		String preventInteractionIdentifierString = payload.preventInteractionIdentifierString();
+
+		String keyIdentifierString = payload.keyIdentifierString();
+
+		String interactionPreventedMessage = payload.interactionPreventedMessage();
+
+		String interactionPreventedSound = payload.interactionPreventedSound();
 
 		String lockedMessage = payload.lockedMessage();
 
@@ -46,7 +52,10 @@ public class UpdateInteractiveTriggerBlockPacketReceiver implements ServerPlayNe
 		if (blockEntity instanceof InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
 			interactiveTriggerBlockEntity.reset();
 			interactiveTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			interactiveTriggerBlockEntity.setKeyIdentifierString(keyItemTag);
+			interactiveTriggerBlockEntity.setPreventInteractionIdentifierString(preventInteractionIdentifierString);
+			interactiveTriggerBlockEntity.setKeyIdentifierString(keyIdentifierString);
+			interactiveTriggerBlockEntity.setInteractionPreventedMessage(interactionPreventedMessage);
+			interactiveTriggerBlockEntity.setInteractionPreventedSound(interactionPreventedSound);
 			interactiveTriggerBlockEntity.setLockedMessage(lockedMessage);
 			interactiveTriggerBlockEntity.setLockedSound(lockedSound);
 			interactiveTriggerBlockEntity.setUnlockedMessage(unlockedMessage);

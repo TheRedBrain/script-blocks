@@ -10,7 +10,10 @@ public record UpdateInteractiveTriggerBlockPacket(
 		BlockPos interactiveTriggerBlockPosition,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
-		String keyItemTag,
+		String preventInteractionIdentifierString,
+		String keyIdentifierString,
+		String interactionPreventedMessage,
+		String interactionPreventedSound,
 		String lockedMessage,
 		String lockedSound,
 		String unlockedMessage,
@@ -28,6 +31,9 @@ public record UpdateInteractiveTriggerBlockPacket(
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
 				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
+				registryByteBuf.readString(),
 				registryByteBuf.readString()
 		);
 	}
@@ -36,7 +42,10 @@ public record UpdateInteractiveTriggerBlockPacket(
 		registryByteBuf.writeBlockPos(this.interactiveTriggerBlockPosition);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
-		registryByteBuf.writeString(this.keyItemTag);
+		registryByteBuf.writeString(this.preventInteractionIdentifierString);
+		registryByteBuf.writeString(this.keyIdentifierString);
+		registryByteBuf.writeString(this.interactionPreventedMessage);
+		registryByteBuf.writeString(this.interactionPreventedSound);
 		registryByteBuf.writeString(this.lockedMessage);
 		registryByteBuf.writeString(this.lockedSound);
 		registryByteBuf.writeString(this.unlockedMessage);
