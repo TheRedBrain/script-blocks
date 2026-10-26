@@ -14,13 +14,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -59,130 +59,126 @@ public class TwoAreasPlayerDetectorBlockEntity extends RotatedBlockEntity implem
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showFirstArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.firstAreaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.firstAreaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.firstAreaDimensions));
-		nbt.put("first_area", nbtCompound.copy());
+		view.put("first_area", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showSecondArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.secondAreaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.secondAreaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.secondAreaDimensions));
-		nbt.put("second_area", nbtCompound.copy());
+		view.put("second_area", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onEnteringFirstAreaTriggeredBlock.getLeft()));
+		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.onEnteringFirstAreaTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.onEnteringFirstAreaTriggeredBlock.getRight());
-		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onEnteringFirstAreaUUIDListHandler));
-		nbt.put("on_entering_first_area", nbtCompound.copy());
+		nbtCompound.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.onEnteringFirstAreaUUIDListHandler);
+		view.put("on_entering_first_area", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onEnteringSecondAreaTriggeredBlock.getLeft()));
+		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.onEnteringSecondAreaTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.onEnteringSecondAreaTriggeredBlock.getRight());
-		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onEnteringSecondAreaUUIDListHandler));
-		nbt.put("on_entering_second_area", nbtCompound.copy());
+		nbtCompound.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.onEnteringSecondAreaUUIDListHandler);
+		view.put("on_entering_second_area", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<UUID> listAppender = view.getListAppender("first_player_list", Uuids.CODEC);
 		for (UUID uuid : this.firstPlayerList) {
-			nbtList.add(NbtHelper.fromUuid(uuid));
+			listAppender.add(uuid);
 		}
-		nbt.put("first_player_list", nbtList.copy());
 
-		nbtList = new NbtList();
+		WriteView.ListAppender<UUID> listAppender1 = view.getListAppender("second_player_list", Uuids.CODEC);
 		for (UUID uuid : this.secondPlayerList) {
-			nbtList.add(NbtHelper.fromUuid(uuid));
+			listAppender1.add(uuid);
 		}
-		nbt.put("second_player_list", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		NbtCompound nbtCompound = nbt.getCompound("first_area");
-		this.showFirstArea = nbtCompound.getBoolean("visible");
+		NbtCompound nbtCompound = view.read("first_area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showFirstArea = nbtCompound.getBoolean("visible", false);
 
 		this.firstAreaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
 		this.firstAreaPositionOffset = BlockPos.max(
 				BlockPos.min(
-						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		nbtCompound = nbt.getCompound("second_area");
-		this.showSecondArea = nbtCompound.getBoolean("visible");
+		nbtCompound = view.read("second_area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showSecondArea = nbtCompound.getBoolean("visible", false);
 
 		this.secondAreaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
 		this.secondAreaPositionOffset = BlockPos.max(
 				BlockPos.min(
-						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		nbtCompound = nbt.getCompound("on_entering_first_area");
+		nbtCompound = view.read("on_entering_first_area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 		this.onEnteringFirstAreaTriggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("triggered_block_resets")
+				nbtCompound.getBoolean("triggered_block_resets", false)
 		);
 
 		this.onEnteringFirstAreaUUIDListHandler = BlockPos.max(
 				BlockPos.min(
-						NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		nbtCompound = nbt.getCompound("on_entering_second_area");
+		nbtCompound = view.read("on_entering_second_area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 		this.onEnteringSecondAreaTriggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
+								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("triggered_block_resets")
+				nbtCompound.getBoolean("triggered_block_resets", false)
 		);
 
 		this.onEnteringSecondAreaUUIDListHandler = BlockPos.max(
 				BlockPos.min(
-						NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
 		this.firstPlayerList.clear();
-		NbtList nbtList = nbt.getList("first_player_list", NbtElement.INT_ARRAY_TYPE);
-		for (NbtElement nbtElement : nbtList) {
-			this.firstPlayerList.add(NbtHelper.toUuid(nbtElement));
+		for (UUID uuid : view.getTypedListView("first_player_list", Uuids.CODEC)) {
+			this.firstPlayerList.add(uuid);
 		}
 
 		this.secondPlayerList.clear();
-		nbtList = nbt.getList("second_player_list", NbtElement.INT_ARRAY_TYPE);
-		for (NbtElement nbtElement : nbtList) {
-			this.secondPlayerList.add(NbtHelper.toUuid(nbtElement));
+		for (UUID uuid : view.getTypedListView("second_player_list", Uuids.CODEC)) {
+			this.secondPlayerList.add(uuid);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

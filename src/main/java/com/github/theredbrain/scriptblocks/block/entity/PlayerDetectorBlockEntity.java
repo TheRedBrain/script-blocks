@@ -14,16 +14,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
@@ -57,308 +56,128 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putBoolean("enable_ticking", this.enableTicking);
+		view.putBoolean("enable_ticking", this.enableTicking);
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		nbt.put("area", nbtCompound.copy());
+		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onEnteringTriggeredBlock.getLeft()));
+		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.onEnteringTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.onEnteringTriggeredBlock.getRight());
-		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onEnteringUUIDListHandler));
-		nbt.put("on_entering", nbtCompound.copy());
+		nbtCompound.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.onEnteringUUIDListHandler);
+		view.put("on_entering", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onLeavingTriggeredBlock.getLeft()));
+		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.onLeavingTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.onLeavingTriggeredBlock.getRight());
-		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onLeavingUUIDListHandler));
-		nbt.put("on_leaving", nbtCompound.copy());
+		nbtCompound.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.onLeavingUUIDListHandler);
+		view.put("on_leaving", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", NbtHelper.fromBlockPos(this.onTriggeringTriggeredBlock.getLeft()));
+		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.onTriggeringTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.onTriggeringTriggeredBlock.getRight());
-		nbtCompound.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.onTriggeringUUIDListHandler));
-		nbt.put("on_triggering", nbtCompound);
+		nbtCompound.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.onTriggeringUUIDListHandler);
+		view.put("on_triggering", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<UUID> listAppender = view.getListAppender("player_list", Uuids.CODEC);
 		for (UUID uuid : this.playerList) {
-			nbtList.add(NbtHelper.fromUuid(uuid));
+			listAppender.add(uuid);
 		}
-		nbt.put("player_list", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		this.enableTicking = nbt.getBoolean("enable_ticking");
+		this.enableTicking = view.getBoolean("enable_ticking", false);
 
-		NbtCompound nbtCompound = nbt.getCompound("area");
-		if (nbt.contains("showArea")) {
-			this.showArea = nbt.getBoolean("showArea");
-			nbt.remove("showArea");
-		} else if (nbt.contains("show_area")) {
-			this.showArea = nbt.getBoolean("show_area");
-			nbt.remove("show_area");
-		} else {
-			this.showArea = nbtCompound.getBoolean("visible");
-		}
+		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showArea = nbtCompound.getBoolean("visible", false);
 
-		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
-			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
-			this.calculateAreaBox = true;
-			nbt.remove("areaMinX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMaxZ");
-		} else if (nbt.contains("area_min_x") || nbt.contains("area_min_y") || nbt.contains("area_min_z") || nbt.contains("area_max_x") || nbt.contains("area_max_y") || nbt.contains("area_max_z")) {
-			this.area = new Box(nbt.getDouble("area_min_x"), nbt.getDouble("area_min_y"), nbt.getDouble("area_min_z"), nbt.getDouble("area_max_x"), nbt.getDouble("area_max_y"), nbt.getDouble("area_max_z"));
-			this.calculateAreaBox = true;
-			nbt.remove("area_min_x");
-			nbt.remove("area_min_y");
-			nbt.remove("area_min_z");
-			nbt.remove("area_max_x");
-			nbt.remove("area_max_y");
-			nbt.remove("area_max_z");
-		}
+		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
-		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
-			);
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
-			);
-			nbt.remove("area_dimensions_x");
-			nbt.remove("area_dimensions_y");
-			nbt.remove("area_dimensions_z");
-		} else {
-			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
-		}
+		this.areaPositionOffset = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
-			);
-			nbt.remove("area_position_offset_x");
-			nbt.remove("area_position_offset_y");
-			nbt.remove("area_position_offset_z");
-		} else {
-			this.areaPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		nbtCompound = view.read("on_entering", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.onEnteringTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("triggered_block_resets", false)
+		);
 
-		nbtCompound = nbt.getCompound("on_entering");
-		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.onEnteringTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("triggeredBlockResets")
-			);
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		} else if (nbt.contains("on_entering_triggered_block_position_offset_x") || nbt.contains("on_entering_triggered_block_position_offset_y") || nbt.contains("on_entering_triggered_block_position_offset_z")) {
-			this.onEnteringTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("on_entering_triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("on_entering_triggered_block_resets")
-			);
-			nbt.remove("on_entering_triggered_block_position_offset_x");
-			nbt.remove("on_entering_triggered_block_position_offset_y");
-			nbt.remove("on_entering_triggered_block_position_offset_z");
-			nbt.remove("on_entering_triggered_block_resets");
-		} else {
-			this.onEnteringTriggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("triggered_block_resets")
-			);
-		}
-
-		if (nbt.contains("on_entering_uuid_list_handler_position_offset_x") || nbt.contains("on_entering_uuid_list_handler_position_offset_y") || nbt.contains("on_entering_uuid_list_handler_position_offset_z")) {
-			this.onEnteringUUIDListHandler = new BlockPos(
-					MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("on_entering_uuid_list_handler_position_offset_z"), -48, 48)
-			);
-			nbt.remove("on_entering_uuid_list_handler_position_offset_x");
-			nbt.remove("on_entering_uuid_list_handler_position_offset_y");
-			nbt.remove("on_entering_uuid_list_handler_position_offset_z");
-		} else {
-			this.onEnteringUUIDListHandler = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.onEnteringUUIDListHandler = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
 
-		nbtCompound = nbt.getCompound("on_leaving");
-		if (nbt.contains("on_leaving_triggered_block_position_offset_x") || nbt.contains("on_leaving_triggered_block_position_offset_y") || nbt.contains("on_leaving_triggered_block_position_offset_z")) {
-			this.onLeavingTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("on_leaving_triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("on_leaving_triggered_block_resets")
-			);
-			nbt.remove("on_leaving_triggered_block_position_offset_x");
-			nbt.remove("on_leaving_triggered_block_position_offset_y");
-			nbt.remove("on_leaving_triggered_block_position_offset_z");
-		} else {
-			this.onLeavingTriggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("triggered_block_resets")
-			);
-		}
+		nbtCompound = view.read("on_leaving", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.onLeavingTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("triggered_block_resets", false)
+		);
 
-		if (nbt.contains("on_leaving_uuid_list_handler_position_offset_x") || nbt.contains("on_leaving_uuid_list_handler_position_offset_y") || nbt.contains("on_leaving_uuid_list_handler_position_offset_z")) {
-			this.onLeavingUUIDListHandler = new BlockPos(
-					MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("on_leaving_uuid_list_handler_position_offset_z"), -48, 48)
-			);
-			nbt.remove("on_leaving_uuid_list_handler_position_offset_x");
-			nbt.remove("on_leaving_uuid_list_handler_position_offset_y");
-			nbt.remove("on_leaving_uuid_list_handler_position_offset_z");
-		} else {
-			this.onLeavingUUIDListHandler = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.onLeavingUUIDListHandler = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
+		nbtCompound = view.read("on_triggering", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.onTriggeringTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("triggered_block_resets", false)
+		);
 
-		nbtCompound = nbt.getCompound("on_triggering");
-		if (nbt.contains("on_triggering_triggered_block_position_offset_x") || nbt.contains("on_triggering_triggered_block_position_offset_y") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("on_triggering_triggered_block_position_offset_z")) {
-			this.onTriggeringTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("on_triggering_triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("on_triggering_triggered_block_resets")
-			);
-			nbt.remove("on_triggering_triggered_block_position_offset_x");
-			nbt.remove("on_triggering_triggered_block_position_offset_y");
-			nbt.remove("on_triggering_triggered_block_position_offset_z");
-		} else {
-			this.onTriggeringTriggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "triggered_block_position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("triggered_block_resets")
-			);
-		}
-
-		if (nbt.contains("on_triggering_uuid_list_handler_position_offset_x") || nbt.contains("on_triggering_uuid_list_handler_position_offset_y") || nbt.contains("on_triggering_uuid_list_handler_position_offset_z")) {
-			this.onTriggeringUUIDListHandler = new BlockPos(
-					MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("on_triggering_uuid_list_handler_position_offset_z"), -48, 48)
-			);
-			nbt.remove("on_triggering_uuid_list_handler_position_offset_x");
-			nbt.remove("on_triggering_uuid_list_handler_position_offset_y");
-			nbt.remove("on_triggering_uuid_list_handler_position_offset_z");
-		} else {
-			this.onTriggeringUUIDListHandler = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.onTriggeringUUIDListHandler = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
 		this.playerList.clear();
-		if (nbt.contains("playerListSize")) {
-			int playerListSize = nbt.getInt("playerListSize");
-			for (int i = 0; i < playerListSize; i++) {
-				if (nbt.contains("playerListEntry_" + i)) {
-					this.playerList.add(nbt.getUuid("playerListEntry_" + i));
-					nbt.remove("playerListEntry_" + i);
-				}
-			}
-			nbt.remove("playerListSize");
-		} else if (nbt.contains("player_list_size")) {
-			int playerListSize = nbt.getInt("player_list_size");
-			for (int i = 0; i < playerListSize; i++) {
-				if (nbt.contains("player_list_entry_" + i)) {
-					this.playerList.add(nbt.getUuid("player_list_entry_" + i));
-				}
-				nbt.remove("player_list_entry_" + i);
-			}
-			nbt.remove("player_list_size");
-		} else {
-			NbtList nbtList = nbt.getList("player_list", NbtElement.INT_ARRAY_TYPE);
-			for (NbtElement nbtElement : nbtList) {
-				this.playerList.add(NbtHelper.toUuid(nbtElement));
-			}
+		for (UUID uuid : view.getTypedListView("player_list", Uuids.CODEC)) {
+			this.playerList.add(uuid);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

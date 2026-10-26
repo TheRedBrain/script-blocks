@@ -9,13 +9,13 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private BlockPos firstDataProvidingBlockPosOffset = BlockPos.ORIGIN;
@@ -27,84 +27,39 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.put("first_data_providing_block_pos_offset", NbtHelper.fromBlockPos(this.firstDataProvidingBlockPosOffset));
+		view.put("first_data_providing_block_pos_offset", BlockPos.CODEC, this.firstDataProvidingBlockPosOffset);
 
-		nbt.put("second_data_providing_block_pos_offset", NbtHelper.fromBlockPos(this.secondDataProvidingBlockPosOffset));
+		view.put("second_data_providing_block_pos_offset", BlockPos.CODEC, this.secondDataProvidingBlockPosOffset);
 
-		nbt.putString("data_identifier", this.dataIdentifier);
+		view.putString("data_identifier", this.dataIdentifier);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("firstDataProvidingBlockPosOffsetX") && nbt.contains("firstDataProvidingBlockPosOffsetY") && nbt.contains("firstDataProvidingBlockPosOffsetZ")) {
-			this.firstDataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-			nbt.remove("firstDataProvidingBlockPosOffsetX");
-			nbt.remove("firstDataProvidingBlockPosOffsetY");
-			nbt.remove("firstDataProvidingBlockPosOffsetZ");
-		} else if (nbt.contains("first_data_providing_block_pos_offset_x") && nbt.contains("first_data_providing_block_pos_offset_y") && nbt.contains("first_data_providing_block_pos_offset_z")) {
-			this.firstDataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("first_data_providing_block_pos_offset_z"), -48, 48)
-			);
-			nbt.remove("first_data_providing_block_pos_offset_x");
-			nbt.remove("first_data_providing_block_pos_offset_y");
-			nbt.remove("first_data_providing_block_pos_offset_z");
-		} else {
-			this.firstDataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "first_data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.firstDataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("first_data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("secondDataProvidingBlockPosOffsetX") && nbt.contains("secondDataProvidingBlockPosOffsetY") && nbt.contains("secondDataProvidingBlockPosOffsetZ")) {
-			this.secondDataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-			nbt.remove("secondDataProvidingBlockPosOffsetX");
-			nbt.remove("secondDataProvidingBlockPosOffsetY");
-			nbt.remove("secondDataProvidingBlockPosOffsetZ");
-		} else if (nbt.contains("second_data_providing_block_pos_offset_x") && nbt.contains("second_data_providing_block_pos_offset_y") && nbt.contains("second_data_providing_block_pos_offset_z")) {
-			this.secondDataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("second_data_providing_block_pos_offset_z"), -48, 48)
-			);
-			nbt.remove("second_data_providing_block_pos_offset_x");
-			nbt.remove("second_data_providing_block_pos_offset_y");
-			nbt.remove("second_data_providing_block_pos_offset_z");
-		} else {
-			this.secondDataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "second_data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.secondDataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("second_data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("dataIdentifier")) {
-			this.dataIdentifier = nbt.getString("dataIdentifier");
-			nbt.remove("dataIdentifier");
-		} else {
-			this.dataIdentifier = nbt.getString("data_identifier");
-		}
+		this.dataIdentifier = view.getString("data_identifier", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

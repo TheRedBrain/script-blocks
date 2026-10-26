@@ -1,13 +1,11 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.Registries;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.village.VillagerData;
 import net.minecraft.village.VillagerDataContainer;
@@ -16,39 +14,26 @@ import net.minecraft.village.VillagerType;
 
 public class TriggeredVillagerSpawnerBlockEntity extends TriggeredSpawnerBlockEntity {
 
-	private static final VillagerData DEFAULT_VILLAGER_DATA = new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1);
+	private static final VillagerData DEFAULT_VILLAGER_DATA = new VillagerData(Registries.VILLAGER_TYPE.getOrThrow(VillagerType.PLAINS), Registries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE), 1);
 	private VillagerData villagerData = DEFAULT_VILLAGER_DATA;
 
 	public TriggeredVillagerSpawnerBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.TRIGGERED_VILLAGER_SPAWNER_BLOCK_ENTITY, pos, state);
 	}
 
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		VillagerData.CODEC
-				.encodeStart(NbtOps.INSTANCE, this.villagerData)
-				.resultOrPartial(ScriptBlocks.LOGGER::error)
-				.ifPresent(nbtElement -> nbt.put("villager_data", nbtElement));
+		view.put("villager_data", VillagerData.CODEC, this.getVillagerData());
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("VillagerData", NbtElement.COMPOUND_TYPE)) {
-			VillagerData.CODEC
-					.parse(NbtOps.INSTANCE, nbt.get("VillagerData"))
-					.resultOrPartial(ScriptBlocks.LOGGER::error)
-					.ifPresent(villagerData -> this.villagerData = villagerData);
-		} else {
-			VillagerData.CODEC
-					.parse(NbtOps.INSTANCE, nbt.get("villager_data"))
-					.resultOrPartial(ScriptBlocks.LOGGER::error)
-					.ifPresent(villagerData -> this.villagerData = villagerData);
-		}
+		this.villagerData = view.read("villager_data", VillagerData.CODEC).orElse(DEFAULT_VILLAGER_DATA);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 
 	}
 

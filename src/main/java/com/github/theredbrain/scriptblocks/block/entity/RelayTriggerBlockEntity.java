@@ -12,11 +12,10 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -50,234 +49,89 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putString("selection_mode", this.selectionMode.asString());
+		view.putString("selection_mode", this.selectionMode.asString());
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showArea);
 		nbtCompound.putBoolean("is_reset", this.resetsArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		nbt.put("area", nbtCompound.copy());
+		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("triggered_blocks", NbtCompound.CODEC);
 		for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(triggeredBlock.getLeft().getLeft()));
+			nbtCompound.put("position_offset", BlockPos.CODEC, triggeredBlock.getLeft().getLeft());
 			nbtCompound.putBoolean("resets", triggeredBlock.getLeft().getRight());
 			nbtCompound.putInt("chance", triggeredBlock.getRight());
-			nbtList.add(nbtCompound.copy());
+			listAppender.add(nbtCompound.copy());
 		}
-		nbt.put("triggered_blocks", nbtList);
 
-		nbt.putString("trigger_mode", this.triggerMode.asString());
+		view.putString("trigger_mode", this.triggerMode.asString());
 
-		nbt.putBoolean("is_trigger_amount_data_driven", this.isTriggerAmountDataDriven);
+		view.putBoolean("is_trigger_amount_data_driven", this.isTriggerAmountDataDriven);
 
-		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbt.putString("data_identifier", this.dataIdentifier);
+		view.putString("data_identifier", this.dataIdentifier);
 
-		nbt.putInt("trigger_amount", this.triggerAmount);
+		view.putInt("trigger_amount", this.triggerAmount);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("selectionMode")) {
-			this.selectionMode = SelectionMode.byName(nbt.getString("selectionMode")).orElseGet(() -> SelectionMode.LIST);
-			nbt.remove("selectionMode");
-		} else {
-			this.selectionMode = SelectionMode.byName(nbt.getString("selection_mode")).orElseGet(() -> SelectionMode.LIST);
-		}
+		this.selectionMode = SelectionMode.byName(view.getString("selection_mode", "")).orElseGet(() -> SelectionMode.LIST);
 
-		NbtCompound nbtCompound = nbt.getCompound("area");
-		if (nbt.contains("showArea")) {
-			this.showArea = nbt.getBoolean("showArea");
-			nbt.remove("showArea");
-		} else if (nbt.contains("show_area")) {
-			this.showArea = nbt.getBoolean("show_area");
-			nbt.remove("show_area");
-		} else {
-			this.showArea = nbtCompound.getBoolean("visible");
-		}
+		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showArea = nbtCompound.getBoolean("visible", false);
 
-		if (nbt.contains("resetsArea")) {
-			this.resetsArea = nbt.getBoolean("resetsArea");
-			nbt.remove("resetsArea");
-		} else if (nbt.contains("resets_area")) {
-			this.resetsArea = nbt.getBoolean("resets_area");
-			nbt.remove("resets_area");
-		} else {
-			this.resetsArea = nbtCompound.getBoolean("is_reset");
-		}
+		this.resetsArea = nbtCompound.getBoolean("is_reset", false);
 
-		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
-			);
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
-			);
-			nbt.remove("area_dimensions_x");
-			nbt.remove("area_dimensions_y");
-			nbt.remove("area_dimensions_z");
-		} else {
-			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
-		}
+		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
-		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
-			);
-			nbt.remove("area_position_offset_x");
-			nbt.remove("area_position_offset_y");
-			nbt.remove("area_position_offset_z");
-		} else {
-			this.areaPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.areaPositionOffset = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
 		this.triggeredBlocks.clear();
-
-		int triggeredBlocksSize;
-		int x;
-		int y;
-		int z;
-		boolean bl;
-		int chance;
-		if (nbt.contains("triggeredBlocksSize")) {
-			triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
-			for (int i = 0; i < triggeredBlocksSize; i++) {
-				x = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX_" + i), -48, 48);
-				y = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY_" + i), -48, 48);
-				z = MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ_" + i), -48, 48);
-				bl = nbt.getBoolean("triggeredBlockResets_" + i);
-				chance = MathHelper.clamp(nbt.getInt("triggeredBlockChance_" + i), 0, 100);
-				this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
-				nbt.remove("triggeredBlockPositionOffsetX_" + i);
-				nbt.remove("triggeredBlockPositionOffsetY_" + i);
-				nbt.remove("triggeredBlockPositionOffsetZ_" + i);
-				nbt.remove("triggeredBlockResets_" + i);
-				nbt.remove("triggeredBlockChance_" + i);
-			}
-			nbt.remove("triggeredBlocksSize");
-		} else if (nbt.contains("triggered_blocks_size")) {
-			triggeredBlocksSize = nbt.getInt("triggered_blocks_size");
-			for (int i = 0; i < triggeredBlocksSize; i++) {
-				x = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x_" + i), -48, 48);
-				y = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y_" + i), -48, 48);
-				z = MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z_" + i), -48, 48);
-				bl = nbt.getBoolean("triggered_block_resets_" + i);
-				chance = MathHelper.clamp(nbt.getInt("triggered_block_chance_" + i), 0, 100);
-				this.triggeredBlocks.add(new MutablePair<>(new MutablePair<>(new BlockPos(x, y, z), bl), chance));
-				nbt.remove("triggered_block_position_offset_x_" + i);
-				nbt.remove("triggered_block_position_offset_y_" + i);
-				nbt.remove("triggered_block_position_offset_z_" + i);
-				nbt.remove("triggered_block_resets_" + i);
-				nbt.remove("triggered_block_chance_" + i);
-			}
-			nbt.remove("triggered_blocks_size");
-		} else {
-			NbtList nbtList = nbt.getList("triggered_blocks", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				nbtCompound = nbtList.getCompound(i);
-				this.triggeredBlocks.add(
-						new MutablePair<>(
-								new MutablePair<>(
-										NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-										nbtCompound.getBoolean("resets")
-								),
-								MathHelper.clamp(nbtCompound.getInt("chance"), 0, 100)
-						)
-				);
-			}
-		}
-
-		if (nbt.contains("triggerMode")) {
-			this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElseGet(() -> TriggerMode.NORMAL);
-			nbt.remove("triggerMode");
-		} else {
-			this.triggerMode = TriggerMode.byName(nbt.getString("trigger_mode")).orElseGet(() -> TriggerMode.NORMAL);
-		}
-
-		if (nbt.contains("isTriggerAmountDataDriven")) {
-			this.isTriggerAmountDataDriven = nbt.getBoolean("isTriggerAmountDataDriven");
-			nbt.remove("isTriggerAmountDataDriven");
-		} else {
-			this.isTriggerAmountDataDriven = nbt.getBoolean("is_trigger_amount_data_driven");
-		}
-
-		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
-		} else if (nbt.contains("data_providing_block_position_offset_x") || nbt.contains("data_providing_block_position_offset_y") || nbt.contains("data_providing_block_position_offset_z")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_z"), -48, 48)
-			);
-			nbt.remove("data_providing_block_position_offset_x");
-			nbt.remove("data_providing_block_position_offset_y");
-			nbt.remove("data_providing_block_position_offset_z");
-		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
+		for (NbtCompound nbtCompound1 : view.getTypedListView("triggered_blocks", NbtCompound.CODEC)) {
+			this.triggeredBlocks.add(
+					new MutablePair<>(
+							new MutablePair<>(
+									nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+									nbtCompound1.getBoolean("resets", false)
+							),
+							MathHelper.clamp(nbtCompound1.getInt("chance", 1), 0, 100)
+					)
 			);
 		}
 
-		if (nbt.contains("dataIdentifier")) {
-			this.dataIdentifier = nbt.getString("dataIdentifier");
-			nbt.remove("dataIdentifier");
-		} else {
-			this.dataIdentifier = nbt.getString("data_identifier");
-		}
+		this.triggerMode = TriggerMode.byName(view.getString("trigger_mode", "")).orElseGet(() -> TriggerMode.NORMAL);
 
-		if (nbt.contains("triggerAmount")) {
-			this.triggerAmount = nbt.getInt("triggerAmount");
-			nbt.remove("triggerAmount");
-		} else {
-			this.triggerAmount = nbt.getInt("trigger_amount");
-		}
+		this.isTriggerAmountDataDriven = view.getBoolean("is_trigger_amount_data_driven", true);
 
-		super.readNbt(nbt, registryLookup);
+		this.dataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
+
+		this.dataIdentifier = view.getString("data_identifier", "");
+
+		this.triggerAmount = view.getInt("trigger_amount", 1);
+
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

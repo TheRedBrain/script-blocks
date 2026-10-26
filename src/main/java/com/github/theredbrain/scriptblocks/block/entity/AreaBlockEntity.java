@@ -20,11 +20,14 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -78,242 +81,242 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		if (this.showArea) {
-			nbt.putBoolean("showArea", true);
+			view.putBoolean("showArea", true);
 		} else {
-			nbt.remove("showArea");
+			view.remove("showArea");
 		}
 
 		if (this.area != null) {
-			nbt.putDouble("areaMinX", this.area.minX);
-			nbt.putDouble("areaMaxX", this.area.maxX);
-			nbt.putDouble("areaMinY", this.area.minY);
-			nbt.putDouble("areaMaxY", this.area.maxY);
-			nbt.putDouble("areaMinZ", this.area.minZ);
-			nbt.putDouble("areaMaxZ", this.area.maxZ);
+			view.putDouble("areaMinX", this.area.minX);
+			view.putDouble("areaMaxX", this.area.maxX);
+			view.putDouble("areaMinY", this.area.minY);
+			view.putDouble("areaMaxY", this.area.maxY);
+			view.putDouble("areaMinZ", this.area.minZ);
+			view.putDouble("areaMaxZ", this.area.maxZ);
 		} else {
-			nbt.remove("areaMinX");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxZ");
+			view.remove("areaMinX");
+			view.remove("areaMaxX");
+			view.remove("areaMinY");
+			view.remove("areaMaxY");
+			view.remove("areaMinZ");
+			view.remove("areaMaxZ");
 		}
 
 		if (this.areaDimensions.getX() != 0) {
-			nbt.putInt("areaDimensionsX", this.areaDimensions.getX());
+			view.putInt("areaDimensionsX", this.areaDimensions.getX());
 		} else {
-			nbt.remove("areaDimensionsX");
+			view.remove("areaDimensionsX");
 		}
 
 		if (this.areaDimensions.getY() != 0) {
-			nbt.putInt("areaDimensionsY", this.areaDimensions.getY());
+			view.putInt("areaDimensionsY", this.areaDimensions.getY());
 		} else {
-			nbt.remove("areaDimensionsY");
+			view.remove("areaDimensionsY");
 		}
 
 		if (this.areaDimensions.getZ() != 0) {
-			nbt.putInt("areaDimensionsZ", this.areaDimensions.getZ());
+			view.putInt("areaDimensionsZ", this.areaDimensions.getZ());
 		} else {
-			nbt.remove("areaDimensionsZ");
+			view.remove("areaDimensionsZ");
 		}
 
 		if (this.areaPositionOffset.getX() != 0) {
-			nbt.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
+			view.putInt("areaPositionOffsetX", this.areaPositionOffset.getX());
 		} else {
-			nbt.remove("areaPositionOffsetX");
+			view.remove("areaPositionOffsetX");
 		}
 
 		if (this.areaPositionOffset.getY() != 0) {
-			nbt.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
+			view.putInt("areaPositionOffsetY", this.areaPositionOffset.getY());
 		} else {
-			nbt.remove("areaPositionOffsetY");
+			view.remove("areaPositionOffsetY");
 		}
 
 		if (this.areaPositionOffset.getZ() != 0) {
-			nbt.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
+			view.putInt("areaPositionOffsetZ", this.areaPositionOffset.getZ());
 		} else {
-			nbt.remove("areaPositionOffsetZ");
+			view.remove("areaPositionOffsetZ");
 		}
 
 
 		if (!this.appliedStatusEffectIdentifier.isEmpty()) {
-			nbt.putString("appliedStatusEffectIdentifier", this.appliedStatusEffectIdentifier);
+			view.putString("appliedStatusEffectIdentifier", this.appliedStatusEffectIdentifier);
 		} else {
-			nbt.remove("appliedStatusEffectIdentifier");
+			view.remove("appliedStatusEffectIdentifier");
 		}
 
 		if (this.appliedStatusEffectAmplifier != 0) {
-			nbt.putInt("appliedStatusEffectAmplifier", this.appliedStatusEffectAmplifier);
+			view.putInt("appliedStatusEffectAmplifier", this.appliedStatusEffectAmplifier);
 		} else {
-			nbt.remove("appliedStatusEffectAmplifier");
+			view.remove("appliedStatusEffectAmplifier");
 		}
 
 		if (this.appliedStatusEffectAmbient) {
-			nbt.putBoolean("appliedStatusEffectAmbient", true);
+			view.putBoolean("appliedStatusEffectAmbient", true);
 		} else {
-			nbt.remove("appliedStatusEffectAmbient");
+			view.remove("appliedStatusEffectAmbient");
 		}
 
 		if (this.appliedStatusEffectShowParticles) {
-			nbt.putBoolean("appliedStatusEffectShowParticles", true);
+			view.putBoolean("appliedStatusEffectShowParticles", true);
 		} else {
-			nbt.remove("appliedStatusEffectShowParticles");
+			view.remove("appliedStatusEffectShowParticles");
 		}
 
 		if (this.appliedStatusEffectShowIcon) {
-			nbt.putBoolean("appliedStatusEffectShowIcon", true);
+			view.putBoolean("appliedStatusEffectShowIcon", true);
 		} else {
-			nbt.remove("appliedStatusEffectShowIcon");
+			view.remove("appliedStatusEffectShowIcon");
 		}
 
 
 		if (this.messageMode != MessageMode.OVERLAY) {
-			nbt.putString("messageMode", this.messageMode.asString());
+			view.putString("messageMode", this.messageMode.asString());
 		} else {
-			nbt.remove("messageMode");
+			view.remove("messageMode");
 		}
 
 		if (!this.joinMessage.isEmpty()) {
-			nbt.putString("joinMessage", this.joinMessage);
+			view.putString("joinMessage", this.joinMessage);
 		} else {
-			nbt.remove("joinMessage");
+			view.remove("joinMessage");
 		}
 
 		if (!this.leaveMessage.isEmpty()) {
-			nbt.putString("leaveMessage", this.leaveMessage);
+			view.putString("leaveMessage", this.leaveMessage);
 		} else {
-			nbt.remove("leaveMessage");
+			view.remove("leaveMessage");
 		}
 
 		if (!this.triggeredMessage.isEmpty()) {
-			nbt.putString("triggeredMessage", this.triggeredMessage);
+			view.putString("triggeredMessage", this.triggeredMessage);
 		} else {
-			nbt.remove("triggeredMessage");
+			view.remove("triggeredMessage");
 		}
 
 
 		if (this.hasTriggered) {
-			nbt.putBoolean("hasTriggered", true);
+			view.putBoolean("hasTriggered", true);
 		} else {
-			nbt.remove("hasTriggered");
+			view.remove("hasTriggered");
 		}
 
 		if (this.wasTriggered) {
-			nbt.putBoolean("wasTriggered", true);
+			view.putBoolean("wasTriggered", true);
 		} else {
-			nbt.remove("wasTriggered");
+			view.remove("wasTriggered");
 		}
 
 		if (this.triggerMode != TriggerMode.ALWAYS) {
-			nbt.putString("triggerMode", this.triggerMode.asString());
+			view.putString("triggerMode", this.triggerMode.asString());
 		} else {
-			nbt.remove("triggerMode");
+			view.remove("triggerMode");
 		}
 
 		if (this.triggeredMode != TriggeredMode.ONCE) {
-			nbt.putString("triggeredMode", this.triggeredMode.asString());
+			view.putString("triggeredMode", this.triggeredMode.asString());
 		} else {
-			nbt.remove("triggeredMode");
+			view.remove("triggeredMode");
 		}
 
 		if (this.maxTimer > 1) {
-			nbt.putInt("maxTimer", this.maxTimer);
+			view.putInt("maxTimer", this.maxTimer);
 		} else {
-			nbt.remove("maxTimer");
+			view.remove("maxTimer");
 		}
 
 		if (this.triggeredBlock.getLeft() != TRIGGERED_BLOCK_POS_DEFAULT || !this.triggeredBlock.getRight()) {
-			nbt.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
-			nbt.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
-			nbt.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
-			nbt.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
+			view.putInt("triggeredBlockPositionOffsetX", this.triggeredBlock.getLeft().getX());
+			view.putInt("triggeredBlockPositionOffsetY", this.triggeredBlock.getLeft().getY());
+			view.putInt("triggeredBlockPositionOffsetZ", this.triggeredBlock.getLeft().getZ());
+			view.putBoolean("triggeredBlockResets", this.triggeredBlock.getRight());
 		} else {
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
+			view.remove("triggeredBlockPositionOffsetX");
+			view.remove("triggeredBlockPositionOffsetY");
+			view.remove("triggeredBlockPositionOffsetZ");
+			view.remove("triggeredBlockResets");
 		}
 
 		int playerListSize = playerList.size();
-		nbt.putInt("playerListSize", playerListSize);
+		view.putInt("playerListSize", playerListSize);
 		for (int i = 0; i < playerListSize; i++) {
-			nbt.putUuid("playerListEntry_" + i, this.playerList.get(i));
+			view.putIntArray("playerListEntry_" + i, Uuids.toIntArray(this.playerList.get(i)));
 		}
 
 		int playerList2Size = playerList2.size();
-		nbt.putInt("playerList2Size", playerList2Size);
+		view.putInt("playerList2Size", playerList2Size);
 		for (int i = 0; i < playerList2Size; i++) {
-			nbt.putUuid("playerList2Entry_" + i, this.playerList2.get(i));
+			view.putIntArray("playerList2Entry_" + i, Uuids.toIntArray(this.playerList2.get(i)));
 		}
 
 		List<UUID> keyList = this.playerMap.keySet().stream().toList();
 		int playerMapSize = this.playerMap.keySet().size();
-		nbt.putInt("playerMapSize", playerMapSize);
+		view.putInt("playerMapSize", playerMapSize);
 		for (int i = 0; i < playerMapSize; i++) {
 			UUID key = keyList.get(i);
-			nbt.putUuid("key_" + i, key);
-			nbt.putInt("timer_" + i, this.playerMap.get(key));
+			view.putIntArray("key_" + i, Uuids.toIntArray(key));
+			view.putInt("timer_" + i, this.playerMap.get(key));
 		}
 
 		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Area Block detected at: " + this.pos.toString() + ". This block will be removed in the future.", this.world != null ? this.world.getServer() : null);
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		this.showArea = nbt.getBoolean("showArea");
+		this.showArea = view.getBoolean("showArea", true);
 
-		if (nbt.contains("areaMinX") && nbt.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
-			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
+		if (nbt.contains("areaMinX") && view.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
+			this.area = new Box(view.getDouble("areaMinX"), view.getDouble("areaMinY"), view.getDouble("areaMinZ"), view.getDouble("areaMaxX"), view.getDouble("areaMaxY"), view.getDouble("areaMaxZ"));
 			this.calculateAreaBox = true;
 		}
 
-		int i = MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48);
-		int j = MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48);
-		int k = MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48);
+		int i = MathHelper.clamp(view.getInt("areaDimensionsX", 0), 0, 48);
+		int j = MathHelper.clamp(view.getInt("areaDimensionsY", 0), 0, 48);
+		int k = MathHelper.clamp(view.getInt("areaDimensionsZ", 0), 0, 48);
 		this.areaDimensions = new Vec3i(i, j, k);
 
-		int l = MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48);
-		int m = MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48);
-		int n = MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48);
+		int l = MathHelper.clamp(view.getInt("areaPositionOffsetX", 0), -48, 48);
+		int m = MathHelper.clamp(view.getInt("areaPositionOffsetY", 0), -48, 48);
+		int n = MathHelper.clamp(view.getInt("areaPositionOffsetZ", 0), -48, 48);
 		this.areaPositionOffset = new BlockPos(l, m, n);
 
 
-		this.appliedStatusEffectIdentifier = nbt.getString("appliedStatusEffectIdentifier");
+		this.appliedStatusEffectIdentifier = view.getString("appliedStatusEffectIdentifier", "");
 
-		this.appliedStatusEffectAmplifier = nbt.getInt("appliedStatusEffectAmplifier");
+		this.appliedStatusEffectAmplifier = view.getInt("appliedStatusEffectAmplifier", 0);
 
-		this.appliedStatusEffectAmbient = nbt.getBoolean("appliedStatusEffectAmbient");
+		this.appliedStatusEffectAmbient = view.getBoolean("appliedStatusEffectAmbient");
 
-		this.appliedStatusEffectShowParticles = nbt.getBoolean("appliedStatusEffectShowParticles");
+		this.appliedStatusEffectShowParticles = view.getBoolean("appliedStatusEffectShowParticles");
 
-		this.appliedStatusEffectShowIcon = nbt.getBoolean("appliedStatusEffectShowIcon");
-
-
-		this.messageMode = MessageMode.byName(nbt.getString("messageMode")).orElse(MessageMode.OVERLAY);
-
-		this.joinMessage = nbt.getString("joinMessage");
-
-		this.leaveMessage = nbt.getString("leaveMessage");
-
-		this.triggeredMessage = nbt.getString("triggeredMessage");
+		this.appliedStatusEffectShowIcon = view.getBoolean("appliedStatusEffectShowIcon");
 
 
-		this.hasTriggered = nbt.getBoolean("hasTriggered");
+		this.messageMode = MessageMode.byName(view.getString("messageMode", "")).orElse(MessageMode.OVERLAY);
 
-		this.wasTriggered = nbt.getBoolean("wasTriggered");
+		this.joinMessage = view.getString("joinMessage", "");
 
-		this.triggerMode = TriggerMode.byName(nbt.getString("triggerMode")).orElse(TriggerMode.ALWAYS);
+		this.leaveMessage = view.getString("leaveMessage", "");
 
-		this.triggeredMode = TriggeredMode.byName(nbt.getString("triggeredMode")).orElse(TriggeredMode.ONCE);
+		this.triggeredMessage = view.getString("triggeredMessage", "");
+
+
+		this.hasTriggered = view.getBoolean("hasTriggered");
+
+		this.wasTriggered = view.getBoolean("wasTriggered");
+
+		this.triggerMode = TriggerMode.byName(view.getString("triggerMode", "")).orElse(TriggerMode.ALWAYS);
+
+		this.triggeredMode = TriggeredMode.byName(view.getString("triggeredMode", "")).orElse(TriggeredMode.ONCE);
 
 		if (nbt.contains("maxTimer", NbtElement.INT_TYPE)) {
-			this.maxTimer = nbt.getInt("maxTimer");
+			this.maxTimer = view.getInt("maxTimer", 1);
 		} else {
 			this.maxTimer = 1;
 		}
@@ -321,33 +324,36 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 		if (nbt.contains("triggeredBlockPositionOffsetX", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetY", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockPositionOffsetZ", NbtElement.INT_TYPE) && nbt.contains("triggeredBlockResets", NbtElement.BYTE_TYPE)) {
 			this.triggeredBlock = new MutablePair<>(
 					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
+							MathHelper.clamp(view.getInt("triggeredBlockPositionOffsetX", 0), -48, 48),
+							MathHelper.clamp(view.getInt("triggeredBlockPositionOffsetY", 0), -48, 48),
+							MathHelper.clamp(view.getInt("triggeredBlockPositionOffsetZ", 0), -48, 48)
 					),
-					nbt.getBoolean("triggeredBlockResets")
+					view.getBoolean("triggeredBlockResets", false)
 			);
 		}
 
-		int playerListSize = nbt.getInt("playerListSize");
+		int playerListSize = view.getInt("playerListSize", 0);
 		for (i = 0; i < playerListSize; i++) {
-			this.playerList.add(nbt.getUuid("playerListSize" + i));
+			Optional<int[]> optionalUUID = view.getOptionalIntArray("playerListSize" + i);
+			if (optionalUUID.isPresent()) {
+				this.playerList.add(Uuids.toUuid(optionalUUID.get()));
+			}
 		}
 
-		int playerList2Size = nbt.getInt("playerList2Size");
+		int playerList2Size = view.getInt("playerList2Size", 0);
 		for (i = 0; i < playerList2Size; i++) {
-			this.playerList2.add(nbt.getUuid("playerList2Size" + i));
+			this.playerList2.add(view.read("playerList2Size" + i, Uuids.CODEC));
 		}
 
-		int playerMapSize = nbt.getInt("playerMapSize");
+		int playerMapSize = view.getInt("playerMapSize", 0);
 		this.playerMap = new HashMap<>();
 		for (i = 0; i < playerMapSize; i++) {
-			UUID key = nbt.getUuid("key_" + i);
-			int timer = nbt.getInt("timer_" + i);
+			UUID key = view.getUuid("key_" + i);
+			int timer = view.getInt("timer_" + i);
 			this.playerMap.put(key, timer);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

@@ -6,11 +6,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.HashSet;
@@ -27,38 +27,25 @@ public class UUIDListSavingBlockEntity extends BlockEntity implements HandlesUUI
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<UUID> listAppender = view.getListAppender("uuidList", Uuids.CODEC);
 		for (UUID uuid : this.uuidList) {
-			nbtList.add(NbtHelper.fromUuid(uuid));
+			listAppender.add(uuid);
 		}
-		nbt.put("uuid_list", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.uuidList.clear();
-		if (nbt.contains("uuid_list_size")) {
-			int listSize = nbt.getInt("uuid_list_size");
-			for (int i = 0; i < listSize; i++) {
-				if (nbt.containsUuid("uuid_" + i)) {
-					this.uuidList.add(nbt.getUuid("uuid_" + i));
-				}
-				nbt.remove("uuid_" + i);
-			}
-			nbt.remove("uuid_list_size");
-		} else {
-			NbtList nbtList = nbt.getList("uuid_list", NbtElement.INT_ARRAY_TYPE);
-			for (NbtElement nbtElement : nbtList) {
-				this.uuidList.add(NbtHelper.toUuid(nbtElement));
-			}
+		for (UUID uuid : view.getTypedListView("uuid_list", Uuids.CODEC)) {
+			this.uuidList.add(uuid);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	@Override

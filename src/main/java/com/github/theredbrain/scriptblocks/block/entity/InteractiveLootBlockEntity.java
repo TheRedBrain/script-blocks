@@ -9,8 +9,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Arrays;
@@ -22,7 +25,7 @@ import java.util.UUID;
 
 @Deprecated
 public class InteractiveLootBlockEntity extends BlockEntity implements Resetable {
-	private Set<UUID> playerSet = new HashSet<>();
+	private final Set<UUID> playerSet = new HashSet<>();
 	private String lootTableIdentifierString = "";
 	private Mode mode = Mode.VANILLA;
 	private int rolls = 3;
@@ -38,131 +41,98 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		List<UUID> list = this.playerSet.stream().toList();
-		int listSize = list.size();
-		nbt.putInt("listSize", listSize);
-		for (int i = 0; i < listSize; i++) {
-			nbt.putUuid("listEntry_" + i, list.get(i));
+		WriteView.ListAppender<UUID> listAppender = view.getListAppender("uuidList", Uuids.CODEC);
+		for (UUID uuid : this.playerSet) {
+			listAppender.add(uuid);
 		}
 
 		if (!this.lootTableIdentifierString.isEmpty()) {
-			nbt.putString("lootTableIdentifierString", this.lootTableIdentifierString);
+			view.putString("lootTableIdentifierString", this.lootTableIdentifierString);
 		} else {
-			nbt.remove("lootTableIdentifierString");
+			view.remove("lootTableIdentifierString");
 		}
 
 		if (this.mode != Mode.VANILLA) {
-			nbt.putString("mode", this.mode.asString());
+			view.putString("mode", this.mode.asString());
 		} else {
-			nbt.remove("mode");
+			view.remove("mode");
 		}
 
 		if (this.rolls != 3) {
-			nbt.putInt("rolls", this.rolls);
+			view.putInt("rolls", this.rolls);
 		} else {
-			nbt.remove("rolls");
+			view.remove("rolls");
 		}
 
 		if (this.choices != 1) {
-			nbt.putInt("choices", this.choices);
+			view.putInt("choices", this.choices);
 		} else {
-			nbt.remove("choices");
+			view.remove("choices");
 		}
 
 		if (this.trackPlayers) {
-			nbt.putBoolean("trackPlayers", true);
+			view.putBoolean("trackPlayers", true);
 		} else {
-			nbt.remove("trackPlayers");
+			view.remove("trackPlayers");
 		}
 
 		if (!this.lootAcquiredMessage.isEmpty()) {
-			nbt.putString("lootAcquiredMessage", this.lootAcquiredMessage);
+			view.putString("lootAcquiredMessage", this.lootAcquiredMessage);
 		} else {
-			nbt.remove("lootAcquiredMessage");
+			view.remove("lootAcquiredMessage");
 		}
 
 		if (!this.lootAcquiredSoundId.isEmpty()) {
-			nbt.putString("lootAcquiredSoundId", this.lootAcquiredSoundId);
+			view.putString("lootAcquiredSoundId", this.lootAcquiredSoundId);
 		} else {
-			nbt.remove("lootAcquiredSoundId");
+			view.remove("lootAcquiredSoundId");
 		}
 
 		if (!this.alreadyLootedMessage.isEmpty()) {
-			nbt.putString("alreadyLootedMessage", this.alreadyLootedMessage);
+			view.putString("alreadyLootedMessage", this.alreadyLootedMessage);
 		} else {
-			nbt.remove("alreadyLootedMessage");
+			view.remove("alreadyLootedMessage");
 		}
 
 		if (!this.alreadyLootedSoundId.isEmpty()) {
-			nbt.putString("alreadyLootedSoundId", this.alreadyLootedSoundId);
+			view.putString("alreadyLootedSoundId", this.alreadyLootedSoundId);
 		} else {
-			nbt.remove("alreadyLootedSoundId");
+			view.remove("alreadyLootedSoundId");
 		}
 
 		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Interactive Loot Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.world != null ? this.world.getServer() : null);
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.playerSet.clear();
-		int listSize = nbt.getInt("listSize");
-		for (int i = 0; i < listSize; i++) {
-			if (nbt.containsUuid("listEntry_" + i)) {
-				this.playerSet.add(nbt.getUuid("listEntry_" + i));
-			}
+		for (UUID uuid : view.getTypedListView("uuidList", Uuids.CODEC)) {
+			this.playerSet.add(uuid);
 		}
 
-		if (nbt.contains("lootTableIdentifierString")) {
-			this.lootTableIdentifierString = nbt.getString("lootTableIdentifierString");
-		} else {
-			this.lootTableIdentifierString = "";
-		}
+		this.lootTableIdentifierString = view.getString("lootTableIdentifierString", "");
 
-		this.mode = Mode.byName(nbt.getString("mode")).orElse(Mode.VANILLA);
+		this.mode = Mode.byName(view.getString("mode", "")).orElse(Mode.VANILLA);
 
-		if (nbt.contains("rolls")) {
-			this.rolls = nbt.getInt("rolls");
-		} else {
-			this.rolls = 3;
-		}
+		this.rolls = view.getInt("rolls", 3);
 
-		if (nbt.contains("choices")) {
-			this.choices = nbt.getInt("choices");
-		} else {
-			this.choices = 1;
-		}
+		this.choices = view.getInt("choices", 1);
 
-		this.trackPlayers = nbt.contains("trackPlayers");
+		this.trackPlayers = view.getBoolean("trackPlayers", false);
 
-		if (nbt.contains("lootAcquiredMessage")) {
-			this.lootAcquiredMessage = nbt.getString("lootAcquiredMessage");
-		} else {
-			this.lootAcquiredMessage = "";
-		}
+		this.lootAcquiredMessage = view.getString("lootAcquiredMessage", "");
 
-		if (nbt.contains("lootAcquiredSoundId")) {
-			this.lootAcquiredSoundId = nbt.getString("lootAcquiredSoundId");
-		} else {
-			this.lootAcquiredSoundId = "";
-		}
+		this.lootAcquiredSoundId = view.getString("lootAcquiredSoundId", "");
 
-		if (nbt.contains("alreadyLootedMessage")) {
-			this.alreadyLootedMessage = nbt.getString("alreadyLootedMessage");
-		} else {
-			this.alreadyLootedMessage = "";
-		}
+		this.alreadyLootedMessage = view.getString("alreadyLootedMessage", "");
 
-		if (nbt.contains("alreadyLootedSoundId")) {
-			this.alreadyLootedSoundId = nbt.getString("alreadyLootedSoundId");
-		} else {
-			this.alreadyLootedSoundId = "";
-		}
+		this.alreadyLootedSoundId = view.getString("alreadyLootedSoundId", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

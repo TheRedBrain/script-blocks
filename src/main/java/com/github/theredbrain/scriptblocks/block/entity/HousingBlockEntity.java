@@ -10,25 +10,23 @@ import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
+import com.mojang.serialization.Codec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -62,207 +60,93 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putString("owner_uuid", this.ownerUuid);
+		view.putString("owner_uuid", this.ownerUuid);
 
-		nbt.putBoolean("is_owner_set", isOwnerSet);
+		view.putBoolean("is_owner_set", isOwnerSet);
 
-		NbtList nbtList = new NbtList();
-		for (String entry : this.coOwnerList) {
-			nbtList.add(NbtString.of(entry));
+		WriteView.ListAppender<String> listAppender = view.getListAppender("co_owners", Codec.STRING);
+		for (String string : this.coOwnerList) {
+			listAppender.add(string);
 		}
-		nbt.put("co_owners", nbtList.copy());
 
-		nbtList = new NbtList();
-		for (String entry : this.trustedList) {
-			nbtList.add(NbtString.of(entry));
+		WriteView.ListAppender<String> listAppender1 = view.getListAppender("trusted_people", Codec.STRING);
+		for (String string : this.trustedList) {
+			listAppender1.add(string);
 		}
-		nbt.put("trusted_people", nbtList.copy());
 
-		nbtList = new NbtList();
-		for (String entry : this.guestList) {
-			nbtList.add(NbtString.of(entry));
+		WriteView.ListAppender<String> listAppender2 = view.getListAppender("guests", Codec.STRING);
+		for (String string : this.guestList) {
+			listAppender2.add(string);
 		}
-		nbt.put("guests", nbtList);
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showInfluenceArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.influenceAreaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.influenceAreaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.influenceAreaDimensions));
-		nbt.put("influence_area", nbtCompound.copy());
+		view.put("influence_area", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putString("owner_mode", this.ownerMode.asString());
+		view.putString("owner_mode", this.ownerMode.asString());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		nbt.put("triggered_block", nbtCompound);
+		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("ownerUuid")) {
-			this.ownerUuid = nbt.getString("ownerUuid");
-			nbt.remove("ownerUuid");
-		} else {
-			this.ownerUuid = nbt.getString("owner_uuid");
-		}
+		this.ownerUuid = view.getString("owner_uuid", "");
 
-		if (nbt.contains("isOwnerSet")) {
-			this.isOwnerSet = nbt.getBoolean("isOwnerSet");
-			nbt.remove("isOwnerSet");
-		} else {
-			this.isOwnerSet = nbt.getBoolean("is_owner_set");
-		}
+		this.isOwnerSet = view.getBoolean("is_owner_set", false);
 
 		this.coOwnerList.clear();
-		if (nbt.contains("coOwnerListSize")) {
-			int coOwnerListSize = nbt.getInt("coOwnerListSize");
-			for (int i = 0; i < coOwnerListSize; i++) {
-				this.coOwnerList.add(nbt.getString("coOwnerListEntry" + i));
-				nbt.remove("coOwnerListEntry" + i);
-			}
-			nbt.remove("coOwnerListSize");
-		} else {
-			NbtList nbtList = nbt.getList("co_owners", NbtElement.STRING_TYPE);
-			for (NbtElement nbtElement : nbtList) {
-				this.coOwnerList.add(nbtElement.asString());
-			}
+		for (String string : view.getTypedListView("co_owners", Codec.STRING)) {
+			this.coOwnerList.add(string);
 		}
 
 		this.trustedList.clear();
-		if (nbt.contains("trustedListSize")) {
-			int trustedListSize = nbt.getInt("trustedListSize");
-			for (int i = 0; i < trustedListSize; i++) {
-				this.trustedList.add(nbt.getString("trustedListEntry" + i));
-				nbt.remove("trustedListEntry" + i);
-			}
-			nbt.remove("trustedListSize");
-		} else {
-			NbtList nbtList = nbt.getList("trusted_people", NbtElement.STRING_TYPE);
-			for (NbtElement nbtElement : nbtList) {
-				this.trustedList.add(nbtElement.asString());
-			}
+		for (String string : view.getTypedListView("trusted_people", Codec.STRING)) {
+			this.trustedList.add(string);
 		}
 
 		this.guestList.clear();
-		if (nbt.contains("guestListSize")) {
-			int guestListSize = nbt.getInt("guestListSize");
-			for (int i = 0; i < guestListSize; i++) {
-				this.guestList.add(nbt.getString("guestListEntry" + i));
-				nbt.remove("guestListEntry" + i);
-			}
-			nbt.remove("guestListSize");
-		} else {
-			NbtList nbtList = nbt.getList("guests", NbtElement.STRING_TYPE);
-			for (NbtElement nbtElement : nbtList) {
-				this.guestList.add(nbtElement.asString());
-			}
+		for (String string : view.getTypedListView("guests", Codec.STRING)) {
+			this.guestList.add(string);
 		}
 
-		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
-			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
-			this.calculateAreaBox = true;
-			nbt.remove("areaMinX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMaxZ");
-		}
+		NbtCompound nbtCompound = view.read("influence_area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showInfluenceArea = nbtCompound.getBoolean("visible", false);
 
-		NbtCompound nbtCompound = nbt.getCompound("influence_area");
-		if (nbt.contains("showInfluenceArea")) {
-			this.showInfluenceArea = nbt.getBoolean("showInfluenceArea");
-			nbt.remove("showInfluenceArea");
-		} else {
-			this.showInfluenceArea = nbtCompound.getBoolean("visible");
-		}
+		this.influenceAreaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
-		if (nbt.contains("influenceAreaDimensionsX") || nbt.contains("influenceAreaDimensionsY") || nbt.contains("influenceAreaDimensionsZ")) {
-			this.influenceAreaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("influenceAreaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("influenceAreaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("influenceAreaDimensionsZ"), 0, 48)
-			);
-			nbt.remove("influenceAreaDimensionsX");
-			nbt.remove("influenceAreaDimensionsY");
-			nbt.remove("influenceAreaDimensionsZ");
-		} else {
-			this.influenceAreaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
-		}
+		this.influenceAreaPositionOffset = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("influenceAreaPositionOffsetX") || nbt.contains("influenceAreaPositionOffsetY") || nbt.contains("influenceAreaPositionOffsetZ")) {
-			this.influenceAreaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("influenceAreaPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("influenceAreaPositionOffsetX");
-			nbt.remove("influenceAreaPositionOffsetY");
-			nbt.remove("influenceAreaPositionOffsetZ");
-		} else {
-			this.influenceAreaPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.ownerMode = OwnerMode.byName(view.getString("owner_mode", "")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
 
-		if (nbt.contains("ownerMode")) {
-			this.ownerMode = OwnerMode.byName(nbt.getString("ownerMode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
-			nbt.remove("ownerMode");
-		} else {
-			this.ownerMode = OwnerMode.byName(nbt.getString("owner_mode")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
-		}
+		nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.triggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
-		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("triggeredBlockResets")
-			);
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("triggered_block_resets")
-			);
-			nbt.remove("triggered_block_position_offset_x");
-			nbt.remove("triggered_block_position_offset_y");
-			nbt.remove("triggered_block_position_offset_z");
-			nbt.remove("triggered_block_resets");
-		} else {
-			nbtCompound = nbt.getCompound("triggered_block");
-			this.triggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
-
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -275,7 +159,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, HousingBlockEntity housingBlockEntity) {
-		if (!world.isClient && world.getTime() % 20L == 0L) {
+		if (!world.isClient() && world.getTime() % 20L == 0L) {
 			Team ownerTeam = null;
 			if (housingBlockEntity.hasWorld() && !housingBlockEntity.isOwnerSet && housingBlockEntity.ownerMode == OwnerMode.DIMENSION_OWNER) {
 				housingBlockEntity.ownerUuid = initOwner(housingBlockEntity.world);

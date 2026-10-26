@@ -11,15 +11,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,69 +31,40 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		NbtList nbtList = new NbtList();
+		NbtCompound nbtCompound;
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("data_providing_blocks", NbtCompound.CODEC);
 		for (BlockPos blockPos : this.dataProvidingBlockPosOffsetList) {
-			NbtCompound nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(blockPos));
-			nbtList.add(nbtCompound);
+			nbtCompound = new NbtCompound();
+			nbtCompound.put("position_offset", BlockPos.CODEC, blockPos);
+			listAppender.add(nbtCompound.copy());
 		}
-		nbt.put("data_providing_blocks", nbtList);
 
-		nbt.putInt("index", this.index);
+		view.putInt("index", this.index);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.dataProvidingBlockPosOffsetList.clear();
-		if (nbt.contains("dataProvidingBlockPosOffsetListSize")) {
-			int dataProvidingBlockPosOffsetListSize = nbt.getInt("dataProvidingBlockPosOffsetListSize");
-			for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
-				this.dataProvidingBlockPosOffsetList.add(new BlockPos(
-						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX_" + i), -48, 48),
-						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY_" + i), -48, 48),
-						MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ_" + i), -48, 48)
-				));
-				nbt.remove("dataProvidingBlockPosOffsetX_" + i);
-				nbt.remove("dataProvidingBlockPosOffsetY_" + i);
-				nbt.remove("dataProvidingBlockPosOffsetZ_" + i);
-			}
-			nbt.remove("dataProvidingBlockPosOffsetListSize");
-		} else if (nbt.contains("data_providing_block_pos_offset_list_size")) {
-			int dataProvidingBlockPosOffsetListSize = nbt.getInt("data_providing_block_pos_offset_list_size");
-			for (int i = 0; i < dataProvidingBlockPosOffsetListSize; i++) {
-				this.dataProvidingBlockPosOffsetList.add(new BlockPos(
-						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_x_" + i), -48, 48),
-						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_y_" + i), -48, 48),
-						MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_z_" + i), -48, 48)
-				));
-				nbt.remove("data_providing_block_pos_offset_x_" + i);
-				nbt.remove("data_providing_block_pos_offset_y_" + i);
-				nbt.remove("data_providing_block_pos_offset_z_" + i);
-			}
-			nbt.remove("data_providing_block_pos_offset_list_size");
-		} else {
-			NbtList nbtList = nbt.getList("data_providing_blocks", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				this.dataProvidingBlockPosOffsetList.add(
-						BlockPos.max(
-								BlockPos.min(
-										NbtHelper.toBlockPos(nbtList.getCompound(i), "position_offset").orElse(BlockPos.ORIGIN),
-										new BlockPos(48, 48, 48)
-								),
-								new BlockPos(-48, -48, -48)
-						)
-				);
-			}
+		for (NbtCompound nbtCompound : view.getTypedListView("data_providing_blocks", NbtCompound.CODEC)) {
+			this.dataProvidingBlockPosOffsetList.add(
+					BlockPos.max(
+							BlockPos.min(
+									nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					)
+			);
 		}
 
-		this.index = nbt.getInt("index");
+		this.index = view.getInt("index", 0);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	@Override

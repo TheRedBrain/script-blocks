@@ -33,11 +33,14 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldEvents;
@@ -82,233 +85,118 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.entitySpawnPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.entitySpawnPositionOffset);
 		nbtCompound.putDouble("yaw", this.entitySpawnOrientationYaw);
 		nbtCompound.putDouble("pitch", this.entitySpawnOrientationPitch);
-		nbt.put("entity_spawn", nbtCompound.copy());
+		view.put("entity_spawn", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		nbt.put("triggered_block", nbtCompound.copy());
+		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.put("use_relay_block_position_offset", NbtHelper.fromBlockPos(this.useRelayBlockPositionOffset));
+		view.put("use_relay_block_position_offset", BlockPos.CODEC, this.useRelayBlockPositionOffset);
 
 		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("entity_attribute_modifiers", NbtCompound.CODEC);
 		for (RegistryEntry<EntityAttribute> registryEntry : this.entityAttributeModifiers.keySet()) {
 			nbtCompound = new NbtCompound();
 			nbtCompound.putString("attribute", String.valueOf(Registries.ATTRIBUTE.getId(registryEntry.value())));
 			NbtList modifiersList = new NbtList();
+			WriteView.ListAppender<EntityAttributeModifier> listAppender1 = nbtCompound.put(.getListAppender("entity_attribute_modifiers", EntityAttributeModifier.CODEC);
 			for (EntityAttributeModifier entityAttributeModifier : this.entityAttributeModifiers.get(registryEntry)) {
-				modifiersList.add(entityAttributeModifier.toNbt());
+				listAppender1.add(entityAttributeModifier);
 			}
-			nbtCompound.put("modifiers", modifiersList);
-			nbtList.add(nbtCompound.copy());
-		}
-		nbt.put("entity_attribute_modifiers", nbtList);
-
-		nbt.putString("spawning_mode", this.spawningMode.asString());
-
-		nbt.putBoolean("is_persistent", this.isPersistent);
-
-		nbt.putBoolean("enable_spawn_effects", this.enableSpawnEffects);
-
-		nbt.putBoolean("triggered", this.triggered);
-
-		nbt.put("entity_type_compound", this.entityTypeCompound);
-
-		if (this.boundEntityUuid != null) {
-			nbt.putUuid("bound_entity_uuid", this.boundEntityUuid);
-		} else {
-			nbt.remove("bound_entity_uuid");
+			nbtCompound.put("modifiers", listAppender1);
+			listAppender.add(nbtCompound.copy());
 		}
 
-		super.writeNbt(nbt, registryLookup);
+		view.putString("spawning_mode", this.spawningMode.asString());
+
+		view.putBoolean("is_persistent", this.isPersistent);
+
+		view.putBoolean("enable_spawn_effects", this.enableSpawnEffects);
+
+		view.putBoolean("triggered", this.triggered);
+
+		view.put("entity_type_compound", NbtCompound.CODEC, this.entityTypeCompound);
+
+		view.put("bound_entity_uuid", Uuids.CODEC, this.boundEntityUuid);
+
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		NbtCompound nbtCompound = nbt.getCompound("entity_spawn");
-		if (nbt.contains("entitySpawnPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("entitySpawnPositionOffsetZ", NbtElement.INT_TYPE)) {
-			this.entitySpawnPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("entitySpawnPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("entitySpawnPositionOffsetX");
-			nbt.remove("entitySpawnPositionOffsetY");
-			nbt.remove("entitySpawnPositionOffsetZ");
-		} else if (nbt.contains("entity_spawn_position_offset")) {
+		NbtCompound nbtCompound = view.read("entity_spawn", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 			this.entitySpawnPositionOffset = BlockPos.max(
 					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "entity_spawn_position_offset").orElse(BlockPos.ORIGIN),
+							nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
 			);
-			nbt.remove("entity_spawn_position_offset");
-		} else {
-			this.entitySpawnPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
 
-		if (nbt.contains("entitySpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
-			this.entitySpawnOrientationPitch = nbt.getDouble("entitySpawnOrientationPitch");
-			nbt.remove("entitySpawnOrientationPitch");
-		} else if (nbt.contains("entity_spawn_orientation_pitch")) {
-			this.entitySpawnOrientationPitch = MathHelper.clamp(nbt.getDouble("entity_spawn_orientation_pitch"), -90.0, 90.0);
-			nbt.remove("entity_spawn_orientation_pitch");
-		} else {
-			this.entitySpawnOrientationPitch = MathHelper.clamp(nbtCompound.getDouble("pitch"), -90.0, 90.0);
-		}
+			this.entitySpawnOrientationPitch = MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90.0, 90.0);
 
-		if (nbt.contains("entitySpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
-			this.entitySpawnOrientationYaw = nbt.getDouble("entitySpawnOrientationYaw");
-			nbt.remove("entitySpawnOrientationYaw");
-		} else if (nbt.contains("entity_spawn_orientation_yaw")) {
-			this.entitySpawnOrientationYaw = MathHelper.clamp(nbt.getDouble("entity_spawn_orientation_yaw"), -180.0, 180.0);
-			nbt.remove("entity_spawn_orientation_yaw");
-		} else {
-			this.entitySpawnOrientationYaw = MathHelper.clamp(nbtCompound.getDouble("yaw"), -180.0, 180.0);
-		}
+			this.entitySpawnOrientationYaw = MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180.0, 180.0);
 
-		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("triggeredBlockResets")
-			);
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("triggered_block_resets")
-			);
-			nbt.remove("triggered_block_position_offset_x");
-			nbt.remove("triggered_block_position_offset_y");
-			nbt.remove("triggered_block_position_offset_z");
-			nbt.remove("triggered_block_resets");
-		} else {
-			nbtCompound = nbt.getCompound("triggered_block");
+			nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 			this.triggeredBlock = new MutablePair<>(
 					BlockPos.max(
 							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+									nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 									new BlockPos(48, 48, 48)
 							),
 							new BlockPos(-48, -48, -48)
 					),
-					nbtCompound.getBoolean("resets")
+					nbtCompound.getBoolean("resets", false)
 			);
-		}
 
-		if (nbt.contains("useRelayedBlockPositionOffsetX", NbtElement.INT_TYPE) || nbt.contains("useRelayedBlockPositionOffsetY", NbtElement.INT_TYPE) || nbt.contains("useRelayedBlockPositionOffsetZ", NbtElement.INT_TYPE)) {
-			this.useRelayBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("useRelayedBlockPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("useRelayedBlockPositionOffsetX");
-			nbt.remove("useRelayedBlockPositionOffsetY");
-			nbt.remove("useRelayedBlockPositionOffsetZ");
-		} else {
 			this.useRelayBlockPositionOffset = BlockPos.max(
 					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "use_relay_block_position_offset").orElse(BlockPos.ORIGIN),
+							view.read("use_relay_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
 			);
-		}
 
 		this.entityAttributeModifiers.clear();
-		if (nbt.contains("entityAttributeModifiersKeysSize")) {
-			int entityAttributeModifiersKeysSize = nbt.getInt("entityAttributeModifiersKeysSize");
-			for (int i = 0; i < entityAttributeModifiersKeysSize; i++) {
-				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE
-						.getEntry(Identifier.tryParse(nbt.getString("entityAttributeModifiers_key" + i)));
+				for (NbtCompound nbtCompound1 : view.getTypedListView("entity_attribute_modifiers", NbtCompound.CODEC)) {
+				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound1.getString("attribute", "")));
 				if (optional.isPresent()) {
 					RegistryEntry.Reference<EntityAttribute> key = optional.get();
-					int modifierListSize = nbt.getInt("entityAttributeModifiers_modifierListSize_" + i);
-					for (int j = 0; j < modifierListSize; j++) {
-						this.entityAttributeModifiers.put(key, EntityAttributeModifier.fromNbt(nbt.getCompound("entityAttributeModifiers_" + i + "_" + j)));
-						nbt.remove("entityAttributeModifiers_" + i + "_" + j);
-					}
-				}
-				nbt.remove("entityAttributeModifiers_key" + i);
-				nbt.remove("entityAttributeModifiers_modifierListSize_" + i);
-			}
-			nbt.remove("entityAttributeModifiersKeysSize");
-		} else {
-			NbtList nbtList = nbt.getList("entity_attribute_modifiers", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				nbtCompound = nbtList.getCompound(i);
-				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound.getString("attribute")));
-				if (optional.isPresent()) {
-					RegistryEntry.Reference<EntityAttribute> key = optional.get();
-					NbtList modifiersList = nbtCompound.getList("modifiers", NbtElement.COMPOUND_TYPE);
-
-					for (int j = 0; j < modifiersList.size(); j++) {
-						EntityAttributeModifier entityAttributeModifier = EntityAttributeModifier.fromNbt(modifiersList.getCompound(j));
-						if (entityAttributeModifier != null) {
-							this.entityAttributeModifiers.put(key, entityAttributeModifier);
+					Optional<NbtList> optionalModifiersList = nbtCompound1.getList("modifiers");
+					if (optionalModifiersList.isPresent()) {
+						for (NbtElement nbtElement : optionalModifiersList.get()) {
+//							nbtElement.
+//					for (int j = 0; j < modifiersList.size(); j++) {
+							if (entityAttributeModifier != null) {
+								this.entityAttributeModifiers.put(key, entityAttributeModifier);
+							}
 						}
 					}
 				}
 			}
-		}
 
-		if (nbt.contains("spawningMode", NbtElement.STRING_TYPE)) {
-			this.spawningMode = SpawningMode.byName(nbt.getString("spawningMode")).orElseGet(() -> SpawningMode.ONCE);
-			nbt.remove("spawningMode");
-		} else {
-			this.spawningMode = SpawningMode.byName(nbt.getString("spawning_mode")).orElseGet(() -> SpawningMode.ONCE);
-		}
+		this.spawningMode = SpawningMode.byName(view.getString("spawning_mode", "")).orElseGet(() -> SpawningMode.ONCE);
 
-		this.isPersistent = nbt.getBoolean("is_persistent");
+		this.isPersistent = view.getBoolean("is_persistent", false);
 
-		this.enableSpawnEffects = nbt.getBoolean("enable_spawn_effects");
+		this.enableSpawnEffects = view.getBoolean("enable_spawn_effects", true);
 
-		this.triggered = nbt.getBoolean("triggered");
+		this.triggered = view.getBoolean("triggered", false);
 
-		if (nbt.contains("EntityTypeCompound", NbtElement.COMPOUND_TYPE)) {
-			this.entityTypeCompound = nbt.getCompound("EntityTypeCompound");
-			nbt.remove("EntityTypeCompound");
-		} else {
-			this.entityTypeCompound = nbt.getCompound("entity_type_compound");
-		}
+		this.entityTypeCompound = view.read("entity_type_compound", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 
-		if (nbt.containsUuid("boundEntityUuid")) {
-			this.boundEntityUuid = nbt.getUuid("boundEntityUuid");
-			nbt.remove("boundEntityUuid");
-		} else if (nbt.containsUuid("bound_entity_uuid")) {
-			this.boundEntityUuid = nbt.getUuid("bound_entity_uuid");
-		} else {
-			nbt.remove("boundEntityUuid");
-			nbt.remove("bound_entity_uuid");
-		}
+		this.boundEntityUuid = view.read("bound_entity_uuid", Uuids.CODEC).orElse(null);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 
 	}
 

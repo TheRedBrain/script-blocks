@@ -10,6 +10,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -24,32 +26,32 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putInt("delegatedEntrance_X", this.delegatedEntrance.getLeft().getX());
-		nbt.putInt("delegatedEntrance_Y", this.delegatedEntrance.getLeft().getY());
-		nbt.putInt("delegatedEntrance_Z", this.delegatedEntrance.getLeft().getZ());
-		nbt.putDouble("delegatedEntrance_Yaw", this.delegatedEntrance.getRight().getLeft());
-		nbt.putDouble("delegatedEntrance_Pitch", this.delegatedEntrance.getRight().getRight());
+		view.putInt("delegatedEntrance_X", this.delegatedEntrance.getLeft().getX());
+		view.putInt("delegatedEntrance_Y", this.delegatedEntrance.getLeft().getY());
+		view.putInt("delegatedEntrance_Z", this.delegatedEntrance.getLeft().getZ());
+		view.putDouble("delegatedEntrance_Yaw", this.delegatedEntrance.getRight().getLeft());
+		view.putDouble("delegatedEntrance_Pitch", this.delegatedEntrance.getRight().getRight());
 
 
 		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Entrance Delegation Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with a Spawn Point Delegation Block.", this.world != null ? this.world.getServer() : null);
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		int delegatedEntrance_X = nbt.getInt("delegatedEntrance_X");
-		int delegatedEntrance_Y = nbt.getInt("delegatedEntrance_Y");
-		int delegatedEntrance_Z = nbt.getInt("delegatedEntrance_Z");
+		int delegatedEntrance_X = view.getInt("delegatedEntrance_X", 0);
+		int delegatedEntrance_Y = view.getInt("delegatedEntrance_Y", 0);
+		int delegatedEntrance_Z = view.getInt("delegatedEntrance_Z", 0);
 		this.delegatedEntrance.setLeft(new BlockPos(delegatedEntrance_X, delegatedEntrance_Y, delegatedEntrance_Z));
-		double delegatedEntrance_Yaw = nbt.getDouble("delegatedEntrance_Yaw");
-		double delegatedEntrance_Pitch = nbt.getDouble("delegatedEntrance_Pitch");
+		double delegatedEntrance_Yaw = view.getDouble("delegatedEntrance_Yaw", 0);
+		double delegatedEntrance_Pitch = view.getDouble("delegatedEntrance_Pitch", 0);
 		this.delegatedEntrance.setRight(new MutablePair<>(delegatedEntrance_Yaw, delegatedEntrance_Pitch));
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

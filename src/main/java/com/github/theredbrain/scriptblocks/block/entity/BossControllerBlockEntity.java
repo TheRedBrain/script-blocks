@@ -28,16 +28,17 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -97,181 +98,102 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.uuidListHandlerBlockPositionOffset));
+		view.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerBlockPositionOffset);
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.noPlayersAroundTriggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.noPlayersAroundTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.noPlayersAroundTriggeredBlock.getRight());
-		nbt.put("triggered_block_on_no_players", nbtCompound.copy());
+		view.put("triggered_block_on_no_players", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putString("boss_identifier", this.bossIdentifier);
+		view.putString("boss_identifier", this.bossIdentifier);
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.bossSpawnPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.bossSpawnPositionOffset);
 		nbtCompound.putDouble("yaw", this.bossSpawnOrientationYaw);
 		nbtCompound.putDouble("pitch", this.bossSpawnOrientationPitch);
-		nbt.put("boss_spawn_point", nbtCompound.copy());
+		view.put("boss_spawn_point", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putBoolean("is_persistent", this.isPersistent);
+		view.putBoolean("is_persistent", this.isPersistent);
 
-		nbt.putBoolean("enable_spawn_effects", this.enableSpawnEffects);
+		view.putBoolean("enable_spawn_effects", this.enableSpawnEffects);
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("boss_triggered_blocks", NbtCompound.CODEC);
 		this.bossTriggeredBlocks.forEach((key, entry) -> {
 			NbtCompound nbtCompound1 = new NbtCompound();
 			nbtCompound1.putString("key", key);
-			nbtCompound1.put("position_offset", NbtHelper.fromBlockPos(entry.getLeft()));
+			nbtCompound1.put("position_offset", BlockPos.CODEC, entry.getLeft());
 			nbtCompound1.putBoolean("resets", entry.getRight());
-			nbtList.add(nbtCompound1.copy());
+			listAppender.add(nbtCompound1.copy());
 		});
-		nbt.put("boss_triggered_blocks", nbtList);
 
-		nbt.put("entity_type_compound", this.entityTypeCompound);
+		view.put("entity_type_compound", NbtCompound.CODEC, this.entityTypeCompound);
 
-		if (this.bossEntityUuid != null) {
-			nbt.putUuid("boss_entity_uuid", this.bossEntityUuid);
-		} else {
-			nbt.remove("boss_entity_uuid");
-		}
+		view.put("boss_entity_uuid", Uuids.CODEC, this.bossEntityUuid);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.uuidListHandlerBlockPositionOffset = BlockPos.max(
 				BlockPos.min(
-						NbtHelper.toBlockPos(nbt, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
+						view.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		if (nbt.contains("noPlayersAroundTriggeredBlockPositionOffsetX") || nbt.contains("noPlayersAroundTriggeredBlockPositionOffsetY") || nbt.contains("noPlayersAroundTriggeredBlockPositionOffsetZ") || nbt.contains("noPlayersAroundTriggeredBlockResets")) {
-			this.noPlayersAroundTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("noPlayersAroundTriggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("noPlayersAroundTriggeredBlockResets")
-			);
-			nbt.remove("noPlayersAroundTriggeredBlockPositionOffsetX");
-			nbt.remove("noPlayersAroundTriggeredBlockPositionOffsetY");
-			nbt.remove("noPlayersAroundTriggeredBlockPositionOffsetZ");
-			nbt.remove("noPlayersAroundTriggeredBlockResets");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("triggered_block_on_no_players");
-			this.noPlayersAroundTriggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
+		NbtCompound nbtCompound = view.read("triggered_block_on_no_players", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.noPlayersAroundTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
-		if (nbt.contains("bossIdentifier")) {
-			this.bossIdentifier = nbt.getString("bossIdentifier");
-			nbt.remove("bossIdentifier");
-		} else {
-			this.bossIdentifier = nbt.getString("boss_identifier");
-		}
+		this.bossIdentifier = view.getString("boss_identifier", "");
 
-		NbtCompound nbtCompound = nbt.getCompound("boss_spawn_point");
-		if (nbt.contains("bossSpawnPositionOffsetX") || nbt.contains("bossSpawnPositionOffsetY") || nbt.contains("bossSpawnPositionOffsetZ")) {
-			this.bossSpawnPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("bossSpawnPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("bossSpawnPositionOffsetX");
-			nbt.remove("bossSpawnPositionOffsetY");
-			nbt.remove("bossSpawnPositionOffsetZ");
-		} else {
-			this.bossSpawnPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		nbtCompound = view.read("boss_spawn_point", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.bossSpawnPositionOffset = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		this.isPersistent = nbt.getBoolean("is_persistent");
+		this.isPersistent = view.getBoolean("is_persistent", false);
 
-		this.enableSpawnEffects = nbt.getBoolean("enable_spawn_effects");
+		this.enableSpawnEffects = view.getBoolean("enable_spawn_effects", true);
 
-		if (nbt.contains("bossSpawnOrientationPitch", NbtElement.DOUBLE_TYPE)) {
-			this.bossSpawnOrientationPitch = nbt.getDouble("bossSpawnOrientationPitch");
-			nbt.remove("bossSpawnOrientationPitch");
-		} else {
-			this.bossSpawnOrientationPitch = MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90);
-		}
+		this.bossSpawnOrientationPitch = MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90);
 
-		if (nbt.contains("bossSpawnOrientationYaw", NbtElement.DOUBLE_TYPE)) {
-			this.bossSpawnOrientationYaw = nbt.getDouble("bossSpawnOrientationYaw");
-			nbt.remove("bossSpawnOrientationYaw");
-		} else {
-			this.bossSpawnOrientationYaw = MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180);
-		}
+		this.bossSpawnOrientationYaw = MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180);
 
 		this.bossTriggeredBlocks.clear();
-		if (nbt.contains("bossTriggeredBlocksKeysSize")) {
-			int bossTriggeredBlocksKeysSize = nbt.getInt("bossTriggeredBlocksKeysSize");
-			for (int b = 0; b < bossTriggeredBlocksKeysSize; b++) {
-				this.bossTriggeredBlocks.put(nbt.getString("bossTriggeredBlocks_key_" + b), new MutablePair<>(
-						new BlockPos(
-								MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_X_" + b), -48, 48),
-								MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_Y_" + b), -48, 48),
-								MathHelper.clamp(nbt.getInt("bossTriggeredBlocks_entry_Z_" + b), -48, 48)
-						), nbt.getBoolean("bossTriggeredBlocks_entry_resets_" + b)));
-				nbt.remove("bossTriggeredBlocks_key_" + b);
-				nbt.remove("bossTriggeredBlocks_entry_X_" + b);
-				nbt.remove("bossTriggeredBlocks_entry_Y_" + b);
-				nbt.remove("bossTriggeredBlocks_entry_Z_" + b);
-				nbt.remove("bossTriggeredBlocks_entry_resets_" + b);
-			}
-			nbt.remove("bossTriggeredBlocksKeysSize");
-		} else {
-			NbtList nbtList = nbt.getList("boss_triggered_blocks", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				nbtCompound = nbtList.getCompound(i);
-				this.bossTriggeredBlocks.put(
-						nbtCompound.getString("key"),
-						new MutablePair<>(
-								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-								nbtCompound.getBoolean("resets")
-						)
-				);
-			}
+		for (NbtCompound nbtCompound1 : view.getTypedListView("boss_triggered_blocks", NbtCompound.CODEC)) {
+			this.bossTriggeredBlocks.put(
+					nbtCompound1.getString("key", ""),
+					new MutablePair<>(
+							nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+							nbtCompound1.getBoolean("resets", false)
+					)
+			);
 		}
 
-		if (nbt.contains("EntityTypeCompound", NbtElement.COMPOUND_TYPE)) {
-			this.entityTypeCompound = nbt.getCompound("EntityTypeCompound");
-		} else {
-			this.entityTypeCompound = nbt.getCompound("entity_type_compound");
-		}
+		this.entityTypeCompound = view.read("entity_type_compound", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 
-		if (nbt.containsUuid("bossEntityUuid")) {
-			this.bossEntityUuid = nbt.getUuid("bossEntityUuid");
-			nbt.remove("bossEntityUuid");
-		} else if (nbt.containsUuid("boss_entity_uuid")) {
-			this.bossEntityUuid = nbt.getUuid("boss_entity_uuid");
-		} else {
-			this.bossEntityUuid = null;
-			nbt.remove("bossEntityUuid");
-			nbt.remove("boss_entity_uuid");
-		}
+		this.bossEntityUuid = view.read("boss_entity_uuid", Uuids.CODEC).orElse(null);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 
 	}
 

@@ -10,13 +10,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -48,54 +49,54 @@ public class UUIDListMessagingBlockEntity extends RotatedBlockEntity implements 
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putString("message_mode", this.messageMode.asString());
+		view.putString("message_mode", this.messageMode.asString());
 
-		nbt.putString("message_localisation_string", this.messageLocalisationString);
+		view.putString("message_localisation_string", this.messageLocalisationString);
 
-		nbt.putString("subtitle_localisation_string", this.subTitleLocalisationString);
+		view.putString("subtitle_localisation_string", this.subTitleLocalisationString);
 
-		nbt.putInt("title_fade_in", this.titleFadeIn);
+		view.putInt("title_fade_in", this.titleFadeIn);
 
-		nbt.putInt("title_stay", this.titleStay);
+		view.putInt("title_stay", this.titleStay);
 
-		nbt.putInt("title_fade_out", this.titleFadeOut);
+		view.putInt("title_fade_out", this.titleFadeOut);
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 		nbtCompound.putString("data_identifier", this.dataIdentifier);
-		nbt.put("data_provider", nbtCompound);
+		view.put("data_provider", NbtCompound.CODEC, nbtCompound.copy());
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		this.messageMode = MessageMode.byName(nbt.getString("message_mode")).orElse(MessageMode.CHAT);
+		this.messageMode = MessageMode.byName(view.getString("message_mode", "")).orElse(MessageMode.CHAT);
 
-		this.messageLocalisationString = nbt.getString("message_localisation_string");
+		this.messageLocalisationString = view.getString("message_localisation_string", "");
 
-		this.subTitleLocalisationString = nbt.getString("subtitle_localisation_string");
+		this.subTitleLocalisationString = view.getString("subtitle_localisation_string", "");
 
-		this.titleFadeIn = nbt.getInt("title_fade_in");
+		this.titleFadeIn = view.getInt("title_fade_in", 0);
 
-		this.titleStay = nbt.getInt("title_stay");
+		this.titleStay = view.getInt("title_stay", 0);
 
-		this.titleFadeOut = nbt.getInt("title_fade_out");
+		this.titleFadeOut = view.getInt("title_fade_out", 0);
 
-		NbtCompound nbtCompound = nbt.getCompound("data_provider");
+		NbtCompound nbtCompound = view.read("data_provider", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 		this.dataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
-		this.dataIdentifier = nbtCompound.getString("data_identifier");
+		this.dataIdentifier = nbtCompound.getString("data_identifier", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

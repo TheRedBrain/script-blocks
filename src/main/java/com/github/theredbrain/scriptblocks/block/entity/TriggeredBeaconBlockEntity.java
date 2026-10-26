@@ -18,6 +18,8 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -62,13 +64,13 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		nbt.put("area", nbtCompound.copy());
+		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
 		nbtCompound.putString("identifier", this.appliedStatusEffectIdentifier);
@@ -77,124 +79,50 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		nbtCompound.putBoolean("is_ambient", this.appliedStatusEffectAmbient);
 		nbtCompound.putBoolean("show_particles", this.appliedStatusEffectShowParticles);
 		nbtCompound.putBoolean("show_icon", this.appliedStatusEffectShowIcon);
-		nbt.put("applied_status_effect", nbtCompound);
+		view.put("applied_status_effect", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putBoolean("triggered", true);
+		view.putBoolean("triggered", true);
 
-		nbt.putString("triggered_mode", this.triggeredMode.asString());
+		view.putString("triggered_mode", this.triggeredMode.asString());
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		NbtCompound nbtCompound = nbt.getCompound("area");
-		if (nbt.contains("showArea")) {
-			this.showArea = nbt.getBoolean("showArea");
-			nbt.remove("showArea");
-		} else {
-			this.showArea = nbtCompound.getBoolean("visible");
-		}
+		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showArea = nbtCompound.getBoolean("visible", false);
 
-		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
-			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
-			this.calculateAreaBox = true;
-			nbt.remove("areaMinX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMaxZ");
-		}
+		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
-		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
-			);
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		} else {
-			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
-		}
+		this.areaPositionOffset = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		} else {
-			this.areaPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		nbtCompound = view.read("applied_status_effect", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.appliedStatusEffectIdentifier = nbtCompound.getString("identifier", "");
 
+		this.appliedStatusEffectAmplifier = nbtCompound.getInt("amplifier", 0);
 
-		nbtCompound = nbt.getCompound("applied_status_effect");
-		if (nbt.contains("appliedStatusEffectIdentifier")) {
-			this.appliedStatusEffectIdentifier = nbt.getString("appliedStatusEffectIdentifier");
-			nbt.remove("appliedStatusEffectIdentifier");
-		} else {
-			this.appliedStatusEffectIdentifier = nbtCompound.getString("identifier");
-		}
+		this.appliedStatusEffectDuration = nbtCompound.getInt("duration", 100);
 
-		if (nbt.contains("appliedStatusEffectIdentifier")) {
-			this.appliedStatusEffectAmplifier = nbt.getInt("appliedStatusEffectAmplifier");
-			nbt.remove("appliedStatusEffectAmplifier");
-		} else {
-			this.appliedStatusEffectAmplifier = nbtCompound.getInt("amplifier");
-		}
+		this.appliedStatusEffectAmbient = nbtCompound.getBoolean("ambient", false);
 
-		if (nbt.contains("appliedStatusEffectDuration")) {
-			this.appliedStatusEffectDuration = nbt.getInt("appliedStatusEffectDuration");
-			nbt.remove("appliedStatusEffectDuration");
-		} else {
-			this.appliedStatusEffectDuration = nbtCompound.getInt("duration");
-		}
+		this.appliedStatusEffectShowParticles = nbtCompound.getBoolean("show_particles", false);
 
-		if (nbt.contains("appliedStatusEffectAmbient")) {
-			this.appliedStatusEffectAmbient = nbt.getBoolean("appliedStatusEffectAmbient");
-			nbt.remove("appliedStatusEffectAmbient");
-		} else {
-			this.appliedStatusEffectAmbient = nbtCompound.getBoolean("ambient");
-		}
+		this.appliedStatusEffectShowIcon = nbtCompound.getBoolean("show_icon", false);
 
-		if (nbt.contains("appliedStatusEffectShowParticles")) {
-			this.appliedStatusEffectShowParticles = nbt.getBoolean("appliedStatusEffectShowParticles");
-			nbt.remove("appliedStatusEffectShowParticles");
-		} else {
-			this.appliedStatusEffectShowParticles = nbtCompound.getBoolean("show_particles");
-		}
+		this.triggered = view.getBoolean("triggered", false);
 
-		if (nbt.contains("appliedStatusEffectShowIcon")) {
-			this.appliedStatusEffectShowIcon = nbt.getBoolean("appliedStatusEffectShowIcon");
-			nbt.remove("appliedStatusEffectShowIcon");
-		} else {
-			this.appliedStatusEffectShowIcon = nbtCompound.getBoolean("show_icon");
-		}
+		this.triggeredMode = TriggeredMode.byName(view.getString("triggered_mode", "")).orElse(TriggeredMode.ONCE);
 
-		this.triggered = nbt.getBoolean("triggered");
-
-		if (nbt.contains("triggeredMode")) {
-			this.triggeredMode = TriggeredMode.byName(nbt.getString("triggeredMode")).orElse(TriggeredMode.ONCE);
-			nbt.remove("triggeredMode");
-		} else {
-			this.triggeredMode = TriggeredMode.byName(nbt.getString("triggered_mode")).orElse(TriggeredMode.ONCE);
-		}
-
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 
 	}
 

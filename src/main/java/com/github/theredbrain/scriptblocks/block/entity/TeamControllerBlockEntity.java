@@ -19,6 +19,8 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -51,9 +53,9 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	private Formatting teamColor = Formatting.RESET;
 	private boolean friendlyFire = false;
 	private boolean showFriendlyInvisibles = false;
-	private String nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
-	private String deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
-	private String collisionRule = AbstractTeam.CollisionRule.ALWAYS.name;
+	private AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS;
+	private AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS;
+	private AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.ALWAYS;
 	private String prefixString = "";
 	private String suffixString = "";
 
@@ -64,17 +66,17 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putBoolean("enable_ticking", this.enableTicking);
+		view.putBoolean("enable_ticking", this.enableTicking);
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		nbt.put("area", nbtCompound.copy());
+		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.put("pvp_controller_block_position_offset", NbtHelper.fromBlockPos(this.pvpControllerBlockPositionOffset));
+		view.put("pvp_controller_block_position_offset", BlockPos.CODEC, this.pvpControllerBlockPositionOffset);
 
 		nbtCompound = new NbtCompound();
 		nbtCompound.putString("identifier", this.teamIdentifier);
@@ -87,238 +89,70 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 
 		nbtCompound.putBoolean("show_friendly_invisibles", this.showFriendlyInvisibles);
 
-		nbtCompound.putString("nametag_visibility", this.nametagVisibility);
+		nbtCompound.put("nametag_visibility", AbstractTeam.VisibilityRule.CODEC, this.nametagVisibility);
 
-		nbtCompound.putString("death_message_visibility", this.deathMessageVisibility);
+		nbtCompound.put("death_message_visibility", AbstractTeam.VisibilityRule.CODEC, this.deathMessageVisibility);
 
-		nbtCompound.putString("collision_rule", this.collisionRule);
+		nbtCompound.put("collision_rule", AbstractTeam.CollisionRule.CODEC, this.collisionRule);
 
 		nbtCompound.putString("prefix_string", this.prefixString);
 
 		nbtCompound.putString("suffix_string", this.suffixString);
-		nbt.put("team_settings", nbtCompound.copy());
+		view.put("team_settings", NbtCompound.CODEC, nbtCompound.copy());
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		this.enableTicking = nbt.getBoolean("enable_ticking");
+		this.enableTicking = view.getBoolean("enable_ticking", true);
 
-		NbtCompound nbtCompound = nbt.getCompound("area");
-		if (nbt.contains("showArea")) {
-			this.showArea = nbt.getBoolean("showArea");
-			nbt.remove("showArea");
-		} else if (nbt.contains("show_area")) {
-			this.showArea = nbt.getBoolean("show_area");
-			nbt.remove("show_area");
-		} else {
-			this.showArea = nbtCompound.getBoolean("visible");
-		}
+		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showArea = nbtCompound.getBoolean("visible", false);
 
-		if (nbt.contains("areaMinX") || nbt.contains("areaMinY") || nbt.contains("areaMinZ") || nbt.contains("areaMaxX") || nbt.contains("areaMaxY") || nbt.contains("areaMaxZ")) {
-			this.area = new Box(nbt.getDouble("areaMinX"), nbt.getDouble("areaMinY"), nbt.getDouble("areaMinZ"), nbt.getDouble("areaMaxX"), nbt.getDouble("areaMaxY"), nbt.getDouble("areaMaxZ"));
-			this.calculateAreaBox = true;
-			nbt.remove("areaMinX");
-			nbt.remove("areaMinY");
-			nbt.remove("areaMinZ");
-			nbt.remove("areaMaxX");
-			nbt.remove("areaMaxY");
-			nbt.remove("areaMaxZ");
-		} else if (nbt.contains("area_min_x") || nbt.contains("area_min_y") || nbt.contains("area_min_z") || nbt.contains("area_max_x") || nbt.contains("area_max_y") || nbt.contains("area_max_z")) {
-			this.area = new Box(nbt.getDouble("area_min_x"), nbt.getDouble("area_min_y"), nbt.getDouble("area_min_z"), nbt.getDouble("area_max_x"), nbt.getDouble("area_max_y"), nbt.getDouble("area_max_z"));
-			this.calculateAreaBox = true;
-			nbt.remove("area_min_x");
-			nbt.remove("area_min_y");
-			nbt.remove("area_min_z");
-			nbt.remove("area_max_x");
-			nbt.remove("area_max_y");
-			nbt.remove("area_max_z");
-		}
+		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
-		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
-			);
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
-			);
-			nbt.remove("area_dimensions_x");
-			nbt.remove("area_dimensions_y");
-			nbt.remove("area_dimensions_z");
-		} else {
-			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
-		}
-
-		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
-			);
-			nbt.remove("area_position_offset_x");
-			nbt.remove("area_position_offset_y");
-			nbt.remove("area_position_offset_z");
-		} else {
 			this.areaPositionOffset = BlockPos.max(
 					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+							nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
 			);
-		}
 
-		if (nbt.contains("pvpControllerBlockPositionOffsetX") || nbt.contains("pvpControllerBlockPositionOffsetY") || nbt.contains("pvpControllerBlockPositionOffsetZ")) {
-			this.pvpControllerBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("pvpControllerBlockPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("pvpControllerBlockPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("pvpControllerBlockPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("pvpControllerBlockPositionOffsetX");
-			nbt.remove("pvpControllerBlockPositionOffsetY");
-			nbt.remove("pvpControllerBlockPositionOffsetZ");
-		} else if (nbt.contains("pvp_controller_block_position_offset_x") || nbt.contains("pvp_controller_block_position_offset_y") || nbt.contains("pvp_controller_block_position_offset_z")) {
-			this.pvpControllerBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("pvp_controller_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("pvp_controller_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("pvp_controller_block_position_offset_z"), -48, 48)
-			);
-			nbt.remove("pvp_controller_block_position_offset_x");
-			nbt.remove("pvp_controller_block_position_offset_y");
-			nbt.remove("pvp_controller_block_position_offset_z");
-		} else {
 			this.pvpControllerBlockPositionOffset = BlockPos.max(
 					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "pvp_controller_block_position_offset").orElse(BlockPos.ORIGIN),
+							nbtCompound.get("pvp_controller_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
 			);
-		}
 
-		nbtCompound = nbt.getCompound("team_settings");
-		if (nbt.contains("teamIdentifier")) {
-			this.teamIdentifier = nbt.getString("teamIdentifier");
-			nbt.remove("teamIdentifier");
-		} else if (nbt.contains("team_identifier")) {
-			this.teamIdentifier = nbt.getString("team_identifier");
-			nbt.remove("team_identifier");
-		} else {
-			this.teamIdentifier = nbtCompound.getString("identifier");
-		}
+		nbtCompound = view.read("team_settings", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.teamIdentifier = nbtCompound.getString("identifier", "");
 
-		if (nbt.contains("displayNameString")) {
-			this.displayNameString = nbt.getString("displayNameString");
-			nbt.remove("displayNameString");
-		} else if (nbt.contains("display_name_string")) {
-			this.displayNameString = nbt.getString("display_name_string");
-			nbt.remove("display_name_string");
-		} else {
-			this.displayNameString = nbtCompound.getString("display_name_string");
-		}
+		this.displayNameString = nbtCompound.getString("display_name_string", "");
 
 
-		if (nbt.contains("teamColorIndex")) {
-			this.setTeamColor(nbt.getInt("teamColorIndex"));
-			nbt.remove("teamColorIndex");
-		} else if (nbt.contains("team_color_index")) {
-			this.setTeamColor(nbt.getInt("team_color_index"));
-			nbt.remove("team_color_index");
-		} else {
-			this.setTeamColor(nbtCompound.getInt("color_index"));
-		}
+		this.setTeamColor(nbtCompound.getInt("color_index", -1));
 
-		if (nbt.contains("friendlyFire")) {
-			this.friendlyFire = nbt.getBoolean("friendlyFire");
-			nbt.remove("friendlyFire");
-		} else if (nbt.contains("friendly_fire")) {
-			this.friendlyFire = nbt.getBoolean("friendly_fire");
-			nbt.remove("friendly_fire");
-		} else {
-			this.friendlyFire = nbtCompound.getBoolean("friendly_fire");
-		}
+		this.friendlyFire = nbtCompound.getBoolean("friendly_fire", false);
 
-		if (nbt.contains("showFriendlyInvisibles")) {
-			this.showFriendlyInvisibles = nbt.getBoolean("showFriendlyInvisibles");
-			nbt.remove("showFriendlyInvisibles");
-		} else if (nbt.contains("show_friendly_invisibles")) {
-			this.showFriendlyInvisibles = nbt.getBoolean("show_friendly_invisibles");
-			nbt.remove("show_friendly_invisibles");
-		} else {
-			this.showFriendlyInvisibles = nbtCompound.getBoolean("show_friendly_invisibles");
-		}
+		this.showFriendlyInvisibles = nbtCompound.getBoolean("show_friendly_invisibles", false);
 
-		if (nbt.contains("nametagVisibility")) {
-			this.nametagVisibility = nbt.getString("nametagVisibility");
-			nbt.remove("nametagVisibility");
-		} else if (nbt.contains("nametag_visibility")) {
-			this.nametagVisibility = nbt.getString("nametag_visibility");
-			nbt.remove("nametag_visibility");
-		} else {
-			this.nametagVisibility = nbtCompound.getString("nametag_visibility");
-		}
+		this.nametagVisibility = nbtCompound.get("nametag_visibility", AbstractTeam.VisibilityRule.CODEC).orElse(AbstractTeam.VisibilityRule.ALWAYS);
 
-		if (nbt.contains("deathMessageVisibility")) {
-			this.deathMessageVisibility = nbt.getString("deathMessageVisibility");
-			nbt.remove("deathMessageVisibility");
-		} else if (nbt.contains("death_message_visibility")) {
-			this.deathMessageVisibility = nbt.getString("death_message_visibility");
-			nbt.remove("death_message_visibility");
-		} else {
-			this.deathMessageVisibility = nbtCompound.getString("death_message_visibility");
-		}
+		this.deathMessageVisibility = nbtCompound.get("death_message_visibility", AbstractTeam.VisibilityRule.CODEC).orElse(AbstractTeam.VisibilityRule.ALWAYS);
 
-		if (nbt.contains("collisionRule")) {
-			this.collisionRule = nbt.getString("collisionRule");
-			nbt.remove("collisionRule");
-		} else if (nbt.contains("collision_rule")) {
-			this.collisionRule = nbt.getString("collision_rule");
-			nbt.remove("collision_rule");
-		} else {
-			this.collisionRule = nbtCompound.getString("collision_rule");
-		}
+		this.collisionRule = nbtCompound.get("collision_rule", AbstractTeam.CollisionRule.CODEC).orElse(AbstractTeam.CollisionRule.ALWAYS);
 
-		if (nbt.contains("prefixString")) {
-			this.prefixString = nbt.getString("prefixString");
-			nbt.remove("prefixString");
-		} else if (nbt.contains("prefix_string")) {
-			this.prefixString = nbt.getString("prefix_string");
-			nbt.remove("prefix_string");
-		} else {
-			this.prefixString = nbtCompound.getString("prefix_string");
-		}
+		this.prefixString = nbtCompound.getString("prefix_string", "");
 
-		if (nbt.contains("suffixString")) {
-			this.suffixString = nbt.getString("suffixString");
-			nbt.remove("suffixString");
-		} else if (nbt.contains("suffix_string")) {
-			this.suffixString = nbt.getString("suffix_string");
-			nbt.remove("suffix_string");
-		} else {
-			this.suffixString = nbtCompound.getString("suffix_string");
-		}
+		this.suffixString = nbtCompound.getString("suffix_string", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 
 	}
 
@@ -458,39 +292,27 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 		this.showFriendlyInvisibles = showFriendlyInvisibles;
 	}
 
-	public String getNametagVisibility() {
+	public AbstractTeam.VisibilityRule getNametagVisibility() {
 		return this.nametagVisibility;
 	}
 
-	public void setNametagVisibility(String nametagVisibility) {
-		AbstractTeam.VisibilityRule var = AbstractTeam.VisibilityRule.getRule(nametagVisibility);
-		if (var == null) {
-			nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
-		}
+	public void setNametagVisibility(AbstractTeam.VisibilityRule nametagVisibility) {
 		this.nametagVisibility = nametagVisibility;
 	}
 
-	public String getDeathMessageVisibility() {
+	public AbstractTeam.VisibilityRule getDeathMessageVisibility() {
 		return this.deathMessageVisibility;
 	}
 
-	public void setDeathMessageVisibility(String deathMessageVisibility) {
-		AbstractTeam.VisibilityRule var = AbstractTeam.VisibilityRule.getRule(deathMessageVisibility);
-		if (var == null) {
-			deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS.name;
-		}
+	public void setDeathMessageVisibility(AbstractTeam.VisibilityRule deathMessageVisibility) {
 		this.deathMessageVisibility = deathMessageVisibility;
 	}
 
-	public String getCollisionRule() {
+	public AbstractTeam.CollisionRule getCollisionRule() {
 		return this.collisionRule;
 	}
 
-	public void setCollisionRule(String collisionRule) {
-		AbstractTeam.CollisionRule var = AbstractTeam.CollisionRule.getRule(collisionRule);
-		if (var == null) {
-			collisionRule = AbstractTeam.CollisionRule.ALWAYS.name;
-		}
+	public void setCollisionRule(AbstractTeam.CollisionRule collisionRule) {
 		this.collisionRule = collisionRule;
 	}
 

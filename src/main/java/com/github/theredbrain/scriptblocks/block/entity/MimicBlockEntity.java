@@ -11,14 +11,14 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 	private BlockPos activeMimicBlockPositionOffset = new BlockPos(0, 1, 0);
@@ -29,75 +29,35 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.put("active_mimic_block_position_offset", NbtHelper.fromBlockPos(this.activeMimicBlockPositionOffset));
+		view.put("active_mimic_block_position_offset", BlockPos.CODEC, this.activeMimicBlockPositionOffset);
 
-		nbt.put("inactive_mimic_block_position_offset", NbtHelper.fromBlockPos(this.inactiveMimicBlockPositionOffset));
+		view.put("inactive_mimic_block_position_offset", BlockPos.CODEC, this.inactiveMimicBlockPositionOffset);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("activeMimicBlockPositionOffsetX") || nbt.contains("activeMimicBlockPositionOffsetY") || nbt.contains("activeMimicBlockPositionOffsetZ")) {
-			this.activeMimicBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("activeMimicBlockPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("activeMimicBlockPositionOffsetX");
-			nbt.remove("activeMimicBlockPositionOffsetY");
-			nbt.remove("activeMimicBlockPositionOffsetZ");
-		} else if (nbt.contains("active_mimic_block_position_offset_x") || nbt.contains("active_mimic_block_position_offset_y") || nbt.contains("active_mimic_block_position_offset_z")) {
-			this.activeMimicBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("active_mimic_block_position_offset_z"), -48, 48)
-			);
-			nbt.remove("active_mimic_block_position_offset_x");
-			nbt.remove("active_mimic_block_position_offset_y");
-			nbt.remove("active_mimic_block_position_offset_z");
-		} else {
-			this.activeMimicBlockPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "active_mimic_block_position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.activeMimicBlockPositionOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("active_mimic_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("inactiveMimicBlockPositionOffsetX") || nbt.contains("inactiveMimicBlockPositionOffsetY") || nbt.contains("inactiveMimicBlockPositionOffsetZ")) {
-			this.inactiveMimicBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("inactiveMimicBlockPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("inactiveMimicBlockPositionOffsetX");
-			nbt.remove("inactiveMimicBlockPositionOffsetY");
-			nbt.remove("inactiveMimicBlockPositionOffsetZ");
-		} else if (nbt.contains("inactive_mimic_block_position_offset_x") || nbt.contains("inactive_mimic_block_position_offset_y") || nbt.contains("inactive_mimic_block_position_offset_z")) {
-			this.inactiveMimicBlockPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("inactive_mimic_block_position_offset_z"), -48, 48)
-			);
-			nbt.remove("inactive_mimic_block_position_offset_x");
-			nbt.remove("inactive_mimic_block_position_offset_y");
-			nbt.remove("inactive_mimic_block_position_offset_z");
-		} else {
-			this.inactiveMimicBlockPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "inactive_mimic_block_position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.inactiveMimicBlockPositionOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("inactive_mimic_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

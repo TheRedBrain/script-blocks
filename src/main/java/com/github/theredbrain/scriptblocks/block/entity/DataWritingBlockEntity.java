@@ -9,13 +9,13 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 public class DataWritingBlockEntity extends RotatedBlockEntity implements Triggerable {
 	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
@@ -27,63 +27,33 @@ public class DataWritingBlockEntity extends RotatedBlockEntity implements Trigge
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbt.putString("data_identifier", this.dataIdentifier);
+		view.putString("data_identifier", this.dataIdentifier);
 
-		nbt.putString("new_data_value", this.newDataValue);
+		view.putString("new_data_value", this.newDataValue);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
-		} else if (nbt.contains("data_providing_block_position_offset_x") || nbt.contains("data_providing_block_position_offset_y") || nbt.contains("data_providing_block_position_offset_z")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("data_providing_block_position_offset_z"), -48, 48)
-			);
-			nbt.remove("data_providing_block_position_offset_x");
-			nbt.remove("data_providing_block_position_offset_y");
-			nbt.remove("data_providing_block_position_offset_z");
-		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.dataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("dataIdentifier")) {
-			this.dataIdentifier = nbt.getString("dataIdentifier");
-			nbt.remove("dataIdentifier");
-		} else {
-			this.dataIdentifier = nbt.getString("data_identifier");
-		}
+		this.dataIdentifier = view.getString("data_identifier", "");
 
-		if (nbt.contains("newDataValue")) {
-			this.newDataValue = nbt.getString("newDataValue");
-			nbt.remove("newDataValue");
-		} else {
-			this.newDataValue = nbt.getString("new_data_value");
-		}
+		this.newDataValue = view.getString("new_data_value", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

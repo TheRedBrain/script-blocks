@@ -7,12 +7,15 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.block.entity.Sherds;
 import net.minecraft.component.ComponentMap;
+import net.minecraft.component.ComponentsAccess;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
@@ -29,15 +32,15 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.writeNbt(nbt, registryLookup);
-		this.sherds.toNbt(nbt);
+	protected void writeData(WriteView view) {
+		super.writeData(view);
+		view.put("sherds", Sherds.CODEC, this.sherds);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.readNbt(nbt, registryLookup);
-		this.sherds = Sherds.fromNbt(nbt);
+	protected void readData(ReadView view) {
+		super.readData(view);
+		this.sherds = view.read("sherds", Sherds.CODEC).orElse(Sherds.DEFAULT);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
@@ -80,15 +83,15 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void readComponents(BlockEntity.ComponentsAccess components) {
+	protected void readComponents(ComponentsAccess components) {
 		super.readComponents(components);
 		this.sherds = components.getOrDefault(DataComponentTypes.POT_DECORATIONS, Sherds.DEFAULT);
 	}
 
 	@Override
-	public void removeFromCopiedStackNbt(NbtCompound nbt) {
-		super.removeFromCopiedStackNbt(nbt);
-		nbt.remove("sherds");
+	public void removeFromCopiedStackData(WriteView view) {
+		super.removeFromCopiedStackData(view);
+		view.remove("sherds");
 	}
 
 	public void wobble(DecoratedPotBlockEntity.WobbleType wobbleType) {

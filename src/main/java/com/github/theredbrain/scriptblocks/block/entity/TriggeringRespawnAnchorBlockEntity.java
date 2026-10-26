@@ -20,8 +20,11 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -47,69 +50,61 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.spawnPoint.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.spawnPoint.getLeft());
 		nbtCompound.putDouble("yaw", this.spawnPoint.getRight().getLeft());
 		nbtCompound.putDouble("pitch", this.spawnPoint.getRight().getRight());
-		nbt.put("spawn_point", nbtCompound.copy());
+		view.put("spawn_point", NbtCompound.CODEC, nbtCompound.copy());
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		nbt.put("triggered_block", nbtCompound);
+		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		List<UUID> list = this.uuidList.stream().toList();
-		nbt.putInt("uuid_list_size", list.size());
-		for (int i = 0; i < list.size(); i++) {
-			nbt.putUuid("uuid_" + i, list.get(i));
-		}
-
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<UUID> listAppender = view.getListAppender("uuid_list", Uuids.CODEC);
 		for (UUID uuid : this.uuidList) {
-			nbtList.add(NbtHelper.fromUuid(uuid));
+			listAppender.add(uuid);
 		}
-		nbt.put("uuid_list", nbtList);
 
-		nbt.putBoolean("send_message", this.sendMessage);
+		view.putBoolean("send_message", this.sendMessage);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		NbtCompound nbtCompound = nbt.getCompound("spawn_point");
+		NbtCompound nbtCompound = view.read("spawn_point", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 		this.spawnPoint = new MutablePair<>(
-				NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+				nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 				new MutablePair<>(
-						MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
-						MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
+						MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180),
+						MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90)
 				)
 		);
 
-		nbtCompound = nbt.getCompound("triggered_block");
+		nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets")
+				nbtCompound.getBoolean("resets", false)
 		);
 
 		this.uuidList.clear();
-		NbtList nbtList = nbt.getList("uuid_list", NbtElement.INT_ARRAY_TYPE);
-		for (int i = 0; i < nbtList.size(); i++) {
-			this.uuidList.add(NbtHelper.toUuid(nbtList.get(i)));
+		for (UUID uuid : view.getTypedListView("uuid_list", Uuids.CODEC)) {
+			this.uuidList.add(uuid);
 		}
 
-		this.sendMessage = nbt.getBoolean("send_message");
+		this.sendMessage = view.getBoolean("send_message", true);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

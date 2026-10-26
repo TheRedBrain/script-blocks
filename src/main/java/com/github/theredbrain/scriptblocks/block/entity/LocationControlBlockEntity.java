@@ -10,12 +10,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -51,217 +50,108 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private int resetAreaMaxZ = RESET_AREA_MAX_Z_DEFAULT;
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.mainEntrance.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.mainEntrance.getLeft());
 		nbtCompound.putDouble("yaw", this.mainEntrance.getRight().getLeft());
 		nbtCompound.putDouble("pitch", this.mainEntrance.getRight().getRight());
-		nbt.put("main_entrance", nbtCompound.copy());
+		view.put("main_entrance", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("side_entrances", NbtCompound.CODEC);
 		this.sideEntrances.forEach((key, value) -> {
 			NbtCompound nbtCompound1 = new NbtCompound();
 			nbtCompound1.putString("key", key);
-			nbtCompound1.put("position_offset", NbtHelper.fromBlockPos(value.getLeft()));
+			nbtCompound1.put("position_offset", BlockPos.CODEC, value.getLeft());
 			nbtCompound1.putDouble("yaw", value.getRight().getLeft());
 			nbtCompound1.putDouble("pitch", value.getRight().getRight());
-			nbtList.add(nbtCompound1.copy());
+			listAppender.add(nbtCompound1.copy());
 		});
-		nbt.put("side_entrances", nbtList);
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		nbt.put("triggered_block", nbtCompound.copy());
+		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbt.putBoolean("manual_reset", this.manualReset);
+		view.putBoolean("manual_reset", this.manualReset);
 
-		nbt.putBoolean("should_always_reset", this.shouldAlwaysReset);
+		view.putBoolean("should_always_reset", this.shouldAlwaysReset);
 
-		nbt.putInt("initial_reset_timer", this.initialResetTimer);
+		view.putInt("initial_reset_timer", this.initialResetTimer);
 
-		nbt.putInt("reset_area_min_x", this.resetAreaMinX);
+		view.putInt("reset_area_min_x", this.resetAreaMinX);
 
-		nbt.putInt("reset_area_min_z", this.resetAreaMinZ);
+		view.putInt("reset_area_min_z", this.resetAreaMinZ);
 
-		nbt.putInt("reset_area_max_x", this.resetAreaMaxX);
+		view.putInt("reset_area_max_x", this.resetAreaMaxX);
 
-		nbt.putInt("reset_area_max_z", this.resetAreaMaxZ);
+		view.putInt("reset_area_max_z", this.resetAreaMaxZ);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("mainEntrance_X") || nbt.contains("mainEntrance_Y") || nbt.contains("mainEntrance_Z") || nbt.contains("mainEntrance_Yaw") || nbt.contains("mainEntrance_Pitch")) {
-			this.mainEntrance = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("mainEntrance_X"), -48, 48),
-							MathHelper.clamp(nbt.getInt("mainEntrance_Y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("mainEntrance_Z"), -48, 48)
-					),
-					new MutablePair<>(
-							nbt.getDouble("mainEntrance_Yaw"),
-							nbt.getDouble("mainEntrance_Pitch"))
-			);
-			nbt.remove("mainEntrance_X");
-			nbt.remove("mainEntrance_Y");
-			nbt.remove("mainEntrance_Z");
-			nbt.remove("mainEntrance_Yaw");
-			nbt.remove("mainEntrance_Pitch");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("main_entrance");
-			this.mainEntrance = new MutablePair<>(
-					NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-					new MutablePair<>(
-							MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
-							MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
-					)
-			);
-		}
+		NbtCompound nbtCompound = view.read("main_entrance", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.mainEntrance = new MutablePair<>(
+				nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+				new MutablePair<>(
+						MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180),
+						MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90)
+				)
+		);
 
 		this.sideEntrances.clear();
-		if (nbt.contains("sideEntrancesSize")) {
-			int delegatedSpawnBlocksSize = nbt.getInt("sideEntrancesSize");
-			for (int i = 0; i < delegatedSpawnBlocksSize; i++) {
-				this.sideEntrances.put(
-						nbt.getString("key_" + i),
-						new MutablePair<>(
-								new BlockPos(
-										MathHelper.clamp(nbt.getInt("sideEntrance_" + i + "_X"), -48, 48),
-										MathHelper.clamp(nbt.getInt("sideEntrance_" + i + "_Y"), -48, 48),
-										MathHelper.clamp(nbt.getInt("sideEntrance_" + i + "_Z"), -48, 48)
-								),
-								new MutablePair<>(
-										nbt.getDouble("sideEntrance_" + i + "_Yaw"),
-										nbt.getDouble("sideEntrance_" + i + "_Pitch"))
-						));
-				nbt.remove("key_" + i);
-				nbt.remove("sideEntrance_" + i + "_X");
-				nbt.remove("sideEntrance_" + i + "_Y");
-				nbt.remove("sideEntrance_" + i + "_Z");
-				nbt.remove("sideEntrance_" + i + "_Yaw");
-				nbt.remove("sideEntrance_" + i + "_Pitch");
-			}
-			nbt.remove("sideEntrancesSize");
-		} else {
-			NbtList nbtList = nbt.getList("side_entrances", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
-				this.sideEntrances.put(
-						nbtCompound.getString("key"),
-						new MutablePair<>(
-								NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-								new MutablePair<>(
-										MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
-										MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
-								)
-						));
-			}
+		for (NbtCompound nbtCompound1 : view.getTypedListView("side_entrances", NbtCompound.CODEC)) {
+			this.sideEntrances.put(
+					nbtCompound1.getString("key", ""),
+					new MutablePair<>(
+							nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+							new MutablePair<>(
+									MathHelper.clamp(nbtCompound1.getDouble("yaw", 0), -180, 180),
+									MathHelper.clamp(nbtCompound1.getDouble("pitch", 0), -90, 90)
+							)
+					));
 		}
 
-		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("triggeredBlockResets")
-			);
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
-			this.triggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
+		nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.triggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
-		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
-		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.dataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("manualReset")) {
-			this.manualReset = nbt.getBoolean("manualReset");
-			nbt.remove("manualReset");
-		} else {
-			this.manualReset = nbt.getBoolean("manual_reset");
-		}
+		this.manualReset = view.getBoolean("manual_reset", false);
 
-		if (nbt.contains("shouldAlwaysReset")) {
-			this.shouldAlwaysReset = nbt.getBoolean("shouldAlwaysReset");
-			nbt.remove("shouldAlwaysReset");
-		} else {
-			this.shouldAlwaysReset = nbt.getBoolean("should_always_reset");
-		}
+		this.shouldAlwaysReset = view.getBoolean("should_always_reset", false);
 
-		if (nbt.contains("initialResetTimer")) {
-			this.initialResetTimer = nbt.getInt("initialResetTimer");
-			nbt.remove("initialResetTimer");
-		} else if (nbt.contains("initial_reset_timer")) {
-			this.initialResetTimer = nbt.getInt("initial_reset_timer");
-			nbt.remove("initial_reset_timer");
-		} else {
-			this.initialResetTimer = -1;
-		}
+		this.initialResetTimer = view.getInt("initial_reset_timer", -1);
 
-		if (nbt.contains("resetAreaMinX")) {
-			this.resetAreaMinX = nbt.getInt("resetAreaMinX");
-			nbt.remove("resetAreaMinX");
-		} else {
-			this.resetAreaMinX = nbt.getInt("reset_area_min_x");
-		}
+		this.resetAreaMinX = view.getInt("reset_area_min_x", RESET_AREA_MIN_X_DEFAULT);
 
-		if (nbt.contains("resetAreaMinZ")) {
-			this.resetAreaMinZ = nbt.getInt("resetAreaMinZ");
-			nbt.remove("resetAreaMinZ");
-		} else {
-			this.resetAreaMinZ = nbt.getInt("reset_area_min_z");
-		}
+		this.resetAreaMinZ = view.getInt("reset_area_min_z", RESET_AREA_MIN_Z_DEFAULT);
 
-		if (nbt.contains("resetAreaMaxX")) {
-			this.resetAreaMaxX = nbt.getInt("resetAreaMaxX");
-			nbt.remove("resetAreaMaxX");
-		} else {
-			this.resetAreaMaxX = nbt.getInt("reset_area_max_x");
-		}
-		if (nbt.contains("resetAreaMaxZ")) {
-			this.resetAreaMaxZ = nbt.getInt("resetAreaMaxZ");
-			nbt.remove("resetAreaMaxZ");
-		} else {
-			this.resetAreaMaxZ = nbt.getInt("reset_area_max_z");
-		}
+		this.resetAreaMaxX = view.getInt("reset_area_max_x", RESET_AREA_MAX_X_DEFAULT);
 
-		super.readNbt(nbt, registryLookup);
+		this.resetAreaMaxZ = view.getInt("reset_area_max_z", RESET_AREA_MAX_Z_DEFAULT);
+
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

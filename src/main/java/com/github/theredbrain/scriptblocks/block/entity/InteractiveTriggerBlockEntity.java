@@ -16,18 +16,18 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
@@ -46,116 +46,64 @@ public class InteractiveTriggerBlockEntity extends RotatedBlockEntity implements
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		nbt.put("triggered_block", nbtCompound.copy());
+		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putString("prevent_interaction_identifier_string", this.preventInteractionIdentifierString);
+		view.putString("prevent_interaction_identifier_string", this.preventInteractionIdentifierString);
 
-		nbt.putString("interaction_prevented_message", this.interactionPreventedMessage);
+		view.putString("interaction_prevented_message", this.interactionPreventedMessage);
 
-		nbt.putString("interaction_prevented_sound", this.interactionPreventedSound);
+		view.putString("interaction_prevented_sound", this.interactionPreventedSound);
 
-		nbt.putString("key_identifier_string", this.keyIdentifierString);
+		view.putString("key_identifier_string", this.keyIdentifierString);
 
-		nbt.putString("locked_message", this.lockedMessage);
+		view.putString("locked_message", this.lockedMessage);
 
-		nbt.putString("locked_sound", this.lockedSound);
+		view.putString("locked_sound", this.lockedSound);
 
-		nbt.putString("unlocked_message", this.unlockedMessage);
+		view.putString("unlocked_message", this.unlockedMessage);
 
-		nbt.putString("unlocked_sound", this.unlockedSound);
+		view.putString("unlocked_sound", this.unlockedSound);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("triggeredBlockResets")
-			);
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("triggered_block_resets")
-			);
-			nbt.remove("triggered_block_position_offset_x");
-			nbt.remove("triggered_block_position_offset_y");
-			nbt.remove("triggered_block_position_offset_z");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
-			this.triggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
+		NbtCompound nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.triggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
-		this.preventInteractionIdentifierString = nbt.getString("prevent_interaction_identifier_string");
+		this.preventInteractionIdentifierString = view.getString("prevent_interaction_identifier_string", "");
 
-		this.interactionPreventedMessage = nbt.getString("interaction_prevented_message");
+		this.interactionPreventedMessage = view.getString("interaction_prevented_message", "");
 
-		this.interactionPreventedSound = nbt.getString("interaction_prevented_sound");
+		this.interactionPreventedSound = view.getString("interaction_prevented_sound", "");
 
-		if (nbt.contains("keyIdentifierString")) {
-			this.keyIdentifierString = nbt.getString("keyIdentifierString");
-			nbt.remove("keyIdentifierString");
-		} else {
-			this.keyIdentifierString = nbt.getString("key_identifier_string");
-		}
+		this.keyIdentifierString = view.getString("key_identifier_string", "");
 
-		if (nbt.contains("lockedMessage")) {
-			this.lockedMessage = nbt.getString("lockedMessage");
-			nbt.remove("lockedMessage");
-		} else {
-			this.lockedMessage = nbt.getString("locked_message");
-		}
+		this.lockedMessage = view.getString("locked_message", "");
 
-		if (nbt.contains("lockedSound")) {
-			this.lockedSound = nbt.getString("lockedSound");
-			nbt.remove("lockedSound");
-		} else {
-			this.lockedSound = nbt.getString("locked_sound");
-		}
+		this.lockedSound = view.getString("locked_sound", "");
 
-		if (nbt.contains("unlockedMessage")) {
-			this.unlockedMessage = nbt.getString("unlockedMessage");
-			nbt.remove("unlockedMessage");
-		} else {
-			this.unlockedMessage = nbt.getString("unlocked_message");
-		}
+		this.unlockedMessage = view.getString("unlocked_message", "");
 
-		if (nbt.contains("unlockedSound")) {
-			this.unlockedSound = nbt.getString("unlockedSound");
-			nbt.remove("unlockedSound");
-		} else {
-			this.unlockedSound = nbt.getString("unlocked_sound");
-		}
+		this.unlockedSound = view.getString("unlocked_sound", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

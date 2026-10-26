@@ -7,10 +7,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
@@ -27,55 +27,31 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("data", NbtCompound.CODEC);
 		this.data.forEach((key, entry) -> {
 			NbtCompound nbtCompound = new NbtCompound();
 			nbtCompound.putString("key", key);
 			nbtCompound.putString("value", entry);
-			nbtList.add(nbtCompound);
+			listAppender.add(nbtCompound.copy());
 		});
-		nbt.put("data", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.data.clear();
-		if (nbt.contains("data")) {
-			NbtList nbtList = nbt.getList("data", NbtElement.COMPOUND_TYPE);
-			NbtCompound nbtCompound;
-			for (int i = 0; i < nbtList.size(); i++) {
-				nbtCompound = nbtList.getCompound(i);
-				this.data.put(
-						nbtCompound.getString("key"),
-						nbtCompound.getString("value")
-				);
-			}
-		} else {
-			int dataSize;
-			if (nbt.contains("dataSize")) {
-				dataSize = nbt.getInt("dataSize");
-				nbt.remove("dataSize");
-			} else {
-				dataSize = nbt.getInt("data_size");
-				nbt.remove("data_size");
-			}
-			for (int i = 0; i < dataSize; i++) {
-				if (nbt.contains("key_" + i, NbtElement.STRING_TYPE) || nbt.contains("value_" + i, NbtElement.STRING_TYPE)) {
-					String key = nbt.getString("key_" + i);
-					String value = nbt.getString("value_" + i);
-					this.data.put(key, value);
-				}
-				nbt.remove("key_" + i);
-				nbt.remove("value_" + i);
-			}
+		for (NbtCompound nbtCompound : view.getTypedListView("data", NbtCompound.CODEC)) {
+			this.data.put(
+					nbtCompound.getString("key", ""),
+					nbtCompound.getString("value", "")
+			);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	@Override

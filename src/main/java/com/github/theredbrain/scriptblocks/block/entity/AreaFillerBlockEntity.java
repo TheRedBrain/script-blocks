@@ -10,20 +10,18 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.GameRules;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -45,153 +43,55 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.areaPositionOffset));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		nbt.put("area", nbtCompound.copy());
+		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("sub_areas", NbtCompound.CODEC);
 		for (MutablePair<BlockPos, Vec3i> subArea : this.subAreasList) {
 			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(subArea.getLeft()));
+			nbtCompound.put("position_offset", BlockPos.CODEC, subArea.getLeft());
 			nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(subArea.getRight()));
-			nbtList.add(nbtCompound.copy());
+			listAppender.add(nbtCompound.copy());
 		}
-		nbt.put("sub_areas", nbtList);
 
-		nbt.putString("block_identifier_string", this.blockIdentifierString);
+		view.putString("block_identifier_string", this.blockIdentifierString);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		NbtCompound nbtCompound = nbt.getCompound("area");
-		if (nbt.contains("showArea")) {
-			this.showArea = nbt.getBoolean("showArea");
-			nbt.remove("showArea");
-		} else if (nbt.contains("show_area")) {
-			this.showArea = nbt.getBoolean("show_area");
-			nbt.remove("show_area");
-		} else {
-			this.showArea = nbtCompound.getBoolean("visible");
-		}
+		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.showArea = nbtCompound.getBoolean("visible").orElse(false);
 
-		if (nbt.contains("areaDimensionsX") || nbt.contains("areaDimensionsY") || nbt.contains("areaDimensionsZ")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("areaDimensionsX"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsY"), 0, 48),
-					MathHelper.clamp(nbt.getInt("areaDimensionsZ"), 0, 48)
-			);
-			nbt.remove("areaDimensionsX");
-			nbt.remove("areaDimensionsY");
-			nbt.remove("areaDimensionsZ");
-		} else if (nbt.contains("area_dimensions_x") || nbt.contains("area_dimensions_y") || nbt.contains("area_dimensions_z")) {
-			this.areaDimensions = new Vec3i(
-					MathHelper.clamp(nbt.getInt("area_dimensions_x"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_y"), 0, 48),
-					MathHelper.clamp(nbt.getInt("area_dimensions_z"), 0, 48)
-			);
-			nbt.remove("area_dimensions_x");
-			nbt.remove("area_dimensions_y");
-			nbt.remove("area_dimensions_z");
-		} else {
-			this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
-		}
+		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
-		if (nbt.contains("areaPositionOffsetX") || nbt.contains("areaPositionOffsetY") || nbt.contains("areaPositionOffsetZ")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("areaPositionOffsetZ"), -48, 48)
-			);
-			nbt.remove("areaPositionOffsetX");
-			nbt.remove("areaPositionOffsetY");
-			nbt.remove("areaPositionOffsetZ");
-		} else if (nbt.contains("area_position_offset_x") || nbt.contains("area_position_offset_y") || nbt.contains("area_position_offset_z")) {
-			this.areaPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("area_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("area_position_offset_z"), -48, 48)
-			);
-			nbt.remove("area_position_offset_x");
-			nbt.remove("area_position_offset_y");
-			nbt.remove("area_position_offset_z");
-		} else {
-			this.areaPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.areaPositionOffset = BlockPos.max(
+				BlockPos.min(
+						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
 		this.subAreasList.clear();
-		if (nbt.contains("subAreasListSize")) {
-			int subAreasListSize = nbt.getInt("subAreasListSize");
-			for (int i = 0; i < subAreasListSize; i++) {
-				this.subAreasList.add(new MutablePair<>(new BlockPos(
-						nbt.getInt("subAreaPositionOffsetX_" + i),
-						nbt.getInt("subAreaPositionOffsetY_" + i),
-						nbt.getInt("subAreaPositionOffsetZ_" + i)
-				), new Vec3i(
-						nbt.getInt("subAreaDimensionX_" + i),
-						nbt.getInt("subAreaDimensionY_" + i),
-						nbt.getInt("subAreaDimensionZ_" + i)
-				)));
-				nbt.remove("subAreaPositionOffsetX_" + i);
-				nbt.remove("subAreaPositionOffsetY_" + i);
-				nbt.remove("subAreaPositionOffsetZ_" + i);
-				nbt.remove("subAreaDimensionX_" + i);
-				nbt.remove("subAreaDimensionY_" + i);
-				nbt.remove("subAreaDimensionZ_" + i);
-			}
-			nbt.remove("subAreasListSize");
-		} else if (nbt.contains("sub_areas_list_size")) {
-			int subAreasListSize = nbt.getInt("sub_areas_list_size");
-			for (int i = 0; i < subAreasListSize; i++) {
-				this.subAreasList.add(new MutablePair<>(new BlockPos(
-						nbt.getInt("sub_area_position_offset_x_" + i),
-						nbt.getInt("sub_area_position_offset_y_" + i),
-						nbt.getInt("sub_area_position_offset_z_" + i)
-				), new Vec3i(
-						nbt.getInt("sub_area_dimension_x_" + i),
-						nbt.getInt("sub_area_dimension_y_" + i),
-						nbt.getInt("sub_area_dimension_z_" + i)
-				)));
-				nbt.remove("sub_area_position_offset_x_" + i);
-				nbt.remove("sub_area_position_offset_y_" + i);
-				nbt.remove("sub_area_position_offset_z_" + i);
-				nbt.remove("sub_area_dimension_x_" + i);
-				nbt.remove("sub_area_dimension_y_" + i);
-				nbt.remove("sub_area_dimension_z_" + i);
-			}
-			nbt.remove("sub_areas_list_size");
-		} else {
-			NbtList nbtList = nbt.getList("sub_areas", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				nbtCompound = nbtList.getCompound(i);
-				this.subAreasList.add(new MutablePair<>(
-						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-						ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0))
-				));
-			}
+		for (NbtCompound nbtCompound1 : view.getTypedListView("sub_areas", NbtCompound.CODEC)) {
+			this.subAreasList.add(new MutablePair<>(
+					nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+					ScriptBlocksNBTHelper.toVec3i(nbtCompound1, "dimensions").orElse(new Vec3i(0, 0, 0))
+			));
 		}
 
-		if (nbt.contains("blockIdentifierString")) {
-			this.blockIdentifierString = nbt.getString("blockIdentifierString");
-			nbt.remove("blockIdentifierString");
-		} else {
-			this.blockIdentifierString = nbt.getString("block_identifier_string");
-		}
+		this.blockIdentifierString = view.getString("block_identifier_string", "");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

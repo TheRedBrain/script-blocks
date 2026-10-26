@@ -9,18 +9,18 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -48,9 +48,9 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putString("manipulation_mode", this.manipulationMode.asString());
+		view.putString("manipulation_mode", this.manipulationMode.asString());
 
 		NbtCompound nbtCompound = new NbtCompound();
 		nbtCompound.putString("identifier", this.effectIdentifier);
@@ -59,89 +59,48 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 		nbtCompound.putBoolean("is_ambient", this.effectIsAmbient);
 		nbtCompound.putBoolean("show_particles", this.effectShowsParticles);
 		nbtCompound.putBoolean("show_icon", this.effectShowsIcon);
-		nbt.put("applied_status_effect", nbtCompound);
+		view.put("applied_status_effect", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putString("manipulated_effect_tag_id", this.manipulatedEffectTagIdentifierString);
+		view.putString("manipulated_effect_tag_id", this.manipulatedEffectTagIdentifierString);
 
-		nbt.putInt("amplifier_modification", this.amplifierModification);
+		view.putInt("amplifier_modification", this.amplifierModification);
 
-		nbt.put("uuid_list_handler_position_offset", NbtHelper.fromBlockPos(this.uuidListHandlerPositionOffset));
+		view.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		this.manipulationMode = ManipulationMode.byName(nbt.getString("manipulation_mode")).orElse(ManipulationMode.APPLY);
+		this.manipulationMode = ManipulationMode.byName(view.getString("manipulation_mode", "")).orElse(ManipulationMode.APPLY);
 
-		NbtCompound nbtCompound = nbt.getCompound("applied_status_effect");
-		if (nbt.contains("effect_identifier")) {
-			this.effectIdentifier = nbt.getString("effect_identifier");
-			nbt.remove("effect_identifier");
-		} else {
-			this.effectIdentifier = nbtCompound.getString("identifier");
-		}
+		NbtCompound nbtCompound = view.read("applied_status_effect", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.effectIdentifier = nbtCompound.getString("identifier", "");
 
-		if (nbt.contains("effect_amplifier")) {
-			this.effectAmplifier = nbt.getInt("effect_amplifier");
-			nbt.remove("effect_amplifier");
-		} else {
-			this.effectAmplifier = nbtCompound.getInt("amplifier");
-		}
+		this.effectAmplifier = nbtCompound.getInt("amplifier", 0);
 
-		if (nbt.contains("effect_duration")) {
-			this.effectDuration = nbt.getInt("effect_duration");
-			nbt.remove("effect_duration");
-		} else {
-			this.effectDuration = nbtCompound.getInt("duration");
-		}
+		this.effectDuration = nbtCompound.getInt("duration", 100);
 
-		if (nbt.contains("effect_is_ambient")) {
-			this.effectIsAmbient = nbt.getBoolean("effect_is_ambient");
-			nbt.remove("effect_is_ambient");
-		} else {
-			this.effectIsAmbient = nbtCompound.getBoolean("ambient");
-		}
+		this.effectIsAmbient = nbtCompound.getBoolean("is_ambient", false);
 
-		if (nbt.contains("effect_shows_particles")) {
-			this.effectShowsParticles = nbt.getBoolean("effect_shows_particles");
-			nbt.remove("effect_shows_particles");
-		} else {
-			this.effectShowsParticles = nbtCompound.getBoolean("show_particles");
-		}
+		this.effectShowsParticles = nbtCompound.getBoolean("show_particles", false);
 
-		if (nbt.contains("effect_shows_icon")) {
-			this.effectShowsIcon = nbt.getBoolean("effect_shows_icon");
-			nbt.remove("effect_shows_icon");
-		} else {
-			this.effectShowsIcon = nbtCompound.getBoolean("show_icon");
-		}
+		this.effectShowsIcon = nbtCompound.getBoolean("show_icon", false);
 
-		this.manipulatedEffectTagIdentifierString = nbt.getString("manipulated_effect_tag_id");
+		this.manipulatedEffectTagIdentifierString = view.getString("manipulated_effect_tag_id", "");
 
-		this.amplifierModification = nbt.getInt("amplifier_modification");
+		this.amplifierModification = view.getInt("amplifier_modification", 0);
 
-		if (nbt.contains("uuid_list_handler_position_offset_x") || nbt.contains("uuid_list_handler_position_offset_y") || nbt.contains("uuid_list_handler_position_offset_z")) {
-			this.uuidListHandlerPositionOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("uuid_list_handler_position_offset_z"), -48, 48)
-			);
-			nbt.remove("uuid_list_handler_position_offset_x");
-			nbt.remove("uuid_list_handler_position_offset_y");
-			nbt.remove("uuid_list_handler_position_offset_z");
-		} else {
-			this.uuidListHandlerPositionOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "uuid_list_handler_position_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.uuidListHandlerPositionOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	@Override

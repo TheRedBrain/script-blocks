@@ -9,16 +9,15 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -35,48 +34,37 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.put("data_providing_block_pos_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		view.put("data_providing_block_pos_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbt.putString("data_modification_mode", this.dataModificationMode.asString());
+		view.putString("data_modification_mode", this.dataModificationMode.asString());
 
-		nbt.putInt("added_integer_value", this.addedIntegerValue);
+		view.putInt("added_integer_value", this.addedIntegerValue);
 
-		nbt.putInt("integer_modulus_value", this.integerModulusValue);
+		view.putInt("integer_modulus_value", this.integerModulusValue);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("data_providing_block_pos_offset_x", NbtElement.INT_TYPE) && nbt.contains("data_providing_block_pos_offset_y", NbtElement.INT_TYPE) && nbt.contains("data_providing_block_pos_offset_z", NbtElement.INT_TYPE)) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_x"), -48, 48),
-					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_y"), -48, 48),
-					MathHelper.clamp(nbt.getInt("data_providing_block_pos_offset_z"), -48, 48)
-			);
-			nbt.remove("data_providing_block_pos_offset_x");
-			nbt.remove("data_providing_block_pos_offset_y");
-			nbt.remove("data_providing_block_pos_offset_z");
-		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.dataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		this.dataModificationMode = DataModificationMode.byName(nbt.getString("data_modification_mode")).orElseGet(() -> DataModificationMode.INTEGER_ADDITION);
+		this.dataModificationMode = DataModificationMode.byName(view.getString("data_modification_mode", "")).orElseGet(() -> DataModificationMode.INTEGER_ADDITION);
 
-		this.addedIntegerValue = nbt.getInt("added_integer_value");
+		this.addedIntegerValue = view.getInt("added_integer_value", 0);
 
-		this.integerModulusValue = nbt.getInt("integer_modulus_value");
+		this.integerModulusValue = view.getInt("integer_modulus_value", 0);
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

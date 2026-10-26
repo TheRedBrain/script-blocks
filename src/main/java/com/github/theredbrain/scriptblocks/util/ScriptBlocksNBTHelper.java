@@ -10,8 +10,8 @@ import java.util.Optional;
 public class ScriptBlocksNBTHelper {
 
 	public static Optional<Vec3i> toVec3i(NbtCompound nbt, String key) {
-		int[] is = nbt.getIntArray(key);
-		return is.length == 3 ? Optional.of(new Vec3i(is[0], is[1], is[2])) : Optional.empty();
+		Optional<int[]> optional = nbt.getIntArray(key);
+		return (optional.isPresent() && optional.get().length == 3) ? Optional.of(new Vec3i(optional.get()[0], optional.get()[1], optional.get()[2])) : Optional.empty();
 	}
 
 	public static NbtElement fromVec3i(Vec3i pos) {

@@ -12,9 +12,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
@@ -22,6 +19,8 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
@@ -58,213 +57,109 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbt.putString("override_data_identifier", this.overrideDataIdentifier);
+		view.putString("override_data_identifier", this.overrideDataIdentifier);
 
-		nbt.putString("override_data_value", this.overrideDataValue);
+		view.putString("override_data_value", this.overrideDataValue);
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.overrideTriggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.overrideTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.overrideTriggeredBlock.getRight());
-		nbt.put("override_triggered_block", nbtCompound.copy());
+		view.put("override_triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		nbt.putString("influencing_attribute_identifier_string", this.influencingAttributeIdentifierString);
+		view.putString("influencing_attribute_identifier_string", this.influencingAttributeIdentifierString);
 
-		nbt.putBoolean("checks_team_attributes", false);
+		view.putBoolean("checks_team_attributes", false);
 
-		nbt.putBoolean("is_affected_by_luck", false);
+		view.putBoolean("is_affected_by_luck", false);
 
-		nbt.putInt("random_min_value", this.randomMinValue);
+		view.putInt("random_min_value", this.randomMinValue);
 
-		nbt.putInt("random_max_value", this.randomMaxValue);
+		view.putInt("random_max_value", this.randomMaxValue);
 
 		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.fallbackTriggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.fallbackTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.fallbackTriggeredBlock.getRight());
-		nbt.put("fallback_triggered_block", nbtCompound.copy());
+		view.put("fallback_triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("triggered_blocks", NbtCompound.CODEC);
 		for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
 			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(triggeredBlock.getLeft().getLeft()));
+			nbtCompound.put("position_offset", BlockPos.CODEC, triggeredBlock.getLeft().getLeft());
 			nbtCompound.putBoolean("resets", triggeredBlock.getLeft().getRight());
 			nbtCompound.putInt("threshold", triggeredBlock.getRight());
-			nbtList.add(nbtCompound.copy());
+			listAppender.add(nbtCompound.copy());
 		}
-		nbt.put("triggered_blocks", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		if (nbt.contains("dataProvidingBlockPosOffsetX") || nbt.contains("dataProvidingBlockPosOffsetY") || nbt.contains("dataProvidingBlockPosOffsetZ")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataProvidingBlockPosOffsetZ"), -48, 48)
-			);
-			nbt.remove("dataProvidingBlockPosOffsetX");
-			nbt.remove("dataProvidingBlockPosOffsetY");
-			nbt.remove("dataProvidingBlockPosOffsetZ");
-		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.dataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
-		if (nbt.contains("overrideDataIdentifier")) {
-			this.overrideDataIdentifier = nbt.getString("overrideDataIdentifier");
-			nbt.remove("overrideDataIdentifier");
-		} else {
-			this.overrideDataIdentifier = nbt.getString("override_data_identifier");
-		}
+		this.overrideDataIdentifier = view.getString("override_data_identifier", "");
 
-		if (nbt.contains("overrideDataValue")) {
-			this.overrideDataValue = nbt.getString("overrideDataValue");
-			nbt.remove("overrideDataValue");
-		} else {
-			this.overrideDataValue = nbt.getString("override_data_value");
-		}
+		this.overrideDataValue = view.getString("override_data_value", "");
 
-		if (nbt.contains("overrideTriggeredBlockPositionOffsetX") || nbt.contains("overrideTriggeredBlockPositionOffsetY") || nbt.contains("overrideTriggeredBlockPositionOffsetZ") || nbt.contains("overrideTriggeredBlockResets")) {
-			this.overrideTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("overrideTriggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("overrideTriggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("overrideTriggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("overrideTriggeredBlockResets")
-			);
-			nbt.remove("overrideTriggeredBlockPositionOffsetX");
-			nbt.remove("overrideTriggeredBlockPositionOffsetY");
-			nbt.remove("overrideTriggeredBlockPositionOffsetZ");
-			nbt.remove("overrideTriggeredBlockResets");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("override_triggered_block");
-			this.overrideTriggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
+		NbtCompound nbtCompound = view.read("override_triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.overrideTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
-		if (nbt.contains("influencingAttributeIdentifierString")) {
-			this.influencingAttributeIdentifierString = nbt.getString("influencingAttributeIdentifierString");
-			nbt.remove("influencingAttributeIdentifierString");
-		} else {
-			this.influencingAttributeIdentifierString = nbt.getString("influencing_attribute_identifier_string");
-		}
+		this.influencingAttributeIdentifierString = view.getString("influencing_attribute_identifier_string", "");
 
-		if (nbt.contains("checksTeamAttributes")) {
-			this.checksTeamAttributes = nbt.getBoolean("checksTeamAttributes");
-			nbt.remove("checksTeamAttributes");
-		} else {
-			this.checksTeamAttributes = nbt.getBoolean("checks_team_attributes");
-		}
+		this.checksTeamAttributes = view.getBoolean("checks_team_attributes", true);
 
-		if (nbt.contains("isAffectedByLuck")) {
-			this.isAffectedByLuck = nbt.getBoolean("isAffectedByLuck");
-			nbt.remove("isAffectedByLuck");
-		} else {
-			this.isAffectedByLuck = nbt.getBoolean("is_affected_by_luck");
-		}
+		this.isAffectedByLuck = view.getBoolean("is_affected_by_luck", true);
 
-		if (nbt.contains("randomMinValue")) {
-			this.randomMinValue = nbt.getInt("randomMinValue");
-			nbt.remove("randomMinValue");
-		} else {
-			this.randomMinValue = nbt.getInt("random_min_value");
-		}
+		this.randomMinValue = view.getInt("random_min_value", 0);
 
-		if (nbt.contains("randomMaxValue")) {
-			this.randomMaxValue = nbt.getInt("randomMaxValue");
-			nbt.remove("randomMaxValue");
-		} else {
-			this.randomMaxValue = nbt.getInt("random_max_value");
-		}
+		this.randomMaxValue = view.getInt("random_max_value", 1);
 
-		if (nbt.contains("fallbackTriggeredBlockPositionOffsetX") || nbt.contains("fallbackTriggeredBlockPositionOffsetY") || nbt.contains("fallbackTriggeredBlockPositionOffsetZ") || nbt.contains("fallbackTriggeredBlockResets")) {
-			this.fallbackTriggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("fallbackTriggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("fallbackTriggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("fallbackTriggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("fallbackTriggeredBlockResets")
-			);
-			nbt.remove("fallbackTriggeredBlockPositionOffsetX");
-			nbt.remove("fallbackTriggeredBlockPositionOffsetY");
-			nbt.remove("fallbackTriggeredBlockPositionOffsetZ");
-			nbt.remove("fallbackTriggeredBlockResets");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("fallback_triggered_block");
-			this.fallbackTriggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
+		nbtCompound = view.read("fallback_triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.fallbackTriggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
 		this.triggeredBlocks.clear();
-		if (nbt.contains("triggeredBlocksSize")) {
-			int triggeredBlocksSize = nbt.getInt("triggeredBlocksSize");
-			for (int i = 0; i < triggeredBlocksSize; i++) {
-				this.triggeredBlocks.add(
-						new MutablePair<>(
-								new MutablePair<>(
-										new BlockPos(
-												MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX_" + i), -48, 48),
-												MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY_" + i), -48, 48),
-												MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ_" + i), -48, 48)
-										),
-										nbt.getBoolean("triggeredBlockResets_" + i)
-								),
-								MathHelper.clamp(nbt.getInt("triggeredBlockThreshold_" + i), 0, 100)
-						)
-				);
-				nbt.remove("triggeredBlockPositionOffsetX_" + i);
-				nbt.remove("triggeredBlockPositionOffsetY_" + i);
-				nbt.remove("triggeredBlockPositionOffsetZ_" + i);
-				nbt.remove("triggeredBlockResets_" + i);
-				nbt.remove("triggeredBlockThreshold_" + i);
-			}
-			nbt.remove("triggeredBlocksSize");
-		} else {
-			NbtList nbtList = nbt.getList("triggered_blocks", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
-				this.triggeredBlocks.add(
-						new MutablePair<>(
-								new MutablePair<>(
-										NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-										nbtCompound.getBoolean("resets")
-								),
-								MathHelper.clamp(nbtCompound.getInt("threshold"), 0, 100)
-						)
-				);
-			}
+		for (NbtCompound nbtCompound1 : view.getTypedListView("triggered_blocks", NbtCompound.CODEC)) {
+			this.triggeredBlocks.add(
+					new MutablePair<>(
+							new MutablePair<>(
+									nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+									nbtCompound1.getBoolean("resets", false)
+							),
+							MathHelper.clamp(nbtCompound1.getInt("threshold", 0), 0, 100)
+					)
+			);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

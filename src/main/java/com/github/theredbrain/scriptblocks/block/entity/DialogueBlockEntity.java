@@ -7,15 +7,13 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -34,150 +32,87 @@ public class DialogueBlockEntity extends RotatedBlockEntity implements DialogueA
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("use_relay_blocks", NbtCompound.CODEC);
 		this.useRelayBlocks.forEach((key, entry) -> {
 			NbtCompound nbtCompound = new NbtCompound();
 			nbtCompound.putString("key", key);
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(entry));
-			nbtList.add(nbtCompound.copy());
+			nbtCompound.put("position_offset", BlockPos.CODEC, entry);
+			listAppender.add(nbtCompound.copy());
 		});
-		nbt.put("use_relay_blocks", nbtList.copy());
 
-		nbtList.clear();
+		WriteView.ListAppender<NbtCompound> listAppender1 = view.getListAppender("triggered_blocks", NbtCompound.CODEC);
 		this.triggeredBlocks.forEach((key, entry) -> {
 			NbtCompound nbtCompound = new NbtCompound();
 			nbtCompound.putString("key", key);
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(entry.getLeft()));
+			nbtCompound.put("position_offset", BlockPos.CODEC, entry.getLeft());
 			nbtCompound.putBoolean("resets", entry.getRight());
-			nbtList.add(nbtCompound.copy());
+			listAppender1.add(nbtCompound.copy());
 		});
-		nbt.put("triggered_blocks", nbtList.copy());
 
-		nbt.put("data_providing_block_position_offset", NbtHelper.fromBlockPos(this.dataProvidingBlockPosOffset));
+		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbtList.clear();
+		WriteView.ListAppender<NbtCompound> listAppender2 = view.getListAppender("starting_dialogues", NbtCompound.CODEC);
 		for (String identifier : this.startingDialogueList) {
 			NbtCompound nbtCompound = new NbtCompound();
 			nbtCompound.putString("identifier", identifier);
-			nbtList.add(nbtCompound.copy());
+			listAppender2.add(nbtCompound.copy());
 		}
-		nbt.put("starting_dialogues", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.useRelayBlocks.clear();
-		if (nbt.contains("dialogueUsedBlocksKeysSize")) {
-			int dialogueUsedBlocksKeysSize = nbt.getInt("dialogueUsedBlocksKeysSize");
-			for (int i = 0; i < dialogueUsedBlocksKeysSize; i++) {
-				this.useRelayBlocks.put(nbt.getString("dialogueUsedBlocks_key_" + i), new BlockPos(
-						MathHelper.clamp(nbt.getInt("dialogueUsedBlocks_entry_X_" + i), -48, 48),
-						MathHelper.clamp(nbt.getInt("dialogueUsedBlocks_entry_Y_" + i), -48, 48),
-						MathHelper.clamp(nbt.getInt("dialogueUsedBlocks_entry_Z_" + i), -48, 48)
-				));
-				nbt.remove("dialogueUsedBlocks_key_" + i);
-				nbt.remove("dialogueUsedBlocks_entry_X_" + i);
-				nbt.remove("dialogueUsedBlocks_entry_Y_" + i);
-				nbt.remove("dialogueUsedBlocks_entry_Z_" + i);
-			}
-			nbt.remove("dialogueUsedBlocksKeysSize");
-		} else {
-			NbtList nbtList = nbt.getList("use_relay_blocks", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
-				this.useRelayBlocks.put(
-						nbtCompound.getString("key"),
-						BlockPos.max(
-								BlockPos.min(
-										NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-										new BlockPos(48, 48, 48)
-								),
-								new BlockPos(-48, -48, -48)
-						)
-				);
-			}
+		for (NbtCompound nbtCompound : view.getTypedListView("use_relay_blocks", NbtCompound.CODEC)) {
+			this.useRelayBlocks.put(
+					nbtCompound.getString("key", ""),
+					BlockPos.max(
+							BlockPos.min(
+									nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+									new BlockPos(48, 48, 48)
+							),
+							new BlockPos(-48, -48, -48)
+					)
+			);
 		}
 
 		this.triggeredBlocks.clear();
-		if (nbt.contains("dialogueTriggeredBlocksKeysSize")) {
-			int dialogueTriggeredBlocksKeysSize = nbt.getInt("dialogueTriggeredBlocksKeysSize");
-			for (int i = 0; i < dialogueTriggeredBlocksKeysSize; i++) {
-				this.triggeredBlocks.put(nbt.getString("dialogueTriggeredBlocks_key_" + i), new MutablePair<>(
-						new BlockPos(
-								MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_X_" + i), -48, 48),
-								MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Y_" + i), -48, 48),
-								MathHelper.clamp(nbt.getInt("dialogueTriggeredBlocks_entry_Z_" + i), -48, 48)
-						), nbt.getBoolean("dialogueTriggeredBlocks_entry_resets_" + i)));
-				nbt.remove("dialogueTriggeredBlocks_key_" + i);
-				nbt.remove("dialogueTriggeredBlocks_entry_X_" + i);
-				nbt.remove("dialogueTriggeredBlocks_entry_Y_" + i);
-				nbt.remove("dialogueTriggeredBlocks_entry_Z_" + i);
-				nbt.remove("dialogueTriggeredBlocks_entry_resets_" + i);
-			}
-			nbt.remove("dialogueTriggeredBlocksKeysSize");
-		} else {
-			NbtList nbtList = nbt.getList("triggered_blocks", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
-				this.triggeredBlocks.put(
-						nbtCompound.getString("key"),
-						new MutablePair<>(
-								BlockPos.max(
-										BlockPos.min(
-												NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-												new BlockPos(48, 48, 48)
-										),
-										new BlockPos(-48, -48, -48)
-								),
-								nbtCompound.getBoolean("resets")
-						)
-				);
-			}
+		for (NbtCompound nbtCompound : view.getTypedListView("triggered_blocks", NbtCompound.CODEC)) {
+			this.triggeredBlocks.put(
+					nbtCompound.getString("key", ""),
+					new MutablePair<>(
+							BlockPos.max(
+									BlockPos.min(
+											nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+											new BlockPos(48, 48, 48)
+									),
+									new BlockPos(-48, -48, -48)
+							),
+							nbtCompound.getBoolean("resets", false)
+					)
+			);
 		}
 
-		if (nbt.contains("dataBlockOffsetX") || nbt.contains("dataBlockOffsetY") || nbt.contains("dataBlockOffsetZ")) {
-			this.dataProvidingBlockPosOffset = new BlockPos(
-					MathHelper.clamp(nbt.getInt("dataBlockOffsetX"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataBlockOffsetY"), -48, 48),
-					MathHelper.clamp(nbt.getInt("dataBlockOffsetZ"), -48, 48)
-			);
-			nbt.remove("dataBlockOffsetX");
-			nbt.remove("dataBlockOffsetY");
-			nbt.remove("dataBlockOffsetZ");
-		} else {
-			this.dataProvidingBlockPosOffset = BlockPos.max(
-					BlockPos.min(
-							NbtHelper.toBlockPos(nbt, "data_providing_block_pos_offset").orElse(BlockPos.ORIGIN),
-							new BlockPos(48, 48, 48)
-					),
-					new BlockPos(-48, -48, -48)
-			);
-		}
+		this.dataProvidingBlockPosOffset = BlockPos.max(
+				BlockPos.min(
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						new BlockPos(48, 48, 48)
+				),
+				new BlockPos(-48, -48, -48)
+		);
 
 		this.startingDialogueList.clear();
-		if (nbt.contains("startingDialogueListSize")) {
-			int startingDialogueListSize = nbt.getInt("startingDialogueListSize");
-			for (int i = 0; i < startingDialogueListSize; i++) {
-				this.startingDialogueList.add(nbt.getString("startingDialogueList_name_" + i));
-				nbt.remove("startingDialogueList_name_" + i);
-			}
-			nbt.remove("startingDialogueListSize");
-		} else {
-			NbtList nbtList = nbt.getList("starting_dialogues", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
-				this.startingDialogueList.add(
-						nbtCompound.getString("identifier")
-				);
-			}
+		for (NbtCompound nbtCompound : view.getTypedListView("starting_dialogues", NbtCompound.CODEC)) {
+			this.startingDialogueList.add(
+					nbtCompound.getString("identifier", "")
+			);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

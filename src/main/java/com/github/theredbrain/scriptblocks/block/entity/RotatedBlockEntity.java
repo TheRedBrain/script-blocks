@@ -6,6 +6,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
@@ -19,24 +21,24 @@ public abstract class RotatedBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.writeNbt(nbt, registryLookup);
+	protected void writeData(WriteView view) {
+		super.writeData(view);
 
-		nbt.putInt("rotated", this.rotated);
-		nbt.putBoolean("x_mirrored", this.x_mirrored);
-		nbt.putBoolean("z_mirrored", this.z_mirrored);
+		view.putInt("rotated", this.rotated);
+		view.putBoolean("x_mirrored", this.x_mirrored);
+		view.putBoolean("z_mirrored", this.z_mirrored);
 	}
 
 	/**
 	 * Has to be called last when overridden to avoid rotated data being overridden by saved data
 	 */
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-		super.readNbt(nbt, registryLookup);
+	protected void readData(ReadView view) {
+		super.readData(view);
 
-		this.rotated = MathHelper.clamp(nbt.getInt("rotated"), 0, 3);
-		this.x_mirrored = nbt.getBoolean("x_mirrored");
-		this.z_mirrored = nbt.getBoolean("z_mirrored");
+		this.rotated = MathHelper.clamp(view.getInt("rotated", 0), 0, 3);
+		this.x_mirrored = view.getBoolean("x_mirrored", false);
+		this.z_mirrored = view.getBoolean("z_mirrored", false);
 		if (this.getCachedState().getBlock() instanceof RotatedBlockWithEntity) {
 			this.onRotate(this.getCachedState());
 		}

@@ -14,9 +14,6 @@ import net.minecraft.block.JigsawBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.JigsawBlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -24,13 +21,14 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.structure.pool.StructurePool;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -49,172 +47,72 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putString("target", this.target.toString());
+		view.putString("target", this.target.toString());
 
-		nbt.putString("structure_pool_string", this.structurePoolString);
+		view.putString("structure_pool_string", this.structurePoolString);
 
-		nbt.putString("joint", this.joint.asString());
+		view.putString("joint", this.joint.asString());
 
 		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", NbtHelper.fromBlockPos(this.triggeredBlock.getLeft()));
+		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		nbt.put("triggered_block", nbtCompound.copy());
+		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("appendices", NbtCompound.CODEC);
 		for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
 			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(appendix.getLeft()));
+			nbtCompound.put("position_offset", BlockPos.CODEC, appendix.getLeft());
 			nbtCompound.putString("data_id", appendix.getRight().getLeft());
 			nbtCompound.putString("static_appendix", appendix.getRight().getRight());
-			nbtList.add(nbtCompound.copy());
+			listAppender.add(nbtCompound.copy());
 		}
-		nbt.put("appendices", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		this.target = Identifier.of(nbt.getString("target"));
+		this.target = Identifier.of(view.getString("target", ""));
 
-		if (nbt.contains("firstStructurePoolString")) {
-			this.structurePoolString = nbt.getString("firstStructurePoolString");
-			nbt.remove("firstStructurePoolString");
-		} else {
-			this.structurePoolString = nbt.getString("structure_pool_string");
-		}
+		this.structurePoolString = view.getString("structure_pool_string", "");
 
-		this.joint = JigsawBlockEntity.Joint.byName(nbt.getString("joint")).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
+		this.joint = view.read("joint", JigsawBlockEntity.Joint.CODEC).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
 
-		if (nbt.contains("triggeredBlockPositionOffsetX") || nbt.contains("triggeredBlockPositionOffsetY") || nbt.contains("triggeredBlockPositionOffsetZ") || nbt.contains("triggeredBlockResets")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggeredBlockPositionOffsetZ"), -48, 48)
-					),
-					nbt.getBoolean("triggeredBlockResets")
-			);
-			nbt.remove("triggeredBlockPositionOffsetX");
-			nbt.remove("triggeredBlockPositionOffsetY");
-			nbt.remove("triggeredBlockPositionOffsetZ");
-			nbt.remove("triggeredBlockResets");
-		} else if (nbt.contains("triggered_block_position_offset_x") || nbt.contains("triggered_block_position_offset_y") || nbt.contains("triggered_block_position_offset_z")) {
-			this.triggeredBlock = new MutablePair<>(
-					new BlockPos(
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_x"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_y"), -48, 48),
-							MathHelper.clamp(nbt.getInt("triggered_block_position_offset_z"), -48, 48)
-					),
-					nbt.getBoolean("triggered_block_resets")
-			);
-			nbt.remove("triggered_block_position_offset_x");
-			nbt.remove("triggered_block_position_offset_y");
-			nbt.remove("triggered_block_position_offset_z");
-			nbt.remove("triggered_block_resets");
-		} else {
-			NbtCompound nbtCompound = nbt.getCompound("triggered_block");
-			this.triggeredBlock = new MutablePair<>(
-					BlockPos.max(
-							BlockPos.min(
-									NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-									new BlockPos(48, 48, 48)
-							),
-							new BlockPos(-48, -48, -48)
-					),
-					nbtCompound.getBoolean("resets")
-			);
-		}
+		NbtCompound nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		this.triggeredBlock = new MutablePair<>(
+				BlockPos.max(
+						BlockPos.min(
+								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								new BlockPos(48, 48, 48)
+						),
+						new BlockPos(-48, -48, -48)
+				),
+				nbtCompound.getBoolean("resets", false)
+		);
 
 		this.structurePoolStringAppendices.clear();
-		if (nbt.contains("firstDataProvidingBlockPosOffsetX") || nbt.contains("firstDataProvidingBlockPosOffsetY") || nbt.contains("firstDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString") || nbt.contains("secondDataProvidingBlockPosOffsetX") || nbt.contains("secondDataProvidingBlockPosOffsetY") || nbt.contains("secondDataProvidingBlockPosOffsetZ") || nbt.contains("first_checked_data_id") || nbt.contains("secondStructurePoolString")) {
-			this.structurePoolStringAppendices.add(
-					new MutablePair<>(new BlockPos(
-							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetX"), -48, 48),
-							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetY"), -48, 48),
-							MathHelper.clamp(nbt.getInt("firstDataProvidingBlockPosOffsetZ"), -48, 48)
-					),
-							new MutablePair<>(
-									nbt.getString("first_checked_data_id"),
-									nbt.getString("secondStructurePoolString")
-							)
-					)
-			);
-			nbt.remove("firstDataProvidingBlockPosOffsetX");
-			nbt.remove("firstDataProvidingBlockPosOffsetY");
-			nbt.remove("firstDataProvidingBlockPosOffsetZ");
-			nbt.remove("first_checked_data_id");
-			nbt.remove("secondStructurePoolString");
-
-			if (nbt.getInt("secondDataProvidingBlockPosOffsetX") != 0 || nbt.getInt("secondDataProvidingBlockPosOffsetY") != 0 || nbt.getInt("secondDataProvidingBlockPosOffsetZ") != 0) {
-				this.structurePoolStringAppendices.add(
-						new MutablePair<>(new BlockPos(
-								MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetX"), -48, 48),
-								MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetY"), -48, 48),
-								MathHelper.clamp(nbt.getInt("secondDataProvidingBlockPosOffsetZ"), -48, 48)
-						),
-								new MutablePair<>(
-										nbt.getString("second_checked_data_id"),
-										""
-								)
-						)
-				);
-			}
-			nbt.remove("secondDataProvidingBlockPosOffsetX");
-			nbt.remove("secondDataProvidingBlockPosOffsetY");
-			nbt.remove("secondDataProvidingBlockPosOffsetZ");
-			nbt.remove("second_checked_data_id");
-		}
-		if (nbt.contains("appendices_size")) {
-			int appendicesSize = nbt.getInt("appendices_size");
-			for (int i = 0; i < appendicesSize; i++) {
-				if (nbt.contains("appendix_position_offset_x_" + i) || nbt.contains("appendix_position_offset_y_" + i) || nbt.contains("appendix_position_offset_z_" + i)) {
-					this.structurePoolStringAppendices.add(
-							new MutablePair<>(
-									new BlockPos(
-											MathHelper.clamp(nbt.getInt("appendix_position_offset_x_" + i), -48, 48),
-											MathHelper.clamp(nbt.getInt("appendix_position_offset_y_" + i), -48, 48),
-											MathHelper.clamp(nbt.getInt("appendix_position_offset_z_" + i), -48, 48)
-									),
-									new MutablePair<>(
-											nbt.getString("appendix_data_id_" + i),
-											nbt.getString("static_appendix_" + i)
-									)
-							)
-					);
-					nbt.remove("appendix_position_offset_x_" + i);
-					nbt.remove("appendix_position_offset_y_" + i);
-					nbt.remove("appendix_position_offset_z_" + i);
-					nbt.remove("appendix_data_id_" + i);
-					nbt.remove("static_appendix_" + i);
-				}
-			}
-			nbt.remove("appendices_size");
-		}
-		NbtList nbtList = nbt.getList("appendices", NbtElement.COMPOUND_TYPE);
-		for (int i = 0; i < nbtList.size(); i++) {
-			NbtCompound nbtCompound = nbtList.getCompound(i);
+		for (NbtCompound nbtCompound1 : view.getTypedListView("appendices", NbtCompound.CODEC)) {
 			this.structurePoolStringAppendices.add(
 					new MutablePair<>(
 							BlockPos.max(
 									BlockPos.min(
-											NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
+											nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
 											new BlockPos(48, 48, 48)
 									),
 									new BlockPos(-48, -48, -48)
 							),
 							new MutablePair<>(
-									nbtCompound.getString("appendix_data_id"),
-									nbtCompound.getString("static_appendix")
+									nbtCompound1.getString("appendix_data_id", ""),
+									nbtCompound1.getString("static_appendix", "")
 							)
 					)
 			);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

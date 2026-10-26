@@ -6,12 +6,11 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -29,61 +28,36 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		NbtList nbtList = new NbtList();
+		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("delegated_spawn_points", NbtCompound.CODEC);
 		for (MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint : this.delegatedSpawnPoints) {
 			NbtCompound nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", NbtHelper.fromBlockPos(spawnPoint.getLeft()));
+			nbtCompound.put("position_offset", BlockPos.CODEC, spawnPoint.getLeft());
 			nbtCompound.putDouble("yaw", spawnPoint.getRight().getLeft());
 			nbtCompound.putDouble("pitch", spawnPoint.getRight().getRight());
-			nbtList.add(nbtCompound.copy());
+			listAppender.add(nbtCompound.copy());
 		}
-		nbt.put("delegated_spawn_points", nbtList);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		this.delegatedSpawnPoints.clear();
-		if (nbt.contains("delegated_spawn_points_size")) {
-			int delegatedSpawnBlocksSize = nbt.getInt("delegated_spawn_points_size");
-			for (int i = 0; i < delegatedSpawnBlocksSize; i++) {
-				this.delegatedSpawnPoints.add(new MutablePair<>(
-						new BlockPos(
-								MathHelper.clamp(nbt.getInt("delegated_spawn_point_x_" + i), -48, 48),
-								MathHelper.clamp(nbt.getInt("delegated_spawn_point_y_" + i), -48, 48),
-								MathHelper.clamp(nbt.getInt("delegated_spawn_point_z_" + i), -48, 48)
-						),
-						new MutablePair<>(
-								nbt.getDouble("delegated_spawn_point_yaw_" + i),
-								nbt.getDouble("delegated_spawn_point_pitch_" + i))
-				));
-				nbt.remove("delegated_spawn_point_x_" + i);
-				nbt.remove("delegated_spawn_point_y_" + i);
-				nbt.remove("delegated_spawn_point_z_" + i);
-				nbt.remove("delegated_spawn_point_yaw_" + i);
-				nbt.remove("delegated_spawn_point_pitch_" + i);
-			}
-			nbt.remove("delegated_spawn_points_size");
-		} else {
-			NbtList nbtList = nbt.getList("delegated_spawn_points", NbtElement.COMPOUND_TYPE);
-			for (int i = 0; i < nbtList.size(); i++) {
-				NbtCompound nbtCompound = nbtList.getCompound(i);
-				this.delegatedSpawnPoints.add(new MutablePair<>(
-						NbtHelper.toBlockPos(nbtCompound, "position_offset").orElse(BlockPos.ORIGIN),
-						new MutablePair<>(
-								MathHelper.clamp(nbtCompound.getDouble("yaw"), -180, 180),
-								MathHelper.clamp(nbtCompound.getDouble("pitch"), -90, 90)
-						)
-				));
-			}
+		for (NbtCompound nbtCompound : view.getTypedListView("delegated_spawn_points", NbtCompound.CODEC)) {
+			this.delegatedSpawnPoints.add(new MutablePair<>(
+					nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+					new MutablePair<>(
+							MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180),
+							MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90)
+					)
+			));
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {

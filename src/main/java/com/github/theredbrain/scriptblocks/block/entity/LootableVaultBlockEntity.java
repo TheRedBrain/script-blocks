@@ -40,6 +40,8 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -77,20 +79,20 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	@Override
 	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return Util.make(new NbtCompound(), nbt -> nbt.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup)));
+		return Util.make(new NbtCompound(), nbt -> view.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup)));
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 //		if (!this.lootableVaultConfigIdentifier.isEmpty()) {
-		nbt.putString("config_identifier", this.lootableVaultConfigIdentifier);
+		view.putString("config_identifier", this.lootableVaultConfigIdentifier);
 //		}
-//		nbt.put("config", encodeValue(LootableVaultConfig.CODEC, this.config, registryLookup));
-		nbt.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup));
-		nbt.put("server_data", encodeValue(LootableVaultServerData.CODEC, this.serverData, registryLookup));
+//		view.put("config", encodeValue(LootableVaultConfig.CODEC, this.config, registryLookup));
+		view.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup));
+		view.put("server_data", encodeValue(LootableVaultServerData.CODEC, this.serverData, registryLookup));
 
 		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Lootable Vault Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.world != null ? this.world.getServer() : null);
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	private static <T> NbtElement encodeValue(Codec<T> codec, T value, RegistryWrapper.WrapperLookup registries) {
@@ -98,25 +100,25 @@ public class LootableVaultBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 		DynamicOps<NbtElement> dynamicOps = registryLookup.getOps(NbtOps.INSTANCE);
 		if (nbt.contains("server_data")) {
-			LootableVaultServerData.CODEC.parse(dynamicOps, nbt.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::copyFrom);
+			LootableVaultServerData.CODEC.parse(dynamicOps, view.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::copyFrom);
 		}
 
 //		if (nbt.contains("config")) {
-//			LootableVaultConfig.CODEC.parse(dynamicOps, nbt.get("config")).resultOrPartial(LOGGER::error).ifPresent(config -> this.config = config);
+//			LootableVaultConfig.CODEC.parse(dynamicOps, view.get("config")).resultOrPartial(LOGGER::error).ifPresent(config -> this.config = config);
 //		}
 
 //		if (nbt.contains("config_identifier")) {
-		this.lootableVaultConfigIdentifier = nbt.getString("config_identifier");
+		this.lootableVaultConfigIdentifier = view.getString("config_identifier");
 //		}
 
 		if (nbt.contains("shared_data")) {
-			LootableVaultSharedData.CODEC.parse(dynamicOps, nbt.get("shared_data")).resultOrPartial(LOGGER::error).ifPresent(this.sharedData::copyFrom);
+			LootableVaultSharedData.CODEC.parse(dynamicOps, view.get("shared_data")).resultOrPartial(LOGGER::error).ifPresent(this.sharedData::copyFrom);
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 //	public boolean isOminous() {

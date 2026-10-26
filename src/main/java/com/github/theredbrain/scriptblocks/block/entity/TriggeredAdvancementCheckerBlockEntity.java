@@ -16,6 +16,8 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
@@ -37,39 +39,39 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
-		nbt.putInt("firstTriggeredBlockPositionOffsetX", this.firstTriggeredBlock.getLeft().getX());
-		nbt.putInt("firstTriggeredBlockPositionOffsetY", this.firstTriggeredBlock.getLeft().getY());
-		nbt.putInt("firstTriggeredBlockPositionOffsetZ", this.firstTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("firstTriggeredBlockResets", this.firstTriggeredBlock.getRight());
+		view.putInt("firstTriggeredBlockPositionOffsetX", this.firstTriggeredBlock.getLeft().getX());
+		view.putInt("firstTriggeredBlockPositionOffsetY", this.firstTriggeredBlock.getLeft().getY());
+		view.putInt("firstTriggeredBlockPositionOffsetZ", this.firstTriggeredBlock.getLeft().getZ());
+		view.putBoolean("firstTriggeredBlockResets", this.firstTriggeredBlock.getRight());
 
-		nbt.putInt("secondTriggeredBlockPositionOffsetX", this.secondTriggeredBlock.getLeft().getX());
-		nbt.putInt("secondTriggeredBlockPositionOffsetY", this.secondTriggeredBlock.getLeft().getY());
-		nbt.putInt("secondTriggeredBlockPositionOffsetZ", this.secondTriggeredBlock.getLeft().getZ());
-		nbt.putBoolean("secondTriggeredBlockResets", this.secondTriggeredBlock.getRight());
+		view.putInt("secondTriggeredBlockPositionOffsetX", this.secondTriggeredBlock.getLeft().getX());
+		view.putInt("secondTriggeredBlockPositionOffsetY", this.secondTriggeredBlock.getLeft().getY());
+		view.putInt("secondTriggeredBlockPositionOffsetZ", this.secondTriggeredBlock.getLeft().getZ());
+		view.putBoolean("secondTriggeredBlockResets", this.secondTriggeredBlock.getRight());
 
-		nbt.putString("checkedAdvancementIdentifier", this.checkedAdvancementIdentifier);
+		view.putString("checkedAdvancementIdentifier", this.checkedAdvancementIdentifier);
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
-		int x = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(nbt.getInt("firstTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.firstTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("firstTriggeredBlockResets"));
+		int x = MathHelper.clamp(view.getInt("firstTriggeredBlockPositionOffsetX"), -48, 48);
+		int y = MathHelper.clamp(view.getInt("firstTriggeredBlockPositionOffsetY"), -48, 48);
+		int z = MathHelper.clamp(view.getInt("firstTriggeredBlockPositionOffsetZ"), -48, 48);
+		this.firstTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBoolean("firstTriggeredBlockResets"));
 
-		x = MathHelper.clamp(nbt.getInt("secondTriggeredBlockPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(nbt.getInt("secondTriggeredBlockPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(nbt.getInt("secondTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.secondTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), nbt.getBoolean("secondTriggeredBlockResets"));
+		x = MathHelper.clamp(view.getInt("secondTriggeredBlockPositionOffsetX"), -48, 48);
+		y = MathHelper.clamp(view.getInt("secondTriggeredBlockPositionOffsetY"), -48, 48);
+		z = MathHelper.clamp(view.getInt("secondTriggeredBlockPositionOffsetZ"), -48, 48);
+		this.secondTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBoolean("secondTriggeredBlockResets"));
 
-		this.checkedAdvancementIdentifier = nbt.getString("checkedAdvancementIdentifier");
+		this.checkedAdvancementIdentifier = view.getString("checkedAdvancementIdentifier");
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 	}
 
 	public BlockEntityUpdateS2CPacket toUpdatePacket() {
