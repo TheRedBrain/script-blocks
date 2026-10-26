@@ -100,13 +100,13 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 	@Override
 	protected void init() {
-		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText, this.screenPage).values(ScreenPage.values()).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.showArea = this.teamControllerBlockEntity.showArea();
-		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -156,7 +156,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addSelectableChild(this.pvpControllerBlockPositionOffsetZField);
 
 		this.enableTicking = this.teamControllerBlockEntity.enableTicking();
-		this.toggleEnableTickingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT).initially(this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, enableTicking) -> {
+		this.toggleEnableTickingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, enableTicking) -> {
 			this.enableTicking = enableTicking;
 		}));
 
@@ -175,30 +175,30 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.cycleTeamColorButton = this.addDrawableChild(ButtonWidget.builder(getTeamColorLabel(this.teamColor), (button) -> this.cycleTeamColor()).dimensions(this.width / 2 - 154, 125, 100, 20).build());
 
 		this.friendlyFire = this.teamControllerBlockEntity.friendlyFire();
-		this.toggleFriendlyFireButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False")).initially(this.friendlyFire).omitKeyText().build(this.width / 2 - 50, 125, 100, 20, Text.empty(), (button, friendlyFire) -> {
+		this.toggleFriendlyFireButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False"), this.friendlyFire).omitKeyText().build(this.width / 2 - 50, 125, 100, 20, Text.empty(), (button, friendlyFire) -> {
 			this.friendlyFire = friendlyFire;
 		}));
 
 		this.showFriendlyInvisibles = this.teamControllerBlockEntity.showFriendlyInvisibles();
-		this.toggleShowFriendlyInvisiblesButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False")).initially(this.showFriendlyInvisibles).omitKeyText().build(this.width / 2 + 54, 125, 100, 20, Text.empty(), (button, showFriendlyInvisibles) -> {
+		this.toggleShowFriendlyInvisiblesButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False"), this.showFriendlyInvisibles).omitKeyText().build(this.width / 2 + 54, 125, 100, 20, Text.empty(), (button, showFriendlyInvisibles) -> {
 			this.showFriendlyInvisibles = showFriendlyInvisibles;
 		}));
 
-		AbstractTeam.VisibilityRule var = AbstractTeam.VisibilityRule.getRule(this.teamControllerBlockEntity.getNametagVisibility());
+		AbstractTeam.VisibilityRule var = this.teamControllerBlockEntity.getNametagVisibility();
 		this.nametagVisibility = var != null ? var : AbstractTeam.VisibilityRule.ALWAYS;
-		this.cycleNametagVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName).values((AbstractTeam.VisibilityRule[]) AbstractTeam.VisibilityRule.values()).initially(this.nametagVisibility).omitKeyText().build(this.width / 2 - 154, 160, 100, 20, Text.empty(), (button, nametagVisibility) -> {
+		this.cycleNametagVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName, this.nametagVisibility).values(AbstractTeam.VisibilityRule.values()).omitKeyText().build(this.width / 2 - 154, 160, 100, 20, Text.empty(), (button, nametagVisibility) -> {
 			this.nametagVisibility = nametagVisibility;
 		}));
 
-		AbstractTeam.VisibilityRule var1 = AbstractTeam.VisibilityRule.getRule(this.teamControllerBlockEntity.getDeathMessageVisibility());
+		AbstractTeam.VisibilityRule var1 = this.teamControllerBlockEntity.getDeathMessageVisibility();
 		this.deathMessageVisibility = var1 != null ? var1 : AbstractTeam.VisibilityRule.ALWAYS;
-		this.cycleDeathMessageVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName).values((AbstractTeam.VisibilityRule[]) AbstractTeam.VisibilityRule.values()).initially(this.deathMessageVisibility).omitKeyText().build(this.width / 2 - 50, 160, 100, 20, Text.empty(), (button, deathMessageVisibility) -> {
+		this.cycleDeathMessageVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName, this.deathMessageVisibility).values(AbstractTeam.VisibilityRule.values()).omitKeyText().build(this.width / 2 - 50, 160, 100, 20, Text.empty(), (button, deathMessageVisibility) -> {
 			this.deathMessageVisibility = deathMessageVisibility;
 		}));
 
-		AbstractTeam.CollisionRule var2 = AbstractTeam.CollisionRule.getRule(this.teamControllerBlockEntity.getCollisionRule());
+		AbstractTeam.CollisionRule var2 = this.teamControllerBlockEntity.getCollisionRule();
 		this.collisionRule = var2 != null ? var2 : AbstractTeam.CollisionRule.ALWAYS;
-		this.cycleCollisionRuleButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.CollisionRule::getDisplayName).values((AbstractTeam.CollisionRule[]) AbstractTeam.CollisionRule.values()).initially(this.collisionRule).omitKeyText().build(this.width / 2 + 54, 160, 100, 20, Text.empty(), (button, collisionRule) -> {
+		this.cycleCollisionRuleButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.CollisionRule::getDisplayName, this.collisionRule).values(AbstractTeam.CollisionRule.values()).omitKeyText().build(this.width / 2 + 54, 160, 100, 20, Text.empty(), (button, collisionRule) -> {
 			this.collisionRule = collisionRule;
 		}));
 
@@ -398,9 +398,9 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 				this.teamColor.getColorIndex(),
 				this.friendlyFire,
 				this.showFriendlyInvisibles,
-				this.nametagVisibility.name,
-				this.deathMessageVisibility.name,
-				this.collisionRule.name,
+				this.nametagVisibility,
+				this.deathMessageVisibility,
+				this.collisionRule,
 				this.prefixField.getText(),
 				this.suffixField.getText()
 		));

@@ -166,7 +166,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TeamControllerBlockEntity teamControllerBlockEntity) {
-		if (!world.isClient && teamControllerBlockEntity.enableTicking && world.getTime() % 80L == 0L) {
+		if (!world.isClient() && teamControllerBlockEntity.enableTicking && world.getTime() % 80L == 0L) {
 			if (teamControllerBlockEntity.calculateAreaBox || teamControllerBlockEntity.area == null) {
 				BlockPos areaPositionOffset = teamControllerBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = teamControllerBlockEntity.areaDimensions;
@@ -177,7 +177,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 				teamControllerBlockEntity.markDirty();
 				world.updateListeners(pos, state, state, Block.NOTIFY_ALL);
 			}
-			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient) {
+			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient()) {
 				BlockPos pvpControllerBlockPos = null;
 				PVPControllerBlockEntity pvpControllerBlockEntity = null;
 				if (teamControllerBlockEntity.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
@@ -387,7 +387,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 
 	@Override
 	public void trigger() {
-		if (this.team == null && this.world != null && !this.world.isClient) {
+		if (this.team == null && this.world != null && !this.world.isClient()) {
 			if (this.world.getScoreboard().getTeam(this.teamIdentifier) == null) {
 				this.world.getScoreboard().addTeam(this.teamIdentifier);
 			}
@@ -409,7 +409,7 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 				this.team.setNameTagVisibilityRule(nametagVisibility != null ? nametagVisibility : AbstractTeam.VisibilityRule.ALWAYS);
 				AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.getRule(this.deathMessageVisibility);
 				this.team.setDeathMessageVisibilityRule(deathMessageVisibility != null ? deathMessageVisibility : AbstractTeam.VisibilityRule.ALWAYS);
-				AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.getRule(this.collisionRule);
+				AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.valueOf(this.collisionRule);
 				this.team.setCollisionRule(collisionRule != null ? collisionRule : AbstractTeam.CollisionRule.ALWAYS);
 				this.team.setColor(this.teamColor);
 			}

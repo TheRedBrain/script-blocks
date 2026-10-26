@@ -23,7 +23,7 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.rule.GameRules;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -154,7 +154,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 
 			// calculate sub areas
 			if (this.subAreasList.isEmpty()) {
-				this.subAreasList.addAll(splitArea(this.areaPositionOffset, this.areaDimensions, server.getGameRules().get(GameRules.COMMAND_MODIFICATION_BLOCK_LIMIT).get(), 16)); // TODO maxIterations gamerule or config
+				this.subAreasList.addAll(splitArea(this.areaPositionOffset, this.areaDimensions, serverWorld.getGameRules().getValue(GameRules.MAX_BLOCK_MODIFICATIONS), 16)); // TODO maxIterations gamerule or config
 				this.markDirty();
 			}
 

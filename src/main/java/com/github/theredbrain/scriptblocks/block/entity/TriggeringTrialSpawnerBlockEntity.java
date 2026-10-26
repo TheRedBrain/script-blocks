@@ -181,12 +181,7 @@ public class TriggeringTrialSpawnerBlockEntity extends RotatedBlockEntity implem
 
 	@Override
 	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.spawner.getData().getSpawnDataNbt(this.getCachedState().get(TrialSpawnerBlock.TRIAL_SPAWNER_STATE));
-	}
-
-	@Override
-	public boolean copyItemDataRequiresOperator() {
-		return true;
+		return this.logic.getData().getSpawnDataNbt(this.getCachedState().get(TrialSpawnerBlock.TRIAL_SPAWNER_STATE));
 	}
 
 	@Override

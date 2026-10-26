@@ -19,6 +19,8 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
@@ -294,70 +296,70 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		}
 	}
 
-	private static byte readFlag(byte flags, NbtCompound nbt, String nbtKey, byte flag) {
-		return nbt.getBoolean(nbtKey) ? (byte) (flags | flag) : flags;
+	private static byte readFlag(byte flags, ReadView view, String nbtKey, byte flag) {
+		return view.getBoolean(nbtKey) ? (byte) (flags | flag) : flags;
 	}
 
 	@Override
-	protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void readData(ReadView view) {
 
 		// common
 		if (nbt.contains("transformation")) {
 			AffineTransformation.ANY_CODEC
-					.decode(NbtOps.INSTANCE, nbt.get("transformation"))
+					.decode(NbtOps.INSTANCE, view.get("transformation"))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
 					.ifPresent(pair -> this.setTransformation((AffineTransformation) pair.getFirst()));
 		}
 
 		if (nbt.contains("interpolation_duration", NbtElement.NUMBER_TYPE)) {
-			int i = nbt.getInt("interpolation_duration");
+			int i = view.getInt("interpolation_duration");
 			this.setInterpolationDuration(i);
 		}
 
 		if (nbt.contains("start_interpolation", NbtElement.NUMBER_TYPE)) {
-			int i = nbt.getInt("start_interpolation");
+			int i = view.getInt("start_interpolation");
 			this.setStartInterpolation(i);
 		}
 
 		if (nbt.contains("teleport_duration", NbtElement.NUMBER_TYPE)) {
-			int i = nbt.getInt("teleport_duration");
+			int i = view.getInt("teleport_duration");
 			this.setTeleportDuration(MathHelper.clamp(i, 0, 59));
 		}
 
 		if (nbt.contains("billboard", NbtElement.STRING_TYPE)) {
 			BillboardMode.CODEC
-					.decode(NbtOps.INSTANCE, nbt.get("billboard"))
+					.decode(NbtOps.INSTANCE, view.get("billboard"))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
 					.ifPresent(pair -> this.setBillboardMode((BillboardMode) pair.getFirst()));
 		}
 
 		if (nbt.contains("view_range", NbtElement.NUMBER_TYPE)) {
-			this.setViewRange(nbt.getFloat("view_range"));
+			this.setViewRange(view.getFloat("view_range"));
 		}
 
 		if (nbt.contains("shadow_radius", NbtElement.NUMBER_TYPE)) {
-			this.setShadowRadius(nbt.getFloat("shadow_radius"));
+			this.setShadowRadius(view.getFloat("shadow_radius"));
 		}
 
 		if (nbt.contains("shadow_strength", NbtElement.NUMBER_TYPE)) {
-			this.setShadowStrength(nbt.getFloat("shadow_strength"));
+			this.setShadowStrength(view.getFloat("shadow_strength"));
 		}
 
 		if (nbt.contains("width", NbtElement.NUMBER_TYPE)) {
-			this.setDisplayWidth(nbt.getFloat("width"));
+			this.setDisplayWidth(view.getFloat("width"));
 		}
 
 		if (nbt.contains("height", NbtElement.NUMBER_TYPE)) {
-			this.setDisplayHeight(nbt.getFloat("height"));
+			this.setDisplayHeight(view.getFloat("height"));
 		}
 
 		if (nbt.contains("glow_color_override", NbtElement.NUMBER_TYPE)) {
-			this.setGlowColorOverride(nbt.getInt("glow_color_override"));
+			this.setGlowColorOverride(view.getInt("glow_color_override"));
 		}
 
 		if (nbt.contains("brightness", NbtElement.COMPOUND_TYPE)) {
 			Brightness.CODEC
-					.decode(NbtOps.INSTANCE, nbt.get("brightness"))
+					.decode(NbtOps.INSTANCE, view.get("brightness"))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
 					.ifPresent(pair -> this.setBrightness((Brightness) pair.getFirst()));
 		} else {
@@ -366,67 +368,67 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		if (nbt.contains(DISPLAY_MODE_NBT_KEY, NbtElement.STRING_TYPE)) {
 			DisplayMode.CODEC
-					.decode(NbtOps.INSTANCE, nbt.get(DISPLAY_MODE_NBT_KEY))
+					.decode(NbtOps.INSTANCE, view.get(DISPLAY_MODE_NBT_KEY))
 					.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
 					.ifPresent(pair -> this.setDisplayMode((DisplayMode) pair.getFirst()));
 		}
 
 		if (nbt.contains(IS_TRIGGERED_NBT_KEY, NbtElement.BYTE_TYPE)) {
-			this.isTriggered = nbt.getBoolean(IS_TRIGGERED_NBT_KEY);
+			this.isTriggered = view.getBoolean(IS_TRIGGERED_NBT_KEY);
 		}
 
 		if (nbt.contains(DISPLAY_OFFSET_X_NBT_KEY, NbtElement.NUMBER_TYPE) || nbt.contains(DISPLAY_OFFSET_Y_NBT_KEY, NbtElement.NUMBER_TYPE) || nbt.contains(DISPLAY_OFFSET_Z_NBT_KEY, NbtElement.NUMBER_TYPE)) {
 			this.setDisplayOffset(new Vec3d(
-					nbt.getDouble(DISPLAY_OFFSET_X_NBT_KEY),
-					nbt.getDouble(DISPLAY_OFFSET_Y_NBT_KEY),
-					nbt.getDouble(DISPLAY_OFFSET_Z_NBT_KEY)
+					view.getDouble(DISPLAY_OFFSET_X_NBT_KEY),
+					view.getDouble(DISPLAY_OFFSET_Y_NBT_KEY),
+					view.getDouble(DISPLAY_OFFSET_Z_NBT_KEY)
 			));
 		}
 
 		if (nbt.contains(DISPLAY_YAW_NBT_KEY)) {
-			this.displayYaw = nbt.getFloat(DISPLAY_YAW_NBT_KEY);
+			this.displayYaw = view.getFloat(DISPLAY_YAW_NBT_KEY);
 		}
 		if (nbt.contains(DISPLAY_PITCH_NBT_KEY)) {
-			this.displayPitch = nbt.getFloat(DISPLAY_PITCH_NBT_KEY);
+			this.displayPitch = view.getFloat(DISPLAY_PITCH_NBT_KEY);
 		}
 		if (nbt.contains(DISPLAY_PREV_YAW_NBT_KEY)) {
-			this.displayPrevYaw = nbt.getFloat(DISPLAY_PREV_YAW_NBT_KEY);
+			this.displayPrevYaw = view.getFloat(DISPLAY_PREV_YAW_NBT_KEY);
 		}
 		if (nbt.contains(DISPLAY_PREV_PITCH_NBT_KEY)) {
-			this.displayPrevPitch = nbt.getFloat(DISPLAY_PREV_PITCH_NBT_KEY);
+			this.displayPrevPitch = view.getFloat(DISPLAY_PREV_PITCH_NBT_KEY);
 		}
 //		// item mode
 //		if (nbt.contains("item")) {
-//			this.setItemStack((ItemStack)ItemStack.fromNbt(registryLookup, nbt.getCompound("item")).orElse(ItemStack.EMPTY));
+//			this.setItemStack((ItemStack)ItemStack.fromNbt(registryLookup, view.getCompound("item")).orElse(ItemStack.EMPTY));
 //		} else {
 //			this.setItemStack(ItemStack.EMPTY);
 //		}
 //
 //		if (nbt.contains("item_display", NbtElement.STRING_TYPE)) {
 //			ModelTransformationMode.CODEC
-//					.decode(NbtOps.INSTANCE, nbt.get("item_display"))
+//					.decode(NbtOps.INSTANCE, view.get("item_display"))
 //					.resultOrPartial(Util.addPrefix("Display entity", ScriptBlocks.LOGGER::error))
 //					.ifPresent(mode -> this.setTransformationMode((ModelTransformationMode)mode.getFirst()));
 //		}
 
 		// text mode
 		if (nbt.contains(LINE_WIDTH_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setLineWidth(nbt.getInt(LINE_WIDTH_NBT_KEY));
+			this.setLineWidth(view.getInt(LINE_WIDTH_NBT_KEY));
 		}
 
 		if (nbt.contains(TEXT_OPACITY_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setTextOpacity(nbt.getByte(TEXT_OPACITY_NBT_KEY));
+			this.setTextOpacity(view.getByte(TEXT_OPACITY_NBT_KEY));
 		}
 
 		if (nbt.contains(BACKGROUND_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setBackground(nbt.getInt(BACKGROUND_NBT_KEY));
+			this.setBackground(view.getInt(BACKGROUND_NBT_KEY));
 		}
 
 		byte b = readFlag((byte) 0, nbt, SHADOW_NBT_KEY, SHADOW_FLAG);
 		b = readFlag(b, nbt, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
 		b = readFlag(b, nbt, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
 		Optional<TextAlignment> optional = TextAlignment.CODEC
-				.decode(NbtOps.INSTANCE, nbt.get(ALIGNMENT_NBT_KEY))
+				.decode(NbtOps.INSTANCE, view.get(ALIGNMENT_NBT_KEY))
 				.resultOrPartial(Util.addPrefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
 				.map(Pair::getFirst);
 		if (optional.isPresent()) {
@@ -439,19 +441,19 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		this.setDisplayFlags(b);
 
 		if (nbt.contains(TEXT_STRING_NBT_KEY, NbtElement.STRING_TYPE)) {
-			this.setTextString(nbt.getString(TEXT_STRING_NBT_KEY));
+			this.setTextString(view.getString(TEXT_STRING_NBT_KEY));
 		}
 
 		if (nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, NbtElement.INT_TYPE) && nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, NbtElement.INT_TYPE) && nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, NbtElement.INT_TYPE)) {
-			this.setDataProvidingBlockPosOffset(new BlockPos(nbt.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY), nbt.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY), nbt.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY)));
+			this.setDataProvidingBlockPosOffset(new BlockPos(view.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY), view.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY), view.getInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY)));
 		}
 
 		if (nbt.contains(DATA_IDENTIFIER_NBT_KEY, NbtElement.STRING_TYPE)) {
-			this.setDataIdentifierString(nbt.getString(DATA_IDENTIFIER_NBT_KEY));
+			this.setDataIdentifierString(view.getString(DATA_IDENTIFIER_NBT_KEY));
 		}
 
 		if (nbt.contains(TEXT_NBT_KEY, NbtElement.STRING_TYPE)) {
-			String string = nbt.getString(TEXT_NBT_KEY);
+			String string = view.getString(TEXT_NBT_KEY);
 
 			try {
 				Text text = Text.Serialization.fromJson(string, registryLookup);
@@ -466,72 +468,72 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			}
 		}
 
-		super.readNbt(nbt, registryLookup);
+		super.readData(view);
 
 	}
 
-	private static void writeFlag(byte flags, NbtCompound nbt, String nbtKey, byte flag) {
-		nbt.putBoolean(nbtKey, (flags & flag) != 0);
+	private static void writeFlag(byte flags, WriteView view, String nbtKey, byte flag) {
+		view.putBoolean(nbtKey, (flags & flag) != 0);
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+	protected void writeData(WriteView view) {
 
 		// common
 		AffineTransformation.ANY_CODEC
 				.encodeStart(NbtOps.INSTANCE, getTransformation(this))
-				.ifSuccess(transformations -> nbt.put("transformation", transformations));
-		BillboardMode.CODEC.encodeStart(NbtOps.INSTANCE, this.getBillboardMode()).ifSuccess(billboard -> nbt.put("billboard", billboard));
-		nbt.putInt("interpolation_duration", this.getInterpolationDuration());
-		nbt.putInt("teleport_duration", this.getTeleportDuration());
-		nbt.putFloat("view_range", this.getViewRange());
-		nbt.putFloat("shadow_radius", this.getShadowRadius());
-		nbt.putFloat("shadow_strength", this.getShadowStrength());
-		nbt.putFloat("width", this.getDisplayWidth());
-		nbt.putFloat("height", this.getDisplayHeight());
-		nbt.putInt("glow_color_override", this.getGlowColorOverride());
+				.ifSuccess(transformations -> view.put("transformation", transformations));
+		BillboardMode.CODEC.encodeStart(NbtOps.INSTANCE, this.getBillboardMode()).ifSuccess(billboard -> view.put("billboard", billboard));
+		view.putInt("interpolation_duration", this.getInterpolationDuration());
+		view.putInt("teleport_duration", this.getTeleportDuration());
+		view.putFloat("view_range", this.getViewRange());
+		view.putFloat("shadow_radius", this.getShadowRadius());
+		view.putFloat("shadow_strength", this.getShadowStrength());
+		view.putFloat("width", this.getDisplayWidth());
+		view.putFloat("height", this.getDisplayHeight());
+		view.putInt("glow_color_override", this.getGlowColorOverride());
 		Brightness brightness = this.getBrightnessUnpacked();
 		if (brightness != null) {
-			Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).ifSuccess(brightnessx -> nbt.put("brightness", brightnessx));
+			Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).ifSuccess(brightnessx -> view.put("brightness", brightnessx));
 		}
 
 		if (this.isTriggered) {
-			nbt.putBoolean(IS_TRIGGERED_NBT_KEY, this.isTriggered);
+			view.putBoolean(IS_TRIGGERED_NBT_KEY, this.isTriggered);
 		}
 		if (this.displayOffset != DISPLAY_OFFSET_DEFAULT) {
-			nbt.putDouble(DISPLAY_OFFSET_X_NBT_KEY, this.displayOffset.x);
-			nbt.putDouble(DISPLAY_OFFSET_Y_NBT_KEY, this.displayOffset.y);
-			nbt.putDouble(DISPLAY_OFFSET_Z_NBT_KEY, this.displayOffset.z);
+			view.putDouble(DISPLAY_OFFSET_X_NBT_KEY, this.displayOffset.x);
+			view.putDouble(DISPLAY_OFFSET_Y_NBT_KEY, this.displayOffset.y);
+			view.putDouble(DISPLAY_OFFSET_Z_NBT_KEY, this.displayOffset.z);
 		}
 
-		nbt.putFloat(DISPLAY_YAW_NBT_KEY, this.displayYaw);
-		nbt.putFloat(DISPLAY_PITCH_NBT_KEY, this.displayPitch);
-		nbt.putFloat(DISPLAY_PREV_YAW_NBT_KEY, this.displayPrevYaw);
-		nbt.putFloat(DISPLAY_PREV_PITCH_NBT_KEY, this.displayPrevPitch);
+		view.putFloat(DISPLAY_YAW_NBT_KEY, this.displayYaw);
+		view.putFloat(DISPLAY_PITCH_NBT_KEY, this.displayPitch);
+		view.putFloat(DISPLAY_PREV_YAW_NBT_KEY, this.displayPrevYaw);
+		view.putFloat(DISPLAY_PREV_PITCH_NBT_KEY, this.displayPrevPitch);
 
 //		// item mode
 //		if (!this.getItemStack().isEmpty()) {
-//			nbt.put("item", this.getItemStack().encode(registryLookup));
+//			view.put("item", this.getItemStack().encode(registryLookup));
 //		}
-//		ModelTransformationMode.CODEC.encodeStart(NbtOps.INSTANCE, this.getTransformationMode()).ifSuccess(nbtx -> nbt.put("item_display", nbtx));
+//		ModelTransformationMode.CODEC.encodeStart(NbtOps.INSTANCE, this.getTransformationMode()).ifSuccess(nbtx -> view.put("item_display", nbtx));
 
 		// text mode
-		nbt.putString(TEXT_STRING_NBT_KEY, this.textString);
-		nbt.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, this.dataProvidingBlockPosOffset.getX());
-		nbt.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, this.dataProvidingBlockPosOffset.getY());
-		nbt.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, this.dataProvidingBlockPosOffset.getZ());
-		nbt.putString(DATA_IDENTIFIER_NBT_KEY, this.dataIdentifierString);
-		nbt.putString(TEXT_NBT_KEY, Text.Serialization.toJsonString(this.getText(), registryLookup));
-		nbt.putInt(LINE_WIDTH_NBT_KEY, this.getLineWidth());
-		nbt.putByte(TEXT_OPACITY_NBT_KEY, this.getTextOpacity());
-		nbt.putInt(BACKGROUND_NBT_KEY, this.getBackground());
+		view.putString(TEXT_STRING_NBT_KEY, this.textString);
+		view.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, this.dataProvidingBlockPosOffset.getX());
+		view.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, this.dataProvidingBlockPosOffset.getY());
+		view.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, this.dataProvidingBlockPosOffset.getZ());
+		view.putString(DATA_IDENTIFIER_NBT_KEY, this.dataIdentifierString);
+		view.putString(TEXT_NBT_KEY, Text.Serialization.toJsonString(this.getText(), registryLookup));
+		view.putInt(LINE_WIDTH_NBT_KEY, this.getLineWidth());
+		view.putByte(TEXT_OPACITY_NBT_KEY, this.getTextOpacity());
+		view.putInt(BACKGROUND_NBT_KEY, this.getBackground());
 		byte b = this.getDisplayFlags();
 		writeFlag(b, nbt, SHADOW_NBT_KEY, SHADOW_FLAG);
 		writeFlag(b, nbt, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
 		writeFlag(b, nbt, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
-		TextAlignment.CODEC.encodeStart(NbtOps.INSTANCE, getAlignment(b)).ifSuccess(nbtElement -> nbt.put(ALIGNMENT_NBT_KEY, nbtElement));
+		TextAlignment.CODEC.encodeStart(NbtOps.INSTANCE, getAlignment(b)).ifSuccess(nbtElement -> view.put(ALIGNMENT_NBT_KEY, nbtElement));
 
-		super.writeNbt(nbt, registryLookup);
+		super.writeData(view);
 
 	}
 

@@ -47,7 +47,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocks = payload.dialogueUsedBlocks();
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
-		World world = serverPlayerEntity.getWorld();
+		World world = serverPlayerEntity.getEntityWorld();
 		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();

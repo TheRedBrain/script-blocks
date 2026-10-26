@@ -366,7 +366,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, AreaBlockEntity areaBlockEntity) {
-		if (!world.isClient && world.getTime() % 20L == 0L && areaBlockEntity.wasTriggered) {
+		if (!world.isClient() && world.getTime() % 20L == 0L && areaBlockEntity.wasTriggered) {
 			if (areaBlockEntity.calculateAreaBox || areaBlockEntity.area == null) {
 				BlockPos areaPositionOffset = areaBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = areaBlockEntity.areaDimensions;

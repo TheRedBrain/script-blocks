@@ -198,7 +198,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, BossControllerBlockEntity bC) {
-		if (!world.isClient && bC.currentPhase != null && bC.boss != null) {
+		if (!world.isClient() && bC.currentPhase != null && bC.boss != null) {
 			bC.globalTimer++;
 			bC.phaseTimer++;
 			int globalTimerThreshold = bC.currentPhase.globalTimerThreshold();

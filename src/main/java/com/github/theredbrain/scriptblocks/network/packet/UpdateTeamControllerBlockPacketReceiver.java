@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -35,13 +36,13 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 		int teamColorIndex = payload.teamColorIndex();
 		boolean friendlyFire = payload.friendlyFire();
 		boolean showFriendlyInvisibles = payload.showFriendlyInvisibles();
-		String nametagVisibility = payload.nametagVisibilityString();
-		String deathMessageVisibility = payload.deathMessageVisibilityString();
-		String collisionRule = payload.collisionRuleString();
+		AbstractTeam.VisibilityRule nametagVisibility = payload.nametagVisibility();
+		AbstractTeam.VisibilityRule deathMessageVisibility = payload.deathMessageVisibility();
+		AbstractTeam.CollisionRule collisionRule = payload.collisionRule();
 		String prefixString = payload.prefixString();
 		String suffixString = payload.suffixString();
 
-		World world = serverPlayerEntity.getWorld();
+		World world = serverPlayerEntity.getEntityWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(teamControllerBlockPosition);
 		BlockState blockState = world.getBlockState(teamControllerBlockPosition);

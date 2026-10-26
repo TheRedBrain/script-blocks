@@ -245,22 +245,25 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 					}
 				});
 			}
-			this.dealDamageToEntities(this.world, entityList);
+			if (this.world instanceof ServerWorld serverWorld) {
+				this.dealDamageToEntities(serverWorld, entityList);
+			}
 		}
 	}
 
-	private void dealDamageToEntities(World world, List<LivingEntity> list) {
+	private void dealDamageToEntities(ServerWorld serverWorld, List<LivingEntity> list) {
 
-		Registry<DamageType> registry = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE);
+		Optional<Registry<DamageType>> optionalRegistry = serverWorld.getRegistryManager().getOptional(RegistryKeys.DAMAGE_TYPE);
 
-		if (!this.damageTypeIdentifierString.isEmpty()) {
+		if (!this.damageTypeIdentifierString.isEmpty() && optionalRegistry.isPresent()) {
 			Identifier damageTypeIdentifier = Identifier.tryParse(this.damageTypeIdentifierString);
 			if (damageTypeIdentifier != null) {
 				RegistryKey<DamageType> key = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, damageTypeIdentifier);
-				DamageSource damageSource = new DamageSource(registry.entryOf(key));
+
+				DamageSource damageSource = new DamageSource(optionalRegistry.get().getEntry(optionalRegistry.get().get(key)));
 
 				for (LivingEntity entity : list) {
-					entity.damage(damageSource, this.damageAmount);
+					entity.damage(serverWorld, damageSource, this.damageAmount);
 				}
 			}
 		}
@@ -281,7 +284,9 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 					entityList.add(playerEntity);
 				}
 			});
-			this.dealDamageToEntities(this.world, entityList);
+			if (this.world instanceof ServerWorld serverWorld) {
+				this.dealDamageToEntities(serverWorld, entityList);
+			}
 		}
 	}
 

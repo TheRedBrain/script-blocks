@@ -100,19 +100,19 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 		view.put("use_relay_block_position_offset", BlockPos.CODEC, this.useRelayBlockPositionOffset);
 
-		NbtList nbtList = new NbtList();
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("entity_attribute_modifiers", NbtCompound.CODEC);
-		for (RegistryEntry<EntityAttribute> registryEntry : this.entityAttributeModifiers.keySet()) {
-			nbtCompound = new NbtCompound();
-			nbtCompound.putString("attribute", String.valueOf(Registries.ATTRIBUTE.getId(registryEntry.value())));
-			NbtList modifiersList = new NbtList();
-			WriteView.ListAppender<EntityAttributeModifier> listAppender1 = nbtCompound.put(.getListAppender("entity_attribute_modifiers", EntityAttributeModifier.CODEC);
-			for (EntityAttributeModifier entityAttributeModifier : this.entityAttributeModifiers.get(registryEntry)) {
-				listAppender1.add(entityAttributeModifier);
-			}
-			nbtCompound.put("modifiers", listAppender1);
-			listAppender.add(nbtCompound.copy());
-		}
+//		NbtList nbtList = new NbtList();
+//		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("entity_attribute_modifiers", NbtCompound.CODEC);
+//		for (RegistryEntry<EntityAttribute> registryEntry : this.entityAttributeModifiers.keySet()) {
+//			nbtCompound = new NbtCompound();
+//			nbtCompound.putString("attribute", String.valueOf(Registries.ATTRIBUTE.getId(registryEntry.value())));
+//			NbtList modifiersList = new NbtList();
+//			WriteView.ListAppender<EntityAttributeModifier> listAppender1 = nbtCompound.put(.getListAppender("entity_attribute_modifiers", EntityAttributeModifier.CODEC);
+//			for (EntityAttributeModifier entityAttributeModifier : this.entityAttributeModifiers.get(registryEntry)) {
+//				listAppender1.add(entityAttributeModifier);
+//			}
+//			nbtCompound.put("modifiers", listAppender1);
+//			listAppender.add(nbtCompound.copy());
+//		}
 
 		view.putString("spawning_mode", this.spawningMode.asString());
 
@@ -167,22 +167,22 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			);
 
 		this.entityAttributeModifiers.clear();
-				for (NbtCompound nbtCompound1 : view.getTypedListView("entity_attribute_modifiers", NbtCompound.CODEC)) {
-				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound1.getString("attribute", "")));
-				if (optional.isPresent()) {
-					RegistryEntry.Reference<EntityAttribute> key = optional.get();
-					Optional<NbtList> optionalModifiersList = nbtCompound1.getList("modifiers");
-					if (optionalModifiersList.isPresent()) {
-						for (NbtElement nbtElement : optionalModifiersList.get()) {
-//							nbtElement.
-//					for (int j = 0; j < modifiersList.size(); j++) {
-							if (entityAttributeModifier != null) {
-								this.entityAttributeModifiers.put(key, entityAttributeModifier);
-							}
-						}
-					}
-				}
-			}
+//				for (NbtCompound nbtCompound1 : view.getTypedListView("entity_attribute_modifiers", NbtCompound.CODEC)) {
+//				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound1.getString("attribute", "")));
+//				if (optional.isPresent()) {
+//					RegistryEntry.Reference<EntityAttribute> key = optional.get();
+//					Optional<NbtList> optionalModifiersList = nbtCompound1.getList("modifiers");
+//					if (optionalModifiersList.isPresent()) {
+//						for (NbtElement nbtElement : optionalModifiersList.get()) {
+////							nbtElement.
+////					for (int j = 0; j < modifiersList.size(); j++) {
+//							if (entityAttributeModifier != null) {
+//								this.entityAttributeModifiers.put(key, entityAttributeModifier);
+//							}
+//						}
+//					}
+//				}
+//			}
 
 		this.spawningMode = SpawningMode.byName(view.getString("spawning_mode", "")).orElseGet(() -> SpawningMode.ONCE);
 

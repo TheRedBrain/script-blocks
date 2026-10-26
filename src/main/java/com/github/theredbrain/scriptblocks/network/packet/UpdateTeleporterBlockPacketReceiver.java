@@ -76,7 +76,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		String teleportButtonLabel = payload.teleportButtonLabel();
 		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
 
-		World world = serverPlayerEntity.getWorld();
+		World world = serverPlayerEntity.getEntityWorld();
 
 		boolean updateSuccessful = true;
 

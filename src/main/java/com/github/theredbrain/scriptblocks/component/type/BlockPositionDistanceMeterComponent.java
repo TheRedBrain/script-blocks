@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.component.type;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.component.ComponentsAccess;
 import net.minecraft.item.Item;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
@@ -54,18 +55,18 @@ public record BlockPositionDistanceMeterComponent(
 	}
 
 	@Override
-	public void appendTooltip(Item.TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+	public void appendTooltip(Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type, ComponentsAccess components) {
 
-		tooltip.accept(this.is_root_mode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
+		textConsumer.accept(this.is_root_mode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
 
 		if (this.root_pos.getY() > -64) {
-			tooltip.accept(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.root_pos", this.root_pos.getX(), this.root_pos.getY(), this.root_pos.getZ()));
+			textConsumer.accept(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.root_pos", this.root_pos.getX(), this.root_pos.getY(), this.root_pos.getZ()));
 		}
 		if (this.offset_pos.getY() > -64) {
-			tooltip.accept(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.offset_pos", this.offset_pos.getX(), this.offset_pos.getY(), this.offset_pos.getZ()));
+			textConsumer.accept(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.offset_pos", this.offset_pos.getX(), this.offset_pos.getY(), this.offset_pos.getZ()));
 		}
 		if (this.offset.getX() != 0 || this.offset.getY() != 0 || this.offset.getZ() != 0) {
-			tooltip.accept(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.offset", this.offset.getX(), this.offset.getY(), this.offset.getZ()));
+			textConsumer.accept(Text.translatable("item.scriptblocks.block_position_distance_meter.tooltip.offset", this.offset.getX(), this.offset.getY(), this.offset.getZ()));
 		}
 	}
 }

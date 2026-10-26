@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 
@@ -19,9 +20,9 @@ public record UpdateTeamControllerBlockPacket(
 		int teamColorIndex,
 		boolean friendlyFire,
 		boolean showFriendlyInvisibles,
-		String nametagVisibilityString,
-		String deathMessageVisibilityString,
-		String collisionRuleString,
+		AbstractTeam.VisibilityRule nametagVisibility,
+		AbstractTeam.VisibilityRule deathMessageVisibility,
+		AbstractTeam.CollisionRule collisionRule,
 		String prefixString,
 		String suffixString
 ) implements CustomPayload {
@@ -45,9 +46,9 @@ public record UpdateTeamControllerBlockPacket(
 				registryByteBuf.readInt(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				AbstractTeam.VisibilityRule.PACKET_CODEC.decode(registryByteBuf),
+				AbstractTeam.VisibilityRule.PACKET_CODEC.decode(registryByteBuf),
+				AbstractTeam.CollisionRule.PACKET_CODEC.decode(registryByteBuf),
 				registryByteBuf.readString(),
 				registryByteBuf.readString()
 		);
@@ -67,9 +68,9 @@ public record UpdateTeamControllerBlockPacket(
 		registryByteBuf.writeInt(this.teamColorIndex);
 		registryByteBuf.writeBoolean(this.friendlyFire);
 		registryByteBuf.writeBoolean(this.showFriendlyInvisibles);
-		registryByteBuf.writeString(this.nametagVisibilityString);
-		registryByteBuf.writeString(this.deathMessageVisibilityString);
-		registryByteBuf.writeString(this.collisionRuleString);
+		AbstractTeam.VisibilityRule.PACKET_CODEC.encode(registryByteBuf, this.nametagVisibility);
+		AbstractTeam.VisibilityRule.PACKET_CODEC.encode(registryByteBuf, this.deathMessageVisibility);
+		AbstractTeam.CollisionRule.PACKET_CODEC.encode(registryByteBuf, this.collisionRule);
 		registryByteBuf.writeString(this.prefixString);
 		registryByteBuf.writeString(this.suffixString);
 	}

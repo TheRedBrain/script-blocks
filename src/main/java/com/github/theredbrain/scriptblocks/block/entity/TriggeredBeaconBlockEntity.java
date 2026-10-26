@@ -136,7 +136,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	}
 
 	public static void tick(World world, BlockPos pos, BlockState state, TriggeredBeaconBlockEntity triggeredBeaconBlockEntity) {
-		if (!world.isClient && world.getTime() % 80L == 0L) {
+		if (!world.isClient() && world.getTime() % 80L == 0L) {
 			if (triggeredBeaconBlockEntity.calculateAreaBox || triggeredBeaconBlockEntity.area == null) {
 				BlockPos areaPositionOffset = triggeredBeaconBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = triggeredBeaconBlockEntity.areaDimensions;
