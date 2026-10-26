@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.9-SNAPSHOT'
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id "com.matthewprenger.cursegradle" version "1.4.0"
 	id "com.github.breadmoirai.github-release" version "2.4.1"
 	id "com.modrinth.minotaur" version "2.+"
@@ -92,25 +92,25 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// Fzzy Config
-	modImplementation"me.fzzyhmstrs:fzzy_config:${project.fzzy_config_version}"
+	implementation"me.fzzyhmstrs:fzzy_config:${project.fzzy_config_version}"
 
 	// Lootable
-	modImplementation "me.fzzyhmstrs:lootables:${project.lootable_version}"
+//	implementation "me.fzzyhmstrs:lootables:${project.lootable_version}"
 
 	// Fantasy
-	include(modImplementation("xyz.nucleoid:fantasy:${project.fantasy_version}"))
+	include(implementation("xyz.nucleoid:fantasy:${project.fantasy_version}"))
 
 	// Slot Customization API
-	modImplementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
+	implementation "maven.modrinth:slot-customization-api:${project.slot_customization_api_version}"
 
 	// RPG Inventory
-	modImplementation "maven.modrinth:rpg-inventory:${project.rpg_inventory_version}"
+	implementation "maven.modrinth:rpg-inventory:${project.rpg_inventory_version}"
 
 	// Test mod
 	testmodImplementation sourceSets.main.output
@@ -119,7 +119,7 @@ dependencies {
 	testmodClientImplementation sourceSets.testmod.output
 
 	// Data Fixer
-	modImplementation "maven.modrinth:easy-data-fix:${project.easy_data_fixer_version}-fabric"
+	implementation "maven.modrinth:easy-data-fix:${project.easy_data_fixer_version}-fabric"
 
 }
 
@@ -199,7 +199,7 @@ if (project.hasProperty('release_type')) {
 		versionNumber = "${version}"
 		// You don't need to set this manually. Will fail if Modrinth has this version already
 		versionType = release_type // This is the default -- can also be `beta` or `alpha`
-		uploadFile = remapJar // With Loom, this MUST be set to `remapJar` instead of `jar`!
+		uploadFile = jar // With Loom, this MUST be set to `remapJar` instead of `jar`!
 		gameVersions = ["${project.minecraft_version}"] // Must be an array, even with only one version
 		loaders = ["fabric"] // Must also be an array - no need to specify this if you're using Loom or ForgeGradle
 		changelog = changelog_last_section()
