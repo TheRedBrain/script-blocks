@@ -1,15 +1,13 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public abstract class RotatedBlockEntity extends BlockEntity {
 	protected int rotated = 0;
@@ -21,8 +19,8 @@ public abstract class RotatedBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
-		super.writeData(view);
+	protected void saveAdditional(ValueOutput view) {
+		super.saveAdditional(view);
 
 		view.putInt("rotated", this.rotated);
 		view.putBoolean("x_mirrored", this.x_mirrored);
@@ -33,14 +31,14 @@ public abstract class RotatedBlockEntity extends BlockEntity {
 	 * Has to be called last when overridden to avoid rotated data being overridden by saved data
 	 */
 	@Override
-	protected void readData(ReadView view) {
-		super.readData(view);
+	protected void loadAdditional(ValueInput view) {
+		super.loadAdditional(view);
 
-		this.rotated = MathHelper.clamp(view.getInt("rotated", 0), 0, 3);
-		this.x_mirrored = view.getBoolean("x_mirrored", false);
-		this.z_mirrored = view.getBoolean("z_mirrored", false);
-		if (this.getCachedState().getBlock() instanceof RotatedBlockWithEntity) {
-			this.onRotate(this.getCachedState());
+		this.rotated = Mth.clamp(view.getIntOr("rotated", 0), 0, 3);
+		this.x_mirrored = view.getBooleanOr("x_mirrored", false);
+		this.z_mirrored = view.getBooleanOr("z_mirrored", false);
+		if (this.getBlockState().getBlock() instanceof RotatedBlockWithEntity) {
+			this.onRotate(this.getBlockState());
 		}
 	}
 

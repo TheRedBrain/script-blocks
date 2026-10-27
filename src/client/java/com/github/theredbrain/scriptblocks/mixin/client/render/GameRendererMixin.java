@@ -5,10 +5,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.entity.player.PlayerAbilities;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.world.entity.player.Abilities;
+import net.minecraft.world.entity.player.Player;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,11 +21,11 @@ public class GameRendererMixin {
 
 	@Shadow
 	@Final
-	MinecraftClient client;
+	Minecraft client;
 
 	@WrapOperation(method = "shouldRenderBlockOutline", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerAbilities;allowModifyWorld:Z", opcode = Opcodes.GETFIELD))
-	private boolean shouldRenderBlockOutline(PlayerAbilities instance, Operation<Boolean> original) {
-		return original.call(instance) && (!(this.client.getCameraEntity() instanceof PlayerEntity playerEntity) || !(playerEntity.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT) && !playerEntity.isCreative()));
+	private boolean shouldRenderBlockOutline(Abilities instance, Operation<Boolean> original) {
+		return original.call(instance) && (!(this.client.getCameraEntity() instanceof Player playerEntity) || !(playerEntity.hasEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT) && !playerEntity.isCreative()));
 	}
 
 }

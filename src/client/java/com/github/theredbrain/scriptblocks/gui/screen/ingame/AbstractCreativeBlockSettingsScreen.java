@@ -1,22 +1,22 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 public abstract class AbstractCreativeBlockSettingsScreen extends Screen {
-	protected AbstractCreativeBlockSettingsScreen(Text title) {
+	protected AbstractCreativeBlockSettingsScreen(Component title) {
 		super(title);
 	}
 
 	protected void done() {
 		if (this.updateBlock()) {
-			this.close();
+			this.onClose();
 		}
 	}
 
 	protected void cancel() {
-		this.close();
+		this.onClose();
 	}
 
 	protected void updateWidgets() {
@@ -28,12 +28,12 @@ public abstract class AbstractCreativeBlockSettingsScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderInGameBackground(context);
+	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+		this.renderTransparentBackground(context);
 	}
 
 	@Override
-	public boolean shouldPause() {
+	public boolean isPauseScreen() {
 		return false;
 	}
 

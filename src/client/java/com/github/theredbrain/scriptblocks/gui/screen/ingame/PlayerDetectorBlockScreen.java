@@ -6,81 +6,80 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringRepresentable;
 import java.util.Arrays;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text ENABLE_TICKING_TRUE_LABEL_TEXT = Text.translatable("gui.player_detector_block.enable_ticking_true_label");
-	private static final Text ENABLE_TICKING_FALSE_LABEL_TEXT = Text.translatable("gui.player_detector_block.enable_ticking_false_label");
-	private static final Text SHOW_AREA_LABEL_TRUE_TEXT = Text.translatable("gui.player_detector_block.show_area_true_label");
-	private static final Text SHOW_AREA_LABEL_FALSE_TEXT = Text.translatable("gui.player_detector_block.show_area_false_label");
-	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.player_detector_block.area_dimensions_label");
-	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.player_detector_block.area_position_offset_label");
-	private static final Text TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT = Text.translatable("gui.player_detector_block.triggered_block_on_entering_position_offset");
-	private static final Text TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT = Text.translatable("gui.player_detector_block.triggered_block_on_leaving_position_offset");
-	private static final Text TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT = Text.translatable("gui.player_detector_block.triggered_block_on_triggering_position_offset");
-	private static final Text UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT = Text.translatable("gui.player_detector_block.uuid_list_handler_on_entering_position_offset");
-	private static final Text UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT = Text.translatable("gui.player_detector_block.uuid_list_handler_on_leaving_position_offset");
-	private static final Text UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT = Text.translatable("gui.player_detector_block.uuid_list_handler_on_triggering_position_offset");
+	private static final Component ENABLE_TICKING_TRUE_LABEL_TEXT = Component.translatable("gui.player_detector_block.enable_ticking_true_label");
+	private static final Component ENABLE_TICKING_FALSE_LABEL_TEXT = Component.translatable("gui.player_detector_block.enable_ticking_false_label");
+	private static final Component SHOW_AREA_LABEL_TRUE_TEXT = Component.translatable("gui.player_detector_block.show_area_true_label");
+	private static final Component SHOW_AREA_LABEL_FALSE_TEXT = Component.translatable("gui.player_detector_block.show_area_false_label");
+	private static final Component AREA_DIMENSIONS_LABEL_TEXT = Component.translatable("gui.player_detector_block.area_dimensions_label");
+	private static final Component AREA_POSITION_OFFET_LABEL_TEXT = Component.translatable("gui.player_detector_block.area_position_offset_label");
+	private static final Component TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT = Component.translatable("gui.player_detector_block.triggered_block_on_entering_position_offset");
+	private static final Component TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT = Component.translatable("gui.player_detector_block.triggered_block_on_leaving_position_offset");
+	private static final Component TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT = Component.translatable("gui.player_detector_block.triggered_block_on_triggering_position_offset");
+	private static final Component UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT = Component.translatable("gui.player_detector_block.uuid_list_handler_on_entering_position_offset");
+	private static final Component UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT = Component.translatable("gui.player_detector_block.uuid_list_handler_on_leaving_position_offset");
+	private static final Component UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT = Component.translatable("gui.player_detector_block.uuid_list_handler_on_triggering_position_offset");
 	private final PlayerDetectorBlockEntity playerDetectorBlock;
-	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
-	private CyclingButtonWidget<Boolean> toggleEnableTickingButton;
-	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
-	private TextFieldWidget areaDimensionsXField;
-	private TextFieldWidget areaDimensionsYField;
-	private TextFieldWidget areaDimensionsZField;
-	private TextFieldWidget areaPositionOffsetXField;
-	private TextFieldWidget areaPositionOffsetYField;
-	private TextFieldWidget areaPositionOffsetZField;
+	private CycleButton<ScreenPage> cycleScreenPageButton;
+	private CycleButton<Boolean> toggleEnableTickingButton;
+	private CycleButton<Boolean> toggleShowAreaButton;
+	private EditBox areaDimensionsXField;
+	private EditBox areaDimensionsYField;
+	private EditBox areaDimensionsZField;
+	private EditBox areaPositionOffsetXField;
+	private EditBox areaPositionOffsetYField;
+	private EditBox areaPositionOffsetZField;
 	private ScreenPage screenPage;
 	private boolean enableTicking;
 	private boolean showArea;
 
-	private TextFieldWidget triggeredBlockOnEnteringPositionOffsetXField;
-	private TextFieldWidget triggeredBlockOnEnteringPositionOffsetYField;
-	private TextFieldWidget triggeredBlockOnEnteringPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleTriggeredBlockOnEnteringResetsButton;
+	private EditBox triggeredBlockOnEnteringPositionOffsetXField;
+	private EditBox triggeredBlockOnEnteringPositionOffsetYField;
+	private EditBox triggeredBlockOnEnteringPositionOffsetZField;
+	private CycleButton<Boolean> toggleTriggeredBlockOnEnteringResetsButton;
 	private boolean triggeredBlockOnEnteringResets;
 
-	private TextFieldWidget triggeredBlockOnLeavingPositionOffsetXField;
-	private TextFieldWidget triggeredBlockOnLeavingPositionOffsetYField;
-	private TextFieldWidget triggeredBlockOnLeavingPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleTriggeredBlockOnLeavingResetsButton;
+	private EditBox triggeredBlockOnLeavingPositionOffsetXField;
+	private EditBox triggeredBlockOnLeavingPositionOffsetYField;
+	private EditBox triggeredBlockOnLeavingPositionOffsetZField;
+	private CycleButton<Boolean> toggleTriggeredBlockOnLeavingResetsButton;
 	private boolean triggeredBlockOnLeavingResets;
 
-	private TextFieldWidget triggeredBlockOnTriggeringPositionOffsetXField;
-	private TextFieldWidget triggeredBlockOnTriggeringPositionOffsetYField;
-	private TextFieldWidget triggeredBlockOnTriggeringPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleTriggeredBlockOnTriggeringResetsButton;
+	private EditBox triggeredBlockOnTriggeringPositionOffsetXField;
+	private EditBox triggeredBlockOnTriggeringPositionOffsetYField;
+	private EditBox triggeredBlockOnTriggeringPositionOffsetZField;
+	private CycleButton<Boolean> toggleTriggeredBlockOnTriggeringResetsButton;
 	private boolean triggeredBlockOnTriggeringResets;
 
-	private TextFieldWidget uuidListHandlerOnEnteringPositionOffsetXField;
-	private TextFieldWidget uuidListHandlerOnEnteringPositionOffsetYField;
-	private TextFieldWidget uuidListHandlerOnEnteringPositionOffsetZField;
+	private EditBox uuidListHandlerOnEnteringPositionOffsetXField;
+	private EditBox uuidListHandlerOnEnteringPositionOffsetYField;
+	private EditBox uuidListHandlerOnEnteringPositionOffsetZField;
 
-	private TextFieldWidget uuidListHandlerOnLeavingPositionOffsetXField;
-	private TextFieldWidget uuidListHandlerOnLeavingPositionOffsetYField;
-	private TextFieldWidget uuidListHandlerOnLeavingPositionOffsetZField;
+	private EditBox uuidListHandlerOnLeavingPositionOffsetXField;
+	private EditBox uuidListHandlerOnLeavingPositionOffsetYField;
+	private EditBox uuidListHandlerOnLeavingPositionOffsetZField;
 
-	private TextFieldWidget uuidListHandlerOnTriggeringPositionOffsetXField;
-	private TextFieldWidget uuidListHandlerOnTriggeringPositionOffsetYField;
-	private TextFieldWidget uuidListHandlerOnTriggeringPositionOffsetZField;
+	private EditBox uuidListHandlerOnTriggeringPositionOffsetXField;
+	private EditBox uuidListHandlerOnTriggeringPositionOffsetYField;
+	private EditBox uuidListHandlerOnTriggeringPositionOffsetZField;
 
 	public PlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.playerDetectorBlock = playerDetectorBlock;
 		this.screenPage = ScreenPage.AREA;
 	}
@@ -88,147 +87,147 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	@Override
 	protected void init() {
 
-		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.enableTicking = this.playerDetectorBlock.enableTicking();
-		this.toggleEnableTickingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT).initially(this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 150, 20, Text.empty(), (button, enableTicking) -> {
+		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT).initially(this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, enableTicking) -> {
 			this.enableTicking = enableTicking;
 		}));
 
 		this.showArea = this.playerDetectorBlock.showArea();
-		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(SHOW_AREA_LABEL_TRUE_TEXT, SHOW_AREA_LABEL_FALSE_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 + 4, 44, 150, 20, Text.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_LABEL_TRUE_TEXT, SHOW_AREA_LABEL_FALSE_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
-		this.areaDimensionsXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 79, 100, 20, Text.empty());
+		this.areaDimensionsXField = new EditBox(this.font, this.width / 2 - 154, 79, 100, 20, Component.empty());
 		this.areaDimensionsXField.setMaxLength(128);
-		this.areaDimensionsXField.setText(Integer.toString(this.playerDetectorBlock.getAreaDimensions().getX()));
-		this.addSelectableChild(this.areaDimensionsXField);
+		this.areaDimensionsXField.setValue(Integer.toString(this.playerDetectorBlock.getAreaDimensions().getX()));
+		this.addWidget(this.areaDimensionsXField);
 
-		this.areaDimensionsYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 79, 100, 20, Text.empty());
+		this.areaDimensionsYField = new EditBox(this.font, this.width / 2 - 50, 79, 100, 20, Component.empty());
 		this.areaDimensionsYField.setMaxLength(128);
-		this.areaDimensionsYField.setText(Integer.toString(this.playerDetectorBlock.getAreaDimensions().getY()));
-		this.addSelectableChild(this.areaDimensionsYField);
+		this.areaDimensionsYField.setValue(Integer.toString(this.playerDetectorBlock.getAreaDimensions().getY()));
+		this.addWidget(this.areaDimensionsYField);
 
-		this.areaDimensionsZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 79, 100, 20, Text.empty());
+		this.areaDimensionsZField = new EditBox(this.font, this.width / 2 + 54, 79, 100, 20, Component.empty());
 		this.areaDimensionsZField.setMaxLength(128);
-		this.areaDimensionsZField.setText(Integer.toString(this.playerDetectorBlock.getAreaDimensions().getZ()));
-		this.addSelectableChild(this.areaDimensionsZField);
+		this.areaDimensionsZField.setValue(Integer.toString(this.playerDetectorBlock.getAreaDimensions().getZ()));
+		this.addWidget(this.areaDimensionsZField);
 
-		this.areaPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 114, 100, 20, Text.empty());
+		this.areaPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 114, 100, 20, Component.empty());
 		this.areaPositionOffsetXField.setMaxLength(128);
-		this.areaPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getAreaPositionOffset().getX()));
-		this.addSelectableChild(this.areaPositionOffsetXField);
+		this.areaPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getAreaPositionOffset().getX()));
+		this.addWidget(this.areaPositionOffsetXField);
 
-		this.areaPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 114, 100, 20, Text.empty());
+		this.areaPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 114, 100, 20, Component.empty());
 		this.areaPositionOffsetYField.setMaxLength(128);
-		this.areaPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getAreaPositionOffset().getY()));
-		this.addSelectableChild(this.areaPositionOffsetYField);
+		this.areaPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getAreaPositionOffset().getY()));
+		this.addWidget(this.areaPositionOffsetYField);
 
-		this.areaPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 114, 100, 20, Text.empty());
+		this.areaPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 114, 100, 20, Component.empty());
 		this.areaPositionOffsetZField.setMaxLength(128);
-		this.areaPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getAreaPositionOffset().getZ()));
-		this.addSelectableChild(this.areaPositionOffsetZField);
+		this.areaPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getAreaPositionOffset().getZ()));
+		this.addWidget(this.areaPositionOffsetZField);
 
 
-		this.triggeredBlockOnEnteringPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 50, 20, Text.empty());
+		this.triggeredBlockOnEnteringPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 55, 50, 20, Component.empty());
 		this.triggeredBlockOnEnteringPositionOffsetXField.setMaxLength(128);
-		this.triggeredBlockOnEnteringPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getOnEnteringTriggeredBlock().getLeft().getX()));
-		this.addSelectableChild(this.triggeredBlockOnEnteringPositionOffsetXField);
-		this.triggeredBlockOnEnteringPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 55, 50, 20, Text.empty());
+		this.triggeredBlockOnEnteringPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getOnEnteringTriggeredBlock().getLeft().getX()));
+		this.addWidget(this.triggeredBlockOnEnteringPositionOffsetXField);
+		this.triggeredBlockOnEnteringPositionOffsetYField = new EditBox(this.font, this.width / 2 - 100, 55, 50, 20, Component.empty());
 		this.triggeredBlockOnEnteringPositionOffsetYField.setMaxLength(128);
-		this.triggeredBlockOnEnteringPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getOnEnteringTriggeredBlock().getLeft().getY()));
-		this.addSelectableChild(this.triggeredBlockOnEnteringPositionOffsetYField);
-		this.triggeredBlockOnEnteringPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 55, 50, 20, Text.empty());
+		this.triggeredBlockOnEnteringPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getOnEnteringTriggeredBlock().getLeft().getY()));
+		this.addWidget(this.triggeredBlockOnEnteringPositionOffsetYField);
+		this.triggeredBlockOnEnteringPositionOffsetZField = new EditBox(this.font, this.width / 2 - 46, 55, 50, 20, Component.empty());
 		this.triggeredBlockOnEnteringPositionOffsetZField.setMaxLength(128);
-		this.triggeredBlockOnEnteringPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getOnEnteringTriggeredBlock().getLeft().getZ()));
-		this.addSelectableChild(this.triggeredBlockOnEnteringPositionOffsetZField);
+		this.triggeredBlockOnEnteringPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getOnEnteringTriggeredBlock().getLeft().getZ()));
+		this.addWidget(this.triggeredBlockOnEnteringPositionOffsetZField);
 
 		this.triggeredBlockOnEnteringResets = this.playerDetectorBlock.getOnEnteringTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnEnteringResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnEnteringResets).omitKeyText().build(this.width / 2 + 8, 55, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnEnteringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnEnteringResets).omitKeyText().build(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnEnteringResets = triggeredBlockResets;
 		}));
 
-		this.triggeredBlockOnLeavingPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 50, 20, Text.empty());
+		this.triggeredBlockOnLeavingPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 90, 50, 20, Component.empty());
 		this.triggeredBlockOnLeavingPositionOffsetXField.setMaxLength(128);
-		this.triggeredBlockOnLeavingPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getOnLeavingTriggeredBlock().getLeft().getX()));
-		this.addSelectableChild(this.triggeredBlockOnLeavingPositionOffsetXField);
-		this.triggeredBlockOnLeavingPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 90, 50, 20, Text.empty());
+		this.triggeredBlockOnLeavingPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getOnLeavingTriggeredBlock().getLeft().getX()));
+		this.addWidget(this.triggeredBlockOnLeavingPositionOffsetXField);
+		this.triggeredBlockOnLeavingPositionOffsetYField = new EditBox(this.font, this.width / 2 - 100, 90, 50, 20, Component.empty());
 		this.triggeredBlockOnLeavingPositionOffsetYField.setMaxLength(128);
-		this.triggeredBlockOnLeavingPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getOnLeavingTriggeredBlock().getLeft().getY()));
-		this.addSelectableChild(this.triggeredBlockOnLeavingPositionOffsetYField);
-		this.triggeredBlockOnLeavingPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 90, 50, 20, Text.empty());
+		this.triggeredBlockOnLeavingPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getOnLeavingTriggeredBlock().getLeft().getY()));
+		this.addWidget(this.triggeredBlockOnLeavingPositionOffsetYField);
+		this.triggeredBlockOnLeavingPositionOffsetZField = new EditBox(this.font, this.width / 2 - 46, 90, 50, 20, Component.empty());
 		this.triggeredBlockOnLeavingPositionOffsetZField.setMaxLength(128);
-		this.triggeredBlockOnLeavingPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getOnLeavingTriggeredBlock().getLeft().getZ()));
-		this.addSelectableChild(this.triggeredBlockOnLeavingPositionOffsetZField);
+		this.triggeredBlockOnLeavingPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getOnLeavingTriggeredBlock().getLeft().getZ()));
+		this.addWidget(this.triggeredBlockOnLeavingPositionOffsetZField);
 
 		this.triggeredBlockOnLeavingResets = this.playerDetectorBlock.getOnLeavingTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnLeavingResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnLeavingResets).omitKeyText().build(this.width / 2 + 8, 90, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnLeavingResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnLeavingResets).omitKeyText().build(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnLeavingResets = triggeredBlockResets;
 		}));
 
-		this.triggeredBlockOnTriggeringPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 50, 20, Text.empty());
+		this.triggeredBlockOnTriggeringPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 125, 50, 20, Component.empty());
 		this.triggeredBlockOnTriggeringPositionOffsetXField.setMaxLength(128);
-		this.triggeredBlockOnTriggeringPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getLeft().getX()));
-		this.addSelectableChild(this.triggeredBlockOnTriggeringPositionOffsetXField);
-		this.triggeredBlockOnTriggeringPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 125, 50, 20, Text.empty());
+		this.triggeredBlockOnTriggeringPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getLeft().getX()));
+		this.addWidget(this.triggeredBlockOnTriggeringPositionOffsetXField);
+		this.triggeredBlockOnTriggeringPositionOffsetYField = new EditBox(this.font, this.width / 2 - 100, 125, 50, 20, Component.empty());
 		this.triggeredBlockOnTriggeringPositionOffsetYField.setMaxLength(128);
-		this.triggeredBlockOnTriggeringPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getLeft().getY()));
-		this.addSelectableChild(this.triggeredBlockOnTriggeringPositionOffsetYField);
-		this.triggeredBlockOnTriggeringPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 125, 50, 20, Text.empty());
+		this.triggeredBlockOnTriggeringPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getLeft().getY()));
+		this.addWidget(this.triggeredBlockOnTriggeringPositionOffsetYField);
+		this.triggeredBlockOnTriggeringPositionOffsetZField = new EditBox(this.font, this.width / 2 - 46, 125, 50, 20, Component.empty());
 		this.triggeredBlockOnTriggeringPositionOffsetZField.setMaxLength(128);
-		this.triggeredBlockOnTriggeringPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getLeft().getZ()));
-		this.addSelectableChild(this.triggeredBlockOnTriggeringPositionOffsetZField);
+		this.triggeredBlockOnTriggeringPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getLeft().getZ()));
+		this.addWidget(this.triggeredBlockOnTriggeringPositionOffsetZField);
 
 		this.triggeredBlockOnTriggeringResets = this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnTriggeringResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnTriggeringResets).omitKeyText().build(this.width / 2 + 8, 125, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnTriggeringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnTriggeringResets).omitKeyText().build(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnTriggeringResets = triggeredBlockResets;
 		}));
 
-		this.uuidListHandlerOnEnteringPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 100, 20, Text.empty());
+		this.uuidListHandlerOnEnteringPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 55, 100, 20, Component.empty());
 		this.uuidListHandlerOnEnteringPositionOffsetXField.setMaxLength(128);
-		this.uuidListHandlerOnEnteringPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getOnEnteringUUIDListHandler().getX()));
-		this.addSelectableChild(this.uuidListHandlerOnEnteringPositionOffsetXField);
-		this.uuidListHandlerOnEnteringPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 55, 100, 20, Text.empty());
+		this.uuidListHandlerOnEnteringPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getOnEnteringUUIDListHandler().getX()));
+		this.addWidget(this.uuidListHandlerOnEnteringPositionOffsetXField);
+		this.uuidListHandlerOnEnteringPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 55, 100, 20, Component.empty());
 		this.uuidListHandlerOnEnteringPositionOffsetYField.setMaxLength(128);
-		this.uuidListHandlerOnEnteringPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getOnEnteringUUIDListHandler().getY()));
-		this.addSelectableChild(this.uuidListHandlerOnEnteringPositionOffsetYField);
-		this.uuidListHandlerOnEnteringPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 55, 100, 20, Text.empty());
+		this.uuidListHandlerOnEnteringPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getOnEnteringUUIDListHandler().getY()));
+		this.addWidget(this.uuidListHandlerOnEnteringPositionOffsetYField);
+		this.uuidListHandlerOnEnteringPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 55, 100, 20, Component.empty());
 		this.uuidListHandlerOnEnteringPositionOffsetZField.setMaxLength(128);
-		this.uuidListHandlerOnEnteringPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getOnEnteringUUIDListHandler().getZ()));
-		this.addSelectableChild(this.uuidListHandlerOnEnteringPositionOffsetZField);
+		this.uuidListHandlerOnEnteringPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getOnEnteringUUIDListHandler().getZ()));
+		this.addWidget(this.uuidListHandlerOnEnteringPositionOffsetZField);
 
-		this.uuidListHandlerOnLeavingPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 100, 20, Text.empty());
+		this.uuidListHandlerOnLeavingPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 90, 100, 20, Component.empty());
 		this.uuidListHandlerOnLeavingPositionOffsetXField.setMaxLength(128);
-		this.uuidListHandlerOnLeavingPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getOnLeavingUUIDListHandler().getX()));
-		this.addSelectableChild(this.uuidListHandlerOnLeavingPositionOffsetXField);
-		this.uuidListHandlerOnLeavingPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 90, 100, 20, Text.empty());
+		this.uuidListHandlerOnLeavingPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getOnLeavingUUIDListHandler().getX()));
+		this.addWidget(this.uuidListHandlerOnLeavingPositionOffsetXField);
+		this.uuidListHandlerOnLeavingPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 90, 100, 20, Component.empty());
 		this.uuidListHandlerOnLeavingPositionOffsetYField.setMaxLength(128);
-		this.uuidListHandlerOnLeavingPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getOnLeavingUUIDListHandler().getY()));
-		this.addSelectableChild(this.uuidListHandlerOnLeavingPositionOffsetYField);
-		this.uuidListHandlerOnLeavingPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 90, 100, 20, Text.empty());
+		this.uuidListHandlerOnLeavingPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getOnLeavingUUIDListHandler().getY()));
+		this.addWidget(this.uuidListHandlerOnLeavingPositionOffsetYField);
+		this.uuidListHandlerOnLeavingPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 90, 100, 20, Component.empty());
 		this.uuidListHandlerOnLeavingPositionOffsetZField.setMaxLength(128);
-		this.uuidListHandlerOnLeavingPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getOnLeavingUUIDListHandler().getZ()));
-		this.addSelectableChild(this.uuidListHandlerOnLeavingPositionOffsetZField);
+		this.uuidListHandlerOnLeavingPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getOnLeavingUUIDListHandler().getZ()));
+		this.addWidget(this.uuidListHandlerOnLeavingPositionOffsetZField);
 
-		this.uuidListHandlerOnTriggeringPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
+		this.uuidListHandlerOnTriggeringPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 125, 100, 20, Component.empty());
 		this.uuidListHandlerOnTriggeringPositionOffsetXField.setMaxLength(128);
-		this.uuidListHandlerOnTriggeringPositionOffsetXField.setText(Integer.toString(this.playerDetectorBlock.getOnTriggeringUUIDListHandler().getX()));
-		this.addSelectableChild(this.uuidListHandlerOnTriggeringPositionOffsetXField);
-		this.uuidListHandlerOnTriggeringPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 125, 100, 20, Text.empty());
+		this.uuidListHandlerOnTriggeringPositionOffsetXField.setValue(Integer.toString(this.playerDetectorBlock.getOnTriggeringUUIDListHandler().getX()));
+		this.addWidget(this.uuidListHandlerOnTriggeringPositionOffsetXField);
+		this.uuidListHandlerOnTriggeringPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 125, 100, 20, Component.empty());
 		this.uuidListHandlerOnTriggeringPositionOffsetYField.setMaxLength(128);
-		this.uuidListHandlerOnTriggeringPositionOffsetYField.setText(Integer.toString(this.playerDetectorBlock.getOnTriggeringUUIDListHandler().getY()));
-		this.addSelectableChild(this.uuidListHandlerOnTriggeringPositionOffsetYField);
-		this.uuidListHandlerOnTriggeringPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 125, 100, 20, Text.empty());
+		this.uuidListHandlerOnTriggeringPositionOffsetYField.setValue(Integer.toString(this.playerDetectorBlock.getOnTriggeringUUIDListHandler().getY()));
+		this.addWidget(this.uuidListHandlerOnTriggeringPositionOffsetYField);
+		this.uuidListHandlerOnTriggeringPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 125, 100, 20, Component.empty());
 		this.uuidListHandlerOnTriggeringPositionOffsetZField.setMaxLength(128);
-		this.uuidListHandlerOnTriggeringPositionOffsetZField.setText(Integer.toString(this.playerDetectorBlock.getOnTriggeringUUIDListHandler().getZ()));
-		this.addSelectableChild(this.uuidListHandlerOnTriggeringPositionOffsetZField);
+		this.uuidListHandlerOnTriggeringPositionOffsetZField.setValue(Integer.toString(this.playerDetectorBlock.getOnTriggeringUUIDListHandler().getZ()));
+		this.addWidget(this.uuidListHandlerOnTriggeringPositionOffsetZField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 207, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 207, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 207, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 207, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -330,37 +329,37 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		ScreenPage var = this.screenPage;
 		boolean bool = this.enableTicking;
 		boolean bool1 = this.showArea;
 		boolean bool2 = this.triggeredBlockOnEnteringResets;
 		boolean bool3 = this.triggeredBlockOnLeavingResets;
 		boolean bool4 = this.triggeredBlockOnTriggeringResets;
-		String string = this.areaDimensionsXField.getText();
-		String string1 = this.areaDimensionsYField.getText();
-		String string2 = this.areaDimensionsZField.getText();
-		String string3 = this.areaPositionOffsetXField.getText();
-		String string4 = this.areaPositionOffsetYField.getText();
-		String string5 = this.areaPositionOffsetZField.getText();
-		String string6 = this.triggeredBlockOnEnteringPositionOffsetXField.getText();
-		String string7 = this.triggeredBlockOnEnteringPositionOffsetYField.getText();
-		String string8 = this.triggeredBlockOnEnteringPositionOffsetZField.getText();
-		String string9 = this.triggeredBlockOnLeavingPositionOffsetXField.getText();
-		String string10 = this.triggeredBlockOnLeavingPositionOffsetYField.getText();
-		String string11 = this.triggeredBlockOnLeavingPositionOffsetZField.getText();
-		String string12 = this.triggeredBlockOnTriggeringPositionOffsetXField.getText();
-		String string13 = this.triggeredBlockOnTriggeringPositionOffsetYField.getText();
-		String string14 = this.triggeredBlockOnTriggeringPositionOffsetZField.getText();
-		String string15 = this.uuidListHandlerOnEnteringPositionOffsetXField.getText();
-		String string16 = this.uuidListHandlerOnEnteringPositionOffsetYField.getText();
-		String string17 = this.uuidListHandlerOnEnteringPositionOffsetZField.getText();
-		String string18 = this.uuidListHandlerOnLeavingPositionOffsetXField.getText();
-		String string19 = this.uuidListHandlerOnLeavingPositionOffsetYField.getText();
-		String string20 = this.uuidListHandlerOnLeavingPositionOffsetZField.getText();
-		String string21 = this.uuidListHandlerOnTriggeringPositionOffsetXField.getText();
-		String string22 = this.uuidListHandlerOnTriggeringPositionOffsetYField.getText();
-		String string23 = this.uuidListHandlerOnTriggeringPositionOffsetZField.getText();
+		String string = this.areaDimensionsXField.getValue();
+		String string1 = this.areaDimensionsYField.getValue();
+		String string2 = this.areaDimensionsZField.getValue();
+		String string3 = this.areaPositionOffsetXField.getValue();
+		String string4 = this.areaPositionOffsetYField.getValue();
+		String string5 = this.areaPositionOffsetZField.getValue();
+		String string6 = this.triggeredBlockOnEnteringPositionOffsetXField.getValue();
+		String string7 = this.triggeredBlockOnEnteringPositionOffsetYField.getValue();
+		String string8 = this.triggeredBlockOnEnteringPositionOffsetZField.getValue();
+		String string9 = this.triggeredBlockOnLeavingPositionOffsetXField.getValue();
+		String string10 = this.triggeredBlockOnLeavingPositionOffsetYField.getValue();
+		String string11 = this.triggeredBlockOnLeavingPositionOffsetZField.getValue();
+		String string12 = this.triggeredBlockOnTriggeringPositionOffsetXField.getValue();
+		String string13 = this.triggeredBlockOnTriggeringPositionOffsetYField.getValue();
+		String string14 = this.triggeredBlockOnTriggeringPositionOffsetZField.getValue();
+		String string15 = this.uuidListHandlerOnEnteringPositionOffsetXField.getValue();
+		String string16 = this.uuidListHandlerOnEnteringPositionOffsetYField.getValue();
+		String string17 = this.uuidListHandlerOnEnteringPositionOffsetZField.getValue();
+		String string18 = this.uuidListHandlerOnLeavingPositionOffsetXField.getValue();
+		String string19 = this.uuidListHandlerOnLeavingPositionOffsetYField.getValue();
+		String string20 = this.uuidListHandlerOnLeavingPositionOffsetZField.getValue();
+		String string21 = this.uuidListHandlerOnTriggeringPositionOffsetXField.getValue();
+		String string22 = this.uuidListHandlerOnTriggeringPositionOffsetYField.getValue();
+		String string23 = this.uuidListHandlerOnTriggeringPositionOffsetZField.getValue();
 		this.init(client, width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
@@ -374,78 +373,78 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.toggleTriggeredBlockOnLeavingResetsButton.setValue(this.triggeredBlockOnLeavingResets);
 		this.triggeredBlockOnTriggeringResets = bool4;
 		this.toggleTriggeredBlockOnTriggeringResetsButton.setValue(this.triggeredBlockOnTriggeringResets);
-		this.areaDimensionsXField.setText(string);
-		this.areaDimensionsYField.setText(string1);
-		this.areaDimensionsZField.setText(string2);
-		this.areaPositionOffsetXField.setText(string3);
-		this.areaPositionOffsetYField.setText(string4);
-		this.areaPositionOffsetZField.setText(string5);
-		this.triggeredBlockOnEnteringPositionOffsetXField.setText(string6);
-		this.triggeredBlockOnEnteringPositionOffsetYField.setText(string7);
-		this.triggeredBlockOnEnteringPositionOffsetZField.setText(string8);
-		this.triggeredBlockOnLeavingPositionOffsetXField.setText(string9);
-		this.triggeredBlockOnLeavingPositionOffsetYField.setText(string10);
-		this.triggeredBlockOnLeavingPositionOffsetZField.setText(string11);
-		this.triggeredBlockOnTriggeringPositionOffsetXField.setText(string12);
-		this.triggeredBlockOnTriggeringPositionOffsetYField.setText(string13);
-		this.triggeredBlockOnTriggeringPositionOffsetZField.setText(string14);
-		this.uuidListHandlerOnEnteringPositionOffsetXField.setText(string15);
-		this.uuidListHandlerOnEnteringPositionOffsetYField.setText(string16);
-		this.uuidListHandlerOnEnteringPositionOffsetZField.setText(string17);
-		this.uuidListHandlerOnLeavingPositionOffsetXField.setText(string18);
-		this.uuidListHandlerOnLeavingPositionOffsetYField.setText(string19);
-		this.uuidListHandlerOnLeavingPositionOffsetZField.setText(string20);
-		this.uuidListHandlerOnTriggeringPositionOffsetXField.setText(string21);
-		this.uuidListHandlerOnTriggeringPositionOffsetYField.setText(string22);
-		this.uuidListHandlerOnTriggeringPositionOffsetZField.setText(string23);
+		this.areaDimensionsXField.setValue(string);
+		this.areaDimensionsYField.setValue(string1);
+		this.areaDimensionsZField.setValue(string2);
+		this.areaPositionOffsetXField.setValue(string3);
+		this.areaPositionOffsetYField.setValue(string4);
+		this.areaPositionOffsetZField.setValue(string5);
+		this.triggeredBlockOnEnteringPositionOffsetXField.setValue(string6);
+		this.triggeredBlockOnEnteringPositionOffsetYField.setValue(string7);
+		this.triggeredBlockOnEnteringPositionOffsetZField.setValue(string8);
+		this.triggeredBlockOnLeavingPositionOffsetXField.setValue(string9);
+		this.triggeredBlockOnLeavingPositionOffsetYField.setValue(string10);
+		this.triggeredBlockOnLeavingPositionOffsetZField.setValue(string11);
+		this.triggeredBlockOnTriggeringPositionOffsetXField.setValue(string12);
+		this.triggeredBlockOnTriggeringPositionOffsetYField.setValue(string13);
+		this.triggeredBlockOnTriggeringPositionOffsetZField.setValue(string14);
+		this.uuidListHandlerOnEnteringPositionOffsetXField.setValue(string15);
+		this.uuidListHandlerOnEnteringPositionOffsetYField.setValue(string16);
+		this.uuidListHandlerOnEnteringPositionOffsetZField.setValue(string17);
+		this.uuidListHandlerOnLeavingPositionOffsetXField.setValue(string18);
+		this.uuidListHandlerOnLeavingPositionOffsetYField.setValue(string19);
+		this.uuidListHandlerOnLeavingPositionOffsetZField.setValue(string20);
+		this.uuidListHandlerOnTriggeringPositionOffsetXField.setValue(string21);
+		this.uuidListHandlerOnTriggeringPositionOffsetYField.setValue(string22);
+		this.uuidListHandlerOnTriggeringPositionOffsetZField.setValue(string23);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		if (this.screenPage == ScreenPage.AREA) {
 
-			context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
 			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
 			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
 			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
 			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK_OFFSETS) {
 
-			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			context.drawString(this.font, TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.triggeredBlockOnEnteringPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockOnEnteringPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockOnEnteringPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			context.drawString(this.font, TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.triggeredBlockOnLeavingPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockOnLeavingPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockOnLeavingPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			context.drawString(this.font, TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
 			this.triggeredBlockOnTriggeringPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockOnTriggeringPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.triggeredBlockOnTriggeringPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
 		} else if (this.screenPage == ScreenPage.UUID_LIST_HANDLER_OFFSETS) {
 
-			context.drawTextWithShadow(this.textRenderer, UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			context.drawString(this.font, UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.uuidListHandlerOnEnteringPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.uuidListHandlerOnEnteringPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.uuidListHandlerOnEnteringPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			context.drawString(this.font, UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.uuidListHandlerOnLeavingPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.uuidListHandlerOnLeavingPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.uuidListHandlerOnLeavingPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			context.drawString(this.font, UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
 			this.uuidListHandlerOnTriggeringPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.uuidListHandlerOnTriggeringPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.uuidListHandlerOnTriggeringPositionOffsetZField.render(context, mouseX, mouseY, delta);
@@ -460,53 +459,53 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 				this.enableTicking,
 				this.showArea,
 				new Vec3i(
-						ItemUtils.parseInt(this.areaDimensionsXField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsYField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsZField.getText())
+						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),
+						ItemUtils.parseInt(this.areaDimensionsYField.getValue()),
+						ItemUtils.parseInt(this.areaDimensionsZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.areaPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.areaPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.areaPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockOnEnteringPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockOnEnteringPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockOnEnteringPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.triggeredBlockOnEnteringPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockOnEnteringPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockOnEnteringPositionOffsetZField.getValue())
 				),
 				this.triggeredBlockOnEnteringResets,
 				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockOnLeavingPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockOnLeavingPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockOnLeavingPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.triggeredBlockOnLeavingPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockOnLeavingPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockOnLeavingPositionOffsetZField.getValue())
 				),
 				this.triggeredBlockOnLeavingResets,
 				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockOnTriggeringPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockOnTriggeringPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockOnTriggeringPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.triggeredBlockOnTriggeringPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockOnTriggeringPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockOnTriggeringPositionOffsetZField.getValue())
 				),
 				this.triggeredBlockOnTriggeringResets,
 				new BlockPos(
-						ItemUtils.parseInt(this.uuidListHandlerOnEnteringPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerOnEnteringPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerOnEnteringPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.uuidListHandlerOnEnteringPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerOnEnteringPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerOnEnteringPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.uuidListHandlerOnLeavingPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerOnLeavingPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerOnLeavingPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.uuidListHandlerOnLeavingPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerOnLeavingPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerOnLeavingPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.uuidListHandlerOnTriggeringPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerOnTriggeringPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerOnTriggeringPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.uuidListHandlerOnTriggeringPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerOnTriggeringPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerOnTriggeringPositionOffsetZField.getValue())
 				)
 		));
 		return true;
 	}
 
-	public enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringRepresentable {
 		AREA("area"),
 		TRIGGERED_BLOCK_OFFSETS("triggered_block_offsets"),
 		UUID_LIST_HANDLER_OFFSETS("uuid_list_handler_offsets");
@@ -518,16 +517,16 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.asString().equals(name)).findFirst();
+			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.player_detector_block.screen_page." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.player_detector_block.screen_page." + this.name);
 		}
 	}
 }

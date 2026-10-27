@@ -11,25 +11,25 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Resetable {
 
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 	private String keyIdentifierString = "";
 	private String lockedMessage = "";
 	private String lockedSound = "";
@@ -41,12 +41,12 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
+		CompoundTag nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
 
 		view.putString("key_identifier_string", this.keyIdentifierString);
 
@@ -58,39 +58,39 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 
 		view.putString("unlocked_sound", this.unlockedSound);
 
-		if (this.world != null && this.world.getBlockState(this.pos).isOf(ScriptBlocksBlocks.LOCKED_USE_RELAY_CHEST)) {
-			ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated 'Locked Use Relay Chest' detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with a 'Trapped Use Relay Chest'.", this.world != null ? this.world.getServer() : null);
+		if (this.level != null && this.level.getBlockState(this.worldPosition).is(ScriptBlocksBlocks.LOCKED_USE_RELAY_CHEST)) {
+			ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated 'Locked Use Relay Chest' detected at: " + this.worldPosition.toString() + ". This block will be removed in the future and should be replaced with a 'Trapped Use Relay Chest'.", this.level != null ? this.level.getServer() : null);
 		}
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		NbtCompound nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets", false)
+				nbtCompound.getBooleanOr("resets", false)
 		);
 
-		this.keyIdentifierString = view.getString("key_identifier_string", "");
+		this.keyIdentifierString = view.getStringOr("key_identifier_string", "");
 
-		this.lockedMessage = view.getString("locked_message", "");
+		this.lockedMessage = view.getStringOr("locked_message", "");
 
-		this.lockedSound = view.getString("locked_sound", "");
+		this.lockedSound = view.getStringOr("locked_sound", "");
 
-		this.unlockedMessage = view.getString("unlocked_message", "");
+		this.unlockedMessage = view.getStringOr("unlocked_message", "");
 
-		this.unlockedSound = view.getString("unlocked_sound", "");
+		this.unlockedSound = view.getStringOr("unlocked_sound", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
 	// region --- getter & setter ---
@@ -143,33 +143,33 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 	}
 	// endregion --- getter & setter ---
 
-	public boolean canTrigger(PlayerEntity playerEntity) {
+	public boolean canTrigger(Player playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {
-			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getActiveItem().get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
+			InteractiveKeyComponent interactiveKeyComponent = playerEntity.getUseItem().get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
 			if (interactiveKeyComponent != null) {
-				return interactiveKeyComponent.identifier_list().contains(Identifier.of(this.keyIdentifierString));
+				return interactiveKeyComponent.identifier_list().contains(Identifier.parse(this.keyIdentifierString));
 			}
 			return false;
 		}
 		return true;
 	}
 
-	public void tryToConsumeKeyItem(PlayerEntity playerEntity) {
+	public void tryToConsumeKeyItem(Player playerEntity) {
 		if (!this.keyIdentifierString.isEmpty()) {
-			Hand hand = playerEntity.getActiveHand();
-			ItemStack stack = playerEntity.getStackInHand(hand);
+			InteractionHand hand = playerEntity.getUsedItemHand();
+			ItemStack stack = playerEntity.getItemInHand(hand);
 			InteractiveKeyComponent interactiveKeyComponent = stack.get(ScriptBlocksDataComponents.INTERACTIVE_KEY);
 			if (interactiveKeyComponent != null) {
 				if (interactiveKeyComponent.is_consumed()) {
-					if (stack.getMaxCount() > 1) {
-						stack.decrementUnlessCreative(1, playerEntity);
+					if (stack.getMaxStackSize() > 1) {
+						stack.consume(1, playerEntity);
 						if (stack.getCount() > 0) {
-							playerEntity.setStackInHand(hand, stack);
+							playerEntity.setItemInHand(hand, stack);
 						} else {
-							playerEntity.setStackInHand(hand, ItemStack.EMPTY);
+							playerEntity.setItemInHand(hand, ItemStack.EMPTY);
 						}
 					} else {
-						stack.damage(1, playerEntity, hand == Hand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+						stack.hurtAndBreak(1, playerEntity, hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
 					}
 				}
 			}
@@ -177,8 +177,8 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 	}
 
 	public void trigger() {
-		if (this.world != null) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+		if (this.level != null) {
+			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.triggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.triggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.triggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.triggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -193,31 +193,31 @@ public class UseRelayChestBlockEntity extends UseRelayBlockEntity implements Res
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.relayBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.relayBlockPositionOffset, blockRotation);
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
-				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.FRONT_BACK);
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, Mirror.FRONT_BACK);
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.FRONT_BACK));
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
-				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+				this.relayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.relayBlockPositionOffset, Mirror.LEFT_RIGHT);
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
 
 	@Override
 	public void reset() {
-		if (this.world != null) {
-			BlockEntity blockEntity = this.world.getBlockEntity(this.pos);
-			if (blockEntity != null && blockEntity.getCachedState().getBlock() instanceof UseRelayChestBlock) {
-				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(Properties.OPEN, false));
+		if (this.level != null) {
+			BlockEntity blockEntity = this.level.getBlockEntity(this.worldPosition);
+			if (blockEntity != null && blockEntity.getBlockState().getBlock() instanceof UseRelayChestBlock) {
+				this.level.setBlockAndUpdate(this.worldPosition, blockEntity.getBlockState().setValue(BlockStateProperties.OPEN, false));
 			}
 		}
 	}

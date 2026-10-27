@@ -3,29 +3,30 @@ package com.github.theredbrain.scriptblocks.registry;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.component.type.BlockPositionDistanceMeterComponent;
 import com.github.theredbrain.scriptblocks.item.BlockPositionDistanceMeterItem;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.VerticallyAttachableBlockItem;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.Direction;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 
 import java.util.List;
 
 public class ScriptBlocksItems {
 
-	public static final Item BLOCK_POSITION_DISTANCE_METER = registerItem("block_position_distance_meter", new BlockPositionDistanceMeterItem(new Item.Settings().maxCount(1).component(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, BlockPositionDistanceMeterComponent.DEFAULT)), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));
-	public static final Item INTERACTIVE_TRIGGER_TORCH = registerItem("interactive_trigger_torch", new VerticallyAttachableBlockItem(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_TORCH, ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WALL_TORCH, new Item.Settings(), Direction.DOWN), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
-	public static final Item INTERACTIVE_TRIGGER_SOUL_TORCH = registerItem("interactive_trigger_soul_torch", new VerticallyAttachableBlockItem(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_TORCH, ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_WALL_TORCH, new Item.Settings(), Direction.DOWN), List.of(ItemGroupRegistry.DECORATIVE_SCRIPT_BLOCKS));
+	public static ResourceKey<Item> BLOCK_POSITION_DISTANCE_METER_KEY = ResourceKey.create(Registries.ITEM, ScriptBlocks.identifier("block_position_distance_meter"));
+	public static final Item BLOCK_POSITION_DISTANCE_METER = registerItem(BLOCK_POSITION_DISTANCE_METER_KEY, new BlockPositionDistanceMeterItem(new Item.Properties().setId(BLOCK_POSITION_DISTANCE_METER_KEY).stacksTo(1).component(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, BlockPositionDistanceMeterComponent.DEFAULT)), List.of(ItemGroupRegistry.SCRIPT_BLOCKS));
 
-	private static Item registerItem(String name, Item item, List<RegistryKey<ItemGroup>> itemGroupList) {
+	private static Item registerItem(ResourceKey<Item> key, Item item, List<ResourceKey<CreativeModeTab>> creativeModeTabList) {
 
-		for (RegistryKey<ItemGroup> itemGroup : itemGroupList) {
-			ItemGroupEvents.modifyEntriesEvent(itemGroup).register(content -> content.add(item));
+		for (ResourceKey<CreativeModeTab> creativeModeTab : creativeModeTabList) {
+			CreativeModeTabEvents.modifyOutputEvent(creativeModeTab).register(content -> {
+				content.accept(item);
+			});
 		}
-		return Registry.register(Registries.ITEM, ScriptBlocks.identifier(name), item);
+
+		return Registry.register(BuiltInRegistries.ITEM, key, item);
 	}
 
 	public static void bootstrap() {

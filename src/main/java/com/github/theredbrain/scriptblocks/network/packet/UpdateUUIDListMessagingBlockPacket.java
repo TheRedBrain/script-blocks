@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateUUIDListMessagingBlockPacket(
 		BlockPos uuidListMessagingBlockPosition,
@@ -16,38 +16,38 @@ public record UpdateUUIDListMessagingBlockPacket(
 		int titleFadeOut,
 		BlockPos dataProvidingBlockPosOffset,
 		String dataIdentifier
-) implements CustomPayload {
-	public static final Id<UpdateUUIDListMessagingBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_uuid_list_messaging_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateUUIDListMessagingBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateUUIDListMessagingBlockPacket::write, UpdateUUIDListMessagingBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateUUIDListMessagingBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_uuid_list_messaging_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateUUIDListMessagingBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateUUIDListMessagingBlockPacket::write, UpdateUUIDListMessagingBlockPacket::new);
 
-	public UpdateUUIDListMessagingBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateUUIDListMessagingBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.uuidListMessagingBlockPosition);
-		registryByteBuf.writeString(this.messageMode);
-		registryByteBuf.writeString(this.messageLocalisationString);
-		registryByteBuf.writeString(this.subTitleLocalisationString);
+		registryByteBuf.writeUtf(this.messageMode);
+		registryByteBuf.writeUtf(this.messageLocalisationString);
+		registryByteBuf.writeUtf(this.subTitleLocalisationString);
 		registryByteBuf.writeInt(this.titleFadeIn);
 		registryByteBuf.writeInt(this.titleStay);
 		registryByteBuf.writeInt(this.titleFadeOut);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
-		registryByteBuf.writeString(this.dataIdentifier);
+		registryByteBuf.writeUtf(this.dataIdentifier);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

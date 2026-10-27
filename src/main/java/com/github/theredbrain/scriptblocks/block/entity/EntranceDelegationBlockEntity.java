@@ -5,16 +5,16 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 @Deprecated
@@ -26,7 +26,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
 		view.putInt("delegatedEntrance_X", this.delegatedEntrance.getLeft().getX());
 		view.putInt("delegatedEntrance_Y", this.delegatedEntrance.getLeft().getY());
@@ -35,32 +35,32 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 		view.putDouble("delegatedEntrance_Pitch", this.delegatedEntrance.getRight().getRight());
 
 
-		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Entrance Delegation Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with a Spawn Point Delegation Block.", this.world != null ? this.world.getServer() : null);
-		super.writeData(view);
+		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Entrance Delegation Block detected at: " + this.worldPosition.toString() + ". This block will be removed in the future and should be replaced with a Spawn Point Delegation Block.", this.level != null ? this.level.getServer() : null);
+		super.saveAdditional(view);
 
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		int delegatedEntrance_X = view.getInt("delegatedEntrance_X", 0);
-		int delegatedEntrance_Y = view.getInt("delegatedEntrance_Y", 0);
-		int delegatedEntrance_Z = view.getInt("delegatedEntrance_Z", 0);
+		int delegatedEntrance_X = view.getIntOr("delegatedEntrance_X", 0);
+		int delegatedEntrance_Y = view.getIntOr("delegatedEntrance_Y", 0);
+		int delegatedEntrance_Z = view.getIntOr("delegatedEntrance_Z", 0);
 		this.delegatedEntrance.setLeft(new BlockPos(delegatedEntrance_X, delegatedEntrance_Y, delegatedEntrance_Z));
-		double delegatedEntrance_Yaw = view.getDouble("delegatedEntrance_Yaw", 0);
-		double delegatedEntrance_Pitch = view.getDouble("delegatedEntrance_Pitch", 0);
+		double delegatedEntrance_Yaw = view.getDoubleOr("delegatedEntrance_Yaw", 0);
+		double delegatedEntrance_Pitch = view.getDoubleOr("delegatedEntrance_Pitch", 0);
 		this.delegatedEntrance.setRight(new MutablePair<>(delegatedEntrance_Yaw, delegatedEntrance_Pitch));
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -74,14 +74,14 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	}
 	// endregion --- getter & setter ---
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerWorld serverWorld) {
+	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerLevel serverWorld) {
 		BlockPos targetPos;
 		MutablePair<Double, Double> targetOrientation;
 
-		targetPos = new BlockPos(this.delegatedEntrance.getLeft().getX() + this.getPos().getX(), this.delegatedEntrance.getLeft().getY() + this.getPos().getY(), this.delegatedEntrance.getLeft().getZ() + this.getPos().getZ());
+		targetPos = new BlockPos(this.delegatedEntrance.getLeft().getX() + this.getBlockPos().getX(), this.delegatedEntrance.getLeft().getY() + this.getBlockPos().getY(), this.delegatedEntrance.getLeft().getZ() + this.getBlockPos().getZ());
 		targetOrientation = this.delegatedEntrance.getRight();
 
-		if (this.delegatedEntrance.getLeft() != BlockPos.ORIGIN && serverWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
+		if (this.delegatedEntrance.getLeft() != BlockPos.ZERO && serverWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
 			return entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
 		}
 
@@ -91,21 +91,21 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.delegatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.delegatedEntrance, blockRotation);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
-				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, BlockMirror.FRONT_BACK);
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, Mirror.FRONT_BACK);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
-				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, BlockMirror.LEFT_RIGHT);
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+				this.delegatedEntrance = BlockRotationUtils.mirrorSpawnPoint(this.delegatedEntrance, Mirror.LEFT_RIGHT);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

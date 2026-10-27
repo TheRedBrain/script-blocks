@@ -4,28 +4,27 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particle.SimpleParticleType;
-import net.minecraft.registry.Registries;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
-	protected static final MapCodec<SimpleParticleType> PARTICLE_TYPE_CODEC = Registries.PARTICLE_TYPE
-			.getCodec()
+	protected static final MapCodec<SimpleParticleType> PARTICLE_TYPE_CODEC = BuiltInRegistries.PARTICLE_TYPE
+			.byNameCodec()
 			.<SimpleParticleType>comapFlatMap(
 					particleType -> particleType instanceof SimpleParticleType simpleParticleType
 							? DataResult.success(simpleParticleType)
@@ -34,59 +33,59 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 			)
 			.fieldOf("particle_options");
 	public static final MapCodec<InteractiveTriggerTorchBlock> CODEC = RecordCodecBuilder.mapCodec(
-			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), createSettingsCodec()).apply(instance, InteractiveTriggerTorchBlock::new)
+			instance -> instance.group(PARTICLE_TYPE_CODEC.forGetter(block -> block.particle), propertiesCodec()).apply(instance, InteractiveTriggerTorchBlock::new)
 	);
 
-	protected static final VoxelShape SHAPE = Block.createCuboidShape(6.0, 0.0, 6.0, 10.0, 10.0, 10.0);
+	protected static final VoxelShape SHAPE = Block.box(6.0, 0.0, 6.0, 10.0, 10.0, 10.0);
 
 	protected final SimpleParticleType particle;
 
-	public InteractiveTriggerTorchBlock(SimpleParticleType particle, Settings settings) {
+	public InteractiveTriggerTorchBlock(SimpleParticleType particle, Properties settings) {
 		super(settings);
-		this.setDefaultState(
-				this.stateManager.getDefaultState()
-						.with(ScriptBlocksBlockProperties.ROTATED, 0)
-						.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-						.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-						.with(Properties.LIT, true)
-						.with(Properties.TRIGGERED, false)
+		this.registerDefaultState(
+				this.stateDefinition.any()
+						.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+						.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+						.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+						.setValue(BlockStateProperties.LIT, true)
+						.setValue(BlockStateProperties.TRIGGERED, false)
 		);
 		this.particle = particle;
 	}
 
 	@Override
-	protected MapCodec<? extends InteractiveTriggerTorchBlock> getCodec() {
+	protected MapCodec<? extends InteractiveTriggerTorchBlock> codec() {
 		return CODEC;
 	}
 
 	@Override // TODO allow floating torches?
 	protected BlockState getStateForNeighborUpdate(
-			BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos
+			BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos
 	) {
-		return direction == Direction.DOWN && !this.canPlaceAt(state, world, pos)
-				? Blocks.AIR.getDefaultState()
-				: super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+		return direction == Direction.DOWN && !this.canSurvive(state, world, pos)
+				? Blocks.AIR.defaultBlockState()
+				: super.updateShape(state, direction, neighborState, world, pos, neighborPos);
 	}
 
 	@Override
-	protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-		return sideCoversSmallSquare(world, pos.down(), Direction.UP);
+	protected boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+		return canSupportCenter(world, pos.below(), Direction.UP);
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		return SHAPE;
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.CANDLES, Properties.LIT, Properties.TRIGGERED);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(BlockStateProperties.CANDLES, BlockStateProperties.LIT, BlockStateProperties.TRIGGERED);
 	}
 
 	@Override
-	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-		if (state.get(Properties.LIT)) {
+	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
+		if (state.getValue(BlockStateProperties.LIT)) {
 			double d = (double) pos.getX() + 0.5;
 			double e = (double) pos.getY() + 0.7;
 			double f = (double) pos.getZ() + 0.5;
@@ -96,20 +95,20 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 	}
 
 	@Override
-	public void creativeSneakingInteraction(BlockState state, World world, BlockPos pos) {
-		state = state.cycle(Properties.LIT).with(Properties.TRIGGERED, false);
-		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
+	public void creativeSneakingInteraction(BlockState state, Level world, BlockPos pos) {
+		state = state.cycle(BlockStateProperties.LIT).setValue(BlockStateProperties.TRIGGERED, false);
+		world.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
 	}
 
 	@Override
 	public boolean canTrigger(BlockState state) {
-		return !state.get(Properties.TRIGGERED);
+		return !state.getValue(BlockStateProperties.TRIGGERED);
 	}
 
 	@Override
-	public void trigger(BlockState state, World world, BlockPos pos) {
-		boolean newLitState = state.get(Properties.LIT);
-		if (!state.get(Properties.TRIGGERED)) {
+	public void trigger(BlockState state, Level world, BlockPos pos) {
+		boolean newLitState = state.getValue(BlockStateProperties.LIT);
+		if (!state.getValue(BlockStateProperties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
 		if (!newLitState) {
@@ -117,18 +116,18 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 				world.addParticle(ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.7, pos.getZ() + 0.5, 0.0, 0.1, 0.0);
 			}
 		}
-		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, true);
-		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
+		state = state.setValue(BlockStateProperties.LIT, newLitState).setValue(BlockStateProperties.TRIGGERED, true);
+		world.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
 	}
 
 	@Override
-	public void reset(BlockState state, World world, BlockPos pos) {
-		boolean newLitState = state.get(Properties.LIT);
-		if (state.get(Properties.TRIGGERED)) {
+	public void reset(BlockState state, Level world, BlockPos pos) {
+		boolean newLitState = state.getValue(BlockStateProperties.LIT);
+		if (state.getValue(BlockStateProperties.TRIGGERED)) {
 			newLitState = !newLitState;
 		}
-		state = state.with(Properties.LIT, newLitState).with(Properties.TRIGGERED, false);
-		world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
+		state = state.setValue(BlockStateProperties.LIT, newLitState).setValue(BlockStateProperties.TRIGGERED, false);
+		world.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
 	}
 
 }

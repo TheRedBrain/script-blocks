@@ -3,33 +3,33 @@ package com.github.theredbrain.scriptblocks.entity.passive;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.village.VillagerData;
-import net.minecraft.village.VillagerDataContainer;
-import net.minecraft.village.VillagerProfession;
-import net.minecraft.village.VillagerType;
-import net.minecraft.world.World;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.npc.villager.VillagerData;
+import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 
 import java.util.Objects;
 
-public class FakeVillagerEntity extends MobEntity implements VillagerDataContainer {
+public class FakeVillagerEntity extends Mob implements VillagerDataHolder {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
-	private static final TrackedData<Integer> NO_INTERACTION_DISPLAY_TIME_LEFT;
-	private static final TrackedData<Integer> HEAD_ROLLING_TIME_LEFT;
-	private static final TrackedData<VillagerData> VILLAGER_DATA;
+	private static final EntityDataAccessor<Integer> NO_INTERACTION_DISPLAY_TIME_LEFT;
+	private static final EntityDataAccessor<Integer> HEAD_ROLLING_TIME_LEFT;
+	private static final EntityDataAccessor<VillagerData> VILLAGER_DATA;
 //	private static final ImmutableList<MemoryModuleType<?>> MEMORY_MODULES = ImmutableList.of(
 //			MemoryModuleType.NEAREST_PLAYERS,
 //			MemoryModuleType.NEAREST_VISIBLE_PLAYER,
@@ -39,7 +39,7 @@ public class FakeVillagerEntity extends MobEntity implements VillagerDataContain
 //			SensorType.NEAREST_PLAYERS
 //	);
 
-	public FakeVillagerEntity(EntityType<? extends MobEntity> entityType, World world) {
+	public FakeVillagerEntity(EntityType<? extends Mob> entityType, Level world) {
 		super(entityType, world);
 	}
 
@@ -103,18 +103,18 @@ public class FakeVillagerEntity extends MobEntity implements VillagerDataContain
 //	}
 
 	@Override
-	protected void initDataTracker(DataTracker.Builder builder) {
-		super.initDataTracker(builder);
-		builder.add(NO_INTERACTION_DISPLAY_TIME_LEFT, 0);
-		builder.add(HEAD_ROLLING_TIME_LEFT, 0);
-		builder.add(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(NO_INTERACTION_DISPLAY_TIME_LEFT, 0);
+		builder.define(HEAD_ROLLING_TIME_LEFT, 0);
+		builder.define(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
 	}
 
 	@Override
-	public void writeCustomDataToNbt(NbtCompound nbt) {
+	public void writeCustomDataToNbt(CompoundTag nbt) {
 		super.writeCustomDataToNbt(nbt);
 
-		DataResult<NbtElement> var10000 = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData());
+		DataResult<Tag> var10000 = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData());
 		Logger var10001 = LOGGER;
 		Objects.requireNonNull(var10001);
 		var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> {
@@ -124,9 +124,9 @@ public class FakeVillagerEntity extends MobEntity implements VillagerDataContain
 	}
 
 	@Override
-	public void readCustomDataFromNbt(NbtCompound nbt) {
+	public void readCustomDataFromNbt(CompoundTag nbt) {
 		super.readCustomDataFromNbt(nbt);
-		if (nbt.contains("VillagerData", NbtElement.COMPOUND_TYPE)) {
+		if (nbt.contains("VillagerData", Tag.TAG_COMPOUND)) {
 			DataResult<VillagerData> dataResult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, nbt.get("VillagerData")));
 			Logger var10001 = LOGGER;
 			Objects.requireNonNull(var10001);
@@ -146,47 +146,47 @@ public class FakeVillagerEntity extends MobEntity implements VillagerDataContain
 	}
 
 	@Override
-	protected ActionResult interactMob(PlayerEntity player, Hand hand) {
-		ActionResult actionResult = super.interactMob(player, hand);
+	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+		InteractionResult actionResult = super.mobInteract(player, hand);
 		if (this.getNoInteractionDisplayTimeLeft() <= 0 && !this.getWorld().isClient) {
 			this.setNoInteractionDisplayTimeLeft(30);
-			if (actionResult.isAccepted()) {
-				this.playSound(SoundEvents.ENTITY_VILLAGER_YES);
+			if (actionResult.consumesAction()) {
+				this.makeSound(SoundEvents.VILLAGER_YES);
 			} else {
 				this.setHeadRollingTimeLeft(20);
-				this.playSound(SoundEvents.ENTITY_VILLAGER_NO);
+				this.makeSound(SoundEvents.VILLAGER_NO);
 			}
 		}
 		return actionResult;
 	}
 
 	public int getNoInteractionDisplayTimeLeft() {
-		return this.dataTracker.get(NO_INTERACTION_DISPLAY_TIME_LEFT);
+		return this.entityData.get(NO_INTERACTION_DISPLAY_TIME_LEFT);
 	}
 
 	public void setNoInteractionDisplayTimeLeft(int ticks) {
-		this.dataTracker.set(NO_INTERACTION_DISPLAY_TIME_LEFT, ticks);
+		this.entityData.set(NO_INTERACTION_DISPLAY_TIME_LEFT, ticks);
 	}
 
 	public int getHeadRollingTimeLeft() {
-		return this.dataTracker.get(HEAD_ROLLING_TIME_LEFT);
+		return this.entityData.get(HEAD_ROLLING_TIME_LEFT);
 	}
 
 	public void setHeadRollingTimeLeft(int ticks) {
-		this.dataTracker.set(HEAD_ROLLING_TIME_LEFT, ticks);
+		this.entityData.set(HEAD_ROLLING_TIME_LEFT, ticks);
 	}
 
 	public void setVillagerData(VillagerData villagerData) {
-		this.dataTracker.set(VILLAGER_DATA, villagerData);
+		this.entityData.set(VILLAGER_DATA, villagerData);
 	}
 
 	public VillagerData getVillagerData() {
-		return (VillagerData) this.dataTracker.get(VILLAGER_DATA);
+		return (VillagerData) this.entityData.get(VILLAGER_DATA);
 	}
 
 	static {
-		NO_INTERACTION_DISPLAY_TIME_LEFT = DataTracker.registerData(FakeVillagerEntity.class, TrackedDataHandlerRegistry.INTEGER);
-		HEAD_ROLLING_TIME_LEFT = DataTracker.registerData(FakeVillagerEntity.class, TrackedDataHandlerRegistry.INTEGER);
-		VILLAGER_DATA = DataTracker.registerData(FakeVillagerEntity.class, TrackedDataHandlerRegistry.VILLAGER_DATA);
+		NO_INTERACTION_DISPLAY_TIME_LEFT = SynchedEntityData.defineId(FakeVillagerEntity.class, EntityDataSerializers.INT);
+		HEAD_ROLLING_TIME_LEFT = SynchedEntityData.defineId(FakeVillagerEntity.class, EntityDataSerializers.INT);
+		VILLAGER_DATA = SynchedEntityData.defineId(FakeVillagerEntity.class, EntityDataSerializers.VILLAGER_DATA);
 	}
 }

@@ -4,84 +4,84 @@ import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.OperatorBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.Orientation;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.GameMasterBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
-public class JigsawPlacerBlock extends RotatedBlockWithEntity implements OperatorBlock {
-	public static final MapCodec<JigsawPlacerBlock> CODEC = createCodec(JigsawPlacerBlock::new);
-	public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
+public class JigsawPlacerBlock extends RotatedBlockWithEntity implements GameMasterBlock {
+	public static final MapCodec<JigsawPlacerBlock> CODEC = simpleCodec(JigsawPlacerBlock::new);
+	public static final EnumProperty<FrontAndTop> ORIENTATION = BlockStateProperties.ORIENTATION;
 
-	public JigsawPlacerBlock(Settings settings) {
+	public JigsawPlacerBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(ORIENTATION, Orientation.NORTH_UP)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(ORIENTATION, FrontAndTop.NORTH_UP)
 		);
 	}
 
-	public MapCodec<JigsawPlacerBlock> getCodec() {
+	public MapCodec<JigsawPlacerBlock> codec() {
 		return CODEC;
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
 		builder.add(ORIENTATION);
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		Direction direction = ctx.getSide();
-		Direction direction2 = direction.getAxis() == Direction.Axis.Y ? ctx.getHorizontalPlayerFacing().getOpposite() : Direction.UP;
-		return this.getDefaultState().with(ORIENTATION, Orientation.byDirections(direction, direction2));
+	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		Direction direction = ctx.getClickedFace();
+		Direction direction2 = direction.getAxis() == Direction.Axis.Y ? ctx.getHorizontalDirection().getOpposite() : Direction.UP;
+		return this.defaultBlockState().setValue(ORIENTATION, FrontAndTop.fromFrontAndTop(direction, direction2));
 	}
 
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new JigsawPlacerBlockEntity(pos, state);
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity && player.isCreativeLevelTwoOp()) {
+		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openJigsawPlacerBlockScreen(jigsawPlacerBlockEntity);
-			return ActionResult.success(world.isClient);
+			return InteractionResult.success(world.isClientSide);
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(ORIENTATION, rotation.getDirectionTransformation().mapJigsawOrientation(state.get(ORIENTATION)));
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		return super.rotate(state, rotation).setValue(ORIENTATION, rotation.rotation().rotate(state.getValue(ORIENTATION)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		return super.mirror(state, mirror).with(ORIENTATION, mirror.getDirectionTransformation().mapJigsawOrientation(state.get(ORIENTATION)));
+	public BlockState mirror(BlockState state, Mirror mirror) {
+		return super.mirror(state, mirror).setValue(ORIENTATION, mirror.rotation().rotate(state.getValue(ORIENTATION)));
 	}
 
 }

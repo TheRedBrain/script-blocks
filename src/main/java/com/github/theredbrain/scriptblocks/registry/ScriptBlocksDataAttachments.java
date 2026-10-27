@@ -7,10 +7,7 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.text.Style;
-import net.minecraft.util.math.BlockPos;
-
+import net.minecraft.network.codec.ByteBufCodecs;
 import java.util.Optional;
 
 public class ScriptBlocksDataAttachments {
@@ -42,7 +39,7 @@ public class ScriptBlocksDataAttachments {
 		CURRENT_LOCATION_ACCESS_DIMENSION = AttachmentRegistry.create(ScriptBlocks.identifier("current_location_access_dimension"), builder -> builder
 				.persistent(Codec.STRING)
 				.copyOnDeath()
-				.syncWith(PacketCodecs.STRING, AttachmentSyncPredicate.all())
+				.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all())
 		);
 		CURRENT_PVP_CONTROLLER_BLOCK_POS = AttachmentRegistry.create(ScriptBlocks.identifier("current_pvp_controller_block_pos"), builder -> builder
 				.persistent(OptionalBlockPosition.CODEC)

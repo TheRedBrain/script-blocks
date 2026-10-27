@@ -7,19 +7,19 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -27,41 +27,41 @@ import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
 public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.uuid_list_relay_block.new_uuid_list_provider_position_offset");
-	private static final Text NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.block_pos.x");
-	private static final Text NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.block_pos.y");
-	private static final Text NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Text.translatable("gui.block_pos.z");
-	private static final Text ADD_NEW_UUID_LIST_HANDLER_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
+	private static final Component NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.uuid_list_relay_block.new_uuid_list_provider_position_offset");
+	private static final Component NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT = Component.translatable("gui.block_pos.x");
+	private static final Component NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT = Component.translatable("gui.block_pos.y");
+	private static final Component NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT = Component.translatable("gui.block_pos.z");
+	private static final Component ADD_NEW_UUID_LIST_HANDLER_BUTTON_LABEL_TEXT = Component.translatable("gui.list_entry.add");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_116_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_116");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
-	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	public static final WidgetSprites REMOVE_ENTRY_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
 	);
 	private static final int VISIBLE_LIST_ELEMENTS = 5;
 	private final UUIDListRelayBlockEntity uuidListRelayBlock;
 	private final List<BlockPos> uuidListHandlers = new ArrayList<>(List.of());
-	private ButtonWidget removeListEntryButton0;
-	private ButtonWidget removeListEntryButton1;
-	private ButtonWidget removeListEntryButton2;
-	private ButtonWidget removeListEntryButton3;
-	private ButtonWidget removeListEntryButton4;
-	private TextFieldWidget newUUIDListProviderPositionOffsetXField;
-	private TextFieldWidget newUUIDListProviderPositionOffsetYField;
-	private TextFieldWidget newUUIDListProviderPositionOffsetZField;
+	private Button removeListEntryButton0;
+	private Button removeListEntryButton1;
+	private Button removeListEntryButton2;
+	private Button removeListEntryButton3;
+	private Button removeListEntryButton4;
+	private EditBox newUUIDListProviderPositionOffsetXField;
+	private EditBox newUUIDListProviderPositionOffsetYField;
+	private EditBox newUUIDListProviderPositionOffsetZField;
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
 
 	public UUIDListRelayBlockScreen(UUIDListRelayBlockEntity uuidListRelayBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.uuidListRelayBlock = uuidListRelayBlockEntity;
 	}
 
 	private void addNewUUIDListHandler() {
 		BlockPos newUUIDListHandler = new BlockPos(
-				ItemUtils.parseInt(this.newUUIDListProviderPositionOffsetXField.getText()),
-				ItemUtils.parseInt(this.newUUIDListProviderPositionOffsetYField.getText()),
-				ItemUtils.parseInt(this.newUUIDListProviderPositionOffsetZField.getText())
+				ItemUtils.parseInt(this.newUUIDListProviderPositionOffsetXField.getValue()),
+				ItemUtils.parseInt(this.newUUIDListProviderPositionOffsetYField.getValue()),
+				ItemUtils.parseInt(this.newUUIDListProviderPositionOffsetZField.getValue())
 		);
 		for (BlockPos uuidListHandler : this.uuidListHandlers) {
 			if (uuidListHandler.equals(newUUIDListHandler)) {
@@ -89,29 +89,29 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 		this.uuidListHandlers.clear();
 		this.uuidListHandlers.addAll(this.uuidListRelayBlock.getUuidListHandlers());
 
-		this.removeListEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(0)));
-		this.removeListEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(1)));
-		this.removeListEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(2)));
-		this.removeListEntryButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(3)));
-		this.removeListEntryButton4 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(4)));
+		this.removeListEntryButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(0)));
+		this.removeListEntryButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(1)));
+		this.removeListEntryButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(2)));
+		this.removeListEntryButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(3)));
+		this.removeListEntryButton4 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeUUIDListHandler(4)));
 
-		this.addDrawableChild(ButtonWidget.builder(ADD_NEW_UUID_LIST_HANDLER_BUTTON_LABEL_TEXT, button -> this.addNewUUIDListHandler()).dimensions(this.width / 2 - 154, 140, 300, 20).build());
+		this.addRenderableWidget(Button.builder(ADD_NEW_UUID_LIST_HANDLER_BUTTON_LABEL_TEXT, button -> this.addNewUUIDListHandler()).bounds(this.width / 2 - 154, 140, 300, 20).build());
 
-		this.newUUIDListProviderPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 175, 100, 20, Text.empty());
+		this.newUUIDListProviderPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 175, 100, 20, Component.empty());
 		this.newUUIDListProviderPositionOffsetXField.setMaxLength(128);
-		this.newUUIDListProviderPositionOffsetXField.setPlaceholder(NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newUUIDListProviderPositionOffsetXField);
-		this.newUUIDListProviderPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 175, 100, 20, Text.empty());
+		this.newUUIDListProviderPositionOffsetXField.setHint(NEW_POSITION_X_FIELD_PLACEHOLDER_TEXT);
+		this.addWidget(this.newUUIDListProviderPositionOffsetXField);
+		this.newUUIDListProviderPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 175, 100, 20, Component.empty());
 		this.newUUIDListProviderPositionOffsetYField.setMaxLength(128);
-		this.newUUIDListProviderPositionOffsetYField.setPlaceholder(NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newUUIDListProviderPositionOffsetYField);
-		this.newUUIDListProviderPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 175, 100, 20, Text.empty());
+		this.newUUIDListProviderPositionOffsetYField.setHint(NEW_POSITION_Y_FIELD_PLACEHOLDER_TEXT);
+		this.addWidget(this.newUUIDListProviderPositionOffsetYField);
+		this.newUUIDListProviderPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 175, 100, 20, Component.empty());
 		this.newUUIDListProviderPositionOffsetZField.setMaxLength(128);
-		this.newUUIDListProviderPositionOffsetZField.setPlaceholder(NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newUUIDListProviderPositionOffsetZField);
+		this.newUUIDListProviderPositionOffsetZField.setHint(NEW_POSITION_Z_FIELD_PLACEHOLDER_TEXT);
+		this.addWidget(this.newUUIDListProviderPositionOffsetZField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 206, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 206, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 206, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 206, 150, 20).build());
 		this.updateWidgets();
 	}
 
@@ -147,17 +147,17 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		List<BlockPos> list = new ArrayList<>(this.uuidListHandlers);
-		String string = this.newUUIDListProviderPositionOffsetXField.getText();
-		String string1 = this.newUUIDListProviderPositionOffsetYField.getText();
-		String string2 = this.newUUIDListProviderPositionOffsetZField.getText();
+		String string = this.newUUIDListProviderPositionOffsetXField.getValue();
+		String string1 = this.newUUIDListProviderPositionOffsetYField.getValue();
+		String string2 = this.newUUIDListProviderPositionOffsetZField.getValue();
 		this.init(client, width, height);
 		this.uuidListHandlers.clear();
 		this.uuidListHandlers.addAll(list);
-		this.newUUIDListProviderPositionOffsetXField.setText(string);
-		this.newUUIDListProviderPositionOffsetYField.setText(string1);
-		this.newUUIDListProviderPositionOffsetZField.setText(string2);
+		this.newUUIDListProviderPositionOffsetXField.setValue(string);
+		this.newUUIDListProviderPositionOffsetYField.setValue(string1);
+		this.newUUIDListProviderPositionOffsetZField.setValue(string2);
 	}
 
 	@Override
@@ -179,7 +179,7 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 				&& this.mouseClicked) {
 			int i = this.uuidListHandlers.size() - VISIBLE_LIST_ELEMENTS;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -192,7 +192,7 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 				&& mouseY >= 20 && mouseY <= 136) {
 			int i = this.uuidListHandlers.size() - VISIBLE_LIST_ELEMENTS;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -208,22 +208,22 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.uuidListHandlers.size()); i++) {
 			BlockPos uuidListHandler = this.uuidListHandlers.get(i);
-			MutableText text = Text.translatable("gui.uuid_list_relay_block.list_entry", uuidListHandler.getX(), uuidListHandler.getY(), uuidListHandler.getZ());
-			context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			MutableComponent text = Component.translatable("gui.uuid_list_relay_block.list_entry", uuidListHandler.getX(), uuidListHandler.getY(), uuidListHandler.getZ());
+			context.drawString(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.uuidListHandlers.size() > VISIBLE_LIST_ELEMENTS) {
-			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 20, 8, 116);
+			context.blitSprite(SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 20, 8, 116);
 			int k = (int) (107.0f * this.scrollAmount);
-			context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
+			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
 
-		context.drawTextWithShadow(this.textRenderer, NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 165, 0xA0A0A0);
+		context.drawString(this.font, NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 165, 0xA0A0A0);
 		this.newUUIDListProviderPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.newUUIDListProviderPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.newUUIDListProviderPositionOffsetZField.render(context, mouseX, mouseY, delta);

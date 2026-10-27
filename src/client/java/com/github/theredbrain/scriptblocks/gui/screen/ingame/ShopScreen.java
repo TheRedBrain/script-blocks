@@ -8,59 +8,58 @@ import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
-public class ShopScreen extends HandledScreen<ShopScreenHandler> {
-	private static final Text TRADE_BUTTON_LABEL_TEXT = Text.translatable("gui.shop_block.trade_button_label");
+public class ShopScreen extends AbstractContainerScreen<ShopScreenHandler> {
+	private static final Component TRADE_BUTTON_LABEL_TEXT = Component.translatable("gui.shop_block.trade_button_label");
 	public static final Identifier SHOP_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/shop_background.png");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_68_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_68");
-	private static final Identifier OUT_OF_STOCK_TEXTURE = Identifier.ofVanilla("container/villager/out_of_stock");
+	private static final Identifier OUT_OF_STOCK_TEXTURE = Identifier.withDefaultNamespace("container/villager/out_of_stock");
 	private static final Identifier HAS_STOCK_TEXTURE = ScriptBlocks.identifier("container/shop_screen/has_stock");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private ShopBlockEntity shopBlockEntity;
-	private ButtonWidget tradeButton0;
-	private ButtonWidget tradeButton1;
-	private ButtonWidget tradeButton2;
-	private TextFieldWidget shopIdentifierField;
-	private ButtonWidget saveCreativeButton;
-	private ButtonWidget cancelCreativeButton;
-	private Text shopTitle = Text.empty();
-	private Text playerOffersTitle = Text.empty();
+	private Button tradeButton0;
+	private Button tradeButton1;
+	private Button tradeButton2;
+	private EditBox shopIdentifierField;
+	private Button saveCreativeButton;
+	private Button cancelCreativeButton;
+	private Component shopTitle = Component.empty();
+	private Component playerOffersTitle = Component.empty();
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
 
-	public ShopScreen(ShopScreenHandler handler, PlayerInventory inventory, Text title) {
+	public ShopScreen(ShopScreenHandler handler, Inventory inventory, Component title) {
 		super(handler, inventory, title);
 		handler.setContentsChangedListener(this::onInventoryChange);
 		this.shopBlockEntity = handler.getShopBlockEntity();
 	}
 
 	private void trade(int index) {
-		if (index + this.scrollPosition < this.handler.getStockedDealsList().size()) {
-			Shop.Deal currentDeal = this.handler.getStockedDealsList().get(index + this.scrollPosition);
-			if (currentDeal != null && this.client != null && this.client.interactionManager != null) {
-				if (this.handler.onButtonClick(this.client.player, index + this.scrollPosition)) {
-					MinecraftClient.getInstance().getSoundManager().play(PositionedSoundInstance.master(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
-					this.client.interactionManager.clickButton(this.handler.syncId, index + this.scrollPosition);
+		if (index + this.scrollPosition < this.menu.getStockedDealsList().size()) {
+			Shop.Deal currentDeal = this.menu.getStockedDealsList().get(index + this.scrollPosition);
+			if (currentDeal != null && this.minecraft != null && this.minecraft.gameMode != null) {
+				if (this.menu.onButtonClick(this.minecraft.player, index + this.scrollPosition)) {
+					Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.master(SoundEvents.UI_STONECUTTER_SELECT_RECIPE, 1.0F));
+					this.minecraft.gameMode.handleInventoryButtonClick(this.menu.syncId, index + this.scrollPosition);
 				}
 			}
 		}
@@ -73,33 +72,33 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 			this.tradeButton1.active = false;
 			this.tradeButton2.active = false;
 
-			Inventory inventory = new SimpleInventory(9);
+			Container inventory = new SimpleContainer(9);
 
 			int index = 0;
-			List<Shop.Deal> stockedDealsList = this.handler.getStockedDealsList();
-			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.handler.getStockedDealsCounter()); i++) {
+			List<Shop.Deal> stockedDealsList = this.menu.getStockedDealsList();
+			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.menu.getStockedDealsCounter()); i++) {
 				if (i > stockedDealsList.size()) {
 					break;
 				}
 				Shop.Deal deal = stockedDealsList.get(i);
 				if (deal != null) {
 					for (int k = 0; k < 9; k++) {
-						ItemStack itemStack = this.handler.getInventory().getStack(k);
-						inventory.setStack(k, itemStack.copy());
+						ItemStack itemStack = this.menu.getInventory().getStack(k);
+						inventory.setItem(k, itemStack.copy());
 					}
 					boolean bl = true;
 					List<ItemStack> priceList = deal.price();
 					for (ItemStack priceStack : priceList) {
 						int priceCount = priceStack.getCount();
-						for (int j = 0; j < inventory.size(); j++) {
-							if (ItemStack.areItemsAndComponentsEqual(inventory.getStack(j), priceStack)) {
-								int stackCount = inventory.getStack(j).getCount();
+						for (int j = 0; j < inventory.getContainerSize(); j++) {
+							if (ItemStack.isSameItemSameComponents(inventory.getItem(j), priceStack)) {
+								int stackCount = inventory.getItem(j).getCount();
 								if (stackCount >= priceCount) {
-									inventory.removeStack(j, priceCount);
+									inventory.removeItem(j, priceCount);
 									priceCount = 0;
 									break;
 								} else {
-									inventory.setStack(j, ItemStack.EMPTY);
+									inventory.setItem(j, ItemStack.EMPTY);
 									priceCount = priceCount - stackCount;
 								}
 							}
@@ -126,53 +125,53 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 
 	private void saveCreative() {
 		if (this.updateShopBlockCreative()) {
-			this.close();
+			this.onClose();
 		}
 	}
 
 	private void cancel() {
-		this.close();
+		this.onClose();
 	}
 
 	@Override
 	protected void init() {
-		if (this.client != null && this.client.world != null) {
-			BlockEntity blockEntity = this.client.world.getBlockEntity(this.handler.getBlockPos());
+		if (this.minecraft != null && this.minecraft.level != null) {
+			BlockEntity blockEntity = this.minecraft.level.getBlockEntity(this.menu.getBlockPos());
 			if (blockEntity instanceof ShopBlockEntity) {
 				this.shopBlockEntity = (ShopBlockEntity) blockEntity;
 			}
 		}
-		if (this.handler.getShop() == null && this.client != null) {
-			this.client.setScreen(null);
+		if (this.menu.getShop() == null && this.minecraft != null) {
+			this.minecraft.setScreen(null);
 			return;
 		}
 
-		this.backgroundWidth = 176;
-		this.backgroundHeight = 212;
+		this.imageWidth = 176;
+		this.imageHeight = 212;
 //        this.x = (this.width - this.backgroundWidth) / 2;
 //        this.y = (this.height - this.backgroundHeight) / 2;
 
-		this.playerInventoryTitleY = 118;
+		this.inventoryLabelY = 118;
 		super.init();
 
-		this.tradeButton0 = this.addDrawableChild(ButtonWidget.builder(TRADE_BUTTON_LABEL_TEXT, button -> this.trade(0)).dimensions(this.x + 107, this.y + 16, 50, 20).build());
-		this.tradeButton1 = this.addDrawableChild(ButtonWidget.builder(TRADE_BUTTON_LABEL_TEXT, button -> this.trade(1)).dimensions(this.x + 107, this.y + 40, 50, 20).build());
-		this.tradeButton2 = this.addDrawableChild(ButtonWidget.builder(TRADE_BUTTON_LABEL_TEXT, button -> this.trade(2)).dimensions(this.x + 107, this.y + 64, 50, 20).build());
+		this.tradeButton0 = this.addRenderableWidget(Button.builder(TRADE_BUTTON_LABEL_TEXT, button -> this.trade(0)).bounds(this.leftPos + 107, this.topPos + 16, 50, 20).build());
+		this.tradeButton1 = this.addRenderableWidget(Button.builder(TRADE_BUTTON_LABEL_TEXT, button -> this.trade(1)).bounds(this.leftPos + 107, this.topPos + 40, 50, 20).build());
+		this.tradeButton2 = this.addRenderableWidget(Button.builder(TRADE_BUTTON_LABEL_TEXT, button -> this.trade(2)).bounds(this.leftPos + 107, this.topPos + 64, 50, 20).build());
 
-		this.shopIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 114, 300, 20, Text.empty());
+		this.shopIdentifierField = new EditBox(this.font, this.width / 2 - 154, 114, 300, 20, Component.empty());
 		this.shopIdentifierField.setMaxLength(128);
-		this.shopIdentifierField.setText(this.shopBlockEntity.getShopIdentifier());
-		this.addSelectableChild(this.shopIdentifierField);
+		this.shopIdentifierField.setValue(this.shopBlockEntity.getShopIdentifier());
+		this.addWidget(this.shopIdentifierField);
 
-		this.saveCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.saveCreative()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.cancelCreativeButton = this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.saveCreativeButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.saveCreative()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.cancelCreativeButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 
-		Shop shop = this.handler.getShop();
+		Shop shop = this.menu.getShop();
 		if (shop != null) {
-			this.handler.calculateUnlockedAndStockedDeals();
+			this.menu.calculateUnlockedAndStockedDeals();
 			this.calculateActiveDeals();
-			this.shopTitle = Text.translatable(shop.shopTitle());
-			this.playerOffersTitle = Text.translatable(shop.offersTitle());
+			this.shopTitle = Component.translatable(shop.shopTitle());
+			this.playerOffersTitle = Component.translatable(shop.offersTitle());
 		} else {
 			this.updateWidgets();
 		}
@@ -190,7 +189,7 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 		this.cancelCreativeButton.visible = false;
 
 		int index = 0;
-		for (int i = 0; i < Math.min(3, this.handler.getUnlockedDealsCounter()); i++) {
+		for (int i = 0; i < Math.min(3, this.menu.getUnlockedDealsCounter()); i++) {
 			if (index == 0) {
 				this.tradeButton0.visible = true;
 			} else if (index == 1) {
@@ -205,19 +204,19 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		String string = this.shopIdentifierField.getText();
+	public void resize(Minecraft client, int width, int height) {
+		String string = this.shopIdentifierField.getValue();
 		this.init(client, width, height);
-		this.shopIdentifierField.setText(string);
+		this.shopIdentifierField.setValue(string);
 		this.updateWidgets();
 	}
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		this.mouseClicked = false;
-		if (this.handler.getUnlockedDealsCounter() > 3) {
-			int i = this.x + this.backgroundWidth - 14;
-			int j = this.y + 99;
+		if (this.menu.getUnlockedDealsCounter() > 3) {
+			int i = this.leftPos + this.imageWidth - 14;
+			int j = this.topPos + 99;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 90)) {
 				this.mouseClicked = true;
 			}
@@ -227,11 +226,11 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-		if (this.handler.getUnlockedDealsCounter() > 3
+		if (this.menu.getUnlockedDealsCounter() > 3
 				&& this.mouseClicked) {
-			int i = this.handler.getUnlockedDealsCounter() - 3;
+			int i = this.menu.getUnlockedDealsCounter() - 3;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -239,19 +238,19 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-		if (this.handler.getUnlockedDealsCounter() > 3
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
-				&& mouseY >= (double) (this.y + 98) && mouseY <= (double) (this.y + 190)) {
-			int i = this.handler.getUnlockedDealsCounter() - 3;
+		if (this.menu.getUnlockedDealsCounter() > 3
+				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
+				&& mouseY >= (double) (this.topPos + 98) && mouseY <= (double) (this.topPos + 190)) {
+			int i = this.menu.getUnlockedDealsCounter() - 3;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
@@ -259,58 +258,58 @@ public class ShopScreen extends HandledScreen<ShopScreenHandler> {
 		int y;
 		int k;
 		int index = 0;
-		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.handler.getUnlockedDealsCounter()); i++) {
-			if (i > this.handler.getUnlockedDealsList().size()) {
+		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.menu.getUnlockedDealsCounter()); i++) {
+			if (i > this.menu.getUnlockedDealsList().size()) {
 				break;
 			}
-			Shop.Deal deal = this.handler.getUnlockedDealsList().get(i);
+			Shop.Deal deal = this.menu.getUnlockedDealsList().get(i);
 			if (deal != null) {
 				for (int j = 0; j < deal.offer().size(); j++) {
 					ItemStack offerStack = deal.offer().get(j);
-					x = this.x + 85 + (j * 18);
-					y = this.y + 18 + (index * 24);
-					k = x + y * this.backgroundWidth;
-					context.drawItemWithoutEntity(offerStack, x, y, k);
-					context.drawItemInSlot(this.textRenderer, offerStack, x, y);
+					x = this.leftPos + 85 + (j * 18);
+					y = this.topPos + 18 + (index * 24);
+					k = x + y * this.imageWidth;
+					context.renderFakeItem(offerStack, x, y, k);
+					context.drawItemInSlot(this.font, offerStack, x, y);
 				}
 				for (int j = 0; j < deal.price().size(); j++) {
 					ItemStack priceStack = deal.price().get(j);
-					x = this.x + 8 + (j * 18);
-					y = this.y + 18 + (index * 24);
-					k = x + y * this.backgroundWidth;
-					context.drawItemWithoutEntity(priceStack, x, y, k);
-					context.drawItemInSlot(this.textRenderer, priceStack, x, y);
+					x = this.leftPos + 8 + (j * 18);
+					y = this.topPos + 18 + (index * 24);
+					k = x + y * this.imageWidth;
+					context.renderFakeItem(priceStack, x, y, k);
+					context.drawItemInSlot(this.font, priceStack, x, y);
 				}
-				context.drawGuiTexture(this.handler.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.x + 55, this.y + 16 + (index * 24), 28, 21);
+				context.blitSprite(this.menu.getStockedDealsList().get(i) != null ? HAS_STOCK_TEXTURE : OUT_OF_STOCK_TEXTURE, this.leftPos + 55, this.topPos + 16 + (index * 24), 28, 21);
 				index++;
 			}
-			if (this.handler.getUnlockedDealsCounter() > 3) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.x + 161, this.y + 16, 8, 68);
+			if (this.menu.getUnlockedDealsCounter() > 3) {
+				context.blitSprite(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.leftPos + 161, this.topPos + 16, 8, 68);
 				k = (int) (59.0f * this.scrollAmount);
-				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + 161 + 1, this.y + 16 + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + 161 + 1, this.topPos + 16 + 1 + k, 6, 7);
 			}
 		}
 	}
 
 	@Override
-	protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
-		context.drawText(this.textRenderer, this.shopTitle, this.titleX, this.titleY, 4210752, false);
-		context.drawText(this.textRenderer, this.playerOffersTitle, this.titleX, this.titleY + 80, 4210752, false);
-		context.drawText(this.textRenderer, this.playerInventoryTitle, this.playerInventoryTitleX, this.playerInventoryTitleY, 4210752, false);
+	protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
+		context.drawString(this.font, this.shopTitle, this.titleLabelX, this.titleLabelY, 4210752, false);
+		context.drawString(this.font, this.playerOffersTitle, this.titleLabelX, this.titleLabelY + 80, 4210752, false);
+		context.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
 	}
 
 	@Override
-	public void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-		int i = this.x;
-		int j = this.y;
-		context.drawTexture(SHOP_BACKGROUND_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+	public void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+		int i = this.leftPos;
+		int j = this.topPos;
+		context.blit(SHOP_BACKGROUND_TEXTURE, i, j, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 
 	}
 
 	private boolean updateShopBlockCreative() {
 		ClientPlayNetworking.send(new UpdateShopBlockPacket(
 				this.shopBlockEntity.getPos(),
-				this.shopIdentifierField.getText()
+				this.shopIdentifierField.getValue()
 		));
 		return true;
 	}

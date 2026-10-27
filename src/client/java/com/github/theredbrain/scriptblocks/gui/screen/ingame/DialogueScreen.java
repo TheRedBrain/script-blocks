@@ -8,34 +8,33 @@ import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
+public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandler> {
 	public static final Identifier GENERIC_BACKGROUND_TEXTURE = ScriptBlocks.identifier("container/generic_background");
 	private static final Identifier SCROLL_BAR_BACKGROUND_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	private static final int TOTAL_LINE_AMOUNT = 8;
 	private static final int LINE_HEIGHT = 26;
 
-	private ButtonWidget answerButton0;
-	private ButtonWidget answerButton1;
-	private ButtonWidget answerButton2;
-	private ButtonWidget answerButton3;
-	private ButtonWidget answerButton4;
-	private ButtonWidget answerButton5;
-	private ButtonWidget answerButton6;
-	private ButtonWidget answerButton7;
+	private Button answerButton0;
+	private Button answerButton1;
+	private Button answerButton2;
+	private Button answerButton3;
+	private Button answerButton4;
+	private Button answerButton5;
+	private Button answerButton6;
+	private Button answerButton7;
 
 	private int backgroundWidth;
 	private int backgroundHeight;
@@ -48,22 +47,22 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	private float answersScrollAmount = 0.0f;
 	private boolean answersMouseClicked = false;
 
-	public DialogueScreen(DialogueScreenHandler handler, PlayerInventory inventory, Text title) {
+	public DialogueScreen(DialogueScreenHandler handler, Inventory inventory, Component title) {
 		super(handler, inventory, title);
 	}
 
 	private void answer(int index) {
-		int finalIndex = index + this.answersScrollPosition - this.handler.answersStartingIndex;
+		int finalIndex = index + this.answersScrollPosition - this.menu.answersStartingIndex;
 
-		if (finalIndex >= 0 && finalIndex < this.handler.visibleAnswersList.size()) {
-			String currentAnswerIdentifierString = this.handler.visibleAnswersList.get(finalIndex);
+		if (finalIndex >= 0 && finalIndex < this.menu.visibleAnswersList.size()) {
+			String currentAnswerIdentifierString = this.menu.visibleAnswersList.get(finalIndex);
 
 			if (!currentAnswerIdentifierString.isEmpty()) {
 				ClientPlayNetworking.send(new DialogueAnswerPacket(
-						Identifier.of(currentAnswerIdentifierString),
-						this.handler.dataBlockPos,
-						this.handler.dialogueUsedBlocksList,
-						this.handler.dialogueTriggeredBlocksList
+						Identifier.parse(currentAnswerIdentifierString),
+						this.menu.dataBlockPos,
+						this.menu.dialogueUsedBlocksList,
+						this.menu.dialogueTriggeredBlocksList
 				));
 			}
 		}
@@ -71,36 +70,36 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 
 	@Override
 	protected void init() {
-		if (this.handler.dialogue == null && this.client != null) {
-			this.client.setScreen(null);
+		if (this.menu.dialogue == null && this.minecraft != null) {
+			this.minecraft.setScreen(null);
 			return;
 		}
 
-		this.backgroundWidth = 218;
-		this.backgroundHeight = 222;
-		this.x = (this.width - this.backgroundWidth) / 2;
-		this.y = (this.height - this.backgroundHeight) / 2;
+		this.imageWidth = 218;
+		this.imageHeight = 222;
+		this.leftPos = (this.width - this.imageWidth) / 2;
+		this.topPos = (this.height - this.imageHeight) / 2;
 
 		super.init();
 
-		this.answerButton0 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(0)).dimensions(this.x + 7, this.y + 10, this.backgroundWidth - 14, 20).build());
-		this.answerButton1 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(1)).dimensions(this.x + 7, this.y + 36, this.backgroundWidth - 14, 20).build());
-		this.answerButton2 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(2)).dimensions(this.x + 7, this.y + 62, this.backgroundWidth - 14, 20).build());
-		this.answerButton3 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(3)).dimensions(this.x + 7, this.y + 88, this.backgroundWidth - 14, 20).build());
-		this.answerButton4 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(4)).dimensions(this.x + 7, this.y + 114, this.backgroundWidth - 14, 20).build());
-		this.answerButton5 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(5)).dimensions(this.x + 7, this.y + 140, this.backgroundWidth - 14, 20).build());
-		this.answerButton6 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(6)).dimensions(this.x + 7, this.y + 166, this.backgroundWidth - 14, 20).build());
-		this.answerButton7 = this.addDrawableChild(ButtonWidget.builder(Text.empty(), button -> this.answer(7)).dimensions(this.x + 7, this.y + 192, this.backgroundWidth - 14, 20).build());
+		this.answerButton0 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(0)).bounds(this.leftPos + 7, this.topPos + 10, this.imageWidth - 14, 20).build());
+		this.answerButton1 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(1)).bounds(this.leftPos + 7, this.topPos + 36, this.imageWidth - 14, 20).build());
+		this.answerButton2 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(2)).bounds(this.leftPos + 7, this.topPos + 62, this.imageWidth - 14, 20).build());
+		this.answerButton3 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(3)).bounds(this.leftPos + 7, this.topPos + 88, this.imageWidth - 14, 20).build());
+		this.answerButton4 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(4)).bounds(this.leftPos + 7, this.topPos + 114, this.imageWidth - 14, 20).build());
+		this.answerButton5 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(5)).bounds(this.leftPos + 7, this.topPos + 140, this.imageWidth - 14, 20).build());
+		this.answerButton6 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(6)).bounds(this.leftPos + 7, this.topPos + 166, this.imageWidth - 14, 20).build());
+		this.answerButton7 = this.addRenderableWidget(Button.builder(Component.empty(), button -> this.answer(7)).bounds(this.leftPos + 7, this.topPos + 192, this.imageWidth - 14, 20).build());
 
-		if (this.handler.visibleAnswersList.size() > TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex()) {
-			this.answerButton0.setWidth(this.backgroundWidth - 26);
-			this.answerButton1.setWidth(this.backgroundWidth - 26);
-			this.answerButton2.setWidth(this.backgroundWidth - 26);
-			this.answerButton3.setWidth(this.backgroundWidth - 26);
-			this.answerButton4.setWidth(this.backgroundWidth - 26);
-			this.answerButton5.setWidth(this.backgroundWidth - 26);
-			this.answerButton6.setWidth(this.backgroundWidth - 26);
-			this.answerButton7.setWidth(this.backgroundWidth - 26);
+		if (this.menu.visibleAnswersList.size() > TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex()) {
+			this.answerButton0.setWidth(this.imageWidth - 26);
+			this.answerButton1.setWidth(this.imageWidth - 26);
+			this.answerButton2.setWidth(this.imageWidth - 26);
+			this.answerButton3.setWidth(this.imageWidth - 26);
+			this.answerButton4.setWidth(this.imageWidth - 26);
+			this.answerButton5.setWidth(this.imageWidth - 26);
+			this.answerButton6.setWidth(this.imageWidth - 26);
+			this.answerButton7.setWidth(this.imageWidth - 26);
 		}
 
 		this.updateWidgets();
@@ -121,11 +120,11 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 		this.answerButton6.visible = false;
 		this.answerButton7.visible = false;
 
-		if (this.handler.visibleAnswersList.size() == this.handler.unlockedAnswersList.size()) {
-			int index = this.handler.getAnswersStartingIndex();
-			for (int i = 0; i < Math.min(TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex(), this.handler.visibleAnswersList.size()); i++) {
-				boolean visible = !this.handler.visibleAnswersList.get(i).isEmpty();
-				boolean active = visible && !this.handler.unlockedAnswersList.get(i).isEmpty();
+		if (this.menu.visibleAnswersList.size() == this.menu.unlockedAnswersList.size()) {
+			int index = this.menu.getAnswersStartingIndex();
+			for (int i = 0; i < Math.min(TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex(), this.menu.visibleAnswersList.size()); i++) {
+				boolean visible = !this.menu.visibleAnswersList.get(i).isEmpty();
+				boolean active = visible && !this.menu.unlockedAnswersList.get(i).isEmpty();
 				if (index == 0) {
 					this.answerButton0.visible = visible;
 					this.answerButton0.active = active;
@@ -157,7 +156,7 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		int number = this.dialogueTextScrollPosition;
 		float number1 = this.dialogueTextScrollAmount;
 		int number2 = this.answersScrollPosition;
@@ -178,23 +177,23 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		this.dialogueTextMouseClicked = false;
 		this.answersMouseClicked = false;
-		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.handler.getDialogueTextsStartingIndex(), this.handler.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.handler.getAnswersStartingIndex() - this.handler.getDialogueTextsStartingIndex());
-		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex();
-		double dialogueLinesMinY = this.y + 7 + 1 + this.handler.getDialogueTextsStartingIndex() * LINE_HEIGHT;
-		double visibleAnswersMinY = this.y + 7 + 1 + this.handler.getAnswersStartingIndex() * LINE_HEIGHT;
+		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.menu.getAnswersStartingIndex() - this.menu.getDialogueTextsStartingIndex());
+		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
+		double dialogueLinesMinY = this.topPos + 7 + 1 + this.menu.getDialogueTextsStartingIndex() * LINE_HEIGHT;
+		double visibleAnswersMinY = this.topPos + 7 + 1 + this.menu.getAnswersStartingIndex() * LINE_HEIGHT;
 		double dialogueLinesMaxY = Math.min(dialogueLinesMinY - 2 + visibleDialogueTextAmount * LINE_HEIGHT, visibleAnswersMinY);
 		double visibleAnswersMaxY = visibleAnswersMinY - 2 + visibleAnswersAmount * LINE_HEIGHT;
-		if (this.handler.getDialogueTextsStartingIndex() < this.handler.getAnswersStartingIndex()
-				&& this.handler.getDialogueTextsStartingIndex() < TOTAL_LINE_AMOUNT
-				&& this.handler.dialogueTextList.size() > visibleDialogueTextAmount) {
-			int i = this.x + this.backgroundWidth - 14;
+		if (this.menu.getDialogueTextsStartingIndex() < this.menu.getAnswersStartingIndex()
+				&& this.menu.getDialogueTextsStartingIndex() < TOTAL_LINE_AMOUNT
+				&& this.menu.dialogueTextList.size() > visibleDialogueTextAmount) {
+			int i = this.leftPos + this.imageWidth - 14;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= dialogueLinesMinY && mouseY < dialogueLinesMaxY) {
 				this.dialogueTextMouseClicked = true;
 			}
 		}
-		if (this.handler.getAnswersStartingIndex() < TOTAL_LINE_AMOUNT
-				&& this.handler.visibleAnswersList.size() > visibleAnswersAmount) {
-			int i = this.x + this.backgroundWidth - 14;
+		if (this.menu.getAnswersStartingIndex() < TOTAL_LINE_AMOUNT
+				&& this.menu.visibleAnswersList.size() > visibleAnswersAmount) {
+			int i = this.leftPos + this.imageWidth - 14;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= visibleAnswersMinY && mouseY < visibleAnswersMaxY) {
 				this.answersMouseClicked = true;
 			}
@@ -205,19 +204,19 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
 		boolean updateWidgets = false;
-		if (this.handler.dialogueTextList.size() > this.handler.getAnswersStartingIndex()
+		if (this.menu.dialogueTextList.size() > this.menu.getAnswersStartingIndex()
 				&& this.dialogueTextMouseClicked) {
-			int i = this.handler.dialogueTextList.size() - (Math.min(TOTAL_LINE_AMOUNT - this.handler.getDialogueTextsStartingIndex(), this.handler.getAnswersStartingIndex()));
+			int i = this.menu.dialogueTextList.size() - (Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.getAnswersStartingIndex()));
 			float f = (float) deltaY / (float) i;
-			this.dialogueTextScrollAmount = MathHelper.clamp(this.dialogueTextScrollAmount + f, 0.0f, 1.0f);
+			this.dialogueTextScrollAmount = Mth.clamp(this.dialogueTextScrollAmount + f, 0.0f, 1.0f);
 			this.dialogueTextScrollPosition = (int) ((double) (this.dialogueTextScrollAmount * (float) i));
 			updateWidgets = true;
 		}
-		if (this.handler.visibleAnswersList.size() > TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex()
+		if (this.menu.visibleAnswersList.size() > TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex()
 				&& this.answersMouseClicked) {
-			int i = this.handler.visibleAnswersList.size() - TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex();
+			int i = this.menu.visibleAnswersList.size() - TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
 			float f = (float) deltaY / (float) i;
-			this.answersScrollAmount = MathHelper.clamp(this.answersScrollAmount + f, 0.0f, 1.0f);
+			this.answersScrollAmount = Mth.clamp(this.answersScrollAmount + f, 0.0f, 1.0f);
 			this.answersScrollPosition = (int) ((double) (this.answersScrollAmount * (float) i));
 			updateWidgets = true;
 		}
@@ -230,27 +229,27 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		boolean updateWidgets = false;
-		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.handler.getDialogueTextsStartingIndex(), this.handler.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.handler.getAnswersStartingIndex() - this.handler.getDialogueTextsStartingIndex());
-		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex();
-		double dialogueLinesMinY = this.y + 7 + this.handler.getDialogueTextsStartingIndex() * LINE_HEIGHT;
-		double visibleAnswersMinY = this.y + 7 + this.handler.getAnswersStartingIndex() * LINE_HEIGHT;
+		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.menu.getAnswersStartingIndex() - this.menu.getDialogueTextsStartingIndex());
+		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
+		double dialogueLinesMinY = this.topPos + 7 + this.menu.getDialogueTextsStartingIndex() * LINE_HEIGHT;
+		double visibleAnswersMinY = this.topPos + 7 + this.menu.getAnswersStartingIndex() * LINE_HEIGHT;
 		double dialogueLinesMaxY = Math.min(dialogueLinesMinY + visibleDialogueTextAmount * LINE_HEIGHT, visibleAnswersMinY);
 		double visibleAnswersMaxY = visibleAnswersMinY + visibleAnswersAmount * LINE_HEIGHT;
-		if (this.handler.dialogueTextList.size() > visibleDialogueTextAmount
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
+		if (this.menu.dialogueTextList.size() > visibleDialogueTextAmount
+				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
 				&& mouseY >= dialogueLinesMinY && mouseY <= dialogueLinesMaxY) {
-			int i = this.handler.dialogueTextList.size() - visibleDialogueTextAmount;
+			int i = this.menu.dialogueTextList.size() - visibleDialogueTextAmount;
 			float f = (float) verticalAmount / (float) i;
-			this.dialogueTextScrollAmount = MathHelper.clamp(this.dialogueTextScrollAmount - f, 0.0f, 1.0f);
+			this.dialogueTextScrollAmount = Mth.clamp(this.dialogueTextScrollAmount - f, 0.0f, 1.0f);
 			this.dialogueTextScrollPosition = (int) ((double) (this.dialogueTextScrollAmount * (float) i));
 			updateWidgets = true;
 		}
-		if (this.handler.visibleAnswersList.size() > visibleAnswersAmount
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
+		if (this.menu.visibleAnswersList.size() > visibleAnswersAmount
+				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
 				&& mouseY >= visibleAnswersMinY && mouseY <= visibleAnswersMaxY) {
-			int i = this.handler.visibleAnswersList.size() - visibleAnswersAmount;
+			int i = this.menu.visibleAnswersList.size() - visibleAnswersAmount;
 			float f = (float) verticalAmount / (float) i;
-			this.answersScrollAmount = MathHelper.clamp(this.answersScrollAmount - f, 0.0f, 1.0f);
+			this.answersScrollAmount = Mth.clamp(this.answersScrollAmount - f, 0.0f, 1.0f);
 			this.answersScrollPosition = (int) ((double) (this.answersScrollAmount * (float) i));
 			updateWidgets = true;
 		}
@@ -261,45 +260,45 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 	}
 
 	@Override
-	public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.renderBackground(context, mouseX, mouseY, delta);
-		this.drawBackground(context, delta, mouseX, mouseY);
+		this.renderBg(context, delta, mouseX, mouseY);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.handler.getDialogueTextsStartingIndex(), this.handler.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.handler.getAnswersStartingIndex() - this.handler.getDialogueTextsStartingIndex());
-		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.handler.getAnswersStartingIndex();
-		int dialogueLinesMinY = this.y + 7 + (this.handler.getDialogueTextsStartingIndex() * LINE_HEIGHT);
+		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.menu.getAnswersStartingIndex() - this.menu.getDialogueTextsStartingIndex());
+		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
+		int dialogueLinesMinY = this.topPos + 7 + (this.menu.getDialogueTextsStartingIndex() * LINE_HEIGHT);
 //		int dialogueLinesMaxY = dialogueLinesMinY + (visibleDialogueTextAmount * LINE_HEIGHT);
-		int visibleAnswersMinY = this.y + 7 + (this.handler.getAnswersStartingIndex() * LINE_HEIGHT);
+		int visibleAnswersMinY = this.topPos + 7 + (this.menu.getAnswersStartingIndex() * LINE_HEIGHT);
 //		int visibleAnswersMaxY = visibleAnswersMinY + (visibleAnswersAmount * LINE_HEIGHT);
 
-		if (this.handler.getDialogueTextsStartingIndex() < this.handler.getAnswersStartingIndex()) {
-			for (int i = this.dialogueTextScrollPosition; i < Math.min(this.dialogueTextScrollPosition + visibleDialogueTextAmount, this.handler.dialogueTextList.size()); i++) {
-				String text = this.handler.dialogueTextList.get(i);
+		if (this.menu.getDialogueTextsStartingIndex() < this.menu.getAnswersStartingIndex()) {
+			for (int i = this.dialogueTextScrollPosition; i < Math.min(this.dialogueTextScrollPosition + visibleDialogueTextAmount, this.menu.dialogueTextList.size()); i++) {
+				String text = this.menu.dialogueTextList.get(i);
 				if (!text.isEmpty()) {
-					context.drawText(this.textRenderer, Text.translatable(text), this.x + 8, this.y + 7 + 8 + ((i - this.dialogueTextScrollPosition + this.handler.getDialogueTextsStartingIndex()) * LINE_HEIGHT), 0x404040, false);
+					context.drawString(this.font, Component.translatable(text), this.leftPos + 8, this.topPos + 7 + 8 + ((i - this.dialogueTextScrollPosition + this.menu.getDialogueTextsStartingIndex()) * LINE_HEIGHT), 0x404040, false);
 				}
 			}
-			if (this.handler.dialogueTextList.size() > visibleDialogueTextAmount) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_TEXTURE, this.x + this.backgroundWidth - 15, dialogueLinesMinY, 8, visibleDialogueTextAmount * LINE_HEIGHT);
+			if (this.menu.dialogueTextList.size() > visibleDialogueTextAmount) {
+				context.blitSprite(SCROLL_BAR_BACKGROUND_TEXTURE, this.leftPos + this.imageWidth - 15, dialogueLinesMinY, 8, visibleDialogueTextAmount * LINE_HEIGHT);
 				int k = (int) ((visibleDialogueTextAmount * LINE_HEIGHT - 9) * this.dialogueTextScrollAmount);
-				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, dialogueLinesMinY + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + this.imageWidth - 14, dialogueLinesMinY + 1 + k, 6, 7);
 			}
 		}
-		int index = this.handler.getAnswersStartingIndex();
-		for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + visibleAnswersAmount, this.handler.visibleAnswersList.size()); i++) {
+		int index = this.menu.getAnswersStartingIndex();
+		for (int i = this.answersScrollPosition; i < Math.min(this.answersScrollPosition + visibleAnswersAmount, this.menu.visibleAnswersList.size()); i++) {
 			String text = "";
-			String answerIdentifier = this.handler.visibleAnswersList.get(i);
+			String answerIdentifier = this.menu.visibleAnswersList.get(i);
 
 			if (!answerIdentifier.isEmpty()) {
 				DialogueAnswer dialogueAnswer = null;
-				if (this.handler.world != null) {
-					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.handler.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifier));
+				if (this.menu.world != null) {
+					Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.menu.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.parse(answerIdentifier));
 					if (optionalDialogueAnswerReference.isPresent()) {
 						dialogueAnswer = optionalDialogueAnswerReference.get().value();
 					}
@@ -309,48 +308,48 @@ public class DialogueScreen extends HandledScreen<DialogueScreenHandler> {
 					text = dialogueAnswer.answerText();
 				}
 				if (index == 0) {
-					this.answerButton0.setMessage(Text.translatable(text));
+					this.answerButton0.setMessage(Component.translatable(text));
 				} else if (index == 1) {
-					this.answerButton1.setMessage(Text.translatable(text));
+					this.answerButton1.setMessage(Component.translatable(text));
 				} else if (index == 2) {
-					this.answerButton2.setMessage(Text.translatable(text));
+					this.answerButton2.setMessage(Component.translatable(text));
 				} else if (index == 3) {
-					this.answerButton3.setMessage(Text.translatable(text));
+					this.answerButton3.setMessage(Component.translatable(text));
 				} else if (index == 4) {
-					this.answerButton4.setMessage(Text.translatable(text));
+					this.answerButton4.setMessage(Component.translatable(text));
 				} else if (index == 5) {
-					this.answerButton5.setMessage(Text.translatable(text));
+					this.answerButton5.setMessage(Component.translatable(text));
 				} else if (index == 6) {
-					this.answerButton6.setMessage(Text.translatable(text));
+					this.answerButton6.setMessage(Component.translatable(text));
 				} else if (index == 7) {
-					this.answerButton7.setMessage(Text.translatable(text));
+					this.answerButton7.setMessage(Component.translatable(text));
 				}
 			}
 			index++;
 		}
-		if (this.handler.visibleAnswersList.size() > visibleAnswersAmount) {
-			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_TEXTURE, this.x + this.backgroundWidth - 15, visibleAnswersMinY, 8, visibleAnswersAmount * LINE_HEIGHT);
+		if (this.menu.visibleAnswersList.size() > visibleAnswersAmount) {
+			context.blitSprite(SCROLL_BAR_BACKGROUND_TEXTURE, this.leftPos + this.imageWidth - 15, visibleAnswersMinY, 8, visibleAnswersAmount * LINE_HEIGHT);
 			int k = (int) ((visibleAnswersAmount * LINE_HEIGHT - 9) * this.answersScrollAmount);
-			context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.x + this.backgroundWidth - 14, visibleAnswersMinY + 1 + k, 6, 7);
+			context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + this.imageWidth - 14, visibleAnswersMinY + 1 + k, 6, 7);
 		}
 	}
 
 	@Override
-	protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+	protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
 	}
 
 	@Override
-	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-		context.drawGuiTexture(GENERIC_BACKGROUND_TEXTURE, this.x, this.y, this.backgroundWidth, this.backgroundHeight);
+	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+		context.blitSprite(GENERIC_BACKGROUND_TEXTURE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
 	}
 
 	@Override
 	public boolean shouldCloseOnEsc() {
-		return this.handler.dialogue == null || this.handler.dialogue.cancellable(); // TODO emergency exit
+		return this.menu.dialogue == null || this.menu.dialogue.cancellable(); // TODO emergency exit
 	}
 
 	@Override
-	public boolean shouldPause() {
+	public boolean isPauseScreen() {
 		return false;
 	}
 }

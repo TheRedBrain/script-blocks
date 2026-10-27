@@ -2,15 +2,15 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public record UpdateTriggeredSpawnerBlockPacket(
 		BlockPos triggeredSpawnerBlockPosition,
@@ -21,24 +21,24 @@ public record UpdateTriggeredSpawnerBlockPacket(
 		boolean isPersistent,
 		boolean enableSpawnEffects,
 		String entityTypeId,
-		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
+		List<MutablePair<Identifier, AttributeModifier>> entityAttributeModifiersList,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		BlockPos useRelayBlockPositionOffset
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateTriggeredSpawnerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_triggered_spawner_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredSpawnerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredSpawnerBlockPacket::write, UpdateTriggeredSpawnerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateTriggeredSpawnerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_triggered_spawner_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredSpawnerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredSpawnerBlockPacket::write, UpdateTriggeredSpawnerBlockPacket::new);
 
-	public UpdateTriggeredSpawnerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredSpawnerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -46,19 +46,19 @@ public record UpdateTriggeredSpawnerBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredSpawnerBlockPosition);
 
 		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
 
-		registryByteBuf.writeString(this.spawningMode);
+		registryByteBuf.writeUtf(this.spawningMode);
 
 		registryByteBuf.writeBoolean(this.isPersistent);
 		registryByteBuf.writeBoolean(this.enableSpawnEffects);
 
-		registryByteBuf.writeString(this.entityTypeId);
+		registryByteBuf.writeUtf(this.entityTypeId);
 
 		registryByteBuf.writeCollection(this.entityAttributeModifiersList, CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER);
 
@@ -69,7 +69,7 @@ public record UpdateTriggeredSpawnerBlockPacket(
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

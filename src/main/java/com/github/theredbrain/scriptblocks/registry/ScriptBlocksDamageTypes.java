@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageType;
 
 public class ScriptBlocksDamageTypes {
 
-	public static final RegistryKey<DamageType> PVP_WINNING_DAMAGE_TYPE = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, ScriptBlocks.identifier("pvp_winning_damage_type"));
+	public static final ResourceKey<DamageType> PVP_WINNING_DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, ScriptBlocks.identifier("pvp_winning_damage_type"));
 }

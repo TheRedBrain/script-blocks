@@ -6,24 +6,25 @@ import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenHandler;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerAdvancementLoader;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public interface DialogueAnchor {
 
@@ -40,42 +42,40 @@ public interface DialogueAnchor {
 
 	List<MutablePair<String, MutablePair<BlockPos, Boolean>>> getDialogueTriggeredBlocks();
 
-	static String getDialogue(World world, PlayerEntity player, List<String> dialogueList) {
+	static String getDialogue(Level world, Player player, List<String> dialogueList) {
 		if (dialogueList.isEmpty()) {
 			return "";
 		}
-		PlayerAdvancementTracker playerAdvancementTracker = null;
-		ServerAdvancementLoader serverAdvancementLoader = null;
+		PlayerAdvancements playerAdvancementTracker = null;
+		ServerAdvancementManager serverAdvancementLoader = null;
 
-		if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-			playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
-			MinecraftServer minecraftServer = serverPlayerEntity.getServer();
-			if (minecraftServer != null) {
-				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
-			}
+		if (player instanceof ServerPlayer serverPlayerEntity) {
+			playerAdvancementTracker = serverPlayerEntity.getAdvancements();
+				MinecraftServer minecraftServer = serverPlayerEntity.level().getServer();
+				serverAdvancementLoader = minecraftServer.getAdvancements();
 		}
 		String lockAdvancement;
 		String unlockAdvancement;
 
 		for (String dialogueEntry : dialogueList) {
-			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueEntry));
+			Optional<Holder.Reference<Dialogue>> optionalDialogueReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(Identifier.tryParse(dialogueEntry));
 			if (optionalDialogueReference.isPresent()) {
 				lockAdvancement = optionalDialogueReference.get().value().lockAdvancement();
 				unlockAdvancement = optionalDialogueReference.get().value().unlockAdvancement();
 
-				AdvancementEntry lockAdvancementEntry = null;
-				AdvancementEntry unlockAdvancementEntry = null;
+				AdvancementHolder lockAdvancementEntry = null;
+				AdvancementHolder unlockAdvancementEntry = null;
 				if (serverAdvancementLoader != null) {
 					if (!lockAdvancement.isEmpty()) {
-						lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(lockAdvancement));
+						lockAdvancementEntry = serverAdvancementLoader.get(Identifier.parse(lockAdvancement));
 					}
 					if (!unlockAdvancement.isEmpty()) {
-						unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(unlockAdvancement));
+						unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.parse(unlockAdvancement));
 					}
 
 				}
 				if (playerAdvancementTracker != null) {
-					if ((lockAdvancement.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) && (unlockAdvancement.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone()))) {
+					if ((lockAdvancement.isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getOrStartProgress(lockAdvancementEntry).isDone())) && (unlockAdvancement.isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getOrStartProgress(unlockAdvancementEntry).isDone()))) {
 						return dialogueEntry;
 					}
 				}
@@ -84,22 +84,22 @@ public interface DialogueAnchor {
 		return "";
 	}
 
-	static void openDialogueScreen(World world, MinecraftServer server, ServerPlayerEntity serverPlayerEntity, String dialogueIdentifierString, BlockPos dataBlockPos, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
-		Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueIdentifierString));
+	static void openDialogueScreen(Level world, MinecraftServer server, ServerPlayer serverPlayerEntity, String dialogueIdentifierString, BlockPos dataBlockPos, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
+		Optional<Holder.Reference<Dialogue>> optionalDialogueReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(Identifier.tryParse(dialogueIdentifierString));
 
 		if (optionalDialogueReference.isPresent()) {
 			Dialogue dialogue = optionalDialogueReference.get().value();
 			List<String> unlockedAnswersList = new ArrayList<>(List.of());
 			List<String> visibleAnswersList = new ArrayList<>(List.of());
-			PlayerAdvancementTracker playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
-			ServerAdvancementLoader serverAdvancementLoader = server.getAdvancementLoader();
+			PlayerAdvancements playerAdvancementTracker = serverPlayerEntity.getAdvancements();
+			ServerAdvancementManager serverAdvancementLoader = server.getAdvancements();
 
 			for (String answerIdentifierString : dialogue.answerList()) {
 
 				if (!answerIdentifierString.isEmpty()) {
 
 					DialogueAnswer dialogueAnswer = null;
-					Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.of(answerIdentifierString));
+					Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).get().value().get(Identifier.parse(answerIdentifierString));
 					if (optionalDialogueAnswerReference1.isPresent()) {
 						dialogueAnswer = optionalDialogueAnswerReference1.get().value();
 					}
@@ -112,12 +112,12 @@ public interface DialogueAnchor {
 					if (!dialogueAnswer.availability().itemCosts().isEmpty()) {
 
 						// player inventory copy
-						int inventorySize = serverPlayerEntity.getInventory().size();
-						Inventory playerInventoryCopy = new SimpleInventory(inventorySize);
+						int inventorySize = serverPlayerEntity.getInventory().getContainerSize();
+						Container playerInventoryCopy = new SimpleContainer(inventorySize);
 						ItemStack itemStack;
 						int j;
 						for (int k = 0; k < inventorySize; k++) {
-							playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
+							playerInventoryCopy.setItem(k, serverPlayerEntity.getInventory().getItem(k).copy());
 						}
 
 						for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
@@ -125,16 +125,16 @@ public interface DialogueAnchor {
 							int itemCount = costStack.getCount();
 							if (!costStack.isEmpty()) {
 								for (j = 0; j < inventorySize; j++) {
-									if (ItemStack.areItemsAndComponentsEqual(playerInventoryCopy.getStack(j), costStack)) {
-										itemStack = playerInventoryCopy.getStack(j).copy();
+									if (ItemStack.isSameItemSameComponents(playerInventoryCopy.getItem(j), costStack)) {
+										itemStack = playerInventoryCopy.getItem(j).copy();
 										int stackCount = itemStack.getCount();
 										if (stackCount >= itemCount) {
 											itemStack.setCount(stackCount - itemCount);
-											playerInventoryCopy.setStack(j, itemStack);
+											playerInventoryCopy.setItem(j, itemStack);
 											itemCount = 0;
 											break;
 										} else {
-											playerInventoryCopy.setStack(j, ItemStack.EMPTY);
+											playerInventoryCopy.setItem(j, ItemStack.EMPTY);
 											itemCount = itemCount - stackCount;
 										}
 									}
@@ -181,12 +181,12 @@ public interface DialogueAnchor {
 
 					if (playerAdvancementTracker != null && serverAdvancementLoader != null) {
 
-						AdvancementEntry lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(dialogueAnswer.availability().lockAdvancement()));
+						AdvancementHolder lockAdvancementEntry = serverAdvancementLoader.get(Identifier.parse(dialogueAnswer.availability().lockAdvancement()));
 
-						AdvancementEntry unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(dialogueAnswer.availability().unlockAdvancement()));
+						AdvancementHolder unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.parse(dialogueAnswer.availability().unlockAdvancement()));
 
-						if ((dialogueAnswer.availability().lockAdvancement().isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone())) &&
-								(dialogueAnswer.availability().unlockAdvancement().isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone())) &&
+						if ((dialogueAnswer.availability().lockAdvancement().isEmpty() || (lockAdvancementEntry != null && !playerAdvancementTracker.getOrStartProgress(lockAdvancementEntry).isDone())) &&
+								(dialogueAnswer.availability().unlockAdvancement().isEmpty() || (unlockAdvancementEntry != null && playerAdvancementTracker.getOrStartProgress(unlockAdvancementEntry).isDone())) &&
 								unlockDataCheckPassed && !lockDataCheckPassed
 						) {
 							if (isItemCostAffordable) {
@@ -206,39 +206,60 @@ public interface DialogueAnchor {
 					visibleAnswersList.add("");
 				}
 			}
-			serverPlayerEntity.openHandledScreen(new ExtendedScreenHandlerFactory<>() {
-				@Override
-				public DialogueScreenHandler.DialogueData getScreenOpeningData(ServerPlayerEntity player) {
-					return new DialogueScreenHandler.DialogueData(
-							dialogueIdentifierString,
-							dataBlockPos,
-							dialogueUsedBlocks,
-							dialogueTriggeredBlocks,
-							unlockedAnswersList,
-							visibleAnswersList
-					);
-				}
-
-				@Override
-				public Text getDisplayName() {
-					return Text.empty();
-				}
-
-				@Nullable
-				@Override
-				public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-					return new DialogueScreenHandler(
-							syncId,
-							playerInventory,
-							dialogueIdentifierString,
-							dataBlockPos,
-							dialogueUsedBlocks,
-							dialogueTriggeredBlocks,
-							unlockedAnswersList,
-							visibleAnswersList
-					);
-				}
-			});
+			serverPlayerEntity.openMenu(createDialogueMenuProvider(
+					Component.empty(),
+					dialogueIdentifierString,
+					dataBlockPos,
+					dialogueUsedBlocks,
+					dialogueTriggeredBlocks,
+					unlockedAnswersList,
+					visibleAnswersList
+			));
 		}
 	}
+
+	static MenuProvider createDialogueMenuProvider(
+			Component title,
+			String dialogueIdentifierString,
+			BlockPos dataBlockPos,
+			List<MutablePair<String, BlockPos>> dialogueUsedBlocks,
+			List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks,
+			List<String> unlockedAnswersList,
+			List<String> visibleAnswersList
+	) {
+		return new ExtendedMenuProvider<>() {
+			@Override
+			public DialogueScreenHandler.DialogueData getScreenOpeningData(ServerPlayer player) {
+				return new DialogueScreenHandler.DialogueData(
+						dialogueIdentifierString,
+						dataBlockPos,
+						dialogueUsedBlocks,
+						dialogueTriggeredBlocks,
+						unlockedAnswersList,
+						visibleAnswersList
+				);
+			}
+
+			@Override
+			public Component getDisplayName() {
+				return title;
+			}
+
+			@Nullable
+			@Override
+			public DialogueScreenHandler createMenu(int syncId, Inventory playerInventory, Player player) {
+				return new DialogueScreenHandler(
+						syncId,
+						playerInventory,
+						dialogueIdentifierString,
+						dataBlockPos,
+						dialogueUsedBlocks,
+						dialogueTriggeredBlocks,
+						unlockedAnswersList,
+						visibleAnswersList
+				);
+			}
+		};
+	}
+
 }

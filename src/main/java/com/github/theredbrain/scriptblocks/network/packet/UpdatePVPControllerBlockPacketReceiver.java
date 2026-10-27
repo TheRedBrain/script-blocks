@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
@@ -18,10 +18,10 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 	@Override
 	public void receive(UpdatePVPControllerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -42,7 +42,7 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 
 		String matchDurationDataIdentifier = payload.matchDurationDataIdentifier();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -52,7 +52,7 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 		if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 			pvpControllerBlockEntity.reset();
 			if (!pvpControllerBlockEntity.setPVPArenaSettingsIdentifier(pvpArenaSettingsIdentifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("pvp_controller_block.pvpArenaSettingsIdentifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("pvp_controller_block.pvpArenaSettingsIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			pvpControllerBlockEntity.setRespawnPositions(sideEntrances);
@@ -61,10 +61,10 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 			pvpControllerBlockEntity.setMatchDurationDataIdentifier(matchDurationDataIdentifier);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
-			pvpControllerBlockEntity.markDirty();
-			world.updateListeners(pvpControllerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			pvpControllerBlockEntity.setChanged();
+			world.sendBlockUpdated(pvpControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

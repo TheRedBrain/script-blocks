@@ -8,41 +8,39 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Team;
 
 public class TeamControllerBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
 	private boolean enableTicking = true;
 
 	private boolean calculateAreaBox = true;
-	private Box area = null;
+	private AABB area = null;
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = new BlockPos(0, 0, 0);
@@ -50,35 +48,35 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 
 	private String teamIdentifier = "";
 	private String displayNameString = "";
-	private Formatting teamColor = Formatting.RESET;
+	private ChatFormatting teamColor = ChatFormatting.RESET;
 	private boolean friendlyFire = false;
 	private boolean showFriendlyInvisibles = false;
-	private AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.ALWAYS;
-	private AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.ALWAYS;
-	private AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.ALWAYS;
+	private Team.Visibility nametagVisibility = Team.Visibility.ALWAYS;
+	private Team.Visibility deathMessageVisibility = Team.Visibility.ALWAYS;
+	private Team.CollisionRule collisionRule = Team.CollisionRule.ALWAYS;
 	private String prefixString = "";
 	private String suffixString = "";
 
-	private Team team = null;
+	private PlayerTeam team = null;
 
 	public TeamControllerBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.TEAM_CONTROLLER_BLOCK_ENTITY, pos, state);
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
 		view.putBoolean("enable_ticking", this.enableTicking);
 
-		NbtCompound nbtCompound = new NbtCompound();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("area", CompoundTag.CODEC, nbtCompound.copy());
 
-		view.put("pvp_controller_block_position_offset", BlockPos.CODEC, this.pvpControllerBlockPositionOffset);
+		view.store("pvp_controller_block_position_offset", BlockPos.CODEC, this.pvpControllerBlockPositionOffset);
 
-		nbtCompound = new NbtCompound();
+		nbtCompound = new CompoundTag();
 		nbtCompound.putString("identifier", this.teamIdentifier);
 
 		nbtCompound.putString("display_name_string", this.displayNameString);
@@ -89,34 +87,34 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 
 		nbtCompound.putBoolean("show_friendly_invisibles", this.showFriendlyInvisibles);
 
-		nbtCompound.put("nametag_visibility", AbstractTeam.VisibilityRule.CODEC, this.nametagVisibility);
+		nbtCompound.store("nametag_visibility", Team.Visibility.CODEC, this.nametagVisibility);
 
-		nbtCompound.put("death_message_visibility", AbstractTeam.VisibilityRule.CODEC, this.deathMessageVisibility);
+		nbtCompound.store("death_message_visibility", Team.Visibility.CODEC, this.deathMessageVisibility);
 
-		nbtCompound.put("collision_rule", AbstractTeam.CollisionRule.CODEC, this.collisionRule);
+		nbtCompound.store("collision_rule", Team.CollisionRule.CODEC, this.collisionRule);
 
 		nbtCompound.putString("prefix_string", this.prefixString);
 
 		nbtCompound.putString("suffix_string", this.suffixString);
-		view.put("team_settings", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("team_settings", CompoundTag.CODEC, nbtCompound.copy());
 
-		super.writeData(view);
+		super.saveAdditional(view);
 
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.enableTicking = view.getBoolean("enable_ticking", true);
+		this.enableTicking = view.getBooleanOr("enable_ticking", true);
 
-		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.showArea = nbtCompound.getBoolean("visible", false);
+		CompoundTag nbtCompound = view.read("area", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.showArea = nbtCompound.getBooleanOr("visible", false);
 
 		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
 			this.areaPositionOffset = BlockPos.max(
 					BlockPos.min(
-							nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+							nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
@@ -124,74 +122,74 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 
 			this.pvpControllerBlockPositionOffset = BlockPos.max(
 					BlockPos.min(
-							nbtCompound.get("pvp_controller_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+							nbtCompound.read("pvp_controller_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
 			);
 
-		nbtCompound = view.read("team_settings", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.teamIdentifier = nbtCompound.getString("identifier", "");
+		nbtCompound = view.read("team_settings", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.teamIdentifier = nbtCompound.getStringOr("identifier", "");
 
-		this.displayNameString = nbtCompound.getString("display_name_string", "");
+		this.displayNameString = nbtCompound.getStringOr("display_name_string", "");
 
 
-		this.setTeamColor(nbtCompound.getInt("color_index", -1));
+		this.setTeamColor(nbtCompound.getIntOr("color_index", -1));
 
-		this.friendlyFire = nbtCompound.getBoolean("friendly_fire", false);
+		this.friendlyFire = nbtCompound.getBooleanOr("friendly_fire", false);
 
-		this.showFriendlyInvisibles = nbtCompound.getBoolean("show_friendly_invisibles", false);
+		this.showFriendlyInvisibles = nbtCompound.getBooleanOr("show_friendly_invisibles", false);
 
-		this.nametagVisibility = nbtCompound.get("nametag_visibility", AbstractTeam.VisibilityRule.CODEC).orElse(AbstractTeam.VisibilityRule.ALWAYS);
+		this.nametagVisibility = nbtCompound.read("nametag_visibility", Team.Visibility.CODEC).orElse(Team.Visibility.ALWAYS);
 
-		this.deathMessageVisibility = nbtCompound.get("death_message_visibility", AbstractTeam.VisibilityRule.CODEC).orElse(AbstractTeam.VisibilityRule.ALWAYS);
+		this.deathMessageVisibility = nbtCompound.read("death_message_visibility", Team.Visibility.CODEC).orElse(Team.Visibility.ALWAYS);
 
-		this.collisionRule = nbtCompound.get("collision_rule", AbstractTeam.CollisionRule.CODEC).orElse(AbstractTeam.CollisionRule.ALWAYS);
+		this.collisionRule = nbtCompound.read("collision_rule", Team.CollisionRule.CODEC).orElse(Team.CollisionRule.ALWAYS);
 
-		this.prefixString = nbtCompound.getString("prefix_string", "");
+		this.prefixString = nbtCompound.getStringOr("prefix_string", "");
 
-		this.suffixString = nbtCompound.getString("suffix_string", "");
+		this.suffixString = nbtCompound.getStringOr("suffix_string", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, TeamControllerBlockEntity teamControllerBlockEntity) {
-		if (!world.isClient() && teamControllerBlockEntity.enableTicking && world.getTime() % 80L == 0L) {
+	public static void tick(Level world, BlockPos pos, BlockState state, TeamControllerBlockEntity teamControllerBlockEntity) {
+		if (!world.isClientSide() && teamControllerBlockEntity.enableTicking && world.getGameTime() % 80L == 0L) {
 			if (teamControllerBlockEntity.calculateAreaBox || teamControllerBlockEntity.area == null) {
 				BlockPos areaPositionOffset = teamControllerBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = teamControllerBlockEntity.areaDimensions;
-				Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
-				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
-				teamControllerBlockEntity.area = new Box(areaStart, areaEnd);
+				Vec3 areaStart = new Vec3(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
+				Vec3 areaEnd = new Vec3(areaStart.x() + areaDimensions.getX(), areaStart.y() + areaDimensions.getY(), areaStart.z() + areaDimensions.getZ());
+				teamControllerBlockEntity.area = new AABB(areaStart, areaEnd);
 				teamControllerBlockEntity.calculateAreaBox = false;
-				teamControllerBlockEntity.markDirty();
-				world.updateListeners(pos, state, state, Block.NOTIFY_ALL);
+				teamControllerBlockEntity.setChanged();
+				world.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
 			}
-			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.world != null && !teamControllerBlockEntity.world.isClient()) {
+			if (teamControllerBlockEntity.team != null && teamControllerBlockEntity.level != null && !teamControllerBlockEntity.level.isClientSide()) {
 				BlockPos pvpControllerBlockPos = null;
 				PVPControllerBlockEntity pvpControllerBlockEntity = null;
-				if (teamControllerBlockEntity.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
+				if (teamControllerBlockEntity.pvpControllerBlockPositionOffset != BlockPos.ZERO) {
 					BlockPos pvpControllerBlockPositionOffset = teamControllerBlockEntity.pvpControllerBlockPositionOffset;
-					pvpControllerBlockPos = teamControllerBlockEntity.pos.add(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
-					BlockEntity blockEntity = teamControllerBlockEntity.world.getBlockEntity(pvpControllerBlockPos);
+					pvpControllerBlockPos = teamControllerBlockEntity.worldPosition.offset(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
+					BlockEntity blockEntity = teamControllerBlockEntity.level.getBlockEntity(pvpControllerBlockPos);
 					if (blockEntity instanceof PVPControllerBlockEntity) {
 						pvpControllerBlockEntity = (PVPControllerBlockEntity) blockEntity;
 					}
 				}
-				List<LivingEntity> livingEntityList = world.getNonSpectatingEntities(LivingEntity.class, teamControllerBlockEntity.area);
+				List<LivingEntity> livingEntityList = world.getEntitiesOfClass(LivingEntity.class, teamControllerBlockEntity.area);
 				for (LivingEntity livingEntity : livingEntityList) {
-					teamControllerBlockEntity.world.getScoreboard().addScoreHolderToTeam(livingEntity.getNameForScoreboard(), teamControllerBlockEntity.team);
-					if (livingEntity instanceof PlayerEntity playerEntity && pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
+					teamControllerBlockEntity.level.getScoreboard().addPlayerToTeam(livingEntity.getScoreboardName(), teamControllerBlockEntity.team);
+					if (livingEntity instanceof Player playerEntity && pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
 						DataAttachmentHelper.setCurrentPVPControllerBlockPosition(playerEntity, Optional.of(pvpControllerBlockPos));
 						pvpControllerBlockEntity.addPlayerAndTeam(teamControllerBlockEntity.team, playerEntity);
 					}
@@ -251,8 +249,8 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 		this.teamIdentifier = teamIdentifier;
 	}
 
-	public Text getDisplayName(World world) {
-		return Text.Serialization.fromLenientJson(this.displayNameString, world.getRegistryManager());
+	public Component getDisplayName(Level world) {
+		return Text.Serialization.fromLenientJson(this.displayNameString, world.registryAccess());
 	}
 
 	public String getDisplayNameString() {
@@ -263,17 +261,17 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 		this.displayNameString = displayNameString;
 	}
 
-	public Formatting getTeamColor() {
+	public ChatFormatting getTeamColor() {
 		return this.teamColor;
 	}
 
 	public int getTeamColorIndex() {
-		return this.teamColor.getColorIndex();
+		return this.teamColor.getId();
 	}
 
 	public void setTeamColor(int teamColorIndex) {
-		Formatting teamColor = Formatting.byColorIndex(teamColorIndex);
-		this.teamColor = teamColor != null ? teamColor : Formatting.RESET;
+		ChatFormatting teamColor = ChatFormatting.getById(teamColorIndex);
+		this.teamColor = teamColor != null ? teamColor : ChatFormatting.RESET;
 	}
 
 	public boolean friendlyFire() {
@@ -292,32 +290,32 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 		this.showFriendlyInvisibles = showFriendlyInvisibles;
 	}
 
-	public AbstractTeam.VisibilityRule getNametagVisibility() {
+	public Team.Visibility getNametagVisibility() {
 		return this.nametagVisibility;
 	}
 
-	public void setNametagVisibility(AbstractTeam.VisibilityRule nametagVisibility) {
+	public void setNametagVisibility(Team.Visibility nametagVisibility) {
 		this.nametagVisibility = nametagVisibility;
 	}
 
-	public AbstractTeam.VisibilityRule getDeathMessageVisibility() {
+	public Team.Visibility getDeathMessageVisibility() {
 		return this.deathMessageVisibility;
 	}
 
-	public void setDeathMessageVisibility(AbstractTeam.VisibilityRule deathMessageVisibility) {
+	public void setDeathMessageVisibility(Team.Visibility deathMessageVisibility) {
 		this.deathMessageVisibility = deathMessageVisibility;
 	}
 
-	public AbstractTeam.CollisionRule getCollisionRule() {
+	public Team.CollisionRule getCollisionRule() {
 		return this.collisionRule;
 	}
 
-	public void setCollisionRule(AbstractTeam.CollisionRule collisionRule) {
+	public void setCollisionRule(Team.CollisionRule collisionRule) {
 		this.collisionRule = collisionRule;
 	}
 
-	public Text getPrefix(World world) {
-		return Text.Serialization.fromLenientJson(this.prefixString, world.getRegistryManager());
+	public Component getPrefix(Level world) {
+		return Text.Serialization.fromLenientJson(this.prefixString, world.registryAccess());
 	}
 
 	public String getPrefixString() {
@@ -328,8 +326,8 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 		this.prefixString = prefixString;
 	}
 
-	public Text getSuffix(World world) {
-		return Text.Serialization.fromLenientJson(this.suffixString, world.getRegistryManager());
+	public Component getSuffix(Level world) {
+		return Text.Serialization.fromLenientJson(this.suffixString, world.registryAccess());
 	}
 
 	public String getSuffixString() {
@@ -348,21 +346,21 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 
 	@Override
 	public void handleUUIDList(List<UUID> list, boolean remove) {
-		if (this.world != null && !this.world.isClient() && this.team != null) {
+		if (this.level != null && !this.level.isClientSide() && this.team != null) {
 			list.forEach((uuid) -> {
-				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
+				Player playerEntity = this.level.getPlayerByUUID(uuid);
 				if (playerEntity != null) {
 					BlockPos pvpControllerBlockPos = null;
 					PVPControllerBlockEntity pvpControllerBlockEntity = null;
-					if (this.pvpControllerBlockPositionOffset != BlockPos.ORIGIN) {
+					if (this.pvpControllerBlockPositionOffset != BlockPos.ZERO) {
 						BlockPos pvpControllerBlockPositionOffset = this.pvpControllerBlockPositionOffset;
-						pvpControllerBlockPos = this.pos.add(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
-						BlockEntity blockEntity = this.world.getBlockEntity(pvpControllerBlockPos);
+						pvpControllerBlockPos = this.worldPosition.offset(pvpControllerBlockPositionOffset.getX(), pvpControllerBlockPositionOffset.getY(), pvpControllerBlockPositionOffset.getZ());
+						BlockEntity blockEntity = this.level.getBlockEntity(pvpControllerBlockPos);
 						if (blockEntity instanceof PVPControllerBlockEntity) {
 							pvpControllerBlockEntity = (PVPControllerBlockEntity) blockEntity;
 						}
 					}
-					this.world.getScoreboard().addScoreHolderToTeam(playerEntity.getNameForScoreboard(), this.team);
+					this.level.getScoreboard().addPlayerToTeam(playerEntity.getScoreboardName(), this.team);
 					if (pvpControllerBlockPos != null && pvpControllerBlockEntity != null) {
 						DataAttachmentHelper.setCurrentPVPControllerBlockPosition(playerEntity, Optional.of(pvpControllerBlockPos));
 						pvpControllerBlockEntity.addPlayerAndTeam(this.team, playerEntity);
@@ -375,79 +373,79 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	@Override
 	public void reset() {
 		if (this.team != null) {
-			this.team.getScoreboard().removeTeam(this.team);
+			this.team.getScoreboard().removePlayerTeam(this.team);
 			this.team = null;
 		}
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
 	@Override
 	public void trigger() {
-		if (this.team == null && this.world != null && !this.world.isClient()) {
-			if (this.world.getScoreboard().getTeam(this.teamIdentifier) == null) {
-				this.world.getScoreboard().addTeam(this.teamIdentifier);
+		if (this.team == null && this.level != null && !this.level.isClientSide()) {
+			if (this.level.getScoreboard().getPlayerTeam(this.teamIdentifier) == null) {
+				this.level.getScoreboard().addPlayerTeam(this.teamIdentifier);
 			}
 
-			this.team = this.world.getScoreboard().getTeam(this.teamIdentifier);
+			this.team = this.level.getScoreboard().getPlayerTeam(this.teamIdentifier);
 			if (this.team != null) {
 				if (!this.displayNameString.isEmpty()) {
-					this.team.setDisplayName(this.getDisplayName(this.world));
+					this.team.setDisplayName(this.getDisplayName(this.level));
 				}
 				if (!this.prefixString.isEmpty()) {
-					this.team.setPrefix(this.getPrefix(this.world));
+					this.team.setPlayerPrefix(this.getPrefix(this.level));
 				}
 				if (!this.suffixString.isEmpty()) {
-					this.team.setSuffix(this.getSuffix(this.world));
+					this.team.setPlayerSuffix(this.getSuffix(this.level));
 				}
-				this.team.setFriendlyFireAllowed(this.friendlyFire);
-				this.team.setShowFriendlyInvisibles(this.showFriendlyInvisibles);
-				AbstractTeam.VisibilityRule nametagVisibility = AbstractTeam.VisibilityRule.getRule(this.nametagVisibility);
-				this.team.setNameTagVisibilityRule(nametagVisibility != null ? nametagVisibility : AbstractTeam.VisibilityRule.ALWAYS);
-				AbstractTeam.VisibilityRule deathMessageVisibility = AbstractTeam.VisibilityRule.getRule(this.deathMessageVisibility);
-				this.team.setDeathMessageVisibilityRule(deathMessageVisibility != null ? deathMessageVisibility : AbstractTeam.VisibilityRule.ALWAYS);
-				AbstractTeam.CollisionRule collisionRule = AbstractTeam.CollisionRule.valueOf(this.collisionRule);
-				this.team.setCollisionRule(collisionRule != null ? collisionRule : AbstractTeam.CollisionRule.ALWAYS);
+				this.team.setAllowFriendlyFire(this.friendlyFire);
+				this.team.setSeeFriendlyInvisibles(this.showFriendlyInvisibles);
+				Team.Visibility nametagVisibility = Team.Visibility.getRule(this.nametagVisibility);
+				this.team.setNameTagVisibility(nametagVisibility != null ? nametagVisibility : Team.Visibility.ALWAYS);
+				Team.Visibility deathMessageVisibility = Team.Visibility.getRule(this.deathMessageVisibility);
+				this.team.setDeathMessageVisibility(deathMessageVisibility != null ? deathMessageVisibility : Team.Visibility.ALWAYS);
+				Team.CollisionRule collisionRule = Team.CollisionRule.valueOf(this.collisionRule);
+				this.team.setCollisionRule(collisionRule != null ? collisionRule : Team.CollisionRule.ALWAYS);
 				this.team.setColor(this.teamColor);
 			}
 		}
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.FRONT_BACK);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.LEFT_RIGHT);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

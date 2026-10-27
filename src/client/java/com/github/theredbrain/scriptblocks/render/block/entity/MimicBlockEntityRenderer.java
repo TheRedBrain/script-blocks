@@ -3,35 +3,35 @@ package com.github.theredbrain.scriptblocks.render.block.entity;
 import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.util.RandomSource;
 
 @Environment(value = EnvType.CLIENT)
 public class MimicBlockEntityRenderer
 		implements BlockEntityRenderer<MimicBlockEntity> {
-	public MimicBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
+	public MimicBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
 	}
 
 	@Override
-	public void render(MimicBlockEntity mimicBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
-		BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
-		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getBlockLayer(mimicBlockEntity.getCurrentMimicBlockState()));
+	public void render(MimicBlockEntity mimicBlockEntity, float f, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, int j) {
+		BlockRenderDispatcher blockRenderManager = Minecraft.getInstance().getBlockRenderer();
+		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderTypes.getBlockLayer(mimicBlockEntity.getCurrentMimicBlockState()));
 		boolean debugRender = ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode;
-		ClientPlayerEntity player = MinecraftClient.getInstance().player;
+		LocalPlayer player = Minecraft.getInstance().player;
 		if (player != null) {
-			debugRender = debugRender || (player.isCreativeLevelTwoOp() && player.getInventory().getMainHandStack().isOf(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()));
+			debugRender = debugRender || (player.canUseGameMasterBlocks() && player.getInventory().getMainHandStack().isOf(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()));
 		}
-		blockRenderManager.renderBlock(debugRender ? ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState() : mimicBlockEntity.getCurrentMimicBlockState(), mimicBlockEntity.getPos(), mimicBlockEntity.getWorld(), matrixStack, vertexConsumer, true, Random.create());
+		blockRenderManager.renderBatched(debugRender ? ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState() : mimicBlockEntity.getCurrentMimicBlockState(), mimicBlockEntity.getPos(), mimicBlockEntity.getWorld(), matrixStack, vertexConsumer, true, RandomSource.create());
 	}
 
 	@Override

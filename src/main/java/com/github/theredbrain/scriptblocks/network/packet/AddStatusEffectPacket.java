@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record AddStatusEffectPacket(
 		Identifier effectId,
@@ -14,15 +14,15 @@ public record AddStatusEffectPacket(
 		boolean showParticles,
 		boolean showIcon,
 		boolean toggle
-) implements CustomPayload {
-	public static final CustomPayload.Id<AddStatusEffectPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("add_status_effect"));
-	public static final PacketCodec<RegistryByteBuf, AddStatusEffectPacket> PACKET_CODEC = PacketCodec.of(AddStatusEffectPacket::write, AddStatusEffectPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<AddStatusEffectPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("add_status_effect"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, AddStatusEffectPacket> PACKET_CODEC = StreamCodec.ofMember(AddStatusEffectPacket::write, AddStatusEffectPacket::new);
 
-	public AddStatusEffectPacket(RegistryByteBuf registryByteBuf) {
+	public AddStatusEffectPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(registryByteBuf.readIdentifier(), registryByteBuf.readInt(), registryByteBuf.readInt(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean(), registryByteBuf.readBoolean());
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeIdentifier(this.effectId);
 		registryByteBuf.writeInt(this.duration);
 		registryByteBuf.writeInt(this.amplifier);
@@ -33,7 +33,7 @@ public record AddStatusEffectPacket(
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

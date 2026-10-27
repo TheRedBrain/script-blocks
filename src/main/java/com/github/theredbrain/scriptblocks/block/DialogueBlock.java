@@ -3,56 +3,56 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class DialogueBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<DialogueBlock> CODEC = createCodec(DialogueBlock::new);
+	public static final MapCodec<DialogueBlock> CODEC = simpleCodec(DialogueBlock::new);
 
-	public DialogueBlock(Settings settings) {
+	public DialogueBlock(Properties settings) {
 		super(settings);
 	}
 
-	public MapCodec<DialogueBlock> getCodec() {
+	public MapCodec<DialogueBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new DialogueBlockEntity(pos, state);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
-			if (player.isCreativeLevelTwoOp()) {
+			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openDialogueBlockScreen(dialogueBlockEntity);
-				return ActionResult.success(world.isClient);
-			} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+				return InteractionResult.success(world.isClientSide);
+			} else if (player instanceof ServerPlayer serverPlayerEntity) {
 				String dialogue = DialogueAnchor.getDialogue(world, player, dialogueBlockEntity.getStartingDialogueList());
 				MinecraftServer server = serverPlayerEntity.getServer();
 				if (!dialogue.isEmpty() && server != null) {
 					DialogueAnchor.openDialogueScreen(world, server, serverPlayerEntity, dialogue, dialogueBlockEntity.getDataBlockPos(), dialogueBlockEntity.getDialogueUsedBlocks(), dialogueBlockEntity.getDialogueTriggeredBlocks());
-					return ActionResult.CONSUME;
+					return InteractionResult.CONSUME;
 				}
 			}
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 }

@@ -15,30 +15,23 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,9 +48,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	private String preventInteractionIdentifierString = "";
 	private String interactionPreventedMessage = "";
 
-	private BlockPos uuidListHandlerPositionOffset = BlockPos.ORIGIN;
+	private BlockPos uuidListHandlerPositionOffset = BlockPos.ZERO;
 
-	private BlockPos accessPositionOffset = BlockPos.ORIGIN;
+	private BlockPos accessPositionOffset = BlockPos.ZERO;
 	private boolean setAccessPosition = false;
 
 	private boolean onlyTeleportDimensionOwner = false;
@@ -69,7 +62,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	private TeleportationMode teleportationMode = TeleportationMode.DIRECT;
 
 	// direct teleportation mode
-	private BlockPos directTeleportPositionOffset = BlockPos.ORIGIN;
+	private BlockPos directTeleportPositionOffset = BlockPos.ZERO;
 	private double directTeleportOrientationYaw = 0.0;
 	private double directTeleportOrientationPitch = 0.0;
 
@@ -87,11 +80,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	private String sentDataIdentifierAppendix = "";
 	private String sentDataValueAppendix = "";
 
-	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 
-	private MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
-	private BlockPos onTeleportUUIDListHandlerPositionOffset = BlockPos.ORIGIN;
-	private MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private MutablePair<BlockPos, Boolean> preTeleportTriggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
+	private BlockPos onTeleportUUIDListHandlerPositionOffset = BlockPos.ZERO;
+	private MutablePair<BlockPos, Boolean> postTeleportTriggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 
 	private String teleporterName = "gui.teleporter_block.teleporter_name_field.label";
 	private String currentTargetOwnerLabel = "gui.teleporter_block.target_owner_field.label";
@@ -106,20 +99,20 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("screen_page", this.creativeScreenPage.asString());
+		view.putString("screen_page", this.creativeScreenPage.getSerializedName());
 
 		view.putString("prevent_interaction_identifier_string", this.preventInteractionIdentifierString);
 
 		view.putString("interaction_prevented_message", this.interactionPreventedMessage);
 
-		view.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
+		view.store("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
 
-		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.accessPositionOffset);
+		CompoundTag nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.accessPositionOffset);
 		nbtCompound.putBoolean("is_enabled", this.setAccessPosition);
-		view.put("location_access", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("location_access", CompoundTag.CODEC, nbtCompound.copy());
 
 		view.putBoolean("only_teleport_dimension_owner", this.onlyTeleportDimensionOwner);
 
@@ -127,19 +120,19 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		view.putBoolean("teleport_team", this.teleportTeam);
 
-		view.putString("teleportation_mode", this.teleportationMode.asString());
+		view.putString("teleportation_mode", this.teleportationMode.getSerializedName());
 
-		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.directTeleportPositionOffset);
+		nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.directTeleportPositionOffset);
 		nbtCompound.putDouble("yaw", this.directTeleportOrientationYaw);
 		nbtCompound.putDouble("pitch", this.directTeleportOrientationPitch);
-		view.put("direct_teleport", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("direct_teleport", CompoundTag.CODEC, nbtCompound.copy());
 
-		view.putString("spawn_point_type", this.spawnPointType.asString());
+		view.putString("spawn_point_type", this.spawnPointType.getSerializedName());
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("locations", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("locations", CompoundTag.CODEC);
 		for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> location : this.locationsList) {
-			nbtCompound = new NbtCompound();
+			nbtCompound = new CompoundTag();
 			nbtCompound.putString("identifier", location.getLeft().getLeft());
 			nbtCompound.putString("entrance", location.getLeft().getRight());
 			nbtCompound.putString("sent_data_id", location.getRight().getLeft());
@@ -147,7 +140,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			listAppender.add(nbtCompound.copy());
 		}
 
-		nbtCompound = new NbtCompound();
+		nbtCompound = new CompoundTag();
 		nbtCompound.putString("identifier", this.location.getLeft().getLeft());
 		nbtCompound.putString("entrance", this.location.getLeft().getRight());
 		nbtCompound.putString("sent_data_id", this.location.getRight().getLeft());
@@ -156,25 +149,25 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		nbtCompound.putString("entrance_appendix", this.entranceAppendix);
 		nbtCompound.putString("sent_data_id_appendix", this.sentDataIdentifierAppendix);
 		nbtCompound.putString("sent_data_appendix", this.sentDataValueAppendix);
-		view.put("location", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("location", CompoundTag.CODEC, nbtCompound.copy());
 
-		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
+		view.store("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.preTeleportTriggeredBlock.getLeft());
+		nbtCompound = new CompoundTag();
+		nbtCompound.store("triggered_block_position_offset", BlockPos.CODEC, this.preTeleportTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.preTeleportTriggeredBlock.getRight());
-		view.put("pre_teleport", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("pre_teleport", CompoundTag.CODEC, nbtCompound.copy());
 
-		nbtCompound = new NbtCompound();
-		nbtCompound.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.onTeleportUUIDListHandlerPositionOffset);
-		view.put("on_teleport", NbtCompound.CODEC, nbtCompound.copy());
+		nbtCompound = new CompoundTag();
+		nbtCompound.store("uuid_list_handler_position_offset", BlockPos.CODEC, this.onTeleportUUIDListHandlerPositionOffset);
+		view.store("on_teleport", CompoundTag.CODEC, nbtCompound.copy());
 
-		nbtCompound = new NbtCompound();
-		nbtCompound.put("triggered_block_position_offset", BlockPos.CODEC, this.postTeleportTriggeredBlock.getLeft());
+		nbtCompound = new CompoundTag();
+		nbtCompound.store("triggered_block_position_offset", BlockPos.CODEC, this.postTeleportTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("triggered_block_resets", this.postTeleportTriggeredBlock.getRight());
-		view.put("post_teleport", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("post_teleport", CompoundTag.CODEC, nbtCompound.copy());
 
-		nbtCompound = new NbtCompound();
+		nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("show_adventure_screen", this.showAdventureScreen);
 		nbtCompound.putString("teleporter_name", this.teleporterName);
 		nbtCompound.putString("current_target_identifier_label", this.currentTargetIdentifierLabel);
@@ -183,180 +176,180 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		nbtCompound.putBoolean("can_owner_be_chosen", this.canOwnerBeChosen);
 		nbtCompound.putString("teleport_button_label", this.teleportButtonLabel);
 		nbtCompound.putString("cancel_teleport_button_label", this.cancelTeleportButtonLabel);
-		view.put("gameplay_screen", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("gameplay_screen", CompoundTag.CODEC, nbtCompound.copy());
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.creativeScreenPage = CreativeScreenPage.byName(view.getString("screen_page", "")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
+		this.creativeScreenPage = CreativeScreenPage.byName(view.getStringOr("screen_page", "")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
 
-		this.preventInteractionIdentifierString = view.getString("prevent_interaction_identifier_string", "");
+		this.preventInteractionIdentifierString = view.getStringOr("prevent_interaction_identifier_string", "");
 
-		this.interactionPreventedMessage = view.getString("interaction_prevented_message", "");
+		this.interactionPreventedMessage = view.getStringOr("interaction_prevented_message", "");
 
 		this.uuidListHandlerPositionOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		NbtCompound nbtCompound = view.read("location_access", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("location_access", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.accessPositionOffset = BlockPos.max(
 				BlockPos.min(
-						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.setAccessPosition = nbtCompound.getBoolean("is_enabled", false);
+		this.setAccessPosition = nbtCompound.getBooleanOr("is_enabled", false);
 
-		this.onlyTeleportDimensionOwner = view.getBoolean("only_teleport_dimension_owner", false);
+		this.onlyTeleportDimensionOwner = view.getBooleanOr("only_teleport_dimension_owner", false);
 
-		this.onlyDimensionOwnerCanTeleportMessage = view.getString("only_dimension_owner_can_teleport_message", "hud.message.only_dimension_owner_can_teleport");
+		this.onlyDimensionOwnerCanTeleportMessage = view.getStringOr("only_dimension_owner_can_teleport_message", "hud.message.only_dimension_owner_can_teleport");
 
-		this.teleportTeam = view.getBoolean("teleport_team", false);
+		this.teleportTeam = view.getBooleanOr("teleport_team", false);
 
-		this.teleportationMode = TeleportationMode.byName(view.getString("teleportation_mode", "")).orElseGet(() -> TeleportationMode.DIRECT);
+		this.teleportationMode = TeleportationMode.byName(view.getStringOr("teleportation_mode", "")).orElseGet(() -> TeleportationMode.DIRECT);
 
-		nbtCompound = view.read("direct_teleport", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("direct_teleport", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.directTeleportPositionOffset = BlockPos.max(
 				BlockPos.min(
-						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.directTeleportOrientationYaw = nbtCompound.getDouble("yaw", 0);
+		this.directTeleportOrientationYaw = nbtCompound.getDoubleOr("yaw", 0);
 
-		this.directTeleportOrientationPitch = nbtCompound.getDouble("pitch", 0);
+		this.directTeleportOrientationPitch = nbtCompound.getDoubleOr("pitch", 0);
 
-		this.spawnPointType = SpawnPointType.byName(view.getString("spawn_point_type", "")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
+		this.spawnPointType = SpawnPointType.byName(view.getStringOr("spawn_point_type", "")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
 
 		this.locationsList.clear();
-				for (NbtCompound nbtCompound1 : view.getTypedListView("locations", NbtCompound.CODEC)) {
+				for (CompoundTag nbtCompound1 : view.listOrEmpty("locations", CompoundTag.CODEC)) {
 				this.locationsList.add(
 						new MutablePair<>(
 								new MutablePair<>(
-										nbtCompound1.getString("identifier", ""),
-										nbtCompound1.getString("entrance", "")
+										nbtCompound1.getStringOr("identifier", ""),
+										nbtCompound1.getStringOr("entrance", "")
 								),
 								new MutablePair<>(
-										nbtCompound1.getString("sent_data_id", ""),
-										nbtCompound1.getString("sent_data", "")
+										nbtCompound1.getStringOr("sent_data_id", ""),
+										nbtCompound1.getStringOr("sent_data", "")
 								)
 						)
 				);
 			}
 
-		nbtCompound = view.read("location", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("location", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.location = new MutablePair<>(
 				new MutablePair<>(
-						nbtCompound.getString("identifier", ""),
-						nbtCompound.getString("entrance", "")
+						nbtCompound.getStringOr("identifier", ""),
+						nbtCompound.getStringOr("entrance", "")
 				),
 				new MutablePair<>(
-						nbtCompound.getString("sent_data_id", ""),
-						nbtCompound.getString("sent_data", "")
+						nbtCompound.getStringOr("sent_data_id", ""),
+						nbtCompound.getStringOr("sent_data", "")
 				)
 		);
 
-		this.sentDataValueAppendix = nbtCompound.getString("identifier_appendix", "");
+		this.sentDataValueAppendix = nbtCompound.getStringOr("identifier_appendix", "");
 
-		this.sentDataValueAppendix = nbtCompound.getString("entrance_appendix", "");
+		this.sentDataValueAppendix = nbtCompound.getStringOr("entrance_appendix", "");
 
-		this.sentDataValueAppendix = nbtCompound.getString("sent_data_id_appendix", "");
+		this.sentDataValueAppendix = nbtCompound.getStringOr("sent_data_id_appendix", "");
 
-		this.sentDataValueAppendix = nbtCompound.getString("sent_data_appendix", "");
+		this.sentDataValueAppendix = nbtCompound.getStringOr("sent_data_appendix", "");
 
 		this.dataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		nbtCompound = view.read("pre_teleport", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("pre_teleport", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.preTeleportTriggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("triggered_block_resets", false)
+				nbtCompound.getBooleanOr("triggered_block_resets", false)
 		);
 
-		nbtCompound = view.read("on_teleport", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("on_teleport", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.onTeleportUUIDListHandlerPositionOffset = BlockPos.max(
 				BlockPos.min(
-						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						nbtCompound.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		nbtCompound = view.read("post_teleport", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("post_teleport", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.postTeleportTriggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("triggered_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("triggered_block_resets", false)
+				nbtCompound.getBooleanOr("triggered_block_resets", false)
 		);
 
-		nbtCompound = view.read("gameplay_screen", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.showAdventureScreen = nbtCompound.getBoolean("show_adventure_screen", true);
+		nbtCompound = view.read("gameplay_screen", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.showAdventureScreen = nbtCompound.getBooleanOr("show_adventure_screen", true);
 
-		this.teleporterName = nbtCompound.getString("teleporter_name", "gui.teleporter_block.teleporter_name_field.label");
+		this.teleporterName = nbtCompound.getStringOr("teleporter_name", "gui.teleporter_block.teleporter_name_field.label");
 
-		this.currentTargetIdentifierLabel = nbtCompound.getString("current_target_identifier_label", "gui.teleporter_block.target_identifier_field.label");
+		this.currentTargetIdentifierLabel = nbtCompound.getStringOr("current_target_identifier_label", "gui.teleporter_block.target_identifier_field.label");
 
-		this.currentTargetOwnerLabel = nbtCompound.getString("current_target_owner_label", "gui.teleporter_block.target_owner_field.label");
+		this.currentTargetOwnerLabel = nbtCompound.getStringOr("current_target_owner_label", "gui.teleporter_block.target_owner_field.label");
 
-		this.showCancelButton = nbtCompound.getBoolean("show_cancel_button", true);
+		this.showCancelButton = nbtCompound.getBooleanOr("show_cancel_button", true);
 
-		this.canOwnerBeChosen = nbtCompound.getBoolean("can_owner_be_chosen", true);
+		this.canOwnerBeChosen = nbtCompound.getBooleanOr("can_owner_be_chosen", true);
 
-		this.teleportButtonLabel = nbtCompound.getString("teleport_button_label", "gui.teleporter_block.teleport_button.label");
+		this.teleportButtonLabel = nbtCompound.getStringOr("teleport_button_label", "gui.teleporter_block.teleport_button.label");
 
-		this.cancelTeleportButtonLabel = nbtCompound.getString("cancel_teleport_button_label", "gui.teleporter_block.cancel_teleport_button.label");
+		this.cancelTeleportButtonLabel = nbtCompound.getStringOr("cancel_teleport_button_label", "gui.teleporter_block.cancel_teleport_button.label");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
-	public static void openNonCreativeScreen(World world, ServerPlayerEntity serverPlayerEntity, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
+	public static void openNonCreativeScreen(Level world, ServerPlayer serverPlayerEntity, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
 
-		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUuid().toString().equals(world.getRegistryKey().getValue().getPath())) {
+		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUUID().toString().equals(world.dimension().identifier().getPath())) {
 			if (!teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage().isEmpty()) {
-				serverPlayerEntity.sendMessage(Text.translatable(teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage()), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable(teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage()), true);
 			}
 			return;
 		}
 
 		if (!teleporterBlockEntity.getPreventInteractionIdentifierString().isEmpty() && !PlayerEntityHelper.allowInteractions(serverPlayerEntity, teleporterBlockEntity.getPreventInteractionIdentifierString())) {
 			if (!teleporterBlockEntity.getInteractionPreventedMessage().isEmpty()) {
-				serverPlayerEntity.sendMessage(Text.translatable(teleporterBlockEntity.getInteractionPreventedMessage()), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable(teleporterBlockEntity.getInteractionPreventedMessage()), true);
 			}
 			return;
 		}
@@ -364,14 +357,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		List<VisibleLocation> visibleLocationsList = new ArrayList<>();
 
 		// check locationsList for visible / unlocked locations
-		if (teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS || teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+		if (teleporterBlockEntity.getTeleportationMode() == TeleportationMode.LOCATIONS || teleporterBlockEntity.getTeleportationMode() == TeleportationMode.LOCATION) {
 
-			if (teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
+			if (teleporterBlockEntity.getTeleportationMode() == TeleportationMode.LOCATIONS) {
 				for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : teleporterBlockEntity.locationsList) {
 
 					Location location = null;
 					if (world != null) {
-						Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(entry.getLeft().getLeft()));
+						Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.parse(entry.getLeft().getLeft()));
 						if (optionalLocationReference.isPresent()) {
 							location = optionalLocationReference.get().value();
 						}
@@ -387,11 +380,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 						}
 					}
 				}
-			} else if (teleporterBlockEntity.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATION) {
+			} else if (teleporterBlockEntity.getTeleportationMode() == TeleportationMode.LOCATION) {
 				MutablePair<MutablePair<String, String>, MutablePair<String, String>> dataDrivenLocation = teleporterBlockEntity.getDataDrivenLocation();
 				Location location = null;
 				if (world != null) {
-					Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.of(dataDrivenLocation.getLeft().getLeft()));
+					Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.parse(dataDrivenLocation.getLeft().getLeft()));
 					if (optionalLocationReference.isPresent()) {
 						location = optionalLocationReference.get().value();
 					}
@@ -409,7 +402,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			}
 		}
 
-		serverPlayerEntity.openHandledScreen(new ExtendedScreenHandlerFactory<>() {
+		serverPlayerEntity.openMenu(new ExtendedScreenHandlerFactory<>() {
 
 			@Override
 			public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayerEntity player) {
@@ -434,8 +427,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public void preTeleportTrigger() {
-		if (this.world != null && !this.preTeleportTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.preTeleportTriggeredBlock.getLeft().getX(), this.pos.getY() + this.preTeleportTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.preTeleportTriggeredBlock.getLeft().getZ()));
+		if (this.level != null && !this.preTeleportTriggeredBlock.getLeft().equals(BlockPos.ZERO)) {
+			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.preTeleportTriggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.preTeleportTriggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.preTeleportTriggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.preTeleportTriggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -448,8 +441,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public void sendPostTeleportUUIDList(List<UUID> uuidList) {
-		if (this.world != null && !this.onTeleportUUIDListHandlerPositionOffset.equals(BlockPos.ORIGIN)) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.onTeleportUUIDListHandlerPositionOffset.getX(), this.pos.getY() + this.onTeleportUUIDListHandlerPositionOffset.getY(), this.pos.getZ() + this.onTeleportUUIDListHandlerPositionOffset.getZ()));
+		if (this.level != null && !this.onTeleportUUIDListHandlerPositionOffset.equals(BlockPos.ZERO)) {
+			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.onTeleportUUIDListHandlerPositionOffset.getX(), this.worldPosition.getY() + this.onTeleportUUIDListHandlerPositionOffset.getY(), this.worldPosition.getZ() + this.onTeleportUUIDListHandlerPositionOffset.getZ()));
 			if (blockEntity != this && blockEntity instanceof HandlesUUIDList handlesUUIDList) {
 				handlesUUIDList.handleUUIDList(uuidList, false);
 			}
@@ -457,8 +450,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	public void postTeleportTrigger() {
-		if (this.world != null && !this.postTeleportTriggeredBlock.getLeft().equals(BlockPos.ORIGIN)) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.postTeleportTriggeredBlock.getLeft().getX(), this.pos.getY() + this.postTeleportTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.postTeleportTriggeredBlock.getLeft().getZ()));
+		if (this.level != null && !this.postTeleportTriggeredBlock.getLeft().equals(BlockPos.ZERO)) {
+			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.postTeleportTriggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.postTeleportTriggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.postTeleportTriggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.postTeleportTriggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -471,13 +464,13 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	}
 
 	private List<UUID> getUUIDListFromHandler() {
-		if (this.world != null) {
+		if (this.level != null) {
 
-			BlockEntity blockEntity = world.getBlockEntity(
+			BlockEntity blockEntity = level.getBlockEntity(
 					new BlockPos(
-							this.pos.getX() + this.uuidListHandlerPositionOffset.getX(),
-							this.pos.getY() + this.uuidListHandlerPositionOffset.getY(),
-							this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ()
+							this.worldPosition.getX() + this.uuidListHandlerPositionOffset.getX(),
+							this.worldPosition.getY() + this.uuidListHandlerPositionOffset.getY(),
+							this.worldPosition.getZ() + this.uuidListHandlerPositionOffset.getZ()
 					)
 			);
 			if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
@@ -489,11 +482,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
+		if (this.level != null) {
 			this.getUUIDListFromHandler().forEach((uuid) -> {
-				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
-				if (playerEntity instanceof ServerPlayerEntity serverPlayerEntity && !playerEntity.isCreative()) {
-					openNonCreativeScreen(this.world, serverPlayerEntity, this.pos, this.world.getBlockState(this.pos), this);
+				Player playerEntity = this.level.getPlayerByUUID(uuid);
+				if (playerEntity instanceof ServerPlayer serverPlayerEntity && !playerEntity.isCreative()) {
+					openNonCreativeScreen(this.level, serverPlayerEntity, this.worldPosition, this.level.getBlockState(this.worldPosition), this);
 				}
 			});
 		}
@@ -506,11 +499,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 	@Override
 	public void handleUUIDList(List<UUID> list, boolean remove) {
-		if (this.world != null) {
+		if (this.level != null) {
 			list.forEach((uuid) -> {
-				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
-				if (playerEntity instanceof ServerPlayerEntity serverPlayerEntity && !playerEntity.isCreative()) {
-					openNonCreativeScreen(this.world, serverPlayerEntity, this.pos, this.world.getBlockState(this.pos), this);
+				Player playerEntity = this.level.getPlayerByUUID(uuid);
+				if (playerEntity instanceof ServerPlayer serverPlayerEntity && !playerEntity.isCreative()) {
+					openNonCreativeScreen(this.level, serverPlayerEntity, this.worldPosition, this.level.getBlockState(this.worldPosition), this);
 				}
 			});
 		}
@@ -528,8 +521,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		String dataValueString = this.location.getRight().getRight() + this.sentDataValueAppendix;
 
 		BlockPos dataProvidingBlockPosOffset = this.dataProvidingBlockPosOffset;
-		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity = this.world.getBlockEntity(this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
+		if (dataProvidingBlockPosOffset != BlockPos.ZERO && this.level != null) {
+			BlockEntity blockEntity = this.level.getBlockEntity(this.getBlockPos().offset(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ()));
 			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
 				locationString = locationString + providesDataBlockEntity.getData(this.locationAppendix);
 				entranceString = entranceString + providesDataBlockEntity.getData(this.entranceAppendix);
@@ -815,8 +808,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				this.uuidListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerPositionOffset, blockRotation);
 
@@ -825,46 +818,46 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 				this.directTeleportPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.directTeleportPositionOffset, blockRotation);
 				this.directTeleportOrientationYaw = BlockRotationUtils.rotateYaw(this.directTeleportOrientationYaw, blockRotation);
 
-				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, blockRotation);
-				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.FRONT_BACK);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, Mirror.FRONT_BACK);
 
-				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, BlockMirror.FRONT_BACK);
+				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, Mirror.FRONT_BACK);
 
-				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, BlockMirror.FRONT_BACK);
-				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, BlockMirror.FRONT_BACK);
+				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, Mirror.FRONT_BACK);
+				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, Mirror.FRONT_BACK);
 
-				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, BlockMirror.FRONT_BACK);
-				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
+				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, Mirror.FRONT_BACK);
+				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, Mirror.LEFT_RIGHT);
 
-				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, Mirror.LEFT_RIGHT);
 
-				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, BlockMirror.LEFT_RIGHT);
+				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, Mirror.LEFT_RIGHT);
+				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, Mirror.LEFT_RIGHT);
 
-				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
-				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
+				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, Mirror.LEFT_RIGHT);
+				this.postTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.postTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
 
-	public enum TeleportationMode implements StringIdentifiable {
+	public enum TeleportationMode implements StringRepresentable {
 		DIRECT("direct"),
 		SPAWN_POINTS("spawn_points"),
 		LOCATIONS("locations"),
@@ -877,20 +870,20 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<TeleportationMode> byName(String name) {
-			return Arrays.stream(TeleportationMode.values()).filter(teleportationMode -> teleportationMode.asString().equals(name)).findFirst();
+			return Arrays.stream(TeleportationMode.values()).filter(teleportationMode -> teleportationMode.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.teleporter_block.teleportation_mode." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.teleporter_block.teleportation_mode." + this.name);
 		}
 	}
 
-	public enum SpawnPointType implements StringIdentifiable {
+	public enum SpawnPointType implements StringRepresentable {
 		WORLD_SPAWN("world_spawn"),
 		PLAYER_SPAWN("player_spawn"),
 		LOCATION_ACCESS_POSITION("location_access_position");
@@ -902,20 +895,20 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<SpawnPointType> byName(String name) {
-			return Arrays.stream(SpawnPointType.values()).filter(spawnPointType -> spawnPointType.asString().equals(name)).findFirst();
+			return Arrays.stream(SpawnPointType.values()).filter(spawnPointType -> spawnPointType.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.teleporter_block.spawn_point_type." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.teleporter_block.spawn_point_type." + this.name);
 		}
 	}
 
-	public enum CreativeScreenPage implements StringIdentifiable {
+	public enum CreativeScreenPage implements StringRepresentable {
 		ACTIVATION("activation"),
 		TELEPORTATION_MODE("teleportation_mode"),
 		ON_TELEPORT_EVENTS("on_teleport_events"),
@@ -928,16 +921,16 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<CreativeScreenPage> byName(String name) {
-			return Arrays.stream(CreativeScreenPage.values()).filter(creativeScreenPage -> creativeScreenPage.asString().equals(name)).findFirst();
+			return Arrays.stream(CreativeScreenPage.values()).filter(creativeScreenPage -> creativeScreenPage.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.teleporter_block.creative_screen_page." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.teleporter_block.creative_screen_page." + this.name);
 		}
 	}
 }

@@ -2,22 +2,22 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.UseRelayBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UpdateUseRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateUseRelayBlockPacket> {
 	@Override
 	public void receive(UpdateUseRelayBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -25,16 +25,16 @@ public class UpdateUseRelayBlockPacketReceiver implements ServerPlayNetworking.P
 
 		BlockPos relayBlockPositionOffset = payload.relayBlockPositionOffset();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(useRelayBlockPosition);
 		BlockState blockState = world.getBlockState(useRelayBlockPosition);
 
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			useRelayBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset);
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			useRelayBlockEntity.markDirty();
-			world.updateListeners(useRelayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			useRelayBlockEntity.setChanged();
+			world.sendBlockUpdated(useRelayBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

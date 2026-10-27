@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateInteractiveTriggerBlockPacket(
 		BlockPos interactiveTriggerBlockPosition,
@@ -18,42 +18,42 @@ public record UpdateInteractiveTriggerBlockPacket(
 		String lockedSound,
 		String unlockedMessage,
 		String unlockedSound
-) implements CustomPayload {
-	public static final Id<UpdateInteractiveTriggerBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_interactive_trigger_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateInteractiveTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateInteractiveTriggerBlockPacket::write, UpdateInteractiveTriggerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateInteractiveTriggerBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_interactive_trigger_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateInteractiveTriggerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateInteractiveTriggerBlockPacket::write, UpdateInteractiveTriggerBlockPacket::new);
 
-	public UpdateInteractiveTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateInteractiveTriggerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.interactiveTriggerBlockPosition);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
-		registryByteBuf.writeString(this.preventInteractionIdentifierString);
-		registryByteBuf.writeString(this.keyIdentifierString);
-		registryByteBuf.writeString(this.interactionPreventedMessage);
-		registryByteBuf.writeString(this.interactionPreventedSound);
-		registryByteBuf.writeString(this.lockedMessage);
-		registryByteBuf.writeString(this.lockedSound);
-		registryByteBuf.writeString(this.unlockedMessage);
-		registryByteBuf.writeString(this.unlockedSound);
+		registryByteBuf.writeUtf(this.preventInteractionIdentifierString);
+		registryByteBuf.writeUtf(this.keyIdentifierString);
+		registryByteBuf.writeUtf(this.interactionPreventedMessage);
+		registryByteBuf.writeUtf(this.interactionPreventedSound);
+		registryByteBuf.writeUtf(this.lockedMessage);
+		registryByteBuf.writeUtf(this.lockedSound);
+		registryByteBuf.writeUtf(this.unlockedMessage);
+		registryByteBuf.writeUtf(this.unlockedSound);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

@@ -3,44 +3,44 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredVillagerSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class TriggeredVillagerSpawnerBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<TriggeredVillagerSpawnerBlock> CODEC = createCodec(TriggeredVillagerSpawnerBlock::new);
+	public static final MapCodec<TriggeredVillagerSpawnerBlock> CODEC = simpleCodec(TriggeredVillagerSpawnerBlock::new);
 
-	public TriggeredVillagerSpawnerBlock(Settings settings) {
+	public TriggeredVillagerSpawnerBlock(Properties settings) {
 		super(settings);
 	}
 
-	public MapCodec<TriggeredVillagerSpawnerBlock> getCodec() {
+	public MapCodec<TriggeredVillagerSpawnerBlock> codec() {
 		return CODEC;
 	}
 
-	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new TriggeredVillagerSpawnerBlockEntity(pos, state);
 	}
 
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlockEntity) {
-			if (player.isCreativeLevelTwoOp()) {
+			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlockEntity);
-				return ActionResult.success(world.isClient);
+				return InteractionResult.success(world.isClientSide);
 			}
 		}
 
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 }

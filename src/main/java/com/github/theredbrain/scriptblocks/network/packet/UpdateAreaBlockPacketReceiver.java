@@ -2,14 +2,14 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 @Deprecated
@@ -17,9 +17,9 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 	@Override
 	public void receive(UpdateAreaBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
 			return;
 		}
 
@@ -49,7 +49,7 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 		AreaBlockEntity.TriggeredMode triggeredMode = AreaBlockEntity.TriggeredMode.byName(payload.triggeredMode()).orElse(AreaBlockEntity.TriggeredMode.CONTINUOUS);
 		int timer = payload.timer();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -60,19 +60,19 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 			areaBlockEntity.reset();
 			areaBlockEntity.setShowArea(showArea);
 			if (!areaBlockEntity.setAreaDimensions(areaDimensions)) {
-				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaDimensions.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.areaDimensions.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("area_block.areaPositionOffset.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAppliedStatusEffectIdentifier(appliedStatusEffectIdentifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("area_block.appliedStatusEffectIdentifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.appliedStatusEffectIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAppliedStatusEffectAmplifier(appliedStatusEffectAmplifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("area_block.appliedStatusEffectAmplifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.appliedStatusEffectAmplifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			areaBlockEntity.setAppliedStatusEffectAmbient(appliedStatusEffectAmbient);
@@ -92,10 +92,10 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 			areaBlockEntity.setMaxTimer(timer);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
-			areaBlockEntity.markDirty();
-			world.updateListeners(areaBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			areaBlockEntity.setChanged();
+			world.sendBlockUpdated(areaBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

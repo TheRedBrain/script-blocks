@@ -5,83 +5,83 @@ import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.DoorHinge;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayDoorBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<UseRelayDoorBlock> CODEC = createCodec(UseRelayDoorBlock::new);
-	protected static final VoxelShape NORTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
-	protected static final VoxelShape SOUTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
-	protected static final VoxelShape EAST_SHAPE = Block.createCuboidShape(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
-	protected static final VoxelShape WEST_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
+	public static final MapCodec<UseRelayDoorBlock> CODEC = simpleCodec(UseRelayDoorBlock::new);
+	protected static final VoxelShape NORTH_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
+	protected static final VoxelShape SOUTH_SHAPE = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
+	protected static final VoxelShape EAST_SHAPE = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+	protected static final VoxelShape WEST_SHAPE = Block.box(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
 
-	public UseRelayDoorBlock(Settings settings) {
+	public UseRelayDoorBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
-				.with(Properties.OPEN, false)
-				.with(Properties.DOOR_HINGE, DoorHinge.LEFT)
-				.with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH)
+				.setValue(BlockStateProperties.OPEN, false)
+				.setValue(BlockStateProperties.DOOR_HINGE, DoorHingeSide.LEFT)
+				.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
 		);
 	}
 
-	public MapCodec<UseRelayDoorBlock> getCodec() {
+	public MapCodec<UseRelayDoorBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new UseRelayBlockEntity(pos, state);
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.DOUBLE_BLOCK_HALF, HorizontalFacingBlock.FACING, Properties.OPEN, Properties.DOOR_HINGE);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(BlockStateProperties.DOUBLE_BLOCK_HALF, HorizontalDirectionalBlock.FACING, BlockStateProperties.OPEN, BlockStateProperties.DOOR_HINGE);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		Direction direction = state.get(HorizontalFacingBlock.FACING);
-		boolean bl = !state.get(Properties.OPEN);
-		boolean bl2 = state.get(Properties.DOOR_HINGE) == DoorHinge.RIGHT;
+	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		Direction direction = state.getValue(HorizontalDirectionalBlock.FACING);
+		boolean bl = !state.getValue(BlockStateProperties.OPEN);
+		boolean bl2 = state.getValue(BlockStateProperties.DOOR_HINGE) == DoorHingeSide.RIGHT;
 		switch (direction) {
 			default: {
 				return bl ? WEST_SHAPE : (bl2 ? SOUTH_SHAPE : NORTH_SHAPE);
@@ -98,34 +98,34 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		DoubleBlockHalf doubleBlockHalf = state.get(Properties.DOUBLE_BLOCK_HALF);
+	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+		DoubleBlockHalf doubleBlockHalf = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
 		if (direction.getAxis() == Direction.Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
-			if (neighborState.isOf(this) && neighborState.get(Properties.DOUBLE_BLOCK_HALF) != doubleBlockHalf) {
-				return state.with(HorizontalFacingBlock.FACING, neighborState.get(HorizontalFacingBlock.FACING)).with(Properties.OPEN, neighborState.get(Properties.OPEN)).with(Properties.DOOR_HINGE, neighborState.get(Properties.DOOR_HINGE));
+			if (neighborState.is(this) && neighborState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) != doubleBlockHalf) {
+				return state.setValue(HorizontalDirectionalBlock.FACING, neighborState.getValue(HorizontalDirectionalBlock.FACING)).setValue(BlockStateProperties.OPEN, neighborState.getValue(BlockStateProperties.OPEN)).setValue(BlockStateProperties.DOOR_HINGE, neighborState.getValue(BlockStateProperties.DOOR_HINGE));
 			}
-			return Blocks.AIR.getDefaultState();
+			return Blocks.AIR.defaultBlockState();
 		}
-		if (doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state.canPlaceAt(world, pos)) {
-			return Blocks.AIR.getDefaultState();
+		if (doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state.canSurvive(world, pos)) {
+			return Blocks.AIR.defaultBlockState();
 		}
-		return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+		return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
 	}
 
 	@Override
-	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		if (!world.isClient && (player.isCreative() || !player.canHarvest(state))) {
+	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+		if (!world.isClientSide && (player.isCreative() || !player.hasCorrectToolForDrops(state))) {
 			onBreakInCreative(world, pos, state, player);
 		}
 
-		return super.onBreak(world, pos, state, player);
+		return super.playerWillDestroy(world, pos, state, player);
 	}
 
 	@Override
-	public boolean canPathfindThrough(BlockState state, NavigationType type) {
+	public boolean isPathfindable(BlockState state, PathComputationType type) {
 		switch (type) {
 			case LAND, AIR -> {
-				return state.get(Properties.OPEN);
+				return state.getValue(BlockStateProperties.OPEN);
 			}
 			case WATER -> {
 				return false;
@@ -136,122 +136,122 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 
 	@Override
 	@Nullable
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		BlockPos blockPos = ctx.getBlockPos();
-		World world = ctx.getWorld();
-		if (blockPos.getY() < world.getTopY() - 1 && world.getBlockState(blockPos.up()).canReplace(ctx)) {
-			boolean bl = world.isReceivingRedstonePower(blockPos) || world.isReceivingRedstonePower(blockPos.up());
-			return this.getDefaultState().with(HorizontalFacingBlock.FACING, ctx.getHorizontalPlayerFacing()).with(Properties.DOOR_HINGE, this.getHinge(ctx)).with(Properties.OPEN, bl).with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
+	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		BlockPos blockPos = ctx.getClickedPos();
+		Level world = ctx.getLevel();
+		if (blockPos.getY() < world.getHeight() - 1 && world.getBlockState(blockPos.above()).canBeReplaced(ctx)) {
+			boolean bl = world.hasNeighborSignal(blockPos) || world.hasNeighborSignal(blockPos.above());
+			return this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, ctx.getHorizontalDirection()).setValue(BlockStateProperties.DOOR_HINGE, this.getHinge(ctx)).setValue(BlockStateProperties.OPEN, bl).setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
 		}
 		return null;
 	}
 
 	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-		world.setBlockState(pos.up(), state.with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), Block.NOTIFY_ALL);
+	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
+		world.setBlock(pos.above(), state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
 	}
 
-	private DoorHinge getHinge(ItemPlacementContext ctx) {
+	private DoorHingeSide getHinge(BlockPlaceContext ctx) {
 		boolean bl2;
-		World blockView = ctx.getWorld();
-		BlockPos blockPos = ctx.getBlockPos();
-		Direction direction = ctx.getHorizontalPlayerFacing();
-		BlockPos blockPos2 = blockPos.up();
-		Direction direction2 = direction.rotateYCounterclockwise();
-		BlockPos blockPos3 = blockPos.offset(direction2);
+		Level blockView = ctx.getLevel();
+		BlockPos blockPos = ctx.getClickedPos();
+		Direction direction = ctx.getHorizontalDirection();
+		BlockPos blockPos2 = blockPos.above();
+		Direction direction2 = direction.getCounterClockWise();
+		BlockPos blockPos3 = blockPos.relative(direction2);
 		BlockState blockState = blockView.getBlockState(blockPos3);
-		BlockPos blockPos4 = blockPos2.offset(direction2);
+		BlockPos blockPos4 = blockPos2.relative(direction2);
 		BlockState blockState2 = blockView.getBlockState(blockPos4);
-		Direction direction3 = direction.rotateYClockwise();
-		BlockPos blockPos5 = blockPos.offset(direction3);
+		Direction direction3 = direction.getClockWise();
+		BlockPos blockPos5 = blockPos.relative(direction3);
 		BlockState blockState3 = blockView.getBlockState(blockPos5);
-		BlockPos blockPos6 = blockPos2.offset(direction3);
+		BlockPos blockPos6 = blockPos2.relative(direction3);
 		BlockState blockState4 = blockView.getBlockState(blockPos6);
-		int i = (blockState.isFullCube(blockView, blockPos3) ? -1 : 0) + (blockState2.isFullCube(blockView, blockPos4) ? -1 : 0) + (blockState3.isFullCube(blockView, blockPos5) ? 1 : 0) + (blockState4.isFullCube(blockView, blockPos6) ? 1 : 0);
-		boolean bl = blockState.isOf(this) && blockState.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
-		boolean bl3 = bl2 = blockState3.isOf(this) && blockState3.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
+		int i = (blockState.isCollisionShapeFullBlock(blockView, blockPos3) ? -1 : 0) + (blockState2.isCollisionShapeFullBlock(blockView, blockPos4) ? -1 : 0) + (blockState3.isCollisionShapeFullBlock(blockView, blockPos5) ? 1 : 0) + (blockState4.isCollisionShapeFullBlock(blockView, blockPos6) ? 1 : 0);
+		boolean bl = blockState.is(this) && blockState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
+		boolean bl3 = bl2 = blockState3.is(this) && blockState3.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
 		if (bl && !bl2 || i > 0) {
-			return DoorHinge.RIGHT;
+			return DoorHingeSide.RIGHT;
 		}
 		if (bl2 && !bl || i < 0) {
-			return DoorHinge.LEFT;
+			return DoorHingeSide.LEFT;
 		}
-		int j = direction.getOffsetX();
-		int k = direction.getOffsetZ();
-		Vec3d vec3d = ctx.getHitPos();
+		int j = direction.getStepX();
+		int k = direction.getStepZ();
+		Vec3 vec3d = ctx.getClickLocation();
 		double d = vec3d.x - (double) blockPos.getX();
 		double e = vec3d.z - (double) blockPos.getZ();
-		return j < 0 && e < 0.5 || j > 0 && e > 0.5 || k < 0 && d > 0.5 || k > 0 && d < 0.5 ? DoorHinge.RIGHT : DoorHinge.LEFT;
+		return j < 0 && e < 0.5 || j > 0 && e > 0.5 || k < 0 && d > 0.5 || k > 0 && d < 0.5 ? DoorHingeSide.RIGHT : DoorHingeSide.LEFT;
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
-			boolean bl = player.isCreativeLevelTwoOp();
-			if (player.isSneaking() && bl) {
-				state = state.cycle(Properties.OPEN);
-				world.setBlockState(pos, state, Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
-				return ActionResult.success(world.isClient);
+			boolean bl = player.canUseGameMasterBlocks();
+			if (player.isShiftKeyDown() && bl) {
+				state = state.cycle(BlockStateProperties.OPEN);
+				world.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
+				return InteractionResult.success(world.isClientSide);
 			}
-			if (state.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
-				BlockPos posDown = pos.down();
-				BlockState stateDown = world.getBlockState(pos.down());
-				if (stateDown.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
-					return ActionResult.PASS;
+			if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
+				BlockPos posDown = pos.below();
+				BlockState stateDown = world.getBlockState(pos.below());
+				if (stateDown.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
+					return InteractionResult.PASS;
 				}
-				return stateDown.getBlock().onUse(stateDown, world, posDown, player, hit);
+				return stateDown.getBlock().useWithoutItem(stateDown, world, posDown, player, hit);
 			}
 			if (bl) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
-				return ActionResult.success(world.isClient);
+				return InteractionResult.success(world.isClientSide);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
-				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
-					return ActionResult.PASS;
+				if (relayBlockPosOffset.equals(BlockPos.ZERO)) {
+					return InteractionResult.PASS;
 				}
-				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
+				BlockPos relayBlockPos = pos.offset(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
 				BlockState relayBlockState = world.getBlockState(relayBlockPos);
-				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
+				return relayBlockState.getBlock().useWithoutItem(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-		BlockPos blockPos = pos.down();
+	public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+		BlockPos blockPos = pos.below();
 		BlockState blockState = world.getBlockState(blockPos);
-		if (state.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+		if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
 			return true;
 		}
-		return blockState.isOf(this);
+		return blockState.is(this);
 	}
 
 	@Override
-	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), rotation));
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		return super.rotate(state, rotation).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), rotation));
 	}
 
 	@Override
-	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
-			return super.mirror(state, mirror).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), mirror.getRotation(state.get(HorizontalFacingBlock.FACING)))).cycle(Properties.DOOR_HINGE);
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return super.mirror(state, mirror).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), mirror.getRotation(state.get(HorizontalFacingBlock.FACING)))).cycle(Properties.DOOR_HINGE);
+	public BlockState mirror(BlockState state, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
+			return super.mirror(state, mirror).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING)))).cycle(BlockStateProperties.DOOR_HINGE);
+		} else if (mirror == Mirror.LEFT_RIGHT) {
+			return super.mirror(state, mirror).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING)))).cycle(BlockStateProperties.DOOR_HINGE);
 		}
 		return state;
 	}
 
-	protected static void onBreakInCreative(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		DoubleBlockHalf doubleBlockHalf = state.get(Properties.DOUBLE_BLOCK_HALF);
+	protected static void onBreakInCreative(Level world, BlockPos pos, BlockState state, Player player) {
+		DoubleBlockHalf doubleBlockHalf = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
 		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
-			BlockPos blockPos = pos.down();
+			BlockPos blockPos = pos.below();
 			BlockState blockState = world.getBlockState(blockPos);
-			if (blockState.isOf(state.getBlock()) && blockState.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
-				BlockState blockState2 = blockState.getFluidState().isOf(Fluids.WATER) ? Blocks.WATER.getDefaultState() : Blocks.AIR.getDefaultState();
-				world.setBlockState(blockPos, blockState2, 35);
-				world.syncWorldEvent(player, 2001, blockPos, Block.getRawIdFromState(blockState));
+			if (blockState.is(state.getBlock()) && blockState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+				BlockState blockState2 = blockState.getFluidState().is(Fluids.WATER) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+				world.setBlock(blockPos, blockState2, 35);
+				world.levelEvent(player, 2001, blockPos, Block.getId(blockState));
 			}
 		}
 

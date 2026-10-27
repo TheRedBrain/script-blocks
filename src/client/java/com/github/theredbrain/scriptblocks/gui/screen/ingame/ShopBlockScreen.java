@@ -5,22 +5,22 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateShopBlockPacket;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private final ShopBlockEntity shopBlockEntity;
-	private TextFieldWidget shopIdentifierField;
+	private EditBox shopIdentifierField;
 
 	public ShopBlockScreen(ShopBlockEntity shopBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.shopBlockEntity = shopBlockEntity;
 	}
 
@@ -28,13 +28,13 @@ public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	protected void init() {
 		super.init();
 
-		this.shopIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 114, 300, 20, Text.empty());
+		this.shopIdentifierField = new EditBox(this.font, this.width / 2 - 154, 114, 300, 20, Component.empty());
 		this.shopIdentifierField.setMaxLength(128);
-		this.shopIdentifierField.setText(this.shopBlockEntity.getShopIdentifier());
-		this.addSelectableChild(this.shopIdentifierField);
+		this.shopIdentifierField.setValue(this.shopBlockEntity.getShopIdentifier());
+		this.addWidget(this.shopIdentifierField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 	}
 
 	@Override
@@ -43,10 +43,10 @@ public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		String string = this.shopIdentifierField.getText();
+	public void resize(Minecraft client, int width, int height) {
+		String string = this.shopIdentifierField.getValue();
 		this.init(client, width, height);
-		this.shopIdentifierField.setText(string);
+		this.shopIdentifierField.setValue(string);
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
@@ -70,7 +70,7 @@ public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateShopBlockPacket(
 				this.shopBlockEntity.getPos(),
-				this.shopIdentifierField.getText()
+				this.shopIdentifierField.getValue()
 		));
 		return true;
 	}

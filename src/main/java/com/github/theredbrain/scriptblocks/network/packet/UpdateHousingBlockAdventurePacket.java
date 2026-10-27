@@ -1,41 +1,40 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateHousingBlockAdventurePacket(
 		BlockPos housingBlockPosition,
 		List<String> coOwnerList,
 		List<String> trustedList,
 		List<String> guestList
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateHousingBlockAdventurePacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_housing_block_adventure"));
-	public static final PacketCodec<RegistryByteBuf, UpdateHousingBlockAdventurePacket> PACKET_CODEC = PacketCodec.of(UpdateHousingBlockAdventurePacket::write, UpdateHousingBlockAdventurePacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateHousingBlockAdventurePacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_housing_block_adventure"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateHousingBlockAdventurePacket> PACKET_CODEC = StreamCodec.ofMember(UpdateHousingBlockAdventurePacket::write, UpdateHousingBlockAdventurePacket::new);
 
-	public UpdateHousingBlockAdventurePacket(RegistryByteBuf registryByteBuf) {
+	public UpdateHousingBlockAdventurePacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readList(PacketCodecs.STRING),
-				registryByteBuf.readList(PacketCodecs.STRING),
-				registryByteBuf.readList(PacketCodecs.STRING)
+				registryByteBuf.readList(ByteBufCodecs.STRING_UTF8),
+				registryByteBuf.readList(ByteBufCodecs.STRING_UTF8),
+				registryByteBuf.readList(ByteBufCodecs.STRING_UTF8)
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.housingBlockPosition);
-		registryByteBuf.writeCollection(this.coOwnerList, PacketCodecs.STRING);
-		registryByteBuf.writeCollection(this.trustedList, PacketCodecs.STRING);
-		registryByteBuf.writeCollection(this.guestList, PacketCodecs.STRING);
+		registryByteBuf.writeCollection(this.coOwnerList, ByteBufCodecs.STRING_UTF8);
+		registryByteBuf.writeCollection(this.trustedList, ByteBufCodecs.STRING_UTF8);
+		registryByteBuf.writeCollection(this.guestList, ByteBufCodecs.STRING_UTF8);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

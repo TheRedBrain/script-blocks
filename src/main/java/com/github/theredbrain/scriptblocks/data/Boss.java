@@ -81,12 +81,12 @@ public record Boss(
 				String operation
 		) {
 
-			public static final Codec<Boss.Phase.AttributeModifierEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			public static final Codec<AttributeModifierEntry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 					Codec.STRING.fieldOf("attribute_identifier").forGetter(x -> x.attributeIdentifier),
 					Codec.STRING.fieldOf("id").forGetter(x -> x.id),
 					Codec.DOUBLE.fieldOf("amount").forGetter(x -> x.amount),
 					Codec.STRING.fieldOf("operation").forGetter(x -> x.operation)
-			).apply(instance, Boss.Phase.AttributeModifierEntry::new));
+			).apply(instance, AttributeModifierEntry::new));
 
 			public AttributeModifierEntry(
 					String attributeIdentifier,

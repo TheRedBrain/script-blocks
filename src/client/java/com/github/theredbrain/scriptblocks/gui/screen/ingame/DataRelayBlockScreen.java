@@ -7,19 +7,19 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -28,28 +28,28 @@ import java.util.List;
 @Environment(value = EnvType.CLIENT)
 public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final int VISIBLE_LIST_ENTRIES = 6;
-	private static final Text NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.new_data_providing_block_position_offset");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
-	private static final Text ADD_NEW_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
+	private static final Component NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.data_provider_block.new_data_providing_block_position_offset");
+	private static final Component NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
+	private static final Component NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
+	private static final Component NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
+	private static final Component ADD_NEW_ENTRY_BUTTON_LABEL_TEXT = Component.translatable("gui.list_entry.add");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_140_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_140");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
-	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	public static final WidgetSprites REMOVE_ENTRY_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
 	);
 	private final DataRelayBlockEntity dataRelayBlockEntity;
 
-	private ButtonWidget removeEntryButton0;
-	private ButtonWidget removeEntryButton1;
-	private ButtonWidget removeEntryButton2;
-	private ButtonWidget removeEntryButton3;
-	private ButtonWidget removeEntryButton4;
-	private ButtonWidget removeEntryButton5;
+	private Button removeEntryButton0;
+	private Button removeEntryButton1;
+	private Button removeEntryButton2;
+	private Button removeEntryButton3;
+	private Button removeEntryButton4;
+	private Button removeEntryButton5;
 
-	private TextFieldWidget newDataProvidingBlockPosOffsetXField;
-	private TextFieldWidget newDataProvidingBlockPosOffsetYField;
-	private TextFieldWidget newDataProvidingBlockPosOffsetZField;
+	private EditBox newDataProvidingBlockPosOffsetXField;
+	private EditBox newDataProvidingBlockPosOffsetYField;
+	private EditBox newDataProvidingBlockPosOffsetZField;
 
 	private final List<BlockPos> dataProvidingBlockPosOffsetList = new ArrayList<>();
 
@@ -58,15 +58,15 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private boolean mouseClicked = false;
 
 	public DataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.dataRelayBlockEntity = dataRelayBlockEntity;
 	}
 
 	private void addNewEntry() {
 		this.dataProvidingBlockPosOffsetList.add(new BlockPos(
-				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetXField.getText()),
-				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetYField.getText()),
-				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetZField.getText())
+				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetXField.getValue()),
+				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetYField.getValue()),
+				ItemUtils.parseInt(this.newDataProvidingBlockPosOffsetZField.getValue())
 		));
 		this.updateWidgets();
 	}
@@ -83,32 +83,32 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		this.dataProvidingBlockPosOffsetList.clear();
 		this.dataProvidingBlockPosOffsetList.addAll(this.dataRelayBlockEntity.getDataProvidingBlockPosOffsetList());
 
-		this.removeEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(0)));
-		this.removeEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(1)));
-		this.removeEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(2)));
-		this.removeEntryButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(3)));
-		this.removeEntryButton4 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(4)));
-		this.removeEntryButton5 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 140, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(5)));
+		this.removeEntryButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(0)));
+		this.removeEntryButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(1)));
+		this.removeEntryButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(2)));
+		this.removeEntryButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(3)));
+		this.removeEntryButton4 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(4)));
+		this.removeEntryButton5 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 140, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeEntry(5)));
 
-		this.newDataProvidingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 186, 50, 20, Text.empty());
+		this.newDataProvidingBlockPosOffsetXField = new EditBox(this.font, this.width / 2 - 154, 186, 50, 20, Component.empty());
 		this.newDataProvidingBlockPosOffsetXField.setMaxLength(128);
-		this.newDataProvidingBlockPosOffsetXField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDataProvidingBlockPosOffsetXField);
+		this.newDataProvidingBlockPosOffsetXField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDataProvidingBlockPosOffsetXField);
 
-		this.newDataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 104, 186, 50, 20, Text.empty());
+		this.newDataProvidingBlockPosOffsetYField = new EditBox(this.font, this.width / 2 - 104, 186, 50, 20, Component.empty());
 		this.newDataProvidingBlockPosOffsetYField.setMaxLength(128);
-		this.newDataProvidingBlockPosOffsetYField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDataProvidingBlockPosOffsetYField);
+		this.newDataProvidingBlockPosOffsetYField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDataProvidingBlockPosOffsetYField);
 
-		this.newDataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 186, 50, 20, Text.empty());
+		this.newDataProvidingBlockPosOffsetZField = new EditBox(this.font, this.width / 2 - 54, 186, 50, 20, Component.empty());
 		this.newDataProvidingBlockPosOffsetZField.setMaxLength(128);
-		this.newDataProvidingBlockPosOffsetZField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDataProvidingBlockPosOffsetZField);
+		this.newDataProvidingBlockPosOffsetZField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDataProvidingBlockPosOffsetZField);
 
-		this.addDrawableChild(ButtonWidget.builder(ADD_NEW_ENTRY_BUTTON_LABEL_TEXT, button -> this.addNewEntry()).dimensions(this.width / 2 + 4, 186, 150, 20).build());
+		this.addRenderableWidget(Button.builder(ADD_NEW_ENTRY_BUTTON_LABEL_TEXT, button -> this.addNewEntry()).bounds(this.width / 2 + 4, 186, 150, 20).build());
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -149,17 +149,17 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		List<BlockPos> list = new ArrayList<>(this.dataProvidingBlockPosOffsetList);
-		String string = this.newDataProvidingBlockPosOffsetXField.getText();
-		String string1 = this.newDataProvidingBlockPosOffsetYField.getText();
-		String string2 = this.newDataProvidingBlockPosOffsetZField.getText();
+		String string = this.newDataProvidingBlockPosOffsetXField.getValue();
+		String string1 = this.newDataProvidingBlockPosOffsetYField.getValue();
+		String string2 = this.newDataProvidingBlockPosOffsetZField.getValue();
 		this.init(client, width, height);
 		this.dataProvidingBlockPosOffsetList.clear();
 		this.dataProvidingBlockPosOffsetList.addAll(list);
-		this.newDataProvidingBlockPosOffsetXField.setText(string);
-		this.newDataProvidingBlockPosOffsetYField.setText(string1);
-		this.newDataProvidingBlockPosOffsetZField.setText(string2);
+		this.newDataProvidingBlockPosOffsetXField.setValue(string);
+		this.newDataProvidingBlockPosOffsetYField.setValue(string1);
+		this.newDataProvidingBlockPosOffsetZField.setValue(string2);
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& this.mouseClicked) {
 			int i = this.dataProvidingBlockPosOffsetList.size() - VISIBLE_LIST_ENTRIES;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -196,7 +196,7 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& mouseY >= 20 && mouseY <= 136) {
 			int i = this.dataProvidingBlockPosOffsetList.size() - VISIBLE_LIST_ENTRIES;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -212,22 +212,22 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ENTRIES, this.dataProvidingBlockPosOffsetList.size()); i++) {
 			BlockPos blockPos = this.dataProvidingBlockPosOffsetList.get(i);
-			MutableText text = Text.translatable("gui.triggered_block.list.entry", blockPos.getX(), blockPos.getY(), blockPos.getZ());
-			context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			MutableComponent text = Component.translatable("gui.triggered_block.list.entry", blockPos.getX(), blockPos.getY(), blockPos.getZ());
+			context.drawString(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.dataProvidingBlockPosOffsetList.size() > VISIBLE_LIST_ENTRIES) {
-			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_140_TEXTURE, this.width / 2 - 153, 20, 8, 140);
+			context.blitSprite(SCROLL_BAR_BACKGROUND_8_140_TEXTURE, this.width / 2 - 153, 20, 8, 140);
 			int k = (int) (131.0f * this.scrollAmount);
-			context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
+			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
 
-		context.drawTextWithShadow(this.textRenderer, NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+		context.drawString(this.font, NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
 		this.newDataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
 		this.newDataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
 		this.newDataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);

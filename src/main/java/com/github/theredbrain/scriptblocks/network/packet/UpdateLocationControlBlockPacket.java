@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateLocationControlBlockPacket(
 		BlockPos locationControlBlockPosition,
@@ -25,11 +25,11 @@ public record UpdateLocationControlBlockPacket(
 		int resetAreaMinZ,
 		int resetAreaMaxX,
 		int resetAreaMaxZ
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_location_control_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateLocationControlBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateLocationControlBlockPacket::write, UpdateLocationControlBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateLocationControlBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_location_control_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateLocationControlBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateLocationControlBlockPacket::write, UpdateLocationControlBlockPacket::new);
 
-	public UpdateLocationControlBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateLocationControlBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
@@ -48,7 +48,7 @@ public record UpdateLocationControlBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.locationControlBlockPosition);
 		registryByteBuf.writeBlockPos(this.mainEntrancePositionOffset);
 		registryByteBuf.writeDouble(this.mainEntranceYaw);
@@ -66,7 +66,7 @@ public record UpdateLocationControlBlockPacket(
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

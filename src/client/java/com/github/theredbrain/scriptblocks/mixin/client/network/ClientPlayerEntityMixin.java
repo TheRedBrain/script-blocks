@@ -89,12 +89,12 @@ import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -102,23 +102,23 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity implements DuckPlayerEntityMixin {
+@Mixin(LocalPlayer.class)
+public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer implements DuckPlayerEntityMixin {
 
 	@Shadow
 	@Final
-	protected MinecraftClient client;
+	protected Minecraft client;
 
 	@Shadow
 	public abstract boolean isUsingItem();
 
 	@Shadow
-	public abstract float getPitch(float tickDelta);
+	public abstract float getViewXRot(float tickDelta);
 
 	@Shadow
-	public abstract void sendMessage(Text message, boolean overlay);
+	public abstract void displayClientMessage(Component message, boolean overlay);
 
-	public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
+	public ClientPlayerEntityMixin(ClientLevel world, GameProfile profile) {
 		super(world, profile);
 	}
 
@@ -130,26 +130,26 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 	@Override
 	public void scriptblocks$openHousingScreen() {
 		Optional<BlockPos> optionalBlockPos = DataAttachmentHelper.getCurrentHousingBlockPosition(this);
-		if (optionalBlockPos.isPresent() && this.client.getServer() != null && this.client.world != null && this.client.world.getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
+		if (optionalBlockPos.isPresent() && this.client.getSingleplayerServer() != null && this.client.level != null && this.client.level.getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 			int currentPermissionLevel;
 
-			if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT)) {
+			if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT)) {
 				currentPermissionLevel = 0;
-			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_CO_OWNER_EFFECT)) {
+			} else if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_CO_OWNER_EFFECT)) {
 				currentPermissionLevel = 1;
-			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_TRUSTED_EFFECT)) {
+			} else if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_TRUSTED_EFFECT)) {
 				currentPermissionLevel = 2;
-			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_GUEST_EFFECT)) {
+			} else if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_GUEST_EFFECT)) {
 				currentPermissionLevel = 3;
-			} else if (this.hasStatusEffect(ScriptBlocksStatusEffects.HOUSING_STRANGER_EFFECT)) {
+			} else if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_STRANGER_EFFECT)) {
 				currentPermissionLevel = 4;
 			} else {
-				this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
+				this.displayClientMessage(Component.translatable("gui.housing_screen.not_in_a_house"), true);
 				return;
 			}
 			this.client.setScreen(new HousingScreen(housingBlockEntity, currentPermissionLevel));
 		} else {
-			this.sendMessage(Text.translatable("gui.housing_screen.not_in_a_house"), true);
+			this.displayClientMessage(Component.translatable("gui.housing_screen.not_in_a_house"), true);
 		}
 	}
 

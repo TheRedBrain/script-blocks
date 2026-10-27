@@ -2,23 +2,23 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredDisplayBlockPacket> {
 	@Override
 	public void receive(UpdateTriggeredDisplayBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -28,7 +28,7 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		TriggeredDisplayBlockEntity.BillboardMode billboardMode = TriggeredDisplayBlockEntity.BillboardMode.byName(payload.billboardModeString()).orElse(TriggeredDisplayBlockEntity.BillboardMode.FIXED);
 		TriggeredDisplayBlockEntity.DisplayMode displayMode = TriggeredDisplayBlockEntity.DisplayMode.byName(payload.displayModeString()).orElse(TriggeredDisplayBlockEntity.DisplayMode.TEXT);
 		boolean isTriggered = payload.isTriggered();
-		Vec3d displayOffset = payload.displayOffset();
+		Vec3 displayOffset = payload.displayOffset();
 		float displayYaw = payload.displayYaw();
 		float displayPitch = payload.displayPitch();
 		// text mode
@@ -39,7 +39,7 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		Byte textOpacity = payload.textOpacity();
 		int textBackground = payload.textBackground();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(triggeredDisplayBlockPosition);
 		BlockState blockState = world.getBlockState(triggeredDisplayBlockPosition);
@@ -57,9 +57,9 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 			triggeredDisplayBlockEntity.setLineWidth(lineWidth);
 			triggeredDisplayBlockEntity.setTextOpacity(textOpacity);
 			triggeredDisplayBlockEntity.setBackground(textBackground);
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			triggeredDisplayBlockEntity.markDirty();
-			world.updateListeners(triggeredDisplayBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			triggeredDisplayBlockEntity.setChanged();
+			world.sendBlockUpdated(triggeredDisplayBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

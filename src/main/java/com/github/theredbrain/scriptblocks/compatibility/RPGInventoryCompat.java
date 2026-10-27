@@ -1,12 +1,12 @@
 package com.github.theredbrain.scriptblocks.compatibility;
 
 import com.github.theredbrain.rpginventory.entity.ExtendedEquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class RPGInventoryCompat {
 
-	public static ItemStack getRPGEquipmentStack(PlayerEntity playerEntity, int index) {
+	public static ItemStack getRPGEquipmentStack(Player playerEntity, int index) {
 		return switch (index) {
 //			case 4 -> playerEntity.getEquippedStack(ExtendedEquipmentSlot.CLASS_ITEM);
 //			case 5 -> playerEntity.getEquippedStack(ExtendedEquipmentSlot.SHOULDERS);
@@ -28,7 +28,7 @@ public class RPGInventoryCompat {
 		};
 	}
 
-	public static void setRPGEquipmentStack(PlayerEntity playerEntity, int index, ItemStack stack) {
+	public static void setRPGEquipmentStack(Player playerEntity, int index, ItemStack stack) {
 //		switch (index) {
 //			case 4 -> playerEntity.equipStack(ExtendedEquipmentSlot.CLASS_ITEM, stack);
 //			case 5 -> playerEntity.equipStack(ExtendedEquipmentSlot.SHOULDERS, stack);

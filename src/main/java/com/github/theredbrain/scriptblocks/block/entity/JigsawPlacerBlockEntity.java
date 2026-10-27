@@ -9,37 +9,37 @@ import com.github.theredbrain.scriptblocks.structure.pool.FixedRotationStructure
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.JigsawBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.JigsawBlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.structure.pool.StructurePool;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.JigsawBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private static final RegistryKey<StructurePool> POOL_DEFAULT = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.of("empty"));
-	private Identifier target = Identifier.of("empty");
+	private static final ResourceKey<StructureTemplatePool> POOL_DEFAULT = ResourceKey.create(Registries.TEMPLATE_POOL, Identifier.parse("empty"));
+	private Identifier target = Identifier.parse("empty");
 	private String structurePoolString = "";
-	private JigsawBlockEntity.Joint joint = JigsawBlockEntity.Joint.ROLLABLE;
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+	private JigsawBlockEntity.JointType joint = JigsawBlockEntity.JointType.ROLLABLE;
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 	private final List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices = new ArrayList<>(List.of());
 
 	public JigsawPlacerBlockEntity(BlockPos pos, BlockState state) {
@@ -47,81 +47,81 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
 		view.putString("target", this.target.toString());
 
 		view.putString("structure_pool_string", this.structurePoolString);
 
-		view.putString("joint", this.joint.asString());
+		view.putString("joint", this.joint.getSerializedName());
 
-		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
+		CompoundTag nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("appendices", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("appendices", CompoundTag.CODEC);
 		for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
-			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", BlockPos.CODEC, appendix.getLeft());
+			nbtCompound = new CompoundTag();
+			nbtCompound.store("position_offset", BlockPos.CODEC, appendix.getLeft());
 			nbtCompound.putString("data_id", appendix.getRight().getLeft());
 			nbtCompound.putString("static_appendix", appendix.getRight().getRight());
 			listAppender.add(nbtCompound.copy());
 		}
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.target = Identifier.of(view.getString("target", ""));
+		this.target = Identifier.parse(view.getStringOr("target", ""));
 
-		this.structurePoolString = view.getString("structure_pool_string", "");
+		this.structurePoolString = view.getStringOr("structure_pool_string", "");
 
-		this.joint = view.read("joint", JigsawBlockEntity.Joint.CODEC).orElseGet(() -> JigsawBlock.getFacing(this.getCachedState()).getAxis().isHorizontal() ? JigsawBlockEntity.Joint.ALIGNED : JigsawBlockEntity.Joint.ROLLABLE);
+		this.joint = view.read("joint", JigsawBlockEntity.JointType.CODEC).orElseGet(() -> JigsawBlock.getFrontFacing(this.getBlockState()).getAxis().isHorizontal() ? JigsawBlockEntity.JointType.ALIGNED : JigsawBlockEntity.JointType.ROLLABLE);
 
-		NbtCompound nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets", false)
+				nbtCompound.getBooleanOr("resets", false)
 		);
 
 		this.structurePoolStringAppendices.clear();
-		for (NbtCompound nbtCompound1 : view.getTypedListView("appendices", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound1 : view.listOrEmpty("appendices", CompoundTag.CODEC)) {
 			this.structurePoolStringAppendices.add(
 					new MutablePair<>(
 							BlockPos.max(
 									BlockPos.min(
-											nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+											nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 											new BlockPos(48, 48, 48)
 									),
 									new BlockPos(-48, -48, -48)
 							),
 							new MutablePair<>(
-									nbtCompound1.getString("appendix_data_id", ""),
-									nbtCompound1.getString("static_appendix", "")
+									nbtCompound1.getStringOr("appendix_data_id", ""),
+									nbtCompound1.getStringOr("static_appendix", "")
 							)
 					)
 			);
 		}
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -155,11 +155,11 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		this.structurePoolStringAppendices.addAll(structurePoolStringAppendices);
 	}
 
-	public JigsawBlockEntity.Joint getJoint() {
+	public JigsawBlockEntity.JointType getJoint() {
 		return this.joint;
 	}
 
-	public void setJoint(JigsawBlockEntity.Joint joint) {
+	public void setJoint(JigsawBlockEntity.JointType joint) {
 		this.joint = joint;
 	}
 
@@ -174,17 +174,17 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
-			if (this.world instanceof ServerWorld serverWorld) {
-				BlockPos blockPos = this.getPos().offset(this.getCachedState().get(JigsawBlock.ORIENTATION).getFacing());
-				Registry<StructurePool> registry = world.getRegistryManager().get(RegistryKeys.TEMPLATE_POOL);
+		if (this.level != null) {
+			if (this.level instanceof ServerLevel serverWorld) {
+				BlockPos blockPos = this.getBlockPos().relative(this.getBlockState().getValue(JigsawBlock.ORIENTATION).front());
+				Registry<StructureTemplatePool> registry = level.registryAccess().get(Registries.TEMPLATE_POOL);
 				try {
-					RegistryEntry.Reference<StructurePool> registryEntry = registry.entryOf(this.getCurrentPool(serverWorld));
+					Holder.Reference<StructureTemplatePool> registryEntry = registry.entryOf(this.getCurrentPool(serverWorld));
 
-					Direction rotation = this.getCachedState().get(JigsawBlock.ORIENTATION).getRotation();
-					Direction facing = this.getCachedState().get(JigsawBlock.ORIENTATION).getFacing();
+					Direction rotation = this.getBlockState().getValue(JigsawBlock.ORIENTATION).top();
+					Direction facing = this.getBlockState().getValue(JigsawBlock.ORIENTATION).front();
 
-					if (registryEntry.hasKeyAndValue()) {
+					if (registryEntry.isBound()) {
 						FixedRotationStructurePoolBasedGenerator.generate(
 								serverWorld,
 								registryEntry,
@@ -192,7 +192,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 								20,
 								new BlockPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()), // offset to fix vanilla bug
 								false,
-								facing == Direction.EAST ? BlockRotation.COUNTERCLOCKWISE_90 : facing == Direction.SOUTH ? BlockRotation.NONE : facing == Direction.WEST ? BlockRotation.CLOCKWISE_90 : facing == Direction.NORTH ? BlockRotation.CLOCKWISE_180 : this.joint == JigsawBlockEntity.Joint.ROLLABLE ? BlockRotation.random(serverWorld.getRandom()) : rotation == Direction.EAST ? BlockRotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? BlockRotation.CLOCKWISE_180 : rotation == Direction.WEST ? BlockRotation.COUNTERCLOCKWISE_90 : BlockRotation.NONE
+								facing == Direction.EAST ? Rotation.COUNTERCLOCKWISE_90 : facing == Direction.SOUTH ? Rotation.NONE : facing == Direction.WEST ? Rotation.CLOCKWISE_90 : facing == Direction.NORTH ? Rotation.CLOCKWISE_180 : this.joint == JigsawBlockEntity.JointType.ROLLABLE ? Rotation.getRandom(serverWorld.getRandom()) : rotation == Direction.EAST ? Rotation.CLOCKWISE_90 : rotation == Direction.SOUTH ? Rotation.CLOCKWISE_180 : rotation == Direction.WEST ? Rotation.COUNTERCLOCKWISE_90 : Rotation.NONE
 						);
 					}
 				} catch (IllegalStateException illegalStateException) {
@@ -201,7 +201,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 				}
 			}
 			// trigger next block
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.triggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.triggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.triggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.triggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -216,8 +216,8 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
 
 				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
@@ -227,42 +227,42 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 				this.structurePoolStringAppendices.clear();
 				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
 				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
-					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.FRONT_BACK), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), Mirror.FRONT_BACK), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
 				}
 				this.structurePoolStringAppendices.clear();
 				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
 				List<MutablePair<BlockPos, MutablePair<String, String>>> newStructurePoolStringAppendices = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<String, String>> appendix : this.structurePoolStringAppendices) {
-					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), BlockMirror.LEFT_RIGHT), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
+					newStructurePoolStringAppendices.add(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(appendix.getLeft(), Mirror.LEFT_RIGHT), new MutablePair<>(appendix.getRight().getLeft(), appendix.getRight().getRight())));
 				}
 				this.structurePoolStringAppendices.clear();
 				this.structurePoolStringAppendices.addAll(newStructurePoolStringAppendices);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
 
-	private RegistryKey<StructurePool> getCurrentPool(ServerWorld serverWorld) {
-		RegistryKey<StructurePool> currentPool = POOL_DEFAULT;
+	private ResourceKey<StructureTemplatePool> getCurrentPool(ServerLevel serverWorld) {
+		ResourceKey<StructureTemplatePool> currentPool = POOL_DEFAULT;
 
 		StringBuilder currentPoolIdentifierStringBuilder = new StringBuilder(this.structurePoolString);
 		for (MutablePair<BlockPos, MutablePair<String, String>> listEntry : this.structurePoolStringAppendices) {
-			if (!listEntry.getLeft().equals(BlockPos.ORIGIN)) {
-				BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getPos().add(listEntry.getLeft().getX(), listEntry.getLeft().getY(), listEntry.getLeft().getZ()));
+			if (!listEntry.getLeft().equals(BlockPos.ZERO)) {
+				BlockEntity blockEntity1 = serverWorld.getBlockEntity(this.getBlockPos().offset(listEntry.getLeft().getX(), listEntry.getLeft().getY(), listEntry.getLeft().getZ()));
 				if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
 					currentPoolIdentifierStringBuilder.append(providesDataBlockEntity.getData(listEntry.getRight().getLeft()));
 				}
@@ -270,7 +270,7 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 			currentPoolIdentifierStringBuilder.append(listEntry.getRight().getRight());
 		}
 		if (!currentPoolIdentifierStringBuilder.isEmpty()) {
-			currentPool = RegistryKey.of(RegistryKeys.TEMPLATE_POOL, Identifier.tryParse(currentPoolIdentifierStringBuilder.toString()));
+			currentPool = ResourceKey.create(Registries.TEMPLATE_POOL, Identifier.tryParse(currentPoolIdentifierStringBuilder.toString()));
 		}
 		return currentPool;
 	}

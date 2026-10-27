@@ -5,120 +5,120 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayLecternBlockEnti
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayLecternBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<UseRelayLecternBlock> CODEC = createCodec(UseRelayLecternBlock::new);
-	public static final VoxelShape BOTTOM_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
-	public static final VoxelShape MIDDLE_SHAPE = Block.createCuboidShape(4.0, 2.0, 4.0, 12.0, 14.0, 12.0);
-	public static final VoxelShape BASE_SHAPE = VoxelShapes.union(BOTTOM_SHAPE, MIDDLE_SHAPE);
-	public static final VoxelShape COLLISION_SHAPE_TOP = Block.createCuboidShape(0.0, 15.0, 0.0, 16.0, 15.0, 16.0);
-	public static final VoxelShape COLLISION_SHAPE = VoxelShapes.union(BASE_SHAPE, COLLISION_SHAPE_TOP);
-	public static final VoxelShape WEST_SHAPE = VoxelShapes.union(
-			Block.createCuboidShape(1.0, 10.0, 0.0, 5.333333, 14.0, 16.0),
-			Block.createCuboidShape(5.333333, 12.0, 0.0, 9.666667, 16.0, 16.0),
-			Block.createCuboidShape(9.666667, 14.0, 0.0, 14.0, 18.0, 16.0),
+	public static final MapCodec<UseRelayLecternBlock> CODEC = simpleCodec(UseRelayLecternBlock::new);
+	public static final VoxelShape BOTTOM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
+	public static final VoxelShape MIDDLE_SHAPE = Block.box(4.0, 2.0, 4.0, 12.0, 14.0, 12.0);
+	public static final VoxelShape BASE_SHAPE = Shapes.or(BOTTOM_SHAPE, MIDDLE_SHAPE);
+	public static final VoxelShape COLLISION_SHAPE_TOP = Block.box(0.0, 15.0, 0.0, 16.0, 15.0, 16.0);
+	public static final VoxelShape COLLISION_SHAPE = Shapes.or(BASE_SHAPE, COLLISION_SHAPE_TOP);
+	public static final VoxelShape WEST_SHAPE = Shapes.or(
+			Block.box(1.0, 10.0, 0.0, 5.333333, 14.0, 16.0),
+			Block.box(5.333333, 12.0, 0.0, 9.666667, 16.0, 16.0),
+			Block.box(9.666667, 14.0, 0.0, 14.0, 18.0, 16.0),
 			BASE_SHAPE
 	);
-	public static final VoxelShape NORTH_SHAPE = VoxelShapes.union(
-			Block.createCuboidShape(0.0, 10.0, 1.0, 16.0, 14.0, 5.333333),
-			Block.createCuboidShape(0.0, 12.0, 5.333333, 16.0, 16.0, 9.666667),
-			Block.createCuboidShape(0.0, 14.0, 9.666667, 16.0, 18.0, 14.0),
+	public static final VoxelShape NORTH_SHAPE = Shapes.or(
+			Block.box(0.0, 10.0, 1.0, 16.0, 14.0, 5.333333),
+			Block.box(0.0, 12.0, 5.333333, 16.0, 16.0, 9.666667),
+			Block.box(0.0, 14.0, 9.666667, 16.0, 18.0, 14.0),
 			BASE_SHAPE
 	);
-	public static final VoxelShape EAST_SHAPE = VoxelShapes.union(
-			Block.createCuboidShape(10.666667, 10.0, 0.0, 15.0, 14.0, 16.0),
-			Block.createCuboidShape(6.333333, 12.0, 0.0, 10.666667, 16.0, 16.0),
-			Block.createCuboidShape(2.0, 14.0, 0.0, 6.333333, 18.0, 16.0),
+	public static final VoxelShape EAST_SHAPE = Shapes.or(
+			Block.box(10.666667, 10.0, 0.0, 15.0, 14.0, 16.0),
+			Block.box(6.333333, 12.0, 0.0, 10.666667, 16.0, 16.0),
+			Block.box(2.0, 14.0, 0.0, 6.333333, 18.0, 16.0),
 			BASE_SHAPE
 	);
-	public static final VoxelShape SOUTH_SHAPE = VoxelShapes.union(
-			Block.createCuboidShape(0.0, 10.0, 10.666667, 16.0, 14.0, 15.0),
-			Block.createCuboidShape(0.0, 12.0, 6.333333, 16.0, 16.0, 10.666667),
-			Block.createCuboidShape(0.0, 14.0, 2.0, 16.0, 18.0, 6.333333),
+	public static final VoxelShape SOUTH_SHAPE = Shapes.or(
+			Block.box(0.0, 10.0, 10.666667, 16.0, 14.0, 15.0),
+			Block.box(0.0, 12.0, 6.333333, 16.0, 16.0, 10.666667),
+			Block.box(0.0, 14.0, 2.0, 16.0, 18.0, 6.333333),
 			BASE_SHAPE
 	);
 
-	public UseRelayLecternBlock(Settings settings) {
+	public UseRelayLecternBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
-				.with(Properties.HAS_BOOK, false)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH)
+				.setValue(BlockStateProperties.HAS_BOOK, false)
 		);
 	}
 
-	public MapCodec<UseRelayLecternBlock> getCodec() {
+	public MapCodec<UseRelayLecternBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new UseRelayLecternBlockEntity(pos, state);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(HorizontalFacingBlock.FACING, ctx.getHorizontalPlayerFacing().getOpposite());
+	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		return this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, ctx.getHorizontalDirection().getOpposite());
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
-			if (player.isCreativeLevelTwoOp()) {
+			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
-				return ActionResult.success(world.isClient);
+				return InteractionResult.success(world.isClientSide);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
-				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
-					return ActionResult.PASS;
+				if (relayBlockPosOffset.equals(BlockPos.ZERO)) {
+					return InteractionResult.PASS;
 				}
-				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
+				BlockPos relayBlockPos = pos.offset(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
 				BlockState relayBlockState = world.getBlockState(relayBlockPos);
-				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
+				return relayBlockState.getBlock().useWithoutItem(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		return COLLISION_SHAPE;
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return switch (state.get(HorizontalFacingBlock.FACING)) {
+	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		return switch (state.getValue(HorizontalDirectionalBlock.FACING)) {
 			case NORTH -> NORTH_SHAPE;
 			case SOUTH -> SOUTH_SHAPE;
 			case EAST -> EAST_SHAPE;
@@ -128,27 +128,27 @@ public class UseRelayLecternBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public boolean canPathfindThrough(BlockState state, NavigationType type) {
+	public boolean isPathfindable(BlockState state, PathComputationType type) {
 		return false;
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(HorizontalFacingBlock.FACING, Properties.HAS_BOOK);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(HorizontalDirectionalBlock.FACING, BlockStateProperties.HAS_BOOK);
 	}
 
 	@Override
-	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(HorizontalFacingBlock.FACING, rotation.rotate(state.get(HorizontalFacingBlock.FACING)));
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		return super.rotate(state, rotation).setValue(HorizontalDirectionalBlock.FACING, rotation.rotate(state.getValue(HorizontalDirectionalBlock.FACING)));
 	}
 
 	@Override
-	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
-			return state.rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.X_MIRRORED, !state.get(ScriptBlocksBlockProperties.X_MIRRORED));
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return state.rotate(mirror.getRotation(state.get(HorizontalFacingBlock.FACING))).with(ScriptBlocksBlockProperties.Z_MIRRORED, !state.get(ScriptBlocksBlockProperties.Z_MIRRORED));
+	public BlockState mirror(BlockState state, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
+			return state.rotate(mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING))).setValue(ScriptBlocksBlockProperties.X_MIRRORED, !state.getValue(ScriptBlocksBlockProperties.X_MIRRORED));
+		} else if (mirror == Mirror.LEFT_RIGHT) {
+			return state.rotate(mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING))).setValue(ScriptBlocksBlockProperties.Z_MIRRORED, !state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED));
 		}
 		return state;
 	}

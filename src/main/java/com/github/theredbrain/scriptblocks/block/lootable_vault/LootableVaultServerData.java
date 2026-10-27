@@ -4,19 +4,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Uuids;
-
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.entity.player.Player;
 
 @Deprecated
 public class LootableVaultServerData {
 	static final String SERVER_DATA_KEY = "server_data";
 	public static Codec<LootableVaultServerData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-							Uuids.LINKED_SET_CODEC.lenientOptionalFieldOf("rewarded_players", Set.of()).forGetter(data -> data.rewardedPlayers),
+							UUIDUtil.CODEC_LINKED_SET.lenientOptionalFieldOf("rewarded_players", Set.of()).forGetter(data -> data.rewardedPlayers),
 							Codec.LONG.lenientOptionalFieldOf("state_updating_resumes_at", Long.valueOf(0L)).forGetter(data -> data.stateUpdatingResumesAt)
 					)
 					.apply(instance, LootableVaultServerData::new)
@@ -47,13 +46,13 @@ public class LootableVaultServerData {
 		return this.rewardedPlayers;
 	}
 
-	public boolean hasRewardedPlayer(PlayerEntity player) {
-		return this.rewardedPlayers.contains(player.getUuid());
+	public boolean hasRewardedPlayer(Player player) {
+		return this.rewardedPlayers.contains(player.getUUID());
 	}
 
 	@VisibleForTesting
-	public void markPlayerAsRewarded(PlayerEntity player) {
-		this.rewardedPlayers.add(player.getUuid());
+	public void markPlayerAsRewarded(Player player) {
+		this.rewardedPlayers.add(player.getUUID());
 		if (this.rewardedPlayers.size() > 128) {
 			Iterator<UUID> iterator = this.rewardedPlayers.iterator();
 			if (iterator.hasNext()) {
@@ -66,8 +65,8 @@ public class LootableVaultServerData {
 	}
 
 	@VisibleForTesting
-	public void unmarkPlayerAsRewarded(PlayerEntity player) {
-		this.rewardedPlayers.remove(player.getUuid());
+	public void unmarkPlayerAsRewarded(Player player) {
+		this.rewardedPlayers.remove(player.getUUID());
 
 		this.markDirty();
 	}

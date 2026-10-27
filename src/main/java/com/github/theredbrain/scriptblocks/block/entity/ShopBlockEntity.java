@@ -5,21 +5,21 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistrie
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -37,28 +37,28 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
 		view.putString("shop_identifier", this.shopIdentifier);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.shopIdentifier = view.getString("shop_identifier", "");
+		this.shopIdentifier = view.getStringOr("shop_identifier", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	public String getShopIdentifier() {
@@ -68,8 +68,8 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 	public boolean setShopIdentifier(String newShopIdentifier) {
 		Shop shop = null;
 		Identifier identifier = Identifier.tryParse(newShopIdentifier);
-		if (identifier != null && this.world != null) {
-			Optional<RegistryEntry.Reference<Shop>> optionalShopReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(identifier);
+		if (identifier != null && this.level != null) {
+			Optional<Holder.Reference<Shop>> optionalShopReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(identifier);
 			if (optionalShopReference.isPresent()) {
 				shop = optionalShopReference.get().value();
 			}
@@ -91,17 +91,17 @@ public class ShopBlockEntity extends BlockEntity implements ExtendedScreenHandle
 
 	@Nullable
 	@Override
-	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-		return new ShopScreenHandler(syncId, playerInventory, this.pos);
+	public AbstractContainerMenu createMenu(int syncId, Inventory playerInventory, Player player) {
+		return new ShopScreenHandler(syncId, playerInventory, this.worldPosition);
 	}
 
 	@Override
-	public Text getDisplayName() {
-		return Text.empty();
+	public Component getDisplayName() {
+		return Component.empty();
 	}
 
 	@Override
-	public Object getScreenOpeningData(ServerPlayerEntity player) {
-		return new ShopScreenHandler.ShopBlockData(this.pos);
+	public Object getScreenOpeningData(ServerPlayer player) {
+		return new ShopScreenHandler.ShopBlockData(this.worldPosition);
 	}
 }

@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.util;
 
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class BlockRotationUtils {
@@ -13,95 +13,95 @@ public class BlockRotationUtils {
 		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
 	}
 
-	public static int calculateNewRotatedBlockState(int currentStateValue, BlockRotation rotation) {
-		if (rotation == BlockRotation.CLOCKWISE_90) {
+	public static int calculateNewRotatedBlockState(int currentStateValue, Rotation rotation) {
+		if (rotation == Rotation.CLOCKWISE_90) {
 			return (currentStateValue + 1) % 4;
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			return (currentStateValue + 2) % 4;
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
 			return (currentStateValue + 3) % 4;
 		} else {
 			return currentStateValue;
 		}
 	}
 
-	public static Direction calculateNewHorizontalFacingBlockState(Direction currentState, BlockRotation rotation) {
-		if (rotation == BlockRotation.CLOCKWISE_90) {
-			return currentState.rotateYClockwise();
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+	public static Direction calculateNewHorizontalFacingBlockState(Direction currentState, Rotation rotation) {
+		if (rotation == Rotation.CLOCKWISE_90) {
+			return currentState.getClockWise();
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			return currentState.getOpposite();
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
-			return currentState.rotateYCounterclockwise();
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
+			return currentState.getCounterClockWise();
 		} else {
 			return currentState;
 		}
 	}
 
-	public static BlockRotation calculateRotationFromDifferentRotatedStates(int value1, int value2) {
+	public static Rotation calculateRotationFromDifferentRotatedStates(int value1, int value2) {
 		if ((value2 + 1) % 4 == value1) {
-			return BlockRotation.CLOCKWISE_90;
+			return Rotation.CLOCKWISE_90;
 		} else if ((value2 + 2) % 4 == value1) {
-			return BlockRotation.CLOCKWISE_180;
+			return Rotation.CLOCKWISE_180;
 		} else if ((value2 + 3) % 4 == value1) {
-			return BlockRotation.COUNTERCLOCKWISE_90;
+			return Rotation.COUNTERCLOCKWISE_90;
 		} else {
-			return BlockRotation.NONE;
+			return Rotation.NONE;
 		}
 	}
 
-	public static BlockPos rotateOffsetBlockPos(BlockPos blockPos, BlockRotation rotation) {
-		if (rotation == BlockRotation.CLOCKWISE_90) {
+	public static BlockPos rotateOffsetBlockPos(BlockPos blockPos, Rotation rotation) {
+		if (rotation == Rotation.CLOCKWISE_90) {
 			return new BlockPos(-(blockPos.getZ()), blockPos.getY(), blockPos.getX());
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			return new BlockPos(-(blockPos.getX()), blockPos.getY(), -(blockPos.getZ()));
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
 			return new BlockPos(blockPos.getZ(), blockPos.getY(), -(blockPos.getX()));
 		} else {
 			return new BlockPos(blockPos);
 		}
 	}
 
-	public static BlockPos mirrorOffsetBlockPos(BlockPos blockPos, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
+	public static BlockPos mirrorOffsetBlockPos(BlockPos blockPos, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
 			return new BlockPos(-(blockPos.getX()), blockPos.getY(), blockPos.getZ());
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+		} else if (mirror == Mirror.LEFT_RIGHT) {
 			return new BlockPos(blockPos.getX(), blockPos.getY(), -(blockPos.getZ()));
 		} else {
 			return new BlockPos(blockPos);
 		}
 	}
 
-	public static Vec3i rotateOffsetVec3i(Vec3i vec3i, BlockRotation rotation) {
-		if (rotation == BlockRotation.CLOCKWISE_90) {
+	public static Vec3i rotateOffsetVec3i(Vec3i vec3i, Rotation rotation) {
+		if (rotation == Rotation.CLOCKWISE_90) {
 			return new Vec3i(-(vec3i.getZ()), vec3i.getY(), vec3i.getX());
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			return new Vec3i(-(vec3i.getX()), vec3i.getY(), -(vec3i.getZ()));
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
 			return new Vec3i(vec3i.getZ(), vec3i.getY(), -(vec3i.getX()));
 		} else {
 			return new Vec3i(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 		}
 	}
 
-	public static Vec3i mirrorOffsetVec3i(Vec3i vec3i, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
+	public static Vec3i mirrorOffsetVec3i(Vec3i vec3i, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
 			return new Vec3i(-(vec3i.getX()), vec3i.getY(), vec3i.getZ());
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+		} else if (mirror == Mirror.LEFT_RIGHT) {
 			return new Vec3i(vec3i.getX(), vec3i.getY(), -(vec3i.getZ()));
 		} else {
 			return new Vec3i(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 		}
 	}
 
-	public static double rotateYaw(double yaw, BlockRotation rotation) {
+	public static double rotateYaw(double yaw, Rotation rotation) {
 		double tempYaw = yaw + 180;
-		if (rotation == BlockRotation.CLOCKWISE_90) {
+		if (rotation == Rotation.CLOCKWISE_90) {
 			tempYaw = (tempYaw + 90) % 360;
 			return tempYaw - 180;
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			tempYaw = (tempYaw + 180) % 360;
 			return tempYaw - 180;
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
 			tempYaw = (tempYaw - 90) % 360;
 			return tempYaw - 180;
 		} else {
@@ -110,10 +110,10 @@ public class BlockRotationUtils {
 
 	}
 
-	public static double mirrorYaw(double yaw, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
+	public static double mirrorYaw(double yaw, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
 			return -yaw;
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+		} else if (mirror == Mirror.LEFT_RIGHT) {
 			if (yaw < -90) {
 				return yaw + 90;
 			} else if (yaw < 0) {
@@ -130,45 +130,45 @@ public class BlockRotationUtils {
 		}
 	}
 
-	public static MutablePair<Integer, Integer> rotateOffset2DPosition(MutablePair<Integer, Integer> offsetPosition, BlockRotation rotation) {
-		if (rotation == BlockRotation.CLOCKWISE_90) {
+	public static MutablePair<Integer, Integer> rotateOffset2DPosition(MutablePair<Integer, Integer> offsetPosition, Rotation rotation) {
+		if (rotation == Rotation.CLOCKWISE_90) {
 			return MutablePair.of(-(offsetPosition.getRight()), offsetPosition.getLeft());
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			return MutablePair.of(-(offsetPosition.getLeft()), -(offsetPosition.getRight()));
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
 			return MutablePair.of(offsetPosition.getRight(), -(offsetPosition.getLeft()));
 		} else {
 			return MutablePair.of(offsetPosition.getLeft(), offsetPosition.getRight());
 		}
 	}
 
-	public static MutablePair<Integer, Integer> mirrorOffset2DPosition(MutablePair<Integer, Integer> offsetPosition, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
+	public static MutablePair<Integer, Integer> mirrorOffset2DPosition(MutablePair<Integer, Integer> offsetPosition, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
 			return MutablePair.of(-(offsetPosition.getLeft()), offsetPosition.getRight());
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+		} else if (mirror == Mirror.LEFT_RIGHT) {
 			return MutablePair.of(offsetPosition.getLeft(), -(offsetPosition.getRight()));
 		} else {
 			return MutablePair.of(offsetPosition.getLeft(), offsetPosition.getRight());
 		}
 	}
 
-	public static MutablePair<BlockPos, MutablePair<Double, Double>> rotateSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, BlockRotation rotation) {
+	public static MutablePair<BlockPos, MutablePair<Double, Double>> rotateSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, Rotation rotation) {
 		return new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(spawnPoint.getLeft(), rotation), new MutablePair<>(BlockRotationUtils.rotateYaw(spawnPoint.getRight().getLeft(), rotation), spawnPoint.getRight().getRight()));
 	}
 
-	public static MutablePair<BlockPos, MutablePair<Double, Double>> mirrorSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, BlockMirror mirror) {
+	public static MutablePair<BlockPos, MutablePair<Double, Double>> mirrorSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, Mirror mirror) {
 		return new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(spawnPoint.getLeft(), mirror), new MutablePair<>(BlockRotationUtils.mirrorYaw(spawnPoint.getRight().getLeft(), mirror), spawnPoint.getRight().getRight()));
 	}
 
-	public static MutablePair<BlockPos, Vec3i> rotateOffsetArea(BlockPos positionOffset, Vec3i areaDimensions, BlockRotation rotation) {
-		if (rotation == BlockRotation.CLOCKWISE_90) {
+	public static MutablePair<BlockPos, Vec3i> rotateOffsetArea(BlockPos positionOffset, Vec3i areaDimensions, Rotation rotation) {
+		if (rotation == Rotation.CLOCKWISE_90) {
 			Vec3i newAreaDimensions = new Vec3i(areaDimensions.getZ(), areaDimensions.getY(), areaDimensions.getX());
 			BlockPos newPositionOffset = new BlockPos(-(positionOffset.getZ()) - newAreaDimensions.getX() + 1, positionOffset.getY(), positionOffset.getX());
 			return MutablePair.of(newPositionOffset, newAreaDimensions);
-		} else if (rotation == BlockRotation.CLOCKWISE_180) {
+		} else if (rotation == Rotation.CLOCKWISE_180) {
 			BlockPos newPositionOffset = new BlockPos(-(positionOffset.getX()) - areaDimensions.getX() + 1, positionOffset.getY(), -(positionOffset.getZ()) - areaDimensions.getZ() + 1);
 			return MutablePair.of(newPositionOffset, areaDimensions);
-		} else if (rotation == BlockRotation.COUNTERCLOCKWISE_90) {
+		} else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
 			Vec3i newAreaDimensions = new Vec3i(areaDimensions.getZ(), areaDimensions.getY(), areaDimensions.getX());
 			BlockPos newPositionOffset = new BlockPos(positionOffset.getZ(), positionOffset.getY(), -(positionOffset.getX()) - newAreaDimensions.getZ() + 1);
 			return MutablePair.of(newPositionOffset, newAreaDimensions);
@@ -177,11 +177,11 @@ public class BlockRotationUtils {
 		}
 	}
 
-	public static MutablePair<BlockPos, Vec3i> mirrorOffsetArea(BlockPos positionOffset, Vec3i areaDimensions, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
+	public static MutablePair<BlockPos, Vec3i> mirrorOffsetArea(BlockPos positionOffset, Vec3i areaDimensions, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
 			BlockPos newPositionOffset = new BlockPos(-(positionOffset.getX()) - areaDimensions.getX() + 1, positionOffset.getY(), positionOffset.getZ());
 			return MutablePair.of(newPositionOffset, areaDimensions);
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
+		} else if (mirror == Mirror.LEFT_RIGHT) {
 			BlockPos newPositionOffset = new BlockPos(positionOffset.getX(), positionOffset.getY(), -(positionOffset.getZ()) - areaDimensions.getZ() + 1);
 			return MutablePair.of(newPositionOffset, areaDimensions);
 		} else {

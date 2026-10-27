@@ -1,9 +1,9 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.item.Item;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 
 public class Tags {
 	//region EntityTags
@@ -108,9 +108,9 @@ public class Tags {
 
 	//endregion DamageTypeTags
 	//region ItemTags
-	public static final TagKey<Item> INTERACTIVE_STONE_BLOCK_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocks.identifier("tools/interactive_stone_block_tools"));
-	public static final TagKey<Item> INTERACTIVE_OAK_LOG_TOOLS = TagKey.of(RegistryKeys.ITEM, ScriptBlocks.identifier("tools/interactive_oak_log_tools"));
-	public static final TagKey<Item> KEYS_FOR_LOCKED_USE_RELAY_CHEST = TagKey.of(RegistryKeys.ITEM, ScriptBlocks.identifier("keys_for_locked_use_relay_chest"));
+	public static final TagKey<Item> INTERACTIVE_STONE_BLOCK_TOOLS = TagKey.create(Registries.ITEM, ScriptBlocks.identifier("tools/interactive_stone_block_tools"));
+	public static final TagKey<Item> INTERACTIVE_OAK_LOG_TOOLS = TagKey.create(Registries.ITEM, ScriptBlocks.identifier("tools/interactive_oak_log_tools"));
+	public static final TagKey<Item> KEYS_FOR_LOCKED_USE_RELAY_CHEST = TagKey.create(Registries.ITEM, ScriptBlocks.identifier("keys_for_locked_use_relay_chest"));
 
 //    public static final TagKey<Item> ADVENTURE_HOTBAR_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("adventure_hotbar_items"));
 //    public static final TagKey<Item> ATTACK_ITEMS = TagKey.of(RegistryKeys.ITEM, ScriptBlocksMod.identifier("attack_items"));

@@ -5,84 +5,84 @@ import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.DoorHinge;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Direction.Axis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class TeleporterDoorBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<TeleporterDoorBlock> CODEC = createCodec(TeleporterDoorBlock::new);
+	public static final MapCodec<TeleporterDoorBlock> CODEC = simpleCodec(TeleporterDoorBlock::new);
 	protected static final VoxelShape NORTH_SHAPE;
 	protected static final VoxelShape SOUTH_SHAPE;
 	protected static final VoxelShape EAST_SHAPE;
 	protected static final VoxelShape WEST_SHAPE;
 
-	public TeleporterDoorBlock(AbstractBlock.Settings settings) {
+	public TeleporterDoorBlock(BlockBehaviour.Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
-				.with(Properties.OPEN, false)
-				.with(Properties.DOOR_HINGE, DoorHinge.LEFT)
-				.with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH)
+				.setValue(BlockStateProperties.OPEN, false)
+				.setValue(BlockStateProperties.DOOR_HINGE, DoorHingeSide.LEFT)
+				.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER)
 		);
 	}
 
-	public MapCodec<TeleporterDoorBlock> getCodec() {
+	public MapCodec<TeleporterDoorBlock> codec() {
 		return CODEC;
 	}
 
-	public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new TeleporterBlockEntity(pos, state);
 	}
 
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.DOUBLE_BLOCK_HALF, HorizontalFacingBlock.FACING, Properties.OPEN, Properties.DOOR_HINGE);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(BlockStateProperties.DOUBLE_BLOCK_HALF, HorizontalDirectionalBlock.FACING, BlockStateProperties.OPEN, BlockStateProperties.DOOR_HINGE);
 	}
 
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		Direction direction = state.get(HorizontalFacingBlock.FACING);
-		boolean bl = !(Boolean) state.get(Properties.OPEN);
-		boolean bl2 = state.get(Properties.DOOR_HINGE) == DoorHinge.RIGHT;
+	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		Direction direction = state.getValue(HorizontalDirectionalBlock.FACING);
+		boolean bl = !(Boolean) state.getValue(BlockStateProperties.OPEN);
+		boolean bl2 = state.getValue(BlockStateProperties.DOOR_HINGE) == DoorHingeSide.RIGHT;
 		switch (direction) {
 			case SOUTH -> {
 				return bl ? NORTH_SHAPE : (bl2 ? WEST_SHAPE : EAST_SHAPE);
@@ -99,44 +99,44 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		}
 	}
 
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		DoubleBlockHalf doubleBlockHalf = state.get(Properties.DOUBLE_BLOCK_HALF);
+	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+		DoubleBlockHalf doubleBlockHalf = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
 		if (direction.getAxis() == Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
-			return neighborState.isOf(this) && neighborState.get(Properties.DOUBLE_BLOCK_HALF) != doubleBlockHalf ? state.with(HorizontalFacingBlock.FACING, neighborState.get(HorizontalFacingBlock.FACING)).with(Properties.OPEN, neighborState.get(Properties.OPEN)).with(Properties.DOOR_HINGE, neighborState.get(Properties.DOOR_HINGE)) : Blocks.AIR.getDefaultState();
+			return neighborState.is(this) && neighborState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) != doubleBlockHalf ? state.setValue(HorizontalDirectionalBlock.FACING, neighborState.getValue(HorizontalDirectionalBlock.FACING)).setValue(BlockStateProperties.OPEN, neighborState.getValue(BlockStateProperties.OPEN)).setValue(BlockStateProperties.DOOR_HINGE, neighborState.getValue(BlockStateProperties.DOOR_HINGE)) : Blocks.AIR.defaultBlockState();
 		} else {
-			return doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state.canPlaceAt(world, pos) ? Blocks.AIR.getDefaultState() : super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+			return doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state.canSurvive(world, pos) ? Blocks.AIR.defaultBlockState() : super.updateShape(state, direction, neighborState, world, pos, neighborPos);
 		}
 	}
 
-	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		if (!world.isClient && (player.isCreative() || !player.canHarvest(state))) {
+	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+		if (!world.isClientSide && (player.isCreative() || !player.hasCorrectToolForDrops(state))) {
 			onBreakInCreative(world, pos, state, player);
 		}
 
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
-			if (!world.isClient && !player.isCreative()) {
+			if (!world.isClientSide && !player.isCreative()) {
 				Block block = state.getBlock();
-				ItemStack itemStack = block.getPickStack(world, pos, state);
+				ItemStack itemStack = block.getCloneItemStack(world, pos, state);
 				if (!itemStack.isEmpty()) {
-					NbtCompound nbtCompound = teleporterBlockEntity.createComponentlessNbtWithIdentifyingData(world.getRegistryManager());
+					CompoundTag nbtCompound = teleporterBlockEntity.createComponentlessNbtWithIdentifyingData(world.registryAccess());
 					BlockItem.setBlockEntityData(itemStack, teleporterBlockEntity.getType(), nbtCompound);
-					itemStack.applyComponentsFrom(teleporterBlockEntity.createComponentMap());
+					itemStack.applyComponents(teleporterBlockEntity.collectComponents());
 					ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
-					itemEntity.setToDefaultPickupDelay();
-					world.spawnEntity(itemEntity);
+					itemEntity.setDefaultPickUpDelay();
+					world.addFreshEntity(itemEntity);
 				}
 			}
 		}
 
-		return super.onBreak(world, pos, state, player);
+		return super.playerWillDestroy(world, pos, state, player);
 	}
 
-	public boolean canPathfindThrough(BlockState state, NavigationType type) {
+	public boolean isPathfindable(BlockState state, PathComputationType type) {
 		switch (type) {
 			case LAND:
 			case AIR:
-				return state.get(Properties.OPEN);
+				return state.getValue(BlockStateProperties.OPEN);
 			case WATER:
 				return false;
 			default:
@@ -144,116 +144,116 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		}
 	}
 
-	public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {
-		BlockPos blockPos = ctx.getBlockPos();
-		World world = ctx.getWorld();
-		if (blockPos.getY() < world.getTopY() - 1 && world.getBlockState(blockPos.up()).canReplace(ctx)) {
-			boolean bl = world.isReceivingRedstonePower(blockPos) || world.isReceivingRedstonePower(blockPos.up());
-			return this.getDefaultState().with(HorizontalFacingBlock.FACING, ctx.getHorizontalPlayerFacing()).with(Properties.DOOR_HINGE, this.getHinge(ctx)).with(Properties.OPEN, bl).with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
+	public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		BlockPos blockPos = ctx.getClickedPos();
+		Level world = ctx.getLevel();
+		if (blockPos.getY() < world.getHeight() - 1 && world.getBlockState(blockPos.above()).canBeReplaced(ctx)) {
+			boolean bl = world.hasNeighborSignal(blockPos) || world.hasNeighborSignal(blockPos.above());
+			return this.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, ctx.getHorizontalDirection()).setValue(BlockStateProperties.DOOR_HINGE, this.getHinge(ctx)).setValue(BlockStateProperties.OPEN, bl).setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER);
 		} else {
 			return null;
 		}
 	}
 
-	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-		world.setBlockState(pos.up(), state.with(Properties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), 3);
+	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
+		world.setBlock(pos.above(), state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), 3);
 	}
 
-	private DoorHinge getHinge(ItemPlacementContext ctx) {
-		World blockView = ctx.getWorld();
-		BlockPos blockPos = ctx.getBlockPos();
-		Direction direction = ctx.getHorizontalPlayerFacing();
-		BlockPos blockPos2 = blockPos.up();
-		Direction direction2 = direction.rotateYCounterclockwise();
-		BlockPos blockPos3 = blockPos.offset(direction2);
+	private DoorHingeSide getHinge(BlockPlaceContext ctx) {
+		Level blockView = ctx.getLevel();
+		BlockPos blockPos = ctx.getClickedPos();
+		Direction direction = ctx.getHorizontalDirection();
+		BlockPos blockPos2 = blockPos.above();
+		Direction direction2 = direction.getCounterClockWise();
+		BlockPos blockPos3 = blockPos.relative(direction2);
 		BlockState blockState = blockView.getBlockState(blockPos3);
-		BlockPos blockPos4 = blockPos2.offset(direction2);
+		BlockPos blockPos4 = blockPos2.relative(direction2);
 		BlockState blockState2 = blockView.getBlockState(blockPos4);
-		Direction direction3 = direction.rotateYClockwise();
-		BlockPos blockPos5 = blockPos.offset(direction3);
+		Direction direction3 = direction.getClockWise();
+		BlockPos blockPos5 = blockPos.relative(direction3);
 		BlockState blockState3 = blockView.getBlockState(blockPos5);
-		BlockPos blockPos6 = blockPos2.offset(direction3);
+		BlockPos blockPos6 = blockPos2.relative(direction3);
 		BlockState blockState4 = blockView.getBlockState(blockPos6);
-		int i = (blockState.isFullCube(blockView, blockPos3) ? -1 : 0) + (blockState2.isFullCube(blockView, blockPos4) ? -1 : 0) + (blockState3.isFullCube(blockView, blockPos5) ? 1 : 0) + (blockState4.isFullCube(blockView, blockPos6) ? 1 : 0);
-		boolean bl = blockState.isOf(this) && blockState.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
-		boolean bl2 = blockState3.isOf(this) && blockState3.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
+		int i = (blockState.isCollisionShapeFullBlock(blockView, blockPos3) ? -1 : 0) + (blockState2.isCollisionShapeFullBlock(blockView, blockPos4) ? -1 : 0) + (blockState3.isCollisionShapeFullBlock(blockView, blockPos5) ? 1 : 0) + (blockState4.isCollisionShapeFullBlock(blockView, blockPos6) ? 1 : 0);
+		boolean bl = blockState.is(this) && blockState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
+		boolean bl2 = blockState3.is(this) && blockState3.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
 		if ((!bl || bl2) && i <= 0) {
 			if ((!bl2 || bl) && i >= 0) {
-				int j = direction.getOffsetX();
-				int k = direction.getOffsetZ();
-				Vec3d vec3d = ctx.getHitPos();
+				int j = direction.getStepX();
+				int k = direction.getStepZ();
+				Vec3 vec3d = ctx.getClickLocation();
 				double d = vec3d.x - (double) blockPos.getX();
 				double e = vec3d.z - (double) blockPos.getZ();
-				return (j >= 0 || !(e < 0.5)) && (j <= 0 || !(e > 0.5)) && (k >= 0 || !(d > 0.5)) && (k <= 0 || !(d < 0.5)) ? DoorHinge.LEFT : DoorHinge.RIGHT;
+				return (j >= 0 || !(e < 0.5)) && (j <= 0 || !(e > 0.5)) && (k >= 0 || !(d > 0.5)) && (k <= 0 || !(d < 0.5)) ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT;
 			} else {
-				return DoorHinge.LEFT;
+				return DoorHingeSide.LEFT;
 			}
 		} else {
-			return DoorHinge.RIGHT;
+			return DoorHingeSide.RIGHT;
 		}
 	}
 
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
-			boolean bl = player.isCreativeLevelTwoOp();
-			if (player.isSneaking() && bl) {
-				state = state.cycle(Properties.OPEN);
-				world.setBlockState(pos, state, 10);
-				return ActionResult.success(world.isClient);
+			boolean bl = player.canUseGameMasterBlocks();
+			if (player.isShiftKeyDown() && bl) {
+				state = state.cycle(BlockStateProperties.OPEN);
+				world.setBlock(pos, state, 10);
+				return InteractionResult.success(world.isClientSide);
 			} else {
 				BlockPos relayBlockPosOffset;
-				if (state.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
-					relayBlockPosOffset = pos.down();
-					BlockState stateDown = world.getBlockState(pos.down());
-					return stateDown.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER ? ActionResult.PASS : stateDown.getBlock().onUse(stateDown, world, relayBlockPosOffset, player, hit);
+				if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
+					relayBlockPosOffset = pos.below();
+					BlockState stateDown = world.getBlockState(pos.below());
+					return stateDown.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER ? InteractionResult.PASS : stateDown.getBlock().useWithoutItem(stateDown, world, relayBlockPosOffset, player, hit);
 				} else if (bl) {
 					((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
-					return ActionResult.success(world.isClient);
-				} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+					return InteractionResult.success(world.isClientSide);
+				} else if (player instanceof ServerPlayer serverPlayerEntity) {
 					TeleporterBlockEntity.openNonCreativeScreen(world, serverPlayerEntity, pos, state, teleporterBlockEntity);
 				}
 			}
 		}
-		return ActionResult.CONSUME;
+		return InteractionResult.CONSUME;
 	}
 
-	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-		BlockPos blockPos = pos.down();
+	public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+		BlockPos blockPos = pos.below();
 		BlockState blockState = world.getBlockState(blockPos);
-		return state.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? true : blockState.isOf(this);
+		return state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? true : blockState.is(this);
 	}
 
-	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), rotation));
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		return super.rotate(state, rotation).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), rotation));
 	}
 
-	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
-			return super.mirror(state, mirror).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), mirror.getRotation(state.get(HorizontalFacingBlock.FACING)))).cycle(Properties.DOOR_HINGE);
+	public BlockState mirror(BlockState state, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
+			return super.mirror(state, mirror).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING)))).cycle(BlockStateProperties.DOOR_HINGE);
 		} else {
-			return mirror == BlockMirror.LEFT_RIGHT ? super.mirror(state, mirror).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), mirror.getRotation(state.get(HorizontalFacingBlock.FACING)))).cycle(Properties.DOOR_HINGE) : state;
+			return mirror == Mirror.LEFT_RIGHT ? super.mirror(state, mirror).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING)))).cycle(BlockStateProperties.DOOR_HINGE) : state;
 		}
 	}
 
-	protected static void onBreakInCreative(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		DoubleBlockHalf doubleBlockHalf = state.get(Properties.DOUBLE_BLOCK_HALF);
+	protected static void onBreakInCreative(Level world, BlockPos pos, BlockState state, Player player) {
+		DoubleBlockHalf doubleBlockHalf = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
 		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
-			BlockPos blockPos = pos.down();
+			BlockPos blockPos = pos.below();
 			BlockState blockState = world.getBlockState(blockPos);
-			if (blockState.isOf(state.getBlock()) && blockState.get(Properties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
-				BlockState blockState2 = blockState.getFluidState().isOf(Fluids.WATER) ? Blocks.WATER.getDefaultState() : Blocks.AIR.getDefaultState();
-				world.setBlockState(blockPos, blockState2, 35);
-				world.syncWorldEvent(player, 2001, blockPos, Block.getRawIdFromState(blockState));
+			if (blockState.is(state.getBlock()) && blockState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+				BlockState blockState2 = blockState.getFluidState().is(Fluids.WATER) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+				world.setBlock(blockPos, blockState2, 35);
+				world.levelEvent(player, 2001, blockPos, Block.getId(blockState));
 			}
 		}
 
 	}
 
 	static {
-		NORTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
-		SOUTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
-		EAST_SHAPE = Block.createCuboidShape(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
-		WEST_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
+		NORTH_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
+		SOUTH_SHAPE = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
+		EAST_SHAPE = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+		WEST_SHAPE = Block.box(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
 	}
 }

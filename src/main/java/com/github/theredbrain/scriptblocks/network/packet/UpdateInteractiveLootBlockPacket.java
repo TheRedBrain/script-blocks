@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 @Deprecated
 public record UpdateInteractiveLootBlockPacket(
@@ -18,40 +18,40 @@ public record UpdateInteractiveLootBlockPacket(
 		String lootAcquiredSoundId,
 		String alreadyLootedMessage,
 		String alreadyLootedSoundId
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateInteractiveLootBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_interactive_loot_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateInteractiveLootBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateInteractiveLootBlockPacket::write, UpdateInteractiveLootBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateInteractiveLootBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_interactive_loot_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateInteractiveLootBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateInteractiveLootBlockPacket::write, UpdateInteractiveLootBlockPacket::new);
 
-	public UpdateInteractiveLootBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateInteractiveLootBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.interactiveLootBlockPosition);
-		registryByteBuf.writeString(this.lootTableIdentifierString);
-		registryByteBuf.writeString(this.mode);
+		registryByteBuf.writeUtf(this.lootTableIdentifierString);
+		registryByteBuf.writeUtf(this.mode);
 		registryByteBuf.writeInt(this.rolls);
 		registryByteBuf.writeInt(this.choices);
 		registryByteBuf.writeBoolean(this.trackPlayers);
-		registryByteBuf.writeString(this.lootAcquiredMessage);
-		registryByteBuf.writeString(this.lootAcquiredSoundId);
-		registryByteBuf.writeString(this.alreadyLootedMessage);
-		registryByteBuf.writeString(this.alreadyLootedSoundId);
+		registryByteBuf.writeUtf(this.lootAcquiredMessage);
+		registryByteBuf.writeUtf(this.lootAcquiredSoundId);
+		registryByteBuf.writeUtf(this.alreadyLootedMessage);
+		registryByteBuf.writeUtf(this.alreadyLootedSoundId);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

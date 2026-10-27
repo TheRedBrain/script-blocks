@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateDataModificationBlockPacket(
 		BlockPos dataAccessBlockPosition,
@@ -12,30 +12,30 @@ public record UpdateDataModificationBlockPacket(
 		String dataModificationMode,
 		int addedIntegerValue,
 		int integerModulusValue
-) implements CustomPayload {
-	public static final Id<UpdateDataModificationBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_data_modification_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateDataModificationBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDataModificationBlockPacket::write, UpdateDataModificationBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateDataModificationBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_data_modification_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateDataModificationBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateDataModificationBlockPacket::write, UpdateDataModificationBlockPacket::new);
 
-	public UpdateDataModificationBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateDataModificationBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.dataAccessBlockPosition);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPositionOffset);
-		registryByteBuf.writeString(this.dataModificationMode);
+		registryByteBuf.writeUtf(this.dataModificationMode);
 		registryByteBuf.writeInt(this.addedIntegerValue);
 		registryByteBuf.writeInt(this.integerModulusValue);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

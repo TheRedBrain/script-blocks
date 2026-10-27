@@ -2,12 +2,12 @@ package com.github.theredbrain.scriptblocks.block.entity;
 
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.screen.TriggeredDispenserBlockScreenHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.DispenserBlockEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class TriggeredDispenserBlockEntity extends DispenserBlockEntity {
 	public TriggeredDispenserBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -15,12 +15,12 @@ public class TriggeredDispenserBlockEntity extends DispenserBlockEntity {
 	}
 
 	@Override
-	protected Text getContainerName() {
-		return Text.translatable("container.triggered_dispenser");
+	protected Component getDefaultName() {
+		return Component.translatable("container.triggered_dispenser");
 	}
 
 	@Override
-	protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
+	protected AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
 		return new TriggeredDispenserBlockScreenHandler(syncId, playerInventory, this);
 	}
 }

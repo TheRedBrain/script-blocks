@@ -1,21 +1,21 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateDelayTriggerBlockPacket(
 		BlockPos delayTriggerBlockPosition,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		int triggerDelay
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateDelayTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_delay_trigger_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateDelayTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDelayTriggerBlockPacket::write, UpdateDelayTriggerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateDelayTriggerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_delay_trigger_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateDelayTriggerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateDelayTriggerBlockPacket::write, UpdateDelayTriggerBlockPacket::new);
 
-	public UpdateDelayTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateDelayTriggerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
@@ -24,7 +24,7 @@ public record UpdateDelayTriggerBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.delayTriggerBlockPosition);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
@@ -32,7 +32,7 @@ public record UpdateDelayTriggerBlockPacket(
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

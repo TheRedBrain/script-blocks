@@ -2,24 +2,24 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TeamControllerBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.scores.Team;
 
 public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTeamControllerBlockPacket> {
 	@Override
 	public void receive(UpdateTeamControllerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -36,13 +36,13 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 		int teamColorIndex = payload.teamColorIndex();
 		boolean friendlyFire = payload.friendlyFire();
 		boolean showFriendlyInvisibles = payload.showFriendlyInvisibles();
-		AbstractTeam.VisibilityRule nametagVisibility = payload.nametagVisibility();
-		AbstractTeam.VisibilityRule deathMessageVisibility = payload.deathMessageVisibility();
-		AbstractTeam.CollisionRule collisionRule = payload.collisionRule();
+		Team.Visibility nametagVisibility = payload.nametagVisibility();
+		Team.Visibility deathMessageVisibility = payload.deathMessageVisibility();
+		Team.CollisionRule collisionRule = payload.collisionRule();
 		String prefixString = payload.prefixString();
 		String suffixString = payload.suffixString();
 
-		World world = serverPlayerEntity.getEntityWorld();
+		Level world = serverPlayerEntity.level();
 
 		BlockEntity blockEntity = world.getBlockEntity(teamControllerBlockPosition);
 		BlockState blockState = world.getBlockState(teamControllerBlockPosition);
@@ -65,9 +65,9 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 			teamControllerBlockEntity.setPrefixString(prefixString);
 			teamControllerBlockEntity.setSuffixString(suffixString);
 
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			teamControllerBlockEntity.markDirty();
-			world.updateListeners(teamControllerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			teamControllerBlockEntity.setChanged();
+			world.sendBlockUpdated(teamControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

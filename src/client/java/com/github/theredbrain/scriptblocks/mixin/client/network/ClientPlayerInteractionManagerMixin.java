@@ -7,21 +7,21 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.network.SequencedPacketCreator;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.GameMode;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.multiplayer.prediction.PredictiveAction;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,18 +29,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public abstract class ClientPlayerInteractionManagerMixin {
 
 	@Shadow
-	private GameMode gameMode;
+	private GameType gameMode;
 
 	@Shadow
 	@Final
-	private MinecraftClient client;
+	private Minecraft client;
 
 	@Shadow
-	protected abstract void sendSequencedPacket(ClientWorld world, SequencedPacketCreator packetCreator);
+	protected abstract void sendSequencedPacket(ClientLevel world, PredictiveAction packetCreator);
 
 	@Shadow
 	public abstract boolean breakBlock(BlockPos pos);
@@ -53,16 +53,16 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@WrapMethod(method = "breakBlock")
 	public boolean scriptblocks$wrap_breakBlock(BlockPos pos, Operation<Boolean> original) {
-		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
-			ClientWorld world = this.client.world;
+		if (this.client.player != null && (this.gameMode.isSurvival() || this.client.player.hasEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.client.player.hasEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
+			ClientLevel world = this.client.level;
 			if (world != null) {
 				BlockState blockState = world.getBlockState(pos);
 				Block block = blockState.getBlock();
-				block.onBreak(world, pos, blockState, this.client.player);
+				block.playerWillDestroy(world, pos, blockState, this.client.player);
 				FluidState fluidState = world.getFluidState(pos);
-				boolean bl = world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_ALL | Block.REDRAW_ON_MAIN_THREAD);
+				boolean bl = world.setBlock(pos, fluidState.createLegacyBlock(), Block.UPDATE_ALL | Block.UPDATE_IMMEDIATE);
 				if (bl) {
-					block.onBroken(world, pos, blockState);
+					block.destroy(world, pos, blockState);
 				}
 				return bl;
 			}
@@ -72,20 +72,20 @@ public abstract class ClientPlayerInteractionManagerMixin {
 
 	@WrapMethod(method = "attackBlock")
 	public boolean scriptblocks$wrap_attackBlock(BlockPos pos, Direction direction, Operation<Boolean> original) {
-		if (this.client.player != null && (this.gameMode.isSurvivalLike() || this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.client.player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
+		if (this.client.player != null && (this.gameMode.isSurvival() || this.client.player.hasEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && this.client.player.hasEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 			Optional<BlockPos> optionalHousingBlockPos = DataAttachmentHelper.getCurrentHousingBlockPosition(this.client.player);
 			boolean bl = false;
-			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
+			if (optionalHousingBlockPos.isPresent() && this.client.level != null && this.client.level.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 				bl = housingBlockEntity.influenceAreaContains(pos);
 			} else {
 				DataAttachmentHelper.setCurrentHousingBlockPosition(this.client.player, Optional.empty());
 			}
 			if (bl) {
-				BlockState blockState = this.client.world.getBlockState(pos);
-				this.client.getTutorialManager().onBlockBreaking(this.client.world, pos, blockState, 1.0f);
-				this.sendSequencedPacket(this.client.world, sequence -> {
+				BlockState blockState = this.client.level.getBlockState(pos);
+				this.client.getTutorial().onDestroyBlock(this.client.level, pos, blockState, 1.0f);
+				this.sendSequencedPacket(this.client.level, sequence -> {
 					this.breakBlock(pos);
-					return new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
+					return new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, direction, sequence);
 				});
 				this.blockBreakingCooldown = 5;
 			}
@@ -95,18 +95,18 @@ public abstract class ClientPlayerInteractionManagerMixin {
 	}
 
 	@WrapMethod(method = "interactBlock")
-	public ActionResult scriptblocks$wrap_interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, Operation<ActionResult> original) {
-		if ((this.gameMode.isSurvivalLike() || player.hasStatusEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && player.hasStatusEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
+	public InteractionResult scriptblocks$wrap_interactBlock(LocalPlayer player, InteractionHand hand, BlockHitResult hitResult, Operation<InteractionResult> original) {
+		if ((this.gameMode.isSurvival() || player.hasEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && player.hasEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 			this.syncSelectedSlot();
 			Optional<BlockPos> optionalHousingBlockPos = DataAttachmentHelper.getCurrentHousingBlockPosition(player);
 			boolean bl = false;
-			if (optionalHousingBlockPos.isPresent() && this.client.world != null && this.client.world.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
-				bl = housingBlockEntity.influenceAreaContains(hitResult.getBlockPos().offset(hitResult.getSide()));
+			if (optionalHousingBlockPos.isPresent() && this.client.level != null && this.client.level.getBlockEntity(optionalHousingBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
+				bl = housingBlockEntity.influenceAreaContains(hitResult.getBlockPos().relative(hitResult.getDirection()));
 			} else {
 				DataAttachmentHelper.setCurrentHousingBlockPosition(player, Optional.empty());
 			}
 			if (!bl) {
-				return ActionResult.FAIL;
+				return InteractionResult.FAIL;
 			}
 		}
 		return original.call(player, hand, hitResult);

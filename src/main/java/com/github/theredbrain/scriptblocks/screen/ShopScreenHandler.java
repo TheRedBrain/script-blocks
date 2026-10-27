@@ -7,35 +7,35 @@ import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerAdvancementLoader;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ShopScreenHandler extends ScreenHandler {
+public class ShopScreenHandler extends AbstractContainerMenu {
 
-	private PlayerInventory playerInventory;
-	private final World world;
+	private Inventory playerInventory;
+	private final Level world;
 	private ShopBlockEntity shopBlockEntity;
 	private @Nullable Shop shop;
 	private List<Shop.Deal> dealsList = new ArrayList<>(List.of());
@@ -45,27 +45,27 @@ public class ShopScreenHandler extends ScreenHandler {
 	private int stockedDealsCounter = 0;
 	Runnable contentsChangedListener = () -> {
 	};
-	public final Inventory inventory = new SimpleInventory(9) {
+	public final Container inventory = new SimpleContainer(9) {
 		@Override
-		public int getMaxCountPerStack() {
+		public int getMaxStackSize() {
 			return 999;
 		}
 
 		@Override
-		public void markDirty() {
-			super.markDirty();
-			ShopScreenHandler.this.onContentChanged(this);
+		public void setChanged() {
+			super.setChanged();
+			ShopScreenHandler.this.slotsChanged(this);
 			ShopScreenHandler.this.contentsChangedListener.run();
 		}
 	};
 
 	private BlockPos blockPos;
 
-	public ShopScreenHandler(int syncId, PlayerInventory playerInventory, ShopBlockData data) {
+	public ShopScreenHandler(int syncId, Inventory playerInventory, ShopBlockData data) {
 		this(syncId, playerInventory, data.blockPos());
 	}
 
-	public ShopScreenHandler(int syncId, PlayerInventory playerInventory, BlockPos blockPos) {
+	public ShopScreenHandler(int syncId, Inventory playerInventory, BlockPos blockPos) {
 		super(ScriptBlocksScreenHandlerTypes.SHOP_BLOCK_SCREEN_HANDLER, syncId);
 		this.playerInventory = playerInventory;
 		this.world = playerInventory.player.getWorld();
@@ -76,7 +76,7 @@ public class ShopScreenHandler extends ScreenHandler {
 			Shop shop = null;
 			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
 			if (!shopIdentifier.isEmpty()) {
-				Optional<RegistryEntry.Reference<Shop>> optionalShopReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.of(shopIdentifier));
+				Optional<Holder.Reference<Shop>> optionalShopReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.parse(shopIdentifier));
 				if (optionalShopReference.isPresent()) {
 					shop = optionalShopReference.get().value();
 				}
@@ -136,7 +136,7 @@ public class ShopScreenHandler extends ScreenHandler {
 		return this.stockedDealsCounter;
 	}
 
-	public Inventory getInventory() {
+	public Container getInventory() {
 		return this.inventory;
 	}
 
@@ -145,7 +145,7 @@ public class ShopScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int slot) {
+	public ItemStack quickMoveStack(Player player, int slot) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		// TODO
 //        Slot slot2 = this.slots.get(slot);
@@ -193,15 +193,15 @@ public class ShopScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public boolean canUse(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
 	@Override
-	public boolean onButtonClick(PlayerEntity player, int id) {
+	public boolean clickMenuButton(Player player, int id) {
 		if (id < this.stockedDealsList.size()) {
 			Shop.Deal currentDeal = this.stockedDealsList.get(id);
-			if (currentDeal != null && player instanceof ServerPlayerEntity serverPlayerEntity) {
+			if (currentDeal != null && player instanceof ServerPlayer serverPlayerEntity) {
 				ServerPlayNetworking.send(serverPlayerEntity,
 						new TradeWithShopPacket(
 								this.shopBlockEntity.getShopIdentifier(),
@@ -214,10 +214,10 @@ public class ShopScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public void onClosed(PlayerEntity player) {
-		super.onClosed(player);
-		if (player instanceof ServerPlayerEntity) {
-			this.dropInventory(player, this.inventory);
+	public void removed(Player player) {
+		super.removed(player);
+		if (player instanceof ServerPlayer) {
+			this.clearContainer(player, this.inventory);
 		}
 	}
 
@@ -226,14 +226,14 @@ public class ShopScreenHandler extends ScreenHandler {
 		ScriptBlocks.info("calculateUnlockedAndStockedDeals");
 
 //        ClientAdvancementManager advancementHandler = null;
-		PlayerAdvancementTracker playerAdvancementTracker = null;
-		ServerAdvancementLoader serverAdvancementLoader = null;
+		PlayerAdvancements playerAdvancementTracker = null;
+		ServerAdvancementManager serverAdvancementLoader = null;
 
-		if (this.playerInventory.player instanceof ServerPlayerEntity serverPlayerEntity) {
-			playerAdvancementTracker = serverPlayerEntity.getAdvancementTracker();
+		if (this.playerInventory.player instanceof ServerPlayer serverPlayerEntity) {
+			playerAdvancementTracker = serverPlayerEntity.getAdvancements();
 			MinecraftServer minecraftServer = serverPlayerEntity.getServer();
 			if (minecraftServer != null) {
-				serverAdvancementLoader = minecraftServer.getAdvancementLoader();
+				serverAdvancementLoader = minecraftServer.getAdvancements();
 			}
 		}
 		String lockAdvancement;
@@ -260,14 +260,14 @@ public class ShopScreenHandler extends ScreenHandler {
 				lockAdvancement = deal.lockAdvancement();
 				unlockAdvancement = deal.unlockAdvancement();
 
-				AdvancementEntry lockAdvancementEntry = null;
-				lockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(lockAdvancement));
+				AdvancementHolder lockAdvancementEntry = null;
+				lockAdvancementEntry = serverAdvancementLoader.get(Identifier.parse(lockAdvancement));
 
-				AdvancementEntry unlockAdvancementEntry = null;
-				unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.of(unlockAdvancement));
+				AdvancementHolder unlockAdvancementEntry = null;
+				unlockAdvancementEntry = serverAdvancementLoader.get(Identifier.parse(unlockAdvancement));
 
-				if ((lockAdvancementEntry != null && !playerAdvancementTracker.getProgress(lockAdvancementEntry).isDone()) &&
-						(unlockAdvancementEntry != null && playerAdvancementTracker.getProgress(unlockAdvancementEntry).isDone())) {
+				if ((lockAdvancementEntry != null && !playerAdvancementTracker.getOrStartProgress(lockAdvancementEntry).isDone()) &&
+						(unlockAdvancementEntry != null && playerAdvancementTracker.getOrStartProgress(unlockAdvancementEntry).isDone())) {
 					this.unlockedDealsList.add(deal);
 					this.unlockedDealsCounter++;
 				} else {
@@ -297,13 +297,13 @@ public class ShopScreenHandler extends ScreenHandler {
 			BlockPos blockPos
 	) {
 
-		public static final PacketCodec<RegistryByteBuf, ShopBlockData> PACKET_CODEC = PacketCodec.of(ShopBlockData::write, ShopBlockData::new);
+		public static final StreamCodec<RegistryFriendlyByteBuf, ShopBlockData> PACKET_CODEC = StreamCodec.ofMember(ShopBlockData::write, ShopBlockData::new);
 
-		public ShopBlockData(RegistryByteBuf registryByteBuf) {
+		public ShopBlockData(RegistryFriendlyByteBuf registryByteBuf) {
 			this(registryByteBuf.readBlockPos());
 		}
 
-		private void write(RegistryByteBuf registryByteBuf) {
+		private void write(RegistryFriendlyByteBuf registryByteBuf) {
 			registryByteBuf.writeBlockPos(blockPos);
 		}
 	}

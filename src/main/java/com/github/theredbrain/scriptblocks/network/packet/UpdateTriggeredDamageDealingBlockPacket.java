@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTriggeredDamageDealingBlockPacket(
 		BlockPos triggeredDamageDealingBlockPosition,
@@ -17,14 +17,14 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 		String exceptionTagIdentifierString,
 		String damageTypeIdentifierString,
 		float damageAmount
-) implements CustomPayload {
-	public static final Id<UpdateTriggeredDamageDealingBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggered_damage_dealing_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredDamageDealingBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredDamageDealingBlockPacket::write, UpdateTriggeredDamageDealingBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTriggeredDamageDealingBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggered_damage_dealing_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredDamageDealingBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredDamageDealingBlockPacket::write, UpdateTriggeredDamageDealingBlockPacket::new);
 
-	public UpdateTriggeredDamageDealingBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredDamageDealingBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
 						registryByteBuf.readInt(),
@@ -33,28 +33,28 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 				),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readFloat()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredDamageDealingBlockPosition);
-		registryByteBuf.writeString(this.selectionMode);
+		registryByteBuf.writeUtf(this.selectionMode);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeInt(this.areaDimensions.getX());
 		registryByteBuf.writeInt(this.areaDimensions.getY());
 		registryByteBuf.writeInt(this.areaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.areaPositionOffset);
 		registryByteBuf.writeBlockPos(this.uuidListHandlerPositionOffset);
-		registryByteBuf.writeString(this.exceptionTagIdentifierString);
-		registryByteBuf.writeString(this.damageTypeIdentifierString);
+		registryByteBuf.writeUtf(this.exceptionTagIdentifierString);
+		registryByteBuf.writeUtf(this.damageTypeIdentifierString);
 		registryByteBuf.writeFloat(this.damageAmount);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

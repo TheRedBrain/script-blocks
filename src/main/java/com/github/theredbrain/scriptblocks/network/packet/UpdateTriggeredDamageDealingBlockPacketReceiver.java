@@ -2,24 +2,24 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredDamageDealingBlockPacket> {
 
 	@Override
 	public void receive(UpdateTriggeredDamageDealingBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -37,7 +37,7 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 		String damageTypeIdentifierString = payload.damageTypeIdentifierString();
 		float damageAmount = payload.damageAmount();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(triggeredDamageDealingBlockPosition);
 		BlockState blockState = world.getBlockState(triggeredDamageDealingBlockPosition);
@@ -51,9 +51,9 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 			triggeredDamageDealingBlockEntity.setExceptionTagIdentifierString(exceptionTagIdentifierString);
 			triggeredDamageDealingBlockEntity.setDamageTypeIdentifierString(damageTypeIdentifierString);
 			triggeredDamageDealingBlockEntity.setDamageAmount(damageAmount);
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			triggeredDamageDealingBlockEntity.markDirty();
-			world.updateListeners(triggeredDamageDealingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			triggeredDamageDealingBlockEntity.setChanged();
+			world.sendBlockUpdated(triggeredDamageDealingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 
 	}

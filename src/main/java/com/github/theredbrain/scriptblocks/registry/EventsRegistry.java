@@ -2,12 +2,12 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public class EventsRegistry {
 	public static void initializeEvents() {
 		ServerLivingEntityEvents.AFTER_DEATH.register((livingEntity, damageSource) -> {
-			if (livingEntity instanceof ServerPlayerEntity serverPlayerEntity) {
+			if (livingEntity instanceof ServerPlayer serverPlayerEntity) {
 				DataAttachmentHelper.setActiveLocationCooldowns(serverPlayerEntity);
 			}
 		});

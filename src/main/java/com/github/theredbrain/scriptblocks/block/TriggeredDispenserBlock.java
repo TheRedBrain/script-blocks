@@ -4,87 +4,87 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredDispenserBlockE
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.block.dispenser.DispenserBehavior;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.DispenserBlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPointer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldEvents;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.dispenser.BlockSource;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import org.slf4j.Logger;
 
 public class TriggeredDispenserBlock extends DispenserBlock {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final MapCodec<TriggeredDispenserBlock> CODEC = createCodec(TriggeredDispenserBlock::new);
+	public static final MapCodec<TriggeredDispenserBlock> CODEC = simpleCodec(TriggeredDispenserBlock::new);
 
 	@Override
-	public MapCodec<TriggeredDispenserBlock> getCodec() {
+	public MapCodec<TriggeredDispenserBlock> codec() {
 		return CODEC;
 	}
 
-	public TriggeredDispenserBlock(AbstractBlock.Settings settings) {
+	public TriggeredDispenserBlock(BlockBehaviour.Properties settings) {
 		super(settings);
 	}
 
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new TriggeredDispenserBlockEntity(pos, state);
 	}
 
 	@Override
-	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-		if (state.hasBlockEntity() && !state.isOf(newState.getBlock())) {
+	protected void onStateReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
+		if (state.hasBlockEntity() && !state.is(newState.getBlock())) {
 			world.removeBlockEntity(pos);
 		}
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		if (player.isCreative()) {
-			if (world.isClient) {
-				return ActionResult.SUCCESS;
+			if (world.isClientSide) {
+				return InteractionResult.SUCCESS;
 			} else {
 				BlockEntity blockEntity = world.getBlockEntity(pos);
 				if (blockEntity instanceof TriggeredDispenserBlockEntity triggeredDispenserBlockEntity) {
-					player.openHandledScreen(triggeredDispenserBlockEntity);
+					player.openMenu(triggeredDispenserBlockEntity);
 				}
-				return ActionResult.CONSUME;
+				return InteractionResult.CONSUME;
 			}
 		} else {
-			return ActionResult.PASS;
+			return InteractionResult.PASS;
 		}
 	}
 
 	@Override
-	protected void dispense(ServerWorld world, BlockState state, BlockPos pos) {
+	protected void dispenseFrom(ServerLevel world, BlockState state, BlockPos pos) {
 		DispenserBlockEntity dispenserBlockEntity = world.getBlockEntity(pos, ScriptBlocksEntities.TRIGGERED_DISPENSER_BLOCK_ENTITY).orElse(null);
 		if (dispenserBlockEntity == null) {
 			LOGGER.warn("Ignoring dispensing attempt for TriggeredDispenserBlock without matching block entity at {}", pos);
 		} else {
-			BlockPointer blockPointer = new BlockPointer(world, pos, state, dispenserBlockEntity);
-			int i = dispenserBlockEntity.chooseNonEmptySlot(world.random);
+			BlockSource blockPointer = new BlockSource(world, pos, state, dispenserBlockEntity);
+			int i = dispenserBlockEntity.getRandomSlot(world.random);
 			if (i < 0) {
-				world.syncWorldEvent(WorldEvents.DISPENSER_FAILS, pos, 0);
-				world.emitGameEvent(GameEvent.BLOCK_ACTIVATE, pos, GameEvent.Emitter.of(dispenserBlockEntity.getCachedState()));
+				world.levelEvent(LevelEvent.SOUND_DISPENSER_FAIL, pos, 0);
+				world.gameEvent(GameEvent.BLOCK_ACTIVATE, pos, GameEvent.Context.of(dispenserBlockEntity.getBlockState()));
 			} else {
-				ItemStack itemStack = dispenserBlockEntity.getStack(i);
+				ItemStack itemStack = dispenserBlockEntity.getItem(i);
 				ItemStack itemStack1 = itemStack.copy();
-				DispenserBehavior dispenserBehavior = this.getBehaviorForItem(world, itemStack);
-				if (dispenserBehavior != DispenserBehavior.NOOP) {
+				DispenseItemBehavior dispenserBehavior = this.getDispenseMethod(world, itemStack);
+				if (dispenserBehavior != DispenseItemBehavior.NOOP) {
 					ItemStack newItemStack = dispenserBehavior.dispense(blockPointer, itemStack);
-					if (ItemStack.areItemsAndComponentsEqual(itemStack, newItemStack)) {
-						dispenserBlockEntity.setStack(i, itemStack1);
+					if (ItemStack.isSameItemSameComponents(itemStack, newItemStack)) {
+						dispenserBlockEntity.setItem(i, itemStack1);
 					} else {
-						dispenserBlockEntity.setStack(i, newItemStack);
+						dispenserBlockEntity.setItem(i, newItemStack);
 					}
 				}
 			}

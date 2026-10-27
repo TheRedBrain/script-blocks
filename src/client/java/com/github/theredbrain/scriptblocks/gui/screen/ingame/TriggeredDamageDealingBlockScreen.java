@@ -6,55 +6,55 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 @Environment(value = EnvType.CLIENT)
 public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text CYCLE_SELECTION_MODE_TOOLTIP_TEXT = Text.translatable("gui.triggered_damage_dealing_block.cycle_selection_mode_button.tooltip");
-	private static final Text SHOW_AREA_TRUE_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.show_area_true_label");
-	private static final Text SHOW_AREA_FALSE_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.show_area_false_label");
-	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.area_dimensions_label");
-	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.area_position_offset_label");
-	private static final Text UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.uuid_list_provider.uuid_list_provider_position_offset");
-	private static final Text EXCEPTION_TAG_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.exception_tag_identifier_label");
-	private static final Text DAMAGE_TYPE_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.damage_type_identifier_label");
-	private static final Text DAMAGE_AMOUNT_LABEL_TEXT = Text.translatable("gui.triggered_damage_dealing_block.damage_amount_label");
+	private static final Component CYCLE_SELECTION_MODE_TOOLTIP_TEXT = Component.translatable("gui.triggered_damage_dealing_block.cycle_selection_mode_button.tooltip");
+	private static final Component SHOW_AREA_TRUE_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.show_area_true_label");
+	private static final Component SHOW_AREA_FALSE_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.show_area_false_label");
+	private static final Component AREA_DIMENSIONS_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.area_dimensions_label");
+	private static final Component AREA_POSITION_OFFET_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.area_position_offset_label");
+	private static final Component UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.uuid_list_provider.uuid_list_provider_position_offset");
+	private static final Component EXCEPTION_TAG_IDENTIFIER_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.exception_tag_identifier_label");
+	private static final Component DAMAGE_TYPE_IDENTIFIER_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.damage_type_identifier_label");
+	private static final Component DAMAGE_AMOUNT_LABEL_TEXT = Component.translatable("gui.triggered_damage_dealing_block.damage_amount_label");
 
 	private final TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity;
 
-	private CyclingButtonWidget<TriggeredDamageDealingBlockEntity.SelectionMode> cycleSelectionModeButton;
+	private CycleButton<TriggeredDamageDealingBlockEntity.SelectionMode> cycleSelectionModeButton;
 	private TriggeredDamageDealingBlockEntity.SelectionMode selectionMode = TriggeredDamageDealingBlockEntity.SelectionMode.AREA;
 
-	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
-	private TextFieldWidget areaDimensionsXField;
-	private TextFieldWidget areaDimensionsYField;
-	private TextFieldWidget areaDimensionsZField;
-	private TextFieldWidget areaPositionOffsetXField;
-	private TextFieldWidget areaPositionOffsetYField;
-	private TextFieldWidget areaPositionOffsetZField;
+	private CycleButton<Boolean> toggleShowAreaButton;
+	private EditBox areaDimensionsXField;
+	private EditBox areaDimensionsYField;
+	private EditBox areaDimensionsZField;
+	private EditBox areaPositionOffsetXField;
+	private EditBox areaPositionOffsetYField;
+	private EditBox areaPositionOffsetZField;
 
-	private TextFieldWidget uuidListHandlerPositionOffsetXField;
-	private TextFieldWidget uuidListHandlerPositionOffsetYField;
-	private TextFieldWidget uuidListHandlerPositionOffsetZField;
+	private EditBox uuidListHandlerPositionOffsetXField;
+	private EditBox uuidListHandlerPositionOffsetYField;
+	private EditBox uuidListHandlerPositionOffsetZField;
 
-	private TextFieldWidget exceptionTagIdentifierField;
-	private TextFieldWidget damageTypeIdentifierField;
-	private TextFieldWidget damageAmountField;
+	private EditBox exceptionTagIdentifierField;
+	private EditBox damageTypeIdentifierField;
+	private EditBox damageAmountField;
 
 	private boolean showArea;
 
 	public TriggeredDamageDealingBlockScreen(TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.triggeredDamageDealingBlockEntity = triggeredDamageDealingBlockEntity;
 	}
 
@@ -64,80 +64,80 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 		super.init();
 
 		this.selectionMode = this.triggeredDamageDealingBlockEntity.getSelectionMode();
-		this.cycleSelectionModeButton = CyclingButtonWidget.builder(TriggeredDamageDealingBlockEntity.SelectionMode::asText).values(TriggeredDamageDealingBlockEntity.SelectionMode.values()).initially(this.selectionMode).omitKeyText().build(this.width / 2 - 154, 20, 150, 20, Text.empty(), (button, selectionMode) -> {
+		this.cycleSelectionModeButton = CycleButton.builder(TriggeredDamageDealingBlockEntity.SelectionMode::asText).values(TriggeredDamageDealingBlockEntity.SelectionMode.values()).initially(this.selectionMode).omitKeyText().build(this.width / 2 - 154, 20, 150, 20, Component.empty(), (button, selectionMode) -> {
 			this.selectionMode = selectionMode;
 			button.setTooltip(Tooltip.of(CYCLE_SELECTION_MODE_TOOLTIP_TEXT));
 		});
-		this.cycleSelectionModeButton.setTooltip(Tooltip.of(CYCLE_SELECTION_MODE_TOOLTIP_TEXT));
-		this.addDrawableChild(this.cycleSelectionModeButton);
+		this.cycleSelectionModeButton.setTooltip(Tooltip.create(CYCLE_SELECTION_MODE_TOOLTIP_TEXT));
+		this.addRenderableWidget(this.cycleSelectionModeButton);
 
 		this.showArea = this.triggeredDamageDealingBlockEntity.showArea();
-		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(SHOW_AREA_TRUE_LABEL_TEXT, SHOW_AREA_FALSE_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 + 4, 20, 150, 20, Text.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_TRUE_LABEL_TEXT, SHOW_AREA_FALSE_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 + 4, 20, 150, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
-		this.areaDimensionsXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 100, 20, Text.empty());
+		this.areaDimensionsXField = new EditBox(this.font, this.width / 2 - 154, 55, 100, 20, Component.empty());
 		this.areaDimensionsXField.setMaxLength(128);
-		this.areaDimensionsXField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaDimensions().getX()));
-		this.addSelectableChild(this.areaDimensionsXField);
+		this.areaDimensionsXField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaDimensions().getX()));
+		this.addWidget(this.areaDimensionsXField);
 
-		this.areaDimensionsYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 55, 100, 20, Text.empty());
+		this.areaDimensionsYField = new EditBox(this.font, this.width / 2 - 50, 55, 100, 20, Component.empty());
 		this.areaDimensionsYField.setMaxLength(128);
-		this.areaDimensionsYField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaDimensions().getY()));
-		this.addSelectableChild(this.areaDimensionsYField);
+		this.areaDimensionsYField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaDimensions().getY()));
+		this.addWidget(this.areaDimensionsYField);
 
-		this.areaDimensionsZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 55, 100, 20, Text.empty());
+		this.areaDimensionsZField = new EditBox(this.font, this.width / 2 + 54, 55, 100, 20, Component.empty());
 		this.areaDimensionsZField.setMaxLength(128);
-		this.areaDimensionsZField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaDimensions().getZ()));
-		this.addSelectableChild(this.areaDimensionsZField);
+		this.areaDimensionsZField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaDimensions().getZ()));
+		this.addWidget(this.areaDimensionsZField);
 
-		this.areaPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 100, 20, Text.empty());
+		this.areaPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 90, 100, 20, Component.empty());
 		this.areaPositionOffsetXField.setMaxLength(128);
-		this.areaPositionOffsetXField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaPositionOffset().getX()));
-		this.addSelectableChild(this.areaPositionOffsetXField);
+		this.areaPositionOffsetXField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaPositionOffset().getX()));
+		this.addWidget(this.areaPositionOffsetXField);
 
-		this.areaPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 90, 100, 20, Text.empty());
+		this.areaPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 90, 100, 20, Component.empty());
 		this.areaPositionOffsetYField.setMaxLength(128);
-		this.areaPositionOffsetYField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaPositionOffset().getY()));
-		this.addSelectableChild(this.areaPositionOffsetYField);
+		this.areaPositionOffsetYField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaPositionOffset().getY()));
+		this.addWidget(this.areaPositionOffsetYField);
 
-		this.areaPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 90, 100, 20, Text.empty());
+		this.areaPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 90, 100, 20, Component.empty());
 		this.areaPositionOffsetZField.setMaxLength(128);
-		this.areaPositionOffsetZField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaPositionOffset().getZ()));
-		this.addSelectableChild(this.areaPositionOffsetZField);
+		this.areaPositionOffsetZField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getAreaPositionOffset().getZ()));
+		this.addWidget(this.areaPositionOffsetZField);
 
-		this.uuidListHandlerPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
+		this.uuidListHandlerPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 125, 100, 20, Component.empty());
 		this.uuidListHandlerPositionOffsetXField.setMaxLength(128);
-		this.uuidListHandlerPositionOffsetXField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getUuidListHandlerPositionOffset().getX()));
-		this.addSelectableChild(this.uuidListHandlerPositionOffsetXField);
+		this.uuidListHandlerPositionOffsetXField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getUuidListHandlerPositionOffset().getX()));
+		this.addWidget(this.uuidListHandlerPositionOffsetXField);
 
-		this.uuidListHandlerPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 125, 100, 20, Text.empty());
+		this.uuidListHandlerPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 125, 100, 20, Component.empty());
 		this.uuidListHandlerPositionOffsetYField.setMaxLength(128);
-		this.uuidListHandlerPositionOffsetYField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getUuidListHandlerPositionOffset().getY()));
-		this.addSelectableChild(this.uuidListHandlerPositionOffsetYField);
+		this.uuidListHandlerPositionOffsetYField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getUuidListHandlerPositionOffset().getY()));
+		this.addWidget(this.uuidListHandlerPositionOffsetYField);
 
-		this.uuidListHandlerPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 125, 100, 20, Text.empty());
+		this.uuidListHandlerPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 125, 100, 20, Component.empty());
 		this.uuidListHandlerPositionOffsetZField.setMaxLength(128);
-		this.uuidListHandlerPositionOffsetZField.setText(Integer.toString(this.triggeredDamageDealingBlockEntity.getUuidListHandlerPositionOffset().getZ()));
-		this.addSelectableChild(this.uuidListHandlerPositionOffsetZField);
+		this.uuidListHandlerPositionOffsetZField.setValue(Integer.toString(this.triggeredDamageDealingBlockEntity.getUuidListHandlerPositionOffset().getZ()));
+		this.addWidget(this.uuidListHandlerPositionOffsetZField);
 
-		this.exceptionTagIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 300, 20, Text.empty());
+		this.exceptionTagIdentifierField = new EditBox(this.font, this.width / 2 - 154, 160, 300, 20, Component.empty());
 		this.exceptionTagIdentifierField.setMaxLength(128);
-		this.exceptionTagIdentifierField.setText(this.triggeredDamageDealingBlockEntity.getExceptionTagIdentifierString());
-		this.addSelectableChild(this.exceptionTagIdentifierField);
+		this.exceptionTagIdentifierField.setValue(this.triggeredDamageDealingBlockEntity.getExceptionTagIdentifierString());
+		this.addWidget(this.exceptionTagIdentifierField);
 
-		this.damageTypeIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 195, 250, 20, Text.empty());
+		this.damageTypeIdentifierField = new EditBox(this.font, this.width / 2 - 154, 195, 250, 20, Component.empty());
 		this.damageTypeIdentifierField.setMaxLength(128);
-		this.damageTypeIdentifierField.setText(this.triggeredDamageDealingBlockEntity.getDamageTypeIdentifierString());
-		this.addSelectableChild(this.damageTypeIdentifierField);
+		this.damageTypeIdentifierField.setValue(this.triggeredDamageDealingBlockEntity.getDamageTypeIdentifierString());
+		this.addWidget(this.damageTypeIdentifierField);
 
-		this.damageAmountField = new TextFieldWidget(this.textRenderer, this.width / 2 + 104, 195, 50, 20, Text.empty());
+		this.damageAmountField = new EditBox(this.font, this.width / 2 + 104, 195, 50, 20, Component.empty());
 		this.damageAmountField.setMaxLength(128);
-		this.damageAmountField.setText(Float.toString(this.triggeredDamageDealingBlockEntity.getDamageAmount()));
-		this.addSelectableChild(this.damageAmountField);
+		this.damageAmountField.setValue(Float.toString(this.triggeredDamageDealingBlockEntity.getDamageAmount()));
+		this.addWidget(this.damageAmountField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 219, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 219, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 219, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 219, 150, 20).build());
 	}
 
 	@Override
@@ -146,62 +146,62 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		boolean bool = this.showArea;
 		TriggeredDamageDealingBlockEntity.SelectionMode var = this.selectionMode;
-		String string = this.areaDimensionsXField.getText();
-		String string1 = this.areaDimensionsYField.getText();
-		String string2 = this.areaDimensionsZField.getText();
-		String string3 = this.areaPositionOffsetXField.getText();
-		String string4 = this.areaPositionOffsetYField.getText();
-		String string5 = this.areaPositionOffsetZField.getText();
-		String string6 = this.uuidListHandlerPositionOffsetXField.getText();
-		String string7 = this.uuidListHandlerPositionOffsetYField.getText();
-		String string8 = this.uuidListHandlerPositionOffsetZField.getText();
-		String string9 = this.exceptionTagIdentifierField.getText();
-		String string10 = this.damageTypeIdentifierField.getText();
-		String string11 = this.damageAmountField.getText();
+		String string = this.areaDimensionsXField.getValue();
+		String string1 = this.areaDimensionsYField.getValue();
+		String string2 = this.areaDimensionsZField.getValue();
+		String string3 = this.areaPositionOffsetXField.getValue();
+		String string4 = this.areaPositionOffsetYField.getValue();
+		String string5 = this.areaPositionOffsetZField.getValue();
+		String string6 = this.uuidListHandlerPositionOffsetXField.getValue();
+		String string7 = this.uuidListHandlerPositionOffsetYField.getValue();
+		String string8 = this.uuidListHandlerPositionOffsetZField.getValue();
+		String string9 = this.exceptionTagIdentifierField.getValue();
+		String string10 = this.damageTypeIdentifierField.getValue();
+		String string11 = this.damageAmountField.getValue();
 		this.init(client, width, height);
 		this.showArea = bool;
 		this.toggleShowAreaButton.setValue(this.showArea);
 		this.selectionMode = var;
 		this.cycleSelectionModeButton.setValue(this.selectionMode);
-		this.areaDimensionsXField.setText(string);
-		this.areaDimensionsYField.setText(string1);
-		this.areaDimensionsZField.setText(string2);
-		this.areaPositionOffsetXField.setText(string3);
-		this.areaPositionOffsetYField.setText(string4);
-		this.areaPositionOffsetZField.setText(string5);
-		this.uuidListHandlerPositionOffsetXField.setText(string6);
-		this.uuidListHandlerPositionOffsetYField.setText(string7);
-		this.uuidListHandlerPositionOffsetZField.setText(string8);
-		this.exceptionTagIdentifierField.setText(string9);
-		this.damageTypeIdentifierField.setText(string10);
-		this.damageAmountField.setText(string11);
+		this.areaDimensionsXField.setValue(string);
+		this.areaDimensionsYField.setValue(string1);
+		this.areaDimensionsZField.setValue(string2);
+		this.areaPositionOffsetXField.setValue(string3);
+		this.areaPositionOffsetYField.setValue(string4);
+		this.areaPositionOffsetZField.setValue(string5);
+		this.uuidListHandlerPositionOffsetXField.setValue(string6);
+		this.uuidListHandlerPositionOffsetYField.setValue(string7);
+		this.uuidListHandlerPositionOffsetZField.setValue(string8);
+		this.exceptionTagIdentifierField.setValue(string9);
+		this.damageTypeIdentifierField.setValue(string10);
+		this.damageAmountField.setValue(string11);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 		this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
 		this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
 		this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+		context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 		this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+		context.drawString(this.font, UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
 		this.uuidListHandlerPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.uuidListHandlerPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.uuidListHandlerPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, EXCEPTION_TAG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+		context.drawString(this.font, EXCEPTION_TAG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
 		this.exceptionTagIdentifierField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, DAMAGE_TYPE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+		context.drawString(this.font, DAMAGE_TYPE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
 		this.damageTypeIdentifierField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, DAMAGE_AMOUNT_LABEL_TEXT, this.width / 2 + 105, 185, 0xA0A0A0);
+		context.drawString(this.font, DAMAGE_AMOUNT_LABEL_TEXT, this.width / 2 + 105, 185, 0xA0A0A0);
 		this.damageAmountField.render(context, mouseX, mouseY, delta);
 
 	}
@@ -213,23 +213,23 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 				this.selectionMode.asString(),
 				this.showArea,
 				new Vec3i(
-						ItemUtils.parseInt(this.areaDimensionsXField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsYField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsZField.getText())
+						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),
+						ItemUtils.parseInt(this.areaDimensionsYField.getValue()),
+						ItemUtils.parseInt(this.areaDimensionsZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.areaPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.areaPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.areaPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.uuidListHandlerPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.uuidListHandlerPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.uuidListHandlerPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.uuidListHandlerPositionOffsetZField.getValue())
 				),
-				this.exceptionTagIdentifierField.getText(),
-				this.damageTypeIdentifierField.getText(),
-				ItemUtils.parseFloat(this.damageAmountField.getText())
+				this.exceptionTagIdentifierField.getValue(),
+				this.damageTypeIdentifierField.getValue(),
+				ItemUtils.parseFloat(this.damageAmountField.getValue())
 		));
 		return true;
 	}

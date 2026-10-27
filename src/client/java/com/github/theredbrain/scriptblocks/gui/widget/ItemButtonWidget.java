@@ -2,40 +2,39 @@ package com.github.theredbrain.scriptblocks.gui.widget;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value = EnvType.CLIENT)
-public class ItemButtonWidget extends ButtonWidget {
+public class ItemButtonWidget extends Button {
 
 	protected final ItemStack itemStack;
 
-	ItemButtonWidget(int x, int y, int width, int height, ItemStack itemStack, ButtonWidget.PressAction onPress) {
-		super(x, y, width, height, Text.empty(), onPress, DEFAULT_NARRATION_SUPPLIER);
+	ItemButtonWidget(int x, int y, int width, int height, ItemStack itemStack, Button.OnPress onPress) {
+		super(x, y, width, height, Plain.empty(), onPress, DEFAULT_NARRATION);
 		this.itemStack = itemStack;
 	}
 
-	public static Builder builder(ItemStack itemStack, ButtonWidget.PressAction onPress) {
+	public static Builder builder(ItemStack itemStack, Button.OnPress onPress) {
 		return new Builder(itemStack, onPress);
 	}
 
-	public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.renderWidget(context, mouseX, mouseY, delta);
 		if (this.visible) {
 			int i = this.getX() + this.getWidth() / 2 - 8;
 			int j = this.getY() + this.getHeight() / 2 - 8;
-			context.drawItemWithoutEntity(this.itemStack, i, j);
+			context.renderFakeItem(this.itemStack, i, j);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
 		private final ItemStack itemStack;
-		private final ButtonWidget.PressAction onPress;
+		private final Button.OnPress onPress;
 		@Nullable
 		private Tooltip tooltip;
 		private int x;
@@ -43,7 +42,7 @@ public class ItemButtonWidget extends ButtonWidget {
 		private int width = 150;
 		private int height = 20;
 
-		public Builder(ItemStack itemStack, ButtonWidget.PressAction onPress) {
+		public Builder(ItemStack itemStack, Button.OnPress onPress) {
 			this.itemStack = itemStack;
 			this.onPress = onPress;
 		}

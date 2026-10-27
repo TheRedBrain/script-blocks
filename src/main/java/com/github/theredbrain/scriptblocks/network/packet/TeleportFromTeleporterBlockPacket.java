@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record TeleportFromTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
@@ -14,34 +14,34 @@ public record TeleportFromTeleporterBlockPacket(
 		String targetLocationEntrance,
 		String dataId,
 		String data
-) implements CustomPayload {
-	public static final CustomPayload.Id<TeleportFromTeleporterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("teleport_from_teleporter_block"));
-	public static final PacketCodec<RegistryByteBuf, TeleportFromTeleporterBlockPacket> PACKET_CODEC = PacketCodec.of(TeleportFromTeleporterBlockPacket::write, TeleportFromTeleporterBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<TeleportFromTeleporterBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("teleport_from_teleporter_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, TeleportFromTeleporterBlockPacket> PACKET_CODEC = StreamCodec.ofMember(TeleportFromTeleporterBlockPacket::write, TeleportFromTeleporterBlockPacket::new);
 
-	public TeleportFromTeleporterBlockPacket(RegistryByteBuf registryByteBuf) {
+	public TeleportFromTeleporterBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
-		registryByteBuf.writeString(this.accessPositionDimension);
-		registryByteBuf.writeString(this.targetDimensionOwnerName);
-		registryByteBuf.writeString(this.targetLocation);
-		registryByteBuf.writeString(this.targetLocationEntrance);
-		registryByteBuf.writeString(this.dataId);
-		registryByteBuf.writeString(this.data);
+		registryByteBuf.writeUtf(this.accessPositionDimension);
+		registryByteBuf.writeUtf(this.targetDimensionOwnerName);
+		registryByteBuf.writeUtf(this.targetLocation);
+		registryByteBuf.writeUtf(this.targetLocationEntrance);
+		registryByteBuf.writeUtf(this.dataId);
+		registryByteBuf.writeUtf(this.data);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

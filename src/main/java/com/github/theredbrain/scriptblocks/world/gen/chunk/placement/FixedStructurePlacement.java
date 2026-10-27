@@ -4,17 +4,16 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksStructurePlaceme
 import com.mojang.datafixers.Products;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.gen.chunk.placement.StructurePlacement;
-import net.minecraft.world.gen.chunk.placement.StructurePlacementCalculator;
-import net.minecraft.world.gen.chunk.placement.StructurePlacementType;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
 
 public class FixedStructurePlacement extends StructurePlacement {
 	public static final MapCodec<FixedStructurePlacement> CODEC = RecordCodecBuilder.mapCodec(
@@ -27,7 +26,7 @@ public class FixedStructurePlacement extends StructurePlacement {
 	private static Products.P6<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>, List<BlockPos>> buildFixedStructuresCodec(
 			RecordCodecBuilder.Instance<FixedStructurePlacement> instance
 	) {
-		Products.P5<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>> p5 = buildCodec(
+		Products.P5<RecordCodecBuilder.Mu<FixedStructurePlacement>, Vec3i, FrequencyReductionMethod, Float, Integer, Optional<ExclusionZone>> p5 = placementCodec(
 				instance
 		);
 		Products.P1<RecordCodecBuilder.Mu<FixedStructurePlacement>, List<BlockPos>> p1 = instance.group(
@@ -53,7 +52,7 @@ public class FixedStructurePlacement extends StructurePlacement {
 		return this.positions;
 	}
 
-	protected boolean isStartChunk(StructurePlacementCalculator calculator, int chunkX, int chunkZ) {
+	protected boolean isPlacementChunk(ChunkGeneratorStructureState calculator, int chunkX, int chunkZ) {
 		if (this.positions.isEmpty()) {
 			return false;
 		} else {
@@ -80,11 +79,11 @@ public class FixedStructurePlacement extends StructurePlacement {
 		}
 	}
 
-	public boolean shouldGenerate(StructurePlacementCalculator calculator, int chunkX, int chunkZ) {
-		return this.isStartChunk(calculator, chunkX, chunkZ);
+	public boolean isStructureChunk(ChunkGeneratorStructureState calculator, int chunkX, int chunkZ) {
+		return this.isPlacementChunk(calculator, chunkX, chunkZ);
 	}
 
-	public StructurePlacementType<?> getType() {
+	public StructurePlacementType<?> type() {
 		return ScriptBlocksStructurePlacementTypes.FIXED;
 	}
 }

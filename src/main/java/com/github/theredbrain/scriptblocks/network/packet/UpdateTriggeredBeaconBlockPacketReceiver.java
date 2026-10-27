@@ -2,23 +2,23 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredBeaconBlockPacket> {
 	@Override
 	public void receive(UpdateTriggeredBeaconBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -40,7 +40,7 @@ public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetwo
 
 		TriggeredBeaconBlockEntity.TriggeredMode triggeredMode = TriggeredBeaconBlockEntity.TriggeredMode.byName(payload.triggeredMode()).orElse(TriggeredBeaconBlockEntity.TriggeredMode.CONTINUOUS);
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -51,19 +51,19 @@ public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetwo
 			triggeredBeaconBlockEntity.reset();
 			triggeredBeaconBlockEntity.setShowArea(showArea);
 			if (!triggeredBeaconBlockEntity.setAreaDimensions(areaDimensions)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_beacon_block.areaDimensions.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_beacon_block.areaDimensions.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredBeaconBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_beacon_block.areaPositionOffset.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_beacon_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredBeaconBlockEntity.setAppliedStatusEffectIdentifier(appliedStatusEffectIdentifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_beacon_block.appliedStatusEffectIdentifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_beacon_block.appliedStatusEffectIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredBeaconBlockEntity.setAppliedStatusEffectAmplifier(appliedStatusEffectAmplifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_beacon_block.appliedStatusEffectAmplifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_beacon_block.appliedStatusEffectAmplifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			triggeredBeaconBlockEntity.setAppliedStatusEffectDuration(appliedStatusEffectDuration);
@@ -76,10 +76,10 @@ public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetwo
 			triggeredBeaconBlockEntity.setTriggeredMode(triggeredMode);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
-			triggeredBeaconBlockEntity.markDirty();
-			world.updateListeners(triggeredBeaconBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			triggeredBeaconBlockEntity.setChanged();
+			world.sendBlockUpdated(triggeredBeaconBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

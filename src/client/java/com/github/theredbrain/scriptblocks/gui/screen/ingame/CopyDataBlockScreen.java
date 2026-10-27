@@ -6,70 +6,70 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 @Environment(value = EnvType.CLIENT)
 public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.copy_data_block.first_data_providing_block_position_offset");
-	private static final Text SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.copy_data_block.second_data_providing_block_position_offset");
-	private static final Text DATA_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_identifier");
+	private static final Component FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.copy_data_block.first_data_providing_block_position_offset");
+	private static final Component SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.copy_data_block.second_data_providing_block_position_offset");
+	private static final Component DATA_IDENTIFIER_LABEL_TEXT = Component.translatable("gui.data_provider_block.data_identifier");
 	private final CopyDataBlockEntity copyDataBlock;
-	private TextFieldWidget firstDataProvidingBlockPositionOffsetXField;
-	private TextFieldWidget firstDataProvidingBlockPositionOffsetYField;
-	private TextFieldWidget firstDataProvidingBlockPositionOffsetZField;
-	private TextFieldWidget secondDataProvidingBlockPositionOffsetXField;
-	private TextFieldWidget secondDataProvidingBlockPositionOffsetYField;
-	private TextFieldWidget secondDataProvidingBlockPositionOffsetZField;
-	private TextFieldWidget dataIdentifierField;
+	private EditBox firstDataProvidingBlockPositionOffsetXField;
+	private EditBox firstDataProvidingBlockPositionOffsetYField;
+	private EditBox firstDataProvidingBlockPositionOffsetZField;
+	private EditBox secondDataProvidingBlockPositionOffsetXField;
+	private EditBox secondDataProvidingBlockPositionOffsetYField;
+	private EditBox secondDataProvidingBlockPositionOffsetZField;
+	private EditBox dataIdentifierField;
 
 	public CopyDataBlockScreen(CopyDataBlockEntity copyDataBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.copyDataBlock = copyDataBlock;
 	}
 
 	@Override
 	protected void init() {
 
-		this.firstDataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 100, 20, Text.empty());
+		this.firstDataProvidingBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 55, 100, 20, Component.empty());
 		this.firstDataProvidingBlockPositionOffsetXField.setMaxLength(128);
-		this.firstDataProvidingBlockPositionOffsetXField.setText(Integer.toString(this.copyDataBlock.getFirstDataProvidingBlockPosOffset().getX()));
-		this.addSelectableChild(this.firstDataProvidingBlockPositionOffsetXField);
-		this.firstDataProvidingBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 55, 100, 20, Text.empty());
+		this.firstDataProvidingBlockPositionOffsetXField.setValue(Integer.toString(this.copyDataBlock.getFirstDataProvidingBlockPosOffset().getX()));
+		this.addWidget(this.firstDataProvidingBlockPositionOffsetXField);
+		this.firstDataProvidingBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 54, 55, 100, 20, Component.empty());
 		this.firstDataProvidingBlockPositionOffsetYField.setMaxLength(128);
-		this.firstDataProvidingBlockPositionOffsetYField.setText(Integer.toString(this.copyDataBlock.getFirstDataProvidingBlockPosOffset().getY()));
-		this.addSelectableChild(this.firstDataProvidingBlockPositionOffsetYField);
-		this.firstDataProvidingBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 46, 55, 100, 20, Text.empty());
+		this.firstDataProvidingBlockPositionOffsetYField.setValue(Integer.toString(this.copyDataBlock.getFirstDataProvidingBlockPosOffset().getY()));
+		this.addWidget(this.firstDataProvidingBlockPositionOffsetYField);
+		this.firstDataProvidingBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 46, 55, 100, 20, Component.empty());
 		this.firstDataProvidingBlockPositionOffsetZField.setMaxLength(128);
-		this.firstDataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.copyDataBlock.getFirstDataProvidingBlockPosOffset().getZ()));
-		this.addSelectableChild(this.firstDataProvidingBlockPositionOffsetZField);
+		this.firstDataProvidingBlockPositionOffsetZField.setValue(Integer.toString(this.copyDataBlock.getFirstDataProvidingBlockPosOffset().getZ()));
+		this.addWidget(this.firstDataProvidingBlockPositionOffsetZField);
 
-		this.secondDataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 100, 20, Text.empty());
+		this.secondDataProvidingBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 90, 100, 20, Component.empty());
 		this.secondDataProvidingBlockPositionOffsetXField.setMaxLength(128);
-		this.secondDataProvidingBlockPositionOffsetXField.setText(Integer.toString(this.copyDataBlock.getSecondDataProvidingBlockPosOffset().getX()));
-		this.addSelectableChild(this.secondDataProvidingBlockPositionOffsetXField);
-		this.secondDataProvidingBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 90, 100, 20, Text.empty());
+		this.secondDataProvidingBlockPositionOffsetXField.setValue(Integer.toString(this.copyDataBlock.getSecondDataProvidingBlockPosOffset().getX()));
+		this.addWidget(this.secondDataProvidingBlockPositionOffsetXField);
+		this.secondDataProvidingBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 54, 90, 100, 20, Component.empty());
 		this.secondDataProvidingBlockPositionOffsetYField.setMaxLength(128);
-		this.secondDataProvidingBlockPositionOffsetYField.setText(Integer.toString(this.copyDataBlock.getSecondDataProvidingBlockPosOffset().getY()));
-		this.addSelectableChild(this.secondDataProvidingBlockPositionOffsetYField);
-		this.secondDataProvidingBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 46, 90, 100, 20, Text.empty());
+		this.secondDataProvidingBlockPositionOffsetYField.setValue(Integer.toString(this.copyDataBlock.getSecondDataProvidingBlockPosOffset().getY()));
+		this.addWidget(this.secondDataProvidingBlockPositionOffsetYField);
+		this.secondDataProvidingBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 46, 90, 100, 20, Component.empty());
 		this.secondDataProvidingBlockPositionOffsetZField.setMaxLength(128);
-		this.secondDataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.copyDataBlock.getSecondDataProvidingBlockPosOffset().getZ()));
-		this.addSelectableChild(this.secondDataProvidingBlockPositionOffsetZField);
+		this.secondDataProvidingBlockPositionOffsetZField.setValue(Integer.toString(this.copyDataBlock.getSecondDataProvidingBlockPosOffset().getZ()));
+		this.addWidget(this.secondDataProvidingBlockPositionOffsetZField);
 
-		this.dataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 300, 20, Text.empty());
+		this.dataIdentifierField = new EditBox(this.font, this.width / 2 - 154, 125, 300, 20, Component.empty());
 		this.dataIdentifierField.setMaxLength(128);
-		this.dataIdentifierField.setText(this.copyDataBlock.getDataIdentifier());
-		this.addSelectableChild(this.dataIdentifierField);
+		this.dataIdentifierField.setValue(this.copyDataBlock.getDataIdentifier());
+		this.addWidget(this.dataIdentifierField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 
 	}
 
@@ -79,40 +79,40 @@ public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		String string = this.firstDataProvidingBlockPositionOffsetXField.getText();
-		String string1 = this.firstDataProvidingBlockPositionOffsetYField.getText();
-		String string2 = this.firstDataProvidingBlockPositionOffsetZField.getText();
-		String string3 = this.secondDataProvidingBlockPositionOffsetXField.getText();
-		String string4 = this.secondDataProvidingBlockPositionOffsetYField.getText();
-		String string5 = this.secondDataProvidingBlockPositionOffsetZField.getText();
-		String string6 = this.dataIdentifierField.getText();
+	public void resize(Minecraft client, int width, int height) {
+		String string = this.firstDataProvidingBlockPositionOffsetXField.getValue();
+		String string1 = this.firstDataProvidingBlockPositionOffsetYField.getValue();
+		String string2 = this.firstDataProvidingBlockPositionOffsetZField.getValue();
+		String string3 = this.secondDataProvidingBlockPositionOffsetXField.getValue();
+		String string4 = this.secondDataProvidingBlockPositionOffsetYField.getValue();
+		String string5 = this.secondDataProvidingBlockPositionOffsetZField.getValue();
+		String string6 = this.dataIdentifierField.getValue();
 		this.init(client, width, height);
-		this.firstDataProvidingBlockPositionOffsetXField.setText(string);
-		this.firstDataProvidingBlockPositionOffsetYField.setText(string1);
-		this.firstDataProvidingBlockPositionOffsetZField.setText(string2);
-		this.secondDataProvidingBlockPositionOffsetXField.setText(string3);
-		this.secondDataProvidingBlockPositionOffsetYField.setText(string4);
-		this.secondDataProvidingBlockPositionOffsetZField.setText(string5);
-		this.dataIdentifierField.setText(string6);
+		this.firstDataProvidingBlockPositionOffsetXField.setValue(string);
+		this.firstDataProvidingBlockPositionOffsetYField.setValue(string1);
+		this.firstDataProvidingBlockPositionOffsetZField.setValue(string2);
+		this.secondDataProvidingBlockPositionOffsetXField.setValue(string3);
+		this.secondDataProvidingBlockPositionOffsetYField.setValue(string4);
+		this.secondDataProvidingBlockPositionOffsetZField.setValue(string5);
+		this.dataIdentifierField.setValue(string6);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		context.drawString(this.font, FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 		this.firstDataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.firstDataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.firstDataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+		context.drawString(this.font, SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 		this.secondDataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.secondDataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.secondDataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+		context.drawString(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
 		this.dataIdentifierField.render(context, mouseX, mouseY, delta);
 
 	}
@@ -122,16 +122,16 @@ public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		ClientPlayNetworking.send(new UpdateCopyDataBlockPacket(
 				this.copyDataBlock.getPos(),
 				new BlockPos(
-						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.secondDataProvidingBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.secondDataProvidingBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.secondDataProvidingBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.secondDataProvidingBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.secondDataProvidingBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.secondDataProvidingBlockPositionOffsetZField.getValue())
 				),
-				this.dataIdentifierField.getText()
+				this.dataIdentifierField.getValue()
 		));
 		return true;
 	}

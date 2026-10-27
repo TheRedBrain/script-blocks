@@ -14,82 +14,81 @@ import com.github.theredbrain.slotcustomizationapi.api.SlotCustomization;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerListener;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.scores.PlayerTeam;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
-public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHandler> implements ScreenHandlerListener {
-	private static final Text EDIT_BUTTON_LABEL_TEXT = Text.translatable("gui.edit");
-	private static final Text CANCEL_BUTTON_LABEL_TEXT = Text.translatable("gui.cancel");
-	private static final Text CHOOSE_BUTTON_LABEL_TEXT = Text.translatable("gui.choose");
-	private static final Text REGENERATE_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.regenerate_button_label");
-	private static final Text REGENERATE_DUNGEON_TEXT = Text.translatable("gui.teleporter_block.regenerate_dungeon");
-	private static final Text CONFIRM_REGENERATION_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.confirm_regeneration_button_label");
-	private static final Text CANCEL_REGENERATION_BUTTON_LABEL_TEXT = Text.translatable("gui.teleporter_block.cancel_regeneration_button_label");
-	private static final Text KEY_ITEM_IS_CONSUMED_TEXT = Text.translatable("gui.teleporter_block.key_item_is_consumed");
-	private static final Text KEY_ITEM_IS_REQUIRED_TEXT = Text.translatable("gui.teleporter_block.key_item_is_required");
-	private static final Text LOCATION_IS_PUBLIC_TEXT = Text.translatable("gui.teleporter_block.location_is_public");
+public class TeleporterBlockScreen extends AbstractContainerScreen<TeleporterBlockScreenHandler> implements ContainerListener {
+	private static final Component EDIT_BUTTON_LABEL_TEXT = Component.translatable("gui.edit");
+	private static final Component CANCEL_BUTTON_LABEL_TEXT = Component.translatable("gui.cancel");
+	private static final Component CHOOSE_BUTTON_LABEL_TEXT = Component.translatable("gui.choose");
+	private static final Component REGENERATE_BUTTON_LABEL_TEXT = Component.translatable("gui.teleporter_block.regenerate_button_label");
+	private static final Component REGENERATE_DUNGEON_TEXT = Component.translatable("gui.teleporter_block.regenerate_dungeon");
+	private static final Component CONFIRM_REGENERATION_BUTTON_LABEL_TEXT = Component.translatable("gui.teleporter_block.confirm_regeneration_button_label");
+	private static final Component CANCEL_REGENERATION_BUTTON_LABEL_TEXT = Component.translatable("gui.teleporter_block.cancel_regeneration_button_label");
+	private static final Component KEY_ITEM_IS_CONSUMED_TEXT = Component.translatable("gui.teleporter_block.key_item_is_consumed");
+	private static final Component KEY_ITEM_IS_REQUIRED_TEXT = Component.translatable("gui.teleporter_block.key_item_is_required");
+	private static final Component LOCATION_IS_PUBLIC_TEXT = Component.translatable("gui.teleporter_block.location_is_public");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_95_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_95");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
 	public static final Identifier ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/teleporter_block/adventure_teleporter_screen.png");
 	public static final Identifier ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE = ScriptBlocks.identifier("textures/gui/container/teleporter_block/adventure_teleporter_locations_screen.png");
-	public static final ButtonTextures CHOOSE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/choose_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/choose_entry_button_highlighted")
+	public static final WidgetSprites CHOOSE_ENTRY_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/choose_entry_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/choose_entry_button_highlighted")
 	);
-	public static final ButtonTextures OPEN_LIST_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/open_list_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/open_list_button_highlighted")
+	public static final WidgetSprites OPEN_LIST_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/open_list_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/open_list_button_highlighted")
 	);
 	private final TeleporterBlockScreenHandler handler;
 	private TeleporterBlockEntity teleporterBlock;
 
-	private PlayerListEntry currentPlayer;
-	private PlayerListEntry currentTargetOwner;
-	private ButtonWidget openChooseTargetOwnerScreenButton;
-	private ButtonWidget confirmChooseCurrentPlayerButton;
-	private ButtonWidget confirmChooseTeamMember0Button;
-	private ButtonWidget confirmChooseTeamMember1Button;
-	private ButtonWidget confirmChooseTeamMember2Button;
-	private ButtonWidget confirmChooseTeamMember3Button;
-	private ButtonWidget confirmChooseTeamMember4Button;
-	private ButtonWidget cancelChooseTargetOwnerButton;
+	private PlayerInfo currentPlayer;
+	private PlayerInfo currentTargetOwner;
+	private Button openChooseTargetOwnerScreenButton;
+	private Button confirmChooseCurrentPlayerButton;
+	private Button confirmChooseTeamMember0Button;
+	private Button confirmChooseTeamMember1Button;
+	private Button confirmChooseTeamMember2Button;
+	private Button confirmChooseTeamMember3Button;
+	private Button confirmChooseTeamMember4Button;
+	private Button cancelChooseTargetOwnerButton;
 	private VisibleLocation currentTarget;
 	private String currentTargetDisplayName;
-	private ButtonWidget openChooseTargetIdentifierScreenButton;
-	private ButtonWidget confirmChooseTargetIdentifier0Button;
-	private ButtonWidget confirmChooseTargetIdentifier1Button;
-	private ButtonWidget confirmChooseTargetIdentifier2Button;
-	private ButtonWidget confirmChooseTargetIdentifier3Button;
-	private ButtonWidget cancelChooseTargetIdentifierButton;
+	private Button openChooseTargetIdentifierScreenButton;
+	private Button confirmChooseTargetIdentifier0Button;
+	private Button confirmChooseTargetIdentifier1Button;
+	private Button confirmChooseTargetIdentifier2Button;
+	private Button confirmChooseTargetIdentifier3Button;
+	private Button cancelChooseTargetIdentifierButton;
 	private String currentTargetEntranceDisplayName;
-	private ButtonWidget teleportButton;
-	private ButtonWidget cancelTeleportButton;
-	private ButtonWidget openDungeonRegenerationScreenButton;
-	private ButtonWidget confirmDungeonRegenerationButton;
-	private ButtonWidget cancelDungeonRegenerationButton;
+	private Button teleportButton;
+	private Button cancelTeleportButton;
+	private Button openDungeonRegenerationScreenButton;
+	private Button confirmDungeonRegenerationButton;
+	private Button cancelDungeonRegenerationButton;
 
 	private boolean showCurrentEntranceDisplayNameFirst;
 	private boolean showChooseTargetOwnerScreen;
@@ -101,7 +100,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private TeleporterBlockEntity.TeleportationMode teleportationMode;
 
-	List<PlayerListEntry> partyMemberList = new ArrayList<>();
+	List<PlayerInfo> partyMemberList = new ArrayList<>();
 	private int partyMemberListScrollPosition = 0;
 	private int visibleLocationsListScrollPosition = 0;
 	private float partyMemberListScrollAmount = 0.0f;
@@ -115,23 +114,23 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private boolean isCurrentLocationPublic;
 	private boolean showCurrentLocationOwner;
 
-	public TeleporterBlockScreen(TeleporterBlockScreenHandler handler, PlayerInventory inventory, Text title) {
+	public TeleporterBlockScreen(TeleporterBlockScreenHandler handler, Inventory inventory, Component title) {
 		super(handler, inventory, title);
 		this.handler = handler;
 	}
 
 	private void cancelTeleport() {
-		this.close();
+		this.onClose();
 	}
 
 	private void openChooseCurrentTargetOwnerScreen() {
 		this.partyMemberList.clear();
-		if (this.client != null && this.client.player != null) {
-			Team team = this.client.player.getScoreboardTeam();
+		if (this.minecraft != null && this.minecraft.player != null) {
+			PlayerTeam team = this.minecraft.player.getTeam();
 			if (team != null) {
-				for (String name : team.getPlayerList()) {
-					if (!this.client.player.getName().getString().equals(name)) {
-						this.partyMemberList.add(this.client.player.networkHandler.getPlayerListEntry(name));
+				for (String name : team.getPlayers()) {
+					if (!this.minecraft.player.getName().getString().equals(name)) {
+						this.partyMemberList.add(this.minecraft.player.connection.getPlayerInfo(name));
 					}
 				}
 			}
@@ -141,8 +140,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	private void chooseTargetOwner(int index) {
-		if (index == -1 && this.client != null && this.client.player != null) {
-			this.currentTargetOwner = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
+		if (index == -1 && this.minecraft != null && this.minecraft.player != null) {
+			this.currentTargetOwner = this.minecraft.player.connection.getPlayerInfo(this.minecraft.player.getUUID());
 		} else {
 			this.currentTargetOwner = this.partyMemberList.get(this.partyMemberListScrollPosition + index);
 		}
@@ -162,9 +161,9 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	private void chooseTargetIdentifier(int index) {
-		if (this.client != null && this.client.interactionManager != null && this.handler.onButtonClick(this.client.player, this.visibleLocationsListScrollPosition + index)) {
+		if (this.minecraft != null && this.minecraft.gameMode != null && this.handler.onButtonClick(this.minecraft.player, this.visibleLocationsListScrollPosition + index)) {
 
-			this.client.interactionManager.clickButton(this.handler.syncId, this.visibleLocationsListScrollPosition + index);
+			this.minecraft.gameMode.handleInventoryButtonClick(this.handler.syncId, this.visibleLocationsListScrollPosition + index);
 			this.currentTarget = this.handler.getVisibleLocationsList().get(this.visibleLocationsListScrollPosition + index);
 			this.showChooseTargetIdentifierScreen = false;
 			this.calculateUnlockedAndVisibleLocations();
@@ -180,8 +179,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	private void openDungeonRegenerationConfirmScreen() {
 		this.showRegenerationConfirmScreen = true;
 		this.setBackgroundDimensions();
-		this.confirmDungeonRegenerationButton.setY(this.y + 20);
-		this.cancelDungeonRegenerationButton.setY(this.y + 20);
+		this.confirmDungeonRegenerationButton.setY(this.topPos + 20);
+		this.cancelDungeonRegenerationButton.setY(this.topPos + 20);
 		this.updateWidgets();
 	}
 
@@ -197,33 +196,33 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 	private void setBackgroundDimensions() {
 		if (this.showRegenerationConfirmScreen) {
-			this.backgroundWidth = 230;
+			this.imageWidth = 230;
 		} else {
-			this.backgroundWidth = 218;
+			this.imageWidth = 218;
 		}
 		if (this.teleporterBlock.getTeleportationMode() == TeleporterBlockEntity.TeleportationMode.LOCATIONS && !this.showRegenerationConfirmScreen) {
-			this.backgroundHeight = 171;
+			this.imageHeight = 171;
 		} else {
-			this.backgroundHeight = 47;
+			this.imageHeight = 47;
 		}
-		this.x = (this.width - this.backgroundWidth) / 2;
-		this.y = (this.height - this.backgroundHeight) / 2;
+		this.leftPos = (this.width - this.imageWidth) / 2;
+		this.topPos = (this.height - this.imageHeight) / 2;
 	}
 
 	@Override
-	public void close() {
-		super.close();
+	public void onClose() {
+		super.onClose();
 	}
 
 	@Override
 	protected void init() {
-		if (this.client != null && this.client.world != null) {
-			BlockEntity blockEntity = this.client.world.getBlockEntity(this.handler.getBlockPos());
+		if (this.minecraft != null && this.minecraft.level != null) {
+			BlockEntity blockEntity = this.minecraft.level.getBlockEntity(this.handler.getBlockPos());
 			if (blockEntity instanceof TeleporterBlockEntity) {
 				this.teleporterBlock = (TeleporterBlockEntity) blockEntity;
 			}
-			if (this.client.player != null) {
-				this.currentPlayer = this.client.player.networkHandler.getPlayerListEntry(this.client.player.getUuid());
+			if (this.minecraft.player != null) {
+				this.currentPlayer = this.minecraft.player.connection.getPlayerInfo(this.minecraft.player.getUUID());
 				this.currentTargetOwner = this.currentPlayer;
 			}
 		}
@@ -237,18 +236,18 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		if ((this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT || this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS)) {
 			if (!this.showAdventureScreen) {
 				this.teleport();
-				this.close();
+				this.onClose();
 				return;
 			}
 		} else {
 
 			if (this.handler.getVisibleLocationsList().isEmpty()) {
-				this.close();
+				this.onClose();
 				return;
 			}
 			this.currentTarget = this.handler.getVisibleLocationsList().getFirst();
-			if (this.client.interactionManager != null && this.handler.onButtonClick(this.client.player, -1)) {
-				this.client.interactionManager.clickButton(this.handler.syncId, -1);
+			if (this.minecraft.gameMode != null && this.handler.onButtonClick(this.minecraft.player, -1)) {
+				this.minecraft.gameMode.handleInventoryButtonClick(this.handler.syncId, -1);
 			}
 			this.calculateUnlockedAndVisibleLocations();
 
@@ -257,46 +256,46 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 					this.teleport();
 				}
 				// TODO send message?
-				this.close();
+				this.onClose();
 				return;
 			}
 		}
 
 		this.setBackgroundDimensions();
 
-		this.openChooseTargetIdentifierScreenButton = this.addDrawableChild(new TexturedButtonWidget(this.x + 7, this.y + 21, 20, 20, OPEN_LIST_BUTTON_TEXTURES, button -> this.openChooseTargetIdentifierScreen()));
-		this.confirmChooseTargetIdentifier0Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 20, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(0)));
-		this.confirmChooseTargetIdentifier1Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 44, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(1)));
-		this.confirmChooseTargetIdentifier2Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 68, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(2)));
-		this.confirmChooseTargetIdentifier3Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 92, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(3)));
-		this.cancelChooseTargetIdentifierButton = this.addDrawableChild(ButtonWidget.builder(CANCEL_BUTTON_LABEL_TEXT, button -> this.cancelChooseTargetLocation()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
+		this.openChooseTargetIdentifierScreenButton = this.addRenderableWidget(new ImageButton(this.leftPos + 7, this.topPos + 21, 20, 20, OPEN_LIST_BUTTON_TEXTURES, button -> this.openChooseTargetIdentifierScreen()));
+		this.confirmChooseTargetIdentifier0Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 20, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(0)));
+		this.confirmChooseTargetIdentifier1Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 44, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(1)));
+		this.confirmChooseTargetIdentifier2Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 68, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(2)));
+		this.confirmChooseTargetIdentifier3Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 92, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetIdentifier(3)));
+		this.cancelChooseTargetIdentifierButton = this.addRenderableWidget(Button.builder(CANCEL_BUTTON_LABEL_TEXT, button -> this.cancelChooseTargetLocation()).bounds(this.leftPos + 7, this.topPos + this.imageHeight - 27, this.imageWidth - 14, 20).build());
 
-		this.openChooseTargetOwnerScreenButton = this.addDrawableChild(new TexturedButtonWidget(this.x + 7, this.y + 71, 20, 20, OPEN_LIST_BUTTON_TEXTURES, button -> this.openChooseCurrentTargetOwnerScreen()));
-		this.confirmChooseCurrentPlayerButton = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 20, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(-1)));
-		this.confirmChooseTeamMember0Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 44, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(0)));
-		this.confirmChooseTeamMember1Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 68, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(1)));
-		this.confirmChooseTeamMember2Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 92, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(2)));
-		this.confirmChooseTeamMember3Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 116, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(3)));
-		this.confirmChooseTeamMember4Button = this.addDrawableChild(new TexturedButtonWidget(this.x + 19, this.y + 140, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(4)));
-		this.cancelChooseTargetOwnerButton = this.addDrawableChild(ButtonWidget.builder(CANCEL_BUTTON_LABEL_TEXT, button -> this.cancelChooseCurrentTargetOwner()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, this.backgroundWidth - 14, 20).build());
+		this.openChooseTargetOwnerScreenButton = this.addRenderableWidget(new ImageButton(this.leftPos + 7, this.topPos + 71, 20, 20, OPEN_LIST_BUTTON_TEXTURES, button -> this.openChooseCurrentTargetOwnerScreen()));
+		this.confirmChooseCurrentPlayerButton = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 20, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(-1)));
+		this.confirmChooseTeamMember0Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 44, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(0)));
+		this.confirmChooseTeamMember1Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 68, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(1)));
+		this.confirmChooseTeamMember2Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 92, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(2)));
+		this.confirmChooseTeamMember3Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 116, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(3)));
+		this.confirmChooseTeamMember4Button = this.addRenderableWidget(new ImageButton(this.leftPos + 19, this.topPos + 140, 20, 20, CHOOSE_ENTRY_BUTTON_TEXTURES, button -> this.chooseTargetOwner(4)));
+		this.cancelChooseTargetOwnerButton = this.addRenderableWidget(Button.builder(CANCEL_BUTTON_LABEL_TEXT, button -> this.cancelChooseCurrentTargetOwner()).bounds(this.leftPos + 7, this.topPos + this.imageHeight - 27, this.imageWidth - 14, 20).build());
 
-		this.openDungeonRegenerationScreenButton = this.addDrawableChild(ButtonWidget.builder(REGENERATE_BUTTON_LABEL_TEXT, button -> this.openDungeonRegenerationConfirmScreen()).dimensions(this.x + 7, this.y + this.backgroundHeight - 51, this.backgroundWidth - 14, 20).build());
-		this.confirmDungeonRegenerationButton = this.addDrawableChild(ButtonWidget.builder(CONFIRM_REGENERATION_BUTTON_LABEL_TEXT, button -> this.confirmDungeonRegeneration()).dimensions(this.x + 7, this.y + 20, (this.backgroundWidth - 18) / 2, 20).build());
-		this.cancelDungeonRegenerationButton = this.addDrawableChild(ButtonWidget.builder(CANCEL_REGENERATION_BUTTON_LABEL_TEXT, button -> this.cancelDungeonRegeneration()).dimensions(this.x + this.backgroundWidth / 2 + 2, this.y + 20, (this.backgroundWidth - 18) / 2, 20).build());
+		this.openDungeonRegenerationScreenButton = this.addRenderableWidget(Button.builder(REGENERATE_BUTTON_LABEL_TEXT, button -> this.openDungeonRegenerationConfirmScreen()).bounds(this.leftPos + 7, this.topPos + this.imageHeight - 51, this.imageWidth - 14, 20).build());
+		this.confirmDungeonRegenerationButton = this.addRenderableWidget(Button.builder(CONFIRM_REGENERATION_BUTTON_LABEL_TEXT, button -> this.confirmDungeonRegeneration()).bounds(this.leftPos + 7, this.topPos + 20, (this.imageWidth - 18) / 2, 20).build());
+		this.cancelDungeonRegenerationButton = this.addRenderableWidget(Button.builder(CANCEL_REGENERATION_BUTTON_LABEL_TEXT, button -> this.cancelDungeonRegeneration()).bounds(this.leftPos + this.imageWidth / 2 + 2, this.topPos + 20, (this.imageWidth - 18) / 2, 20).build());
 
-		this.teleportButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable(this.teleporterBlock.getTeleportButtonLabel()), button -> this.teleport()).dimensions(this.x + 7, this.y + this.backgroundHeight - 27, 100, 20).build());
-		this.cancelTeleportButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable(this.teleporterBlock.getCancelTeleportButtonLabel()), button -> this.cancelTeleport()).dimensions(this.x + this.backgroundWidth - 107, this.y + this.backgroundHeight - 27, 100, 20).build());
+		this.teleportButton = this.addRenderableWidget(Button.builder(Component.translatable(this.teleporterBlock.getTeleportButtonLabel()), button -> this.teleport()).dimensions(this.leftPos + 7, this.topPos + this.imageHeight - 27, 100, 20).build());
+		this.cancelTeleportButton = this.addRenderableWidget(Button.builder(Component.translatable(this.teleporterBlock.getCancelTeleportButtonLabel()), button -> this.cancelTeleport()).dimensions(this.leftPos + this.imageWidth - 107, this.topPos + this.imageHeight - 27, 100, 20).build());
 
 		this.setInitialFocus(this.teleportButton);
 		this.updateWidgets();
 	}
 
 	@Override
-	public void handledScreenTick() {
-		super.handledScreenTick();
-		if (this.client != null) {
-			if (this.client.interactionManager != null && this.handler.onButtonClick(this.client.player, -1)) {
-				this.client.interactionManager.clickButton(this.handler.syncId, -1);
+	public void containerTick() {
+		super.containerTick();
+		if (this.minecraft != null) {
+			if (this.minecraft.gameMode != null && this.handler.onButtonClick(this.minecraft.player, -1)) {
+				this.minecraft.gameMode.handleInventoryButtonClick(this.handler.syncId, -1);
 			}
 		}
 	}
@@ -405,9 +404,9 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		this.isCurrentLocationUnlocked = this.currentTarget.isUnlocked();
 
 		Location location = null;
-		World world = this.teleporterBlock.getWorld();
+		Level world = this.teleporterBlock.getWorld();
 		if (world != null) {
-			Optional<RegistryEntry.Reference<Location>> optionalLocationReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTarget.identifier()));
+			Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(this.currentTarget.identifier()));
 			if (optionalLocationReference.isPresent()) {
 				location = optionalLocationReference.get().value();
 			}
@@ -421,25 +420,25 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 
 			this.showCurrentLocationOwner = LocationUtils.showLocationOwnerForEntrance(location, this.currentTarget.entrance());
 
-			Inventory inventory = new SimpleInventory(36);
+			Container inventory = new SimpleContainer(36);
 			for (int k = 0; k < 36; k++) {
 				ItemStack itemStack = this.handler.getPlayerInventory().getStack(k);
-				inventory.setStack(k, itemStack.copy());
+				inventory.setItem(k, itemStack.copy());
 			}
 			this.areCurrentLocationKeysPresent = true;
 			for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, this.currentTarget.entrance())) {
 				ItemStack currentKeyItemStack = itemCost.itemStack();
 				int keyCount = currentKeyItemStack.getCount();
-				for (int j = 0; j < inventory.size(); j++) {
-					ItemStack itemStack = inventory.getStack(j);
-					if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
-						int stackCount = inventory.getStack(j).getCount();
+				for (int j = 0; j < inventory.getContainerSize(); j++) {
+					ItemStack itemStack = inventory.getItem(j);
+					if (ItemStack.isSameItemSameComponents(currentKeyItemStack, itemStack)) {
+						int stackCount = inventory.getItem(j).getCount();
 						if (stackCount >= keyCount) {
-							inventory.removeStack(j, keyCount);
+							inventory.removeItem(j, keyCount);
 							keyCount = 0;
 							break;
 						} else {
-							inventory.setStack(j, ItemStack.EMPTY);
+							inventory.setItem(j, ItemStack.EMPTY);
 							keyCount = keyCount - stackCount;
 						}
 					}
@@ -452,16 +451,16 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 			for (CommonDataStructures.ItemCost regenerationItemCost : LocationUtils.getResetCostForEntrance(location, this.currentTarget.entrance())) {
 				ItemStack currentKeyItemStack = regenerationItemCost.itemStack();
 				int keyCount = currentKeyItemStack.getCount();
-				for (int j = 0; j < inventory.size(); j++) {
-					ItemStack itemStack = inventory.getStack(j);
-					if (ItemStack.areItemsAndComponentsEqual(currentKeyItemStack, itemStack)) {
-						int stackCount = inventory.getStack(j).getCount();
+				for (int j = 0; j < inventory.getContainerSize(); j++) {
+					ItemStack itemStack = inventory.getItem(j);
+					if (ItemStack.isSameItemSameComponents(currentKeyItemStack, itemStack)) {
+						int stackCount = inventory.getItem(j).getCount();
 						if (stackCount >= keyCount) {
-							inventory.removeStack(j, keyCount);
+							inventory.removeItem(j, keyCount);
 							keyCount = 0;
 							break;
 						} else {
-							inventory.setStack(j, ItemStack.EMPTY);
+							inventory.setItem(j, ItemStack.EMPTY);
 							keyCount = keyCount - stackCount;
 						}
 					}
@@ -474,11 +473,11 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		String string = this.currentTargetDisplayName;
 		String string1 = this.currentTargetEntranceDisplayName;
 		VisibleLocation var = new VisibleLocation(this.currentTarget);
-		List<PlayerListEntry> list = new ArrayList<>(this.partyMemberList);
+		List<PlayerInfo> list = new ArrayList<>(this.partyMemberList);
 		this.init(client, width, height);
 		this.currentTargetDisplayName = string;
 		this.currentTargetEntranceDisplayName = string1;
@@ -494,8 +493,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		int i;
 		int j;
 		if (this.showChooseTargetOwnerScreen) {
-			i = this.x + 8;
-			j = this.y + 45;
+			i = this.leftPos + 8;
+			j = this.topPos + 45;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 114)) {
 				this.partyMemberListMouseClicked = true;
 			}
@@ -503,8 +502,8 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		if (this.showChooseTargetIdentifierScreen
 				&& this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS
 				&& this.handler.getVisibleLocationsList().size() > 4) {
-			i = this.x + 8;
-			j = this.y + 21;
+			i = this.leftPos + 8;
+			j = this.topPos + 21;
 			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 90)) {
 				this.visibleLocationsListMouseClicked = true;
 			}
@@ -519,7 +518,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				&& this.partyMemberListMouseClicked) {
 			int i = this.partyMemberList.size() - 5;
 			float f = (float) deltaY / (float) i;
-			this.partyMemberListScrollAmount = MathHelper.clamp(this.partyMemberListScrollAmount + f, 0.0f, 1.0f);
+			this.partyMemberListScrollAmount = Mth.clamp(this.partyMemberListScrollAmount + f, 0.0f, 1.0f);
 			this.partyMemberListScrollPosition = (int) ((double) (this.partyMemberListScrollAmount * (float) i));
 		}
 		if (this.showChooseTargetIdentifierScreen
@@ -528,7 +527,7 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 				&& this.visibleLocationsListMouseClicked) {
 			int i = this.handler.getVisibleLocationsList().size() - 4;
 			float f = (float) deltaY / (float) i;
-			this.visibleLocationsListScrollAmount = MathHelper.clamp(this.visibleLocationsListScrollAmount + f, 0.0f, 1.0f);
+			this.visibleLocationsListScrollAmount = Mth.clamp(this.visibleLocationsListScrollAmount + f, 0.0f, 1.0f);
 			this.visibleLocationsListScrollPosition = (int) ((double) (this.visibleLocationsListScrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -538,137 +537,137 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
 		if (this.showChooseTargetOwnerScreen
 				&& this.partyMemberList.size() > 5
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
-				&& mouseY >= this.y + 44 && mouseY <= this.y + 116) {
+				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
+				&& mouseY >= this.topPos + 44 && mouseY <= this.topPos + 116) {
 			int i = this.partyMemberList.size() - 5;
 			float f = (float) verticalAmount / (float) i;
-			this.partyMemberListScrollAmount = MathHelper.clamp(this.partyMemberListScrollAmount - f, 0.0f, 1.0f);
+			this.partyMemberListScrollAmount = Mth.clamp(this.partyMemberListScrollAmount - f, 0.0f, 1.0f);
 			this.partyMemberListScrollPosition = (int) ((double) (this.partyMemberListScrollAmount * (float) i));
 		}
 		if (this.showChooseTargetIdentifierScreen
 				&& this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS
 				&& this.handler.getVisibleLocationsList().size() > 4
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 7)
-				&& mouseY >= this.y + 20 && mouseY <= this.y + 92) {
+				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
+				&& mouseY >= this.topPos + 20 && mouseY <= this.topPos + 92) {
 			int i = this.handler.getVisibleLocationsList().size() - 4;
 			float f = (float) verticalAmount / (float) i;
-			this.visibleLocationsListScrollAmount = MathHelper.clamp(this.visibleLocationsListScrollAmount - f, 0.0f, 1.0f);
+			this.visibleLocationsListScrollAmount = Mth.clamp(this.visibleLocationsListScrollAmount - f, 0.0f, 1.0f);
 			this.visibleLocationsListScrollPosition = (int) ((double) (this.visibleLocationsListScrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.render(context, mouseX, mouseY, delta);
-		this.drawMouseoverTooltip(context, mouseX, mouseY);
+		this.renderTooltip(context, mouseX, mouseY);
 	}
 
 	@Override
-	protected void drawForeground(DrawContext context, int mouseX, int mouseY) {
+	protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
 	}
 
 	@Override
-	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
 
-		int x = this.x;
-		int y = this.y;
+		int x = this.leftPos;
+		int y = this.topPos;
 		TeleporterBlockEntity.TeleportationMode mode = this.teleporterBlock.getTeleportationMode();
 
 		if (this.showChooseTargetOwnerScreen) {
-			context.drawTexture(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+			context.blit(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 
-			context.drawTexture(this.currentPlayer.getSkinTextures().texture(), x + 43/*7*/, y + 26, 8, 8, 8, 8, 8, 8, 64, 64);
-			context.drawText(this.textRenderer, this.currentPlayer.getProfile().getName(), x + 55/*19*/, y + 26, 0x404040, false);
+			context.blit(this.currentPlayer.getSkin().texture(), x + 43/*7*/, y + 26, 8, 8, 8, 8, 8, 8, 64, 64);
+			context.drawString(this.font, this.currentPlayer.getProfile().getName(), x + 55/*19*/, y + 26, 0x404040, false);
 
 			for (int i = this.partyMemberListScrollPosition; i < Math.min(this.partyMemberListScrollPosition + 4, this.partyMemberList.size()); i++) {
 
-				PlayerListEntry playerListEntry = this.partyMemberList.get(i);
-				context.drawTexture(playerListEntry.getSkinTextures().texture(), x + 43/*7*/, y + 50 + ((i - this.partyMemberListScrollPosition) * 24), 8, 8, 8, 8, 8, 8, 64, 64);
-				context.drawText(this.textRenderer, playerListEntry.getProfile().getName(), x + 55/*19*/, y + 50 + ((i - this.partyMemberListScrollPosition) * 24), 0x404040, false);
+				PlayerInfo playerListEntry = this.partyMemberList.get(i);
+				context.blit(playerListEntry.getSkin().texture(), x + 43/*7*/, y + 50 + ((i - this.partyMemberListScrollPosition) * 24), 8, 8, 8, 8, 8, 8, 64, 64);
+				context.drawString(this.font, playerListEntry.getProfile().getName(), x + 55/*19*/, y + 50 + ((i - this.partyMemberListScrollPosition) * 24), 0x404040, false);
 			}
 			if (this.partyMemberList.size() > 5) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 44, 8, 116);
+				context.blitSprite(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 44, 8, 116);
 				int k = (int) (105.0f * this.partyMemberListScrollAmount);
-				context.drawGuiTexture(SCROLLER_TEXTURE, x + 8, y + 44 + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_TEXTURE, x + 8, y + 44 + 1 + k, 6, 7);
 			}
 		} else if (this.showChooseTargetIdentifierScreen) {
 
-			context.drawTexture(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+			context.blit(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 			VisibleLocation visibleLocation;
 			for (int i = this.visibleLocationsListScrollPosition; i < Math.min(this.visibleLocationsListScrollPosition + 4, this.handler.getVisibleLocationsList().size()); i++) {
 
 				visibleLocation = this.handler.getVisibleLocationsList().get(i);
 				if (!visibleLocation.entrance().isEmpty() && !visibleLocation.entranceDisplayName().isEmpty()) {
 					if (visibleLocation.isEntranceNameShownFirst()) {
-						context.drawText(this.textRenderer, Text.translatable(visibleLocation.entranceDisplayName()), x + 43, y + 19, 0x404040, false);
-						context.drawText(this.textRenderer, Text.translatable(visibleLocation.displayName()), x + 43, y + 32, 0x404040, false);
+						context.drawString(this.font, Component.translatable(visibleLocation.entranceDisplayName()), x + 43, y + 19, 0x404040, false);
+						context.drawString(this.font, Component.translatable(visibleLocation.displayName()), x + 43, y + 32, 0x404040, false);
 					} else {
-						context.drawText(this.textRenderer, Text.translatable(visibleLocation.displayName()), x + 43, y + 19, 0x404040, false);
-						context.drawText(this.textRenderer, Text.translatable(visibleLocation.entranceDisplayName()), x + 43, y + 32, 0x404040, false);
+						context.drawString(this.font, Component.translatable(visibleLocation.displayName()), x + 43, y + 19, 0x404040, false);
+						context.drawString(this.font, Component.translatable(visibleLocation.entranceDisplayName()), x + 43, y + 32, 0x404040, false);
 					}
 				} else {
-					context.drawText(this.textRenderer, Text.translatable(visibleLocation.displayName()), x + 43, y + 26 + ((i - this.visibleLocationsListScrollPosition) * 24), 0x404040, false);
+					context.drawString(this.font, Component.translatable(visibleLocation.displayName()), x + 43, y + 26 + ((i - this.visibleLocationsListScrollPosition) * 24), 0x404040, false);
 				}
 			}
 			if (this.handler.getVisibleLocationsList().size() > 4) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 20, 8, 92);
+				context.blitSprite(SCROLL_BAR_BACKGROUND_8_95_TEXTURE, x + 7, y + 20, 8, 92);
 				int k = (int) (83.0f * this.visibleLocationsListScrollAmount);
-				context.drawGuiTexture(SCROLLER_TEXTURE, x + 8, y + 20 + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_TEXTURE, x + 8, y + 20 + 1 + k, 6, 7);
 			}
 
 		} else if (this.showRegenerationConfirmScreen) {
-			context.drawTexture(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+			context.blit(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 
-			int regenerationTextOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(REGENERATE_DUNGEON_TEXT) / 2;
+			int regenerationTextOffset = this.imageWidth / 2 - this.font.width(REGENERATE_DUNGEON_TEXT) / 2;
 
-			context.drawText(this.textRenderer, REGENERATE_DUNGEON_TEXT, x + regenerationTextOffset, y + 7, 0x404040, false);
+			context.drawString(this.font, REGENERATE_DUNGEON_TEXT, x + regenerationTextOffset, y + 7, 0x404040, false);
 		} else if (this.showAdventureScreen) {
 
 			if (mode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 
-				context.drawTexture(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+				context.blit(ADVENTURE_TELEPORTER_LOCATIONS_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 
-				Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
-				int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
+				Component teleporterName = Component.translatable(this.teleporterBlock.getTeleporterName());
+				int teleporterNameOffset = this.imageWidth / 2 - this.font.width(teleporterName) / 2;
 
-				context.drawText(this.textRenderer, teleporterName, x + teleporterNameOffset, y + 7, 0x404040, false);
+				context.drawString(this.font, teleporterName, x + teleporterNameOffset, y + 7, 0x404040, false);
 
 				if (!this.currentTargetDisplayName.isEmpty() || this.handler.getVisibleLocationsList().size() > 1) {
 					if (!this.currentTarget.entrance().isEmpty() && !this.currentTargetEntranceDisplayName.isEmpty()) {
 						if (this.showCurrentEntranceDisplayNameFirst) {
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), x + 31, y + 20, 0x404040, false);
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 31, y + 33, 0x404040, false);
+							context.drawString(this.font, Component.translatable(this.currentTargetEntranceDisplayName), x + 31, y + 20, 0x404040, false);
+							context.drawString(this.font, Component.translatable(this.currentTargetDisplayName), x + 31, y + 33, 0x404040, false);
 						} else {
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 31, y + 20, 0x404040, false);
-							context.drawText(this.textRenderer, Text.translatable(this.currentTargetEntranceDisplayName), x + 31, y + 33, 0x404040, false);
+							context.drawString(this.font, Component.translatable(this.currentTargetDisplayName), x + 31, y + 20, 0x404040, false);
+							context.drawString(this.font, Component.translatable(this.currentTargetEntranceDisplayName), x + 31, y + 33, 0x404040, false);
 						}
 
 					} else {
 
-						context.drawText(this.textRenderer, Text.translatable(this.currentTargetDisplayName), x + 31, y + 27, 0x404040, false);
+						context.drawString(this.font, Component.translatable(this.currentTargetDisplayName), x + 31, y + 27, 0x404040, false);
 
 					}
 				}
 				if (this.handler.getCurrentLocationCooldown() > 0) {
-					this.teleportButton.setMessage(Text.translatable("gui.teleporter_block.teleport_button.cooldown_label", LocationUtils.getCooldownText(this.handler.getCurrentLocationCooldown())));
+					this.teleportButton.setMessage(Component.translatable("gui.teleporter_block.teleport_button.cooldown_label", LocationUtils.getCooldownText(this.handler.getCurrentLocationCooldown())));
 				} else {
-					this.teleportButton.setMessage(Text.translatable(this.teleporterBlock.getTeleportButtonLabel()));
+					this.teleportButton.setMessage(Component.translatable(this.teleporterBlock.getTeleportButtonLabel()));
 				}
 
 				this.teleportButton.active = this.isCurrentLocationUnlocked && this.areCurrentLocationKeysPresent && this.handler.getCurrentLocationCooldown() <= 0;
 
 				if (this.isCurrentLocationPublic && this.showCurrentLocationOwner) {
-					context.drawText(this.textRenderer, LOCATION_IS_PUBLIC_TEXT, x + 19, y + 77, 0x404040, false);
+					context.drawString(this.font, LOCATION_IS_PUBLIC_TEXT, x + 19, y + 77, 0x404040, false);
 				} else if (this.currentTargetOwner != null && this.showCurrentLocationOwner) {
-					context.drawText(this.textRenderer, Text.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), x + 8, y + 58, 0x404040, false);
+					context.drawString(this.font, Component.translatable(this.teleporterBlock.getCurrentTargetOwnerLabel()), x + 8, y + 58, 0x404040, false);
 
 					if (this.canOwnerBeChosen && !this.isCurrentLocationPublic) {
-						context.drawTexture(currentTargetOwner.getSkinTextures().texture(), x + 31, y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
-						context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), x + 43, y + 77, 0x404040, false);
+						context.blit(currentTargetOwner.getSkin().texture(), x + 31, y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
+						context.drawString(this.font, currentTargetOwner.getProfile().getName(), x + 43, y + 77, 0x404040, false);
 					} else {
-						context.drawTexture(currentTargetOwner.getSkinTextures().texture(), x + 7, y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
-						context.drawText(this.textRenderer, currentTargetOwner.getProfile().getName(), x + 19, y + 77, 0x404040, false);
+						context.blit(currentTargetOwner.getSkin().texture(), x + 7, y + 77, 8, 8, 8, 8, 8, 8, 64, 64);
+						context.drawString(this.font, currentTargetOwner.getProfile().getName(), x + 19, y + 77, 0x404040, false);
 					}
 				}
 
@@ -680,12 +679,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 //					context.drawText(this.textRenderer, this.consumeKeyItem ? KEY_ITEM_IS_CONSUMED_TEXT : KEY_ITEM_IS_REQUIRED_TEXT, x + 26, y + 100, 0x404040, false);
 //				}
 			} else {
-				context.drawTexture(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+				context.blit(ADVENTURE_TELEPORTER_SCREEN_BACKGROUND_TEXTURE, x, y, 0, 0, this.imageWidth, this.imageHeight, this.imageWidth, this.imageHeight);
 
-				Text teleporterName = Text.translatable(this.teleporterBlock.getTeleporterName());
-				int teleporterNameOffset = this.backgroundWidth / 2 - this.textRenderer.getWidth(teleporterName) / 2;
+				Component teleporterName = Component.translatable(this.teleporterBlock.getTeleporterName());
+				int teleporterNameOffset = this.imageWidth / 2 - this.font.width(teleporterName) / 2;
 
-				context.drawText(this.textRenderer, teleporterName, x + teleporterNameOffset, y + 7, 0x404040, false);
+				context.drawString(this.font, teleporterName, x + teleporterNameOffset, y + 7, 0x404040, false);
 			}
 		}
 	}
@@ -702,17 +701,17 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 		return character == '_' || character == '-' || character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || character >= '0' && character <= '9' || character == '.' || character == ' ';
 	}
 
-	private void renderSlotTooltip(DrawContext context, int mouseX, int mouseY) {
-		Optional<Text> optional = Optional.empty();
-		if (this.focusedSlot != null) {
+	private void renderSlotTooltip(GuiGraphics context, int mouseX, int mouseY) {
+		Optional<Component> optional = Optional.empty();
+		if (this.hoveredSlot != null) {
 			ItemStack itemStack = this.handler.getSlot(37).getStack();
 			if (itemStack.isEmpty()) {
-				if (this.focusedSlot.id == 37) {
-					optional = Optional.of(Text.translatable("gui.teleporter_block.requiredItemStackSlot.tooltip"));
+				if (this.hoveredSlot.index == 37) {
+					optional = Optional.of(Component.translatable("gui.teleporter_block.requiredItemStackSlot.tooltip"));
 				}
 			}
 		}
-		optional.ifPresent(text -> context.drawOrderedTooltip(this.textRenderer, this.textRenderer.wrapLines((StringVisitable) text, 115), mouseX, mouseY));
+		optional.ifPresent(text -> context.setTooltipForNextFrame(this.font, this.font.split((FormattedText) text, 115), mouseX, mouseY));
 	}
 
 	private void tryDungeonRegeneration() {
@@ -752,12 +751,12 @@ public class TeleporterBlockScreen extends HandledScreen<TeleporterBlockScreenHa
 	}
 
 	@Override
-	public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack stack) {
+	public void slotChanged(AbstractContainerMenu handler, int slotId, ItemStack stack) {
 
 	}
 
 	@Override
-	public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+	public void dataChanged(AbstractContainerMenu handler, int property, int value) {
 		if (property == 0 && value <= 0) {
 			this.calculateUnlockedAndVisibleLocations();
 		}

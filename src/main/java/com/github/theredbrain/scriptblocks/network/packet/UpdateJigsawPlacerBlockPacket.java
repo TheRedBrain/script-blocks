@@ -2,51 +2,51 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.block.entity.JigsawBlockEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 
 public record UpdateJigsawPlacerBlockPacket(
 		BlockPos jigsawPlacerBlockPosition,
 		String structurePoolString,
 		List<MutablePair<BlockPos, MutablePair<String, String>>> structurePoolStringAppendices,
 		String target,
-		JigsawBlockEntity.Joint joint,
+		JigsawBlockEntity.JointType joint,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateJigsawPlacerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_jigsaw_placer_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateJigsawPlacerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateJigsawPlacerBlockPacket::write, UpdateJigsawPlacerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateJigsawPlacerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_jigsaw_placer_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateJigsawPlacerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateJigsawPlacerBlockPacket::write, UpdateJigsawPlacerBlockPacket::new);
 
-	public UpdateJigsawPlacerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateJigsawPlacerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_STRING_STRING),
-				registryByteBuf.readString(),
-				JigsawBlockEntity.Joint.byName(registryByteBuf.readString()).orElse(JigsawBlockEntity.Joint.ALIGNED),
+				registryByteBuf.readUtf(),
+				JigsawBlockEntity.JointType.byName(registryByteBuf.readUtf()).orElse(JigsawBlockEntity.JointType.ALIGNED),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.jigsawPlacerBlockPosition);
-		registryByteBuf.writeString(this.structurePoolString);
+		registryByteBuf.writeUtf(this.structurePoolString);
 		registryByteBuf.writeCollection(this.structurePoolStringAppendices, CustomPacketCodecs.MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_STRING_STRING);
-		registryByteBuf.writeString(this.target);
-		registryByteBuf.writeString(this.joint.asString());
+		registryByteBuf.writeUtf(this.target);
+		registryByteBuf.writeUtf(this.joint.getSerializedName());
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

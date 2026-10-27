@@ -29,9 +29,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 @Environment(value = EnvType.CLIENT)
 public class ScriptBlocksClient implements ClientModInitializer {
@@ -48,7 +48,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 	}
 
 	private void registerTransparency() {
-		RenderLayer renderLayer = RenderLayer.getCutout();
+		RenderType renderLayer = RenderType.getCutout();
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_OAK_DOOR, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_IRON_DOOR, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SPRUCE_DOOR, renderLayer);
@@ -164,34 +164,34 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.BOSS_CONTROLLER_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.LOOTABLE_VAULT_BLOCK, renderLayer);
 		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TRIGGERING_TRIAL_SPAWNER_BLOCK, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getTranslucent(),
+		BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.getTranslucent(),
 				ScriptBlocksBlocks.AESTHETIC_NETHER_PORTAL
 		);
 	}
 
 	private void registerBlockEntityRenderer() {
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.AESTHETIC_DECORATED_POT_BLOCK_ENTITY, AestheticDecoratedPotBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.HOUSING_BLOCK_ENTITY, HousingBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.MIMIC_BLOCK_ENTITY, MimicBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.AREA_BLOCK_ENTITY, StatusEffectApplierBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.AREA_FILLER_BLOCK_ENTITY, AreaFillerBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.RELAY_TRIGGER_BLOCK_ENTITY, RelayTriggerBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.PLAYER_DETECTOR_BLOCK_ENTITY, PlayerDetectorBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY, TriggeredDamageDealingBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, TriggeredEntityRemoverBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.TRIGGERED_BEACON_BLOCK_ENTITY, TriggeredBeaconBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.LOOTABLE_VAULT_BLOCK_ENTITY, LootableVaultBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.TWO_AREAS_PLAYER_DETECTOR_BLOCK_ENTITY, TwoAreasPlayerDetectorBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.USE_RELAY_LECTERN_BLOCK_ENTITY, UseRelayLecternBlockEntityRenderer::new);
-		BlockEntityRendererFactories.register(ScriptBlocksEntities.TEAM_CONTROLLER_BLOCK_ENTITY, TeamControllerBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.AESTHETIC_DECORATED_POT_BLOCK_ENTITY, AestheticDecoratedPotBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.HOUSING_BLOCK_ENTITY, HousingBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.MIMIC_BLOCK_ENTITY, MimicBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.AREA_BLOCK_ENTITY, StatusEffectApplierBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.AREA_FILLER_BLOCK_ENTITY, AreaFillerBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.RELAY_TRIGGER_BLOCK_ENTITY, RelayTriggerBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.PLAYER_DETECTOR_BLOCK_ENTITY, PlayerDetectorBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.TRIGGERED_DAMAGE_DEALING_BLOCK_ENTITY, TriggeredDamageDealingBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.TRIGGERED_ENTITY_REMOVER_BLOCK_ENTITY, TriggeredEntityRemoverBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.TRIGGERED_BEACON_BLOCK_ENTITY, TriggeredBeaconBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.TRIGGERED_DISPLAY_BLOCK_ENTITY, TriggeredDisplayBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.LOOTABLE_VAULT_BLOCK_ENTITY, LootableVaultBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.TWO_AREAS_PLAYER_DETECTOR_BLOCK_ENTITY, TwoAreasPlayerDetectorBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.USE_RELAY_LECTERN_BLOCK_ENTITY, UseRelayLecternBlockEntityRenderer::new);
+		BlockEntityRenderers.register(ScriptBlocksEntities.TEAM_CONTROLLER_BLOCK_ENTITY, TeamControllerBlockEntityRenderer::new);
 	}
 
 	private void registerScreens() {
-		HandledScreens.register(ScriptBlocksScreenHandlerTypes.DIALOGUE_SCREEN_HANDLER, DialogueScreen::new);
-		HandledScreens.register(ScriptBlocksScreenHandlerTypes.TRIGGERED_DISPENSER_BLOCK_SCREEN_HANDLER, TriggeredDispenserBlockScreen::new);
-		HandledScreens.register(ScriptBlocksScreenHandlerTypes.SHOP_BLOCK_SCREEN_HANDLER, ShopScreen::new);
-		HandledScreens.register(ScriptBlocksScreenHandlerTypes.TELEPORTER_BLOCK_SCREEN_HANDLER, TeleporterBlockScreen::new);
+		MenuScreens.register(ScriptBlocksScreenHandlerTypes.DIALOGUE_SCREEN_HANDLER, DialogueScreen::new);
+		MenuScreens.register(ScriptBlocksScreenHandlerTypes.TRIGGERED_DISPENSER_BLOCK_SCREEN_HANDLER, TriggeredDispenserBlockScreen::new);
+		MenuScreens.register(ScriptBlocksScreenHandlerTypes.SHOP_BLOCK_SCREEN_HANDLER, ShopScreen::new);
+		MenuScreens.register(ScriptBlocksScreenHandlerTypes.TELEPORTER_BLOCK_SCREEN_HANDLER, TeleporterBlockScreen::new);
 	}
 
 	private void registerEntityRenderer() {

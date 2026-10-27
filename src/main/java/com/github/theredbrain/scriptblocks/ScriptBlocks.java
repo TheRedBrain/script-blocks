@@ -22,19 +22,19 @@ import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.PlayerTeam;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ScriptBlocks implements ModInitializer {
 	public static final boolean isRPGInventoryLoaded = FabricLoader.getInstance().isModLoaded("rpginventory");
 
 	@Deprecated
-	public static void supplyLootableLoot(Identifier identifier, ServerWorld world, ServerPlayerEntity serverPlayerEntity, Vec3d pos, int rolls, int choices, boolean withChoice, @Nullable ItemStack itemStack) {
+	public static void supplyLootableLoot(Identifier identifier, ServerLevel world, ServerPlayer serverPlayerEntity, Vec3 pos, int rolls, int choices, boolean withChoice, @Nullable ItemStack itemStack) {
 		if (isLootablesLoaded) {
 			LootableCompat.supplyLootableLoot(identifier, world, serverPlayerEntity, pos, rolls, choices, withChoice, itemStack);
 		} else {
@@ -58,11 +58,11 @@ public class ScriptBlocks implements ModInitializer {
 		}
 	}
 
-	public static void setCurrentPVPControllerBlockPosition(PlayerEntity playerEntity, Optional<BlockPos> currentPVPControllerBlockPosition) {
+	public static void setCurrentPVPControllerBlockPosition(Player playerEntity, Optional<BlockPos> currentPVPControllerBlockPosition) {
 		DataAttachmentHelper.setCurrentPVPControllerBlockPosition(playerEntity, currentPVPControllerBlockPosition);
 	}
 
-	public static void addPlayerAndTeamToPVPControllerBlock(Team team, PlayerEntity playerEntity, ServerWorld serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
+	public static void addPlayerAndTeamToPVPControllerBlock(PlayerTeam team, Player playerEntity, ServerLevel serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
 		if (currentPVPControllerBlockPosition.isPresent()) {
 			if (serverWorld.getBlockEntity(currentPVPControllerBlockPosition.get()) instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 				pvpControllerBlockEntity.addPlayerAndTeam(team, playerEntity);
@@ -70,7 +70,7 @@ public class ScriptBlocks implements ModInitializer {
 		}
 	}
 
-	public static void removePlayerFromPVPControllerBlock(PlayerEntity playerEntity, ServerWorld serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
+	public static void removePlayerFromPVPControllerBlock(Player playerEntity, ServerLevel serverWorld, Optional<BlockPos> currentPVPControllerBlockPosition) {
 		if (currentPVPControllerBlockPosition.isPresent()) {
 			if (serverWorld.getBlockEntity(currentPVPControllerBlockPosition.get()) instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 				pvpControllerBlockEntity.removePlayer(playerEntity);
@@ -78,7 +78,7 @@ public class ScriptBlocks implements ModInitializer {
 		}
 	}
 
-	public static ItemStack getRPGEquipmentStack(PlayerEntity playerEntity, int index) {
+	public static ItemStack getRPGEquipmentStack(Player playerEntity, int index) {
 		if (isRPGInventoryLoaded) {
 			return RPGInventoryCompat.getRPGEquipmentStack(playerEntity, index);
 		} else {
@@ -86,13 +86,13 @@ public class ScriptBlocks implements ModInitializer {
 		}
 	}
 
-	public static void setRPGEquipmentStack(PlayerEntity playerEntity, int index, ItemStack stack) {
+	public static void setRPGEquipmentStack(Player playerEntity, int index, ItemStack stack) {
 		if (isRPGInventoryLoaded) {
 			RPGInventoryCompat.setRPGEquipmentStack(playerEntity, index, stack);
 		}
 	}
 
-	public static void trigger(ServerWorld serverWorld, BlockPos blockPos, boolean resets) {
+	public static void trigger(ServerLevel serverWorld, BlockPos blockPos, boolean resets) {
 		BlockEntity blockEntity = serverWorld.getBlockEntity(blockPos);
 		if (resets && blockEntity instanceof Resetable resetable) {
 			resetable.reset();
@@ -102,10 +102,10 @@ public class ScriptBlocks implements ModInitializer {
 	}
 
 	@Nullable
-	public static MutablePair<RegistryKey<World>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(Team team, ServerPlayerEntity serverPlayerEntity, boolean endOfBattle) {
+	public static MutablePair<ResourceKey<Level>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(PlayerTeam team, ServerPlayer serverPlayerEntity, boolean endOfBattle) {
 		Optional<BlockPos> optionalBlockPos = DataAttachmentHelper.getCurrentPVPControllerBlockPosition(serverPlayerEntity);
-		World world = serverPlayerEntity.getWorld();
-		if (optionalBlockPos.isPresent() && team != null && world instanceof ServerWorld serverWorld) {
+		Level world = serverPlayerEntity.level();
+		if (optionalBlockPos.isPresent() && team != null && world instanceof ServerLevel serverWorld) {
 			String teamId = team.getName();
 			BlockEntity blockEntity = serverWorld.getBlockEntity(optionalBlockPos.get());
 			if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
@@ -115,7 +115,7 @@ public class ScriptBlocks implements ModInitializer {
 						pvpControllerBlockEntity.removePlayer(serverPlayerEntity);
 					}
 					return new MutablePair<>(
-							serverWorld.getRegistryKey(),
+							serverWorld.dimension(),
 							new MutablePair<>(
 									teamRespawnPos.getLeft(),
 									new MutablePair<>(
@@ -156,14 +156,14 @@ public class ScriptBlocks implements ModInitializer {
 	public static void sendDeprecatedFeatureInfo(String message, @Nullable MinecraftServer minecraftServer) {
 		if (minecraftServer != null) {
 			if (ScriptBlocksConfigs.SERVER_CONFIG.enable_deprecated_feature_chat_message) {
-				minecraftServer.getPlayerManager().broadcast(Text.of(message), false);
+				minecraftServer.getPlayerList().broadcastSystemMessage(Component.nullToEmpty(message), false);
 			}
 			info(message);
 		}
 	}
 
 	public static Identifier identifier(String path) {
-		return Identifier.of(MOD_ID, path);
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
 	public static void info(String message) {

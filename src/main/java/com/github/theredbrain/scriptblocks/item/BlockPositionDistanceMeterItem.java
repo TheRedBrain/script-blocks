@@ -2,49 +2,48 @@ package com.github.theredbrain.scriptblocks.item;
 
 import com.github.theredbrain.scriptblocks.component.type.BlockPositionDistanceMeterComponent;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import java.util.function.Consumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 
 public class BlockPositionDistanceMeterItem extends Item {
 
-	public BlockPositionDistanceMeterItem(Settings settings) {
+	public BlockPositionDistanceMeterItem(Properties settings) {
 		super(settings);
 	}
 
 	@Override
-	public ActionResult useOnBlock(ItemUsageContext context) {
-		ItemStack itemStack = context.getStack();
+	public InteractionResult useOn(UseOnContext context) {
+		ItemStack itemStack = context.getItemInHand();
 		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER);
-		PlayerEntity playerEntity = context.getPlayer();
-		BlockPos pos = context.getBlockPos();
+		Player playerEntity = context.getPlayer();
+		BlockPos pos = context.getClickedPos();
 		if (playerEntity != null && blockPositionDistanceMeterComponent != null) {
 			boolean isRootMode = blockPositionDistanceMeterComponent.is_root_mode();
 			BlockPos offset;
-			if (playerEntity.isSneaking()) {
+			if (playerEntity.isShiftKeyDown()) {
 				BlockPos root_pos;
 				BlockPos offset_pos;
 				if (isRootMode) {
 					root_pos = pos;
 					offset_pos = blockPositionDistanceMeterComponent.offset_pos();
-					if (playerEntity.getEntityWorld().isClient()) {
-						playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_block", pos.getX(), pos.getY(), pos.getZ()), false);
+					if (playerEntity.level().isClientSide()) {
+						playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_block", pos.getX(), pos.getY(), pos.getZ()), false);
 					}
 				} else {
 					root_pos = blockPositionDistanceMeterComponent.root_pos();
 					offset_pos = pos;
-					if (playerEntity.getEntityWorld().isClient()) {
-						playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.set_offset_block", pos.getX(), pos.getY(), pos.getZ()), false);
+					if (playerEntity.level().isClientSide()) {
+						playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.set_offset_block", pos.getX(), pos.getY(), pos.getZ()), false);
 					}
 				}
 				if (root_pos.getY() > -64 && offset_pos.getY() > -64) {
@@ -52,59 +51,59 @@ public class BlockPositionDistanceMeterItem extends Item {
 					int offset_y = offset_pos.getY() - root_pos.getY();
 					int offset_z = offset_pos.getZ() - root_pos.getZ();
 					offset = new BlockPos(offset_pos.getX() - root_pos.getX(), offset_pos.getY() - root_pos.getY(), offset_pos.getZ() - root_pos.getZ());
-					if (playerEntity.getEntityWorld().isClient()) {
-						playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset_x, offset_y, offset_z), false);
+					if (playerEntity.level().isClientSide()) {
+						playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset_x, offset_y, offset_z), false);
 					}
 				} else {
-					offset = BlockPos.ORIGIN;
+					offset = BlockPos.ZERO;
 				}
 				itemStack.set(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(isRootMode, root_pos, offset_pos, offset));
 
-			} else if (playerEntity.getEntityWorld().isClient()) {
-				playerEntity.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"), false);
+			} else if (playerEntity.level().isClientSide()) {
+				playerEntity.displayClientMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Component.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"), false);
 
 				offset = blockPositionDistanceMeterComponent.offset();
 				if (offset.getX() != 0 || offset.getY() != 0 || offset.getZ() != 0) {
-					playerEntity.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()), false);
+					playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()), false);
 				}
 			}
-			return ActionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public ActionResult use(World world, PlayerEntity user, Hand hand) {
-		ItemStack itemStack = user.getStackInHand(hand);
+	public InteractionResult use(Level world, Player user, InteractionHand hand) {
+		ItemStack itemStack = user.getItemInHand(hand);
 		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = itemStack.get(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER);
 		if (blockPositionDistanceMeterComponent != null) {
 			boolean isRootMode = blockPositionDistanceMeterComponent.is_root_mode();
-			if (user.isSneaking()) {
+			if (user.isShiftKeyDown()) {
 
 				itemStack.set(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(!isRootMode, blockPositionDistanceMeterComponent.root_pos(), blockPositionDistanceMeterComponent.offset_pos(), blockPositionDistanceMeterComponent.offset()));
-				if (world.isClient()) {
-					user.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Text.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"), false);
+				if (world.isClientSide()) {
+					user.displayClientMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"), false);
 				}
-			} else if (user.getEntityWorld().isClient()) {
-				user.sendMessage(isRootMode ? Text.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Text.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"), false);
+			} else if (user.level().isClientSide()) {
+				user.displayClientMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Component.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"), false);
 
 				BlockPos offset = blockPositionDistanceMeterComponent.offset();
 				if (offset.getX() != 0 || offset.getY() != 0 || offset.getZ() != 0) {
-					user.sendMessage(Text.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()), false);
+					user.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()), false);
 				}
 			}
-			return ActionResult.CONSUME;
+			return InteractionResult.CONSUME;
 		}
 		return super.use(world, user, hand);
 	}
 
 	@Deprecated
-	public void appendTooltip(
-			ItemStack stack, Item.TooltipContext context, TooltipDisplayComponent displayComponent, Consumer<Text> textConsumer, TooltipType type
+	public void appendHoverText(
+			ItemStack stack, Item.TooltipContext context, TooltipDisplay displayComponent, Consumer<Component> textConsumer, TooltipFlag type
 	) {
 		BlockPositionDistanceMeterComponent blockPositionDistanceMeterComponent = stack.get(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER);
 		if (blockPositionDistanceMeterComponent != null) {
-			blockPositionDistanceMeterComponent.appendTooltip(context, textConsumer, type, stack.getComponents());
+			blockPositionDistanceMeterComponent.addToTooltip(context, textConsumer, type, stack.getComponents());
 		}
 	}
 

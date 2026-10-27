@@ -3,45 +3,45 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.AreaFillerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class AreaFillerBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<AreaFillerBlock> CODEC = createCodec(AreaFillerBlock::new);
+	public static final MapCodec<AreaFillerBlock> CODEC = simpleCodec(AreaFillerBlock::new);
 
-	public AreaFillerBlock(Settings settings) {
+	public AreaFillerBlock(Properties settings) {
 		super(settings);
 	}
 
-	public MapCodec<AreaFillerBlock> getCodec() {
+	public MapCodec<AreaFillerBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new AreaFillerBlockEntity(pos, state);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof AreaFillerBlockEntity areaFillerBlockEntity && player.isCreativeLevelTwoOp()) {
+		if (blockEntity instanceof AreaFillerBlockEntity areaFillerBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openAreaFillerBlockScreen(areaFillerBlockEntity);
-			return ActionResult.success(world.isClient);
+			return InteractionResult.success(world.isClientSide);
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 }

@@ -2,30 +2,30 @@ package com.github.theredbrain.scriptblocks.render.renderer;
 
 import com.github.theredbrain.scriptblocks.entity.passive.FakeVillagerEntity;
 import com.github.theredbrain.scriptblocks.render.FakeVillagerEntityModel;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.render.entity.feature.HeadFeatureRenderer;
-import net.minecraft.client.render.entity.feature.VillagerClothingFeatureRenderer;
-import net.minecraft.client.render.entity.feature.VillagerHeldItemFeatureRenderer;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
+import net.minecraft.resources.Identifier;
 
-public class FakeVillagerEntityRenderer extends MobEntityRenderer<FakeVillagerEntity, FakeVillagerEntityModel<FakeVillagerEntity>> {
-	private static final Identifier TEXTURE = Identifier.of("textures/entity/villager/villager.png");
+public class FakeVillagerEntityRenderer extends MobRenderer<FakeVillagerEntity, FakeVillagerEntityModel<FakeVillagerEntity>> {
+	private static final Identifier TEXTURE = Identifier.parse("textures/entity/villager/villager.png");
 
-	public FakeVillagerEntityRenderer(EntityRendererFactory.Context context) {
-		super(context, new FakeVillagerEntityModel<>(context.getPart(EntityModelLayers.VILLAGER)), 0.5F);
-		this.addFeature(new HeadFeatureRenderer<>(this, context.getModelLoader(), context.getHeldItemRenderer()));
-		this.addFeature(new VillagerClothingFeatureRenderer<>(this, context.getResourceManager(), "villager"));
-		this.addFeature(new VillagerHeldItemFeatureRenderer<>(this, context.getHeldItemRenderer()));
+	public FakeVillagerEntityRenderer(EntityRendererProvider.Context context) {
+		super(context, new FakeVillagerEntityModel<>(context.bakeLayer(ModelLayers.VILLAGER)), 0.5F);
+		this.addFeature(new CustomHeadLayer<>(this, context.getModelLoader(), context.getHeldItemRenderer()));
+		this.addFeature(new VillagerProfessionLayer<>(this, context.getResourceManager(), "villager"));
+		this.addFeature(new CrossedArmsItemLayer<>(this, context.getHeldItemRenderer()));
 	}
 
 	public Identifier getTexture(FakeVillagerEntity fakeVillagerEntity) {
 		return TEXTURE;
 	}
 
-	protected void scale(FakeVillagerEntity fakeVillagerEntity, MatrixStack matrixStack, float f) {
+	protected void scale(FakeVillagerEntity fakeVillagerEntity, PoseStack matrixStack, float f) {
 		float g = 0.9375F;
 		if (fakeVillagerEntity.isBaby()) {
 			g *= 0.5F;

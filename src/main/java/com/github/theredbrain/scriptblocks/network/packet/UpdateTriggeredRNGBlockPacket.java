@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTriggeredRNGBlockPacket(
 		BlockPos triggeredRNGBlockPosition,
@@ -25,19 +25,19 @@ public record UpdateTriggeredRNGBlockPacket(
 		BlockPos fallbackTriggeredBlockPosOffset,
 		boolean fallbackTriggeredBlockResets,
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks
-) implements CustomPayload {
-	public static final Id<UpdateTriggeredRNGBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggered_rng_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredRNGBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredRNGBlockPacket::write, UpdateTriggeredRNGBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTriggeredRNGBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggered_rng_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredRNGBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredRNGBlockPacket::write, UpdateTriggeredRNGBlockPacket::new);
 
-	public UpdateTriggeredRNGBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredRNGBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readInt(),
@@ -48,14 +48,14 @@ public record UpdateTriggeredRNGBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredRNGBlockPosition);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
-		registryByteBuf.writeString(this.overrideDataIdentifier);
-		registryByteBuf.writeString(this.overrideDataValue);
+		registryByteBuf.writeUtf(this.overrideDataIdentifier);
+		registryByteBuf.writeUtf(this.overrideDataValue);
 		registryByteBuf.writeBlockPos(this.overrideTriggeredBlockPosOffset);
 		registryByteBuf.writeBoolean(this.overrideTriggeredBlockResets);
-		registryByteBuf.writeString(this.influencingAttributeIdentifierString);
+		registryByteBuf.writeUtf(this.influencingAttributeIdentifierString);
 		registryByteBuf.writeBoolean(this.checksTeamAttributes);
 		registryByteBuf.writeBoolean(this.isAffectedByLuck);
 		registryByteBuf.writeInt(this.randomMinValue);
@@ -66,7 +66,7 @@ public record UpdateTriggeredRNGBlockPacket(
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

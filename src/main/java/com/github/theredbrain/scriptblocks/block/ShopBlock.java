@@ -3,51 +3,51 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.block.entity.ShopBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-public class ShopBlock extends BlockWithEntity {
-	public static final MapCodec<ShopBlock> CODEC = createCodec(ShopBlock::new);
+public class ShopBlock extends BaseEntityBlock {
+	public static final MapCodec<ShopBlock> CODEC = simpleCodec(ShopBlock::new);
 
-	public ShopBlock(Settings settings) {
+	public ShopBlock(Properties settings) {
 		super(settings);
 	}
 
-	public MapCodec<ShopBlock> getCodec() {
+	public MapCodec<ShopBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new ShopBlockEntity(pos, state);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof ShopBlockEntity shopBlockEntity) {
-			if (player.isCreativeLevelTwoOp()) {
+			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openShopBlockScreen(shopBlockEntity);
-				return ActionResult.success(world.isClient);
-			} else if (!world.isClient) {
-				player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-				return ActionResult.CONSUME;
+				return InteractionResult.success(world.isClientSide);
+			} else if (!world.isClientSide) {
+				player.openMenu(state.getMenuProvider(world, pos));
+				return InteractionResult.CONSUME;
 			}
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 }

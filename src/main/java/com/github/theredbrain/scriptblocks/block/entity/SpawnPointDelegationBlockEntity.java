@@ -4,21 +4,21 @@ import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	private final List<MutablePair<BlockPos, MutablePair<Double, Double>>> delegatedSpawnPoints = new ArrayList<>(List.of());
@@ -28,45 +28,45 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("delegated_spawn_points", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("delegated_spawn_points", CompoundTag.CODEC);
 		for (MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint : this.delegatedSpawnPoints) {
-			NbtCompound nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", BlockPos.CODEC, spawnPoint.getLeft());
+			CompoundTag nbtCompound = new CompoundTag();
+			nbtCompound.store("position_offset", BlockPos.CODEC, spawnPoint.getLeft());
 			nbtCompound.putDouble("yaw", spawnPoint.getRight().getLeft());
 			nbtCompound.putDouble("pitch", spawnPoint.getRight().getRight());
 			listAppender.add(nbtCompound.copy());
 		}
 
-		super.writeData(view);
+		super.saveAdditional(view);
 
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.delegatedSpawnPoints.clear();
-		for (NbtCompound nbtCompound : view.getTypedListView("delegated_spawn_points", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound : view.listOrEmpty("delegated_spawn_points", CompoundTag.CODEC)) {
 			this.delegatedSpawnPoints.add(new MutablePair<>(
-					nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+					nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 					new MutablePair<>(
-							MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180),
-							MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90)
+							Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
+							Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
 					)
 			));
 		}
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -80,14 +80,14 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	}
 	// endregion --- getter & setter ---
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetSpawnPoint(ServerWorld serverWorld) {
+	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetSpawnPoint(ServerLevel serverWorld) {
 		BlockPos positionOffset = new BlockPos(0, 1, 0);
 		BlockPos targetPos;
 		MutablePair<Double, Double> targetOrientation = new MutablePair<>(0.0, 0.0);
 		int index = 0;
 
-		if (this.getWorld() != null && !this.delegatedSpawnPoints.isEmpty()) {
-			index = this.getWorld().getRandom().nextInt(this.delegatedSpawnPoints.size());
+		if (this.getLevel() != null && !this.delegatedSpawnPoints.isEmpty()) {
+			index = this.getLevel().getRandom().nextInt(this.delegatedSpawnPoints.size());
 		}
 
 		if (index < this.delegatedSpawnPoints.size()) {
@@ -95,9 +95,9 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 			targetOrientation = this.delegatedSpawnPoints.get(index).getRight();
 		}
 
-		targetPos = new BlockPos(positionOffset.getX() + this.getPos().getX(), positionOffset.getY() + this.getPos().getY(), positionOffset.getZ() + this.getPos().getZ());
+		targetPos = new BlockPos(positionOffset.getX() + this.getBlockPos().getX(), positionOffset.getY() + this.getBlockPos().getY(), positionOffset.getZ() + this.getBlockPos().getZ());
 
-		if (!positionOffset.equals(BlockPos.ORIGIN) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+		if (!positionOffset.equals(BlockPos.ZERO) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
 		}
 
@@ -107,8 +107,8 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				List<MutablePair<BlockPos, MutablePair<Double, Double>>> newDelegatedSpawnPoints = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
@@ -117,29 +117,29 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 				this.delegatedSpawnPoints.clear();
 				this.delegatedSpawnPoints.addAll(newDelegatedSpawnPoints);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
 				List<MutablePair<BlockPos, MutablePair<Double, Double>>> newDelegatedSpawnPoints = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
-					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorSpawnPoint(delegatedSpawnPoint, BlockMirror.FRONT_BACK));
+					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorSpawnPoint(delegatedSpawnPoint, Mirror.FRONT_BACK));
 				}
 				this.delegatedSpawnPoints.clear();
 				this.delegatedSpawnPoints.addAll(newDelegatedSpawnPoints);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
 				List<MutablePair<BlockPos, MutablePair<Double, Double>>> newDelegatedSpawnPoints = new ArrayList<>(List.of());
 				for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
-					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorSpawnPoint(delegatedSpawnPoint, BlockMirror.LEFT_RIGHT));
+					newDelegatedSpawnPoints.add(BlockRotationUtils.mirrorSpawnPoint(delegatedSpawnPoint, Mirror.LEFT_RIGHT));
 				}
 				this.delegatedSpawnPoints.clear();
 				this.delegatedSpawnPoints.addAll(newDelegatedSpawnPoints);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

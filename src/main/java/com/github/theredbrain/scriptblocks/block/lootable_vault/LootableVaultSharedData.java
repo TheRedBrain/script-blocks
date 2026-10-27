@@ -4,23 +4,22 @@ import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
-import net.minecraft.block.spawner.EntityDetector;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.trialspawner.PlayerDetector;
 
 @Deprecated
 public class LootableVaultSharedData {
 	static final String SHARED_DATA_KEY = "shared_data";
 	public static Codec<LootableVaultSharedData> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-							ItemStack.createOptionalCodec("display_item").forGetter(data -> data.displayItem),
-							Uuids.LINKED_SET_CODEC.lenientOptionalFieldOf("connected_players", Set.of()).forGetter(data -> data.connectedPlayers),
+							ItemStack.lenientOptionalFieldOf("display_item").forGetter(data -> data.displayItem),
+							UUIDUtil.CODEC_LINKED_SET.lenientOptionalFieldOf("connected_players", Set.of()).forGetter(data -> data.connectedPlayers),
 							Codec.DOUBLE
 									.lenientOptionalFieldOf("connected_particles_range", Double.valueOf(LootableVaultConfig.DEFAULT.deactivationRange()))
 									.forGetter(data -> data.connectedParticlesRange)
@@ -50,7 +49,7 @@ public class LootableVaultSharedData {
 	}
 
 	public void setDisplayItem(ItemStack stack) {
-		if (!ItemStack.areEqual(this.displayItem, stack)) {
+		if (!ItemStack.matches(this.displayItem, stack)) {
 			this.displayItem = stack.copy();
 			this.markDirty();
 		}
@@ -68,9 +67,9 @@ public class LootableVaultSharedData {
 		return this.connectedParticlesRange;
 	}
 
-	public void updateConnectedPlayers(ServerWorld world, BlockPos pos, LootableVaultServerData serverData, LootableVaultConfig config, double radius) {
-		Set<UUID> set = (Set<UUID>) EntityDetector.NON_SPECTATOR_PLAYERS
-				.detect(world, EntityDetector.Selector.IN_WORLD, pos, radius, false)
+	public void updateConnectedPlayers(ServerLevel world, BlockPos pos, LootableVaultServerData serverData, LootableVaultConfig config, double radius) {
+		Set<UUID> set = (Set<UUID>) PlayerDetector.INCLUDING_CREATIVE_PLAYERS
+				.detect(world, PlayerDetector.EntitySelector.SELECT_FROM_LEVEL, pos, radius, false)
 				.stream()
 				.filter(uuid -> !serverData.getRewardedPlayers().contains(uuid))
 				.collect(Collectors.toSet());

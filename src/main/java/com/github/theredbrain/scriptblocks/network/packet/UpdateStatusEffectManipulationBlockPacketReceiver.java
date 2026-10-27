@@ -2,22 +2,22 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.StatusEffectManipulationBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UpdateStatusEffectManipulationBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateStatusEffectManipulationBlockPacket> {
 	@Override
 	public void receive(UpdateStatusEffectManipulationBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -34,7 +34,7 @@ public class UpdateStatusEffectManipulationBlockPacketReceiver implements Server
 		int amplifierModification = payload.amplifierModification();
 		BlockPos uuidListHandlerPositionOffset = payload.uuidListHandlerPositionOffset();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -44,11 +44,11 @@ public class UpdateStatusEffectManipulationBlockPacketReceiver implements Server
 		if (blockEntity instanceof StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
 			statusEffectManipulationBlockEntity.setManipulationMode(manipulationMode);
 			if (!statusEffectManipulationBlockEntity.setEffectIdentifier(effectIdentifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("status_effect_manipulation_block.effect_identifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("status_effect_manipulation_block.effect_identifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!statusEffectManipulationBlockEntity.setEffectAmplifier(effectAmplifier)) {
-				serverPlayerEntity.sendMessage(Text.translatable("status_effect_manipulation_block.effect_amplifier.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("status_effect_manipulation_block.effect_amplifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			statusEffectManipulationBlockEntity.setEffectDuration(effectDuration);
@@ -60,10 +60,10 @@ public class UpdateStatusEffectManipulationBlockPacketReceiver implements Server
 			statusEffectManipulationBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerPositionOffset);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
-			statusEffectManipulationBlockEntity.markDirty();
-			world.updateListeners(statusEffectManipulationBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			statusEffectManipulationBlockEntity.setChanged();
+			world.sendBlockUpdated(statusEffectManipulationBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

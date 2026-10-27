@@ -7,9 +7,8 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.TaggedChoice;
-import net.minecraft.datafixer.TypeReferences;
-
 import java.util.Map;
+import net.minecraft.util.datafix.fixes.References;
 
 public class JigsawPlacerBlockEntityIdFix extends DataFix {
 	private static final Map<String, String> RENAMED_BLOCK_ENTITIES = DataFixUtils.make(Maps.<String, String>newHashMap(), map -> {
@@ -22,10 +21,10 @@ public class JigsawPlacerBlockEntityIdFix extends DataFix {
 
 	@Override
 	public TypeRewriteRule makeRule() {
-		Type<?> type = this.getInputSchema().getType(TypeReferences.ITEM_STACK);
-		Type<?> type2 = this.getOutputSchema().getType(TypeReferences.ITEM_STACK);
-		TaggedChoice.TaggedChoiceType<String> taggedChoiceType = (TaggedChoice.TaggedChoiceType<String>) this.getInputSchema().findChoiceType(TypeReferences.BLOCK_ENTITY);
-		TaggedChoice.TaggedChoiceType<String> taggedChoiceType2 = (TaggedChoice.TaggedChoiceType<String>) this.getOutputSchema().findChoiceType(TypeReferences.BLOCK_ENTITY);
+		Type<?> type = this.getInputSchema().getType(References.ITEM_STACK);
+		Type<?> type2 = this.getOutputSchema().getType(References.ITEM_STACK);
+		TaggedChoice.TaggedChoiceType<String> taggedChoiceType = (TaggedChoice.TaggedChoiceType<String>) this.getInputSchema().findChoiceType(References.BLOCK_ENTITY);
+		TaggedChoice.TaggedChoiceType<String> taggedChoiceType2 = (TaggedChoice.TaggedChoiceType<String>) this.getOutputSchema().findChoiceType(References.BLOCK_ENTITY);
 		return TypeRewriteRule.seq(
 				this.convertUnchecked("item stack block entity name hook converter", type, type2),
 				this.fixTypeEverywhere(

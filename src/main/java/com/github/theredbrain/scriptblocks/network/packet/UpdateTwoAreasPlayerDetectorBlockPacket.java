@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTwoAreasPlayerDetectorBlockPacket(
 		BlockPos twoAreasPlayerDetectorBlockPosition,
@@ -21,11 +21,11 @@ public record UpdateTwoAreasPlayerDetectorBlockPacket(
 		boolean onEnteringSecondAreaTriggeredBlockResets,
 		BlockPos onEnteringFirstAreaUUIDListHandler,
 		BlockPos onEnteringSecondAreaUUIDListHandler
-) implements CustomPayload {
-	public static final Id<UpdateTwoAreasPlayerDetectorBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_two_areas_player_detector_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTwoAreasPlayerDetectorBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTwoAreasPlayerDetectorBlockPacket::write, UpdateTwoAreasPlayerDetectorBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTwoAreasPlayerDetectorBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_two_areas_player_detector_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTwoAreasPlayerDetectorBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTwoAreasPlayerDetectorBlockPacket::write, UpdateTwoAreasPlayerDetectorBlockPacket::new);
 
-	public UpdateTwoAreasPlayerDetectorBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTwoAreasPlayerDetectorBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -51,7 +51,7 @@ public record UpdateTwoAreasPlayerDetectorBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.twoAreasPlayerDetectorBlockPosition);
 		registryByteBuf.writeBoolean(this.showFirstArea);
 		registryByteBuf.writeBoolean(this.showSecondArea);
@@ -72,7 +72,7 @@ public record UpdateTwoAreasPlayerDetectorBlockPacket(
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

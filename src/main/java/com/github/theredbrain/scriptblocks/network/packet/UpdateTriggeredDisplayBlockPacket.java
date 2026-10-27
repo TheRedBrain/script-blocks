@@ -1,18 +1,18 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.phys.Vec3;
 
 public record UpdateTriggeredDisplayBlockPacket(
 		BlockPos triggeredDisplayBlockPosition,
 		String billboardModeString,
 		String displayModeString,
 		boolean isTriggered,
-		Vec3d displayOffset,
+		Vec3 displayOffset,
 		float displayYaw,
 		float displayPitch,
 		String displayTextString,
@@ -21,46 +21,46 @@ public record UpdateTriggeredDisplayBlockPacket(
 		int lineWidth,
 		Byte textOpacity,
 		int textBackground
-) implements CustomPayload {
-	public static final Id<UpdateTriggeredDisplayBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggered_display_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredDisplayBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredDisplayBlockPacket::write, UpdateTriggeredDisplayBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTriggeredDisplayBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggered_display_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredDisplayBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredDisplayBlockPacket::write, UpdateTriggeredDisplayBlockPacket::new);
 
-	public UpdateTriggeredDisplayBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredDisplayBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readVec3d(),
+				registryByteBuf.readVec3(),
 				registryByteBuf.readFloat(),
 				registryByteBuf.readFloat(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readByte(),
 				registryByteBuf.readInt()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredDisplayBlockPosition);
-		registryByteBuf.writeString(this.billboardModeString);
-		registryByteBuf.writeString(this.displayModeString);
+		registryByteBuf.writeUtf(this.billboardModeString);
+		registryByteBuf.writeUtf(this.displayModeString);
 		registryByteBuf.writeBoolean(this.isTriggered);
-		registryByteBuf.writeVec3d(this.displayOffset);
+		registryByteBuf.writeVec3(this.displayOffset);
 		registryByteBuf.writeFloat(this.displayYaw);
 		registryByteBuf.writeFloat(this.displayPitch);
-		registryByteBuf.writeString(this.displayTextString);
+		registryByteBuf.writeUtf(this.displayTextString);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
-		registryByteBuf.writeString(this.dataIdentifierString);
+		registryByteBuf.writeUtf(this.dataIdentifierString);
 		registryByteBuf.writeInt(this.lineWidth);
 		registryByteBuf.writeByte(this.textOpacity);
 		registryByteBuf.writeInt(this.textBackground);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

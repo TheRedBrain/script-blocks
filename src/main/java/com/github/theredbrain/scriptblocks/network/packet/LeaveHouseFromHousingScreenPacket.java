@@ -1,23 +1,23 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record LeaveHouseFromHousingScreenPacket() implements CustomPayload {
-	public static final CustomPayload.Id<LeaveHouseFromHousingScreenPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("leave_house_from_housing_screen"));
-	public static final PacketCodec<RegistryByteBuf, LeaveHouseFromHousingScreenPacket> PACKET_CODEC = PacketCodec.of(LeaveHouseFromHousingScreenPacket::write, LeaveHouseFromHousingScreenPacket::new);
+public record LeaveHouseFromHousingScreenPacket() implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<LeaveHouseFromHousingScreenPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("leave_house_from_housing_screen"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, LeaveHouseFromHousingScreenPacket> PACKET_CODEC = StreamCodec.ofMember(LeaveHouseFromHousingScreenPacket::write, LeaveHouseFromHousingScreenPacket::new);
 
-	public LeaveHouseFromHousingScreenPacket(RegistryByteBuf registryByteBuf) {
+	public LeaveHouseFromHousingScreenPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this();
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

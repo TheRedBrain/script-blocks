@@ -9,29 +9,28 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistrie
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import java.util.Optional;
 
 public class SetManualResetLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<SetManualResetLocationControlBlockPacket> {
 	@Override
 	public void receive(SetManualResetLocationControlBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
 		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
 		String targetLocation = payload.targetLocation();
@@ -41,45 +40,45 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 
 		MinecraftServer server = context.server();
 
-		ServerWorld targetWorld = null;
+		ServerLevel targetWorld = null;
 		Location location = null;
-		Optional<RegistryEntry.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
+		Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
 		if (optionalLocationReference.isPresent()) {
 			location = optionalLocationReference.get().value();
 		}
 
-		ServerPlayerEntity targetDimensionOwner = server.getPlayerManager().getPlayer(targetDimensionOwnerName);
+		ServerPlayer targetDimensionOwner = server.getPlayerList().getPlayerByName(targetDimensionOwnerName);
 
 		if (location == null) {
-			serverPlayerEntity.closeHandledScreen();
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.location_reset.location_not_found"));
+			serverPlayerEntity.closeContainer();
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.location_reset.location_not_found"));
 			return;
 		}
 
 		boolean playerOwnsLocation = true;
 		if (location.isPublic()) {
 			if (ScriptBlocksConfigs.SERVER_CONFIG.enable_public_locations_dimension) {
-				RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
-				targetWorld = server.getWorld(dimensionregistryKey);
+				ResourceKey<Level> dimensionregistryKey = ResourceKey.create(Registries.DIMENSION, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
+				targetWorld = server.getLevel(dimensionregistryKey);
 
 				if (targetWorld == null) {
 					DimensionsManager.addAndSavePublicDimension(DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER, server);
-					dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
-					targetWorld = server.getWorld(dimensionregistryKey);
+					dimensionregistryKey = ResourceKey.create(Registries.DIMENSION, DimensionsManager.PUBLIC_LOCATIONS_DIMENSION_IDENTIFIER);
+					targetWorld = server.getLevel(dimensionregistryKey);
 				}
 			} else {
-				targetWorld = server.getOverworld();
+				targetWorld = server.overworld();
 			}
 		} else if (targetDimensionOwner != null) {
-			if (targetDimensionOwner.getUuid() == serverPlayerEntity.getUuid()) {
-				Identifier targetDimensionId = ScriptBlocks.identifier(targetDimensionOwner.getUuidAsString());
-				RegistryKey<World> dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
-				targetWorld = server.getWorld(dimensionregistryKey);
+			if (targetDimensionOwner.getUUID() == serverPlayerEntity.getUUID()) {
+				Identifier targetDimensionId = ScriptBlocks.identifier(targetDimensionOwner.getStringUUID());
+				ResourceKey<Level> dimensionregistryKey = ResourceKey.create(Registries.DIMENSION, targetDimensionId);
+				targetWorld = server.getLevel(dimensionregistryKey);
 
 				if (targetWorld == null) {
 					DimensionsManager.addAndSaveDynamicDimension(targetDimensionId, server);
-					dimensionregistryKey = RegistryKey.of(RegistryKeys.WORLD, targetDimensionId);
-					targetWorld = server.getWorld(dimensionregistryKey);
+					dimensionregistryKey = ResourceKey.create(Registries.DIMENSION, targetDimensionId);
+					targetWorld = server.getLevel(dimensionregistryKey);
 				}
 			} else {
 				playerOwnsLocation = false;
@@ -87,14 +86,14 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 		}
 
 		if (!playerOwnsLocation) {
-			serverPlayerEntity.closeHandledScreen();
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.location_reset.player_location_not_owned"));
+			serverPlayerEntity.closeContainer();
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.location_reset.player_location_not_owned"));
 			return;
 		}
 
 		if (targetWorld == null) {
-			serverPlayerEntity.closeHandledScreen();
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.location_reset.target_world_not_found"));
+			serverPlayerEntity.closeContainer();
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.location_reset.target_world_not_found"));
 			return;
 		}
 
@@ -105,23 +104,23 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 
 				ItemStack keyStack = itemCost.itemStack();
 				int keyCount = keyStack.getCount();
-				PlayerInventory playerInventory = serverPlayerEntity.getInventory();
+				Inventory playerInventory = serverPlayerEntity.getInventory();
 
-				for (int i = 0; i < playerInventory.size(); i++) {
-					ItemStack currentItemStack = playerInventory.getStack(i);
-					if (ItemStack.areItemsAndComponentsEqual(keyStack, currentItemStack)) {
+				for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+					ItemStack currentItemStack = playerInventory.getItem(i);
+					if (ItemStack.isSameItemSameComponents(keyStack, currentItemStack)) {
 						ItemStack currentItemStackCopy = currentItemStack.copy();
 						int currentItemStackCount = currentItemStackCopy.getCount();
 						if (currentItemStackCount >= keyCount) {
 							currentItemStackCopy.setCount(currentItemStackCount - keyCount);
 							if (itemCost.consumeStack()) {
-								playerInventory.setStack(i, currentItemStackCopy);
+								playerInventory.setItem(i, currentItemStackCopy);
 							}
 							keyCount = 0;
 							break;
 						} else {
 							if (itemCost.consumeStack()) {
-								playerInventory.setStack(i, ItemStack.EMPTY);
+								playerInventory.setItem(i, ItemStack.EMPTY);
 							}
 							keyCount = keyCount - currentItemStackCount;
 						}
@@ -135,8 +134,8 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 		}
 
 		if (!resetCostPaid) {
-			serverPlayerEntity.closeHandledScreen();
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.location_reset.reset_cost_not_paid"));
+			serverPlayerEntity.closeContainer();
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.location_reset.reset_cost_not_paid"));
 			return;
 		}
 
@@ -147,16 +146,16 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
 			locationControlBlockEntity.setManualReset(manualReset);
 
-			locationControlBlockEntity.markDirty();
-			targetWorld.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
+			locationControlBlockEntity.setChanged();
+			targetWorld.sendBlockUpdated(blockPos, blockState, blockState, Block.UPDATE_ALL);
 
 			if (ScriptBlocksConfigs.SERVER_CONFIG.confirm_successful_location_reset) {
-				serverPlayerEntity.closeHandledScreen();
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.location_reset.success"));
+				serverPlayerEntity.closeContainer();
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.location_reset.success"));
 				return;
 			}
 		}
-		serverPlayerEntity.closeHandledScreen();
-		serverPlayerEntity.sendMessage(Text.translatable("hud.message.location_reset.location_control_block_missing"));
+		serverPlayerEntity.closeContainer();
+		serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.location_reset.location_control_block_missing"));
 	}
 }

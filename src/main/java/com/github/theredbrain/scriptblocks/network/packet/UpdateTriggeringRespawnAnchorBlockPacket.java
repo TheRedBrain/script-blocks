@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTriggeringRespawnAnchorBlockPacket(
 		BlockPos triggeringRespawnAnchorBlockPosition,
@@ -14,11 +14,11 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		boolean sendMessage
-) implements CustomPayload {
-	public static final Id<UpdateTriggeringRespawnAnchorBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggering_respawn_anchor_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeringRespawnAnchorBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeringRespawnAnchorBlockPacket::write, UpdateTriggeringRespawnAnchorBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTriggeringRespawnAnchorBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggering_respawn_anchor_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeringRespawnAnchorBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeringRespawnAnchorBlockPacket::write, UpdateTriggeringRespawnAnchorBlockPacket::new);
 
-	public UpdateTriggeringRespawnAnchorBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeringRespawnAnchorBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
@@ -30,7 +30,7 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeringRespawnAnchorBlockPosition);
 		registryByteBuf.writeBlockPos(this.spawnPointPositionOffset);
 		registryByteBuf.writeDouble(this.spawnPointYaw);
@@ -41,7 +41,7 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

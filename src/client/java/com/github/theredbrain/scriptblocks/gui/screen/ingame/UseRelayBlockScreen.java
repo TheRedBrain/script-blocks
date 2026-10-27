@@ -6,45 +6,45 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.use_relay_block.relay_block_position_offset");
+	private static final Component RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.use_relay_block.relay_block_position_offset");
 	private final UseRelayBlockEntity useRelayBlock;
-	private TextFieldWidget relayBlockPositionOffsetXField;
-	private TextFieldWidget relayBlockPositionOffsetYField;
-	private TextFieldWidget relayBlockPositionOffsetZField;
+	private EditBox relayBlockPositionOffsetXField;
+	private EditBox relayBlockPositionOffsetYField;
+	private EditBox relayBlockPositionOffsetZField;
 
 	public UseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.useRelayBlock = useRelayBlock;
 	}
 
 	@Override
 	protected void init() {
-		this.relayBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 100, 20, Text.translatable(""));
+		this.relayBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 80, 100, 20, Component.translatable(""));
 		this.relayBlockPositionOffsetXField.setMaxLength(128);
-		this.relayBlockPositionOffsetXField.setText(Integer.toString(this.useRelayBlock.getRelayBlockPositionOffset().getX()));
-		this.addSelectableChild(this.relayBlockPositionOffsetXField);
-		this.relayBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 80, 100, 20, Text.translatable(""));
+		this.relayBlockPositionOffsetXField.setValue(Integer.toString(this.useRelayBlock.getRelayBlockPositionOffset().getX()));
+		this.addWidget(this.relayBlockPositionOffsetXField);
+		this.relayBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 80, 100, 20, Component.translatable(""));
 		this.relayBlockPositionOffsetYField.setMaxLength(128);
-		this.relayBlockPositionOffsetYField.setText(Integer.toString(this.useRelayBlock.getRelayBlockPositionOffset().getY()));
-		this.addSelectableChild(this.relayBlockPositionOffsetYField);
-		this.relayBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 80, 100, 20, Text.translatable(""));
+		this.relayBlockPositionOffsetYField.setValue(Integer.toString(this.useRelayBlock.getRelayBlockPositionOffset().getY()));
+		this.addWidget(this.relayBlockPositionOffsetYField);
+		this.relayBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 80, 100, 20, Component.translatable(""));
 		this.relayBlockPositionOffsetZField.setMaxLength(128);
-		this.relayBlockPositionOffsetZField.setText(Integer.toString(this.useRelayBlock.getRelayBlockPositionOffset().getZ()));
-		this.addSelectableChild(this.relayBlockPositionOffsetZField);
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 145, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 145, 150, 20).build());
+		this.relayBlockPositionOffsetZField.setValue(Integer.toString(this.useRelayBlock.getRelayBlockPositionOffset().getZ()));
+		this.addWidget(this.relayBlockPositionOffsetZField);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 145, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 145, 150, 20).build());
 	}
 
 	@Override
@@ -53,14 +53,14 @@ public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		String string = this.relayBlockPositionOffsetXField.getText();
-		String string1 = this.relayBlockPositionOffsetYField.getText();
-		String string2 = this.relayBlockPositionOffsetZField.getText();
+	public void resize(Minecraft client, int width, int height) {
+		String string = this.relayBlockPositionOffsetXField.getValue();
+		String string1 = this.relayBlockPositionOffsetYField.getValue();
+		String string2 = this.relayBlockPositionOffsetZField.getValue();
 		this.init(client, width, height);
-		this.relayBlockPositionOffsetXField.setText(string);
-		this.relayBlockPositionOffsetYField.setText(string1);
-		this.relayBlockPositionOffsetZField.setText(string2);
+		this.relayBlockPositionOffsetXField.setValue(string);
+		this.relayBlockPositionOffsetYField.setValue(string1);
+		this.relayBlockPositionOffsetZField.setValue(string2);
 	}
 
 	@Override
@@ -73,11 +73,11 @@ public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		context.drawString(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 		this.relayBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.relayBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.relayBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
@@ -88,9 +88,9 @@ public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		ClientPlayNetworking.send(new UpdateUseRelayBlockPacket(
 				this.useRelayBlock.getPos(),
 				new BlockPos(
-						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.relayBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.relayBlockPositionOffsetZField.getValue())
 				)
 		));
 		return true;

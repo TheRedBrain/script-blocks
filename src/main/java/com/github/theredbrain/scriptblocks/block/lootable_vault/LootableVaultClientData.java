@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.lootable_vault;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 @Deprecated
 public class LootableVaultClientData {
@@ -21,6 +21,6 @@ public class LootableVaultClientData {
 
 	public void rotateDisplay() {
 		this.prevDisplayRotation = this.displayRotation;
-		this.displayRotation = MathHelper.wrapDegrees(this.displayRotation + 10.0F);
+		this.displayRotation = Mth.wrapDegrees(this.displayRotation + 10.0F);
 	}
 }

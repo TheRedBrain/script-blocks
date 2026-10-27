@@ -3,8 +3,8 @@ package com.github.theredbrain.scriptblocks.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record VisibleLocation(
 		String identifier,
@@ -30,29 +30,29 @@ public record VisibleLocation(
 			Codec.BOOL.fieldOf("allow_regeneration").forGetter(x -> x.allowRegeneration)
 	).apply(instance, VisibleLocation::new));
 
-	public static final PacketCodec<ByteBuf, VisibleLocation> PACKET_CODEC = new PacketCodec<>() {
+	public static final StreamCodec<ByteBuf, VisibleLocation> PACKET_CODEC = new StreamCodec<>() {
 		public VisibleLocation decode(ByteBuf byteBuf) {
 			return new VisibleLocation(
-					PacketCodecs.STRING.decode(byteBuf),
-					PacketCodecs.STRING.decode(byteBuf),
-					PacketCodecs.STRING.decode(byteBuf),
-					PacketCodecs.STRING.decode(byteBuf),
+					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
+					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
+					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
+					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
 					PacketCodecs.BOOL.decode(byteBuf),
-					PacketCodecs.STRING.decode(byteBuf),
-					PacketCodecs.STRING.decode(byteBuf),
+					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
+					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
 					PacketCodecs.BOOL.decode(byteBuf),
 					PacketCodecs.BOOL.decode(byteBuf)
 			);
 		}
 
 		public void encode(ByteBuf byteBuf, VisibleLocation visibleLocation) {
-			PacketCodecs.STRING.encode(byteBuf, visibleLocation.identifier);
-			PacketCodecs.STRING.encode(byteBuf, visibleLocation.entrance);
-			PacketCodecs.STRING.encode(byteBuf, visibleLocation.displayName);
-			PacketCodecs.STRING.encode(byteBuf, visibleLocation.entranceDisplayName);
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.identifier);
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.entrance);
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.displayName);
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.entranceDisplayName);
 			PacketCodecs.BOOL.encode(byteBuf, visibleLocation.isEntranceNameShownFirst);
-			PacketCodecs.STRING.encode(byteBuf, visibleLocation.dataIdentifier);
-			PacketCodecs.STRING.encode(byteBuf, visibleLocation.dataValue);
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.dataIdentifier);
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.dataValue);
 			PacketCodecs.BOOL.encode(byteBuf, visibleLocation.isUnlocked);
 			PacketCodecs.BOOL.encode(byteBuf, visibleLocation.allowRegeneration);
 		}

@@ -3,25 +3,6 @@ package com.github.theredbrain.scriptblocks.mixin.entity.mob;
 import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,8 +11,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Objects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
 
-@Mixin(MobEntity.class)
+@Mixin(Mob.class)
 public abstract class MobEntityMixin extends LivingEntity implements DuckMobEntityMixin {
 
 	@Unique
@@ -47,32 +47,32 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	private static final BlockPos USE_RELAY_BLOCK_POS_DEFAULT = new BlockPos(0, -100, 0);
 
 	@Unique
-	private static final TrackedData<Float> BOSS_HEALTH_THRESHOLD = DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.FLOAT);
+	private static final EntityDataAccessor<Float> BOSS_HEALTH_THRESHOLD = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.FLOAT);
 
 	@Unique
-	private static final TrackedData<Integer> BOSS_PHASE = DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.INTEGER);
+	private static final EntityDataAccessor<Integer> BOSS_PHASE = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.INT);
 
 	@Unique
-	private static final TrackedData<BlockPos> CONTROLLER_BLOCK_POS = DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.BLOCK_POS);
+	private static final EntityDataAccessor<BlockPos> CONTROLLER_BLOCK_POS = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BLOCK_POS);
 
 	@Unique
-	private static final TrackedData<BlockPos> USE_RELAY_BLOCK_POS = DataTracker.registerData(MobEntity.class, TrackedDataHandlerRegistry.BLOCK_POS);
+	private static final EntityDataAccessor<BlockPos> USE_RELAY_BLOCK_POS = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BLOCK_POS);
 
-	protected MobEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
+	protected MobEntityMixin(EntityType<? extends LivingEntity> entityType, Level world) {
 		super(entityType, world);
 	}
 
 	@Inject(method = "initDataTracker", at = @At("RETURN"))
-	protected void overhauleddamage$initDataTracker(DataTracker.Builder builder, CallbackInfo ci) {
-		builder.add(BOSS_HEALTH_THRESHOLD, BOSS_HEALTH_THRESHOLD_DEFAULT);
-		builder.add(BOSS_PHASE, BOSS_PHASE_DEFAULT);
-		builder.add(CONTROLLER_BLOCK_POS, CONTROLLER_BLOCK_POS_DEFAULT);
-		builder.add(USE_RELAY_BLOCK_POS, USE_RELAY_BLOCK_POS_DEFAULT);
+	protected void overhauleddamage$initDataTracker(SynchedEntityData.Builder builder, CallbackInfo ci) {
+		builder.define(BOSS_HEALTH_THRESHOLD, BOSS_HEALTH_THRESHOLD_DEFAULT);
+		builder.define(BOSS_PHASE, BOSS_PHASE_DEFAULT);
+		builder.define(CONTROLLER_BLOCK_POS, CONTROLLER_BLOCK_POS_DEFAULT);
+		builder.define(USE_RELAY_BLOCK_POS, USE_RELAY_BLOCK_POS_DEFAULT);
 
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
-	public void scriptblocks$writeCustomDataToNbt(NbtCompound nbt, CallbackInfo ci) {
+	public void scriptblocks$writeCustomDataToNbt(CompoundTag nbt, CallbackInfo ci) {
 
 		float bossHealthThreshold = this.scriptblocks$getBossHealthThreshold();
 		if (bossHealthThreshold != BOSS_HEALTH_THRESHOLD_DEFAULT) {
@@ -112,7 +112,7 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
-	public void scriptblocks$readCustomDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
+	public void scriptblocks$readCustomDataFromNbt(CompoundTag nbt, CallbackInfo ci) {
 
 		if (nbt.contains("boss_health_threshold")) {
 			this.scriptblocks$setBossHealthThreshold(nbt.getFloat("boss_health_threshold"));
@@ -140,19 +140,19 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	}
 
 	@Inject(method = "interactMob", at = @At("TAIL"), cancellable = true)
-	protected void scriptblocks$interactMob(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+	protected void scriptblocks$interactMob(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
 
 		BlockPos useRelayBlockPos = this.scriptblocks$getUseRelayBlockPos();
 		if (!Objects.equals(useRelayBlockPos, USE_RELAY_BLOCK_POS_DEFAULT)) {
-			if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-				World world = player.getWorld();
+			if (player instanceof ServerPlayer serverPlayerEntity) {
+				Level world = player.getWorld();
 				BlockHitResult blockHitResult = new BlockHitResult(player.getPos(), Direction.UP, useRelayBlockPos, false);
-				ItemStack itemStack = player.getStackInHand(hand);
-				serverPlayerEntity.interactionManager.interactBlock(serverPlayerEntity, world, itemStack, hand, blockHitResult);
-				cir.setReturnValue(ActionResult.CONSUME);
+				ItemStack itemStack = player.getItemInHand(hand);
+				serverPlayerEntity.gameMode.useItemOn(serverPlayerEntity, world, itemStack, hand, blockHitResult);
+				cir.setReturnValue(InteractionResult.CONSUME);
 				cir.cancel();
 			} else {
-				cir.setReturnValue(ActionResult.SUCCESS);
+				cir.setReturnValue(InteractionResult.SUCCESS);
 				cir.cancel();
 			}
 		}
@@ -164,10 +164,10 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 		if (healthThreshold > BOSS_HEALTH_THRESHOLD_DEFAULT && health <= healthThreshold) {
 			health = healthThreshold;
 			BlockPos controllerBlockPos = this.scriptblocks$getControllerBlockPos();
-			if (this.getWorld() instanceof ServerWorld serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
+			if (this.getWorld() instanceof ServerLevel serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
 				BlockEntity blockEntity = serverWorld.getBlockEntity(controllerBlockPos);
 				if (blockEntity instanceof BossControllerBlockEntity bossControllerBlockEntity) {
-					BossControllerBlockEntity.bossReachedHealthThreshold(bossControllerBlockEntity, ((MobEntity) (Object) this));
+					BossControllerBlockEntity.bossReachedHealthThreshold(bossControllerBlockEntity, ((Mob) (Object) this));
 				}
 			}
 		}
@@ -175,10 +175,10 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	}
 
 	@Override
-	public void onDeath(DamageSource damageSource) {
-		super.onDeath(damageSource);
+	public void die(DamageSource damageSource) {
+		super.die(damageSource);
 		BlockPos controllerBlockPos = this.scriptblocks$getControllerBlockPos();
-		if (this.getWorld() instanceof ServerWorld serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
+		if (this.getWorld() instanceof ServerLevel serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
 			BlockEntity blockEntity = serverWorld.getBlockEntity(controllerBlockPos);
 			if (blockEntity instanceof TriggeredSpawnerBlockEntity triggeredSpawnerBlockEntity) {
 				triggeredSpawnerBlockEntity.onBoundEntityKilled();
@@ -188,42 +188,42 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 
 	@Override
 	public float scriptblocks$getBossHealthThreshold() {
-		return this.dataTracker.get(BOSS_HEALTH_THRESHOLD);
+		return this.entityData.get(BOSS_HEALTH_THRESHOLD);
 	}
 
 	@Override
 	public void scriptblocks$setBossHealthThreshold(float bossHealthThreshold) {
-		this.dataTracker.set(BOSS_HEALTH_THRESHOLD, bossHealthThreshold);
+		this.entityData.set(BOSS_HEALTH_THRESHOLD, bossHealthThreshold);
 	}
 
 	@Override
 	public int scriptblocks$getBossPhase() {
-		return this.dataTracker.get(BOSS_PHASE);
+		return this.entityData.get(BOSS_PHASE);
 	}
 
 	@Override
 	public void scriptblocks$setBossPhase(int bossPhase) {
-		this.dataTracker.set(BOSS_PHASE, bossPhase);
+		this.entityData.set(BOSS_PHASE, bossPhase);
 	}
 
 	@Override
 	public BlockPos scriptblocks$getControllerBlockPos() {
-		return this.dataTracker.get(CONTROLLER_BLOCK_POS);
+		return this.entityData.get(CONTROLLER_BLOCK_POS);
 	}
 
 	@Override
 	public void scriptblocks$setControllerBlockPos(BlockPos controllerBlockPos) {
-		this.dataTracker.set(CONTROLLER_BLOCK_POS, controllerBlockPos);
+		this.entityData.set(CONTROLLER_BLOCK_POS, controllerBlockPos);
 	}
 
 	@Override
 	public BlockPos scriptblocks$getUseRelayBlockPos() {
-		return this.dataTracker.get(USE_RELAY_BLOCK_POS);
+		return this.entityData.get(USE_RELAY_BLOCK_POS);
 	}
 
 	@Override
 	public void scriptblocks$setUseRelayBlockPos(BlockPos useRelayBlockPos) {
-		this.dataTracker.set(USE_RELAY_BLOCK_POS, useRelayBlockPos);
+		this.entityData.set(USE_RELAY_BLOCK_POS, useRelayBlockPos);
 	}
 
 }

@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdatePlayerDetectorBlockPacket(
 		BlockPos areaBlockPosition,
@@ -22,11 +22,11 @@ public record UpdatePlayerDetectorBlockPacket(
 		BlockPos onEnteringUUIDListHandler,
 		BlockPos onLeavingUUIDListHandler,
 		BlockPos onTriggeringUUIDListHandler
-) implements CustomPayload {
-	public static final Id<UpdatePlayerDetectorBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_player_detector_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdatePlayerDetectorBlockPacket> PACKET_CODEC = PacketCodec.of(UpdatePlayerDetectorBlockPacket::write, UpdatePlayerDetectorBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdatePlayerDetectorBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_player_detector_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdatePlayerDetectorBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdatePlayerDetectorBlockPacket::write, UpdatePlayerDetectorBlockPacket::new);
 
-	public UpdatePlayerDetectorBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdatePlayerDetectorBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -49,7 +49,7 @@ public record UpdatePlayerDetectorBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.areaBlockPosition);
 		registryByteBuf.writeBoolean(this.enableTicking);
 		registryByteBuf.writeBoolean(this.showArea);
@@ -69,7 +69,7 @@ public record UpdatePlayerDetectorBlockPacket(
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

@@ -2,29 +2,29 @@ package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.effect.ScriptBlocksStatusEffect;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
 
 public class ScriptBlocksStatusEffects {
 
-	public static RegistryEntry<StatusEffect> HOUSING_OWNER_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_CO_OWNER_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_TRUSTED_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_GUEST_EFFECT;
-	public static RegistryEntry<StatusEffect> HOUSING_STRANGER_EFFECT;
-	public static RegistryEntry<StatusEffect> BUILDING_MODE;
-	public static RegistryEntry<StatusEffect> ADVENTURE_EFFECT;
+	public static Holder<MobEffect> HOUSING_OWNER_EFFECT;
+	public static Holder<MobEffect> HOUSING_CO_OWNER_EFFECT;
+	public static Holder<MobEffect> HOUSING_TRUSTED_EFFECT;
+	public static Holder<MobEffect> HOUSING_GUEST_EFFECT;
+	public static Holder<MobEffect> HOUSING_STRANGER_EFFECT;
+	public static Holder<MobEffect> BUILDING_MODE;
+	public static Holder<MobEffect> ADVENTURE_EFFECT;
 
-	public static final StatusEffect HOUSING_OWNER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
-	public static final StatusEffect HOUSING_CO_OWNER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
-	public static final StatusEffect HOUSING_TRUSTED_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
-	public static final StatusEffect HOUSING_GUEST_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
-	public static final StatusEffect HOUSING_STRANGER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect HOUSING_OWNER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect HOUSING_CO_OWNER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect HOUSING_TRUSTED_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect HOUSING_GUEST_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect HOUSING_STRANGER_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
 
-	public static final StatusEffect BUILDING_MODE_INSTANCE = new ScriptBlocksStatusEffect();
-	public static final StatusEffect ADVENTURE_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect BUILDING_MODE_INSTANCE = new ScriptBlocksStatusEffect();
+	public static final MobEffect ADVENTURE_EFFECT_INSTANCE = new ScriptBlocksStatusEffect();
 
 	public static void bootstrap() {
 	}
@@ -40,7 +40,7 @@ public class ScriptBlocksStatusEffects {
 		ADVENTURE_EFFECT = register("adventure", ADVENTURE_EFFECT_INSTANCE);
 	}
 
-	private static RegistryEntry<StatusEffect> register(String identifierString, StatusEffect statusEffect) {
-		return Registry.registerReference(Registries.STATUS_EFFECT, ScriptBlocks.identifier(identifierString), statusEffect);
+	private static Holder<MobEffect> register(String identifierString, MobEffect statusEffect) {
+		return Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, ScriptBlocks.identifier(identifierString), statusEffect);
 	}
 }

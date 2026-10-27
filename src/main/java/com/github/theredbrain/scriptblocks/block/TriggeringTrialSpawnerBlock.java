@@ -4,83 +4,83 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeringTrialSpawnerBl
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.Spawner;
-import net.minecraft.block.enums.TrialSpawnerState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Spawner;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class TriggeringTrialSpawnerBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<TriggeringTrialSpawnerBlock> CODEC = createCodec(TriggeringTrialSpawnerBlock::new);
+	public static final MapCodec<TriggeringTrialSpawnerBlock> CODEC = simpleCodec(TriggeringTrialSpawnerBlock::new);
 
 	@Override
-	public MapCodec<TriggeringTrialSpawnerBlock> getCodec() {
+	public MapCodec<TriggeringTrialSpawnerBlock> codec() {
 		return CODEC;
 	}
 
-	public TriggeringTrialSpawnerBlock(AbstractBlock.Settings settings) {
+	public TriggeringTrialSpawnerBlock(BlockBehaviour.Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(Properties.TRIAL_SPAWNER_STATE, TrialSpawnerState.INACTIVE)
-				.with(Properties.OMINOUS, false)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(BlockStateProperties.TRIAL_SPAWNER_STATE, TrialSpawnerState.INACTIVE)
+				.setValue(BlockStateProperties.OMINOUS, false)
 		);
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.TRIAL_SPAWNER_STATE, Properties.OMINOUS);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(BlockStateProperties.TRIAL_SPAWNER_STATE, BlockStateProperties.OMINOUS);
 	}
 
 	@Override
-	protected BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	protected RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new TriggeringTrialSpawnerBlockEntity(pos, state);
 	}
 
 	@Nullable
 	@Override
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return world instanceof ServerWorld serverWorld
-				? validateTicker(
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+		return world instanceof ServerLevel serverWorld
+				? createTickerHelper(
 				type,
 				ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER,
-				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickServer(serverWorld, pos, (Boolean) statex.getOrEmpty(Properties.OMINOUS).orElse(false))
+				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickServer(serverWorld, pos, (Boolean) statex.getOptionalValue(BlockStateProperties.OMINOUS).orElse(false))
 		)
-				: validateTicker(
+				: createTickerHelper(
 				type,
 				ScriptBlocksEntities.TRIGGERING_TRIAL_SPAWNER,
-				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickClient(worldx, pos, (Boolean) statex.getOrEmpty(Properties.OMINOUS).orElse(false))
+				(worldx, pos, statex, blockEntity) -> blockEntity.getSpawner().tickClient(worldx, pos, (Boolean) statex.getOptionalValue(BlockStateProperties.OMINOUS).orElse(false))
 		);
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType options) {
+	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
 		super.appendTooltip(stack, context, tooltip, options);
-		Spawner.appendSpawnDataToTooltip(stack, tooltip, "spawn_data");
+		Spawner.appendHoverText(stack, tooltip, "spawn_data");
 	}
 }

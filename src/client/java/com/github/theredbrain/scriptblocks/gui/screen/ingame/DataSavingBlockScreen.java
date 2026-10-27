@@ -6,17 +6,17 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateDataSavingBlockP
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,24 +26,24 @@ import java.util.List;
 @Environment(value = EnvType.CLIENT)
 public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final int VISIBLE_DATA_LIST_ENTRIES = 5;
-	private static final Text NEW_DATA_IDENTIFIER_PLACEHOLDER_TEXT = Text.translatable("gui.data_saving_block.new_data_identifier_placeholder");
-	private static final Text NEW_DATA_VALUE_PLACEHOLDER_TEXT = Text.translatable("gui.data_saving_block.new_data_value_placeholder");
-	private static final Text ADD_NEW_DATA_BUTTON_LABEL_TEXT = Text.translatable("gui.data_saving_block.add_new_data_button_label");
+	private static final Component NEW_DATA_IDENTIFIER_PLACEHOLDER_TEXT = Component.translatable("gui.data_saving_block.new_data_identifier_placeholder");
+	private static final Component NEW_DATA_VALUE_PLACEHOLDER_TEXT = Component.translatable("gui.data_saving_block.new_data_value_placeholder");
+	private static final Component ADD_NEW_DATA_BUTTON_LABEL_TEXT = Component.translatable("gui.data_saving_block.add_new_data_button_label");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_116_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_116");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
-	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	public static final WidgetSprites REMOVE_ENTRY_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
 	);
 	private final DataSavingBlockEntity dataSavingBlock;
 
-	private ButtonWidget removeDataButton0;
-	private ButtonWidget removeDataButton1;
-	private ButtonWidget removeDataButton2;
-	private ButtonWidget removeDataButton3;
-	private ButtonWidget removeDataButton4;
+	private Button removeDataButton0;
+	private Button removeDataButton1;
+	private Button removeDataButton2;
+	private Button removeDataButton3;
+	private Button removeDataButton4;
 
-	private TextFieldWidget newDataIdentifierField;
-	private TextFieldWidget newDataValueField;
+	private EditBox newDataIdentifierField;
+	private EditBox newDataValueField;
 
 	private List<MutablePair<String, String>> dataList = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private boolean mouseClicked = false;
 
 	public DataSavingBlockScreen(DataSavingBlockEntity dataSavingBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.dataSavingBlock = dataSavingBlock;
 	}
 
@@ -81,26 +81,26 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		this.dataList = this.dataSavingBlock.getDataList();
 
-		this.removeDataButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(0)));
-		this.removeDataButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(1)));
-		this.removeDataButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(2)));
-		this.removeDataButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(3)));
-		this.removeDataButton4 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(4)));
+		this.removeDataButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(0)));
+		this.removeDataButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(1)));
+		this.removeDataButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(2)));
+		this.removeDataButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(3)));
+		this.removeDataButton4 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeData(4)));
 
-		this.newDataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 140, 300, 20, Text.empty());
+		this.newDataIdentifierField = new EditBox(this.font, this.width / 2 - 154, 140, 300, 20, Component.empty());
 		this.newDataIdentifierField.setMaxLength(128);
-		this.newDataIdentifierField.setPlaceholder(NEW_DATA_IDENTIFIER_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDataIdentifierField);
+		this.newDataIdentifierField.setHint(NEW_DATA_IDENTIFIER_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDataIdentifierField);
 
-		this.newDataValueField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 300, 20, Text.empty());
+		this.newDataValueField = new EditBox(this.font, this.width / 2 - 154, 164, 300, 20, Component.empty());
 		this.newDataValueField.setMaxLength(128);
-		this.newDataValueField.setPlaceholder(NEW_DATA_VALUE_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDataValueField);
+		this.newDataValueField.setHint(NEW_DATA_VALUE_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDataValueField);
 
-		this.addDrawableChild(ButtonWidget.builder(ADD_NEW_DATA_BUTTON_LABEL_TEXT, button -> this.addNewData(this.newDataIdentifierField.getText(), this.newDataValueField.getText())).dimensions(this.width / 2 - 154, 188, 300, 20).build());
+		this.addRenderableWidget(Button.builder(ADD_NEW_DATA_BUTTON_LABEL_TEXT, button -> this.addNewData(this.newDataIdentifierField.getValue(), this.newDataValueField.getValue())).bounds(this.width / 2 - 154, 188, 300, 20).build());
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 212, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 212, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 212, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 212, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -138,15 +138,15 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		List<MutablePair<String, String>> list = new ArrayList<>(this.dataList);
-		String string = this.newDataIdentifierField.getText();
-		String string1 = this.newDataValueField.getText();
+		String string = this.newDataIdentifierField.getValue();
+		String string1 = this.newDataValueField.getValue();
 		this.init(client, width, height);
 		this.dataList.clear();
 		this.dataList.addAll(list);
-		this.newDataIdentifierField.setText(string);
-		this.newDataValueField.setText(string1);
+		this.newDataIdentifierField.setValue(string);
+		this.newDataValueField.setValue(string1);
 	}
 
 	@Override
@@ -170,7 +170,7 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& this.mouseClicked) {
 			int i = this.dataList.size() - VISIBLE_DATA_LIST_ENTRIES;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -183,7 +183,7 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& mouseY >= 20 && mouseY <= 136) {
 			int i = this.dataList.size() - VISIBLE_DATA_LIST_ENTRIES;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -199,18 +199,18 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_DATA_LIST_ENTRIES, this.dataList.size()); i++) {
-			context.drawTextWithShadow(this.textRenderer, this.dataList.get(i).left, this.width / 2 - 117, 20 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, this.dataList.get(i).right, this.width / 2 - 117, 30 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			context.drawString(this.font, this.dataList.get(i).left, this.width / 2 - 117, 20 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			context.drawString(this.font, this.dataList.get(i).right, this.width / 2 - 117, 30 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.dataList.size() > VISIBLE_DATA_LIST_ENTRIES) {
-			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 20, 8, 116);
+			context.blitSprite(SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 20, 8, 116);
 			int k = (int) (107.0f * this.scrollAmount);
-			context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 		}
 
 		this.newDataIdentifierField.render(context, mouseX, mouseY, delta);

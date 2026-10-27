@@ -3,32 +3,31 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class StatusEffectManipulationBlockEntity extends BlockEntity implements HandlesUUIDList, Triggerable {
 
@@ -48,69 +47,69 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("manipulation_mode", this.manipulationMode.asString());
+		view.putString("manipulation_mode", this.manipulationMode.getSerializedName());
 
-		NbtCompound nbtCompound = new NbtCompound();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putString("identifier", this.effectIdentifier);
 		nbtCompound.putInt("amplifier", this.effectAmplifier);
 		nbtCompound.putInt("duration", this.effectDuration);
 		nbtCompound.putBoolean("is_ambient", this.effectIsAmbient);
 		nbtCompound.putBoolean("show_particles", this.effectShowsParticles);
 		nbtCompound.putBoolean("show_icon", this.effectShowsIcon);
-		view.put("applied_status_effect", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("applied_status_effect", CompoundTag.CODEC, nbtCompound.copy());
 
 		view.putString("manipulated_effect_tag_id", this.manipulatedEffectTagIdentifierString);
 
 		view.putInt("amplifier_modification", this.amplifierModification);
 
-		view.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
+		view.store("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.manipulationMode = ManipulationMode.byName(view.getString("manipulation_mode", "")).orElse(ManipulationMode.APPLY);
+		this.manipulationMode = ManipulationMode.byName(view.getStringOr("manipulation_mode", "")).orElse(ManipulationMode.APPLY);
 
-		NbtCompound nbtCompound = view.read("applied_status_effect", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.effectIdentifier = nbtCompound.getString("identifier", "");
+		CompoundTag nbtCompound = view.read("applied_status_effect", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.effectIdentifier = nbtCompound.getStringOr("identifier", "");
 
-		this.effectAmplifier = nbtCompound.getInt("amplifier", 0);
+		this.effectAmplifier = nbtCompound.getIntOr("amplifier", 0);
 
-		this.effectDuration = nbtCompound.getInt("duration", 100);
+		this.effectDuration = nbtCompound.getIntOr("duration", 100);
 
-		this.effectIsAmbient = nbtCompound.getBoolean("is_ambient", false);
+		this.effectIsAmbient = nbtCompound.getBooleanOr("is_ambient", false);
 
-		this.effectShowsParticles = nbtCompound.getBoolean("show_particles", false);
+		this.effectShowsParticles = nbtCompound.getBooleanOr("show_particles", false);
 
-		this.effectShowsIcon = nbtCompound.getBoolean("show_icon", false);
+		this.effectShowsIcon = nbtCompound.getBooleanOr("show_icon", false);
 
-		this.manipulatedEffectTagIdentifierString = view.getString("manipulated_effect_tag_id", "");
+		this.manipulatedEffectTagIdentifierString = view.getStringOr("manipulated_effect_tag_id", "");
 
-		this.amplifierModification = view.getInt("amplifier_modification", 0);
+		this.amplifierModification = view.getIntOr("amplifier_modification", 0);
 
 		this.uuidListHandlerPositionOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
 	@Override
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -128,7 +127,7 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	}
 
 	public boolean setEffectIdentifier(String effectIdentifier) {
-		if (Registries.STATUS_EFFECT.get(Identifier.tryParse(effectIdentifier)) != null || effectIdentifier.isEmpty()) {
+		if (BuiltInRegistries.MOB_EFFECT.getValue(Identifier.tryParse(effectIdentifier)) != null || effectIdentifier.isEmpty()) {
 			this.effectIdentifier = effectIdentifier;
 			return true;
 		}
@@ -208,27 +207,27 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	// endregion --- getter & setter ---
 
 	public BlockPos getActualUUIDListHandlerPosition() {
-		return new BlockPos(this.pos.getX() + this.uuidListHandlerPositionOffset.getX(), this.pos.getY() + this.uuidListHandlerPositionOffset.getY(), this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ());
+		return new BlockPos(this.worldPosition.getX() + this.uuidListHandlerPositionOffset.getX(), this.worldPosition.getY() + this.uuidListHandlerPositionOffset.getY(), this.worldPosition.getZ() + this.uuidListHandlerPositionOffset.getZ());
 	}
 
-	private void manipulateStatusEffects(World world, List<UUID> list, RegistryEntry.Reference<StatusEffect> statusEffectEntry) {
+	private void manipulateStatusEffects(Level world, List<UUID> list, Holder.Reference<MobEffect> statusEffectEntry) {
 
 		Iterator<UUID> playerListIterator = list.iterator();
 
-		PlayerEntity playerEntity;
+		Player playerEntity;
 		UUID uuid;
 
 		while (playerListIterator.hasNext()) {
 			uuid = playerListIterator.next();
-			playerEntity = world.getPlayerByUuid(uuid);
+			playerEntity = world.getPlayerByUUID(uuid);
 
 			if (playerEntity == null) {
 				continue;
 			}
 			if (this.manipulationMode == ManipulationMode.APPLY) {
 
-				playerEntity.addStatusEffect(
-						new StatusEffectInstance(
+				playerEntity.addEffect(
+						new MobEffectInstance(
 								statusEffectEntry,
 								this.effectDuration,
 								this.effectAmplifier,
@@ -240,20 +239,20 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 
 			} else {
 
-				TagKey<StatusEffect> tagKey = TagKey.of(RegistryKeys.STATUS_EFFECT, Identifier.of(this.manipulatedEffectTagIdentifierString));
-				for (StatusEffectInstance statusEffectInstance : playerEntity.getStatusEffects().stream().toList()) {
-					RegistryEntry<StatusEffect> statusEffectRegistryEntry = statusEffectInstance.getEffectType();
-					if (statusEffectRegistryEntry.isIn(tagKey)) {
+				TagKey<MobEffect> tagKey = TagKey.create(Registries.MOB_EFFECT, Identifier.parse(this.manipulatedEffectTagIdentifierString));
+				for (MobEffectInstance statusEffectInstance : playerEntity.getActiveEffects().stream().toList()) {
+					Holder<MobEffect> statusEffectRegistryEntry = statusEffectInstance.getEffect();
+					if (statusEffectRegistryEntry.is(tagKey)) {
 						if (this.manipulationMode == ManipulationMode.REMOVE) {
-							playerEntity.removeStatusEffect(statusEffectRegistryEntry);
+							playerEntity.removeEffect(statusEffectRegistryEntry);
 						} else if (this.manipulationMode == ManipulationMode.DECREMENT_AMPLIFIER) {
 							int oldAmplifier = statusEffectInstance.getAmplifier();
 							if (oldAmplifier <= 0) {
-								playerEntity.removeStatusEffect(statusEffectRegistryEntry);
+								playerEntity.removeEffect(statusEffectRegistryEntry);
 							} else {
-								StatusEffectInstance newStatusEffectInstance = new StatusEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.shouldShowParticles(), statusEffectInstance.shouldShowIcon());
-								playerEntity.removeStatusEffect(statusEffectRegistryEntry);
-								playerEntity.addStatusEffect(newStatusEffectInstance);
+								MobEffectInstance newStatusEffectInstance = new MobEffectInstance(statusEffectRegistryEntry, statusEffectInstance.getDuration(), statusEffectInstance.getAmplifier() - 1, statusEffectInstance.isAmbient(), statusEffectInstance.isVisible(), statusEffectInstance.showIcon());
+								playerEntity.removeEffect(statusEffectRegistryEntry);
+								playerEntity.addEffect(newStatusEffectInstance);
 							}
 						}
 					}
@@ -270,15 +269,15 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	@Override
 	public void handleUUIDList(List<UUID> list, boolean remove) {
 
-		Optional<RegistryEntry.Reference<StatusEffect>> statusEffect = Registries.STATUS_EFFECT.getEntry(Identifier.tryParse(this.effectIdentifier));
+		Optional<Holder.Reference<MobEffect>> statusEffect = BuiltInRegistries.MOB_EFFECT.get(Identifier.tryParse(this.effectIdentifier));
 		if (statusEffect.isEmpty()) {
 			return;
 		}
-		if (this.getWorld() == null) {
+		if (this.getLevel() == null) {
 			return;
 		}
 
-		this.manipulateStatusEffects(this.getWorld(), list, statusEffect.get());
+		this.manipulateStatusEffects(this.getLevel(), list, statusEffect.get());
 	}
 
 	@Override
@@ -287,24 +286,24 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 
 	@Override
 	public void trigger() {
-		Optional<RegistryEntry.Reference<StatusEffect>> statusEffect = Registries.STATUS_EFFECT.getEntry(Identifier.tryParse(this.effectIdentifier));
+		Optional<Holder.Reference<MobEffect>> statusEffect = BuiltInRegistries.MOB_EFFECT.get(Identifier.tryParse(this.effectIdentifier));
 		if (statusEffect.isEmpty()) {
 			return;
 		}
-		if (this.getWorld() == null) {
+		if (this.getLevel() == null) {
 			return;
 		}
-		BlockEntity blockEntity = this.getWorld().getBlockEntity(this.getActualUUIDListHandlerPosition());
+		BlockEntity blockEntity = this.getLevel().getBlockEntity(this.getActualUUIDListHandlerPosition());
 		if (blockEntity == this) {
 			return;
 		}
 
 		if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
-			this.manipulateStatusEffects(this.getWorld(), handlesUUIDList.supplyUUIDList(false), statusEffect.get());
+			this.manipulateStatusEffects(this.getLevel(), handlesUUIDList.supplyUUIDList(false), statusEffect.get());
 		}
 	}
 
-	public enum ManipulationMode implements StringIdentifiable {
+	public enum ManipulationMode implements StringRepresentable {
 		APPLY("apply"),
 		REMOVE("remove"),
 		DECREMENT_AMPLIFIER("decrement_amplifier");
@@ -316,16 +315,16 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<ManipulationMode> byName(String name) {
-			return Arrays.stream(ManipulationMode.values()).filter(manipulationMode -> manipulationMode.asString().equals(name)).findFirst();
+			return Arrays.stream(ManipulationMode.values()).filter(manipulationMode -> manipulationMode.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.status_effect_manipulation_block.mode." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.status_effect_manipulation_block.mode." + this.name);
 		}
 	}
 }

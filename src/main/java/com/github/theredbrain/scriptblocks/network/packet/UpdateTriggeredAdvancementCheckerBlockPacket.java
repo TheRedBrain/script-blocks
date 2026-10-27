@@ -1,10 +1,10 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTriggeredAdvancementCheckerBlockPacket(
 		BlockPos triggeredAdvancementCheckerBlockPosition,
@@ -13,32 +13,32 @@ public record UpdateTriggeredAdvancementCheckerBlockPacket(
 		BlockPos secondTriggeredBlockPositionOffset,
 		boolean secondTriggeredBlockResets,
 		String checkedAdvancementIdentifier
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateTriggeredAdvancementCheckerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_triggered_advancement_checker_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredAdvancementCheckerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredAdvancementCheckerBlockPacket::write, UpdateTriggeredAdvancementCheckerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateTriggeredAdvancementCheckerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_triggered_advancement_checker_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredAdvancementCheckerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredAdvancementCheckerBlockPacket::write, UpdateTriggeredAdvancementCheckerBlockPacket::new);
 
-	public UpdateTriggeredAdvancementCheckerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredAdvancementCheckerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredAdvancementCheckerBlockPosition);
 		registryByteBuf.writeBlockPos(this.firstTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.firstTriggeredBlockResets);
 		registryByteBuf.writeBlockPos(this.secondTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.secondTriggeredBlockResets);
-		registryByteBuf.writeString(this.checkedAdvancementIdentifier);
+		registryByteBuf.writeUtf(this.checkedAdvancementIdentifier);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

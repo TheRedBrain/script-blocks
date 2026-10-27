@@ -5,81 +5,81 @@ import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<UseRelayTrapdoorBlock> CODEC = createCodec(UseRelayTrapdoorBlock::new);
-	protected static final VoxelShape EAST_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
-	protected static final VoxelShape WEST_SHAPE = Block.createCuboidShape(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
-	protected static final VoxelShape SOUTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
-	protected static final VoxelShape NORTH_SHAPE = Block.createCuboidShape(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
-	protected static final VoxelShape OPEN_BOTTOM_SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 3.0, 16.0);
-	protected static final VoxelShape OPEN_TOP_SHAPE = Block.createCuboidShape(0.0, 13.0, 0.0, 16.0, 16.0, 16.0);
+	public static final MapCodec<UseRelayTrapdoorBlock> CODEC = simpleCodec(UseRelayTrapdoorBlock::new);
+	protected static final VoxelShape EAST_SHAPE = Block.box(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
+	protected static final VoxelShape WEST_SHAPE = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+	protected static final VoxelShape SOUTH_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
+	protected static final VoxelShape NORTH_SHAPE = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
+	protected static final VoxelShape OPEN_BOTTOM_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 3.0, 16.0);
+	protected static final VoxelShape OPEN_TOP_SHAPE = Block.box(0.0, 13.0, 0.0, 16.0, 16.0, 16.0);
 
-	public UseRelayTrapdoorBlock(Settings settings) {
+	public UseRelayTrapdoorBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(HorizontalFacingBlock.FACING, Direction.NORTH)
-				.with(Properties.OPEN, false)
-				.with(Properties.BLOCK_HALF, BlockHalf.BOTTOM)
-				.with(Properties.WATERLOGGED, false)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH)
+				.setValue(BlockStateProperties.OPEN, false)
+				.setValue(BlockStateProperties.HALF, Half.BOTTOM)
+				.setValue(BlockStateProperties.WATERLOGGED, false)
 		);
 	}
 
-	public MapCodec<UseRelayTrapdoorBlock> getCodec() {
+	public MapCodec<UseRelayTrapdoorBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new UseRelayBlockEntity(pos, state);
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.BLOCK_HALF, HorizontalFacingBlock.FACING, Properties.OPEN, Properties.WATERLOGGED);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(BlockStateProperties.HALF, HorizontalDirectionalBlock.FACING, BlockStateProperties.OPEN, BlockStateProperties.WATERLOGGED);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (!state.get(Properties.OPEN)) {
-			return state.get(Properties.BLOCK_HALF) == BlockHalf.TOP ? OPEN_TOP_SHAPE : OPEN_BOTTOM_SHAPE;
+	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		if (!state.getValue(BlockStateProperties.OPEN)) {
+			return state.getValue(BlockStateProperties.HALF) == Half.TOP ? OPEN_TOP_SHAPE : OPEN_BOTTOM_SHAPE;
 		}
-		return switch (state.get(HorizontalFacingBlock.FACING)) {
+		return switch (state.getValue(HorizontalDirectionalBlock.FACING)) {
 			case NORTH -> NORTH_SHAPE;
 			case SOUTH -> SOUTH_SHAPE;
 			case WEST -> WEST_SHAPE;
@@ -88,82 +88,82 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public boolean canPathfindThrough(BlockState state, NavigationType type) {
+	public boolean isPathfindable(BlockState state, PathComputationType type) {
 		switch (type) {
 			case LAND, AIR -> {
-				return state.get(Properties.OPEN);
+				return state.getValue(BlockStateProperties.OPEN);
 			}
 			case WATER -> {
-				return state.get(Properties.WATERLOGGED);
+				return state.getValue(BlockStateProperties.WATERLOGGED);
 			}
 		}
 		return false;
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		BlockState blockState = this.getDefaultState();
-		FluidState fluidState = ctx.getWorld().getFluidState(ctx.getBlockPos());
-		Direction direction = ctx.getSide();
-		blockState = ctx.canReplaceExisting() || !direction.getAxis().isHorizontal() ? blockState.with(HorizontalFacingBlock.FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(Properties.BLOCK_HALF, direction == Direction.UP ? BlockHalf.BOTTOM : BlockHalf.TOP) : blockState.with(HorizontalFacingBlock.FACING, direction).with(Properties.BLOCK_HALF, ctx.getHitPos().y - (double) ctx.getBlockPos().getY() > 0.5 ? BlockHalf.TOP : BlockHalf.BOTTOM);
-		return blockState.with(Properties.WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		BlockState blockState = this.defaultBlockState();
+		FluidState fluidState = ctx.getLevel().getFluidState(ctx.getClickedPos());
+		Direction direction = ctx.getClickedFace();
+		blockState = ctx.replacingClickedOnBlock() || !direction.getAxis().isHorizontal() ? blockState.setValue(HorizontalDirectionalBlock.FACING, ctx.getHorizontalDirection().getOpposite()).setValue(BlockStateProperties.HALF, direction == Direction.UP ? Half.BOTTOM : Half.TOP) : blockState.setValue(HorizontalDirectionalBlock.FACING, direction).setValue(BlockStateProperties.HALF, ctx.getClickLocation().y - (double) ctx.getClickedPos().getY() > 0.5 ? Half.TOP : Half.BOTTOM);
+		return blockState.setValue(BlockStateProperties.WATERLOGGED, fluidState.getType() == Fluids.WATER);
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
-			if (player.isCreativeLevelTwoOp()) {
-				if (player.isSneaking()) {
-					state = state.cycle(Properties.OPEN);
-					world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
-					if (state.get(Properties.WATERLOGGED)) {
-						world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+			if (player.canUseGameMasterBlocks()) {
+				if (player.isShiftKeyDown()) {
+					state = state.cycle(BlockStateProperties.OPEN);
+					world.setBlock(pos, state, Block.UPDATE_CLIENTS);
+					if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+						world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 					}
-					return ActionResult.success(world.isClient);
+					return InteractionResult.success(world.isClientSide);
 				}
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
-				return ActionResult.success(world.isClient);
+				return InteractionResult.success(world.isClientSide);
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
-				if (relayBlockPosOffset.equals(BlockPos.ORIGIN)) {
-					return ActionResult.PASS;
+				if (relayBlockPosOffset.equals(BlockPos.ZERO)) {
+					return InteractionResult.PASS;
 				}
-				BlockPos relayBlockPos = pos.add(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
+				BlockPos relayBlockPos = pos.offset(relayBlockPosOffset.getX(), relayBlockPosOffset.getY(), relayBlockPosOffset.getZ());
 				BlockState relayBlockState = world.getBlockState(relayBlockPos);
-				return relayBlockState.getBlock().onUse(relayBlockState, world, relayBlockPos, player, hit);
+				return relayBlockState.getBlock().useWithoutItem(relayBlockState, world, relayBlockPos, player, hit);
 			}
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
 	public FluidState getFluidState(BlockState state) {
-		if (state.get(Properties.WATERLOGGED)) {
-			return Fluids.WATER.getStill(false);
+		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+			return Fluids.WATER.getSource(false);
 		}
 		return super.getFluidState(state);
 	}
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
-		if (state.get(Properties.WATERLOGGED)) {
-			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+			world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 		}
-		return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
+		return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
 	}
 
 	@Override
-	public BlockState rotate(BlockState state, BlockRotation rotation) {
-		return super.rotate(state, rotation).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), rotation));
+	public BlockState rotate(BlockState state, Rotation rotation) {
+		return super.rotate(state, rotation).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), rotation));
 	}
 
 	@Override
-	public BlockState mirror(BlockState state, BlockMirror mirror) {
-		if (mirror == BlockMirror.FRONT_BACK) {
-			return super.mirror(state, mirror).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), mirror.getRotation(state.get(HorizontalFacingBlock.FACING))));
-		} else if (mirror == BlockMirror.LEFT_RIGHT) {
-			return super.mirror(state, mirror).with(HorizontalFacingBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.get(HorizontalFacingBlock.FACING), mirror.getRotation(state.get(HorizontalFacingBlock.FACING))));
+	public BlockState mirror(BlockState state, Mirror mirror) {
+		if (mirror == Mirror.FRONT_BACK) {
+			return super.mirror(state, mirror).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING))));
+		} else if (mirror == Mirror.LEFT_RIGHT) {
+			return super.mirror(state, mirror).setValue(HorizontalDirectionalBlock.FACING, BlockRotationUtils.calculateNewHorizontalFacingBlockState(state.getValue(HorizontalDirectionalBlock.FACING), mirror.getRotation(state.getValue(HorizontalDirectionalBlock.FACING))));
 		}
 		return state;
 	}

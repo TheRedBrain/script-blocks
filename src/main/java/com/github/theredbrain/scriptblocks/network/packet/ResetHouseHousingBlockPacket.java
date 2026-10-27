@@ -1,25 +1,25 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public record ResetHouseHousingBlockPacket(BlockPos housingBlockPosition) implements CustomPayload {
-	public static final CustomPayload.Id<ResetHouseHousingBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("reset_house_housing_block"));
-	public static final PacketCodec<RegistryByteBuf, ResetHouseHousingBlockPacket> PACKET_CODEC = PacketCodec.of(ResetHouseHousingBlockPacket::write, ResetHouseHousingBlockPacket::new);
+public record ResetHouseHousingBlockPacket(BlockPos housingBlockPosition) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<ResetHouseHousingBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("reset_house_housing_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, ResetHouseHousingBlockPacket> PACKET_CODEC = StreamCodec.ofMember(ResetHouseHousingBlockPacket::write, ResetHouseHousingBlockPacket::new);
 
-	public ResetHouseHousingBlockPacket(RegistryByteBuf registryByteBuf) {
+	public ResetHouseHousingBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(registryByteBuf.readBlockPos());
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.housingBlockPosition);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

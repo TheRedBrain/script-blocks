@@ -3,16 +3,15 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class LocationCooldownStarterBlockEntity extends BlockEntity implements HandlesUUIDList {
 	public LocationCooldownStarterBlockEntity(BlockPos pos, BlockState state) {
@@ -27,20 +26,20 @@ public class LocationCooldownStarterBlockEntity extends BlockEntity implements H
 	@Override
 	public void handleUUIDList(List<UUID> list, boolean remove) {
 
-		if (this.getWorld() == null) {
+		if (this.getLevel() == null) {
 			return;
 		}
 
 		Iterator<UUID> playerListIterator = list.iterator();
 
-		PlayerEntity playerEntity;
+		Player playerEntity;
 		UUID uuid;
 
 		while (playerListIterator.hasNext()) {
 			uuid = playerListIterator.next();
-			playerEntity = this.getWorld().getPlayerByUuid(uuid);
+			playerEntity = this.getLevel().getPlayerByUUID(uuid);
 
-			if (playerEntity instanceof ServerPlayerEntity serverPlayerEntity) {
+			if (playerEntity instanceof ServerPlayer serverPlayerEntity) {
 				DataAttachmentHelper.setActiveLocationCooldowns(serverPlayerEntity);
 			}
 		}

@@ -7,30 +7,6 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -39,11 +15,33 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
 	private boolean calculateAreaBox = true;
-	private Box area = null;
+	private AABB area = null;
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
 	private BlockPos areaPositionOffset = new BlockPos(0, 1, 0);
@@ -64,88 +62,88 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		NbtCompound nbtCompound = new NbtCompound();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("area", CompoundTag.CODEC, nbtCompound.copy());
 
-		nbtCompound = new NbtCompound();
+		nbtCompound = new CompoundTag();
 		nbtCompound.putString("identifier", this.appliedStatusEffectIdentifier);
 		nbtCompound.putInt("amplifier", this.appliedStatusEffectAmplifier);
 		nbtCompound.putInt("duration", this.appliedStatusEffectDuration);
 		nbtCompound.putBoolean("is_ambient", this.appliedStatusEffectAmbient);
 		nbtCompound.putBoolean("show_particles", this.appliedStatusEffectShowParticles);
 		nbtCompound.putBoolean("show_icon", this.appliedStatusEffectShowIcon);
-		view.put("applied_status_effect", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("applied_status_effect", CompoundTag.CODEC, nbtCompound.copy());
 
 		view.putBoolean("triggered", true);
 
-		view.putString("triggered_mode", this.triggeredMode.asString());
+		view.putString("triggered_mode", this.triggeredMode.getSerializedName());
 
-		super.writeData(view);
+		super.saveAdditional(view);
 
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.showArea = nbtCompound.getBoolean("visible", false);
+		CompoundTag nbtCompound = view.read("area", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.showArea = nbtCompound.getBooleanOr("visible", false);
 
 		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
 		this.areaPositionOffset = BlockPos.max(
 				BlockPos.min(
-						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		nbtCompound = view.read("applied_status_effect", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.appliedStatusEffectIdentifier = nbtCompound.getString("identifier", "");
+		nbtCompound = view.read("applied_status_effect", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.appliedStatusEffectIdentifier = nbtCompound.getStringOr("identifier", "");
 
-		this.appliedStatusEffectAmplifier = nbtCompound.getInt("amplifier", 0);
+		this.appliedStatusEffectAmplifier = nbtCompound.getIntOr("amplifier", 0);
 
-		this.appliedStatusEffectDuration = nbtCompound.getInt("duration", 100);
+		this.appliedStatusEffectDuration = nbtCompound.getIntOr("duration", 100);
 
-		this.appliedStatusEffectAmbient = nbtCompound.getBoolean("ambient", false);
+		this.appliedStatusEffectAmbient = nbtCompound.getBooleanOr("ambient", false);
 
-		this.appliedStatusEffectShowParticles = nbtCompound.getBoolean("show_particles", false);
+		this.appliedStatusEffectShowParticles = nbtCompound.getBooleanOr("show_particles", false);
 
-		this.appliedStatusEffectShowIcon = nbtCompound.getBoolean("show_icon", false);
+		this.appliedStatusEffectShowIcon = nbtCompound.getBooleanOr("show_icon", false);
 
-		this.triggered = view.getBoolean("triggered", false);
+		this.triggered = view.getBooleanOr("triggered", false);
 
-		this.triggeredMode = TriggeredMode.byName(view.getString("triggered_mode", "")).orElse(TriggeredMode.ONCE);
+		this.triggeredMode = TriggeredMode.byName(view.getStringOr("triggered_mode", "")).orElse(TriggeredMode.ONCE);
 
-		super.readData(view);
+		super.loadAdditional(view);
 
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, TriggeredBeaconBlockEntity triggeredBeaconBlockEntity) {
-		if (!world.isClient() && world.getTime() % 80L == 0L) {
+	public static void tick(Level world, BlockPos pos, BlockState state, TriggeredBeaconBlockEntity triggeredBeaconBlockEntity) {
+		if (!world.isClientSide() && world.getGameTime() % 80L == 0L) {
 			if (triggeredBeaconBlockEntity.calculateAreaBox || triggeredBeaconBlockEntity.area == null) {
 				BlockPos areaPositionOffset = triggeredBeaconBlockEntity.areaPositionOffset;
 				Vec3i areaDimensions = triggeredBeaconBlockEntity.areaDimensions;
-				Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
-				Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
-				triggeredBeaconBlockEntity.area = new Box(areaStart, areaEnd);
+				Vec3 areaStart = new Vec3(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
+				Vec3 areaEnd = new Vec3(areaStart.x() + areaDimensions.getX(), areaStart.y() + areaDimensions.getY(), areaStart.z() + areaDimensions.getZ());
+				triggeredBeaconBlockEntity.area = new AABB(areaStart, areaEnd);
 				triggeredBeaconBlockEntity.calculateAreaBox = false;
-				triggeredBeaconBlockEntity.markDirty();
-				world.updateListeners(pos, state, state, Block.NOTIFY_ALL);
+				triggeredBeaconBlockEntity.setChanged();
+				world.sendBlockUpdated(pos, state, state, Block.UPDATE_ALL);
 			}
 			if (triggeredBeaconBlockEntity.triggeredMode == TriggeredMode.CONTINUOUS && triggeredBeaconBlockEntity.triggered) {
 				triggeredBeaconBlockEntity.applyStatusEffect(world);
@@ -153,29 +151,29 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		}
 	}
 
-	private void applyStatusEffect(World world) {
-		Optional<RegistryEntry.Reference<StatusEffect>> statusEffect = Registries.STATUS_EFFECT.getEntry(Identifier.tryParse(this.appliedStatusEffectIdentifier));
+	private void applyStatusEffect(Level world) {
+		Optional<Holder.Reference<MobEffect>> statusEffect = BuiltInRegistries.MOB_EFFECT.get(Identifier.tryParse(this.appliedStatusEffectIdentifier));
 		if (statusEffect.isEmpty()) {
 			return;
 		}
 
-		List<PlayerEntity> playerList = world.getNonSpectatingEntities(PlayerEntity.class, this.area);
+		List<Player> playerList = world.getEntitiesOfClass(Player.class, this.area);
 		List<UUID> playerUuidList = new ArrayList<>();
-		for (PlayerEntity player : playerList) {
-			playerUuidList.add(player.getUuid());
+		for (Player player : playerList) {
+			playerUuidList.add(player.getUUID());
 		}
 
 		Iterator<UUID> playerListIterator = playerUuidList.iterator();
-		PlayerEntity playerEntity;
+		Player playerEntity;
 		UUID uuid;
 
 		while (playerListIterator.hasNext()) {
 			uuid = playerListIterator.next();
-			playerEntity = world.getPlayerByUuid(uuid);
+			playerEntity = world.getPlayerByUUID(uuid);
 
 			if (playerEntity != null) {
-				playerEntity.addStatusEffect(
-						new StatusEffectInstance(
+				playerEntity.addEffect(
+						new MobEffectInstance(
 								statusEffect.get(),
 								this.appliedStatusEffectDuration,
 								this.appliedStatusEffectAmplifier,
@@ -224,7 +222,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	}
 
 	public boolean setAppliedStatusEffectIdentifier(String appliedStatusEffectIdentifier) {
-		if (Registries.STATUS_EFFECT.get(Identifier.tryParse(appliedStatusEffectIdentifier)) != null || appliedStatusEffectIdentifier.equals("")) {
+		if (BuiltInRegistries.MOB_EFFECT.getValue(Identifier.tryParse(appliedStatusEffectIdentifier)) != null || appliedStatusEffectIdentifier.equals("")) {
 			this.appliedStatusEffectIdentifier = appliedStatusEffectIdentifier;
 			return true;
 		}
@@ -299,10 +297,10 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	public void reset() {
 		if (this.triggered) {
 			this.triggered = false;
-			this.markDirty();
-			if (this.world != null) {
-				BlockState blockState = this.world.getBlockState(this.pos);
-				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			this.setChanged();
+			if (this.level != null) {
+				BlockState blockState = this.level.getBlockState(this.worldPosition);
+				this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 			}
 		}
 	}
@@ -311,48 +309,48 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	public void trigger() {
 		if (this.triggeredMode == TriggeredMode.CONTINUOUS && !this.triggered) {
 			this.triggered = true;
-			this.markDirty();
-			if (this.world != null) {
-				BlockState blockState = this.world.getBlockState(this.pos);
-				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			this.setChanged();
+			if (this.level != null) {
+				BlockState blockState = this.level.getBlockState(this.worldPosition);
+				this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 			}
-		} else if (this.triggeredMode == TriggeredMode.ONCE && this.world != null) {
-			this.applyStatusEffect(this.world);
+		} else if (this.triggeredMode == TriggeredMode.ONCE && this.level != null) {
+			this.applyStatusEffect(this.level);
 		}
 	}
 
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.FRONT_BACK);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.LEFT_RIGHT);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
 
-	public enum TriggeredMode implements StringIdentifiable {
+	public enum TriggeredMode implements StringRepresentable {
 		CONTINUOUS("continuous"),
 		ONCE("once");
 
@@ -363,16 +361,16 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<TriggeredMode> byName(String name) {
-			return Arrays.stream(TriggeredMode.values()).filter(triggeredMode -> triggeredMode.asString().equals(name)).findFirst();
+			return Arrays.stream(TriggeredMode.values()).filter(triggeredMode -> triggeredMode.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.triggered_beacon_block.triggered_mode." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.triggered_beacon_block.triggered_mode." + this.name);
 		}
 	}
 }

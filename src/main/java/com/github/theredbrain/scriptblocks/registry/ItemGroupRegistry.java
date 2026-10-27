@@ -1,27 +1,27 @@
 package com.github.theredbrain.scriptblocks.registry;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
 
 public class ItemGroupRegistry {
-	public static final RegistryKey<ItemGroup> DECORATIVE_SCRIPT_BLOCKS = RegistryKey.of(RegistryKeys.ITEM_GROUP, ScriptBlocks.identifier("decorative_script_blocks"));
-	public static final RegistryKey<ItemGroup> SCRIPT_BLOCKS = RegistryKey.of(RegistryKeys.ITEM_GROUP, ScriptBlocks.identifier("script_blocks"));
+	public static final ResourceKey<CreativeModeTab> DECORATIVE_SCRIPT_BLOCKS = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ScriptBlocks.identifier("decorative_script_blocks"));
+	public static final ResourceKey<CreativeModeTab> SCRIPT_BLOCKS = ResourceKey.create(Registries.CREATIVE_MODE_TAB, ScriptBlocks.identifier("script_blocks"));
 
 	public static void init() {
-		Registry.register(Registries.ITEM_GROUP, DECORATIVE_SCRIPT_BLOCKS, FabricItemGroup.builder()
+		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, DECORATIVE_SCRIPT_BLOCKS, FabricCreativeModeTab.builder()
 				.icon(() -> new ItemStack(ScriptBlocksBlocks.AESTHETIC_NETHER_PORTAL))
-				.displayName(Text.translatable("itemGroup.scriptblocks.decorative_script_blocks"))
+				.title(Component.translatable("itemGroup.scriptblocks.decorative_script_blocks"))
 				.build());
-		Registry.register(Registries.ITEM_GROUP, SCRIPT_BLOCKS, FabricItemGroup.builder()
+		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, SCRIPT_BLOCKS, FabricCreativeModeTab.builder()
 				.icon(() -> new ItemStack(ScriptBlocksBlocks.TELEPORTER_BLOCK))
-				.displayName(Text.translatable("itemGroup.scriptblocks.script_blocks"))
+				.title(Component.translatable("itemGroup.scriptblocks.script_blocks"))
 				.build());
 	}
 }

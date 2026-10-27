@@ -5,33 +5,33 @@ import com.github.theredbrain.scriptblocks.component.type.BlockPositionDistanceM
 import com.github.theredbrain.scriptblocks.component.type.InteractiveKeyComponent;
 import com.github.theredbrain.scriptblocks.component.type.PreventInteractionsDataComponent;
 import com.github.theredbrain.scriptblocks.component.type.RemovedOnInteractionsDataComponent;
-import net.minecraft.component.ComponentType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ScriptBlocksDataComponents {
-	public static final ComponentType<BlockPositionDistanceMeterComponent> BLOCK_POSITION_DISTANCE_METER = Registry.register(
-			Registries.DATA_COMPONENT_TYPE,
+	public static final DataComponentType<BlockPositionDistanceMeterComponent> BLOCK_POSITION_DISTANCE_METER = Registry.register(
+			BuiltInRegistries.DATA_COMPONENT_TYPE,
 			ScriptBlocks.identifier("block_position_distance_meter"),
-			ComponentType.<BlockPositionDistanceMeterComponent>builder().codec(BlockPositionDistanceMeterComponent.CODEC).build()
+			DataComponentType.<BlockPositionDistanceMeterComponent>builder().persistent(BlockPositionDistanceMeterComponent.CODEC).build()
 	);
 
-	public static final ComponentType<InteractiveKeyComponent> INTERACTIVE_KEY = Registry.register(
-			Registries.DATA_COMPONENT_TYPE,
+	public static final DataComponentType<InteractiveKeyComponent> INTERACTIVE_KEY = Registry.register(
+			BuiltInRegistries.DATA_COMPONENT_TYPE,
 			ScriptBlocks.identifier("interactive_key"),
-			ComponentType.<InteractiveKeyComponent>builder().codec(InteractiveKeyComponent.CODEC).packetCodec(InteractiveKeyComponent.PACKET_CODEC).cache().build()
+			DataComponentType.<InteractiveKeyComponent>builder().persistent(InteractiveKeyComponent.CODEC).networkSynchronized(InteractiveKeyComponent.PACKET_CODEC).cacheEncoding().build()
 	);
 
-	public static final ComponentType<RemovedOnInteractionsDataComponent> REMOVED_ON_INTERACTIONS = Registry.register(
-			Registries.DATA_COMPONENT_TYPE,
+	public static final DataComponentType<RemovedOnInteractionsDataComponent> REMOVED_ON_INTERACTIONS = Registry.register(
+			BuiltInRegistries.DATA_COMPONENT_TYPE,
 			ScriptBlocks.identifier("removed_on_interactions"),
-			ComponentType.<RemovedOnInteractionsDataComponent>builder().codec(RemovedOnInteractionsDataComponent.CODEC).packetCodec(RemovedOnInteractionsDataComponent.PACKET_CODEC).cache().build()
+			DataComponentType.<RemovedOnInteractionsDataComponent>builder().persistent(RemovedOnInteractionsDataComponent.CODEC).networkSynchronized(RemovedOnInteractionsDataComponent.PACKET_CODEC).cacheEncoding().build()
 	);
 
-	public static final ComponentType<PreventInteractionsDataComponent> PREVENT_INTERACTIONS = Registry.register(
-			Registries.DATA_COMPONENT_TYPE,
+	public static final DataComponentType<PreventInteractionsDataComponent> PREVENT_INTERACTIONS = Registry.register(
+			BuiltInRegistries.DATA_COMPONENT_TYPE,
 			ScriptBlocks.identifier("prevent_interactions"),
-			ComponentType.<PreventInteractionsDataComponent>builder().codec(PreventInteractionsDataComponent.CODEC).packetCodec(PreventInteractionsDataComponent.PACKET_CODEC).cache().build()
+			DataComponentType.<PreventInteractionsDataComponent>builder().persistent(PreventInteractionsDataComponent.CODEC).networkSynchronized(PreventInteractionsDataComponent.PACKET_CODEC).cacheEncoding().build()
 	);
 
 	public static void bootstrap() {

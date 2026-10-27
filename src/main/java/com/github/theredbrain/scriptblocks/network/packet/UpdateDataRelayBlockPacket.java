@@ -1,34 +1,33 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateDataRelayBlockPacket(
 		BlockPos dataRelayBlockPosition,
 		List<BlockPos> dataProvidingBlockPosOffsetList
-) implements CustomPayload {
-	public static final Id<UpdateDataRelayBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_data_relay_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateDataRelayBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateDataRelayBlockPacket::write, UpdateDataRelayBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateDataRelayBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_data_relay_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateDataRelayBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateDataRelayBlockPacket::write, UpdateDataRelayBlockPacket::new);
 
-	public UpdateDataRelayBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateDataRelayBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readList(BlockPos.PACKET_CODEC)
+				registryByteBuf.readList(BlockPos.STREAM_CODEC)
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.dataRelayBlockPosition);
-		registryByteBuf.writeCollection(this.dataProvidingBlockPosOffsetList, BlockPos.PACKET_CODEC);
+		registryByteBuf.writeCollection(this.dataProvidingBlockPosOffsetList, BlockPos.STREAM_CODEC);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

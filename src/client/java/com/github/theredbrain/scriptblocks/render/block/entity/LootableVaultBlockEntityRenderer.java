@@ -2,33 +2,33 @@ package com.github.theredbrain.scriptblocks.render.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultClientData;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.entity.ItemEntityRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemEntityRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 @Deprecated
 @Environment(EnvType.CLIENT)
 public class LootableVaultBlockEntityRenderer implements BlockEntityRenderer<LootableVaultBlockEntity> {
 	private final ItemRenderer itemRenderer;
-	private final Random random = Random.create();
+	private final RandomSource random = RandomSource.create();
 
-	public LootableVaultBlockEntityRenderer(BlockEntityRendererFactory.Context context) {
+	public LootableVaultBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
 		this.itemRenderer = context.getItemRenderer();
 	}
 
-	public void render(LootableVaultBlockEntity lootableVaultBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
+	public void render(LootableVaultBlockEntity lootableVaultBlockEntity, float f, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, int j) {
 		if (LootableVaultBlockEntity.Client.hasDisplayItem(lootableVaultBlockEntity.getSharedData())) {
-			World world = lootableVaultBlockEntity.getWorld();
+			Level world = lootableVaultBlockEntity.getWorld();
 			if (world != null) {
 				ItemStack itemStack = lootableVaultBlockEntity.getSharedData().getDisplayItem();
 				if (!itemStack.isEmpty()) {
@@ -53,20 +53,20 @@ public class LootableVaultBlockEntityRenderer implements BlockEntityRenderer<Loo
 
 	public static void renderDisplayItem(
 			float tickDelta,
-			World world,
-			MatrixStack matrices,
-			VertexConsumerProvider vertexConsumers,
+			Level world,
+			PoseStack matrices,
+			MultiBufferSource vertexConsumers,
 			int light,
 			ItemStack stack,
 			ItemRenderer itemRenderer,
 			float prevRotation,
 			float rotation,
-			Random random
+			RandomSource random
 	) {
-		matrices.push();
+		matrices.pushPose();
 		matrices.translate(0.5F, 0.4F, 0.5F);
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(MathHelper.lerpAngleDegrees(tickDelta, prevRotation, rotation)));
-		ItemEntityRenderer.renderStack(itemRenderer, matrices, vertexConsumers, light, stack, random, world);
-		matrices.pop();
+		matrices.mulPose(Axis.YP.rotationDegrees(Mth.rotLerp(tickDelta, prevRotation, rotation)));
+		ItemEntityRenderer.renderMultipleFromCount(itemRenderer, matrices, vertexConsumers, light, stack, random, world);
+		matrices.popPose();
 	}
 }

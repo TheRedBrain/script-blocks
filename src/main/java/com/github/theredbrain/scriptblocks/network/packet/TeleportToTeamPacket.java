@@ -1,22 +1,22 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 public record TeleportToTeamPacket(
 		Identifier targetWorldIdentifier,
 		BlockPos targetPosition,
 		double targetYaw,
 		double targetPitch
-) implements CustomPayload {
-	public static final CustomPayload.Id<TeleportToTeamPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("teleport_to_team"));
-	public static final PacketCodec<RegistryByteBuf, TeleportToTeamPacket> PACKET_CODEC = PacketCodec.of(TeleportToTeamPacket::write, TeleportToTeamPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<TeleportToTeamPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("teleport_to_team"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, TeleportToTeamPacket> PACKET_CODEC = StreamCodec.ofMember(TeleportToTeamPacket::write, TeleportToTeamPacket::new);
 
-	public TeleportToTeamPacket(RegistryByteBuf registryByteBuf) {
+	public TeleportToTeamPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readIdentifier(),
 				registryByteBuf.readBlockPos(),
@@ -25,7 +25,7 @@ public record TeleportToTeamPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeIdentifier(this.targetWorldIdentifier);
 		registryByteBuf.writeBlockPos(this.targetPosition);
 		registryByteBuf.writeDouble(this.targetYaw);
@@ -33,7 +33,7 @@ public record TeleportToTeamPacket(
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

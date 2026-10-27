@@ -4,53 +4,53 @@ import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
 public class PVPControllerBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<PVPControllerBlock> CODEC = createCodec(PVPControllerBlock::new);
+	public static final MapCodec<PVPControllerBlock> CODEC = simpleCodec(PVPControllerBlock::new);
 
-	public PVPControllerBlock(Settings settings) {
+	public PVPControllerBlock(Properties settings) {
 		super(settings);
 	}
 
-	public MapCodec<PVPControllerBlock> getCodec() {
+	public MapCodec<PVPControllerBlock> codec() {
 		return CODEC;
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new PVPControllerBlockEntity(pos, state);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
 	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		return validateTicker(type, ScriptBlocksEntities.PVP_CONTROLLER_BLOCK_ENTITY, PVPControllerBlockEntity::tick);
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+		return createTickerHelper(type, ScriptBlocksEntities.PVP_CONTROLLER_BLOCK_ENTITY, PVPControllerBlockEntity::tick);
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity && player.isCreativeLevelTwoOp()) {
+		if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openPVPControllerBlockScreen(pvpControllerBlockEntity);
-			return ActionResult.success(world.isClient);
+			return InteractionResult.success(world.isClientSide);
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 }

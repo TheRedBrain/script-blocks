@@ -1,9 +1,9 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record SetManualResetLocationControlBlockPacket(
 		String targetDimensionOwnerName,
@@ -11,30 +11,30 @@ public record SetManualResetLocationControlBlockPacket(
 		String targetEntrance,
 		boolean checkForResetCost,
 		boolean manualReset
-) implements CustomPayload {
-	public static final CustomPayload.Id<SetManualResetLocationControlBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("set_manual_reset_location_control_block"));
-	public static final PacketCodec<RegistryByteBuf, SetManualResetLocationControlBlockPacket> PACKET_CODEC = PacketCodec.of(SetManualResetLocationControlBlockPacket::write, SetManualResetLocationControlBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<SetManualResetLocationControlBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("set_manual_reset_location_control_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, SetManualResetLocationControlBlockPacket> PACKET_CODEC = StreamCodec.ofMember(SetManualResetLocationControlBlockPacket::write, SetManualResetLocationControlBlockPacket::new);
 
-	public SetManualResetLocationControlBlockPacket(RegistryByteBuf registryByteBuf) {
+	public SetManualResetLocationControlBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
-		registryByteBuf.writeString(this.targetDimensionOwnerName);
-		registryByteBuf.writeString(this.targetLocation);
-		registryByteBuf.writeString(this.targetEntrance);
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
+		registryByteBuf.writeUtf(this.targetDimensionOwnerName);
+		registryByteBuf.writeUtf(this.targetLocation);
+		registryByteBuf.writeUtf(this.targetEntrance);
 		registryByteBuf.writeBoolean(this.checkForResetCost);
 		registryByteBuf.writeBoolean(this.manualReset);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

@@ -3,9 +3,9 @@ package com.github.theredbrain.scriptblocks.util;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.datafixer.JigsawPlacerBlockEntityIdFix;
 import com.mojang.datafixers.schemas.Schema;
-import me.bjtmastermind.easy_data_fix.api.DataFixerRegistry;
+import me.voxelbill.easy_data_fix.common.api.DataFixerRegistry;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
-import net.minecraft.datafixer.schema.IdentifierNormalizingSchema;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class ScriptBlocksDataFixer implements PreLaunchEntrypoint {
 	@Override
@@ -15,7 +15,7 @@ public class ScriptBlocksDataFixer implements PreLaunchEntrypoint {
 			// dataVersion = The Minecraft data version used in the version your upgrading to.
 			// SchemaVersion = The builtin schema class that goes with the data version.
 			// Example: (4773, V4771::new) = 26.1 full release
-			Schema schema = builder.addSchema(3945, IdentifierNormalizingSchema::new);
+			Schema schema = builder.addSchema(3945, NamespacedSchema::new);
 			builder.addFixer(new JigsawPlacerBlockEntityIdFix(schema, false));
 		});
 	}

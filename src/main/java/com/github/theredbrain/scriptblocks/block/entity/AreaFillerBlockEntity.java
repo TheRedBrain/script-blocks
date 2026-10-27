@@ -7,23 +7,23 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.rule.GameRules;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -43,64 +43,64 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		NbtCompound nbtCompound = new NbtCompound();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("area", CompoundTag.CODEC, nbtCompound.copy());
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("sub_areas", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("sub_areas", CompoundTag.CODEC);
 		for (MutablePair<BlockPos, Vec3i> subArea : this.subAreasList) {
-			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", BlockPos.CODEC, subArea.getLeft());
+			nbtCompound = new CompoundTag();
+			nbtCompound.store("position_offset", BlockPos.CODEC, subArea.getLeft());
 			nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(subArea.getRight()));
 			listAppender.add(nbtCompound.copy());
 		}
 
 		view.putString("block_identifier_string", this.blockIdentifierString);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("area", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.showArea = nbtCompound.getBoolean("visible").orElse(false);
 
 		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
 		this.areaPositionOffset = BlockPos.max(
 				BlockPos.min(
-						nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
 		this.subAreasList.clear();
-		for (NbtCompound nbtCompound1 : view.getTypedListView("sub_areas", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound1 : view.listOrEmpty("sub_areas", CompoundTag.CODEC)) {
 			this.subAreasList.add(new MutablePair<>(
-					nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+					nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 					ScriptBlocksNBTHelper.toVec3i(nbtCompound1, "dimensions").orElse(new Vec3i(0, 0, 0))
 			));
 		}
 
-		this.blockIdentifierString = view.getString("block_identifier_string", "");
+		this.blockIdentifierString = view.getStringOr("block_identifier_string", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -135,8 +135,8 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	}
 
 	public boolean setBlockIdentifierString(String blockIdentifierString) {
-		if (this.world != null) {
-			Optional<RegistryEntry.Reference<Block>> optionalBlockReference = this.world.getRegistryManager().get(RegistryKeys.BLOCK).getEntry(Identifier.tryParse(blockIdentifierString));
+		if (this.level != null) {
+			Optional<Holder.Reference<Block>> optionalBlockReference = this.level.registryAccess().get(Registries.BLOCK).getEntry(Identifier.tryParse(blockIdentifierString));
 			if (optionalBlockReference.isPresent()) {
 				this.blockIdentifierString = blockIdentifierString;
 				return true;
@@ -149,13 +149,13 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	@Override
 	public void trigger() {
 
-		if (this.world instanceof ServerWorld serverWorld) {
+		if (this.level instanceof ServerLevel serverWorld) {
 			MinecraftServer server = serverWorld.getServer();
 
 			// calculate sub areas
 			if (this.subAreasList.isEmpty()) {
-				this.subAreasList.addAll(splitArea(this.areaPositionOffset, this.areaDimensions, serverWorld.getGameRules().getValue(GameRules.MAX_BLOCK_MODIFICATIONS), 16)); // TODO maxIterations gamerule or config
-				this.markDirty();
+				this.subAreasList.addAll(splitArea(this.areaPositionOffset, this.areaDimensions, serverWorld.getGameRules().get(GameRules.MAX_BLOCK_MODIFICATIONS), 16)); // TODO maxIterations gamerule or config
+				this.setChanged();
 			}
 
 			BlockPos startPos;
@@ -163,11 +163,11 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 			// fill each sub area with the block
 			for (MutablePair<BlockPos, Vec3i> pair : this.subAreasList) {
 
-				startPos = this.pos.add(pair.getLeft());
-				endPos = startPos.add(pair.getRight().getX() - 1, pair.getRight().getY() - 1, pair.getRight().getZ() - 1);
-				String commandString = "/execute in " + this.world.getRegistryKey().getValue() + " run fill " + startPos.getX() + " " + startPos.getY() + " " + startPos.getZ() + " " + endPos.getX() + " " + endPos.getY() + " " + endPos.getZ() + " " + this.blockIdentifierString;
+				startPos = this.worldPosition.offset(pair.getLeft());
+				endPos = startPos.offset(pair.getRight().getX() - 1, pair.getRight().getY() - 1, pair.getRight().getZ() - 1);
+				String commandString = "/execute in " + this.level.dimension().identifier() + " run fill " + startPos.getX() + " " + startPos.getY() + " " + startPos.getZ() + " " + endPos.getX() + " " + endPos.getY() + " " + endPos.getZ() + " " + this.blockIdentifierString;
 				ScriptBlocks.info(commandString);
-				server.getCommandManager().executeWithPrefix(server.getCommandSource(), commandString);
+				server.getCommands().executeWithPrefix(server.createCommandSourceStack(), commandString);
 			}
 		}
 	}
@@ -211,10 +211,10 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 				second_pos_offset[index] = m;
 
 				list.addAll(splitArea(areaPos, new Vec3i(new_array_1[0], new_array_1[1], new_array_1[2]), maxVolume, maxIterations - 1));
-				list.addAll(splitArea(areaPos.add(second_pos_offset[0], second_pos_offset[1], second_pos_offset[2]), new Vec3i(new_array_2[0], new_array_2[1], new_array_2[2]), maxVolume, maxIterations - 1));
+				list.addAll(splitArea(areaPos.offset(second_pos_offset[0], second_pos_offset[1], second_pos_offset[2]), new Vec3i(new_array_2[0], new_array_2[1], new_array_2[2]), maxVolume, maxIterations - 1));
 			}
-		} else if (this.world != null) {
-			ScriptBlocks.info("AreaFillerBlock in " + this.world.getRegistryKey().getValue() + " at " + this.pos.toShortString() + " ran out of iteration attempts!");
+		} else if (this.level != null) {
+			ScriptBlocks.info("AreaFillerBlock in " + this.level.dimension().identifier() + " at " + this.worldPosition.toShortString() + " ran out of iteration attempts!");
 		}
 		return list;
 	}
@@ -222,30 +222,30 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.FRONT_BACK);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.LEFT_RIGHT);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 			this.subAreasList.clear();
 		}

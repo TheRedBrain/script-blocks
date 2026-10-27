@@ -4,36 +4,35 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.data.VisibleLocation;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.screen.Property;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public class TeleporterBlockScreenHandler extends ScreenHandler {
+public class TeleporterBlockScreenHandler extends AbstractContainerMenu {
 
-	private final ScreenHandlerContext context;
-	private PlayerInventory playerInventory;
-	private Inventory inventory = new SimpleInventory(9) {
+	private final ContainerLevelAccess context;
+	private Inventory playerInventory;
+	private Container inventory = new SimpleContainer(9) {
 		@Override
-		public int getMaxCountPerStack() {
+		public int getMaxStackSize() {
 			return 999;
 		}
 
 		@Override
-		public void markDirty() {
-			super.markDirty();
+		public void setChanged() {
+			super.setChanged();
 //            ShopBlockScreenHandler.this.onContentChanged(this);
 //            ShopBlockScreenHandler.this.contentsChangedListener.run();
 		}
@@ -46,14 +45,14 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 
 	private final int requiredKeyItemStackSlotX = 66;
 	private final int requiredKeyItemStackSlotY = 148;
-	private final Property currentLocationListIndex = Property.create();
-	private final Property currentLocationCooldown = Property.create();
+	private final DataSlot currentLocationListIndex = DataSlot.standalone();
+	private final DataSlot currentLocationCooldown = DataSlot.standalone();
 
-	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, TeleporterBlockData data) {
-		this(syncId, playerInventory, ScreenHandlerContext.EMPTY, data.blockPos(), data.visibleLocationsList);
+	public TeleporterBlockScreenHandler(int syncId, Inventory playerInventory, TeleporterBlockData data) {
+		this(syncId, playerInventory, ContainerLevelAccess.NULL, data.blockPos(), data.visibleLocationsList);
 	}
 
-	public TeleporterBlockScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, BlockPos blockPos, List<VisibleLocation> visibleLocationsList) {
+	public TeleporterBlockScreenHandler(int syncId, Inventory playerInventory, ContainerLevelAccess context, BlockPos blockPos, List<VisibleLocation> visibleLocationsList) {
 		super(ScriptBlocksScreenHandlerTypes.TELEPORTER_BLOCK_SCREEN_HANDLER, syncId);
 		this.playerInventory = playerInventory;
 		this.blockPos = blockPos;
@@ -71,8 +70,8 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
                 }
             }*/);
 		}
-		this.addProperty(this.currentLocationListIndex).set(0);
-		this.addProperty(this.currentLocationCooldown).set(0);
+		this.addDataSlot(this.currentLocationListIndex).set(0);
+		this.addDataSlot(this.currentLocationCooldown).set(0);
 //		this.addProperty(this.currentCooldownMax).set(0);
 		// main inventory
 		for (i = 0; i < 3; ++i) {
@@ -81,7 +80,7 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 			}
 		}
 		// keyItemStackSlot
-		this.addSlot(new Slot(new SimpleInventory(1), 0, 77, 80) {
+		this.addSlot(new Slot(new SimpleContainer(1), 0, 77, 80) {
 //            @Override
 //            public boolean isEnabled() {
 //                return !showCreativeTab && !(inventory.getStack(0).isEmpty());
@@ -131,7 +130,7 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 		return requiredKeyItemStackSlotY;
 	}
 
-	public PlayerInventory getPlayerInventory() {
+	public Inventory getPlayerInventory() {
 		return playerInventory;
 	}
 
@@ -149,50 +148,50 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public boolean onButtonClick(PlayerEntity player, int id) {
+	public boolean clickMenuButton(Player player, int id) {
 		if (id == -1) {
 			this.updateRemainingCooldown(player);
 			return true;
 		} else if (id >= 0 && id < this.visibleLocationsList.size()) {
-			this.context.run((world, pos) -> {
-			this.setProperty(0, id);
-			this.sendContentUpdates();
+			this.context.execute((world, pos) -> {
+			this.setData(0, id);
+			this.broadcastChanges();
 			});
 			return true;
 		}
 		return false;
 	}
 
-	private void updateRemainingCooldown(PlayerEntity player) {
-		this.context.run((world, pos) -> {
-			if (this.currentLocationListIndex.get() < this.visibleLocationsList.size() && player instanceof ServerPlayerEntity serverPlayerEntity) {
+	private void updateRemainingCooldown(Player player) {
+		this.context.execute((world, pos) -> {
+			if (this.currentLocationListIndex.get() < this.visibleLocationsList.size() && player instanceof ServerPlayer serverPlayerEntity) {
 				VisibleLocation currentLocation = this.visibleLocationsList.get(this.currentLocationListIndex.get());
 				int remainingCooldown = (int) LocationUtils.getRemainingCooldownForEntrance(serverPlayerEntity, currentLocation.identifier(), currentLocation.entrance());
-				this.setProperty(1, remainingCooldown);
-				this.sendContentUpdates();
+				this.setData(1, remainingCooldown);
+				this.broadcastChanges();
 			}
 		});
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int slot) {
+	public ItemStack quickMoveStack(Player player, int slot) {
 		return ItemStack.EMPTY;
 	}
 
 	@Override
-	public boolean canUse(PlayerEntity player) {
-		return this.inventory.canPlayerUse(player);
+	public boolean stillValid(Player player) {
+		return this.inventory.stillValid(player);
 	}
 
 	@Override
-	public void onClosed(PlayerEntity player) {
-		super.onClosed(player);
+	public void removed(Player player) {
+		super.removed(player);
 		ItemStack itemStack;
-		if (player instanceof ServerPlayerEntity && !(itemStack = this.getSlot(36).getStack()).isEmpty()) {
-			if (!player.isAlive() || ((ServerPlayerEntity) player).isDisconnected()) {
-				player.dropItem(itemStack, false);
+		if (player instanceof ServerPlayer && !(itemStack = this.getSlot(36).getItem()).isEmpty()) {
+			if (!player.isAlive() || ((ServerPlayer) player).hasDisconnected()) {
+				player.drop(itemStack, false);
 			} else {
-				player.getInventory().offerOrDrop(itemStack);
+				player.getInventory().placeItemBackInInventory(itemStack);
 			}
 		}
 	}
@@ -202,16 +201,16 @@ public class TeleporterBlockScreenHandler extends ScreenHandler {
 			List<VisibleLocation> visibleLocationsList
 	) {
 
-		public static final PacketCodec<RegistryByteBuf, TeleporterBlockData> PACKET_CODEC = PacketCodec.of(TeleporterBlockData::write, TeleporterBlockData::new);
+		public static final StreamCodec<RegistryFriendlyByteBuf, TeleporterBlockData> PACKET_CODEC = StreamCodec.ofMember(TeleporterBlockData::write, TeleporterBlockData::new);
 
-		public TeleporterBlockData(RegistryByteBuf registryByteBuf) {
+		public TeleporterBlockData(RegistryFriendlyByteBuf registryByteBuf) {
 			this(
 					registryByteBuf.readBlockPos(),
 					registryByteBuf.readList(VisibleLocation.PACKET_CODEC)
 			);
 		}
 
-		private void write(RegistryByteBuf registryByteBuf) {
+		private void write(RegistryFriendlyByteBuf registryByteBuf) {
 			registryByteBuf.writeBlockPos(blockPos);
 			registryByteBuf.writeCollection(this.visibleLocationsList, VisibleLocation.PACKET_CODEC);
 		}

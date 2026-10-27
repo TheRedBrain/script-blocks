@@ -1,20 +1,20 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateRedstoneTriggerBlockPacket(
 		BlockPos redstoneTriggerBlockPosition,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateRedstoneTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_redstone_trigger_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateRedstoneTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateRedstoneTriggerBlockPacket::write, UpdateRedstoneTriggerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateRedstoneTriggerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_redstone_trigger_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateRedstoneTriggerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateRedstoneTriggerBlockPacket::write, UpdateRedstoneTriggerBlockPacket::new);
 
-	public UpdateRedstoneTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateRedstoneTriggerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
@@ -22,14 +22,14 @@ public record UpdateRedstoneTriggerBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.redstoneTriggerBlockPosition);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

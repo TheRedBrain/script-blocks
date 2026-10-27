@@ -6,57 +6,57 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class MimicBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Text.translatable("gui.mimic_block.active_mimic_block_position_offset");
-	private static final Text INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Text.translatable("gui.mimic_block.inactive_mimic_block_position_offset");
+	private static final Component ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Component.translatable("gui.mimic_block.active_mimic_block_position_offset");
+	private static final Component INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT = Component.translatable("gui.mimic_block.inactive_mimic_block_position_offset");
 	private final MimicBlockEntity mimicBlock;
-	private TextFieldWidget activeMimicBlockPositionOffsetXField;
-	private TextFieldWidget activeMimicBlockPositionOffsetYField;
-	private TextFieldWidget activeMimicBlockPositionOffsetZField;
-	private TextFieldWidget inactiveMimicBlockPositionOffsetXField;
-	private TextFieldWidget inactiveMimicBlockPositionOffsetYField;
-	private TextFieldWidget inactiveMimicBlockPositionOffsetZField;
+	private EditBox activeMimicBlockPositionOffsetXField;
+	private EditBox activeMimicBlockPositionOffsetYField;
+	private EditBox activeMimicBlockPositionOffsetZField;
+	private EditBox inactiveMimicBlockPositionOffsetXField;
+	private EditBox inactiveMimicBlockPositionOffsetYField;
+	private EditBox inactiveMimicBlockPositionOffsetZField;
 
 	public MimicBlockScreen(MimicBlockEntity mimicBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.mimicBlock = mimicBlock;
 	}
 
 	@Override
 	protected void init() {
-		this.activeMimicBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 100, 20, Text.translatable(""));
-		this.activeMimicBlockPositionOffsetXField.setText(Integer.toString(this.mimicBlock.getActiveMimicBlockPositionOffset().getX()));
-		this.addSelectableChild(this.activeMimicBlockPositionOffsetXField);
-		this.activeMimicBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 80, 100, 20, Text.translatable(""));
-		this.activeMimicBlockPositionOffsetYField.setText(Integer.toString(this.mimicBlock.getActiveMimicBlockPositionOffset().getY()));
-		this.addSelectableChild(this.activeMimicBlockPositionOffsetYField);
-		this.activeMimicBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 80, 100, 20, Text.translatable(""));
-		this.activeMimicBlockPositionOffsetZField.setText(Integer.toString(this.mimicBlock.getActiveMimicBlockPositionOffset().getZ()));
-		this.addSelectableChild(this.activeMimicBlockPositionOffsetZField);
+		this.activeMimicBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 80, 100, 20, Component.translatable(""));
+		this.activeMimicBlockPositionOffsetXField.setValue(Integer.toString(this.mimicBlock.getActiveMimicBlockPositionOffset().getX()));
+		this.addWidget(this.activeMimicBlockPositionOffsetXField);
+		this.activeMimicBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 80, 100, 20, Component.translatable(""));
+		this.activeMimicBlockPositionOffsetYField.setValue(Integer.toString(this.mimicBlock.getActiveMimicBlockPositionOffset().getY()));
+		this.addWidget(this.activeMimicBlockPositionOffsetYField);
+		this.activeMimicBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 80, 100, 20, Component.translatable(""));
+		this.activeMimicBlockPositionOffsetZField.setValue(Integer.toString(this.mimicBlock.getActiveMimicBlockPositionOffset().getZ()));
+		this.addWidget(this.activeMimicBlockPositionOffsetZField);
 
-		this.inactiveMimicBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 115, 100, 20, Text.translatable(""));
-		this.inactiveMimicBlockPositionOffsetXField.setText(Integer.toString(this.mimicBlock.getInactiveMimicBlockPositionOffset().getX()));
-		this.addSelectableChild(this.inactiveMimicBlockPositionOffsetXField);
-		this.inactiveMimicBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 115, 100, 20, Text.translatable(""));
-		this.inactiveMimicBlockPositionOffsetYField.setText(Integer.toString(this.mimicBlock.getInactiveMimicBlockPositionOffset().getY()));
-		this.addSelectableChild(this.inactiveMimicBlockPositionOffsetYField);
-		this.inactiveMimicBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 115, 100, 20, Text.translatable(""));
-		this.inactiveMimicBlockPositionOffsetZField.setText(Integer.toString(this.mimicBlock.getInactiveMimicBlockPositionOffset().getZ()));
-		this.addSelectableChild(this.inactiveMimicBlockPositionOffsetZField);
+		this.inactiveMimicBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 115, 100, 20, Component.translatable(""));
+		this.inactiveMimicBlockPositionOffsetXField.setValue(Integer.toString(this.mimicBlock.getInactiveMimicBlockPositionOffset().getX()));
+		this.addWidget(this.inactiveMimicBlockPositionOffsetXField);
+		this.inactiveMimicBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 115, 100, 20, Component.translatable(""));
+		this.inactiveMimicBlockPositionOffsetYField.setValue(Integer.toString(this.mimicBlock.getInactiveMimicBlockPositionOffset().getY()));
+		this.addWidget(this.inactiveMimicBlockPositionOffsetYField);
+		this.inactiveMimicBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 115, 100, 20, Component.translatable(""));
+		this.inactiveMimicBlockPositionOffsetZField.setValue(Integer.toString(this.mimicBlock.getInactiveMimicBlockPositionOffset().getZ()));
+		this.addWidget(this.inactiveMimicBlockPositionOffsetZField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 139, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 139, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 139, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 139, 150, 20).build());
 	}
 
 	@Override
@@ -65,20 +65,20 @@ public class MimicBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		String string = this.activeMimicBlockPositionOffsetXField.getText();
-		String string1 = this.activeMimicBlockPositionOffsetYField.getText();
-		String string2 = this.activeMimicBlockPositionOffsetZField.getText();
-		String string3 = this.inactiveMimicBlockPositionOffsetXField.getText();
-		String string4 = this.inactiveMimicBlockPositionOffsetYField.getText();
-		String string5 = this.inactiveMimicBlockPositionOffsetZField.getText();
+	public void resize(Minecraft client, int width, int height) {
+		String string = this.activeMimicBlockPositionOffsetXField.getValue();
+		String string1 = this.activeMimicBlockPositionOffsetYField.getValue();
+		String string2 = this.activeMimicBlockPositionOffsetZField.getValue();
+		String string3 = this.inactiveMimicBlockPositionOffsetXField.getValue();
+		String string4 = this.inactiveMimicBlockPositionOffsetYField.getValue();
+		String string5 = this.inactiveMimicBlockPositionOffsetZField.getValue();
 		this.init(client, width, height);
-		this.activeMimicBlockPositionOffsetXField.setText(string);
-		this.activeMimicBlockPositionOffsetYField.setText(string1);
-		this.activeMimicBlockPositionOffsetZField.setText(string2);
-		this.inactiveMimicBlockPositionOffsetXField.setText(string3);
-		this.inactiveMimicBlockPositionOffsetYField.setText(string4);
-		this.inactiveMimicBlockPositionOffsetZField.setText(string5);
+		this.activeMimicBlockPositionOffsetXField.setValue(string);
+		this.activeMimicBlockPositionOffsetYField.setValue(string1);
+		this.activeMimicBlockPositionOffsetZField.setValue(string2);
+		this.inactiveMimicBlockPositionOffsetXField.setValue(string3);
+		this.inactiveMimicBlockPositionOffsetYField.setValue(string4);
+		this.inactiveMimicBlockPositionOffsetZField.setValue(string5);
 	}
 
 	@Override
@@ -91,16 +91,16 @@ public class MimicBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 71, 0xA0A0A0);
+		context.drawString(this.font, ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 71, 0xA0A0A0);
 		this.activeMimicBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.activeMimicBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.activeMimicBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+		context.drawString(this.font, INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
 		this.inactiveMimicBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.inactiveMimicBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.inactiveMimicBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
@@ -111,14 +111,14 @@ public class MimicBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		ClientPlayNetworking.send(new UpdateMimicBlockPacket(
 				this.mimicBlock.getPos(),
 				new BlockPos(
-						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.activeMimicBlockPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.inactiveMimicBlockPositionOffsetZField.getValue())
 				)
 		));
 		return true;

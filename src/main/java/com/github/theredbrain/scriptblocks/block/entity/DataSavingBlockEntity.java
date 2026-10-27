@@ -3,21 +3,21 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class DataSavingBlockEntity extends BlockEntity implements Resetable, ProvidesData {
 	private final HashMap<String, String> data = new HashMap<>(Map.of());
@@ -27,41 +27,41 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("data", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("data", CompoundTag.CODEC);
 		this.data.forEach((key, entry) -> {
-			NbtCompound nbtCompound = new NbtCompound();
+			CompoundTag nbtCompound = new CompoundTag();
 			nbtCompound.putString("key", key);
 			nbtCompound.putString("value", entry);
 			listAppender.add(nbtCompound.copy());
 		});
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.data.clear();
-		for (NbtCompound nbtCompound : view.getTypedListView("data", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound : view.listOrEmpty("data", CompoundTag.CODEC)) {
 			this.data.put(
-					nbtCompound.getString("key", ""),
-					nbtCompound.getString("value", "")
+					nbtCompound.getStringOr("key", ""),
+					nbtCompound.getStringOr("value", "")
 			);
 		}
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
 	@Override
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	@Override
@@ -72,10 +72,10 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	@Override
 	public void setData(String id, String value) {
 		this.data.put(id, value);
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -99,10 +99,10 @@ public class DataSavingBlockEntity extends BlockEntity implements Resetable, Pro
 	@Override
 	public void reset() {
 		this.data.clear();
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

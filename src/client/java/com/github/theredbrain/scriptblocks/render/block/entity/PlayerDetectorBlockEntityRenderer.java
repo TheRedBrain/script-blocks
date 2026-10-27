@@ -1,36 +1,36 @@
 package com.github.theredbrain.scriptblocks.render.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(value = EnvType.CLIENT)
 public class PlayerDetectorBlockEntityRenderer implements BlockEntityRenderer<PlayerDetectorBlockEntity> {
-	public PlayerDetectorBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
+	public PlayerDetectorBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
 	}
 
 	@Override
-	public void render(PlayerDetectorBlockEntity entity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
+	public void render(PlayerDetectorBlockEntity entity, float f, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, int j) {
 		double o;
 		double n;
 		double m;
 		double k;
-		ClientPlayerEntity clientPlayerEntity = MinecraftClient.getInstance().player;
-		if (clientPlayerEntity == null || !clientPlayerEntity.isCreativeLevelTwoOp() && !clientPlayerEntity.isSpectator()) {
+		LocalPlayer clientPlayerEntity = Minecraft.getInstance().player;
+		if (clientPlayerEntity == null || !clientPlayerEntity.canUseGameMasterBlocks() && !clientPlayerEntity.isSpectator()) {
 			return;
 		}
 		BlockPos blockPos = entity.getAreaPositionOffset();
@@ -48,25 +48,25 @@ public class PlayerDetectorBlockEntityRenderer implements BlockEntityRenderer<Pl
 		n = l < 0.0 ? e + 1.0 : e; // temp
 		o = m + k; // temp
 		double p = n + l; // temp
-		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getLines());
+		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderType.getLines());
 		if (entity.showArea()) {
-			WorldRenderer.drawBox(matrixStack, vertexConsumer, m, g, n, o, h, p, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
+			LevelRenderer.drawBox(matrixStack, vertexConsumer, m, g, n, o, h, p, 0.9f, 0.9f, 0.9f, 1.0f, 0.5f, 0.5f, 0.5f);
 			this.renderInvisibleBlocks(entity, vertexConsumer, blockPos, matrixStack);
 		}
 	}
 
-	private void renderInvisibleBlocks(PlayerDetectorBlockEntity entity, VertexConsumer vertices, BlockPos pos, MatrixStack matrices) {
-		World blockView = entity.getWorld();
+	private void renderInvisibleBlocks(PlayerDetectorBlockEntity entity, VertexConsumer vertices, BlockPos pos, PoseStack matrices) {
+		Level blockView = entity.getWorld();
 		BlockPos blockPos = entity.getPos();
-		BlockPos blockPos2 = blockPos.add(pos);
+		BlockPos blockPos2 = blockPos.offset(pos);
 		if (blockView != null) {
-			for (BlockPos blockPos3 : BlockPos.iterate(blockPos2, blockPos2.add(entity.getAreaDimensions()).add(-1, -1, -1))) {
+			for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos2, blockPos2.offset(entity.getAreaDimensions()).add(-1, -1, -1))) {
 				boolean bl5;
 				BlockState blockState = blockView.getBlockState(blockPos3);
 				boolean bl = blockState.isAir();
-				boolean bl2 = blockState.isOf(Blocks.STRUCTURE_VOID);
-				boolean bl3 = blockState.isOf(Blocks.BARRIER);
-				boolean bl4 = blockState.isOf(Blocks.LIGHT);
+				boolean bl2 = blockState.is(Blocks.STRUCTURE_VOID);
+				boolean bl3 = blockState.is(Blocks.BARRIER);
+				boolean bl4 = blockState.is(Blocks.LIGHT);
 				boolean bl6 = bl5 = bl2 || bl3 || bl4;
 				if (!bl && !bl5) continue;
 				float f = bl ? 0.05f : 0.0f;
@@ -77,19 +77,19 @@ public class PlayerDetectorBlockEntityRenderer implements BlockEntityRenderer<Pl
 				double i = (float) (blockPos3.getY() - blockPos.getY()) + 0.55f + f;
 				double j = (float) (blockPos3.getZ() - blockPos.getZ()) + 0.55f + f;
 				if (bl) {
-					WorldRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 1.0f);
+					LevelRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 0.5f, 0.5f, 1.0f, 1.0f, 0.5f, 0.5f, 1.0f);
 					continue;
 				}
 				if (bl2) {
-					WorldRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 1.0f, 0.75f, 0.75f, 1.0f, 1.0f, 0.75f, 0.75f);
+					LevelRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 1.0f, 0.75f, 0.75f, 1.0f, 1.0f, 0.75f, 0.75f);
 					continue;
 				}
 				if (bl3) {
-					WorldRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f);
+					LevelRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f);
 					continue;
 				}
 				if (!bl4) continue;
-				WorldRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f);
+				LevelRenderer.drawBox(matrices, vertices, d, e, g, h, i, j, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f);
 			}
 		}
 	}

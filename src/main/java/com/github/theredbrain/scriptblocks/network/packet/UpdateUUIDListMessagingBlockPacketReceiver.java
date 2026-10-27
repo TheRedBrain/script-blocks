@@ -2,22 +2,22 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UpdateUUIDListMessagingBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateUUIDListMessagingBlockPacket> {
 	@Override
 	public void receive(UpdateUUIDListMessagingBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -31,7 +31,7 @@ public class UpdateUUIDListMessagingBlockPacketReceiver implements ServerPlayNet
 		int titleStay = payload.titleStay();
 		int titleFadeOut = payload.titleFadeOut();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(uuidListMessagingBlockPosition);
 		BlockState blockState = world.getBlockState(uuidListMessagingBlockPosition);
@@ -46,9 +46,9 @@ public class UpdateUUIDListMessagingBlockPacketReceiver implements ServerPlayNet
 			uuidListMessagingBlockEntity.setTitleStay(titleStay);
 			uuidListMessagingBlockEntity.setTitleFadeOut(titleFadeOut);
 
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			uuidListMessagingBlockEntity.markDirty();
-			world.updateListeners(uuidListMessagingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			uuidListMessagingBlockEntity.setChanged();
+			world.sendBlockUpdated(uuidListMessagingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

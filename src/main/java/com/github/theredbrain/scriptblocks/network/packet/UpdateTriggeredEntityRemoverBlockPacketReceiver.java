@@ -2,24 +2,24 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredEntityRemoverBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class UpdateTriggeredEntityRemoverBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateTriggeredEntityRemoverBlockPacket> {
 
 	@Override
 	public void receive(UpdateTriggeredEntityRemoverBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -29,7 +29,7 @@ public class UpdateTriggeredEntityRemoverBlockPacketReceiver implements ServerPl
 		Vec3i areaDimensions = payload.areaDimensions();
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(triggeredEntityRemoverBlockPosition);
 		BlockState blockState = world.getBlockState(triggeredEntityRemoverBlockPosition);
@@ -38,9 +38,9 @@ public class UpdateTriggeredEntityRemoverBlockPacketReceiver implements ServerPl
 			triggeredEntityRemoverBlockEntity.setShowArea(showArea);
 			triggeredEntityRemoverBlockEntity.setAreaDimensions(areaDimensions);
 			triggeredEntityRemoverBlockEntity.setAreaPositionOffset(areaPositionOffset);
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			triggeredEntityRemoverBlockEntity.markDirty();
-			world.updateListeners(triggeredEntityRemoverBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			triggeredEntityRemoverBlockEntity.setChanged();
+			world.sendBlockUpdated(triggeredEntityRemoverBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 
 	}

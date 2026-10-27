@@ -6,105 +6,105 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksConfigs;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class MimicBlock extends RotatedBlockWithEntity {
-	public static final MapCodec<MimicBlock> CODEC = createCodec(MimicBlock::new);
+	public static final MapCodec<MimicBlock> CODEC = simpleCodec(MimicBlock::new);
 
-	public MimicBlock(Settings settings) {
+	public MimicBlock(Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(ScriptBlocksBlockProperties.ROTATED, 0)
-				.with(ScriptBlocksBlockProperties.X_MIRRORED, false)
-				.with(ScriptBlocksBlockProperties.Z_MIRRORED, false)
-				.with(Properties.TRIGGERED, false)
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(ScriptBlocksBlockProperties.ROTATED, 0)
+				.setValue(ScriptBlocksBlockProperties.X_MIRRORED, false)
+				.setValue(ScriptBlocksBlockProperties.Z_MIRRORED, false)
+				.setValue(BlockStateProperties.TRIGGERED, false)
 		);
 	}
 
-	public MapCodec<MimicBlock> getCodec() {
+	public MapCodec<MimicBlock> codec() {
 		return CODEC;
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
-		builder.add(Properties.TRIGGERED);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
+		builder.add(BlockStateProperties.TRIGGERED);
 	}
 
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
 		return new MimicBlockEntity(pos, state);
 	}
 
 	@Override
-	public BlockRenderType getRenderType(BlockState state) {
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state) {
+		return RenderShape.MODEL;
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof MimicBlockEntity mimicBlockEntity && player.isCreativeLevelTwoOp()) {
+		if (blockEntity instanceof MimicBlockEntity mimicBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openMimicBlockScreen(mimicBlockEntity);
-			return ActionResult.success(world.isClient);
+			return InteractionResult.success(world.isClientSide);
 		}
-		return ActionResult.PASS;
+		return InteractionResult.PASS;
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
 		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
 		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
 			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
 			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
 		}
-		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.defaultBlockState();
 		BlockPos mimicBlockPos;
-		if (state.get(Properties.TRIGGERED)) {
-			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
+		if (state.getValue(BlockStateProperties.TRIGGERED)) {
+			mimicBlockPos = pos.offset(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 		} else {
-			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
+			mimicBlockPos = pos.offset(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !(ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHolding(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()))) {
+		if (!blockState.is(this) && !(ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHoldingItem(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()))) {
 			mimicBlockState = blockState;
 		}
-		return mimicBlockState.getBlock().getOutlineShape(mimicBlockState, world, mimicBlockPos, context);
+		return mimicBlockState.getBlock().getShape(mimicBlockState, world, mimicBlockPos, context);
 	}
 
 	@Deprecated
-	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
 		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
 		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
 			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
 			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
 		}
-		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.defaultBlockState();
 		BlockPos mimicBlockPos;
-		if (state.get(Properties.TRIGGERED)) {
-			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
+		if (state.getValue(BlockStateProperties.TRIGGERED)) {
+			mimicBlockPos = pos.offset(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 		} else {
-			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
+			mimicBlockPos = pos.offset(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !(ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHolding(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()))) {
+		if (!blockState.is(this) && !(ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode || context.isHoldingItem(ScriptBlocksBlocks.MIMIC_BLOCK.asItem()))) {
 			mimicBlockState = blockState;
 		}
 		return mimicBlockState.getBlock().getCollisionShape(mimicBlockState, world, mimicBlockPos, context);
@@ -135,24 +135,24 @@ public class MimicBlock extends RotatedBlockWithEntity {
 //	}
 
 	@Override
-	public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
+	public boolean isTransparent(BlockState state, BlockGetter world, BlockPos pos) {
 		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
 		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
 		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
 			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
 			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
 		}
-		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
+		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.defaultBlockState();
 		BlockPos mimicBlockPos;
-		if (state.get(Properties.TRIGGERED)) {
-			mimicBlockPos = pos.add(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
+		if (state.getValue(BlockStateProperties.TRIGGERED)) {
+			mimicBlockPos = pos.offset(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
 		} else {
-			mimicBlockPos = pos.add(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
+			mimicBlockPos = pos.offset(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
 		}
 		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.isOf(this) && !ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode) {
+		if (!blockState.is(this) && !ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode) {
 			mimicBlockState = blockState;
 		}
-		return mimicBlockState.getBlock().isTransparent(mimicBlockState, world, mimicBlockPos);
+		return mimicBlockState.getBlock().propagatesSkylightDown(mimicBlockState, world, mimicBlockPos);
 	}
 }

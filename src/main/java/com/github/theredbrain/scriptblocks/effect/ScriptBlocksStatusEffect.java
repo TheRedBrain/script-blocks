@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.effect;
 
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 
-public class ScriptBlocksStatusEffect extends StatusEffect {
+public class ScriptBlocksStatusEffect extends MobEffect {
 
 	public ScriptBlocksStatusEffect() {
-		super(StatusEffectCategory.NEUTRAL, 3381504);
+		super(MobEffectCategory.NEUTRAL, 3381504);
 	}
 }

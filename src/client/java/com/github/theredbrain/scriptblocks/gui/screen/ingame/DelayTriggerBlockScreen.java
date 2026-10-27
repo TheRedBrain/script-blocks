@@ -6,59 +6,59 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset");
-	private static final Text TRIGGER_DELAY_LABEL_TEXT = Text.translatable("gui.delay_trigger_block.triggered_block_trigger_delay");
+	private static final Component TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset");
+	private static final Component TRIGGER_DELAY_LABEL_TEXT = Component.translatable("gui.delay_trigger_block.triggered_block_trigger_delay");
 	private final DelayTriggerBlockEntity delayTriggerBlock;
-	private TextFieldWidget triggeredBlockPositionOffsetXField;
-	private TextFieldWidget triggeredBlockPositionOffsetYField;
-	private TextFieldWidget triggeredBlockPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleTriggeredBlockResetsButton;
+	private EditBox triggeredBlockPositionOffsetXField;
+	private EditBox triggeredBlockPositionOffsetYField;
+	private EditBox triggeredBlockPositionOffsetZField;
+	private CycleButton<Boolean> toggleTriggeredBlockResetsButton;
 	private boolean triggeredBlockResets;
-	private TextFieldWidget triggerDelayField;
+	private EditBox triggerDelayField;
 
 	public DelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.delayTriggerBlock = delayTriggerBlock;
 	}
 
 	@Override
 	protected void init() {
-		this.triggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 80, 50, 20, Text.empty());
+		this.triggeredBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 80, 50, 20, Component.empty());
 		this.triggeredBlockPositionOffsetXField.setMaxLength(128);
-		this.triggeredBlockPositionOffsetXField.setText(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getX()));
-		this.addSelectableChild(this.triggeredBlockPositionOffsetXField);
-		this.triggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 80, 50, 20, Text.empty());
+		this.triggeredBlockPositionOffsetXField.setValue(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getX()));
+		this.addWidget(this.triggeredBlockPositionOffsetXField);
+		this.triggeredBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 100, 80, 50, 20, Component.empty());
 		this.triggeredBlockPositionOffsetYField.setMaxLength(128);
-		this.triggeredBlockPositionOffsetYField.setText(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getY()));
-		this.addSelectableChild(this.triggeredBlockPositionOffsetYField);
-		this.triggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 80, 50, 20, Text.empty());
+		this.triggeredBlockPositionOffsetYField.setValue(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getY()));
+		this.addWidget(this.triggeredBlockPositionOffsetYField);
+		this.triggeredBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 - 46, 80, 50, 20, Component.empty());
 		this.triggeredBlockPositionOffsetZField.setMaxLength(128);
-		this.triggeredBlockPositionOffsetZField.setText(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getZ()));
-		this.addSelectableChild(this.triggeredBlockPositionOffsetZField);
+		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getZ()));
+		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.delayTriggerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 80, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
-		this.triggerDelayField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 115, 100, 20, Text.empty());
+		this.triggerDelayField = new EditBox(this.font, this.width / 2 - 50, 115, 100, 20, Component.empty());
 		this.triggerDelayField.setMaxLength(128);
-		this.triggerDelayField.setText(Integer.toString(this.delayTriggerBlock.getTriggerDelay()));
-		this.addSelectableChild(this.triggerDelayField);
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 145, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 145, 150, 20).build());
+		this.triggerDelayField.setValue(Integer.toString(this.delayTriggerBlock.getTriggerDelay()));
+		this.addWidget(this.triggerDelayField);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 145, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 145, 150, 20).build());
 	}
 
 	@Override
@@ -67,17 +67,17 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
-		String string = this.triggeredBlockPositionOffsetXField.getText();
-		String string1 = this.triggeredBlockPositionOffsetYField.getText();
-		String string2 = this.triggeredBlockPositionOffsetZField.getText();
-		String string3 = this.triggerDelayField.getText();
+	public void resize(Minecraft client, int width, int height) {
+		String string = this.triggeredBlockPositionOffsetXField.getValue();
+		String string1 = this.triggeredBlockPositionOffsetYField.getValue();
+		String string2 = this.triggeredBlockPositionOffsetZField.getValue();
+		String string3 = this.triggerDelayField.getValue();
 		boolean bl = this.triggeredBlockResets;
 		this.init(client, width, height);
-		this.triggeredBlockPositionOffsetXField.setText(string);
-		this.triggeredBlockPositionOffsetYField.setText(string1);
-		this.triggeredBlockPositionOffsetZField.setText(string2);
-		this.triggerDelayField.setText(string3);
+		this.triggeredBlockPositionOffsetXField.setValue(string);
+		this.triggeredBlockPositionOffsetYField.setValue(string1);
+		this.triggeredBlockPositionOffsetZField.setValue(string2);
+		this.triggerDelayField.setValue(string3);
 		this.triggeredBlockResets = bl;
 		this.toggleTriggeredBlockResetsButton.setValue(this.triggeredBlockResets);
 	}
@@ -92,15 +92,15 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		context.drawString(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
 		this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, TRIGGER_DELAY_LABEL_TEXT, this.width / 2 - 49, 105, 0xA0A0A0);
+		context.drawString(this.font, TRIGGER_DELAY_LABEL_TEXT, this.width / 2 - 49, 105, 0xA0A0A0);
 		this.triggerDelayField.render(context, mouseX, mouseY, delta);
 	}
 
@@ -109,12 +109,12 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		ClientPlayNetworking.send(new UpdateDelayTriggerBlockPacket(
 				this.delayTriggerBlock.getPos(),
 				new BlockPos(
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getValue())
 				),
 				this.triggeredBlockResets,
-				ItemUtils.parseInt(this.triggerDelayField.getText())
+				ItemUtils.parseInt(this.triggerDelayField.getValue())
 		));
 		return true;
 	}

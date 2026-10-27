@@ -1,23 +1,23 @@
 package com.github.theredbrain.scriptblocks.render.block.entity;
 
 import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Transformation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.AffineTransformation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Display;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -26,18 +26,18 @@ import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
 public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<TriggeredDisplayBlockEntity> {
-	private final TextRenderer textRenderer;
+	private final Font textRenderer;
 	private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 	protected float shadowRadius;
 	protected float shadowOpacity = 1.0F;
 
-	public TriggeredDisplayBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
+	public TriggeredDisplayBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
 		this.textRenderer = ctx.getTextRenderer();
 		this.blockEntityRenderDispatcher = ctx.getRenderDispatcher();
 	}
 
 	@Override
-	public void render(TriggeredDisplayBlockEntity triggeredDisplayBlockEntity, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, int overlay) {
+	public void render(TriggeredDisplayBlockEntity triggeredDisplayBlockEntity, float tickDelta, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, int overlay) {
 
 //		this.displayOffset = new Vec3d(triggeredDisplayBlockEntity.getDisplayOffsetX(), triggeredDisplayBlockEntity.getDisplayOffsetY(), triggeredDisplayBlockEntity.getDisplayOffsetZ());
 		TriggeredDisplayBlockEntity.RenderState renderState = triggeredDisplayBlockEntity.getRenderState();
@@ -50,16 +50,16 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 				this.shadowOpacity = renderState.shadowStrength().lerp(lerpProgress);
 				int j = renderState.brightnessOverride();
 				int brightness = j != -1 ? j : light;
-				matrixStack.push();
+				matrixStack.pushPose();
 
 				matrixStack.translate(triggeredDisplayBlockEntity.getDisplayOffset().x, triggeredDisplayBlockEntity.getDisplayOffset().y, triggeredDisplayBlockEntity.getDisplayOffset().z);
-				matrixStack.multiply(this.getBillboardRotation(renderState, triggeredDisplayBlockEntity, tickDelta, new Quaternionf()));
-				AffineTransformation affineTransformation = (AffineTransformation) renderState.transformation().interpolate(lerpProgress);
-				matrixStack.multiplyPositionMatrix(affineTransformation.getMatrix());
+				matrixStack.mulPose(this.getBillboardRotation(renderState, triggeredDisplayBlockEntity, tickDelta, new Quaternionf()));
+				Transformation affineTransformation = (Transformation) renderState.transformation().interpolate(lerpProgress);
+				matrixStack.mulPose(affineTransformation.getMatrix());
 				if (triggeredDisplayBlockEntity.getDisplayMode() == TriggeredDisplayBlockEntity.DisplayMode.TEXT) {
 					this.renderTextMode(triggeredDisplayBlockEntity, object, matrixStack, vertexConsumerProvider, brightness, lerpProgress);
 				}
-				matrixStack.pop();
+				matrixStack.popPose();
 //				if (triggeredDisplayBlockEntity.getDisplayMode() == TriggeredDisplayBlockEntity.DisplayMode.TEXT) {
 //
 //					this.renderText(triggeredDisplayBlockEntity, matrixStack, vertexConsumerProvider, light);
@@ -99,8 +99,8 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 	public void renderTextMode(
 			TriggeredDisplayBlockEntity triggeredDisplayBlockEntity,
 			TriggeredDisplayBlockEntity.Data data,
-			MatrixStack matrixStack,
-			VertexConsumerProvider vertexConsumerProvider,
+			PoseStack matrixStack,
+			MultiBufferSource vertexConsumerProvider,
 			int brightness,
 			float lerpProgress
 	) {
@@ -112,14 +112,14 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 		byte c = (byte) data.textOpacity().lerp(lerpProgress);
 		int j;
 		if (bl2) {
-			float g = MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F);
+			float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
 			j = (int) (g * 255.0F) << 24;
 		} else {
 			j = data.backgroundColor().lerp(lerpProgress);
 		}
 
 		float g = 0.0F;
-		Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
+		Matrix4f matrix4f = matrixStack.last().pose();
 		matrix4f.rotate((float) Math.PI, 0.0F, 1.0F, 0.0F);
 		matrix4f.scale(-0.025F, -0.025F, -0.025F);
 		TriggeredDisplayBlockEntity.TextLines textLines = triggeredDisplayBlockEntity.splitLines(this::getLines);
@@ -128,11 +128,11 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 		int m = textLines.lines().size() * k;
 		matrix4f.translate(1.0F - (float) l / 2.0F, (float) (-m), 0.0F);
 		if (j != 0) {
-			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(bl ? RenderLayer.getTextBackgroundSeeThrough() : RenderLayer.getTextBackground());
-			vertexConsumer.vertex(matrix4f, -1.0F, -1.0F, 0.0F).color(j).light(brightness);
-			vertexConsumer.vertex(matrix4f, -1.0F, (float) m, 0.0F).color(j).light(brightness);
-			vertexConsumer.vertex(matrix4f, (float) l, (float) m, 0.0F).color(j).light(brightness);
-			vertexConsumer.vertex(matrix4f, (float) l, -1.0F, 0.0F).color(j).light(brightness);
+			VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(bl ? RenderType.getTextBackgroundSeeThrough() : RenderType.getTextBackground());
+			vertexConsumer.addVertex(matrix4f, -1.0F, -1.0F, 0.0F).setColor(j).setLight(brightness);
+			vertexConsumer.addVertex(matrix4f, -1.0F, (float) m, 0.0F).setColor(j).setLight(brightness);
+			vertexConsumer.addVertex(matrix4f, (float) l, (float) m, 0.0F).setColor(j).setLight(brightness);
+			vertexConsumer.addVertex(matrix4f, (float) l, -1.0F, 0.0F).setColor(j).setLight(brightness);
 		}
 
 		for (TriggeredDisplayBlockEntity.TextLine textLine : textLines.lines()) {
@@ -143,7 +143,7 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 				default -> throw new MatchException(null, null);
 			};
 			this.textRenderer
-					.draw(
+					.drawInBatch(
 							textLine.contents(),
 							h,
 							g,
@@ -151,7 +151,7 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 							bl3,
 							matrix4f,
 							vertexConsumerProvider,
-							bl ? TextRenderer.TextLayerType.SEE_THROUGH : TextRenderer.TextLayerType.POLYGON_OFFSET,
+							bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET,
 							0,
 							brightness
 					);
@@ -159,13 +159,13 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 		}
 	}
 
-	private TriggeredDisplayBlockEntity.TextLines getLines(Text text, int width) {
-		List<OrderedText> list = this.textRenderer.wrapLines(text, width);
+	private TriggeredDisplayBlockEntity.TextLines getLines(Component text, int width) {
+		List<FormattedCharSequence> list = this.textRenderer.split(text, width);
 		List<TriggeredDisplayBlockEntity.TextLine> list2 = new ArrayList<>(list.size());
 		int i = 0;
 
-		for (OrderedText orderedText : list) {
-			int j = this.textRenderer.getWidth(orderedText);
+		for (FormattedCharSequence orderedText : list) {
+			int j = this.textRenderer.width(orderedText);
 			i = Math.max(i, j);
 			list2.add(new TriggeredDisplayBlockEntity.TextLine(orderedText, j));
 		}
@@ -190,19 +190,19 @@ public class TriggeredDisplayBlockEntityRenderer implements BlockEntityRenderer<
 	}
 
 	private static float getBackwardsYaw(Camera camera) {
-		return camera.getYaw() - 180.0F;
+		return camera.yRot() - 180.0F;
 	}
 
 	private static float getNegatedPitch(Camera camera) {
-		return -camera.getPitch();
+		return -camera.xRot();
 	}
 
-	private static <T extends DisplayEntity> float lerpYaw(TriggeredDisplayBlockEntity entity, float delta) {
-		return MathHelper.lerpAngleDegrees(delta, entity.getPrevDisplayYaw(), entity.getDisplayYaw());
+	private static <T extends Display> float lerpYaw(TriggeredDisplayBlockEntity entity, float delta) {
+		return Mth.rotLerp(delta, entity.getPrevDisplayYaw(), entity.getDisplayYaw());
 	}
 
-	private static <T extends DisplayEntity> float lerpPitch(TriggeredDisplayBlockEntity entity, float delta) {
-		return MathHelper.lerp(delta, entity.getPrevDisplayPitch(), entity.getDisplayPitch());
+	private static <T extends Display> float lerpPitch(TriggeredDisplayBlockEntity entity, float delta) {
+		return Mth.lerp(delta, entity.getPrevDisplayPitch(), entity.getDisplayPitch());
 	}
 
 	@Override

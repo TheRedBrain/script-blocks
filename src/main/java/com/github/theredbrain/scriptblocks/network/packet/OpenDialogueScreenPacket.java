@@ -2,41 +2,41 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record OpenDialogueScreenPacket(
 		String dialogueIdentifierString,
 		BlockPos dataBlockPos,
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocks,
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks
-) implements CustomPayload {
-	public static final CustomPayload.Id<OpenDialogueScreenPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("open_dialogue_screen"));
-	public static final PacketCodec<RegistryByteBuf, OpenDialogueScreenPacket> PACKET_CODEC = PacketCodec.of(OpenDialogueScreenPacket::write, OpenDialogueScreenPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<OpenDialogueScreenPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("open_dialogue_screen"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, OpenDialogueScreenPacket> PACKET_CODEC = StreamCodec.ofMember(OpenDialogueScreenPacket::write, OpenDialogueScreenPacket::new);
 
-	public OpenDialogueScreenPacket(RegistryByteBuf registryByteBuf) {
+	public OpenDialogueScreenPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN)
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
-		registryByteBuf.writeString(this.dialogueIdentifierString);
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
+		registryByteBuf.writeUtf(this.dialogueIdentifierString);
 		registryByteBuf.writeBlockPos(this.dataBlockPos);
 		registryByteBuf.writeCollection(this.dialogueUsedBlocks, CustomPacketCodecs.MUTABLE_PAIR_STRING_BLOCK_POS);
 		registryByteBuf.writeCollection(this.dialogueTriggeredBlocks, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

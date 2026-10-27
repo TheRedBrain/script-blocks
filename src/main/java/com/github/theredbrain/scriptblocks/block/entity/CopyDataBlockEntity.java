@@ -6,20 +6,20 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerable {
-	private BlockPos firstDataProvidingBlockPosOffset = BlockPos.ORIGIN;
-	private BlockPos secondDataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private BlockPos firstDataProvidingBlockPosOffset = BlockPos.ZERO;
+	private BlockPos secondDataProvidingBlockPosOffset = BlockPos.ZERO;
 	private String dataIdentifier = "";
 
 	public CopyDataBlockEntity(BlockPos pos, BlockState state) {
@@ -27,23 +27,23 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		view.put("first_data_providing_block_pos_offset", BlockPos.CODEC, this.firstDataProvidingBlockPosOffset);
+		view.store("first_data_providing_block_pos_offset", BlockPos.CODEC, this.firstDataProvidingBlockPosOffset);
 
-		view.put("second_data_providing_block_pos_offset", BlockPos.CODEC, this.secondDataProvidingBlockPosOffset);
+		view.store("second_data_providing_block_pos_offset", BlockPos.CODEC, this.secondDataProvidingBlockPosOffset);
 
 		view.putString("data_identifier", this.dataIdentifier);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.firstDataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("first_data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("first_data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
@@ -51,24 +51,24 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 
 		this.secondDataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("second_data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("second_data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.dataIdentifier = view.getString("data_identifier", "");
+		this.dataIdentifier = view.getStringOr("data_identifier", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -99,13 +99,13 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
-			if (this.firstDataProvidingBlockPosOffset != BlockPos.ORIGIN && this.secondDataProvidingBlockPosOffset != BlockPos.ORIGIN) {
-				BlockPos firstDataProviderBlockPos = new BlockPos(this.pos.getX() + this.firstDataProvidingBlockPosOffset.getX(), this.pos.getY() + this.firstDataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.firstDataProvidingBlockPosOffset.getZ());
-				BlockPos secondDataProviderBlockPos = new BlockPos(this.pos.getX() + this.secondDataProvidingBlockPosOffset.getX(), this.pos.getY() + this.secondDataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.secondDataProvidingBlockPosOffset.getZ());
+		if (this.level != null) {
+			if (this.firstDataProvidingBlockPosOffset != BlockPos.ZERO && this.secondDataProvidingBlockPosOffset != BlockPos.ZERO) {
+				BlockPos firstDataProviderBlockPos = new BlockPos(this.worldPosition.getX() + this.firstDataProvidingBlockPosOffset.getX(), this.worldPosition.getY() + this.firstDataProvidingBlockPosOffset.getY(), this.worldPosition.getZ() + this.firstDataProvidingBlockPosOffset.getZ());
+				BlockPos secondDataProviderBlockPos = new BlockPos(this.worldPosition.getX() + this.secondDataProvidingBlockPosOffset.getX(), this.worldPosition.getY() + this.secondDataProvidingBlockPosOffset.getY(), this.worldPosition.getZ() + this.secondDataProvidingBlockPosOffset.getZ());
 
-				BlockEntity firstBlockEntity = world.getBlockEntity(firstDataProviderBlockPos);
-				BlockEntity secondBlockEntity = world.getBlockEntity(secondDataProviderBlockPos);
+				BlockEntity firstBlockEntity = level.getBlockEntity(firstDataProviderBlockPos);
+				BlockEntity secondBlockEntity = level.getBlockEntity(secondDataProviderBlockPos);
 				if (firstBlockEntity instanceof ProvidesData firstProvidesDataEntity && secondBlockEntity instanceof ProvidesData secondProvidesDataEntity) {
 					secondProvidesDataEntity.setData(this.dataIdentifier, firstProvidesDataEntity.getData(this.dataIdentifier));
 				}
@@ -116,30 +116,30 @@ public class CopyDataBlockEntity extends RotatedBlockEntity implements Triggerab
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.rotateOffsetBlockPos(this.firstDataProvidingBlockPosOffset, blockRotation);
 
 				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.rotateOffsetBlockPos(this.secondDataProvidingBlockPosOffset, blockRotation);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.firstDataProvidingBlockPosOffset, BlockMirror.FRONT_BACK);
+				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.firstDataProvidingBlockPosOffset, Mirror.FRONT_BACK);
 
-				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.secondDataProvidingBlockPosOffset, BlockMirror.FRONT_BACK);
+				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.secondDataProvidingBlockPosOffset, Mirror.FRONT_BACK);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.firstDataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
+				this.firstDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.firstDataProvidingBlockPosOffset, Mirror.LEFT_RIGHT);
 
-				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.secondDataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
+				this.secondDataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.secondDataProvidingBlockPosOffset, Mirror.LEFT_RIGHT);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

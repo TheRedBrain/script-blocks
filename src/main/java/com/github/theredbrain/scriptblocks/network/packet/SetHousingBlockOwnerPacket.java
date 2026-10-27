@@ -1,32 +1,32 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record SetHousingBlockOwnerPacket(
 		BlockPos housingBlockPosition,
 		String owner
-) implements CustomPayload {
-	public static final CustomPayload.Id<SetHousingBlockOwnerPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("set_housing_block_owner"));
-	public static final PacketCodec<RegistryByteBuf, SetHousingBlockOwnerPacket> PACKET_CODEC = PacketCodec.of(SetHousingBlockOwnerPacket::write, SetHousingBlockOwnerPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<SetHousingBlockOwnerPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("set_housing_block_owner"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, SetHousingBlockOwnerPacket> PACKET_CODEC = StreamCodec.ofMember(SetHousingBlockOwnerPacket::write, SetHousingBlockOwnerPacket::new);
 
-	public SetHousingBlockOwnerPacket(RegistryByteBuf registryByteBuf) {
+	public SetHousingBlockOwnerPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.housingBlockPosition);
-		registryByteBuf.writeString(this.owner);
+		registryByteBuf.writeUtf(this.owner);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

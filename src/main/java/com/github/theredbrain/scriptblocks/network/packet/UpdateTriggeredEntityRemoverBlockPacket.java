@@ -1,22 +1,22 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTriggeredEntityRemoverBlockPacket(
 		BlockPos triggeredEntityRemoverBlockPosition,
 		boolean showArea,
 		Vec3i areaDimensions,
 		BlockPos areaPositionOffset
-) implements CustomPayload {
-	public static final Id<UpdateTriggeredEntityRemoverBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggered_entity_remover_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredEntityRemoverBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredEntityRemoverBlockPacket::write, UpdateTriggeredEntityRemoverBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTriggeredEntityRemoverBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggered_entity_remover_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredEntityRemoverBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredEntityRemoverBlockPacket::write, UpdateTriggeredEntityRemoverBlockPacket::new);
 
-	public UpdateTriggeredEntityRemoverBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredEntityRemoverBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -29,7 +29,7 @@ public record UpdateTriggeredEntityRemoverBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredEntityRemoverBlockPosition);
 
 		registryByteBuf.writeBoolean(this.showArea);
@@ -40,7 +40,7 @@ public record UpdateTriggeredEntityRemoverBlockPacket(
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

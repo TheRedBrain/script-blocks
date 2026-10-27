@@ -2,13 +2,12 @@ package com.github.theredbrain.scriptblocks.component.type;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.Identifier;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 
 public record InteractiveKeyComponent(
 		boolean is_consumed,
@@ -22,10 +21,10 @@ public record InteractiveKeyComponent(
 					)
 					.apply(instance, InteractiveKeyComponent::new)
 	);
-	public static final PacketCodec<RegistryByteBuf, InteractiveKeyComponent> PACKET_CODEC = PacketCodec.tuple(
+	public static final StreamCodec<RegistryFriendlyByteBuf, InteractiveKeyComponent> PACKET_CODEC = StreamCodec.composite(
 			PacketCodecs.BOOL,
 			InteractiveKeyComponent::is_consumed,
-			Identifier.PACKET_CODEC.collect(PacketCodecs.toList()),
+			Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()),
 			InteractiveKeyComponent::identifier_list,
 			InteractiveKeyComponent::new
 	);

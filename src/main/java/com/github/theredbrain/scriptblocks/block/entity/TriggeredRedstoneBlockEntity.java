@@ -3,12 +3,12 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.block.TriggeredRedstoneBlock;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class TriggeredRedstoneBlockEntity extends BlockEntity implements Triggerable {
 
@@ -16,21 +16,21 @@ public class TriggeredRedstoneBlockEntity extends BlockEntity implements Trigger
 		super(ScriptBlocksEntities.TRIGGERED_REDSTONE_BLOCK_ENTITY, pos, state);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
-			BlockState blockState = world.getBlockState(this.pos);
+		if (this.level != null) {
+			BlockState blockState = level.getBlockState(this.worldPosition);
 			if (blockState.getBlock() instanceof TriggeredRedstoneBlock triggeredRedstoneBlock) {
-				triggeredRedstoneBlock.trigger(this.world, blockState, this.pos);
+				triggeredRedstoneBlock.trigger(this.level, blockState, this.worldPosition);
 			}
 		}
 	}

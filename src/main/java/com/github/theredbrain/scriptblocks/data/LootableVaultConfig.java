@@ -3,8 +3,8 @@ package com.github.theredbrain.scriptblocks.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 @Deprecated
 public record LootableVaultConfig(
@@ -29,7 +29,7 @@ public record LootableVaultConfig(
 									Codec.BOOL.fieldOf("withChoice").forGetter(LootableVaultConfig::withChoice),
 									Codec.DOUBLE.fieldOf("activationRange").forGetter(LootableVaultConfig::activationRange),
 									Codec.DOUBLE.fieldOf("deactivationRange").forGetter(LootableVaultConfig::deactivationRange),
-									ItemStack.VALIDATED_CODEC.fieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
+									ItemStack.STRICT_CODEC.fieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
 									Codec.STRING.fieldOf("displayLootTableIdentifier").forGetter(LootableVaultConfig::lootableIdentifier)
 							)
 							.apply(instance, LootableVaultConfig::new)

@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -17,10 +17,10 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 	@Override
 	public void receive(UpdateTeleporterBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -76,7 +76,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		String teleportButtonLabel = payload.teleportButtonLabel();
 		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
 
-		World world = serverPlayerEntity.getEntityWorld();
+		Level world = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
@@ -97,11 +97,11 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);
 			teleporterBlockEntity.setDirectTeleportPositionOffset(directTeleportPositionOffset);
 			if (!teleporterBlockEntity.setDirectTeleportOrientationYaw(directTeleportOrientationYaw)) {
-				serverPlayerEntity.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!teleporterBlockEntity.setDirectTeleportOrientationPitch(directTeleportOrientationPitch)) {
-				serverPlayerEntity.sendMessage(Text.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			teleporterBlockEntity.setSpawnPointType(spawnPointType);
@@ -124,10 +124,10 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setCancelTeleportButtonLabel(cancelTeleportButtonLabel);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
-			teleporterBlockEntity.markDirty();
-			world.updateListeners(teleportBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			teleporterBlockEntity.setChanged();
+			world.sendBlockUpdated(teleportBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

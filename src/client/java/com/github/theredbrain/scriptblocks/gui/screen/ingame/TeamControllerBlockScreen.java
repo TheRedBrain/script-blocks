@@ -6,214 +6,213 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.scores.Team;
 import java.util.Arrays;
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text HIDE_AREA_LABEL_TEXT = Text.translatable("gui.team_controller_block.hide_area_label");
-	private static final Text SHOW_AREA_LABEL_TEXT = Text.translatable("gui.team_controller_block.show_area_label");
-	private static final Text AREA_DIMENSIONS_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_dimensions_label");
-	private static final Text AREA_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.area_position_offset_label");
-	private static final Text PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.team_controller_block.pvp_controller_block_position_offset_label");
-	private static final Text ENABLE_TICKING_TRUE_LABEL_TEXT = Text.translatable("gui.team_controller_block.enable_ticking_true_label");
-	private static final Text ENABLE_TICKING_FALSE_LABEL_TEXT = Text.translatable("gui.team_controller_block.enable_ticking_false_label");
-	private static final Text TEAM_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_identifier_label");
-	private static final Text DISPLAY_NAME_LABEL_TEXT = Text.translatable("gui.team_controller_block.display_name_label");
-	private static final Text TEAM_COLOR_LABEL_TEXT = Text.translatable("gui.team_controller_block.team_color_label");
-	private static final Text FRIENDLY_FIRE_LABEL_TEXT = Text.translatable("gui.team_controller_block.friendly_fire_label");
-	private static final Text FRIENDLY_INVISIBLES_LABEL_TEXT = Text.translatable("gui.team_controller_block.friendly_invisibles_label");
-	private static final Text NAME_TAG_VISIBILITY_LABEL_TEXT = Text.translatable("gui.team_controller_block.name_tag_visibility_label");
-	private static final Text DEATH_MESSAGE_VISIBILITY_LABEL_TEXT = Text.translatable("gui.team_controller_block.death_message_visibility_label");
-	private static final Text COLLISION_RULE_LABEL_TEXT = Text.translatable("gui.team_controller_block.collision_rule_label");
-	private static final Text PREFIX_LABEL_TEXT = Text.translatable("gui.team_controller_block.prefix_label");
-	private static final Text SUFFIX_LABEL_TEXT = Text.translatable("gui.team_controller_block.suffix_label");
+	private static final Component HIDE_AREA_LABEL_TEXT = Component.translatable("gui.team_controller_block.hide_area_label");
+	private static final Component SHOW_AREA_LABEL_TEXT = Component.translatable("gui.team_controller_block.show_area_label");
+	private static final Component AREA_DIMENSIONS_LABEL_TEXT = Component.translatable("gui.team_controller_block.area_dimensions_label");
+	private static final Component AREA_POSITION_OFFET_LABEL_TEXT = Component.translatable("gui.team_controller_block.area_position_offset_label");
+	private static final Component PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT = Component.translatable("gui.team_controller_block.pvp_controller_block_position_offset_label");
+	private static final Component ENABLE_TICKING_TRUE_LABEL_TEXT = Component.translatable("gui.team_controller_block.enable_ticking_true_label");
+	private static final Component ENABLE_TICKING_FALSE_LABEL_TEXT = Component.translatable("gui.team_controller_block.enable_ticking_false_label");
+	private static final Component TEAM_IDENTIFIER_LABEL_TEXT = Component.translatable("gui.team_controller_block.team_identifier_label");
+	private static final Component DISPLAY_NAME_LABEL_TEXT = Component.translatable("gui.team_controller_block.display_name_label");
+	private static final Component TEAM_COLOR_LABEL_TEXT = Component.translatable("gui.team_controller_block.team_color_label");
+	private static final Component FRIENDLY_FIRE_LABEL_TEXT = Component.translatable("gui.team_controller_block.friendly_fire_label");
+	private static final Component FRIENDLY_INVISIBLES_LABEL_TEXT = Component.translatable("gui.team_controller_block.friendly_invisibles_label");
+	private static final Component NAME_TAG_VISIBILITY_LABEL_TEXT = Component.translatable("gui.team_controller_block.name_tag_visibility_label");
+	private static final Component DEATH_MESSAGE_VISIBILITY_LABEL_TEXT = Component.translatable("gui.team_controller_block.death_message_visibility_label");
+	private static final Component COLLISION_RULE_LABEL_TEXT = Component.translatable("gui.team_controller_block.collision_rule_label");
+	private static final Component PREFIX_LABEL_TEXT = Component.translatable("gui.team_controller_block.prefix_label");
+	private static final Component SUFFIX_LABEL_TEXT = Component.translatable("gui.team_controller_block.suffix_label");
 	private final TeamControllerBlockEntity teamControllerBlockEntity;
 	private ScreenPage screenPage;
-	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
-	private CyclingButtonWidget<Boolean> toggleShowAreaButton;
-	private TextFieldWidget areaDimensionsXField;
-	private TextFieldWidget areaDimensionsYField;
-	private TextFieldWidget areaDimensionsZField;
-	private TextFieldWidget areaPositionOffsetXField;
-	private TextFieldWidget areaPositionOffsetYField;
-	private TextFieldWidget areaPositionOffsetZField;
+	private CycleButton<ScreenPage> cycleScreenPageButton;
+	private CycleButton<Boolean> toggleShowAreaButton;
+	private EditBox areaDimensionsXField;
+	private EditBox areaDimensionsYField;
+	private EditBox areaDimensionsZField;
+	private EditBox areaPositionOffsetXField;
+	private EditBox areaPositionOffsetYField;
+	private EditBox areaPositionOffsetZField;
 	private boolean showArea;
-	private TextFieldWidget pvpControllerBlockPositionOffsetXField;
-	private TextFieldWidget pvpControllerBlockPositionOffsetYField;
-	private TextFieldWidget pvpControllerBlockPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleEnableTickingButton;
+	private EditBox pvpControllerBlockPositionOffsetXField;
+	private EditBox pvpControllerBlockPositionOffsetYField;
+	private EditBox pvpControllerBlockPositionOffsetZField;
+	private CycleButton<Boolean> toggleEnableTickingButton;
 	private boolean enableTicking;
 
-	private TextFieldWidget teamIdentifierField;
-	private TextFieldWidget displayNameField;
-	private ButtonWidget cycleTeamColorButton;
-	private Formatting teamColor;
-	private CyclingButtonWidget<Boolean> toggleFriendlyFireButton;
-	private CyclingButtonWidget<Boolean> toggleShowFriendlyInvisiblesButton;
+	private EditBox teamIdentifierField;
+	private EditBox displayNameField;
+	private Button cycleTeamColorButton;
+	private ChatFormatting teamColor;
+	private CycleButton<Boolean> toggleFriendlyFireButton;
+	private CycleButton<Boolean> toggleShowFriendlyInvisiblesButton;
 	private boolean friendlyFire;
 	private boolean showFriendlyInvisibles;
-	private CyclingButtonWidget<AbstractTeam.VisibilityRule> cycleNametagVisibilityButton;
-	private CyclingButtonWidget<AbstractTeam.VisibilityRule> cycleDeathMessageVisibilityButton;
-	private CyclingButtonWidget<AbstractTeam.CollisionRule> cycleCollisionRuleButton;
-	private AbstractTeam.VisibilityRule nametagVisibility;
-	private AbstractTeam.VisibilityRule deathMessageVisibility;
-	private AbstractTeam.CollisionRule collisionRule;
-	private TextFieldWidget prefixField;
-	private TextFieldWidget suffixField;
+	private CycleButton<Team.Visibility> cycleNametagVisibilityButton;
+	private CycleButton<Team.Visibility> cycleDeathMessageVisibilityButton;
+	private CycleButton<Team.CollisionRule> cycleCollisionRuleButton;
+	private Team.Visibility nametagVisibility;
+	private Team.Visibility deathMessageVisibility;
+	private Team.CollisionRule collisionRule;
+	private EditBox prefixField;
+	private EditBox suffixField;
 
 	public TeamControllerBlockScreen(TeamControllerBlockEntity teamControllerBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.teamControllerBlockEntity = teamControllerBlockEntity;
 		this.screenPage = ScreenPage.AREA;
 	}
 
 	private void cycleTeamColor() {
-		int newIndex = this.teamColor.getColorIndex() + 1;
+		int newIndex = this.teamColor.getId() + 1;
 		if (newIndex > 15) {
 			newIndex = -1;
 		}
-		this.teamColor = Formatting.byColorIndex(newIndex);
+		this.teamColor = ChatFormatting.getById(newIndex);
 		if (this.teamColor == null) {
-			this.teamColor = Formatting.RESET;
+			this.teamColor = ChatFormatting.RESET;
 		}
 		this.cycleTeamColorButton.setMessage(getTeamColorLabel(this.teamColor));
 	}
 
-	private Text getTeamColorLabel(Formatting formatting) {
-		return Text.translatable("formatting." + formatting.getName());
+	private Component getTeamColorLabel(ChatFormatting formatting) {
+		return Component.translatable("formatting." + formatting.getName());
 	}
 
 	@Override
 	protected void init() {
-		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText, this.screenPage).values(ScreenPage.values()).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).displayOnlyValue().create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.showArea = this.teamControllerBlockEntity.showArea();
-		this.toggleShowAreaButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).displayOnlyValue().create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
-		this.areaDimensionsXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 79, 100, 20, Text.empty());
+		this.areaDimensionsXField = new EditBox(this.font, this.width / 2 - 154, 79, 100, 20, Component.empty());
 		this.areaDimensionsXField.setMaxLength(128);
-		this.areaDimensionsXField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaDimensions().getX()));
-		this.addSelectableChild(this.areaDimensionsXField);
+		this.areaDimensionsXField.setValue(Integer.toString(this.teamControllerBlockEntity.getAreaDimensions().getX()));
+		this.addWidget(this.areaDimensionsXField);
 
-		this.areaDimensionsYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 79, 100, 20, Text.empty());
+		this.areaDimensionsYField = new EditBox(this.font, this.width / 2 - 50, 79, 100, 20, Component.empty());
 		this.areaDimensionsYField.setMaxLength(128);
-		this.areaDimensionsYField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaDimensions().getY()));
-		this.addSelectableChild(this.areaDimensionsYField);
+		this.areaDimensionsYField.setValue(Integer.toString(this.teamControllerBlockEntity.getAreaDimensions().getY()));
+		this.addWidget(this.areaDimensionsYField);
 
-		this.areaDimensionsZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 79, 100, 20, Text.empty());
+		this.areaDimensionsZField = new EditBox(this.font, this.width / 2 + 54, 79, 100, 20, Component.empty());
 		this.areaDimensionsZField.setMaxLength(128);
-		this.areaDimensionsZField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaDimensions().getZ()));
-		this.addSelectableChild(this.areaDimensionsZField);
+		this.areaDimensionsZField.setValue(Integer.toString(this.teamControllerBlockEntity.getAreaDimensions().getZ()));
+		this.addWidget(this.areaDimensionsZField);
 
-		this.areaPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 114, 100, 20, Text.empty());
+		this.areaPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 114, 100, 20, Component.empty());
 		this.areaPositionOffsetXField.setMaxLength(128);
-		this.areaPositionOffsetXField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getX()));
-		this.addSelectableChild(this.areaPositionOffsetXField);
+		this.areaPositionOffsetXField.setValue(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getX()));
+		this.addWidget(this.areaPositionOffsetXField);
 
-		this.areaPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 114, 100, 20, Text.empty());
+		this.areaPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 114, 100, 20, Component.empty());
 		this.areaPositionOffsetYField.setMaxLength(128);
-		this.areaPositionOffsetYField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getY()));
-		this.addSelectableChild(this.areaPositionOffsetYField);
+		this.areaPositionOffsetYField.setValue(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getY()));
+		this.addWidget(this.areaPositionOffsetYField);
 
-		this.areaPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 114, 100, 20, Text.empty());
+		this.areaPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 114, 100, 20, Component.empty());
 		this.areaPositionOffsetZField.setMaxLength(128);
-		this.areaPositionOffsetZField.setText(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getZ()));
-		this.addSelectableChild(this.areaPositionOffsetZField);
+		this.areaPositionOffsetZField.setValue(Integer.toString(this.teamControllerBlockEntity.getAreaPositionOffset().getZ()));
+		this.addWidget(this.areaPositionOffsetZField);
 
-		this.pvpControllerBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 149, 100, 20, Text.empty());
+		this.pvpControllerBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 149, 100, 20, Component.empty());
 		this.pvpControllerBlockPositionOffsetXField.setMaxLength(128);
-		this.pvpControllerBlockPositionOffsetXField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getX()));
-		this.addSelectableChild(this.pvpControllerBlockPositionOffsetXField);
+		this.pvpControllerBlockPositionOffsetXField.setValue(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getX()));
+		this.addWidget(this.pvpControllerBlockPositionOffsetXField);
 
-		this.pvpControllerBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 149, 100, 20, Text.empty());
+		this.pvpControllerBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 149, 100, 20, Component.empty());
 		this.pvpControllerBlockPositionOffsetYField.setMaxLength(128);
-		this.pvpControllerBlockPositionOffsetYField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getY()));
-		this.addSelectableChild(this.pvpControllerBlockPositionOffsetYField);
+		this.pvpControllerBlockPositionOffsetYField.setValue(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getY()));
+		this.addWidget(this.pvpControllerBlockPositionOffsetYField);
 
-		this.pvpControllerBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 149, 100, 20, Text.empty());
+		this.pvpControllerBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 149, 100, 20, Component.empty());
 		this.pvpControllerBlockPositionOffsetZField.setMaxLength(128);
-		this.pvpControllerBlockPositionOffsetZField.setText(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getZ()));
-		this.addSelectableChild(this.pvpControllerBlockPositionOffsetZField);
+		this.pvpControllerBlockPositionOffsetZField.setValue(Integer.toString(this.teamControllerBlockEntity.getPVPControllerBlockPositionOffset().getZ()));
+		this.addWidget(this.pvpControllerBlockPositionOffsetZField);
 
 		this.enableTicking = this.teamControllerBlockEntity.enableTicking();
-		this.toggleEnableTickingButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, enableTicking) -> {
+		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking).displayOnlyValue().create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, enableTicking) -> {
 			this.enableTicking = enableTicking;
 		}));
 
 
-		this.teamIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
+		this.teamIdentifierField = new EditBox(this.font, this.width / 2 - 154, 55, 300, 20, Component.empty());
 		this.teamIdentifierField.setMaxLength(128);
-		this.teamIdentifierField.setText(this.teamControllerBlockEntity.getTeamIdentifier());
-		this.addSelectableChild(this.teamIdentifierField);
+		this.teamIdentifierField.setValue(this.teamControllerBlockEntity.getTeamIdentifier());
+		this.addWidget(this.teamIdentifierField);
 
-		this.displayNameField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
+		this.displayNameField = new EditBox(this.font, this.width / 2 - 154, 90, 300, 20, Component.empty());
 		this.displayNameField.setMaxLength(128);
-		this.displayNameField.setText(this.teamControllerBlockEntity.getDisplayNameString());
-		this.addSelectableChild(this.displayNameField);
+		this.displayNameField.setValue(this.teamControllerBlockEntity.getDisplayNameString());
+		this.addWidget(this.displayNameField);
 
 		this.teamColor = this.teamControllerBlockEntity.getTeamColor();
-		this.cycleTeamColorButton = this.addDrawableChild(ButtonWidget.builder(getTeamColorLabel(this.teamColor), (button) -> this.cycleTeamColor()).dimensions(this.width / 2 - 154, 125, 100, 20).build());
+		this.cycleTeamColorButton = this.addRenderableWidget(Button.builder(getTeamColorLabel(this.teamColor), (button) -> this.cycleTeamColor()).bounds(this.width / 2 - 154, 125, 100, 20).build());
 
 		this.friendlyFire = this.teamControllerBlockEntity.friendlyFire();
-		this.toggleFriendlyFireButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False"), this.friendlyFire).omitKeyText().build(this.width / 2 - 50, 125, 100, 20, Text.empty(), (button, friendlyFire) -> {
+		this.toggleFriendlyFireButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.literal("True"), Component.literal("False"), this.friendlyFire).displayOnlyValue().create(this.width / 2 - 50, 125, 100, 20, Component.empty(), (button, friendlyFire) -> {
 			this.friendlyFire = friendlyFire;
 		}));
 
 		this.showFriendlyInvisibles = this.teamControllerBlockEntity.showFriendlyInvisibles();
-		this.toggleShowFriendlyInvisiblesButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.literal("True"), Text.literal("False"), this.showFriendlyInvisibles).omitKeyText().build(this.width / 2 + 54, 125, 100, 20, Text.empty(), (button, showFriendlyInvisibles) -> {
+		this.toggleShowFriendlyInvisiblesButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.literal("True"), Component.literal("False"), this.showFriendlyInvisibles).displayOnlyValue().create(this.width / 2 + 54, 125, 100, 20, Component.empty(), (button, showFriendlyInvisibles) -> {
 			this.showFriendlyInvisibles = showFriendlyInvisibles;
 		}));
 
-		AbstractTeam.VisibilityRule var = this.teamControllerBlockEntity.getNametagVisibility();
-		this.nametagVisibility = var != null ? var : AbstractTeam.VisibilityRule.ALWAYS;
-		this.cycleNametagVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName, this.nametagVisibility).values(AbstractTeam.VisibilityRule.values()).omitKeyText().build(this.width / 2 - 154, 160, 100, 20, Text.empty(), (button, nametagVisibility) -> {
+		Team.Visibility var = this.teamControllerBlockEntity.getNametagVisibility();
+		this.nametagVisibility = var != null ? var : Team.Visibility.ALWAYS;
+		this.cycleNametagVisibilityButton = this.addRenderableWidget(CycleButton.builder(Team.Visibility::getDisplayName, this.nametagVisibility).withValues(Team.Visibility.values()).displayOnlyValue().create(this.width / 2 - 154, 160, 100, 20, Component.empty(), (button, nametagVisibility) -> {
 			this.nametagVisibility = nametagVisibility;
 		}));
 
-		AbstractTeam.VisibilityRule var1 = this.teamControllerBlockEntity.getDeathMessageVisibility();
-		this.deathMessageVisibility = var1 != null ? var1 : AbstractTeam.VisibilityRule.ALWAYS;
-		this.cycleDeathMessageVisibilityButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.VisibilityRule::getDisplayName, this.deathMessageVisibility).values(AbstractTeam.VisibilityRule.values()).omitKeyText().build(this.width / 2 - 50, 160, 100, 20, Text.empty(), (button, deathMessageVisibility) -> {
+		Team.Visibility var1 = this.teamControllerBlockEntity.getDeathMessageVisibility();
+		this.deathMessageVisibility = var1 != null ? var1 : Team.Visibility.ALWAYS;
+		this.cycleDeathMessageVisibilityButton = this.addRenderableWidget(CycleButton.builder(Team.Visibility::getDisplayName, this.deathMessageVisibility).withValues(Team.Visibility.values()).displayOnlyValue().create(this.width / 2 - 50, 160, 100, 20, Component.empty(), (button, deathMessageVisibility) -> {
 			this.deathMessageVisibility = deathMessageVisibility;
 		}));
 
-		AbstractTeam.CollisionRule var2 = this.teamControllerBlockEntity.getCollisionRule();
-		this.collisionRule = var2 != null ? var2 : AbstractTeam.CollisionRule.ALWAYS;
-		this.cycleCollisionRuleButton = this.addDrawableChild(CyclingButtonWidget.builder(AbstractTeam.CollisionRule::getDisplayName, this.collisionRule).values(AbstractTeam.CollisionRule.values()).omitKeyText().build(this.width / 2 + 54, 160, 100, 20, Text.empty(), (button, collisionRule) -> {
+		Team.CollisionRule var2 = this.teamControllerBlockEntity.getCollisionRule();
+		this.collisionRule = var2 != null ? var2 : Team.CollisionRule.ALWAYS;
+		this.cycleCollisionRuleButton = this.addRenderableWidget(CycleButton.builder(Team.CollisionRule::getDisplayName, this.collisionRule).withValues(Team.CollisionRule.values()).displayOnlyValue().create(this.width / 2 + 54, 160, 100, 20, Component.empty(), (button, collisionRule) -> {
 			this.collisionRule = collisionRule;
 		}));
 
-		this.prefixField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 195, 150, 20, Text.empty());
+		this.prefixField = new EditBox(this.font, this.width / 2 - 154, 195, 150, 20, Component.empty());
 		this.prefixField.setMaxLength(128);
-		this.prefixField.setText(this.teamControllerBlockEntity.getPrefixString());
-		this.addSelectableChild(this.prefixField);
+		this.prefixField.setValue(this.teamControllerBlockEntity.getPrefixString());
+		this.addWidget(this.prefixField);
 
-		this.suffixField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 195, 150, 20, Text.empty());
+		this.suffixField = new EditBox(this.font, this.width / 2 + 4, 195, 150, 20, Component.empty());
 		this.suffixField.setMaxLength(128);
-		this.suffixField.setText(this.teamControllerBlockEntity.getSuffixString());
-		this.addSelectableChild(this.suffixField);
+		this.suffixField.setValue(this.teamControllerBlockEntity.getSuffixString());
+		this.addWidget(this.suffixField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 219, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 219, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 219, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 219, 150, 20).build());
 		this.updateWidgets();
 	}
 
@@ -279,29 +278,29 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		ScreenPage var = this.screenPage;
-		AbstractTeam.VisibilityRule var1 = this.nametagVisibility;
-		AbstractTeam.VisibilityRule var2 = this.deathMessageVisibility;
-		AbstractTeam.CollisionRule var3 = this.collisionRule;
-		Formatting var4 = this.teamColor;
+		Team.Visibility var1 = this.nametagVisibility;
+		Team.Visibility var2 = this.deathMessageVisibility;
+		Team.CollisionRule var3 = this.collisionRule;
+		ChatFormatting var4 = this.teamColor;
 		boolean bool = this.showArea;
 		boolean bool1 = this.friendlyFire;
 		boolean bool2 = this.showFriendlyInvisibles;
 		boolean bool3 = this.enableTicking;
-		String string = this.areaDimensionsXField.getText();
-		String string1 = this.areaDimensionsYField.getText();
-		String string2 = this.areaDimensionsZField.getText();
-		String string3 = this.areaPositionOffsetXField.getText();
-		String string4 = this.areaPositionOffsetYField.getText();
-		String string5 = this.areaPositionOffsetZField.getText();
-		String string6 = this.pvpControllerBlockPositionOffsetXField.getText();
-		String string7 = this.pvpControllerBlockPositionOffsetYField.getText();
-		String string8 = this.pvpControllerBlockPositionOffsetZField.getText();
-		String string9 = this.teamIdentifierField.getText();
-		String string10 = this.displayNameField.getText();
-		String string11 = this.prefixField.getText();
-		String string12 = this.suffixField.getText();
+		String string = this.areaDimensionsXField.getValue();
+		String string1 = this.areaDimensionsYField.getValue();
+		String string2 = this.areaDimensionsZField.getValue();
+		String string3 = this.areaPositionOffsetXField.getValue();
+		String string4 = this.areaPositionOffsetYField.getValue();
+		String string5 = this.areaPositionOffsetZField.getValue();
+		String string6 = this.pvpControllerBlockPositionOffsetXField.getValue();
+		String string7 = this.pvpControllerBlockPositionOffsetYField.getValue();
+		String string8 = this.pvpControllerBlockPositionOffsetZField.getValue();
+		String string9 = this.teamIdentifierField.getValue();
+		String string10 = this.displayNameField.getValue();
+		String string11 = this.prefixField.getValue();
+		String string12 = this.suffixField.getValue();
 		this.init(client, width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
@@ -321,52 +320,52 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.toggleShowFriendlyInvisiblesButton.setValue(this.showFriendlyInvisibles);
 		this.enableTicking = bool3;
 		this.toggleEnableTickingButton.setValue(this.enableTicking);
-		this.areaDimensionsXField.setText(string);
-		this.areaDimensionsYField.setText(string1);
-		this.areaDimensionsZField.setText(string2);
-		this.areaPositionOffsetXField.setText(string3);
-		this.areaPositionOffsetYField.setText(string4);
-		this.areaPositionOffsetZField.setText(string5);
-		this.pvpControllerBlockPositionOffsetXField.setText(string6);
-		this.pvpControllerBlockPositionOffsetYField.setText(string7);
-		this.pvpControllerBlockPositionOffsetZField.setText(string8);
-		this.teamIdentifierField.setText(string9);
-		this.displayNameField.setText(string10);
-		this.prefixField.setText(string11);
-		this.suffixField.setText(string12);
+		this.areaDimensionsXField.setValue(string);
+		this.areaDimensionsYField.setValue(string1);
+		this.areaDimensionsZField.setValue(string2);
+		this.areaPositionOffsetXField.setValue(string3);
+		this.areaPositionOffsetYField.setValue(string4);
+		this.areaPositionOffsetZField.setValue(string5);
+		this.pvpControllerBlockPositionOffsetXField.setValue(string6);
+		this.pvpControllerBlockPositionOffsetYField.setValue(string7);
+		this.pvpControllerBlockPositionOffsetZField.setValue(string8);
+		this.teamIdentifierField.setValue(string9);
+		this.displayNameField.setValue(string10);
+		this.prefixField.setValue(string11);
+		this.suffixField.setValue(string12);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		if (this.screenPage == ScreenPage.AREA) {
-			context.drawTextWithShadow(this.textRenderer, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
 			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
 			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
 			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
 			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			context.drawString(this.font, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
 			this.pvpControllerBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.pvpControllerBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.pvpControllerBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.TEAM) {
-			context.drawTextWithShadow(this.textRenderer, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			context.drawString(this.font, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 			this.teamIdentifierField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			context.drawString(this.font, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.displayNameField.render(context, mouseX, mouseY, delta);
-			context.drawTextWithShadow(this.textRenderer, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
+			context.drawString(this.font, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			context.drawString(this.font, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
+			context.drawString(this.font, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
+			context.drawString(this.font, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			context.drawString(this.font, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, 0xA0A0A0);
+			context.drawString(this.font, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, 0xA0A0A0);
+			context.drawString(this.font, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+			context.drawString(this.font, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
 			this.prefixField.render(context, mouseX, mouseY, delta);
 			this.suffixField.render(context, mouseX, mouseY, delta);
 		}
@@ -379,35 +378,35 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 				this.enableTicking,
 				this.showArea,
 				new Vec3i(
-						ItemUtils.parseInt(this.areaDimensionsXField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsYField.getText()),
-						ItemUtils.parseInt(this.areaDimensionsZField.getText())
+						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),
+						ItemUtils.parseInt(this.areaDimensionsYField.getValue()),
+						ItemUtils.parseInt(this.areaDimensionsZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.areaPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.areaPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.areaPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.areaPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.areaPositionOffsetZField.getValue())
 				),
 				new BlockPos(
-						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.pvpControllerBlockPositionOffsetZField.getValue())
 				),
-				this.teamIdentifierField.getText(),
-				this.displayNameField.getText(),
-				this.teamColor.getColorIndex(),
+				this.teamIdentifierField.getValue(),
+				this.displayNameField.getValue(),
+				this.teamColor.getId(),
 				this.friendlyFire,
 				this.showFriendlyInvisibles,
 				this.nametagVisibility,
 				this.deathMessageVisibility,
 				this.collisionRule,
-				this.prefixField.getText(),
-				this.suffixField.getText()
+				this.prefixField.getValue(),
+				this.suffixField.getValue()
 		));
 		return true;
 	}
 
-	public enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringRepresentable {
 		AREA("area"),
 		TEAM("team");
 
@@ -418,16 +417,16 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.asString().equals(name)).findFirst();
+			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.team_controller_block.screen_page." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.team_controller_block.screen_page." + this.name);
 		}
 	}
 }

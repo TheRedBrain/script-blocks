@@ -1,11 +1,11 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 @Deprecated
 public record UpdateAreaBlockPacket(
@@ -28,11 +28,11 @@ public record UpdateAreaBlockPacket(
 		String triggerMode,
 		String triggeredMode,
 		int timer
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateAreaBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_area_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateAreaBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateAreaBlockPacket::write, UpdateAreaBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateAreaBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_area_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateAreaBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateAreaBlockPacket::write, UpdateAreaBlockPacket::new);
 
-	public UpdateAreaBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateAreaBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -42,7 +42,7 @@ public record UpdateAreaBlockPacket(
 						registryByteBuf.readInt()
 				),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
@@ -50,24 +50,24 @@ public record UpdateAreaBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.areaBlockPosition);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getX());
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getY());
 		registryByteBuf.writeInt(this.applicationAreaDimensions.getZ());
 		registryByteBuf.writeBlockPos(this.applicationAreaPositionOffset);
-		registryByteBuf.writeString(this.appliedStatusEffectIdentifier);
+		registryByteBuf.writeUtf(this.appliedStatusEffectIdentifier);
 		registryByteBuf.writeInt(this.appliedStatusEffectAmplifier);
 		registryByteBuf.writeBoolean(this.appliedStatusEffectAmbient);
 		registryByteBuf.writeBoolean(this.appliedStatusEffectShowParticles);
@@ -75,17 +75,17 @@ public record UpdateAreaBlockPacket(
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBoolean(this.wasTriggered);
-		registryByteBuf.writeString(this.joinMessage);
-		registryByteBuf.writeString(this.leaveMessage);
-		registryByteBuf.writeString(this.triggeredMessage);
-		registryByteBuf.writeString(this.messageMode);
-		registryByteBuf.writeString(this.triggerMode);
-		registryByteBuf.writeString(this.triggeredMode);
+		registryByteBuf.writeUtf(this.joinMessage);
+		registryByteBuf.writeUtf(this.leaveMessage);
+		registryByteBuf.writeUtf(this.triggeredMessage);
+		registryByteBuf.writeUtf(this.messageMode);
+		registryByteBuf.writeUtf(this.triggerMode);
+		registryByteBuf.writeUtf(this.triggeredMode);
 		registryByteBuf.writeInt(this.timer);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

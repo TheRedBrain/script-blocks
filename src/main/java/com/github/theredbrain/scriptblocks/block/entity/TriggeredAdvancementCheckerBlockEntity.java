@@ -7,22 +7,22 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.advancement.PlayerAdvancementTracker;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.UUID;
@@ -39,7 +39,7 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
 		view.putInt("firstTriggeredBlockPositionOffsetX", this.firstTriggeredBlock.getLeft().getX());
 		view.putInt("firstTriggeredBlockPositionOffsetY", this.firstTriggeredBlock.getLeft().getY());
@@ -53,34 +53,34 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 
 		view.putString("checkedAdvancementIdentifier", this.checkedAdvancementIdentifier);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		int x = MathHelper.clamp(view.getInt("firstTriggeredBlockPositionOffsetX"), -48, 48);
-		int y = MathHelper.clamp(view.getInt("firstTriggeredBlockPositionOffsetY"), -48, 48);
-		int z = MathHelper.clamp(view.getInt("firstTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.firstTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBoolean("firstTriggeredBlockResets"));
+		int x = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetX"), -48, 48);
+		int y = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetY"), -48, 48);
+		int z = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetZ"), -48, 48);
+		this.firstTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBooleanOr("firstTriggeredBlockResets"));
 
-		x = MathHelper.clamp(view.getInt("secondTriggeredBlockPositionOffsetX"), -48, 48);
-		y = MathHelper.clamp(view.getInt("secondTriggeredBlockPositionOffsetY"), -48, 48);
-		z = MathHelper.clamp(view.getInt("secondTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.secondTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBoolean("secondTriggeredBlockResets"));
+		x = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetX"), -48, 48);
+		y = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetY"), -48, 48);
+		z = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetZ"), -48, 48);
+		this.secondTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBooleanOr("secondTriggeredBlockResets"));
 
-		this.checkedAdvancementIdentifier = view.getString("checkedAdvancementIdentifier");
+		this.checkedAdvancementIdentifier = view.getStringOr("checkedAdvancementIdentifier");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -112,25 +112,25 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
-			String worldName = this.world.getRegistryKey().getValue().getPath();
-			MinecraftServer server = this.world.getServer();
-			BlockPos triggeredBlockPos = new BlockPos(this.pos.getX() + this.secondTriggeredBlock.getLeft().getX(), this.pos.getY() + this.secondTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.secondTriggeredBlock.getLeft().getZ());
+		if (this.level != null) {
+			String worldName = this.level.dimension().identifier().getPath();
+			MinecraftServer server = this.level.getServer();
+			BlockPos triggeredBlockPos = new BlockPos(this.worldPosition.getX() + this.secondTriggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.secondTriggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.secondTriggeredBlock.getLeft().getZ());
 			boolean triggeredBlockResets = this.secondTriggeredBlock.getRight();
 			if (server != null && UUIDUtilities.isStringValidUUID(worldName)) {
-				ServerPlayerEntity serverPlayerEntity = server.getPlayerManager().getPlayer(UUID.fromString(worldName));
+				ServerPlayer serverPlayerEntity = server.getPlayerList().getPlayer(UUID.fromString(worldName));
 				if (serverPlayerEntity != null) {
-					PlayerAdvancementTracker advancementTracker = server.getPlayerManager().getAdvancementTracker(serverPlayerEntity);
+					PlayerAdvancements advancementTracker = server.getPlayerList().getPlayerAdvancements(serverPlayerEntity);
 					if (advancementTracker != null) {
-						AdvancementEntry checkedAdvancementEntry = server.getAdvancementLoader().get(Identifier.tryParse(this.checkedAdvancementIdentifier));
-						if (checkedAdvancementEntry != null && advancementTracker.getProgress(checkedAdvancementEntry).isDone()) {
-							triggeredBlockPos = new BlockPos(this.pos.getX() + this.firstTriggeredBlock.getLeft().getX(), this.pos.getY() + this.firstTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.firstTriggeredBlock.getLeft().getZ());
+						AdvancementHolder checkedAdvancementEntry = server.getAdvancements().get(Identifier.tryParse(this.checkedAdvancementIdentifier));
+						if (checkedAdvancementEntry != null && advancementTracker.getOrStartProgress(checkedAdvancementEntry).isDone()) {
+							triggeredBlockPos = new BlockPos(this.worldPosition.getX() + this.firstTriggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.firstTriggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.firstTriggeredBlock.getLeft().getZ());
 							triggeredBlockResets = this.firstTriggeredBlock.getRight();
 						}
 					}
 				}
 			}
-			BlockEntity blockEntity = world.getBlockEntity(triggeredBlockPos);
+			BlockEntity blockEntity = level.getBlockEntity(triggeredBlockPos);
 			if (blockEntity != this) {
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
 					resetable.reset();
@@ -144,30 +144,30 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				this.firstTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.firstTriggeredBlock.getLeft(), blockRotation));
 
 				this.secondTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.secondTriggeredBlock.getLeft(), blockRotation));
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				this.firstTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.firstTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.firstTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.firstTriggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
-				this.secondTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.secondTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.secondTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.secondTriggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				this.firstTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.firstTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.firstTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.firstTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.secondTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.secondTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.secondTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.secondTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

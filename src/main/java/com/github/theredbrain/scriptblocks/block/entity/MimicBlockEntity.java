@@ -8,17 +8,17 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 	private BlockPos activeMimicBlockPositionOffset = new BlockPos(0, 1, 0);
@@ -29,21 +29,21 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		view.put("active_mimic_block_position_offset", BlockPos.CODEC, this.activeMimicBlockPositionOffset);
+		view.store("active_mimic_block_position_offset", BlockPos.CODEC, this.activeMimicBlockPositionOffset);
 
-		view.put("inactive_mimic_block_position_offset", BlockPos.CODEC, this.inactiveMimicBlockPositionOffset);
+		view.store("inactive_mimic_block_position_offset", BlockPos.CODEC, this.inactiveMimicBlockPositionOffset);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.activeMimicBlockPositionOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("active_mimic_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("active_mimic_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
@@ -51,22 +51,22 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 
 		this.inactiveMimicBlockPositionOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("inactive_mimic_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("inactive_mimic_block_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -98,56 +98,56 @@ public class MimicBlockEntity extends RotatedBlockEntity implements Triggerable,
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.activeMimicBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.activeMimicBlockPositionOffset, blockRotation);
 				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.inactiveMimicBlockPositionOffset, blockRotation);
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
-				this.activeMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.activeMimicBlockPositionOffset, BlockMirror.FRONT_BACK);
-				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.inactiveMimicBlockPositionOffset, BlockMirror.FRONT_BACK);
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+				this.activeMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.activeMimicBlockPositionOffset, Mirror.FRONT_BACK);
+				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.inactiveMimicBlockPositionOffset, Mirror.FRONT_BACK);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
-				this.activeMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.activeMimicBlockPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.inactiveMimicBlockPositionOffset, BlockMirror.LEFT_RIGHT);
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+				this.activeMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.activeMimicBlockPositionOffset, Mirror.LEFT_RIGHT);
+				this.inactiveMimicBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.inactiveMimicBlockPositionOffset, Mirror.LEFT_RIGHT);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
 
 	@Override
 	public void reset() {
-		if (this.world != null) {
-			BlockEntity blockEntity = this.world.getBlockEntity(this.pos);
-			if (blockEntity != null && blockEntity.getCachedState().getBlock() instanceof MimicBlock) {
-				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(Properties.TRIGGERED, false));
+		if (this.level != null) {
+			BlockEntity blockEntity = this.level.getBlockEntity(this.worldPosition);
+			if (blockEntity != null && blockEntity.getBlockState().getBlock() instanceof MimicBlock) {
+				this.level.setBlockAndUpdate(this.worldPosition, blockEntity.getBlockState().setValue(BlockStateProperties.TRIGGERED, false));
 			}
 		}
 	}
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
-			BlockEntity blockEntity = this.world.getBlockEntity(this.pos);
-			if (blockEntity != null && blockEntity.getCachedState().getBlock() instanceof MimicBlock) {
-				this.world.setBlockState(this.pos, blockEntity.getCachedState().with(Properties.TRIGGERED, true));
+		if (this.level != null) {
+			BlockEntity blockEntity = this.level.getBlockEntity(this.worldPosition);
+			if (blockEntity != null && blockEntity.getBlockState().getBlock() instanceof MimicBlock) {
+				this.level.setBlockAndUpdate(this.worldPosition, blockEntity.getBlockState().setValue(BlockStateProperties.TRIGGERED, true));
 			}
 		}
 	}
 
 	public BlockState getCurrentMimicBlockState() {
-		BlockState fallbackMimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.getDefaultState();
-		if (this.world != null && this.world.getBlockState(this.pos).isOf(ScriptBlocksBlocks.MIMIC_BLOCK)) {
+		BlockState fallbackMimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.defaultBlockState();
+		if (this.level != null && this.level.getBlockState(this.worldPosition).is(ScriptBlocksBlocks.MIMIC_BLOCK)) {
 			BlockPos mimicBlockPos;
-			if (this.world.getBlockState(this.pos).get(Properties.TRIGGERED)) {
-				mimicBlockPos = pos.add(this.activeMimicBlockPositionOffset.getX(), this.activeMimicBlockPositionOffset.getY(), this.activeMimicBlockPositionOffset.getZ());
+			if (this.level.getBlockState(this.worldPosition).getValue(BlockStateProperties.TRIGGERED)) {
+				mimicBlockPos = worldPosition.offset(this.activeMimicBlockPositionOffset.getX(), this.activeMimicBlockPositionOffset.getY(), this.activeMimicBlockPositionOffset.getZ());
 			} else {
-				mimicBlockPos = pos.add(this.inactiveMimicBlockPositionOffset.getX(), this.inactiveMimicBlockPositionOffset.getY(), this.inactiveMimicBlockPositionOffset.getZ());
+				mimicBlockPos = worldPosition.offset(this.inactiveMimicBlockPositionOffset.getX(), this.inactiveMimicBlockPositionOffset.getY(), this.inactiveMimicBlockPositionOffset.getZ());
 			}
-			BlockState mimicBlockState = world.getBlockState(mimicBlockPos);
-			if (!mimicBlockState.isOf(ScriptBlocksBlocks.MIMIC_BLOCK)) {
+			BlockState mimicBlockState = level.getBlockState(mimicBlockPos);
+			if (!mimicBlockState.is(ScriptBlocksBlocks.MIMIC_BLOCK)) {
 				return mimicBlockState;
 			}
 		}

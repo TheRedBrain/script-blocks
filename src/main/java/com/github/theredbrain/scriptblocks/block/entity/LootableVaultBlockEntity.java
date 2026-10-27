@@ -13,43 +13,43 @@ import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.VaultBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.VaultBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -73,35 +73,35 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	@Nullable
 	@Override
-	public Packet<ClientPlayPacketListener> toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return Util.make(new NbtCompound(), nbt -> view.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup)));
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return Util.make(new CompoundTag(), nbt -> view.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup)));
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 //		if (!this.lootableVaultConfigIdentifier.isEmpty()) {
 		view.putString("config_identifier", this.lootableVaultConfigIdentifier);
 //		}
 //		view.put("config", encodeValue(LootableVaultConfig.CODEC, this.config, registryLookup));
-		view.put("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup));
-		view.put("server_data", encodeValue(LootableVaultServerData.CODEC, this.serverData, registryLookup));
+		view.store("shared_data", encodeValue(LootableVaultSharedData.CODEC, this.sharedData, registryLookup));
+		view.store("server_data", encodeValue(LootableVaultServerData.CODEC, this.serverData, registryLookup));
 
-		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Lootable Vault Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.world != null ? this.world.getServer() : null);
-		super.writeData(view);
+		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Lootable Vault Block detected at: " + this.worldPosition.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.level != null ? this.level.getServer() : null);
+		super.saveAdditional(view);
 	}
 
-	private static <T> NbtElement encodeValue(Codec<T> codec, T value, RegistryWrapper.WrapperLookup registries) {
-		return codec.encodeStart(registries.getOps(NbtOps.INSTANCE), value).getOrThrow();
+	private static <T> Tag encodeValue(Codec<T> codec, T value, HolderLookup.Provider registries) {
+		return codec.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), value).getOrThrow();
 	}
 
 	@Override
-	protected void readData(ReadView view) {
-		DynamicOps<NbtElement> dynamicOps = registryLookup.getOps(NbtOps.INSTANCE);
+	protected void loadAdditional(ValueInput view) {
+		DynamicOps<Tag> dynamicOps = registryLookup.getOps(NbtOps.INSTANCE);
 		if (nbt.contains("server_data")) {
 			LootableVaultServerData.CODEC.parse(dynamicOps, view.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::copyFrom);
 		}
@@ -111,14 +111,14 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //		}
 
 //		if (nbt.contains("config_identifier")) {
-		this.lootableVaultConfigIdentifier = view.getString("config_identifier");
+		this.lootableVaultConfigIdentifier = view.getStringOr("config_identifier");
 //		}
 
 		if (nbt.contains("shared_data")) {
 			LootableVaultSharedData.CODEC.parse(dynamicOps, view.get("shared_data")).resultOrPartial(LOGGER::error).ifPresent(this.sharedData::copyFrom);
 		}
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
 //	public boolean isOminous() {
@@ -133,7 +133,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	@Nullable
 	public LootableVaultServerData getServerData() {
-		return this.world != null && !this.world.isClient ? this.serverData : null;
+		return this.level != null && !this.level.isClientSide ? this.serverData : null;
 	}
 
 	public LootableVaultSharedData getSharedData() {
@@ -144,18 +144,18 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		return this.clientData;
 	}
 
-	public void markAsRewarded(ServerPlayerEntity serverPlayerEntity, ItemStack itemStack) {
-		if (this.world instanceof ServerWorld serverWorld) {
+	public void markAsRewarded(ServerPlayer serverPlayerEntity, ItemStack itemStack) {
+		if (this.level instanceof ServerLevel serverWorld) {
 			LootableVaultServerData serverData = this.getServerData();
 			LootableVaultSharedData sharedData = this.getSharedData();
 			LootableVaultConfig config = this.getConfig(serverWorld);
 			if (serverData != null && sharedData != null) {
 //				ScriptBlocks.info("loot supplied");
-				serverPlayerEntity.incrementStat(Stats.USED.getOrCreateStat(itemStack.getItem()));
-				itemStack.decrementUnlessCreative(config.keyItem().getCount(), serverPlayerEntity);
-				Server.unlock(serverWorld, serverWorld.getBlockState(this.pos), this.pos, config, serverData, sharedData);
+				serverPlayerEntity.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+				itemStack.consume(config.keyItem().getCount(), serverPlayerEntity);
+				Server.unlock(serverWorld, serverWorld.getBlockState(this.worldPosition), this.worldPosition, config, serverData, sharedData);
 				serverData.markPlayerAsRewarded(serverPlayerEntity);
-				sharedData.updateConnectedPlayers(serverWorld, this.pos, serverData, config, config.deactivationRange());
+				sharedData.updateConnectedPlayers(serverWorld, this.worldPosition, serverData, config, config.deactivationRange());
 			}
 		}
 	}
@@ -182,9 +182,9 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //		this.lootableVaultConfigIdentifier = lootableVaultConfigIdentifier;
 //	}
 
-	public LootableVaultConfig getConfig(World world) {
+	public LootableVaultConfig getConfig(Level world) {
 //		return this.config;
-		LootableVaultConfig lootableVaultConfig = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY).get(Identifier.of(this.lootableVaultConfigIdentifier));
+		LootableVaultConfig lootableVaultConfig = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY).get(Identifier.parse(this.lootableVaultConfigIdentifier));
 		if (lootableVaultConfig != null) {
 			return lootableVaultConfig;
 		}
@@ -206,66 +206,66 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		private static final int field_48873 = 20;
 		private static final int field_48874 = 20;
 
-		public static void tick(World world, BlockPos pos, BlockState state, LootableVaultClientData clientData, LootableVaultSharedData sharedData) {
+		public static void tick(Level world, BlockPos pos, BlockState state, LootableVaultClientData clientData, LootableVaultSharedData sharedData) {
 			clientData.rotateDisplay();
-			if (world.getTime() % 20L == 0L) {
+			if (world.getGameTime() % 20L == 0L) {
 				spawnConnectedParticles(world, pos, state, sharedData);
 			}
 
-			spawnAmbientParticles(world, pos, sharedData, state.get(VaultBlock.OMINOUS) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.SMALL_FLAME);
+			spawnAmbientParticles(world, pos, sharedData, state.getValue(VaultBlock.OMINOUS) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.SMALL_FLAME);
 			playAmbientSound(world, pos, sharedData);
 		}
 
-		public static void spawnActivateParticles(World world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData, ParticleEffect particle) {
+		public static void spawnActivateParticles(Level world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData, ParticleOptions particle) {
 			spawnConnectedParticles(world, pos, state, sharedData);
-			Random random = world.random;
+			RandomSource random = world.random;
 
 			for (int i = 0; i < 20; i++) {
-				Vec3d vec3d = getRegularParticlesPos(pos, random);
-				world.addParticle(ParticleTypes.SMOKE, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0.0, 0.0, 0.0);
-				world.addParticle(particle, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0.0, 0.0, 0.0);
+				Vec3 vec3d = getRegularParticlesPos(pos, random);
+				world.addParticle(ParticleTypes.SMOKE, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
+				world.addParticle(particle, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
 			}
 		}
 
-		public static void spawnDeactivateParticles(World world, BlockPos pos, ParticleEffect particle) {
-			Random random = world.random;
+		public static void spawnDeactivateParticles(Level world, BlockPos pos, ParticleOptions particle) {
+			RandomSource random = world.random;
 
 			for (int i = 0; i < 20; i++) {
-				Vec3d vec3d = getDeactivateParticlesPos(pos, random);
-				Vec3d vec3d2 = new Vec3d(random.nextGaussian() * 0.02, random.nextGaussian() * 0.02, random.nextGaussian() * 0.02);
-				world.addParticle(particle, vec3d.getX(), vec3d.getY(), vec3d.getZ(), vec3d2.getX(), vec3d2.getY(), vec3d2.getZ());
+				Vec3 vec3d = getDeactivateParticlesPos(pos, random);
+				Vec3 vec3d2 = new Vec3(random.nextGaussian() * 0.02, random.nextGaussian() * 0.02, random.nextGaussian() * 0.02);
+				world.addParticle(particle, vec3d.x(), vec3d.y(), vec3d.z(), vec3d2.x(), vec3d2.y(), vec3d2.z());
 			}
 		}
 
-		private static void spawnAmbientParticles(World world, BlockPos pos, LootableVaultSharedData sharedData, ParticleEffect particle) {
-			Random random = world.getRandom();
+		private static void spawnAmbientParticles(Level world, BlockPos pos, LootableVaultSharedData sharedData, ParticleOptions particle) {
+			RandomSource random = world.getRandom();
 			if (random.nextFloat() <= 0.5F) {
-				Vec3d vec3d = getRegularParticlesPos(pos, random);
-				world.addParticle(ParticleTypes.SMOKE, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0.0, 0.0, 0.0);
+				Vec3 vec3d = getRegularParticlesPos(pos, random);
+				world.addParticle(ParticleTypes.SMOKE, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
 				if (hasDisplayItem(sharedData)) {
-					world.addParticle(particle, vec3d.getX(), vec3d.getY(), vec3d.getZ(), 0.0, 0.0, 0.0);
+					world.addParticle(particle, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
 				}
 			}
 		}
 
-		private static void spawnConnectedParticlesFor(World world, Vec3d pos, PlayerEntity player) {
-			Random random = world.random;
-			Vec3d vec3d = pos.relativize(player.getPos().add(0.0, (double) (player.getHeight() / 2.0F), 0.0));
-			int i = MathHelper.nextInt(random, 2, 5);
+		private static void spawnConnectedParticlesFor(Level world, Vec3 pos, Player player) {
+			RandomSource random = world.random;
+			Vec3 vec3d = pos.vectorTo(player.getPos().add(0.0, (double) (player.getBbHeight() / 2.0F), 0.0));
+			int i = Mth.nextInt(random, 2, 5);
 
 			for (int j = 0; j < i; j++) {
-				Vec3d vec3d2 = vec3d.addRandom(random, 1.0F);
-				world.addParticle(ParticleTypes.VAULT_CONNECTION, pos.getX(), pos.getY(), pos.getZ(), vec3d2.getX(), vec3d2.getY(), vec3d2.getZ());
+				Vec3 vec3d2 = vec3d.offsetRandom(random, 1.0F);
+				world.addParticle(ParticleTypes.VAULT_CONNECTION, pos.x(), pos.y(), pos.z(), vec3d2.x(), vec3d2.y(), vec3d2.z());
 			}
 		}
 
-		private static void spawnConnectedParticles(World world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData) {
+		private static void spawnConnectedParticles(Level world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData) {
 			Set<UUID> set = sharedData.getConnectedPlayers();
 			if (!set.isEmpty()) {
-				Vec3d vec3d = getConnectedParticlesOrigin(pos, state.get(VaultBlock.FACING));
+				Vec3 vec3d = getConnectedParticlesOrigin(pos, state.getValue(VaultBlock.FACING));
 
 				for (UUID uUID : set) {
-					PlayerEntity playerEntity = world.getPlayerByUuid(uUID);
+					Player playerEntity = world.getPlayerByUUID(uUID);
 					if (playerEntity != null && isPlayerWithinConnectedParticlesRange(pos, sharedData, playerEntity)) {
 						spawnConnectedParticlesFor(world, vec3d, playerEntity);
 					}
@@ -273,16 +273,16 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			}
 		}
 
-		private static boolean isPlayerWithinConnectedParticlesRange(BlockPos pos, LootableVaultSharedData sharedData, PlayerEntity player) {
-			return player.getBlockPos().getSquaredDistance(pos) <= MathHelper.square(sharedData.getConnectedParticlesRange());
+		private static boolean isPlayerWithinConnectedParticlesRange(BlockPos pos, LootableVaultSharedData sharedData, Player player) {
+			return player.blockPosition().distSqr(pos) <= Mth.square(sharedData.getConnectedParticlesRange());
 		}
 
-		private static void playAmbientSound(World world, BlockPos pos, LootableVaultSharedData sharedData) {
+		private static void playAmbientSound(Level world, BlockPos pos, LootableVaultSharedData sharedData) {
 			if (hasDisplayItem(sharedData)) {
-				Random random = world.getRandom();
+				RandomSource random = world.getRandom();
 				if (random.nextFloat() <= 0.02F) {
 					world.playSoundAtBlockCenter(
-							pos, SoundEvents.BLOCK_VAULT_AMBIENT, SoundCategory.BLOCKS, random.nextFloat() * 0.25F + 0.75F, random.nextFloat() + 0.5F, false
+							pos, SoundEvents.VAULT_AMBIENT, SoundSource.BLOCKS, random.nextFloat() * 0.25F + 0.75F, random.nextFloat() + 0.5F, false
 					);
 				}
 			}
@@ -292,16 +292,16 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			return sharedData.hasDisplayItem();
 		}
 
-		private static Vec3d getDeactivateParticlesPos(BlockPos pos, Random random) {
-			return Vec3d.of(pos).add(MathHelper.nextDouble(random, 0.4, 0.6), MathHelper.nextDouble(random, 0.4, 0.6), MathHelper.nextDouble(random, 0.4, 0.6));
+		private static Vec3 getDeactivateParticlesPos(BlockPos pos, RandomSource random) {
+			return Vec3.atLowerCornerOf(pos).add(Mth.nextDouble(random, 0.4, 0.6), Mth.nextDouble(random, 0.4, 0.6), Mth.nextDouble(random, 0.4, 0.6));
 		}
 
-		private static Vec3d getRegularParticlesPos(BlockPos pos, Random random) {
-			return Vec3d.of(pos).add(MathHelper.nextDouble(random, 0.1, 0.9), MathHelper.nextDouble(random, 0.25, 0.75), MathHelper.nextDouble(random, 0.1, 0.9));
+		private static Vec3 getRegularParticlesPos(BlockPos pos, RandomSource random) {
+			return Vec3.atLowerCornerOf(pos).add(Mth.nextDouble(random, 0.1, 0.9), Mth.nextDouble(random, 0.25, 0.75), Mth.nextDouble(random, 0.1, 0.9));
 		}
 
-		private static Vec3d getConnectedParticlesOrigin(BlockPos pos, Direction direction) {
-			return Vec3d.ofBottomCenter(pos).add((double) direction.getOffsetX() * 0.5, 1.75, (double) direction.getOffsetZ() * 0.5);
+		private static Vec3 getConnectedParticlesOrigin(BlockPos pos, Direction direction) {
+			return Vec3.atBottomCenterOf(pos).add((double) direction.getStepX() * 0.5, 1.75, (double) direction.getStepZ() * 0.5);
 		}
 	}
 
@@ -310,24 +310,24 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		private static final int DISPLAY_UPDATE_INTERVAL = 20;
 		private static final int FAILED_UNLOCK_COOLDOWN = 15;
 
-		public static void tick(ServerWorld world, BlockPos pos, BlockState state, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData) {
-			LootableVaultState vaultState = state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE);
-			if (shouldUpdateDisplayItem(world.getTime(), vaultState)) {
+		public static void tick(ServerLevel world, BlockPos pos, BlockState state, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData) {
+			LootableVaultState vaultState = state.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
+			if (shouldUpdateDisplayItem(world.getGameTime(), vaultState)) {
 				updateDisplayItem(world, vaultState, config, sharedData, pos);
 			}
 
 			BlockState blockState = state;
-			if (world.getTime() >= serverData.getStateUpdatingResumeTime()) {
-				blockState = state.with(LootableVaultBlock.LOOTABLE_VAULT_STATE, vaultState.update(world, pos, config, serverData, sharedData));
+			if (world.getGameTime() >= serverData.getStateUpdatingResumeTime()) {
+				blockState = state.setValue(LootableVaultBlock.LOOTABLE_VAULT_STATE, vaultState.update(world, pos, config, serverData, sharedData));
 				if (!state.equals(blockState)) {
 					changeVaultState(world, pos, state, blockState, config, sharedData);
 				}
 			}
 
 			if (serverData.isDirty() || sharedData.isDirty()) {
-				LootableVaultBlockEntity.markDirty(world, pos, state);
+				LootableVaultBlockEntity.setChanged(world, pos, state);
 				if (sharedData.isDirty()) {
-					world.updateListeners(pos, state, blockState, Block.NOTIFY_LISTENERS);
+					world.sendBlockUpdated(pos, state, blockState, Block.UPDATE_CLIENTS);
 				}
 
 				serverData.markClean();
@@ -336,31 +336,31 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		}
 
 		public static void tryUnlock(
-				ServerWorld world,
+				ServerLevel world,
 				BlockPos pos,
 				BlockState state,
 				LootableVaultConfig config,
 				LootableVaultServerData serverData,
 				LootableVaultSharedData sharedData,
-				PlayerEntity player,
+				Player player,
 				ItemStack stack
 		) {
-			LootableVaultState vaultState = state.get(LootableVaultBlock.LOOTABLE_VAULT_STATE);
+			LootableVaultState vaultState = state.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
 			if (canBeUnlocked(config, vaultState)) {
 				if (!isValidKey(config, stack)) {
 					ScriptBlocks.info("invalid key");
-					playFailedUnlockSound(world, serverData, pos, SoundEvents.BLOCK_VAULT_INSERT_ITEM_FAIL);
+					playFailedUnlockSound(world, serverData, pos, SoundEvents.VAULT_INSERT_ITEM_FAIL);
 				} else if (serverData.hasRewardedPlayer(player)) {
 					ScriptBlocks.info("player already rewarded");
-					playFailedUnlockSound(world, serverData, pos, SoundEvents.BLOCK_VAULT_REJECT_REWARDED_PLAYER);
-				} else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+					playFailedUnlockSound(world, serverData, pos, SoundEvents.VAULT_REJECT_REWARDED_PLAYER);
+				} else if (player instanceof ServerPlayer serverPlayerEntity) {
 					// TODO loot
 //					Vec3d lootPos = new Vec3d(this.getPos().getX(), interactiveLootBlockEntity.getPos().getY(), interactiveLootBlockEntity.getPos().getZ());
 //					boolean lootSupplied = ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice());
 
 //					List<ItemStack> list = generateLoot(world, config, pos, player);
 					/*if (*/
-					ScriptBlocks.supplyLootableLoot(Identifier.of(config.lootableIdentifier()), world, serverPlayerEntity, Vec3d.of(pos), config.rolls(), config.choices(), config.withChoice(), stack);/*) {
+					ScriptBlocks.supplyLootableLoot(Identifier.parse(config.lootableIdentifier()), world, serverPlayerEntity, Vec3.atLowerCornerOf(pos), config.rolls(), config.choices(), config.withChoice(), stack);/*) {
 						ScriptBlocks.info("loot supplied");
 						player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
 						stack.decrementUnlessCreative(config.keyItem().getCount(), player);
@@ -372,41 +372,41 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			}
 		}
 
-		static void changeVaultState(ServerWorld world, BlockPos pos, BlockState oldState, BlockState newState, LootableVaultConfig config, LootableVaultSharedData sharedData) {
-			LootableVaultState vaultState = oldState.get(LootableVaultBlock.LOOTABLE_VAULT_STATE);
-			LootableVaultState vaultState2 = newState.get(LootableVaultBlock.LOOTABLE_VAULT_STATE);
-			world.setBlockState(pos, newState, Block.NOTIFY_ALL);
-			vaultState.onStateChange(world, pos, vaultState2, config, sharedData, (Boolean) newState.get(VaultBlock.OMINOUS));
+		static void changeVaultState(ServerLevel world, BlockPos pos, BlockState oldState, BlockState newState, LootableVaultConfig config, LootableVaultSharedData sharedData) {
+			LootableVaultState vaultState = oldState.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
+			LootableVaultState vaultState2 = newState.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
+			world.setBlock(pos, newState, Block.UPDATE_ALL);
+			vaultState.onStateChange(world, pos, vaultState2, config, sharedData, (Boolean) newState.getValue(VaultBlock.OMINOUS));
 		}
 
-		public static void updateDisplayItem(ServerWorld world, LootableVaultState state, LootableVaultConfig config, LootableVaultSharedData sharedData, BlockPos pos) {
+		public static void updateDisplayItem(ServerLevel world, LootableVaultState state, LootableVaultConfig config, LootableVaultSharedData sharedData, BlockPos pos) {
 			if (!canBeUnlocked(config, state)) {
 				sharedData.setDisplayItem(ItemStack.EMPTY);
 			} else {
 				ItemStack itemStack = ItemStack.EMPTY;
 				if (!config.displayLootTableIdentifier().isEmpty()) {
-					itemStack = generateDisplayItem(world, pos, world.getServer().getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(config.displayLootTableIdentifier()))));
+					itemStack = generateDisplayItem(world, pos, world.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, Identifier.parse(config.displayLootTableIdentifier()))));
 				}
 				sharedData.setDisplayItem(itemStack);
 			}
 		}
 
-		private static ItemStack generateDisplayItem(ServerWorld world, BlockPos pos, LootTable lootTable) {
+		private static ItemStack generateDisplayItem(ServerLevel world, BlockPos pos, LootTable lootTable) {
 //			LootTable lootTable2 = world.getServer().getReloadableRegistries().getLootTable(lootTable);
 			LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(world)
-					.add(LootContextParameters.ORIGIN, Vec3d.ofCenter(pos))
-					.build(LootContextTypes.VAULT);
-			List<ItemStack> list = lootTable.generateLoot(lootContextParameterSet, world.getRandom());
+					.add(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
+					.build(LootContextParamSets.VAULT);
+			List<ItemStack> list = lootTable.getRandomItems(lootContextParameterSet, world.getRandom());
 			return list.isEmpty() ? ItemStack.EMPTY : Util.getRandom(list, world.getRandom());
 		}
 
 		public static void unlock(
-				ServerWorld world, BlockState state, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData
+				ServerLevel world, BlockState state, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData
 		) {
 //			serverData.setItemsToEject(itemsToEject);
 			sharedData.setDisplayItem(ItemStack.EMPTY);
-			serverData.setStateUpdatingResumeTime(world.getTime() + 14L);
-			changeVaultState(world, pos, state, state.with(LootableVaultBlock.LOOTABLE_VAULT_STATE, LootableVaultState.UNLOCKING), config, sharedData);
+			serverData.setStateUpdatingResumeTime(world.getGameTime() + 14L);
+			changeVaultState(world, pos, state, state.setValue(LootableVaultBlock.LOOTABLE_VAULT_STATE, LootableVaultState.UNLOCKING), config, sharedData);
 		}
 
 //		private static List<ItemStack> generateLoot(ServerWorld world, LootableVaultConfig config, BlockPos pos, PlayerEntity player) {
@@ -424,17 +424,17 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		}
 
 		private static boolean isValidKey(LootableVaultConfig config, ItemStack stack) {
-			return ItemStack.areItemsAndComponentsEqual(stack, config.keyItem()) && stack.getCount() >= config.keyItem().getCount();
+			return ItemStack.isSameItemSameComponents(stack, config.keyItem()) && stack.getCount() >= config.keyItem().getCount();
 		}
 
 		private static boolean shouldUpdateDisplayItem(long time, LootableVaultState state) {
 			return time % 20L == 0L && state == LootableVaultState.ACTIVE;
 		}
 
-		private static void playFailedUnlockSound(ServerWorld world, LootableVaultServerData serverData, BlockPos pos, SoundEvent sound) {
-			if (world.getTime() >= serverData.getLastFailedUnlockTime() + 15L) {
-				world.playSound(null, pos, sound, SoundCategory.BLOCKS);
-				serverData.setLastFailedUnlockTime(world.getTime());
+		private static void playFailedUnlockSound(ServerLevel world, LootableVaultServerData serverData, BlockPos pos, SoundEvent sound) {
+			if (world.getGameTime() >= serverData.getLastFailedUnlockTime() + 15L) {
+				world.playSound(null, pos, sound, SoundSource.BLOCKS);
+				serverData.setLastFailedUnlockTime(world.getGameTime());
 			}
 		}
 	}

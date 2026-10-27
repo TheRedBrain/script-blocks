@@ -5,18 +5,18 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -27,10 +27,10 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 	@Override
 	public void receive(UpdateTriggeredSpawnerBlockPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -47,11 +47,11 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 
 		String entityTypeId = payload.entityTypeId();
 
-		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList = payload.entityAttributeModifiersList();
+		List<MutablePair<Identifier, AttributeModifier>> entityAttributeModifiersList = payload.entityAttributeModifiersList();
 
-		Multimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
-		for (MutablePair<Identifier, EntityAttributeModifier> entityAttributeModifiersListEntry : entityAttributeModifiersList) {
-			Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(entityAttributeModifiersListEntry.getLeft());
+		Multimap<Holder<Attribute>, AttributeModifier> entityAttributeModifiers = Multimaps.newMultimap(Maps.newLinkedHashMap(), ArrayList::new);
+		for (MutablePair<Identifier, AttributeModifier> entityAttributeModifiersListEntry : entityAttributeModifiersList) {
+			Optional<Holder.Reference<Attribute>> optional = BuiltInRegistries.ATTRIBUTE.get(entityAttributeModifiersListEntry.getLeft());
 			optional.ifPresent(entityAttributeReference -> entityAttributeModifiers.put(entityAttributeReference, entityAttributeModifiersListEntry.getRight()));
 		}
 
@@ -60,7 +60,7 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 		BlockPos triggeredBlockPositionOffset = payload.triggeredBlockPositionOffset();
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		boolean updateSuccessful = true;
 
@@ -71,28 +71,28 @@ public class UpdateTriggeredSpawnerBlockPacketReceiver implements ServerPlayNetw
 			triggeredSpawnerBlockEntity.reset();
 			triggeredSpawnerBlockEntity.setEntitySpawnPositionOffset(entitySpawnPositionOffset);
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionPitch(entitySpawnOrientationPitch)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_spawn_orientation_pitch.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_spawner_block.entity_spawn_orientation_pitch.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!triggeredSpawnerBlockEntity.setEntitySpawnPositionYaw(entitySpawnOrientationYaw)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_spawn_orientation_yaw.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_spawner_block.entity_spawn_orientation_yaw.invalid"), false);
 				updateSuccessful = false;
 			}
 			triggeredSpawnerBlockEntity.setSpawningMode(spawningMode);
 			triggeredSpawnerBlockEntity.setIsPersistent(isPersistent);
 			triggeredSpawnerBlockEntity.setEnableSpawnEffects(enableSpawnEffects);
 			if (!triggeredSpawnerBlockEntity.setEntityType(entityTypeId)) {
-				serverPlayerEntity.sendMessage(Text.translatable("triggered_spawner_block.entity_type_id.invalid"), false);
+				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_spawner_block.entity_type_id.invalid"), false);
 				updateSuccessful = false;
 			}
 			triggeredSpawnerBlockEntity.setEntityAttributeModifiers(entityAttributeModifiers);
 			triggeredSpawnerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			triggeredSpawnerBlockEntity.setUseRelayBlockPositionOffset(useRelayBlockPositionOffset);
 			if (updateSuccessful) {
-				serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
-			triggeredSpawnerBlockEntity.markDirty();
-			world.updateListeners(triggeredSpawnerBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			triggeredSpawnerBlockEntity.setChanged();
+			world.sendBlockUpdated(triggeredSpawnerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

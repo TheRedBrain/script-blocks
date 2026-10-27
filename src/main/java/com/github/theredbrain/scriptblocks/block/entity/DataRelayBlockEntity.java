@@ -7,20 +7,19 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable, ProvidesData {
 	private final List<BlockPos> dataProvidingBlockPosOffsetList = new ArrayList<>();
@@ -31,30 +30,30 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		NbtCompound nbtCompound;
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("data_providing_blocks", NbtCompound.CODEC);
+		CompoundTag nbtCompound;
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("data_providing_blocks", CompoundTag.CODEC);
 		for (BlockPos blockPos : this.dataProvidingBlockPosOffsetList) {
-			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", BlockPos.CODEC, blockPos);
+			nbtCompound = new CompoundTag();
+			nbtCompound.store("position_offset", BlockPos.CODEC, blockPos);
 			listAppender.add(nbtCompound.copy());
 		}
 
 		view.putInt("index", this.index);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.dataProvidingBlockPosOffsetList.clear();
-		for (NbtCompound nbtCompound : view.getTypedListView("data_providing_blocks", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound : view.listOrEmpty("data_providing_blocks", CompoundTag.CODEC)) {
 			this.dataProvidingBlockPosOffsetList.add(
 					BlockPos.max(
 							BlockPos.min(
-									nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+									nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 									new BlockPos(48, 48, 48)
 							),
 							new BlockPos(-48, -48, -48)
@@ -62,26 +61,26 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 			);
 		}
 
-		this.index = view.getInt("index", 0);
+		this.index = view.getIntOr("index", 0);
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
 	@Override
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	@Override
 	public String getData(String id) {
 		BlockPos dataProvidingBlockPos = this.getCurrentDataProvidingBlockPosOffset();
-		if (dataProvidingBlockPos != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity1 = this.world.getBlockEntity(this.getActualDataProvidingBlockPos(dataProvidingBlockPos));
+		if (dataProvidingBlockPos != BlockPos.ZERO && this.level != null) {
+			BlockEntity blockEntity1 = this.level.getBlockEntity(this.getActualDataProvidingBlockPos(dataProvidingBlockPos));
 			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
 				return providesDataBlockEntity.getData(id);
 			}
@@ -92,8 +91,8 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	@Override
 	public void setData(String id, String value) {
 		BlockPos dataProvidingBlockPosOffset = this.getCurrentDataProvidingBlockPosOffset();
-		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity1 = this.world.getBlockEntity(this.getActualDataProvidingBlockPos(dataProvidingBlockPosOffset));
+		if (dataProvidingBlockPosOffset != BlockPos.ZERO && this.level != null) {
+			BlockEntity blockEntity1 = this.level.getBlockEntity(this.getActualDataProvidingBlockPos(dataProvidingBlockPosOffset));
 			if (blockEntity1 instanceof ProvidesData providesDataBlockEntity) {
 				providesDataBlockEntity.setData(id, value);
 			}
@@ -105,25 +104,25 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 			return this.dataProvidingBlockPosOffsetList.get(this.index);
 		} else if (!this.dataProvidingBlockPosOffsetList.isEmpty()) {
 			this.index = this.dataProvidingBlockPosOffsetList.size() - 1;
-			this.markDirty();
-			if (this.world != null) {
-				BlockState blockState = this.world.getBlockState(this.pos);
-				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			this.setChanged();
+			if (this.level != null) {
+				BlockState blockState = this.level.getBlockState(this.worldPosition);
+				this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 			}
 			return this.dataProvidingBlockPosOffsetList.getLast();
 		} else {
 			this.index = 0;
-			this.markDirty();
-			if (this.world != null) {
-				BlockState blockState = this.world.getBlockState(this.pos);
-				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			this.setChanged();
+			if (this.level != null) {
+				BlockState blockState = this.level.getBlockState(this.worldPosition);
+				this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 			}
-			return BlockPos.ORIGIN;
+			return BlockPos.ZERO;
 		}
 	}
 
 	private BlockPos getActualDataProvidingBlockPos(BlockPos dataProvidingBlockPosOffset) {
-		return this.getPos().add(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ());
+		return this.getBlockPos().offset(dataProvidingBlockPosOffset.getX(), dataProvidingBlockPosOffset.getY(), dataProvidingBlockPosOffset.getZ());
 	}
 
 	// region --- getter & setter ---
@@ -147,18 +146,18 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 		if (this.index >= this.dataProvidingBlockPosOffsetList.size()) {
 			this.index = 0;
 		}
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
 	@Override
 	public void reset() {
 		BlockPos dataProvidingBlockPosOffset = this.getCurrentDataProvidingBlockPosOffset();
-		if (dataProvidingBlockPosOffset != BlockPos.ORIGIN && this.world != null) {
-			BlockEntity blockEntity = this.world.getBlockEntity(this.getActualDataProvidingBlockPos(dataProvidingBlockPosOffset));
+		if (dataProvidingBlockPosOffset != BlockPos.ZERO && this.level != null) {
+			BlockEntity blockEntity = this.level.getBlockEntity(this.getActualDataProvidingBlockPos(dataProvidingBlockPosOffset));
 			if (blockEntity instanceof ProvidesData providesDataBlockEntity) {
 				providesDataBlockEntity.reset();
 			}
@@ -168,8 +167,8 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				List<BlockPos> newList = new ArrayList<>();
 				for (BlockPos triggeredBlock : this.dataProvidingBlockPosOffsetList) {
@@ -178,29 +177,29 @@ public class DataRelayBlockEntity extends RotatedBlockEntity implements Triggera
 				this.dataProvidingBlockPosOffsetList.clear();
 				this.dataProvidingBlockPosOffsetList.addAll(newList);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
 				List<BlockPos> newList = new ArrayList<>();
 				for (BlockPos triggeredBlock : this.dataProvidingBlockPosOffsetList) {
-					newList.add(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock, BlockMirror.FRONT_BACK));
+					newList.add(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock, Mirror.FRONT_BACK));
 				}
 				this.dataProvidingBlockPosOffsetList.clear();
 				this.dataProvidingBlockPosOffsetList.addAll(newList);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
 				List<BlockPos> newList = new ArrayList<>();
 				for (BlockPos triggeredBlock : this.dataProvidingBlockPosOffsetList) {
-					newList.add(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock, BlockMirror.LEFT_RIGHT));
+					newList.add(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock, Mirror.LEFT_RIGHT));
 				}
 				this.dataProvidingBlockPosOffsetList.clear();
 				this.dataProvidingBlockPosOffsetList.addAll(newList);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

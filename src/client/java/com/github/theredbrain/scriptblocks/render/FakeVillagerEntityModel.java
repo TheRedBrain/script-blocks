@@ -1,12 +1,12 @@
 package com.github.theredbrain.scriptblocks.render;
 
 import com.github.theredbrain.scriptblocks.entity.passive.FakeVillagerEntity;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.VillagerResemblingModel;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.npc.VillagerModel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 
-public class FakeVillagerEntityModel<T extends Entity> extends VillagerResemblingModel<T> {
+public class FakeVillagerEntityModel<T extends Entity> extends VillagerModel<T> {
 
 	public FakeVillagerEntityModel(ModelPart modelPart) {
 		super(modelPart);
@@ -19,7 +19,7 @@ public class FakeVillagerEntityModel<T extends Entity> extends VillagerResemblin
 			bl = ((FakeVillagerEntity) entity).getHeadRollingTimeLeft() > 0;
 		}
 		if (bl) {
-			this.getHead().roll = 0.3F * MathHelper.sin(0.45F * animationProgress);
+			this.getHead().roll = 0.3F * Mth.sin(0.45F * animationProgress);
 			this.getHead().pitch = 0.4F;
 		} else {
 			this.getHead().roll = 0.0F;

@@ -1,18 +1,20 @@
 package com.github.theredbrain.scriptblocks.world;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.dimension.DimensionTypes;
-import net.minecraft.world.gen.FlatLevelGeneratorPreset;
-import net.minecraft.world.gen.chunk.FlatChunkGenerator;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import xyz.nucleoid.fantasy.Fantasy;
-import xyz.nucleoid.fantasy.RuntimeWorldConfig;
+import xyz.nucleoid.fantasy.RuntimeLevelConfig;
+
+import java.util.Optional;
 
 public class DimensionsManager {
 
@@ -25,14 +27,14 @@ public class DimensionsManager {
 
 		Fantasy fantasy = Fantasy.get(server);
 
-		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
-				.setDimensionType(DimensionTypes.OVERWORLD)
+		RuntimeLevelConfig worldConfig = new RuntimeLevelConfig()
+				.setDimensionType(BuiltinDimensionTypes.OVERWORLD)
 				.setFlat(true)
 				.setMirrorOverworldDifficulty(true)
 				.setMirrorOverworldGameRules(true)
-				.setGenerator(server.getOverworld().getChunkManager().getChunkGenerator());
+				.setGenerator(server.overworld().getChunkSource().getGenerator());
 
-		fantasy.getOrOpenPersistentWorld(dimensionId, worldConfig);
+		fantasy.getOrOpenPersistentLevel(dimensionId, worldConfig);
 
 	}
 
@@ -40,22 +42,27 @@ public class DimensionsManager {
 
 		Fantasy fantasy = Fantasy.get(server);
 
-		DynamicRegistryManager.Immutable registryAccess = server.getRegistryManager();
+		RegistryAccess.Frozen registryAccess = server.registryAccess();
 
-		Registry<FlatLevelGeneratorPreset> flatLevelGeneratorPresetRegistry = registryAccess.get(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET);
+		Optional<Holder.Reference<Registry<FlatLevelGeneratorPreset>>> optionalFlatLevelGeneratorPresetRegistryReference = registryAccess.get(Registries.FLAT_LEVEL_GENERATOR_PRESET);
 
-		RegistryEntry.Reference<FlatLevelGeneratorPreset> flatLevelGeneratorPresetReference = flatLevelGeneratorPresetRegistry.entryOf(RegistryKey.of(RegistryKeys.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("player_locations_dimension")));
+		if (optionalFlatLevelGeneratorPresetRegistryReference.isPresent()) {
 
-		FlatChunkGenerator chunkGenerator = new FlatChunkGenerator(flatLevelGeneratorPresetReference.value().settings());
+			Optional<Holder.Reference<FlatLevelGeneratorPreset>> optionalFlatLevelGeneratorPresetReference = optionalFlatLevelGeneratorPresetRegistryReference.get().value().get(ResourceKey.create(Registries.FLAT_LEVEL_GENERATOR_PRESET, ScriptBlocks.identifier("player_locations_dimension")));
 
-		RuntimeWorldConfig worldConfig = new RuntimeWorldConfig()
-				.setDimensionType(DimensionTypes.OVERWORLD)
-				.setFlat(true)
-				.setMirrorOverworldDifficulty(true)
-				.setMirrorOverworldGameRules(true)
-				.setGenerator(chunkGenerator);
+			if (optionalFlatLevelGeneratorPresetReference.isPresent()) {
 
-		fantasy.getOrOpenPersistentWorld(dimensionId, worldConfig);
+				FlatLevelSource chunkGenerator = new FlatLevelSource(optionalFlatLevelGeneratorPresetReference.get().value().settings());
 
+				RuntimeLevelConfig worldConfig = new RuntimeLevelConfig()
+						.setDimensionType(BuiltinDimensionTypes.OVERWORLD)
+						.setFlat(true)
+						.setMirrorOverworldDifficulty(true)
+						.setMirrorOverworldGameRules(true)
+						.setGenerator(chunkGenerator);
+
+				fantasy.getOrOpenPersistentLevel(dimensionId, worldConfig);
+			}
+		}
 	}
 }

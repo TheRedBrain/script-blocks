@@ -2,14 +2,14 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateRelayTriggerBlockPacket(
 		BlockPos relayTriggerBlockPosition,
@@ -24,14 +24,14 @@ public record UpdateRelayTriggerBlockPacket(
 		BlockPos dataProvidingBlockPosOffset,
 		String dataIdentifier,
 		int triggerAmount
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateRelayTriggerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_relay_trigger_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateRelayTriggerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateRelayTriggerBlockPacket::write, UpdateRelayTriggerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateRelayTriggerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_relay_trigger_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateRelayTriggerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateRelayTriggerBlockPacket::write, UpdateRelayTriggerBlockPacket::new);
 
-	public UpdateRelayTriggerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateRelayTriggerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
@@ -41,16 +41,16 @@ public record UpdateRelayTriggerBlockPacket(
 				),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readInt());
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.relayTriggerBlockPosition);
-		registryByteBuf.writeString(this.selectionMode);
+		registryByteBuf.writeUtf(this.selectionMode);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeBoolean(this.resetsArea);
 
@@ -60,15 +60,15 @@ public record UpdateRelayTriggerBlockPacket(
 		registryByteBuf.writeBlockPos(this.areaPositionOffset);
 
 		registryByteBuf.writeCollection(this.triggeredBlocks, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER);
-		registryByteBuf.writeString(this.triggerMode);
+		registryByteBuf.writeUtf(this.triggerMode);
 		registryByteBuf.writeBoolean(this.isTriggerAmountDataDriven);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
-		registryByteBuf.writeString(this.dataIdentifier);
+		registryByteBuf.writeUtf(this.dataIdentifier);
 		registryByteBuf.writeInt(this.triggerAmount);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

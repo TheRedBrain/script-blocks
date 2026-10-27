@@ -1,32 +1,32 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateUseRelayBlockPacket(
 		BlockPos useRelayBlockPosition,
 		BlockPos relayBlockPositionOffset
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateUseRelayBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_use_relay_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateUseRelayBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateUseRelayBlockPacket::write, UpdateUseRelayBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateUseRelayBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_use_relay_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateUseRelayBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateUseRelayBlockPacket::write, UpdateUseRelayBlockPacket::new);
 
-	public UpdateUseRelayBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateUseRelayBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.useRelayBlockPosition);
 		registryByteBuf.writeBlockPos(this.relayBlockPositionOffset);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

@@ -1,34 +1,33 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateUUIDListRelayBlockPacket(
 		BlockPos uuidListRelayBlockPosition,
 		List<BlockPos> uuidListProviderPositionOffsets
-) implements CustomPayload {
-	public static final Id<UpdateUUIDListRelayBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_uuid_list_relay_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateUUIDListRelayBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateUUIDListRelayBlockPacket::write, UpdateUUIDListRelayBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateUUIDListRelayBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_uuid_list_relay_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateUUIDListRelayBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateUUIDListRelayBlockPacket::write, UpdateUUIDListRelayBlockPacket::new);
 
-	public UpdateUUIDListRelayBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateUUIDListRelayBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readList(BlockPos.PACKET_CODEC)
+				registryByteBuf.readList(BlockPos.STREAM_CODEC)
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.uuidListRelayBlockPosition);
-		registryByteBuf.writeCollection(this.uuidListProviderPositionOffsets, BlockPos.PACKET_CODEC);
+		registryByteBuf.writeCollection(this.uuidListProviderPositionOffsets, BlockPos.STREAM_CODEC);
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

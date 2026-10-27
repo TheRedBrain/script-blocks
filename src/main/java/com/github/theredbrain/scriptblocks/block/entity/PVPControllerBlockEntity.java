@@ -11,30 +11,6 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,13 +22,37 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 
 public class PVPControllerBlockEntity extends RotatedBlockEntity implements Resetable, Triggerable {
 
 	private String pvpArenaSettingsIdentifier = "";
 	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions = new HashMap<>(Map.of());
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
-	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 
 	private final Set<String> teamSet = new HashSet<>();
 	private final Set<UUID> playerUUIDSet = new HashSet<>();
@@ -67,89 +67,89 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
 		view.putString("pvp_arena_settings_identifier", this.pvpArenaSettingsIdentifier);
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("respawn_positions", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("respawn_positions", CompoundTag.CODEC);
 		this.respawnPositions.forEach((key, entry) -> {
-			NbtCompound nbtCompound = new NbtCompound();
+			CompoundTag nbtCompound = new CompoundTag();
 			nbtCompound.putString("key", key);
-			nbtCompound.put("position_offset", BlockPos.CODEC, this.respawnPositions.get(key).getLeft());
+			nbtCompound.store("position_offset", BlockPos.CODEC, this.respawnPositions.get(key).getLeft());
 			nbtCompound.putDouble("yaw", this.respawnPositions.get(key).getRight().getLeft());
 			nbtCompound.putDouble("pitch", this.respawnPositions.get(key).getRight().getRight());
 			listAppender.add(nbtCompound.copy());
 		});
 
-		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
+		CompoundTag nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
 
-		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
+		view.store("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
 		view.putString("match_duration_data_identifier", this.matchDurationDataIdentifier);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.pvpArenaSettingsIdentifier = view.getString("pvp_arena_settings_identifier", "");
+		this.pvpArenaSettingsIdentifier = view.getStringOr("pvp_arena_settings_identifier", "");
 
 		this.respawnPositions.clear();
-		for (NbtCompound nbtCompound : view.getTypedListView("respawn_positions", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound : view.listOrEmpty("respawn_positions", CompoundTag.CODEC)) {
 			this.respawnPositions.put(
-					nbtCompound.getString("key", ""),
+					nbtCompound.getStringOr("key", ""),
 					new MutablePair<>(
 							BlockPos.max(
 									BlockPos.min(
-											nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+											nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 											new BlockPos(48, 48, 48)
 									),
 									new BlockPos(-48, -48, -48)
 							),
 							new MutablePair<>(
-									MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180),
-									MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90)
+									Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
+									Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
 							)
 					)
 			);
 		}
 
-		NbtCompound nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets", false)
+				nbtCompound.getBooleanOr("resets", false)
 		);
 
 		this.dataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.matchDurationDataIdentifier = view.getString("match_duration_data_identifier", "");
+		this.matchDurationDataIdentifier = view.getStringOr("match_duration_data_identifier", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -160,8 +160,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	public boolean setPVPArenaSettingsIdentifier(String newPVPArenaSettingsIdentifier) {
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(newPVPArenaSettingsIdentifier);
-		if (identifier != null && this.world != null) {
-			Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+		if (identifier != null && this.level != null) {
+			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
 			if (optionalPVPArenaSettingsReference.isPresent()) {
 				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
 			}
@@ -211,8 +211,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	public MutablePair<BlockPos, MutablePair<Double, Double>> getTeamRespawnPosition(String teamId, boolean endOfBattle) {
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
-		if (identifier != null && this.world != null) {
-			Optional<RegistryEntry.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+		if (identifier != null && this.level != null) {
+			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
 			if (optionalPVPArenaSettingsReference.isPresent()) {
 				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
 			}
@@ -229,22 +229,22 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		return null;
 	}
 
-	public void addPlayerAndTeam(Team team, PlayerEntity playerEntity) {
+	public void addPlayerAndTeam(PlayerTeam team, Player playerEntity) {
 		this.teamSet.add(team.getName());
-		this.playerUUIDSet.add(playerEntity.getUuid());
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.playerUUIDSet.add(playerEntity.getUUID());
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
-	public void removePlayer(PlayerEntity playerEntity) {
-		this.playerUUIDSet.remove(playerEntity.getUuid());
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+	public void removePlayer(Player playerEntity) {
+		this.playerUUIDSet.remove(playerEntity.getUUID());
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -254,11 +254,11 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	}
 
 	private void initMatchDuration() {
-		if (this.world != null && !this.world.isClient()) {
-			if (this.dataProvidingBlockPosOffset != BlockPos.ORIGIN) {
-				BlockPos firstDataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
+		if (this.level != null && !this.level.isClientSide()) {
+			if (this.dataProvidingBlockPosOffset != BlockPos.ZERO) {
+				BlockPos firstDataProviderBlockPos = new BlockPos(this.worldPosition.getX() + this.dataProvidingBlockPosOffset.getX(), this.worldPosition.getY() + this.dataProvidingBlockPosOffset.getY(), this.worldPosition.getZ() + this.dataProvidingBlockPosOffset.getZ());
 
-				if (world.getBlockEntity(firstDataProviderBlockPos) instanceof ProvidesData providesDataEntity) {
+				if (level.getBlockEntity(firstDataProviderBlockPos) instanceof ProvidesData providesDataEntity) {
 					this.matchDuration = ItemUtils.parseInt(providesDataEntity.getData(this.matchDurationDataIdentifier));
 					return;
 				}
@@ -268,9 +268,9 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	}
 
 	public void endMatch(boolean forceEnd) {
-		if (this.world != null) {
+		if (this.level != null) {
 			if (!forceEnd) {
-				BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+				BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.triggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.triggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.triggeredBlock.getLeft().getZ()));
 				if (blockEntity != this) {
 					boolean triggeredBlockResets = this.triggeredBlock.getRight();
 					if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -281,34 +281,34 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				}
 			}
 
-			Registry<DamageType> registry = world.getRegistryManager().get(RegistryKeys.DAMAGE_TYPE);
+			Registry<DamageType> registry = level.registryAccess().get(Registries.DAMAGE_TYPE);
 
 			DamageSource damageSource = new DamageSource(registry.entryOf(ScriptBlocksDamageTypes.PVP_WINNING_DAMAGE_TYPE));
 
 			Iterator<UUID> iterator = this.playerUUIDSet.stream().iterator();
 			while (iterator.hasNext()) {
-				PlayerEntity playerEntity = world.getPlayerByUuid(iterator.next());
+				Player playerEntity = level.getPlayerByUUID(iterator.next());
 
 				if (playerEntity != null) {
 
-					playerEntity.damage(damageSource, 2048.0F);
-					if (!forceEnd && this.world instanceof ServerWorld serverWorld) {
-						serverWorld.getServer().getPlayerManager().broadcast(Text.translatable("hud.message.pvp_controller_block.player_won_match", playerEntity.getDisplayName()), false);
+					playerEntity.hurtServer(damageSource, 2048.0F);
+					if (!forceEnd && this.level instanceof ServerLevel serverWorld) {
+						serverWorld.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("hud.message.pvp_controller_block.player_won_match", playerEntity.getDisplayName()), false);
 					}
 				}
 			}
 		}
 		this.matchTicker = 0;
 		this.matchIsActive = false;
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
-	public static void tick(World world, BlockPos pos, BlockState state, PVPControllerBlockEntity pvpControllerBlockEntity) {
-		if (!world.isClient && pvpControllerBlockEntity.matchIsActive) {
+	public static void tick(Level world, BlockPos pos, BlockState state, PVPControllerBlockEntity pvpControllerBlockEntity) {
+		if (!world.isClientSide && pvpControllerBlockEntity.matchIsActive) {
 			pvpControllerBlockEntity.matchTicker++;
 
 			if (pvpControllerBlockEntity.matchTicker > pvpControllerBlockEntity.matchDuration) {
@@ -319,13 +319,13 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				Iterator<String> iterator = pvpControllerBlockEntity.teamSet.stream().iterator();
 				Scoreboard scoreboard = world.getScoreboard();
 				// new list
-				Team team;
+				PlayerTeam team;
 				int activeTeamCounter = 0;
 				while (iterator.hasNext()) {
-					team = scoreboard.getTeam(iterator.next());
+					team = scoreboard.getPlayerTeam(iterator.next());
 
 					if (team != null) {
-						if (team.getPlayerList().isEmpty()) {
+						if (team.getPlayers().isEmpty()) {
 							pvpControllerBlockEntity.teamSet.remove(team.getName());
 						} else {
 							activeTeamCounter++;
@@ -352,10 +352,10 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 //				}
 //			}
 			}
-			pvpControllerBlockEntity.markDirty();
-			if (pvpControllerBlockEntity.world != null) {
-				BlockState blockState = pvpControllerBlockEntity.world.getBlockState(pvpControllerBlockEntity.pos);
-				pvpControllerBlockEntity.world.updateListeners(pvpControllerBlockEntity.pos, blockState, blockState, Block.NOTIFY_ALL);
+			pvpControllerBlockEntity.setChanged();
+			if (pvpControllerBlockEntity.level != null) {
+				BlockState blockState = pvpControllerBlockEntity.level.getBlockState(pvpControllerBlockEntity.worldPosition);
+				pvpControllerBlockEntity.level.sendBlockUpdated(pvpControllerBlockEntity.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 			}
 		}
 	}
@@ -363,10 +363,10 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	@Override
 	public void trigger() {
 		this.startMatch();
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -376,18 +376,18 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		this.endMatch(true);
 		this.teamSet.clear();
 		this.playerUUIDSet.clear();
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				List<String> keyList = this.respawnPositions.keySet().stream().toList();
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
@@ -399,35 +399,35 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
 				List<String> keyList = this.respawnPositions.keySet().stream().toList();
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), BlockMirror.FRONT_BACK);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), Mirror.FRONT_BACK);
 					this.respawnPositions.put(key, mirroredEntrance);
 				}
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
 				List<String> keyList = this.respawnPositions.keySet().stream().toList();
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), BlockMirror.LEFT_RIGHT);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), Mirror.LEFT_RIGHT);
 					this.respawnPositions.put(key, mirroredEntrance);
 				}
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

@@ -7,29 +7,29 @@ import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -40,15 +40,15 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 	@Override
 	public void receive(DialogueAnswerPacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
 		Identifier answerIdentifier = payload.answerIdentifier();
 		BlockPos dataBlockPos = payload.dataBlockPos();
 		List<MutablePair<String, BlockPos>> dialogueUsedBlocks = payload.dialogueUsedBlocks();
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
-		World world = serverPlayerEntity.getEntityWorld();
-		Optional<RegistryEntry.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
+		Level world = serverPlayerEntity.level();
+		Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
 
 		MinecraftServer server = serverPlayerEntity.getServer();
 
@@ -58,11 +58,11 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			if (!dialogueAnswer.availability().itemCosts().isEmpty()) {
 
 				// create inventory copy
-				int playerInventorySize = serverPlayerEntity.getInventory().size();
-				Inventory playerInventoryCopy = new SimpleInventory(playerInventorySize);
+				int playerInventorySize = serverPlayerEntity.getInventory().getContainerSize();
+				Container playerInventoryCopy = new SimpleContainer(playerInventorySize);
 				ItemStack itemStack;
 				for (int k = 0; k < playerInventorySize; k++) {
-					playerInventoryCopy.setStack(k, serverPlayerEntity.getInventory().getStack(k).copy());
+					playerInventoryCopy.setItem(k, serverPlayerEntity.getInventory().getItem(k).copy());
 				}
 
 				// check for itemCosts
@@ -70,23 +70,23 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 					int itemCount = itemCost.itemStack().getCount();
 					for (int j = 0; j < playerInventorySize; j++) {
 
-						if (ItemStack.areItemsAndComponentsEqual(playerInventoryCopy.getStack(j), itemCost.itemStack())) {
-							itemStack = playerInventoryCopy.getStack(j).copy();
+						if (ItemStack.isSameItemSameComponents(playerInventoryCopy.getItem(j), itemCost.itemStack())) {
+							itemStack = playerInventoryCopy.getItem(j).copy();
 							int stackCount = itemStack.getCount();
 
 							if (stackCount >= itemCount) {
 								itemStack.setCount(stackCount - itemCount);
-								playerInventoryCopy.setStack(j, itemStack);
+								playerInventoryCopy.setItem(j, itemStack);
 								itemCount = 0;
 								break;
 							} else {
-								playerInventoryCopy.setStack(j, ItemStack.EMPTY);
+								playerInventoryCopy.setItem(j, ItemStack.EMPTY);
 								itemCount = itemCount - stackCount;
 							}
 						}
 					}
 					if (itemCount > 0) {
-						serverPlayerEntity.sendMessage(Text.translatable("gui.dialogue_screen.item_cost_too_high"));
+						serverPlayerEntity.sendSystemMessage(Component.translatable("gui.dialogue_screen.item_cost_too_high"));
 						return;
 					}
 				}
@@ -98,17 +98,17 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 						int ingredientCount = itemCost.itemStack().getCount();
 						for (int j = 0; j < playerInventorySize; j++) {
 
-							if (ItemStack.areItemsAndComponentsEqual(serverPlayerEntity.getInventory().getStack(j), itemCost.itemStack())) {
-								itemStack = serverPlayerEntity.getInventory().getStack(j).copy();
+							if (ItemStack.isSameItemSameComponents(serverPlayerEntity.getInventory().getItem(j), itemCost.itemStack())) {
+								itemStack = serverPlayerEntity.getInventory().getItem(j).copy();
 								int stackCount = itemStack.getCount();
 
 								if (stackCount >= ingredientCount) {
 									itemStack.setCount(stackCount - ingredientCount);
-									serverPlayerEntity.getInventory().setStack(j, itemStack);
+									serverPlayerEntity.getInventory().setItem(j, itemStack);
 									ingredientCount = 0;
 									break;
 								} else {
-									serverPlayerEntity.getInventory().setStack(j, ItemStack.EMPTY);
+									serverPlayerEntity.getInventory().setItem(j, ItemStack.EMPTY);
 									ingredientCount = ingredientCount - stackCount;
 								}
 							}
@@ -124,24 +124,24 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			String lootTable = dialogueAnswer.results().lootTable();
 
 			if (!lootTable.isEmpty()) {
-				Identifier lootTableIdentifier = Identifier.of(lootTable);
-				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParameters.THIS_ENTITY, serverPlayerEntity).add(LootContextParameters.ORIGIN, serverPlayerEntity.getPos()).build(LootContextTypes.ADVANCEMENT_REWARD);
+				Identifier lootTableIdentifier = Identifier.parse(lootTable);
+				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParams.THIS_ENTITY, serverPlayerEntity).add(LootContextParams.ORIGIN, serverPlayerEntity.getPos()).build(LootContextParamSets.ADVANCEMENT_REWARD);
 				boolean bl = false;
-				for (ItemStack itemStack : server.getReloadableRegistries().getLootTable(RegistryKey.of(RegistryKeys.LOOT_TABLE, lootTableIdentifier)).generateLoot(lootContextParameterSet)) {
+				for (ItemStack itemStack : server.reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableIdentifier)).getRandomItems(lootContextParameterSet)) {
 
-					if (serverPlayerEntity.giveItemStack(itemStack)) {
-						serverPlayerEntity.getWorld().playSound(null, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
+					if (serverPlayerEntity.addItem(itemStack)) {
+						serverPlayerEntity.getWorld().playSound(null, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
 						bl = true;
 						continue;
 					}
-					ItemEntity itemEntity = serverPlayerEntity.dropItem(itemStack, false);
+					ItemEntity itemEntity = serverPlayerEntity.drop(itemStack, false);
 
 					if (itemEntity == null) continue;
-					itemEntity.resetPickupDelay();
-					itemEntity.setOwner(serverPlayerEntity.getUuid());
+					itemEntity.setNoPickUpDelay();
+					itemEntity.setTarget(serverPlayerEntity.getUUID());
 				}
 				if (bl) {
-					serverPlayerEntity.currentScreenHandler.sendContentUpdates();
+					serverPlayerEntity.containerMenu.broadcastChanges();
 				}
 			}
 
@@ -150,10 +150,10 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			String criterionName = dialogueAnswer.results().criterionName();
 
 			if (!grantedAdvancement.isEmpty() && !criterionName.isEmpty()) {
-				AdvancementEntry advancementEntry = server.getAdvancementLoader().get(Identifier.of(grantedAdvancement));
+				AdvancementHolder advancementEntry = server.getAdvancements().get(Identifier.parse(grantedAdvancement));
 
 				if (advancementEntry != null) {
-					serverPlayerEntity.getAdvancementTracker().grantCriterion(advancementEntry, criterionName);
+					serverPlayerEntity.getAdvancements().award(advancementEntry, criterionName);
 				}
 			}
 
@@ -161,13 +161,13 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 			String overlayMessage = dialogueAnswer.results().overlayMessage();
 
 			if (overlayMessage != null) {
-				serverPlayerEntity.sendMessageToClient(Text.translatable(overlayMessage), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable(overlayMessage), true);
 			}
 
 			String responseDialogueIdentifierString = DialogueAnchor.getDialogue(serverPlayerEntity.getWorld(), serverPlayerEntity, dialogueAnswer.responseDialogues());
 
 			if (responseDialogueIdentifierString.isEmpty()) {
-				serverPlayerEntity.closeHandledScreen();
+				serverPlayerEntity.closeContainer();
 			} else {
 				DialogueAnchor.openDialogueScreen(world, server, serverPlayerEntity, responseDialogueIdentifierString, dataBlockPos, dialogueUsedBlocks, dialogueTriggeredBlocks);
 			}
@@ -201,10 +201,10 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
 					if (entry.getLeft().equals(usedBlock)) {
 						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.getPos(), Direction.UP, entry.getRight(), false);
-						Hand hand = serverPlayerEntity.getActiveHand();
-						ItemStack itemStack = serverPlayerEntity.getStackInHand(hand);
+						InteractionHand hand = serverPlayerEntity.getUsedItemHand();
+						ItemStack itemStack = serverPlayerEntity.getItemInHand(hand);
 
-						serverPlayerEntity.interactionManager.interactBlock(serverPlayerEntity, world, itemStack, hand, blockHitResult);
+						serverPlayerEntity.gameMode.useItemOn(serverPlayerEntity, world, itemStack, hand, blockHitResult);
 					}
 				}
 			}

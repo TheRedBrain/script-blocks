@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateBossControllerBlockPacket(
 		BlockPos bossControllerBlockPosition,
@@ -22,17 +22,17 @@ public record UpdateBossControllerBlockPacket(
 		boolean isPersistent,
 		boolean enableSpawnEffects,
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateBossControllerBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_boss_controller_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateBossControllerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateBossControllerBlockPacket::write, UpdateBossControllerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateBossControllerBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_boss_controller_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateBossControllerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateBossControllerBlockPacket::write, UpdateBossControllerBlockPacket::new);
 
-	public UpdateBossControllerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateBossControllerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
@@ -42,7 +42,7 @@ public record UpdateBossControllerBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.bossControllerBlockPosition);
 
 		registryByteBuf.writeBlockPos(this.uuidListHandlerBlockPositionOffset);
@@ -50,7 +50,7 @@ public record UpdateBossControllerBlockPacket(
 		registryByteBuf.writeBlockPos(this.noPlayersAroundTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.noPlayersAroundTriggeredBlockResets);
 
-		registryByteBuf.writeString(this.bossIdentifier);
+		registryByteBuf.writeUtf(this.bossIdentifier);
 		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
@@ -62,7 +62,7 @@ public record UpdateBossControllerBlockPacket(
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

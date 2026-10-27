@@ -6,44 +6,44 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 @Environment(value = EnvType.CLIENT)
 public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text MESSAGE_LOCALISATION_STRING_LABEL_TEXT = Text.translatable("gui.uuid_list_messaging_block.message_localisation_string_label");
-	private static final Text SUBTITLE_LOCALISATION_STRING_LABEL_TEXT = Text.translatable("gui.uuid_list_messaging_block.subtitle_localisation_string_label");
-	private static final Text TITLE_FADE_IN_LABEL_TEXT = Text.translatable("gui.uuid_list_messaging_block.title_fade_in_label");
-	private static final Text TITLE_STAY_LABEL_TEXT = Text.translatable("gui.uuid_list_messaging_block.title_stay_label");
-	private static final Text TITLE_FADE_OUT_LABEL_TEXT = Text.translatable("gui.uuid_list_messaging_block.title_fade_out_label");
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
-	private static final Text DATA_IDENTIFIER_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_identifier");
+	private static final Component MESSAGE_LOCALISATION_STRING_LABEL_TEXT = Component.translatable("gui.uuid_list_messaging_block.message_localisation_string_label");
+	private static final Component SUBTITLE_LOCALISATION_STRING_LABEL_TEXT = Component.translatable("gui.uuid_list_messaging_block.subtitle_localisation_string_label");
+	private static final Component TITLE_FADE_IN_LABEL_TEXT = Component.translatable("gui.uuid_list_messaging_block.title_fade_in_label");
+	private static final Component TITLE_STAY_LABEL_TEXT = Component.translatable("gui.uuid_list_messaging_block.title_stay_label");
+	private static final Component TITLE_FADE_OUT_LABEL_TEXT = Component.translatable("gui.uuid_list_messaging_block.title_fade_out_label");
+	private static final Component DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.data_provider_block.data_providing_block_position_offset");
+	private static final Component DATA_IDENTIFIER_LABEL_TEXT = Component.translatable("gui.data_provider_block.data_identifier");
 
 	private final UUIDListMessagingBlockEntity uuidListMessagingBlock;
 
-	private CyclingButtonWidget<UUIDListMessagingBlockEntity.MessageMode> cycleMessageModeButton;
+	private CycleButton<UUIDListMessagingBlockEntity.MessageMode> cycleMessageModeButton;
 	private UUIDListMessagingBlockEntity.MessageMode messageMode;
 
-	private TextFieldWidget messageLocalisationStringField;
-	private TextFieldWidget subTitleLocalisationStringField;
-	private TextFieldWidget titleFadeInField;
-	private TextFieldWidget titleStayField;
-	private TextFieldWidget titleFadeOutField;
+	private EditBox messageLocalisationStringField;
+	private EditBox subTitleLocalisationStringField;
+	private EditBox titleFadeInField;
+	private EditBox titleStayField;
+	private EditBox titleFadeOutField;
 
-	private TextFieldWidget dataProvidingBlockPositionOffsetXField;
-	private TextFieldWidget dataProvidingBlockPositionOffsetYField;
-	private TextFieldWidget dataProvidingBlockPositionOffsetZField;
-	private TextFieldWidget dataIdentifierField;
+	private EditBox dataProvidingBlockPositionOffsetXField;
+	private EditBox dataProvidingBlockPositionOffsetYField;
+	private EditBox dataProvidingBlockPositionOffsetZField;
+	private EditBox dataIdentifierField;
 
 	public UUIDListMessagingBlockScreen(UUIDListMessagingBlockEntity uuidListMessagingBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.uuidListMessagingBlock = uuidListMessagingBlockEntity;
 	}
 
@@ -53,56 +53,56 @@ public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsS
 		super.init();
 
 		this.messageMode = this.uuidListMessagingBlock.getMessageMode();
-		this.cycleMessageModeButton = this.addDrawableChild(CyclingButtonWidget.builder(UUIDListMessagingBlockEntity.MessageMode::asText).values(UUIDListMessagingBlockEntity.MessageMode.values()).initially(this.messageMode).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, messageMode) -> {
+		this.cycleMessageModeButton = this.addRenderableWidget(CycleButton.builder(UUIDListMessagingBlockEntity.MessageMode::asText).values(UUIDListMessagingBlockEntity.MessageMode.values()).initially(this.messageMode).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, messageMode) -> {
 			this.messageMode = messageMode;
 			this.updateWidgets();
 		}));
 
-		this.messageLocalisationStringField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 55, 300, 20, Text.empty());
+		this.messageLocalisationStringField = new EditBox(this.font, this.width / 2 - 154, 55, 300, 20, Component.empty());
 		this.messageLocalisationStringField.setMaxLength(128);
-		this.messageLocalisationStringField.setText(this.uuidListMessagingBlock.getMessageLocalisationString());
-		this.addSelectableChild(this.messageLocalisationStringField);
+		this.messageLocalisationStringField.setValue(this.uuidListMessagingBlock.getMessageLocalisationString());
+		this.addWidget(this.messageLocalisationStringField);
 
-		this.subTitleLocalisationStringField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 90, 300, 20, Text.empty());
+		this.subTitleLocalisationStringField = new EditBox(this.font, this.width / 2 - 154, 90, 300, 20, Component.empty());
 		this.subTitleLocalisationStringField.setMaxLength(128);
-		this.subTitleLocalisationStringField.setText(this.uuidListMessagingBlock.getSubTitleLocalisationString());
-		this.addSelectableChild(this.subTitleLocalisationStringField);
+		this.subTitleLocalisationStringField.setValue(this.uuidListMessagingBlock.getSubTitleLocalisationString());
+		this.addWidget(this.subTitleLocalisationStringField);
 
-		this.titleFadeInField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 125, 100, 20, Text.empty());
+		this.titleFadeInField = new EditBox(this.font, this.width / 2 - 154, 125, 100, 20, Component.empty());
 		this.titleFadeInField.setMaxLength(128);
-		this.titleFadeInField.setText(Integer.toString(this.uuidListMessagingBlock.getTitleFadeIn()));
-		this.addSelectableChild(this.titleFadeInField);
+		this.titleFadeInField.setValue(Integer.toString(this.uuidListMessagingBlock.getTitleFadeIn()));
+		this.addWidget(this.titleFadeInField);
 
-		this.titleStayField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 125, 100, 20, Text.empty());
+		this.titleStayField = new EditBox(this.font, this.width / 2 - 50, 125, 100, 20, Component.empty());
 		this.titleStayField.setMaxLength(128);
-		this.titleStayField.setText(Integer.toString(this.uuidListMessagingBlock.getTitleStay()));
-		this.addSelectableChild(this.titleStayField);
+		this.titleStayField.setValue(Integer.toString(this.uuidListMessagingBlock.getTitleStay()));
+		this.addWidget(this.titleStayField);
 
-		this.titleFadeOutField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 125, 100, 20, Text.empty());
+		this.titleFadeOutField = new EditBox(this.font, this.width / 2 + 54, 125, 100, 20, Component.empty());
 		this.titleFadeOutField.setMaxLength(128);
-		this.titleFadeOutField.setText(Integer.toString(this.uuidListMessagingBlock.getTitleFadeOut()));
-		this.addSelectableChild(this.titleFadeOutField);
+		this.titleFadeOutField.setValue(Integer.toString(this.uuidListMessagingBlock.getTitleFadeOut()));
+		this.addWidget(this.titleFadeOutField);
 
-		this.dataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 160, 100, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 160, 100, 20, Component.empty());
 		this.dataProvidingBlockPositionOffsetXField.setMaxLength(128);
-		this.dataProvidingBlockPositionOffsetXField.setText(Integer.toString(this.uuidListMessagingBlock.getDataProvidingBlockPosOffset().getX()));
-		this.addSelectableChild(this.dataProvidingBlockPositionOffsetXField);
-		this.dataProvidingBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 160, 100, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetXField.setValue(Integer.toString(this.uuidListMessagingBlock.getDataProvidingBlockPosOffset().getX()));
+		this.addWidget(this.dataProvidingBlockPositionOffsetXField);
+		this.dataProvidingBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 160, 100, 20, Component.empty());
 		this.dataProvidingBlockPositionOffsetYField.setMaxLength(128);
-		this.dataProvidingBlockPositionOffsetYField.setText(Integer.toString(this.uuidListMessagingBlock.getDataProvidingBlockPosOffset().getY()));
-		this.addSelectableChild(this.dataProvidingBlockPositionOffsetYField);
-		this.dataProvidingBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 160, 100, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetYField.setValue(Integer.toString(this.uuidListMessagingBlock.getDataProvidingBlockPosOffset().getY()));
+		this.addWidget(this.dataProvidingBlockPositionOffsetYField);
+		this.dataProvidingBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 160, 100, 20, Component.empty());
 		this.dataProvidingBlockPositionOffsetZField.setMaxLength(128);
-		this.dataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.uuidListMessagingBlock.getDataProvidingBlockPosOffset().getZ()));
-		this.addSelectableChild(this.dataProvidingBlockPositionOffsetZField);
+		this.dataProvidingBlockPositionOffsetZField.setValue(Integer.toString(this.uuidListMessagingBlock.getDataProvidingBlockPosOffset().getZ()));
+		this.addWidget(this.dataProvidingBlockPositionOffsetZField);
 
-		this.dataIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 195, 300, 20, Text.empty());
+		this.dataIdentifierField = new EditBox(this.font, this.width / 2 - 154, 195, 300, 20, Component.empty());
 		this.dataIdentifierField.setMaxLength(128);
-		this.dataIdentifierField.setText(this.uuidListMessagingBlock.getDataIdentifier());
-		this.addSelectableChild(this.dataIdentifierField);
+		this.dataIdentifierField.setValue(this.uuidListMessagingBlock.getDataIdentifier());
+		this.addWidget(this.dataIdentifierField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 154, 220, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 220, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 154, 220, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 220, 150, 20).build());
 		this.updateWidgets();
 	}
 
@@ -130,61 +130,61 @@ public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsS
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		UUIDListMessagingBlockEntity.MessageMode var = this.messageMode;
-		String string = this.messageLocalisationStringField.getText();
-		String string1 = this.subTitleLocalisationStringField.getText();
-		String string2 = this.titleFadeInField.getText();
-		String string3 = this.titleStayField.getText();
-		String string4 = this.titleFadeOutField.getText();
-		String string5 = this.dataProvidingBlockPositionOffsetXField.getText();
-		String string6 = this.dataProvidingBlockPositionOffsetYField.getText();
-		String string7 = this.dataProvidingBlockPositionOffsetZField.getText();
-		String string8 = this.dataIdentifierField.getText();
+		String string = this.messageLocalisationStringField.getValue();
+		String string1 = this.subTitleLocalisationStringField.getValue();
+		String string2 = this.titleFadeInField.getValue();
+		String string3 = this.titleStayField.getValue();
+		String string4 = this.titleFadeOutField.getValue();
+		String string5 = this.dataProvidingBlockPositionOffsetXField.getValue();
+		String string6 = this.dataProvidingBlockPositionOffsetYField.getValue();
+		String string7 = this.dataProvidingBlockPositionOffsetZField.getValue();
+		String string8 = this.dataIdentifierField.getValue();
 		this.init(client, width, height);
 		this.messageMode = var;
 		this.cycleMessageModeButton.setValue(this.messageMode);
-		this.messageLocalisationStringField.setText(string);
-		this.subTitleLocalisationStringField.setText(string1);
-		this.titleFadeInField.setText(string2);
-		this.titleStayField.setText(string3);
-		this.titleFadeOutField.setText(string4);
-		this.dataProvidingBlockPositionOffsetXField.setText(string5);
-		this.dataProvidingBlockPositionOffsetYField.setText(string6);
-		this.dataProvidingBlockPositionOffsetZField.setText(string7);
-		this.dataIdentifierField.setText(string8);
+		this.messageLocalisationStringField.setValue(string);
+		this.subTitleLocalisationStringField.setValue(string1);
+		this.titleFadeInField.setValue(string2);
+		this.titleStayField.setValue(string3);
+		this.titleFadeOutField.setValue(string4);
+		this.dataProvidingBlockPositionOffsetXField.setValue(string5);
+		this.dataProvidingBlockPositionOffsetYField.setValue(string6);
+		this.dataProvidingBlockPositionOffsetZField.setValue(string7);
+		this.dataIdentifierField.setValue(string8);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, MESSAGE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		context.drawString(this.font, MESSAGE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
 		this.messageLocalisationStringField.render(context, mouseX, mouseY, delta);
 
 		if (this.messageMode == UUIDListMessagingBlockEntity.MessageMode.TITLE) {
 
-			context.drawTextWithShadow(this.textRenderer, SUBTITLE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			context.drawString(this.font, SUBTITLE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
 			this.subTitleLocalisationStringField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, TITLE_FADE_IN_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			context.drawString(this.font, TITLE_FADE_IN_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
 			this.titleFadeInField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, TITLE_STAY_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
+			context.drawString(this.font, TITLE_STAY_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
 			this.titleStayField.render(context, mouseX, mouseY, delta);
 
-			context.drawTextWithShadow(this.textRenderer, TITLE_FADE_OUT_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
+			context.drawString(this.font, TITLE_FADE_OUT_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
 			this.titleFadeOutField.render(context, mouseX, mouseY, delta);
 
 		}
 
-		context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+		context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
 		this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 
-		context.drawTextWithShadow(this.textRenderer, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+		context.drawString(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
 		this.dataIdentifierField.render(context, mouseX, mouseY, delta);
 
 	}
@@ -194,17 +194,17 @@ public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsS
 		ClientPlayNetworking.send(new UpdateUUIDListMessagingBlockPacket(
 				this.uuidListMessagingBlock.getPos(),
 				this.messageMode.asString(),
-				this.messageLocalisationStringField.getText(),
-				this.subTitleLocalisationStringField.getText(),
-				ItemUtils.parseInt(this.titleFadeInField.getText()),
-				ItemUtils.parseInt(this.titleStayField.getText()),
-				ItemUtils.parseInt(this.titleFadeOutField.getText()),
+				this.messageLocalisationStringField.getValue(),
+				this.subTitleLocalisationStringField.getValue(),
+				ItemUtils.parseInt(this.titleFadeInField.getValue()),
+				ItemUtils.parseInt(this.titleStayField.getValue()),
+				ItemUtils.parseInt(this.titleFadeOutField.getValue()),
 				new BlockPos(
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getValue())
 				),
-				this.dataIdentifierField.getText()
+				this.dataIdentifierField.getValue()
 		));
 		return true;
 	}

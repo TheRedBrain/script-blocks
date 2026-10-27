@@ -6,17 +6,17 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.phys.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
@@ -27,28 +27,28 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 
 	private final TriggeredDisplayBlockEntity triggeredDisplayBlock;
 
-	private CyclingButtonWidget<TriggeredDisplayBlockScreen.ScreenPage> cycleScreenPageButton;
+	private CycleButton<ScreenPage> cycleScreenPageButton;
 
 	// common
-	private CyclingButtonWidget<TriggeredDisplayBlockEntity.BillboardMode> billboardModeButton;
-	private CyclingButtonWidget<TriggeredDisplayBlockEntity.DisplayMode> displayModeButton;
-	private CyclingButtonWidget<Boolean> toggleIsTriggeredButton;
-	private TextFieldWidget displayOffsetXField;
-	private TextFieldWidget displayOffsetYField;
-	private TextFieldWidget displayOffsetZField;
-	private TextFieldWidget displayYawField;
-	private TextFieldWidget displayPitchField;
+	private CycleButton<TriggeredDisplayBlockEntity.BillboardMode> billboardModeButton;
+	private CycleButton<TriggeredDisplayBlockEntity.DisplayMode> displayModeButton;
+	private CycleButton<Boolean> toggleIsTriggeredButton;
+	private EditBox displayOffsetXField;
+	private EditBox displayOffsetYField;
+	private EditBox displayOffsetZField;
+	private EditBox displayYawField;
+	private EditBox displayPitchField;
 
 
 	// text mode
-	private TextFieldWidget displayTextField;
-	private TextFieldWidget dataProvidingBlockPosOffsetXField;
-	private TextFieldWidget dataProvidingBlockPosOffsetYField;
-	private TextFieldWidget dataProvidingBlockPosOffsetZField;
-	private TextFieldWidget dataIdentifierTextField;
-	private TextFieldWidget lineWidthField;
-	private TextFieldWidget textOpacityField;
-	private TextFieldWidget textBackgroundField;
+	private EditBox displayTextField;
+	private EditBox dataProvidingBlockPosOffsetXField;
+	private EditBox dataProvidingBlockPosOffsetYField;
+	private EditBox dataProvidingBlockPosOffsetZField;
+	private EditBox dataIdentifierTextField;
+	private EditBox lineWidthField;
+	private EditBox textOpacityField;
+	private EditBox textBackgroundField;
 
 	private ScreenPage screenPage;
 	private TriggeredDisplayBlockEntity.BillboardMode billboardMode;
@@ -56,7 +56,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	private boolean isTriggered;
 
 	public TriggeredDisplayBlockScreen(TriggeredDisplayBlockEntity triggeredDisplayBlock) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.triggeredDisplayBlock = triggeredDisplayBlock;
 	}
 
@@ -67,92 +67,92 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.displayMode = this.triggeredDisplayBlock.getDisplayMode();
 		this.isTriggered = this.triggeredDisplayBlock.getIsTriggered();
 
-		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- common ---
-		this.billboardModeButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredDisplayBlockEntity.BillboardMode::asText).values((TriggeredDisplayBlockEntity.BillboardMode[]) TriggeredDisplayBlockEntity.BillboardMode.values()).initially(this.billboardMode).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Text.empty(), (button, billboardMode) -> {
+		this.billboardModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.BillboardMode::asText).values((TriggeredDisplayBlockEntity.BillboardMode[]) TriggeredDisplayBlockEntity.BillboardMode.values()).initially(this.billboardMode).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, billboardMode) -> {
 			this.billboardMode = billboardMode;
 		}));
 
-		this.displayModeButton = this.addDrawableChild(CyclingButtonWidget.builder(TriggeredDisplayBlockEntity.DisplayMode::asText).values((TriggeredDisplayBlockEntity.DisplayMode[]) TriggeredDisplayBlockEntity.DisplayMode.values()).initially(this.displayMode).omitKeyText().build(this.width / 2 - 154, 68, 300, 20, Text.empty(), (button, displayMode) -> {
+		this.displayModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.DisplayMode::asText).values((TriggeredDisplayBlockEntity.DisplayMode[]) TriggeredDisplayBlockEntity.DisplayMode.values()).initially(this.displayMode).omitKeyText().build(this.width / 2 - 154, 68, 300, 20, Component.empty(), (button, displayMode) -> {
 			this.displayMode = displayMode;
 		}));
 
-		this.toggleIsTriggeredButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.on"), Text.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.off")).initially(this.isTriggered).omitKeyText().build(this.width / 2 - 154, 92, 300, 20, Text.empty(), (button, isTriggered) -> {
+		this.toggleIsTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.on"), Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.off")).initially(this.isTriggered).omitKeyText().build(this.width / 2 - 154, 92, 300, 20, Component.empty(), (button, isTriggered) -> {
 			this.isTriggered = isTriggered;
 		}));
 
-		this.displayOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 116, 50, 20, Text.empty());
+		this.displayOffsetXField = new EditBox(this.font, this.width / 2 - 154, 116, 50, 20, Component.empty());
 		this.displayOffsetXField.setMaxLength(128);
-		this.displayOffsetXField.setText(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getX()));
-		this.addSelectableChild(this.displayOffsetXField);
+		this.displayOffsetXField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getX()));
+		this.addWidget(this.displayOffsetXField);
 
-		this.displayOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 116, 50, 20, Text.empty());
+		this.displayOffsetYField = new EditBox(this.font, this.width / 2 - 100, 116, 50, 20, Component.empty());
 		this.displayOffsetYField.setMaxLength(128);
-		this.displayOffsetYField.setText(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getY()));
-		this.addSelectableChild(this.displayOffsetYField);
+		this.displayOffsetYField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getY()));
+		this.addWidget(this.displayOffsetYField);
 
-		this.displayOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 116, 50, 20, Text.empty());
+		this.displayOffsetZField = new EditBox(this.font, this.width / 2 - 46, 116, 50, 20, Component.empty());
 		this.displayOffsetZField.setMaxLength(128);
-		this.displayOffsetZField.setText(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getZ()));
-		this.addSelectableChild(this.displayOffsetZField);
+		this.displayOffsetZField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getZ()));
+		this.addWidget(this.displayOffsetZField);
 
-		this.displayYawField = new TextFieldWidget(this.textRenderer, this.width / 2 + 8, 116, 50, 20, Text.empty());
+		this.displayYawField = new EditBox(this.font, this.width / 2 + 8, 116, 50, 20, Component.empty());
 		this.displayYawField.setMaxLength(128);
-		this.displayYawField.setText(Float.toString(this.triggeredDisplayBlock.getDisplayYaw()));
-		this.addSelectableChild(this.displayYawField);
+		this.displayYawField.setValue(Float.toString(this.triggeredDisplayBlock.getDisplayYaw()));
+		this.addWidget(this.displayYawField);
 
-		this.displayPitchField = new TextFieldWidget(this.textRenderer, this.width / 2 + 62, 116, 50, 20, Text.empty());
+		this.displayPitchField = new EditBox(this.font, this.width / 2 + 62, 116, 50, 20, Component.empty());
 		this.displayPitchField.setMaxLength(128);
-		this.displayPitchField.setText(Float.toString(this.triggeredDisplayBlock.getDisplayPitch()));
-		this.addSelectableChild(this.displayPitchField);
+		this.displayPitchField.setValue(Float.toString(this.triggeredDisplayBlock.getDisplayPitch()));
+		this.addWidget(this.displayPitchField);
 
 		// --- text mode ---
-		this.displayTextField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 44, 300, 20, Text.empty());
+		this.displayTextField = new EditBox(this.font, this.width / 2 - 154, 44, 300, 20, Component.empty());
 		this.displayTextField.setMaxLength(128);
-		this.displayTextField.setText(this.triggeredDisplayBlock.getTextString());
-		this.addSelectableChild(this.displayTextField);
+		this.displayTextField.setValue(this.triggeredDisplayBlock.getTextString());
+		this.addWidget(this.displayTextField);
 
-		this.dataProvidingBlockPosOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 68, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetXField = new EditBox(this.font, this.width / 2 - 154, 68, 50, 20, Component.empty());
 		this.dataProvidingBlockPosOffsetXField.setMaxLength(128);
-		this.dataProvidingBlockPosOffsetXField.setText(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getX()));
-		this.addSelectableChild(this.dataProvidingBlockPosOffsetXField);
+		this.dataProvidingBlockPosOffsetXField.setValue(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getX()));
+		this.addWidget(this.dataProvidingBlockPosOffsetXField);
 
-		this.dataProvidingBlockPosOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 104, 68, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetYField = new EditBox(this.font, this.width / 2 - 104, 68, 50, 20, Component.empty());
 		this.dataProvidingBlockPosOffsetYField.setMaxLength(128);
-		this.dataProvidingBlockPosOffsetYField.setText(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getY()));
-		this.addSelectableChild(this.dataProvidingBlockPosOffsetYField);
+		this.dataProvidingBlockPosOffsetYField.setValue(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getY()));
+		this.addWidget(this.dataProvidingBlockPosOffsetYField);
 
-		this.dataProvidingBlockPosOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 54, 68, 50, 20, Text.empty());
+		this.dataProvidingBlockPosOffsetZField = new EditBox(this.font, this.width / 2 - 54, 68, 50, 20, Component.empty());
 		this.dataProvidingBlockPosOffsetZField.setMaxLength(128);
-		this.dataProvidingBlockPosOffsetZField.setText(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getZ()));
-		this.addSelectableChild(this.dataProvidingBlockPosOffsetZField);
+		this.dataProvidingBlockPosOffsetZField.setValue(Integer.toString(this.triggeredDisplayBlock.getDataProvidingBlockPosOffset().getZ()));
+		this.addWidget(this.dataProvidingBlockPosOffsetZField);
 
-		this.dataIdentifierTextField = new TextFieldWidget(this.textRenderer, this.width / 2 + 4, 68, 150, 20, Text.empty());
+		this.dataIdentifierTextField = new EditBox(this.font, this.width / 2 + 4, 68, 150, 20, Component.empty());
 		this.dataIdentifierTextField.setMaxLength(128);
-		this.dataIdentifierTextField.setText(this.triggeredDisplayBlock.getDataIdentifierString());
-		this.addSelectableChild(this.dataIdentifierTextField);
+		this.dataIdentifierTextField.setValue(this.triggeredDisplayBlock.getDataIdentifierString());
+		this.addWidget(this.dataIdentifierTextField);
 
-		this.lineWidthField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 92, 100, 20, Text.empty());
+		this.lineWidthField = new EditBox(this.font, this.width / 2 - 154, 92, 100, 20, Component.empty());
 		this.lineWidthField.setMaxLength(128);
-		this.lineWidthField.setText(Integer.toString(this.triggeredDisplayBlock.getLineWidth()));
-		this.addSelectableChild(this.lineWidthField);
+		this.lineWidthField.setValue(Integer.toString(this.triggeredDisplayBlock.getLineWidth()));
+		this.addWidget(this.lineWidthField);
 
-		this.textOpacityField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 92, 100, 20, Text.empty());
+		this.textOpacityField = new EditBox(this.font, this.width / 2 - 50, 92, 100, 20, Component.empty());
 		this.textOpacityField.setMaxLength(128);
-		this.textOpacityField.setText(Byte.toString(this.triggeredDisplayBlock.getTextOpacity()));
-		this.addSelectableChild(this.textOpacityField);
+		this.textOpacityField.setValue(Byte.toString(this.triggeredDisplayBlock.getTextOpacity()));
+		this.addWidget(this.textOpacityField);
 
-		this.textBackgroundField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 92, 100, 20, Text.empty());
+		this.textBackgroundField = new EditBox(this.font, this.width / 2 + 54, 92, 100, 20, Component.empty());
 		this.textBackgroundField.setMaxLength(128);
-		this.textBackgroundField.setText(Integer.toString(this.triggeredDisplayBlock.getBackground()));
-		this.addSelectableChild(this.textBackgroundField);
+		this.textBackgroundField.setValue(Integer.toString(this.triggeredDisplayBlock.getBackground()));
+		this.addWidget(this.textBackgroundField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -209,7 +209,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		// TODO
 		this.init(client, width, height);
 	}
@@ -224,7 +224,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
@@ -256,28 +256,28 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 				this.billboardMode.asString(),
 				this.displayMode.asString(),
 				this.isTriggered,
-				new Vec3d(
-						ItemUtils.parseDouble(this.displayOffsetXField.getText()),
-						ItemUtils.parseDouble(this.displayOffsetYField.getText()),
-						ItemUtils.parseDouble(this.displayOffsetZField.getText())
+				new Vec3(
+						ItemUtils.parseDouble(this.displayOffsetXField.getValue()),
+						ItemUtils.parseDouble(this.displayOffsetYField.getValue()),
+						ItemUtils.parseDouble(this.displayOffsetZField.getValue())
 				),
-				ItemUtils.parseFloat(this.displayYawField.getText()),
-				ItemUtils.parseFloat(this.displayPitchField.getText()),
-				this.displayTextField.getText(),
+				ItemUtils.parseFloat(this.displayYawField.getValue()),
+				ItemUtils.parseFloat(this.displayPitchField.getValue()),
+				this.displayTextField.getValue(),
 				new BlockPos(
-						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getText())
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getValue()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetYField.getValue()),
+						ItemUtils.parseInt(this.dataProvidingBlockPosOffsetZField.getValue())
 				),
-				this.dataIdentifierTextField.getText(),
-				ItemUtils.parseInt(this.lineWidthField.getText()),
-				ItemUtils.parseByte(this.textOpacityField.getText()),
-				ItemUtils.parseInt(this.textBackgroundField.getText())
+				this.dataIdentifierTextField.getValue(),
+				ItemUtils.parseInt(this.lineWidthField.getValue()),
+				ItemUtils.parseByte(this.textOpacityField.getValue()),
+				ItemUtils.parseInt(this.textBackgroundField.getValue())
 		));
 		return true;
 	}
 
-	public enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringRepresentable {
 		COMMON("common"),
 		BLOCK_MODE("block_mode"),
 		ITEM_MODE("item_mode"),
@@ -290,16 +290,16 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.asString().equals(name)).findFirst();
+			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.triggered_display_block.screen_page." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.triggered_display_block.screen_page." + this.name);
 		}
 	}
 }

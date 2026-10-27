@@ -2,24 +2,24 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateHousingBlockCreativePacket> {
 	@Override
 	public void receive(UpdateHousingBlockCreativePacket payload, ServerPlayNetworking.Context context) {
 
-		ServerPlayerEntity serverPlayerEntity = context.player();
+		ServerPlayer serverPlayerEntity = context.player();
 
-		if (!serverPlayerEntity.isCreativeLevelTwoOp()) {
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.no_permission"));
+		if (!serverPlayerEntity.canUseGameMasterBlocks()) {
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.no_permission"));
 			return;
 		}
 
@@ -34,7 +34,7 @@ public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetwo
 
 		HousingBlockEntity.OwnerMode ownerMode = HousingBlockEntity.OwnerMode.byName(payload.ownerMode()).orElse(HousingBlockEntity.OwnerMode.DIMENSION_OWNER);
 
-		World world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.getWorld();
 
 		BlockEntity blockEntity = world.getBlockEntity(housingBlockPosition);
 		BlockState blockState = world.getBlockState(housingBlockPosition);
@@ -46,9 +46,9 @@ public class UpdateHousingBlockCreativePacketReceiver implements ServerPlayNetwo
 			housingBlockEntity.setRestrictBlockBreakingAreaPositionOffset(restrictBlockBreakingAreaPositionOffset);
 			housingBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			housingBlockEntity.setOwnerMode(ownerMode);
-			serverPlayerEntity.sendMessage(Text.translatable("hud.message.script_block.update_successful"), true);
-			housingBlockEntity.markDirty();
-			world.updateListeners(housingBlockPosition, blockState, blockState, Block.NOTIFY_ALL);
+			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			housingBlockEntity.setChanged();
+			world.sendBlockUpdated(housingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

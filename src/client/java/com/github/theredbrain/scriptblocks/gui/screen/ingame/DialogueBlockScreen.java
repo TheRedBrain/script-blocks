@@ -9,23 +9,23 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -38,57 +38,57 @@ import java.util.Optional;
 public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private static final int VISIBLE_SMALL_LIST_ENTRIES = 4;
 	private static final int VISIBLE_LARGE_LIST_ENTRIES = 5;
-	private static final Text ADD_ENTRY_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
-	private static final Text ENTRY_ALREADY_IN_LIST_TEXT = Text.translatable("gui.dialogue_block.entry_already_in_list");
-	private static final Text EMPTY_IDENTIFIER_TEXT = Text.translatable("gui.dialogue_block.empty_identifier");
+	private static final Component ADD_ENTRY_BUTTON_LABEL_TEXT = Component.translatable("gui.list_entry.add");
+	private static final Component ENTRY_ALREADY_IN_LIST_TEXT = Component.translatable("gui.dialogue_block.entry_already_in_list");
+	private static final Component EMPTY_IDENTIFIER_TEXT = Component.translatable("gui.dialogue_block.empty_identifier");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_116_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_116");
 	private static final Identifier SCROLLER_VERTICAL_6_7_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
-	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	public static final WidgetSprites REMOVE_ENTRY_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
 	);
-	private static final Text IDENTIFIER_PLACEHOLDER_TEXT = Text.translatable("gui.dialogue_block.identifier_placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
-	private static final Text NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Text.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
-	private static final Text DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Text.translatable("gui.data_provider_block.data_providing_block_position_offset");
+	private static final Component IDENTIFIER_PLACEHOLDER_TEXT = Component.translatable("gui.dialogue_block.identifier_placeholder");
+	private static final Component NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset_x.placeholder");
+	private static final Component NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset_y.placeholder");
+	private static final Component NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT = Component.translatable("gui.triggered_block.triggered_block_position_offset_z.placeholder");
+	private static final Component DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT = Component.translatable("gui.data_provider_block.data_providing_block_position_offset");
 	private final DialogueBlockEntity dialogueBlockEntity;
 
-	private CyclingButtonWidget<ScreenPage> cycleScreenPageButton;
+	private CycleButton<ScreenPage> cycleScreenPageButton;
 
-	private ButtonWidget removeDialogueUsedBlockEntryButton0;
-	private ButtonWidget removeDialogueUsedBlockEntryButton1;
-	private ButtonWidget removeDialogueUsedBlockEntryButton2;
-	private ButtonWidget removeDialogueUsedBlockEntryButton3;
-	private TextFieldWidget newDialogueUsedBlockIdentifierField;
-	private TextFieldWidget newDialogueUsedBlockPositionOffsetXField;
-	private TextFieldWidget newDialogueUsedBlockPositionOffsetYField;
-	private TextFieldWidget newDialogueUsedBlockPositionOffsetZField;
-	private ButtonWidget addDialogueUsedBlockButton;
+	private Button removeDialogueUsedBlockEntryButton0;
+	private Button removeDialogueUsedBlockEntryButton1;
+	private Button removeDialogueUsedBlockEntryButton2;
+	private Button removeDialogueUsedBlockEntryButton3;
+	private EditBox newDialogueUsedBlockIdentifierField;
+	private EditBox newDialogueUsedBlockPositionOffsetXField;
+	private EditBox newDialogueUsedBlockPositionOffsetYField;
+	private EditBox newDialogueUsedBlockPositionOffsetZField;
+	private Button addDialogueUsedBlockButton;
 
-	private ButtonWidget removeDialogueTriggeredBlockEntryButton0;
-	private ButtonWidget removeDialogueTriggeredBlockEntryButton1;
-	private ButtonWidget removeDialogueTriggeredBlockEntryButton2;
-	private ButtonWidget removeDialogueTriggeredBlockEntryButton3;
-	private TextFieldWidget newDialogueTriggeredBlockIdentifierField;
-	private TextFieldWidget newDialogueTriggeredBlockPositionOffsetXField;
-	private TextFieldWidget newDialogueTriggeredBlockPositionOffsetYField;
-	private TextFieldWidget newDialogueTriggeredBlockPositionOffsetZField;
-	private CyclingButtonWidget<Boolean> toggleNewDialogueTriggeredBlockResetsButton;
+	private Button removeDialogueTriggeredBlockEntryButton0;
+	private Button removeDialogueTriggeredBlockEntryButton1;
+	private Button removeDialogueTriggeredBlockEntryButton2;
+	private Button removeDialogueTriggeredBlockEntryButton3;
+	private EditBox newDialogueTriggeredBlockIdentifierField;
+	private EditBox newDialogueTriggeredBlockPositionOffsetXField;
+	private EditBox newDialogueTriggeredBlockPositionOffsetYField;
+	private EditBox newDialogueTriggeredBlockPositionOffsetZField;
+	private CycleButton<Boolean> toggleNewDialogueTriggeredBlockResetsButton;
 	private boolean newDialogueTriggeredBlockResets;
-	private ButtonWidget addDialogueTriggeredBlockButton;
+	private Button addDialogueTriggeredBlockButton;
 
-	private ButtonWidget removeStartingDialogueEntryButton0;
-	private ButtonWidget removeStartingDialogueEntryButton1;
-	private ButtonWidget removeStartingDialogueEntryButton2;
-	private ButtonWidget removeStartingDialogueEntryButton3;
-	private ButtonWidget removeStartingDialogueEntryButton4;
-	private TextFieldWidget newStartingDialogueIdentifierField;
-	private ButtonWidget addStartingDialogueButton;
+	private Button removeStartingDialogueEntryButton0;
+	private Button removeStartingDialogueEntryButton1;
+	private Button removeStartingDialogueEntryButton2;
+	private Button removeStartingDialogueEntryButton3;
+	private Button removeStartingDialogueEntryButton4;
+	private EditBox newStartingDialogueIdentifierField;
+	private Button addStartingDialogueButton;
 
-	private TextFieldWidget dataProvidingBlockPositionOffsetXField;
-	private TextFieldWidget dataProvidingBlockPositionOffsetYField;
-	private TextFieldWidget dataProvidingBlockPositionOffsetZField;
+	private EditBox dataProvidingBlockPositionOffsetXField;
+	private EditBox dataProvidingBlockPositionOffsetYField;
+	private EditBox dataProvidingBlockPositionOffsetZField;
 
 	private ScreenPage screenPage;
 	private final List<MutablePair<String, BlockPos>> dialogueUsedBlocksList = new ArrayList<>(List.of());
@@ -99,7 +99,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	private boolean mouseClicked = false;
 
 	public DialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.dialogueBlockEntity = dialogueBlockEntity;
 		this.screenPage = ScreenPage.STARTING_DIALOGUES;
 	}
@@ -114,17 +114,17 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	private void addDialogueUsedBlockEntry() {
-		String newDialogueUsedBlockIdentifier = this.newDialogueUsedBlockIdentifierField.getText();
+		String newDialogueUsedBlockIdentifier = this.newDialogueUsedBlockIdentifierField.getValue();
 		if (newDialogueUsedBlockIdentifier.isEmpty()) {
-			if (this.client != null && this.client.player != null) {
-				this.client.player.sendMessage(EMPTY_IDENTIFIER_TEXT);
+			if (this.minecraft != null && this.minecraft.player != null) {
+				this.minecraft.player.displayClientMessage(EMPTY_IDENTIFIER_TEXT);
 			}
 			return;
 		}
 		for (MutablePair<String, BlockPos> entry : this.dialogueUsedBlocksList) {
 			if (entry.getLeft().equals(newDialogueUsedBlockIdentifier)) {
-				if (this.client != null && this.client.player != null) {
-					this.client.player.sendMessage(ENTRY_ALREADY_IN_LIST_TEXT);
+				if (this.minecraft != null && this.minecraft.player != null) {
+					this.minecraft.player.displayClientMessage(ENTRY_ALREADY_IN_LIST_TEXT);
 				}
 				return;
 			}
@@ -132,9 +132,9 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		this.dialogueUsedBlocksList.add(
 				new MutablePair<>(newDialogueUsedBlockIdentifier,
 						new BlockPos(
-								ItemUtils.parseInt(this.newDialogueUsedBlockPositionOffsetXField.getText()),
-								ItemUtils.parseInt(this.newDialogueUsedBlockPositionOffsetYField.getText()),
-								ItemUtils.parseInt(this.newDialogueUsedBlockPositionOffsetZField.getText())
+								ItemUtils.parseInt(this.newDialogueUsedBlockPositionOffsetXField.getValue()),
+								ItemUtils.parseInt(this.newDialogueUsedBlockPositionOffsetYField.getValue()),
+								ItemUtils.parseInt(this.newDialogueUsedBlockPositionOffsetZField.getValue())
 						)
 				)
 		);
@@ -153,17 +153,17 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	private void addDialogueTriggeredBlockEntry() {
-		String newDialogueTriggeredBlockIdentifier = this.newDialogueTriggeredBlockIdentifierField.getText();
+		String newDialogueTriggeredBlockIdentifier = this.newDialogueTriggeredBlockIdentifierField.getValue();
 		if (newDialogueTriggeredBlockIdentifier.isEmpty()) {
-			if (this.client != null && this.client.player != null) {
-				this.client.player.sendMessage(EMPTY_IDENTIFIER_TEXT);
+			if (this.minecraft != null && this.minecraft.player != null) {
+				this.minecraft.player.displayClientMessage(EMPTY_IDENTIFIER_TEXT);
 			}
 			return;
 		}
 		for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : this.dialogueTriggeredBlocksList) {
 			if (entry.getLeft().equals(newDialogueTriggeredBlockIdentifier)) {
-				if (this.client != null && this.client.player != null) {
-					this.client.player.sendMessage(ENTRY_ALREADY_IN_LIST_TEXT);
+				if (this.minecraft != null && this.minecraft.player != null) {
+					this.minecraft.player.displayClientMessage(ENTRY_ALREADY_IN_LIST_TEXT);
 				}
 				return;
 			}
@@ -172,9 +172,9 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				new MutablePair<>(newDialogueTriggeredBlockIdentifier,
 						new MutablePair<>(
 								new BlockPos(
-										ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetXField.getText()),
-										ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetYField.getText()),
-										ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetZField.getText())
+										ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetXField.getValue()),
+										ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetYField.getValue()),
+										ItemUtils.parseInt(this.newDialogueTriggeredBlockPositionOffsetZField.getValue())
 								),
 								this.newDialogueTriggeredBlockResets
 						)
@@ -196,12 +196,12 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 	private void addStartingDialogueEntry() {
 		String message = "";
-		String newStartingDialogueIdentifier = this.newStartingDialogueIdentifierField.getText();
+		String newStartingDialogueIdentifier = this.newStartingDialogueIdentifierField.getValue();
 
 		Dialogue newStartingDialogue = null;
-		World world = this.dialogueBlockEntity.getWorld();
+		Level world = this.dialogueBlockEntity.getWorld();
 		if (world != null) {
-			Optional<RegistryEntry.Reference<Dialogue>> optionalDialogueReference = world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(newStartingDialogueIdentifier));
+			Optional<Holder.Reference<Dialogue>> optionalDialogueReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(newStartingDialogueIdentifier));
 			if (optionalDialogueReference.isPresent()) {
 				newStartingDialogue = optionalDialogueReference.get().value();
 			}
@@ -218,8 +218,8 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				}
 			}
 		}
-		if (this.client != null && this.client.player != null && !message.isEmpty()) {
-			this.client.player.sendMessage(Text.translatable(message));
+		if (this.minecraft != null && this.minecraft.player != null && !message.isEmpty()) {
+			this.minecraft.player.displayClientMessage(Component.translatable(message));
 			return;
 		}
 		this.startingDialogueList.add(newStartingDialogueIdentifier);
@@ -245,107 +245,107 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		super.init();
 
-		this.cycleScreenPageButton = this.addDrawableChild(CyclingButtonWidget.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Text.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- dialogue used blocks page ---
 
-		this.removeDialogueUsedBlockEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(0)));
-		this.removeDialogueUsedBlockEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(1)));
-		this.removeDialogueUsedBlockEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(2)));
-		this.removeDialogueUsedBlockEntryButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(3)));
+		this.removeDialogueUsedBlockEntryButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(0)));
+		this.removeDialogueUsedBlockEntryButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(1)));
+		this.removeDialogueUsedBlockEntryButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(2)));
+		this.removeDialogueUsedBlockEntryButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueUsedBlockEntry(3)));
 
-		this.addDialogueUsedBlockButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addDialogueUsedBlockEntry()).dimensions(this.width / 2 - 4 - 150, 140, 300, 20).build());
+		this.addDialogueUsedBlockButton = this.addRenderableWidget(Button.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addDialogueUsedBlockEntry()).bounds(this.width / 2 - 4 - 150, 140, 300, 20).build());
 
-		this.newDialogueUsedBlockIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 300, 20, Text.empty());
+		this.newDialogueUsedBlockIdentifierField = new EditBox(this.font, this.width / 2 - 154, 164, 300, 20, Component.empty());
 		this.newDialogueUsedBlockIdentifierField.setMaxLength(128);
-		this.newDialogueUsedBlockIdentifierField.setPlaceholder(IDENTIFIER_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueUsedBlockIdentifierField);
+		this.newDialogueUsedBlockIdentifierField.setHint(IDENTIFIER_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueUsedBlockIdentifierField);
 
-		this.newDialogueUsedBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 188, 100, 20, Text.empty());
+		this.newDialogueUsedBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 188, 100, 20, Component.empty());
 		this.newDialogueUsedBlockPositionOffsetXField.setMaxLength(128);
-		this.newDialogueUsedBlockPositionOffsetXField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueUsedBlockPositionOffsetXField);
+		this.newDialogueUsedBlockPositionOffsetXField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueUsedBlockPositionOffsetXField);
 
-		this.newDialogueUsedBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 188, 100, 20, Text.empty());
+		this.newDialogueUsedBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 188, 100, 20, Component.empty());
 		this.newDialogueUsedBlockPositionOffsetYField.setMaxLength(128);
-		this.newDialogueUsedBlockPositionOffsetYField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueUsedBlockPositionOffsetYField);
+		this.newDialogueUsedBlockPositionOffsetYField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueUsedBlockPositionOffsetYField);
 
-		this.newDialogueUsedBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 188, 100, 20, Text.empty());
+		this.newDialogueUsedBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 188, 100, 20, Component.empty());
 		this.newDialogueUsedBlockPositionOffsetZField.setMaxLength(128);
-		this.newDialogueUsedBlockPositionOffsetZField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueUsedBlockPositionOffsetZField);
+		this.newDialogueUsedBlockPositionOffsetZField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueUsedBlockPositionOffsetZField);
 
 		// --- dialogue used blocks page ---
 
-		this.removeDialogueTriggeredBlockEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(0)));
-		this.removeDialogueTriggeredBlockEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(1)));
-		this.removeDialogueTriggeredBlockEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(2)));
-		this.removeDialogueTriggeredBlockEntryButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(3)));
+		this.removeDialogueTriggeredBlockEntryButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(0)));
+		this.removeDialogueTriggeredBlockEntryButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(1)));
+		this.removeDialogueTriggeredBlockEntryButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(2)));
+		this.removeDialogueTriggeredBlockEntryButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDialogueTriggeredBlockEntry(3)));
 
-		this.addDialogueTriggeredBlockButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addDialogueTriggeredBlockEntry()).dimensions(this.width / 2 - 4 - 150, 140, 300, 20).build());
+		this.addDialogueTriggeredBlockButton = this.addRenderableWidget(Button.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addDialogueTriggeredBlockEntry()).bounds(this.width / 2 - 4 - 150, 140, 300, 20).build());
 
-		this.newDialogueTriggeredBlockIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 164, 300, 20, Text.empty());
+		this.newDialogueTriggeredBlockIdentifierField = new EditBox(this.font, this.width / 2 - 154, 164, 300, 20, Component.empty());
 		this.newDialogueTriggeredBlockIdentifierField.setMaxLength(128);
-		this.newDialogueTriggeredBlockIdentifierField.setPlaceholder(IDENTIFIER_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueTriggeredBlockIdentifierField);
+		this.newDialogueTriggeredBlockIdentifierField.setHint(IDENTIFIER_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueTriggeredBlockIdentifierField);
 
-		this.newDialogueTriggeredBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 188, 50, 20, Text.empty());
+		this.newDialogueTriggeredBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 188, 50, 20, Component.empty());
 		this.newDialogueTriggeredBlockPositionOffsetXField.setMaxLength(128);
-		this.newDialogueTriggeredBlockPositionOffsetXField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueTriggeredBlockPositionOffsetXField);
+		this.newDialogueTriggeredBlockPositionOffsetXField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_X_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueTriggeredBlockPositionOffsetXField);
 
-		this.newDialogueTriggeredBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 188, 50, 20, Text.empty());
+		this.newDialogueTriggeredBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 100, 188, 50, 20, Component.empty());
 		this.newDialogueTriggeredBlockPositionOffsetYField.setMaxLength(128);
-		this.newDialogueTriggeredBlockPositionOffsetYField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueTriggeredBlockPositionOffsetYField);
+		this.newDialogueTriggeredBlockPositionOffsetYField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_Y_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueTriggeredBlockPositionOffsetYField);
 
-		this.newDialogueTriggeredBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 - 46, 188, 50, 20, Text.empty());
+		this.newDialogueTriggeredBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 - 46, 188, 50, 20, Component.empty());
 		this.newDialogueTriggeredBlockPositionOffsetZField.setMaxLength(128);
-		this.newDialogueTriggeredBlockPositionOffsetZField.setPlaceholder(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
-		this.addSelectableChild(this.newDialogueTriggeredBlockPositionOffsetZField);
+		this.newDialogueTriggeredBlockPositionOffsetZField.setHint(NEW_TRIGGERED_BLOCK_POS_OFFSET_Z_PLACEHOLDER_TEXT);
+		this.addWidget(this.newDialogueTriggeredBlockPositionOffsetZField);
 
 		this.newDialogueTriggeredBlockResets = false;
-		this.toggleNewDialogueTriggeredBlockResetsButton = this.addDrawableChild(CyclingButtonWidget.onOffBuilder(Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Text.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.newDialogueTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 188, 150, 20, Text.empty(), (button, triggeredBlockResets) -> {
+		this.toggleNewDialogueTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.newDialogueTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 188, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.newDialogueTriggeredBlockResets = triggeredBlockResets;
 		}));
 
 		// --- starting dialogues page ---
 
-		this.removeStartingDialogueEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(0)));
-		this.removeStartingDialogueEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(1)));
-		this.removeStartingDialogueEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(2)));
-		this.removeStartingDialogueEntryButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(3)));
-		this.removeStartingDialogueEntryButton4 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 140, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(4)));
+		this.removeStartingDialogueEntryButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(0)));
+		this.removeStartingDialogueEntryButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(1)));
+		this.removeStartingDialogueEntryButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(2)));
+		this.removeStartingDialogueEntryButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 116, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(3)));
+		this.removeStartingDialogueEntryButton4 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 140, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeStartingDialogueEntry(4)));
 
-		this.addStartingDialogueButton = this.addDrawableChild(ButtonWidget.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addStartingDialogueEntry()).dimensions(this.width / 2 - 4 - 150, 164, 300, 20).build());
+		this.addStartingDialogueButton = this.addRenderableWidget(Button.builder(ADD_ENTRY_BUTTON_LABEL_TEXT, button -> this.addStartingDialogueEntry()).bounds(this.width / 2 - 4 - 150, 164, 300, 20).build());
 
-		this.newStartingDialogueIdentifierField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 188, 300, 20, Text.empty());
+		this.newStartingDialogueIdentifierField = new EditBox(this.font, this.width / 2 - 154, 188, 300, 20, Component.empty());
 		this.newStartingDialogueIdentifierField.setMaxLength(128);
-		this.addSelectableChild(this.newStartingDialogueIdentifierField);
+		this.addWidget(this.newStartingDialogueIdentifierField);
 
 		// --- data providing block page ---
 
-		this.dataProvidingBlockPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 116, 100, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 116, 100, 20, Component.empty());
 		this.dataProvidingBlockPositionOffsetXField.setMaxLength(128);
-		this.dataProvidingBlockPositionOffsetXField.setText(Integer.toString(this.dialogueBlockEntity.getDataProvidingBlockPosOffset().getX()));
-		this.addSelectableChild(this.dataProvidingBlockPositionOffsetXField);
+		this.dataProvidingBlockPositionOffsetXField.setValue(Integer.toString(this.dialogueBlockEntity.getDataProvidingBlockPosOffset().getX()));
+		this.addWidget(this.dataProvidingBlockPositionOffsetXField);
 
-		this.dataProvidingBlockPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 116, 100, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 116, 100, 20, Component.empty());
 		this.dataProvidingBlockPositionOffsetYField.setMaxLength(128);
-		this.dataProvidingBlockPositionOffsetYField.setText(Integer.toString(this.dialogueBlockEntity.getDataProvidingBlockPosOffset().getY()));
-		this.addSelectableChild(this.dataProvidingBlockPositionOffsetYField);
+		this.dataProvidingBlockPositionOffsetYField.setValue(Integer.toString(this.dialogueBlockEntity.getDataProvidingBlockPosOffset().getY()));
+		this.addWidget(this.dataProvidingBlockPositionOffsetYField);
 
-		this.dataProvidingBlockPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 116, 100, 20, Text.empty());
+		this.dataProvidingBlockPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 116, 100, 20, Component.empty());
 		this.dataProvidingBlockPositionOffsetZField.setMaxLength(128);
-		this.dataProvidingBlockPositionOffsetZField.setText(Integer.toString(this.dialogueBlockEntity.getDataProvidingBlockPosOffset().getZ()));
-		this.addSelectableChild(this.dataProvidingBlockPositionOffsetZField);
+		this.dataProvidingBlockPositionOffsetZField.setValue(Integer.toString(this.dialogueBlockEntity.getDataProvidingBlockPosOffset().getZ()));
+		this.addWidget(this.dataProvidingBlockPositionOffsetZField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 212, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 212, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 212, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 212, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -479,25 +479,25 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		List<MutablePair<String, BlockPos>> list = new ArrayList<>(this.dialogueUsedBlocksList);
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> list1 = new ArrayList<>(this.dialogueTriggeredBlocksList);
 		List<String> list2 = new ArrayList<>(this.startingDialogueList);
 		int number4 = this.scrollPosition;
 		float number5 = this.scrollAmount;
 		ScreenPage var = this.screenPage;
-		String string = this.newDialogueUsedBlockIdentifierField.getText();
-		String string1 = this.newDialogueUsedBlockPositionOffsetXField.getText();
-		String string2 = this.newDialogueUsedBlockPositionOffsetYField.getText();
-		String string3 = this.newDialogueUsedBlockPositionOffsetZField.getText();
-		String string4 = this.newDialogueTriggeredBlockIdentifierField.getText();
-		String string5 = this.newDialogueTriggeredBlockPositionOffsetXField.getText();
-		String string6 = this.newDialogueTriggeredBlockPositionOffsetYField.getText();
-		String string7 = this.newDialogueTriggeredBlockPositionOffsetZField.getText();
-		String string8 = this.newStartingDialogueIdentifierField.getText();
-		String string9 = this.dataProvidingBlockPositionOffsetXField.getText();
-		String string10 = this.dataProvidingBlockPositionOffsetYField.getText();
-		String string11 = this.dataProvidingBlockPositionOffsetZField.getText();
+		String string = this.newDialogueUsedBlockIdentifierField.getValue();
+		String string1 = this.newDialogueUsedBlockPositionOffsetXField.getValue();
+		String string2 = this.newDialogueUsedBlockPositionOffsetYField.getValue();
+		String string3 = this.newDialogueUsedBlockPositionOffsetZField.getValue();
+		String string4 = this.newDialogueTriggeredBlockIdentifierField.getValue();
+		String string5 = this.newDialogueTriggeredBlockPositionOffsetXField.getValue();
+		String string6 = this.newDialogueTriggeredBlockPositionOffsetYField.getValue();
+		String string7 = this.newDialogueTriggeredBlockPositionOffsetZField.getValue();
+		String string8 = this.newStartingDialogueIdentifierField.getValue();
+		String string9 = this.dataProvidingBlockPositionOffsetXField.getValue();
+		String string10 = this.dataProvidingBlockPositionOffsetYField.getValue();
+		String string11 = this.dataProvidingBlockPositionOffsetZField.getValue();
 		this.init(client, width, height);
 		this.dialogueUsedBlocksList.clear();
 		this.dialogueTriggeredBlocksList.clear();
@@ -508,18 +508,18 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		this.scrollPosition = number4;
 		this.scrollAmount = number5;
 		this.screenPage = var;
-		this.newDialogueUsedBlockIdentifierField.setText(string);
-		this.newDialogueUsedBlockPositionOffsetXField.setText(string1);
-		this.newDialogueUsedBlockPositionOffsetYField.setText(string2);
-		this.newDialogueUsedBlockPositionOffsetZField.setText(string3);
-		this.newDialogueTriggeredBlockIdentifierField.setText(string4);
-		this.newDialogueTriggeredBlockPositionOffsetXField.setText(string5);
-		this.newDialogueTriggeredBlockPositionOffsetYField.setText(string6);
-		this.newDialogueTriggeredBlockPositionOffsetZField.setText(string7);
-		this.newStartingDialogueIdentifierField.setText(string8);
-		this.dataProvidingBlockPositionOffsetXField.setText(string9);
-		this.dataProvidingBlockPositionOffsetYField.setText(string10);
-		this.dataProvidingBlockPositionOffsetZField.setText(string11);
+		this.newDialogueUsedBlockIdentifierField.setValue(string);
+		this.newDialogueUsedBlockPositionOffsetXField.setValue(string1);
+		this.newDialogueUsedBlockPositionOffsetYField.setValue(string2);
+		this.newDialogueUsedBlockPositionOffsetZField.setValue(string3);
+		this.newDialogueTriggeredBlockIdentifierField.setValue(string4);
+		this.newDialogueTriggeredBlockPositionOffsetXField.setValue(string5);
+		this.newDialogueTriggeredBlockPositionOffsetYField.setValue(string6);
+		this.newDialogueTriggeredBlockPositionOffsetZField.setValue(string7);
+		this.newStartingDialogueIdentifierField.setValue(string8);
+		this.dataProvidingBlockPositionOffsetXField.setValue(string9);
+		this.dataProvidingBlockPositionOffsetYField.setValue(string10);
+		this.dataProvidingBlockPositionOffsetZField.setValue(string11);
 		this.updateWidgets();
 	}
 
@@ -558,7 +558,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& this.mouseClicked) {
 			int i = this.dialogueUsedBlocksList.size() - VISIBLE_SMALL_LIST_ENTRIES;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS
@@ -566,7 +566,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& this.mouseClicked) {
 			int i = this.dialogueTriggeredBlocksList.size() - VISIBLE_SMALL_LIST_ENTRIES;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		if (this.screenPage == ScreenPage.STARTING_DIALOGUES
@@ -574,7 +574,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& this.mouseClicked) {
 			int i = this.startingDialogueList.size() - VISIBLE_LARGE_LIST_ENTRIES;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -588,7 +588,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& mouseY >= 44 && mouseY <= 116) {
 			int i = this.dialogueUsedBlocksList.size() - VISIBLE_SMALL_LIST_ENTRIES;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS
@@ -597,7 +597,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& mouseY >= 44 && mouseY <= 116) {
 			int i = this.dialogueTriggeredBlocksList.size() - VISIBLE_SMALL_LIST_ENTRIES;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		if (this.screenPage == ScreenPage.STARTING_DIALOGUES
@@ -606,7 +606,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				&& mouseY >= 44 && mouseY <= 140) {
 			int i = this.startingDialogueList.size() - VISIBLE_LARGE_LIST_ENTRIES;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -622,20 +622,20 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		if (this.screenPage == ScreenPage.DIALOGUE_USED_BLOCKS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_SMALL_LIST_ENTRIES, this.dialogueUsedBlocksList.size()); i++) {
 				BlockPos usedBlockPos = this.dialogueUsedBlocksList.get(i).getRight();
-				MutableText text = Text.translatable("gui.dialogue_block.used_blocks_list.entry", this.dialogueUsedBlocksList.get(i).getLeft(), usedBlockPos.getX(), usedBlockPos.getY(), usedBlockPos.getZ());
-				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				MutableComponent text = Component.translatable("gui.dialogue_block.used_blocks_list.entry", this.dialogueUsedBlocksList.get(i).getLeft(), usedBlockPos.getX(), usedBlockPos.getY(), usedBlockPos.getZ());
+				context.drawString(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.dialogueUsedBlocksList.size() > VISIBLE_SMALL_LIST_ENTRIES) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
+				context.blitSprite(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
 				int k = (int) (83.0f * this.scrollAmount);
-				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
 			this.newDialogueUsedBlockIdentifierField.render(context, mouseX, mouseY, delta);
 			this.newDialogueUsedBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
@@ -644,13 +644,13 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		} else if (this.screenPage == ScreenPage.DIALOGUE_TRIGGERED_BLOCKS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_SMALL_LIST_ENTRIES, this.dialogueTriggeredBlocksList.size()); i++) {
 				BlockPos usedBlockPos = this.dialogueTriggeredBlocksList.get(i).getRight().getLeft();
-				MutableText text = Text.translatable("gui.dialogue_block.triggered_blocks_list.entry", this.dialogueTriggeredBlocksList.get(i).getLeft(), this.dialogueTriggeredBlocksList.get(i).getRight().getRight() ? Text.translatable("gui.dialogue_block.triggered_blocks_list.resets") : Text.translatable("gui.dialogue_block.triggered_blocks_list.triggers"), usedBlockPos.getX(), usedBlockPos.getY(), usedBlockPos.getZ());
-				context.drawTextWithShadow(this.textRenderer, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				MutableComponent text = Component.translatable("gui.dialogue_block.triggered_blocks_list.entry", this.dialogueTriggeredBlocksList.get(i).getLeft(), this.dialogueTriggeredBlocksList.get(i).getRight().getRight() ? Component.translatable("gui.dialogue_block.triggered_blocks_list.resets") : Component.translatable("gui.dialogue_block.triggered_blocks_list.triggers"), usedBlockPos.getX(), usedBlockPos.getY(), usedBlockPos.getZ());
+				context.drawString(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.dialogueTriggeredBlocksList.size() > VISIBLE_SMALL_LIST_ENTRIES) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
+				context.blitSprite(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
 				int k = (int) (83.0f * this.scrollAmount);
-				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
 			this.newDialogueTriggeredBlockIdentifierField.render(context, mouseX, mouseY, delta);
 			this.newDialogueTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
@@ -658,17 +658,17 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 			this.newDialogueTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.STARTING_DIALOGUES) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LARGE_LIST_ENTRIES, this.startingDialogueList.size()); i++) {
-				context.drawTextWithShadow(this.textRenderer, Text.translatable(this.startingDialogueList.get(i)), this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				context.drawString(this.font, Component.translatable(this.startingDialogueList.get(i)), this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.startingDialogueList.size() > VISIBLE_LARGE_LIST_ENTRIES) {
-				context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 44, 8, 116);
+				context.blitSprite(SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 44, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-				context.drawGuiTexture(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
 			this.newStartingDialogueIdentifierField.render(context, mouseX, mouseY, delta);
 		} else if (this.screenPage == ScreenPage.DATA_BLOCK_OFFSET) {
 
-			context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 106, 0xA0A0A0);
+			context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 106, 0xA0A0A0);
 			this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
 			this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
 			this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
@@ -683,15 +683,15 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				this.dialogueTriggeredBlocksList,
 				this.startingDialogueList,
 				new BlockPos(
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getValue())
 				)
 		));
 		return true;
 	}
 
-	public enum ScreenPage implements StringIdentifiable {
+	public enum ScreenPage implements StringRepresentable {
 		DATA_BLOCK_OFFSET("data_block_offset"),
 		DIALOGUE_USED_BLOCKS("dialogue_used_blocks"),
 		DIALOGUE_TRIGGERED_BLOCKS("dialogue_triggered_blocks"),
@@ -704,16 +704,16 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.asString().equals(name)).findFirst();
+			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.dialogue_screen.screen_page." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.dialogue_screen.screen_page." + this.name);
 		}
 	}
 }

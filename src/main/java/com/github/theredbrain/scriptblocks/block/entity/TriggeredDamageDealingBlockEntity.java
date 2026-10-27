@@ -7,35 +7,6 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -43,18 +14,44 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
 	private SelectionMode selectionMode = SelectionMode.AREA;
 
 	private boolean calculateAreaBox = true;
-	private Box area = null;
+	private AABB area = null;
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
-	private BlockPos areaPositionOffset = BlockPos.ORIGIN;
+	private BlockPos areaPositionOffset = BlockPos.ZERO;
 
-	private BlockPos uuidListHandlerPositionOffset = BlockPos.ORIGIN;
+	private BlockPos uuidListHandlerPositionOffset = BlockPos.ZERO;
 
 	private String exceptionTagIdentifierString = "";
 	private String damageTypeIdentifierString = "";
@@ -65,17 +62,17 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("selection_mode", this.selectionMode.asString());
+		view.putString("selection_mode", this.selectionMode.getSerializedName());
 
-		NbtCompound nbtCompound = new NbtCompound();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("visible", this.showArea);
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.areaPositionOffset);
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.areaPositionOffset);
 		nbtCompound.put("dimensions", ScriptBlocksNBTHelper.fromVec3i(this.areaDimensions));
-		view.put("area", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("area", CompoundTag.CODEC, nbtCompound.copy());
 
-		view.put("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
+		view.store("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
 
 		view.putString("exception_tag_identifier_string", this.exceptionTagIdentifierString);
 
@@ -83,23 +80,23 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 
 		view.putFloat("damage_amount", this.damageAmount);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		this.selectionMode = SelectionMode.byName(view.getString("selection_mode", "")).orElse(SelectionMode.AREA);
+		this.selectionMode = SelectionMode.byName(view.getStringOr("selection_mode", "")).orElse(SelectionMode.AREA);
 
-		NbtCompound nbtCompound = view.read("area", NbtCompound.CODEC).orElseGet(NbtCompound::new);
-		this.showArea = nbtCompound.getBoolean("visible", false);
+		CompoundTag nbtCompound = view.read("area", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		this.showArea = nbtCompound.getBooleanOr("visible", false);
 
 		this.areaDimensions = ScriptBlocksNBTHelper.toVec3i(nbtCompound, "dimensions").orElse(new Vec3i(0, 0, 0));
 
 			this.areaPositionOffset = BlockPos.max(
 					BlockPos.min(
-							nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+							nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 							new BlockPos(48, 48, 48)
 					),
 					new BlockPos(-48, -48, -48)
@@ -107,38 +104,38 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 
 		this.uuidListHandlerPositionOffset = BlockPos.max(
 				BlockPos.min(
-						nbtCompound.get("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						nbtCompound.read("uuid_list_handler_position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.exceptionTagIdentifierString = view.getString("exception_tag_identifier_string", "");
+		this.exceptionTagIdentifierString = view.getStringOr("exception_tag_identifier_string", "");
 
-		this.damageTypeIdentifierString = view.getString("damage_type_identifier_string", "");
+		this.damageTypeIdentifierString = view.getStringOr("damage_type_identifier_string", "");
 
-		this.damageAmount = view.getFloat("damage_amount", 0);
+		this.damageAmount = view.getFloatOr("damage_amount", 0);
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	private List<UUID> getUUIDListFromHandler() {
-		if (this.world != null) {
+		if (this.level != null) {
 
-			BlockEntity blockEntity = world.getBlockEntity(
+			BlockEntity blockEntity = level.getBlockEntity(
 					new BlockPos(
-							this.pos.getX() + this.uuidListHandlerPositionOffset.getX(),
-							this.pos.getY() + this.uuidListHandlerPositionOffset.getY(),
-							this.pos.getZ() + this.uuidListHandlerPositionOffset.getZ()
+							this.worldPosition.getX() + this.uuidListHandlerPositionOffset.getX(),
+							this.worldPosition.getY() + this.uuidListHandlerPositionOffset.getY(),
+							this.worldPosition.getZ() + this.uuidListHandlerPositionOffset.getZ()
 					)
 			);
 			if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
@@ -222,48 +219,48 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		if (this.selectionMode == SelectionMode.AREA && (this.calculateAreaBox || this.area == null)) {
 			BlockPos areaPositionOffset = this.areaPositionOffset;
 			Vec3i areaDimensions = this.areaDimensions;
-			Vec3d areaStart = new Vec3d(pos.getX() + areaPositionOffset.getX(), pos.getY() + areaPositionOffset.getY(), pos.getZ() + areaPositionOffset.getZ());
-			Vec3d areaEnd = new Vec3d(areaStart.getX() + areaDimensions.getX(), areaStart.getY() + areaDimensions.getY(), areaStart.getZ() + areaDimensions.getZ());
-			this.area = new Box(areaStart, areaEnd);
+			Vec3 areaStart = new Vec3(worldPosition.getX() + areaPositionOffset.getX(), worldPosition.getY() + areaPositionOffset.getY(), worldPosition.getZ() + areaPositionOffset.getZ());
+			Vec3 areaEnd = new Vec3(areaStart.x() + areaDimensions.getX(), areaStart.y() + areaDimensions.getY(), areaStart.z() + areaDimensions.getZ());
+			this.area = new AABB(areaStart, areaEnd);
 			this.calculateAreaBox = false;
-			this.markDirty();
-			if (this.world != null) {
-				BlockState blockState = this.world.getBlockState(this.pos);
-				this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+			this.setChanged();
+			if (this.level != null) {
+				BlockState blockState = this.level.getBlockState(this.worldPosition);
+				this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 			}
 		}
 
-		if (this.world != null) {
+		if (this.level != null) {
 			List<LivingEntity> entityList = new ArrayList<>();
 			if (this.selectionMode == SelectionMode.AREA) {
-				entityList.addAll(this.world.getEntitiesByClass(LivingEntity.class, this.area, entity -> !(entity.getType().isIn(TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(this.exceptionTagIdentifierString))))));
+				entityList.addAll(this.level.getEntitiesOfClass(LivingEntity.class, this.area, entity -> !(entity.getType().is(TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(this.exceptionTagIdentifierString))))));
 			} else {
 				this.getUUIDListFromHandler().forEach((uuid) -> {
-					PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
+					Player playerEntity = this.level.getPlayerByUUID(uuid);
 					if (playerEntity != null) {
 						entityList.add(playerEntity);
 					}
 				});
 			}
-			if (this.world instanceof ServerWorld serverWorld) {
+			if (this.level instanceof ServerLevel serverWorld) {
 				this.dealDamageToEntities(serverWorld, entityList);
 			}
 		}
 	}
 
-	private void dealDamageToEntities(ServerWorld serverWorld, List<LivingEntity> list) {
+	private void dealDamageToEntities(ServerLevel serverWorld, List<LivingEntity> list) {
 
-		Optional<Registry<DamageType>> optionalRegistry = serverWorld.getRegistryManager().getOptional(RegistryKeys.DAMAGE_TYPE);
+		Optional<Registry<DamageType>> optionalRegistry = serverWorld.registryAccess().lookup(Registries.DAMAGE_TYPE);
 
 		if (!this.damageTypeIdentifierString.isEmpty() && optionalRegistry.isPresent()) {
 			Identifier damageTypeIdentifier = Identifier.tryParse(this.damageTypeIdentifierString);
 			if (damageTypeIdentifier != null) {
-				RegistryKey<DamageType> key = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, damageTypeIdentifier);
+				ResourceKey<DamageType> key = ResourceKey.create(Registries.DAMAGE_TYPE, damageTypeIdentifier);
 
-				DamageSource damageSource = new DamageSource(optionalRegistry.get().getEntry(optionalRegistry.get().get(key)));
+				DamageSource damageSource = new DamageSource(optionalRegistry.get().wrapAsHolder(optionalRegistry.get().getValue(key)));
 
 				for (LivingEntity entity : list) {
-					entity.damage(serverWorld, damageSource, this.damageAmount);
+					entity.hurtServer(serverWorld, damageSource, this.damageAmount);
 				}
 			}
 		}
@@ -276,15 +273,15 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 
 	@Override
 	public void handleUUIDList(List<UUID> list, boolean remove) {
-		if (this.world != null) {
+		if (this.level != null) {
 			List<LivingEntity> entityList = new ArrayList<>();
 			list.forEach((uuid) -> {
-				PlayerEntity playerEntity = this.world.getPlayerByUuid(uuid);
+				Player playerEntity = this.level.getPlayerByUUID(uuid);
 				if (playerEntity != null) {
 					entityList.add(playerEntity);
 				}
 			});
-			if (this.world instanceof ServerWorld serverWorld) {
+			if (this.level instanceof ServerLevel serverWorld) {
 				this.dealDamageToEntities(serverWorld, entityList);
 			}
 		}
@@ -297,8 +294,8 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.rotateOffsetArea(this.areaPositionOffset, this.areaDimensions, blockRotation);
 				this.areaPositionOffset = offsetArea.getLeft();
@@ -306,32 +303,32 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 
 				this.uuidListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerPositionOffset, blockRotation);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.FRONT_BACK);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.FRONT_BACK);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.FRONT_BACK);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, Mirror.FRONT_BACK);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, BlockMirror.LEFT_RIGHT);
+				MutablePair<BlockPos, Vec3i> offsetArea = BlockRotationUtils.mirrorOffsetArea(this.areaPositionOffset, this.areaDimensions, Mirror.LEFT_RIGHT);
 				this.areaPositionOffset = offsetArea.getLeft();
 				this.areaDimensions = offsetArea.getRight();
 
-				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, BlockMirror.LEFT_RIGHT);
+				this.uuidListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerPositionOffset, Mirror.LEFT_RIGHT);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}
 
-	public enum SelectionMode implements StringIdentifiable {
+	public enum SelectionMode implements StringRepresentable {
 		AREA("area"),
 		UUID_LIST("uuid_list");
 
@@ -342,16 +339,16 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<SelectionMode> byName(String name) {
-			return Arrays.stream(SelectionMode.values()).filter(selectionMode -> selectionMode.asString().equals(name)).findFirst();
+			return Arrays.stream(SelectionMode.values()).filter(selectionMode -> selectionMode.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.triggered_damage_dealing_block.selection_mode." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.triggered_damage_dealing_block.selection_mode." + this.name);
 		}
 	}
 

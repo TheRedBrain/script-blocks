@@ -6,25 +6,25 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class LocationControlBlockEntity extends RotatedBlockEntity implements Resetable {
 	private static final int RESET_AREA_MIN_X_DEFAULT = -16;
@@ -33,8 +33,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private static final int RESET_AREA_MAX_Z_DEFAULT = 31;
 	private MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
 	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
-	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
-	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 
 	public LocationControlBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.LOCATION_CONTROL_BLOCK_ENTITY, pos, state);
@@ -50,30 +50,30 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	private int resetAreaMaxZ = RESET_AREA_MAX_Z_DEFAULT;
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.mainEntrance.getLeft());
+		CompoundTag nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.mainEntrance.getLeft());
 		nbtCompound.putDouble("yaw", this.mainEntrance.getRight().getLeft());
 		nbtCompound.putDouble("pitch", this.mainEntrance.getRight().getRight());
-		view.put("main_entrance", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("main_entrance", CompoundTag.CODEC, nbtCompound.copy());
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("side_entrances", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("side_entrances", CompoundTag.CODEC);
 		this.sideEntrances.forEach((key, value) -> {
-			NbtCompound nbtCompound1 = new NbtCompound();
+			CompoundTag nbtCompound1 = new CompoundTag();
 			nbtCompound1.putString("key", key);
-			nbtCompound1.put("position_offset", BlockPos.CODEC, value.getLeft());
+			nbtCompound1.store("position_offset", BlockPos.CODEC, value.getLeft());
 			nbtCompound1.putDouble("yaw", value.getRight().getLeft());
 			nbtCompound1.putDouble("pitch", value.getRight().getRight());
 			listAppender.add(nbtCompound1.copy());
 		});
 
-		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
+		nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
-		view.put("triggered_block", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
 
-		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
+		view.store("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
 		view.putBoolean("manual_reset", this.manualReset);
 
@@ -89,84 +89,84 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 
 		view.putInt("reset_area_max_z", this.resetAreaMaxZ);
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
-		NbtCompound nbtCompound = view.read("main_entrance", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("main_entrance", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.mainEntrance = new MutablePair<>(
-				nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+				nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 				new MutablePair<>(
-						MathHelper.clamp(nbtCompound.getDouble("yaw", 0), -180, 180),
-						MathHelper.clamp(nbtCompound.getDouble("pitch", 0), -90, 90)
+						Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
+						Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
 				)
 		);
 
 		this.sideEntrances.clear();
-		for (NbtCompound nbtCompound1 : view.getTypedListView("side_entrances", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound1 : view.listOrEmpty("side_entrances", CompoundTag.CODEC)) {
 			this.sideEntrances.put(
-					nbtCompound1.getString("key", ""),
+					nbtCompound1.getStringOr("key", ""),
 					new MutablePair<>(
-							nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+							nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 							new MutablePair<>(
-									MathHelper.clamp(nbtCompound1.getDouble("yaw", 0), -180, 180),
-									MathHelper.clamp(nbtCompound1.getDouble("pitch", 0), -90, 90)
+									Mth.clamp(nbtCompound1.getDoubleOr("yaw", 0), -180, 180),
+									Mth.clamp(nbtCompound1.getDoubleOr("pitch", 0), -90, 90)
 							)
 					));
 		}
 
-		nbtCompound = view.read("triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets", false)
+				nbtCompound.getBooleanOr("resets", false)
 		);
 
 		this.dataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.manualReset = view.getBoolean("manual_reset", false);
+		this.manualReset = view.getBooleanOr("manual_reset", false);
 
-		this.shouldAlwaysReset = view.getBoolean("should_always_reset", false);
+		this.shouldAlwaysReset = view.getBooleanOr("should_always_reset", false);
 
-		this.initialResetTimer = view.getInt("initial_reset_timer", -1);
+		this.initialResetTimer = view.getIntOr("initial_reset_timer", -1);
 
-		this.resetAreaMinX = view.getInt("reset_area_min_x", RESET_AREA_MIN_X_DEFAULT);
+		this.resetAreaMinX = view.getIntOr("reset_area_min_x", RESET_AREA_MIN_X_DEFAULT);
 
-		this.resetAreaMinZ = view.getInt("reset_area_min_z", RESET_AREA_MIN_Z_DEFAULT);
+		this.resetAreaMinZ = view.getIntOr("reset_area_min_z", RESET_AREA_MIN_Z_DEFAULT);
 
-		this.resetAreaMaxX = view.getInt("reset_area_max_x", RESET_AREA_MAX_X_DEFAULT);
+		this.resetAreaMaxX = view.getIntOr("reset_area_max_x", RESET_AREA_MAX_X_DEFAULT);
 
-		this.resetAreaMaxZ = view.getInt("reset_area_max_z", RESET_AREA_MAX_Z_DEFAULT);
+		this.resetAreaMaxZ = view.getIntOr("reset_area_max_z", RESET_AREA_MAX_Z_DEFAULT);
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	public void trigger() {
 		this.manualReset = false;
-		if (this.world != null) {
-			BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.triggeredBlock.getLeft().getX(), this.pos.getY() + this.triggeredBlock.getLeft().getY(), this.pos.getZ() + this.triggeredBlock.getLeft().getZ()));
+		if (this.level != null) {
+			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.triggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.triggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.triggeredBlock.getLeft().getZ()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.triggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -189,10 +189,10 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	public void reset() {
 		this.manualReset = true;
-		this.markDirty();
-		if (this.world != null) {
-			BlockState blockState = this.world.getBlockState(this.pos);
-			this.world.updateListeners(this.pos, blockState, blockState, Block.NOTIFY_ALL);
+		this.setChanged();
+		if (this.level != null) {
+			BlockState blockState = this.level.getBlockState(this.worldPosition);
+			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -205,16 +205,16 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 		this.mainEntrance = mainEntrance;
 	}
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerWorld serverWorld, String entrance) {
+	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerLevel serverWorld, String entrance) {
 		BlockPos targetPos;
 		MutablePair<Double, Double> targetOrientation;
 
 		if (!entrance.isEmpty() && sideEntrances.containsKey(entrance)) {
 			MutablePair<BlockPos, MutablePair<Double, Double>> targetEntranceOffset = this.sideEntrances.get(entrance);
-			targetPos = new BlockPos(targetEntranceOffset.getLeft().getX() + this.getPos().getX(), targetEntranceOffset.getLeft().getY() + this.getPos().getY(), targetEntranceOffset.getLeft().getZ() + this.getPos().getZ());
+			targetPos = new BlockPos(targetEntranceOffset.getLeft().getX() + this.getBlockPos().getX(), targetEntranceOffset.getLeft().getY() + this.getBlockPos().getY(), targetEntranceOffset.getLeft().getZ() + this.getBlockPos().getZ());
 			targetOrientation = targetEntranceOffset.getRight();
 		} else {
-			targetPos = new BlockPos(this.mainEntrance.getLeft().getX() + this.getPos().getX(), this.mainEntrance.getLeft().getY() + this.getPos().getY(), this.mainEntrance.getLeft().getZ() + this.getPos().getZ());
+			targetPos = new BlockPos(this.mainEntrance.getLeft().getX() + this.getBlockPos().getX(), this.mainEntrance.getLeft().getY() + this.getBlockPos().getY(), this.mainEntrance.getLeft().getZ() + this.getBlockPos().getZ());
 			targetOrientation = this.mainEntrance.getRight();
 		}
 
@@ -310,8 +310,8 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 				this.mainEntrance = BlockRotationUtils.rotateSpawnPoint(this.mainEntrance, blockRotation);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
@@ -332,53 +332,53 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				this.resetAreaMaxX = resetAreaMax.getX();
 				this.resetAreaMaxZ = resetAreaMax.getZ();
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
-				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, BlockMirror.FRONT_BACK);
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, Mirror.FRONT_BACK);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), BlockMirror.FRONT_BACK);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), Mirror.FRONT_BACK);
 					this.sideEntrances.put(key, mirroredEntrance);
 				}
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
-				Vec3i resetAreaMin = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), BlockMirror.FRONT_BACK);
+				Vec3i resetAreaMin = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), Mirror.FRONT_BACK);
 				this.resetAreaMinX = resetAreaMin.getX();
 				this.resetAreaMinZ = resetAreaMin.getZ();
 
-				Vec3i resetAreaMax = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), BlockMirror.FRONT_BACK);
+				Vec3i resetAreaMax = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), Mirror.FRONT_BACK);
 				this.resetAreaMaxX = resetAreaMax.getX();
 				this.resetAreaMaxZ = resetAreaMax.getZ();
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
-				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, BlockMirror.LEFT_RIGHT);
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+				this.mainEntrance = BlockRotationUtils.mirrorSpawnPoint(this.mainEntrance, Mirror.LEFT_RIGHT);
 
 				List<String> keyList = this.sideEntrances.keySet().stream().toList();
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), BlockMirror.LEFT_RIGHT);
+					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), Mirror.LEFT_RIGHT);
 					this.sideEntrances.put(key, mirroredEntrance);
 				}
 
-				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				Vec3i resetAreaMin = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), BlockMirror.LEFT_RIGHT);
+				Vec3i resetAreaMin = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMinX, 0, this.resetAreaMinZ), Mirror.LEFT_RIGHT);
 				this.resetAreaMinX = resetAreaMin.getX();
 				this.resetAreaMinZ = resetAreaMin.getZ();
 
-				Vec3i resetAreaMax = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), BlockMirror.LEFT_RIGHT);
+				Vec3i resetAreaMax = BlockRotationUtils.mirrorOffsetVec3i(new Vec3i(this.resetAreaMaxX, 0, this.resetAreaMaxZ), Mirror.LEFT_RIGHT);
 				this.resetAreaMaxX = resetAreaMax.getX();
 				this.resetAreaMaxZ = resetAreaMax.getZ();
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

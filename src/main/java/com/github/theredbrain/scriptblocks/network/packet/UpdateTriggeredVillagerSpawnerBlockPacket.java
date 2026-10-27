@@ -2,16 +2,16 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.village.VillagerData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.npc.villager.VillagerData;
 
 public record UpdateTriggeredVillagerSpawnerBlockPacket(
 		BlockPos triggeredSpawnerBlockPosition,
@@ -23,25 +23,25 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 		boolean enableSpawnEffects,
 		String entityTypeId,
 		VillagerData villagerData,
-		List<MutablePair<Identifier, EntityAttributeModifier>> entityAttributeModifiersList,
+		List<MutablePair<Identifier, AttributeModifier>> entityAttributeModifiersList,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		BlockPos useRelayBlockPositionOffset
-) implements CustomPayload {
-	public static final Id<UpdateTriggeredVillagerSpawnerBlockPacket> PACKET_ID = new Id<>(ScriptBlocks.identifier("update_triggered_villager_spawner_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTriggeredVillagerSpawnerBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTriggeredVillagerSpawnerBlockPacket::write, UpdateTriggeredVillagerSpawnerBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final Type<UpdateTriggeredVillagerSpawnerBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggered_villager_spawner_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredVillagerSpawnerBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredVillagerSpawnerBlockPacket::write, UpdateTriggeredVillagerSpawnerBlockPacket::new);
 
-	public UpdateTriggeredVillagerSpawnerBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTriggeredVillagerSpawnerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.decodeAsJson(VillagerData.CODEC),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readLenientJsonWithCodec(VillagerData.CODEC),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -49,21 +49,21 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredSpawnerBlockPosition);
 
 		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
 		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
 
-		registryByteBuf.writeString(this.spawningMode);
+		registryByteBuf.writeUtf(this.spawningMode);
 
 		registryByteBuf.writeBoolean(this.isPersistent);
 		registryByteBuf.writeBoolean(this.enableSpawnEffects);
 
-		registryByteBuf.writeString(this.entityTypeId);
+		registryByteBuf.writeUtf(this.entityTypeId);
 
-		registryByteBuf.encodeAsJson(VillagerData.CODEC, this.villagerData);
+		registryByteBuf.writeJsonWithCodec(VillagerData.CODEC, this.villagerData);
 
 		registryByteBuf.writeCollection(this.entityAttributeModifiersList, CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER);
 
@@ -74,7 +74,7 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

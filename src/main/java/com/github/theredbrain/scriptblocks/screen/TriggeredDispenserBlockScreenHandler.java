@@ -1,38 +1,38 @@
 package com.github.theredbrain.scriptblocks.screen;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public class TriggeredDispenserBlockScreenHandler extends ScreenHandler {
+public class TriggeredDispenserBlockScreenHandler extends AbstractContainerMenu {
 	private static final int CONTAINER_SIZE = 9;
 	private static final int INVENTORY_START = 9;
 	private static final int INVENTORY_END = 36;
 	private static final int HOTBAR_START = 36;
 	private static final int HOTBAR_END = 45;
-	private final Inventory inventory;
+	private final Container inventory;
 
-	public TriggeredDispenserBlockScreenHandler(int syncId, PlayerInventory playerInventory) {
-		this(syncId, playerInventory, new SimpleInventory(9));
+	public TriggeredDispenserBlockScreenHandler(int syncId, Inventory playerInventory) {
+		this(syncId, playerInventory, new SimpleContainer(9));
 	}
 
-	public TriggeredDispenserBlockScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
-		super(ScreenHandlerType.GENERIC_3X3, syncId);
-		checkSize(inventory, 9);
+	public TriggeredDispenserBlockScreenHandler(int syncId, Inventory playerInventory, Container inventory) {
+		super(MenuType.GENERIC_3x3, syncId);
+		checkContainerSize(inventory, 9);
 		this.inventory = inventory;
-		inventory.onOpen(playerInventory.player);
+		inventory.startOpen(playerInventory.player);
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
 				this.addSlot(new Slot(inventory, j + i * 3, 62 + j * 18, 17 + i * 18) {
 
 					@Override
-					public int getMaxItemCount() {
+					public int getMaxStackSize() {
 						return 1;
 					}
 
@@ -52,44 +52,44 @@ public class TriggeredDispenserBlockScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public boolean canUse(PlayerEntity player) {
-		return this.inventory.canPlayerUse(player);
+	public boolean stillValid(Player player) {
+		return this.inventory.stillValid(player);
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int slot) {
+	public ItemStack quickMoveStack(Player player, int slot) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		Slot slot2 = this.slots.get(slot);
-		if (slot2 != null && slot2.hasStack()) {
-			ItemStack itemStack2 = slot2.getStack();
+		if (slot2 != null && slot2.hasItem()) {
+			ItemStack itemStack2 = slot2.getItem();
 			itemStack = itemStack2.copy();
 			if (slot < 9) {
-				if (!this.insertItem(itemStack2, 9, 45, true)) {
+				if (!this.moveItemStackTo(itemStack2, 9, 45, true)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (!this.insertItem(itemStack2, 0, 9, false)) {
+			} else if (!this.moveItemStackTo(itemStack2, 0, 9, false)) {
 				return ItemStack.EMPTY;
 			}
 
 			if (itemStack2.isEmpty()) {
-				slot2.setStack(ItemStack.EMPTY);
+				slot2.setByPlayer(ItemStack.EMPTY);
 			} else {
-				slot2.markDirty();
+				slot2.setChanged();
 			}
 
 			if (itemStack2.getCount() == itemStack.getCount()) {
 				return ItemStack.EMPTY;
 			}
 
-			slot2.onTakeItem(player, itemStack2);
+			slot2.onTake(player, itemStack2);
 		}
 
 		return itemStack;
 	}
 
 	@Override
-	public void onClosed(PlayerEntity player) {
-		super.onClosed(player);
-		this.inventory.onClose(player);
+	public void removed(Player player) {
+		super.removed(player);
+		this.inventory.stopOpen(player);
 	}
 }

@@ -4,20 +4,19 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.component.type.PreventInteractionsDataComponent;
 import com.github.theredbrain.scriptblocks.component.type.RemovedOnInteractionsDataComponent;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataComponents;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-
 import java.util.Objects;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class PlayerEntityHelper {
 
 	private static final int EXCLUSIVE_EQUIPMENT_SLOT_AMOUNT = 20;
 
 	// TODO rework into dedicated ItemRemoverBlock
-	public static void removeItemsOnTeleport(ServerPlayerEntity serverPlayerEntity, String removedItemIdentifier) {
+	public static void removeItemsOnTeleport(ServerPlayer serverPlayerEntity, String removedItemIdentifier) {
 		if (removedItemIdentifier.isEmpty()) {
 			return;
 		}
@@ -36,21 +35,21 @@ public class PlayerEntityHelper {
 			}
 		}
 
-		PlayerInventory playerInventory = serverPlayerEntity.getInventory();
-		for (int i = 0; i < playerInventory.main.size(); i++) {
-			ItemStack currentItemStack = playerInventory.main.get(i).copy();
+		Inventory playerInventory = serverPlayerEntity.getInventory();
+		for (int i = 0; i < playerInventory.items.size(); i++) {
+			ItemStack currentItemStack = playerInventory.items.get(i).copy();
 			RemovedOnInteractionsDataComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_INTERACTIONS);
 			if (removedOnTeleportDataComponent != null) {
 				for (String identifier : removedOnTeleportDataComponent.identifier_list()) {
 					if (Objects.equals(identifier, removedItemIdentifier)) {
-						playerInventory.main.set(i, ItemStack.EMPTY);
+						playerInventory.items.set(i, ItemStack.EMPTY);
 					}
 				}
 			}
 		}
 	}
 
-	public static boolean allowInteractions(PlayerEntity playerEntity, String preventingItemIdentifier) {
+	public static boolean allowInteractions(Player playerEntity, String preventingItemIdentifier) {
 		if (preventingItemIdentifier.isEmpty()) {
 			return true;
 		}
@@ -69,9 +68,9 @@ public class PlayerEntityHelper {
 			}
 		}
 
-		PlayerInventory playerInventory = playerEntity.getInventory();
-		for (int i = 0; i < playerInventory.main.size(); i++) {
-			ItemStack currentItemStack = playerInventory.main.get(i).copy();
+		Inventory playerInventory = playerEntity.getInventory();
+		for (int i = 0; i < playerInventory.items.size(); i++) {
+			ItemStack currentItemStack = playerInventory.items.get(i).copy();
 			PreventInteractionsDataComponent preventInteractionsDataComponent = currentItemStack.get(ScriptBlocksDataComponents.PREVENT_INTERACTIONS);
 			if (preventInteractionsDataComponent != null) {
 				for (String identifier : preventInteractionsDataComponent.identifier_list()) {
@@ -84,22 +83,22 @@ public class PlayerEntityHelper {
 		return true;
 	}
 
-	private static ItemStack getEquipmentStack(PlayerEntity playerEntity, int index) {
+	private static ItemStack getEquipmentStack(Player playerEntity, int index) {
 		return switch (index) {
-			case 0 -> playerEntity.getEquippedStack(EquipmentSlot.HEAD);
-			case 1 -> playerEntity.getEquippedStack(EquipmentSlot.CHEST);
-			case 2 -> playerEntity.getEquippedStack(EquipmentSlot.LEGS);
-			case 3 -> playerEntity.getEquippedStack(EquipmentSlot.FEET);
+			case 0 -> playerEntity.getItemBySlot(EquipmentSlot.HEAD);
+			case 1 -> playerEntity.getItemBySlot(EquipmentSlot.CHEST);
+			case 2 -> playerEntity.getItemBySlot(EquipmentSlot.LEGS);
+			case 3 -> playerEntity.getItemBySlot(EquipmentSlot.FEET);
 			default -> ScriptBlocks.getRPGEquipmentStack(playerEntity, index);
 		};
 	}
 
-	private static void setEquipmentStack(PlayerEntity playerEntity, int index, ItemStack stack) {
+	private static void setEquipmentStack(Player playerEntity, int index, ItemStack stack) {
 		switch (index) {
-			case 0 -> playerEntity.equipStack(EquipmentSlot.HEAD, stack);
-			case 1 -> playerEntity.equipStack(EquipmentSlot.CHEST, stack);
-			case 2 -> playerEntity.equipStack(EquipmentSlot.LEGS, stack);
-			case 3 -> playerEntity.equipStack(EquipmentSlot.FEET, stack);
+			case 0 -> playerEntity.setItemSlot(EquipmentSlot.HEAD, stack);
+			case 1 -> playerEntity.setItemSlot(EquipmentSlot.CHEST, stack);
+			case 2 -> playerEntity.setItemSlot(EquipmentSlot.LEGS, stack);
+			case 3 -> playerEntity.setItemSlot(EquipmentSlot.FEET, stack);
 			default -> ScriptBlocks.setRPGEquipmentStack(playerEntity, index, stack);
 		}
 

@@ -2,48 +2,48 @@ package com.github.theredbrain.scriptblocks.block.lootable_vault;
 
 import com.github.theredbrain.scriptblocks.block.entity.LootableVaultBlockEntity;
 import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldEvents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.LevelEvent;
 
 @Deprecated
-public enum LootableVaultState implements StringIdentifiable {
-	INACTIVE("inactive", LootableVaultState.Light.HALF_LIT) {
+public enum LootableVaultState implements StringRepresentable {
+	INACTIVE("inactive", Light.HALF_LIT) {
 		@Override
-		protected void onChangedTo(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
+		protected void onChangedTo(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
 			sharedData.setDisplayItem(ItemStack.EMPTY);
-			world.syncWorldEvent(WorldEvents.VAULT_DEACTIVATES, pos, ominous ? 1 : 0);
+			world.levelEvent(LevelEvent.ANIMATION_VAULT_DEACTIVATE, pos, ominous ? 1 : 0);
 		}
 	},
-	ACTIVE("active", LootableVaultState.Light.LIT) {
+	ACTIVE("active", Light.LIT) {
 		@Override
-		protected void onChangedTo(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
+		protected void onChangedTo(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
 			if (!sharedData.hasDisplayItem()) {
 				LootableVaultBlockEntity.Server.updateDisplayItem(world, this, config, sharedData, pos);
 			}
 
-			world.syncWorldEvent(WorldEvents.VAULT_ACTIVATES, pos, ominous ? 1 : 0);
+			world.levelEvent(LevelEvent.ANIMATION_VAULT_ACTIVATE, pos, ominous ? 1 : 0);
 		}
 	},
-	UNLOCKING("unlocking", LootableVaultState.Light.LIT) {
+	UNLOCKING("unlocking", Light.LIT) {
 		@Override
-		protected void onChangedTo(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
-			world.playSound(null, pos, SoundEvents.BLOCK_VAULT_INSERT_ITEM, SoundCategory.BLOCKS);
+		protected void onChangedTo(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
+			world.playSound(null, pos, SoundEvents.VAULT_INSERT_ITEM, SoundSource.BLOCKS);
 		}
 	},
-	EJECTING("ejecting", LootableVaultState.Light.LIT) {
+	EJECTING("ejecting", Light.LIT) {
 		@Override
-		protected void onChangedTo(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
-			world.playSound(null, pos, SoundEvents.BLOCK_VAULT_OPEN_SHUTTER, SoundCategory.BLOCKS);
+		protected void onChangedTo(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
+			world.playSound(null, pos, SoundEvents.VAULT_OPEN_SHUTTER, SoundSource.BLOCKS);
 		}
 
 		@Override
-		protected void onChangedFrom(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData) {
-			world.playSound(null, pos, SoundEvents.BLOCK_VAULT_CLOSE_SHUTTER, SoundCategory.BLOCKS);
+		protected void onChangedFrom(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData) {
+			world.playSound(null, pos, SoundEvents.VAULT_CLOSE_SHUTTER, SoundSource.BLOCKS);
 		}
 	};
 
@@ -52,15 +52,15 @@ public enum LootableVaultState implements StringIdentifiable {
 	private static final int field_48905 = 20;
 	private static final int field_48906 = 20;
 	private final String id;
-	private final LootableVaultState.Light light;
+	private final Light light;
 
-	LootableVaultState(final String id, final LootableVaultState.Light light) {
+	LootableVaultState(final String id, final Light light) {
 		this.id = id;
 		this.light = light;
 	}
 
 	@Override
-	public String asString() {
+	public String getSerializedName() {
 		return this.id;
 	}
 
@@ -68,12 +68,12 @@ public enum LootableVaultState implements StringIdentifiable {
 		return this.light.luminance;
 	}
 
-	public LootableVaultState update(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData) {
+	public LootableVaultState update(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData) {
 		return switch (this) {
 			case INACTIVE -> updateActiveState(world, pos, config, serverData, sharedData, config.activationRange());
 			case ACTIVE -> updateActiveState(world, pos, config, serverData, sharedData, config.deactivationRange());
 			case UNLOCKING -> {
-				serverData.setStateUpdatingResumeTime(world.getTime() + 20L);
+				serverData.setStateUpdatingResumeTime(world.getGameTime() + 20L);
 				yield EJECTING;
 			}
 			case EJECTING -> {
@@ -88,35 +88,35 @@ public enum LootableVaultState implements StringIdentifiable {
 //				}
 //				float f = serverData.getEjectSoundPitchModifier();
 				this.ejectReward(world, pos);
-				serverData.setStateUpdatingResumeTime(world.getTime() + 20L);
+				serverData.setStateUpdatingResumeTime(world.getGameTime() + 20L);
 				yield updateActiveState(world, pos, config, serverData, sharedData, config.deactivationRange());
 			}
 		};
 	}
 
 	private static LootableVaultState updateActiveState(
-			ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData, double radius
+			ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData, double radius
 	) {
 		sharedData.updateConnectedPlayers(world, pos, serverData, config, radius);
-		serverData.setStateUpdatingResumeTime(world.getTime() + 20L);
+		serverData.setStateUpdatingResumeTime(world.getGameTime() + 20L);
 		return sharedData.hasConnectedPlayers() ? ACTIVE : INACTIVE;
 	}
 
-	public void onStateChange(ServerWorld world, BlockPos pos, LootableVaultState newState, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
+	public void onStateChange(ServerLevel world, BlockPos pos, LootableVaultState newState, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
 		this.onChangedFrom(world, pos, config, sharedData);
 		newState.onChangedTo(world, pos, config, sharedData, ominous);
 	}
 
-	protected void onChangedTo(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
+	protected void onChangedTo(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData, boolean ominous) {
 	}
 
-	protected void onChangedFrom(ServerWorld world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData) {
+	protected void onChangedFrom(ServerLevel world, BlockPos pos, LootableVaultConfig config, LootableVaultSharedData sharedData) {
 	}
 
-	private void ejectReward(ServerWorld world, BlockPos pos) {
+	private void ejectReward(ServerLevel world, BlockPos pos) {
 //		ItemDispenserBehavior.spawnItem(world, stack, 2, Direction.UP, Vec3d.ofBottomCenter(pos).offset(Direction.UP, 1.2));
-		world.syncWorldEvent(WorldEvents.VAULT_EJECTS_ITEM, pos, 0);
-		world.playSound(null, pos, SoundEvents.BLOCK_VAULT_EJECT_ITEM, SoundCategory.BLOCKS, 1.0F, 0.8F + 0.4F);
+		world.levelEvent(LevelEvent.ANIMATION_VAULT_EJECT_ITEM, pos, 0);
+		world.playSound(null, pos, SoundEvents.VAULT_EJECT_ITEM, SoundSource.BLOCKS, 1.0F, 0.8F + 0.4F);
 	}
 
 	static enum Light {

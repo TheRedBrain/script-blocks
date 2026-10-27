@@ -8,24 +8,24 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.scoreboard.Team;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.scores.PlayerTeam;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	private static final BlockPos OVERRIDE_TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private static final BlockPos FALLBACK_TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 1, 0);
 
-	private BlockPos dataProvidingBlockPosOffset = BlockPos.ORIGIN;
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 	private String overrideDataIdentifier = "";
 	private String overrideDataValue = "";
 	private MutablePair<BlockPos, Boolean> overrideTriggeredBlock = new MutablePair<>(OVERRIDE_TRIGGERED_BLOCK_POS_DEFAULT, false);
@@ -57,18 +57,18 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		view.put("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
+		view.store("data_providing_block_position_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
 		view.putString("override_data_identifier", this.overrideDataIdentifier);
 
 		view.putString("override_data_value", this.overrideDataValue);
 
-		NbtCompound nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.overrideTriggeredBlock.getLeft());
+		CompoundTag nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.overrideTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.overrideTriggeredBlock.getRight());
-		view.put("override_triggered_block", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("override_triggered_block", CompoundTag.CODEC, nbtCompound.copy());
 
 		view.putString("influencing_attribute_identifier_string", this.influencingAttributeIdentifierString);
 
@@ -80,95 +80,95 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 
 		view.putInt("random_max_value", this.randomMaxValue);
 
-		nbtCompound = new NbtCompound();
-		nbtCompound.put("position_offset", BlockPos.CODEC, this.fallbackTriggeredBlock.getLeft());
+		nbtCompound = new CompoundTag();
+		nbtCompound.store("position_offset", BlockPos.CODEC, this.fallbackTriggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.fallbackTriggeredBlock.getRight());
-		view.put("fallback_triggered_block", NbtCompound.CODEC, nbtCompound.copy());
+		view.store("fallback_triggered_block", CompoundTag.CODEC, nbtCompound.copy());
 
-		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("triggered_blocks", NbtCompound.CODEC);
+		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("triggered_blocks", CompoundTag.CODEC);
 		for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-			nbtCompound = new NbtCompound();
-			nbtCompound.put("position_offset", BlockPos.CODEC, triggeredBlock.getLeft().getLeft());
+			nbtCompound = new CompoundTag();
+			nbtCompound.store("position_offset", BlockPos.CODEC, triggeredBlock.getLeft().getLeft());
 			nbtCompound.putBoolean("resets", triggeredBlock.getLeft().getRight());
 			nbtCompound.putInt("threshold", triggeredBlock.getRight());
 			listAppender.add(nbtCompound.copy());
 		}
 
-		super.writeData(view);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.dataProvidingBlockPosOffset = BlockPos.max(
 				BlockPos.min(
-						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+						view.read("data_providing_block_pos_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 						new BlockPos(48, 48, 48)
 				),
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.overrideDataIdentifier = view.getString("override_data_identifier", "");
+		this.overrideDataIdentifier = view.getStringOr("override_data_identifier", "");
 
-		this.overrideDataValue = view.getString("override_data_value", "");
+		this.overrideDataValue = view.getStringOr("override_data_value", "");
 
-		NbtCompound nbtCompound = view.read("override_triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		CompoundTag nbtCompound = view.read("override_triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.overrideTriggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets", false)
+				nbtCompound.getBooleanOr("resets", false)
 		);
 
-		this.influencingAttributeIdentifierString = view.getString("influencing_attribute_identifier_string", "");
+		this.influencingAttributeIdentifierString = view.getStringOr("influencing_attribute_identifier_string", "");
 
-		this.checksTeamAttributes = view.getBoolean("checks_team_attributes", true);
+		this.checksTeamAttributes = view.getBooleanOr("checks_team_attributes", true);
 
-		this.isAffectedByLuck = view.getBoolean("is_affected_by_luck", true);
+		this.isAffectedByLuck = view.getBooleanOr("is_affected_by_luck", true);
 
-		this.randomMinValue = view.getInt("random_min_value", 0);
+		this.randomMinValue = view.getIntOr("random_min_value", 0);
 
-		this.randomMaxValue = view.getInt("random_max_value", 1);
+		this.randomMaxValue = view.getIntOr("random_max_value", 1);
 
-		nbtCompound = view.read("fallback_triggered_block", NbtCompound.CODEC).orElseGet(NbtCompound::new);
+		nbtCompound = view.read("fallback_triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.fallbackTriggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
-								nbtCompound.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
+								nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
 								new BlockPos(48, 48, 48)
 						),
 						new BlockPos(-48, -48, -48)
 				),
-				nbtCompound.getBoolean("resets", false)
+				nbtCompound.getBooleanOr("resets", false)
 		);
 
 		this.triggeredBlocks.clear();
-		for (NbtCompound nbtCompound1 : view.getTypedListView("triggered_blocks", NbtCompound.CODEC)) {
+		for (CompoundTag nbtCompound1 : view.listOrEmpty("triggered_blocks", CompoundTag.CODEC)) {
 			this.triggeredBlocks.add(
 					new MutablePair<>(
 							new MutablePair<>(
-									nbtCompound1.get("position_offset", BlockPos.CODEC).orElse(BlockPos.ORIGIN),
-									nbtCompound1.getBoolean("resets", false)
+									nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+									nbtCompound1.getBooleanOr("resets", false)
 							),
-							MathHelper.clamp(nbtCompound1.getInt("threshold", 0), 0, 100)
+							Mth.clamp(nbtCompound1.getIntOr("threshold", 0), 0, 100)
 					)
 			);
 		}
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	// region --- getter & setter ---
@@ -264,23 +264,23 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 
 	@Override
 	public void trigger() {
-		if (this.world != null) {
-			String worldName = this.world.getRegistryKey().getValue().getPath();
-			MinecraftServer server = this.world.getServer();
+		if (this.level != null) {
+			String worldName = this.level.dimension().identifier().getPath();
+			MinecraftServer server = this.level.getServer();
 
 			boolean overrideIsActive = false;
 
 			// check if override is active
-			if (this.dataProvidingBlockPosOffset != BlockPos.ORIGIN && !this.overrideDataIdentifier.isEmpty() && !this.overrideDataValue.isEmpty()) {
-				BlockPos dataProviderBlockPos = new BlockPos(this.pos.getX() + this.dataProvidingBlockPosOffset.getX(), this.pos.getY() + this.dataProvidingBlockPosOffset.getY(), this.pos.getZ() + this.dataProvidingBlockPosOffset.getZ());
-				BlockEntity blockEntity = world.getBlockEntity(dataProviderBlockPos);
+			if (this.dataProvidingBlockPosOffset != BlockPos.ZERO && !this.overrideDataIdentifier.isEmpty() && !this.overrideDataValue.isEmpty()) {
+				BlockPos dataProviderBlockPos = new BlockPos(this.worldPosition.getX() + this.dataProvidingBlockPosOffset.getX(), this.worldPosition.getY() + this.dataProvidingBlockPosOffset.getY(), this.worldPosition.getZ() + this.dataProvidingBlockPosOffset.getZ());
+				BlockEntity blockEntity = level.getBlockEntity(dataProviderBlockPos);
 				if (blockEntity instanceof ProvidesData providesDataEntity) {
 					overrideIsActive = Objects.equals(providesDataEntity.getData(this.overrideDataIdentifier), this.overrideDataValue);
 				}
 			}
 
 			if (overrideIsActive) {
-				BlockEntity blockEntity = world.getBlockEntity(new BlockPos(this.pos.getX() + this.overrideTriggeredBlock.getLeft().getX(), this.pos.getY() + this.overrideTriggeredBlock.getLeft().getY(), this.pos.getZ() + this.overrideTriggeredBlock.getLeft().getZ()));
+				BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.overrideTriggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.overrideTriggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.overrideTriggeredBlock.getLeft().getZ()));
 				if (blockEntity != this) {
 					boolean overrideTriggeredBlockResets = this.overrideTriggeredBlock.getRight();
 					if (overrideTriggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -294,11 +294,11 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				float attributeValue = 0.0F;
 				String attributeString = this.influencingAttributeIdentifierString;
 
-				Optional<RegistryEntry.Reference<EntityAttribute>> attributeEntry = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(attributeString));
+				Optional<Holder.Reference<Attribute>> attributeEntry = BuiltInRegistries.ATTRIBUTE.get(Identifier.tryParse(attributeString));
 
-				ServerPlayerEntity serverPlayerEntity = null;
+				ServerPlayer serverPlayerEntity = null;
 				if (server != null && UUIDUtilities.isStringValidUUID(worldName)) {
-					serverPlayerEntity = server.getPlayerManager().getPlayer(UUID.fromString(worldName));
+					serverPlayerEntity = server.getPlayerList().getPlayer(UUID.fromString(worldName));
 				}
 				if (serverPlayerEntity != null) {
 					luck += serverPlayerEntity.getLuck();
@@ -306,10 +306,10 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 						attributeValue += (float) serverPlayerEntity.getAttributeValue(attributeEntry.get());
 					}
 					if (this.checksTeamAttributes) {
-						Team team = serverPlayerEntity.getScoreboardTeam();
+						PlayerTeam team = serverPlayerEntity.getTeam();
 						if (team != null) {
-							for (String playerString : team.getPlayerList()) {
-								ServerPlayerEntity teamServerPlayerEntity = server.getPlayerManager().getPlayer(playerString);
+							for (String playerString : team.getPlayers()) {
+								ServerPlayer teamServerPlayerEntity = server.getPlayerList().getPlayerByName(playerString);
 								if (teamServerPlayerEntity != null && teamServerPlayerEntity != serverPlayerEntity) {
 									luck += teamServerPlayerEntity.getLuck();
 									if (attributeEntry.isPresent()) {
@@ -321,12 +321,12 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 					}
 				}
 
-				int randomNumber = this.world.random.nextBetween(this.randomMinValue, this.randomMaxValue);
+				int randomNumber = this.level.getRandom().nextIntBetweenInclusive(this.randomMinValue, this.randomMaxValue);
 				if (this.isAffectedByLuck) {
 					boolean rollWithAdvantage = luck > 0;
 					int additionalRollAmount = (int) Math.floor(Math.abs(luck));
 					for (int i = 0; i < additionalRollAmount; i++) {
-						int newRandomNumber = this.world.random.nextBetween(this.randomMinValue, this.randomMaxValue);
+						int newRandomNumber = this.level.getRandom().nextIntBetweenInclusive(this.randomMinValue, this.randomMaxValue);
 						if (rollWithAdvantage) {
 							if (newRandomNumber > randomNumber) {
 								randomNumber = newRandomNumber;
@@ -340,7 +340,7 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				}
 				randomNumber += (int) Math.floor(Math.abs(attributeValue));
 
-				MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ORIGIN, false);
+				MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 
 				// determine highest reached threshold
 				int currentThreshold = this.randomMinValue;
@@ -353,12 +353,12 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				}
 
 				// fallback
-				if (Objects.equals(triggeredBlock, new MutablePair<>(BlockPos.ORIGIN, false))) {
+				if (Objects.equals(triggeredBlock, new MutablePair<>(BlockPos.ZERO, false))) {
 					triggeredBlock = this.fallbackTriggeredBlock;
 				}
 
 				// trigger chosen triggeredBlock
-				BlockEntity blockEntity = world.getBlockEntity(triggeredBlock.left);
+				BlockEntity blockEntity = level.getBlockEntity(triggeredBlock.left);
 				if (blockEntity != this) {
 					if (triggeredBlock.right && blockEntity instanceof Resetable resetable) {
 						resetable.reset();
@@ -373,8 +373,8 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void onRotate(BlockState state) {
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
-			if (state.get(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
-				BlockRotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.get(ScriptBlocksBlockProperties.ROTATED), this.rotated);
+			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
+				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
 
 				this.dataProvidingBlockPosOffset = BlockRotationUtils.rotateOffsetBlockPos(this.dataProvidingBlockPosOffset, blockRotation);
 
@@ -389,41 +389,41 @@ public class TriggeredRNGBlockEntity extends RotatedBlockEntity implements Trigg
 				this.triggeredBlocks.clear();
 				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
-				this.rotated = state.get(ScriptBlocksBlockProperties.ROTATED);
+				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 
-				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, BlockMirror.FRONT_BACK);
+				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, Mirror.FRONT_BACK);
 
-				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
-				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), BlockMirror.FRONT_BACK));
+				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
 				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
+					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), Mirror.FRONT_BACK), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
 				this.triggeredBlocks.clear();
 				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
-				this.x_mirrored = state.get(ScriptBlocksBlockProperties.X_MIRRORED);
+				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
-			if (state.get(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
+			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 
-				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, BlockMirror.LEFT_RIGHT);
+				this.dataProvidingBlockPosOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.dataProvidingBlockPosOffset, Mirror.LEFT_RIGHT);
 
-				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.overrideTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.overrideTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
-				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), BlockMirror.LEFT_RIGHT));
+				this.fallbackTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.fallbackTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 
 				List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> newTriggeredBlocks = new ArrayList<>(List.of());
 				for (MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock : this.triggeredBlocks) {
-					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), BlockMirror.LEFT_RIGHT), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
+					newTriggeredBlocks.add(new MutablePair<>(new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(triggeredBlock.getLeft().getLeft(), Mirror.LEFT_RIGHT), triggeredBlock.getLeft().getRight()), triggeredBlock.getRight()));
 				}
 				this.triggeredBlocks.clear();
 				this.triggeredBlocks.addAll(newTriggeredBlocks);
 
-				this.z_mirrored = state.get(ScriptBlocksBlockProperties.Z_MIRRORED);
+				this.z_mirrored = state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED);
 			}
 		}
 	}

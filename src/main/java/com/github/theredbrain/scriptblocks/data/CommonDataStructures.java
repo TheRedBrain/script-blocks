@@ -2,7 +2,7 @@ package com.github.theredbrain.scriptblocks.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class CommonDataStructures {
 
@@ -44,7 +44,7 @@ public class CommonDataStructures {
 	) {
 
 		public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ItemStack.VALIDATED_CODEC.fieldOf("item_stack").forGetter(x -> x.itemStack),
+				ItemStack.STRICT_CODEC.fieldOf("item_stack").forGetter(x -> x.itemStack),
 				Codec.BOOL.optionalFieldOf("consume_stack", true).forGetter(x -> x.consumeStack)
 		).apply(instance, ItemCost::new));
 

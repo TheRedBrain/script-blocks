@@ -2,12 +2,11 @@ package com.github.theredbrain.scriptblocks.component.type;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 public record PreventInteractionsDataComponent(
 		List<String> identifier_list
@@ -19,8 +18,8 @@ public record PreventInteractionsDataComponent(
 					)
 					.apply(instance, PreventInteractionsDataComponent::new)
 	);
-	public static final PacketCodec<RegistryByteBuf, PreventInteractionsDataComponent> PACKET_CODEC = PacketCodec.tuple(
-			PacketCodecs.STRING.collect(PacketCodecs.toList()),
+	public static final StreamCodec<RegistryFriendlyByteBuf, PreventInteractionsDataComponent> PACKET_CODEC = StreamCodec.composite(
+			ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
 			PreventInteractionsDataComponent::identifier_list,
 			PreventInteractionsDataComponent::new
 	);

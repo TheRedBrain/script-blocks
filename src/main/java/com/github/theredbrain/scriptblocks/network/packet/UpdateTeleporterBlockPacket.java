@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
@@ -46,59 +46,59 @@ public record UpdateTeleporterBlockPacket(
 		boolean canOwnerBeChosen,
 		String teleportButtonLabel,
 		String cancelTeleportButtonLabel
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateTeleporterBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_teleporter_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateTeleporterBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateTeleporterBlockPacket::write, UpdateTeleporterBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateTeleporterBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_teleporter_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTeleporterBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTeleporterBlockPacket::write, UpdateTeleporterBlockPacket::new);
 
-	public UpdateTeleporterBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateTeleporterBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readDouble(),
 				registryByteBuf.readDouble(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
 				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readString(),
-				registryByteBuf.readString()
+				registryByteBuf.readUtf(),
+				registryByteBuf.readUtf()
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
 
-		registryByteBuf.writeString(this.creativeScreenPage);
+		registryByteBuf.writeUtf(this.creativeScreenPage);
 
 		registryByteBuf.writeBoolean(this.showAdventureScreen);
 
-		registryByteBuf.writeString(this.preventInteractionIdentifierString);
-		registryByteBuf.writeString(this.interactionPreventedMessage);
+		registryByteBuf.writeUtf(this.preventInteractionIdentifierString);
+		registryByteBuf.writeUtf(this.interactionPreventedMessage);
 
 		registryByteBuf.writeBlockPos(this.uuidListHandlerBlockPositionOffset);
 
@@ -106,17 +106,17 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeBoolean(this.setAccessPosition);
 
 		registryByteBuf.writeBoolean(this.onlyTeleportDimensionOwner);
-		registryByteBuf.writeString(this.onlyDimensionOwnerCanTeleportMessage);
+		registryByteBuf.writeUtf(this.onlyDimensionOwnerCanTeleportMessage);
 
 		registryByteBuf.writeBoolean(this.teleportTeam);
 
-		registryByteBuf.writeString(this.teleportationMode);
+		registryByteBuf.writeUtf(this.teleportationMode);
 
 		registryByteBuf.writeBlockPos(this.directTeleportPositionOffset);
 		registryByteBuf.writeDouble(this.directTeleportOrientationYaw);
 		registryByteBuf.writeDouble(this.directTeleportOrientationPitch);
 
-		registryByteBuf.writeString(this.spawnPointType);
+		registryByteBuf.writeUtf(this.spawnPointType);
 
 		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING);
 
@@ -124,10 +124,10 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
 
-		registryByteBuf.writeString(this.locationDataIdentifier);
-		registryByteBuf.writeString(this.entranceDataIdentifier);
-		registryByteBuf.writeString(this.sendDataIdentifierDataIdentifier);
-		registryByteBuf.writeString(this.sendDataValueDataIdentifier);
+		registryByteBuf.writeUtf(this.locationDataIdentifier);
+		registryByteBuf.writeUtf(this.entranceDataIdentifier);
+		registryByteBuf.writeUtf(this.sendDataIdentifierDataIdentifier);
+		registryByteBuf.writeUtf(this.sendDataValueDataIdentifier);
 
 		registryByteBuf.writeBlockPos(this.preTeleportTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.preTeleportTriggeredBlockResets);
@@ -135,17 +135,17 @@ public record UpdateTeleporterBlockPacket(
 		registryByteBuf.writeBlockPos(this.postTeleportTriggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.postTeleportTriggeredBlockResets);
 
-		registryByteBuf.writeString(this.teleporterName);
-		registryByteBuf.writeString(this.currentTargetIdentifierLabel);
-		registryByteBuf.writeString(this.currentTargetOwnerLabel);
+		registryByteBuf.writeUtf(this.teleporterName);
+		registryByteBuf.writeUtf(this.currentTargetIdentifierLabel);
+		registryByteBuf.writeUtf(this.currentTargetOwnerLabel);
 		registryByteBuf.writeBoolean(this.showCancelButton);
 		registryByteBuf.writeBoolean(this.canOwnerBeChosen);
-		registryByteBuf.writeString(this.teleportButtonLabel);
-		registryByteBuf.writeString(this.cancelTeleportButtonLabel);
+		registryByteBuf.writeUtf(this.teleportButtonLabel);
+		registryByteBuf.writeUtf(this.cancelTeleportButtonLabel);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

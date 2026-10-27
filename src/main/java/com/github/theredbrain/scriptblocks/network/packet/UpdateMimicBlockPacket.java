@@ -1,20 +1,20 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateMimicBlockPacket(
 		BlockPos mimicBlockPosition,
 		BlockPos activeMimicBlockPositionOffset,
 		BlockPos inactiveMimicBlockPositionOffset
-) implements CustomPayload {
-	public static final CustomPayload.Id<UpdateMimicBlockPacket> PACKET_ID = new CustomPayload.Id<>(ScriptBlocks.identifier("update_mimic_block"));
-	public static final PacketCodec<RegistryByteBuf, UpdateMimicBlockPacket> PACKET_CODEC = PacketCodec.of(UpdateMimicBlockPacket::write, UpdateMimicBlockPacket::new);
+) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<UpdateMimicBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_mimic_block"));
+	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateMimicBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateMimicBlockPacket::write, UpdateMimicBlockPacket::new);
 
-	public UpdateMimicBlockPacket(RegistryByteBuf registryByteBuf) {
+	public UpdateMimicBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
@@ -22,14 +22,14 @@ public record UpdateMimicBlockPacket(
 		);
 	}
 
-	private void write(RegistryByteBuf registryByteBuf) {
+	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.mimicBlockPosition);
 		registryByteBuf.writeBlockPos(this.activeMimicBlockPositionOffset);
 		registryByteBuf.writeBlockPos(this.inactiveMimicBlockPositionOffset);
 	}
 
 	@Override
-	public CustomPayload.Id<? extends CustomPayload> getId() {
+	public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
 		return PACKET_ID;
 	}
 }

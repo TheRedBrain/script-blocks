@@ -1,6 +1,6 @@
 package com.github.theredbrain.scriptblocks.entity.mob;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 public interface DuckMobEntityMixin {
 

@@ -3,25 +3,24 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 @Deprecated
 public class InteractiveLootBlockEntity extends BlockEntity implements Resetable {
@@ -41,9 +40,9 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
+	protected void saveAdditional(ValueOutput view) {
 
-		WriteView.ListAppender<UUID> listAppender = view.getListAppender("uuidList", Uuids.CODEC);
+		ValueOutput.TypedOutputList<UUID> listAppender = view.list("uuidList", UUIDUtil.AUTHLIB_CODEC);
 		for (UUID uuid : this.playerSet) {
 			listAppender.add(uuid);
 		}
@@ -51,97 +50,97 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 		if (!this.lootTableIdentifierString.isEmpty()) {
 			view.putString("lootTableIdentifierString", this.lootTableIdentifierString);
 		} else {
-			view.remove("lootTableIdentifierString");
+			view.discard("lootTableIdentifierString");
 		}
 
 		if (this.mode != Mode.VANILLA) {
-			view.putString("mode", this.mode.asString());
+			view.putString("mode", this.mode.getSerializedName());
 		} else {
-			view.remove("mode");
+			view.discard("mode");
 		}
 
 		if (this.rolls != 3) {
 			view.putInt("rolls", this.rolls);
 		} else {
-			view.remove("rolls");
+			view.discard("rolls");
 		}
 
 		if (this.choices != 1) {
 			view.putInt("choices", this.choices);
 		} else {
-			view.remove("choices");
+			view.discard("choices");
 		}
 
 		if (this.trackPlayers) {
 			view.putBoolean("trackPlayers", true);
 		} else {
-			view.remove("trackPlayers");
+			view.discard("trackPlayers");
 		}
 
 		if (!this.lootAcquiredMessage.isEmpty()) {
 			view.putString("lootAcquiredMessage", this.lootAcquiredMessage);
 		} else {
-			view.remove("lootAcquiredMessage");
+			view.discard("lootAcquiredMessage");
 		}
 
 		if (!this.lootAcquiredSoundId.isEmpty()) {
 			view.putString("lootAcquiredSoundId", this.lootAcquiredSoundId);
 		} else {
-			view.remove("lootAcquiredSoundId");
+			view.discard("lootAcquiredSoundId");
 		}
 
 		if (!this.alreadyLootedMessage.isEmpty()) {
 			view.putString("alreadyLootedMessage", this.alreadyLootedMessage);
 		} else {
-			view.remove("alreadyLootedMessage");
+			view.discard("alreadyLootedMessage");
 		}
 
 		if (!this.alreadyLootedSoundId.isEmpty()) {
 			view.putString("alreadyLootedSoundId", this.alreadyLootedSoundId);
 		} else {
-			view.remove("alreadyLootedSoundId");
+			view.discard("alreadyLootedSoundId");
 		}
 
-		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Interactive Loot Block detected at: " + this.pos.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.world != null ? this.world.getServer() : null);
-		super.writeData(view);
+		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Interactive Loot Block detected at: " + this.worldPosition.toString() + ". This block will be removed in the future and should be replaced with the corresponding block from the 'Lootable Blocks' mod.", this.level != null ? this.level.getServer() : null);
+		super.saveAdditional(view);
 	}
 
 	@Override
-	protected void readData(ReadView view) {
+	protected void loadAdditional(ValueInput view) {
 
 		this.playerSet.clear();
-		for (UUID uuid : view.getTypedListView("uuidList", Uuids.CODEC)) {
+		for (UUID uuid : view.listOrEmpty("uuidList", UUIDUtil.AUTHLIB_CODEC)) {
 			this.playerSet.add(uuid);
 		}
 
-		this.lootTableIdentifierString = view.getString("lootTableIdentifierString", "");
+		this.lootTableIdentifierString = view.getStringOr("lootTableIdentifierString", "");
 
-		this.mode = Mode.byName(view.getString("mode", "")).orElse(Mode.VANILLA);
+		this.mode = Mode.byName(view.getStringOr("mode", "")).orElse(Mode.VANILLA);
 
-		this.rolls = view.getInt("rolls", 3);
+		this.rolls = view.getIntOr("rolls", 3);
 
-		this.choices = view.getInt("choices", 1);
+		this.choices = view.getIntOr("choices", 1);
 
-		this.trackPlayers = view.getBoolean("trackPlayers", false);
+		this.trackPlayers = view.getBooleanOr("trackPlayers", false);
 
-		this.lootAcquiredMessage = view.getString("lootAcquiredMessage", "");
+		this.lootAcquiredMessage = view.getStringOr("lootAcquiredMessage", "");
 
-		this.lootAcquiredSoundId = view.getString("lootAcquiredSoundId", "");
+		this.lootAcquiredSoundId = view.getStringOr("lootAcquiredSoundId", "");
 
-		this.alreadyLootedMessage = view.getString("alreadyLootedMessage", "");
+		this.alreadyLootedMessage = view.getStringOr("alreadyLootedMessage", "");
 
-		this.alreadyLootedSoundId = view.getString("alreadyLootedSoundId", "");
+		this.alreadyLootedSoundId = view.getStringOr("alreadyLootedSoundId", "");
 
-		super.readData(view);
+		super.loadAdditional(view);
 	}
 
-	public BlockEntityUpdateS2CPacket toUpdatePacket() {
-		return BlockEntityUpdateS2CPacket.create(this);
+	public ClientboundBlockEntityDataPacket getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
-		return this.createComponentlessNbt(registryLookup);
+	public CompoundTag getUpdateTag(HolderLookup.Provider registryLookup) {
+		return this.saveCustomOnly(registryLookup);
 	}
 
 	public String getLootTableIdentifierString() {
@@ -216,16 +215,16 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 		this.alreadyLootedSoundId = alreadyLootedSoundId;
 	}
 
-	public boolean isPlayerInSet(PlayerEntity playerEntity) {
-		return this.playerSet.contains(playerEntity.getUuid());
+	public boolean isPlayerInSet(Player playerEntity) {
+		return this.playerSet.contains(playerEntity.getUUID());
 	}
 
-	public void addPlayerToSet(PlayerEntity playerEntity) {
-		this.playerSet.add(playerEntity.getUuid());
+	public void addPlayerToSet(Player playerEntity) {
+		this.playerSet.add(playerEntity.getUUID());
 	}
 
-	public void removePlayerFromSet(PlayerEntity playerEntity) {
-		this.playerSet.remove(playerEntity.getUuid());
+	public void removePlayerFromSet(Player playerEntity) {
+		this.playerSet.remove(playerEntity.getUUID());
 	}
 
 	@Override
@@ -234,7 +233,7 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 	}
 
 
-	public static enum Mode implements StringIdentifiable {
+	public static enum Mode implements StringRepresentable {
 		CHOICE("choice"),
 		RANDOM("random"),
 		VANILLA("vanilla");
@@ -246,16 +245,16 @@ public class InteractiveLootBlockEntity extends BlockEntity implements Resetable
 		}
 
 		@Override
-		public String asString() {
+		public String getSerializedName() {
 			return this.name;
 		}
 
 		public static Optional<Mode> byName(String name) {
-			return Arrays.stream(InteractiveLootBlockEntity.Mode.values()).filter(mode -> mode.asString().equals(name)).findFirst();
+			return Arrays.stream(Mode.values()).filter(mode -> mode.getSerializedName().equals(name)).findFirst();
 		}
 
-		public Text asText() {
-			return Text.translatable("gui.interactive_loot_block.mode." + this.name);
+		public Component asText() {
+			return Component.translatable("gui.interactive_loot_block.mode." + this.name);
 		}
 	}
 }

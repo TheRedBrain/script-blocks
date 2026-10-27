@@ -7,18 +7,18 @@ import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.util.NarratorManager;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -27,80 +27,80 @@ import java.util.List;
 
 @Environment(value = EnvType.CLIENT)
 public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettingsScreen {
-	private static final Text ADD_NEW_DELEGATED_SPAWN_POINT_BUTTON_LABEL_TEXT = Text.translatable("gui.list_entry.add");
-	private static final Text NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT = Text.translatable("gui.spawn_point_delegation_block.spawn_point_position_offset");
-	private static final Text NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT = Text.translatable("gui.spawn_point_delegation_block.spawn_point_orientation");
+	private static final Component ADD_NEW_DELEGATED_SPAWN_POINT_BUTTON_LABEL_TEXT = Component.translatable("gui.list_entry.add");
+	private static final Component NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT = Component.translatable("gui.spawn_point_delegation_block.spawn_point_position_offset");
+	private static final Component NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT = Component.translatable("gui.spawn_point_delegation_block.spawn_point_orientation");
 	private static final Identifier SCROLL_BAR_BACKGROUND_8_92_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroll_bar_background_8_92");
 	private static final Identifier SCROLLER_TEXTURE = ScriptBlocks.identifier("scroll_bar/scroller_vertical_6_7");
-	public static final ButtonTextures REMOVE_ENTRY_BUTTON_TEXTURES = new ButtonTextures(
-			Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.of(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
+	public static final WidgetSprites REMOVE_ENTRY_BUTTON_TEXTURES = new WidgetSprites(
+			Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button"), Identifier.fromNamespaceAndPath(ScriptBlocks.MOD_ID, "widgets/remove_entry_button_highlighted")
 	);
 	private static final int VISIBLE_LIST_ELEMENTS = 4;
 	private final SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity;
-	private ButtonWidget removeListEntryButton0;
-	private ButtonWidget removeListEntryButton1;
-	private ButtonWidget removeListEntryButton2;
-	private ButtonWidget removeListEntryButton3;
-	private TextFieldWidget newDelegatedSpawnPointPositionOffsetXField;
-	private TextFieldWidget newDelegatedSpawnPointPositionOffsetYField;
-	private TextFieldWidget newDelegatedSpawnPointPositionOffsetZField;
-	private TextFieldWidget newDelegatedSpawnPointOrientationYawField;
-	private TextFieldWidget newDelegatedSpawnPointOrientationPitchField;
+	private Button removeListEntryButton0;
+	private Button removeListEntryButton1;
+	private Button removeListEntryButton2;
+	private Button removeListEntryButton3;
+	private EditBox newDelegatedSpawnPointPositionOffsetXField;
+	private EditBox newDelegatedSpawnPointPositionOffsetYField;
+	private EditBox newDelegatedSpawnPointPositionOffsetZField;
+	private EditBox newDelegatedSpawnPointOrientationYawField;
+	private EditBox newDelegatedSpawnPointOrientationPitchField;
 	private final List<MutablePair<BlockPos, MutablePair<Double, Double>>> delegatedSpawnPoints = new ArrayList<>(List.of());
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
 
 	public SpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-		super(NarratorManager.EMPTY);
+		super(GameNarrator.NO_TITLE);
 		this.spawnPointDelegationBlockEntity = spawnPointDelegationBlockEntity;
 	}
 
 	private void addNewDelegatedSpawnPoint() {
 		boolean bl = false;
-		int x = ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetXField.getText());
+		int x = ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetXField.getValue());
 		if (x < -48 || x > 48) {
 			x = Math.max(-48, Math.min(x, 48));
-			this.newDelegatedSpawnPointPositionOffsetXField.setText(Integer.toString(x));
+			this.newDelegatedSpawnPointPositionOffsetXField.setValue(Integer.toString(x));
 			bl = true;
 		}
-		int y = ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetYField.getText());
+		int y = ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetYField.getValue());
 		if (y < -48 || y > 48) {
 			y = Math.max(-48, Math.min(y, 48));
-			this.newDelegatedSpawnPointPositionOffsetYField.setText(Integer.toString(y));
+			this.newDelegatedSpawnPointPositionOffsetYField.setValue(Integer.toString(y));
 			bl = true;
 		}
-		int z = ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetZField.getText());
+		int z = ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetZField.getValue());
 		if (z < -48 || z > 48) {
 			z = Math.max(-48, Math.min(z, 48));
-			this.newDelegatedSpawnPointPositionOffsetZField.setText(Integer.toString(z));
+			this.newDelegatedSpawnPointPositionOffsetZField.setValue(Integer.toString(z));
 			bl = true;
 		}
-		int yaw = ItemUtils.parseInt(this.newDelegatedSpawnPointOrientationYawField.getText());
+		int yaw = ItemUtils.parseInt(this.newDelegatedSpawnPointOrientationYawField.getValue());
 		if (yaw < -180 || yaw > 180) {
 			yaw = Math.max(-180, Math.min(yaw, 180));
-			this.newDelegatedSpawnPointOrientationYawField.setText(Integer.toString(yaw));
+			this.newDelegatedSpawnPointOrientationYawField.setValue(Integer.toString(yaw));
 			bl = true;
 		}
-		int pitch = ItemUtils.parseInt(this.newDelegatedSpawnPointOrientationPitchField.getText());
+		int pitch = ItemUtils.parseInt(this.newDelegatedSpawnPointOrientationPitchField.getValue());
 		if (pitch < -90 || pitch > 90) {
 			pitch = Math.max(-90, Math.min(pitch, 90));
-			this.newDelegatedSpawnPointOrientationPitchField.setText(Integer.toString(pitch));
+			this.newDelegatedSpawnPointOrientationPitchField.setValue(Integer.toString(pitch));
 			bl = true;
 		}
-		if (bl && this.client != null && this.client.player != null) {
-			this.client.player.sendMessage(Text.translatable("gui.spawn_point_delegation_block.invalid_entry_was_corrected"));
+		if (bl && this.minecraft != null && this.minecraft.player != null) {
+			this.minecraft.player.displayClientMessage(Component.translatable("gui.spawn_point_delegation_block.invalid_entry_was_corrected"));
 			return;
 		}
 		MutablePair<BlockPos, MutablePair<Double, Double>> newDelegatedSpawnPoint = new MutablePair<>(
 				new BlockPos(
-						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetXField.getText()),
-						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetYField.getText()),
-						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetZField.getText())
+						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetXField.getValue()),
+						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetYField.getValue()),
+						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetZField.getValue())
 				),
 				new MutablePair<>(
-						ItemUtils.parseDouble(this.newDelegatedSpawnPointOrientationYawField.getText()),
-						ItemUtils.parseDouble(this.newDelegatedSpawnPointOrientationPitchField.getText())
+						ItemUtils.parseDouble(this.newDelegatedSpawnPointOrientationYawField.getValue()),
+						ItemUtils.parseDouble(this.newDelegatedSpawnPointOrientationPitchField.getValue())
 				)
 		);
 		bl = false;
@@ -110,8 +110,8 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 				break;
 			}
 		}
-		if (bl && this.client != null && this.client.player != null) {
-			this.client.player.sendMessage(Text.translatable("gui.spawn_point_delegation_block.spawn_point_already_in_list"));
+		if (bl && this.minecraft != null && this.minecraft.player != null) {
+			this.minecraft.player.displayClientMessage(Component.translatable("gui.spawn_point_delegation_block.spawn_point_already_in_list"));
 		} else {
 			this.delegatedSpawnPoints.add(newDelegatedSpawnPoint);
 			this.scrollPosition = 0;
@@ -135,35 +135,35 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 		this.delegatedSpawnPoints.clear();
 		this.delegatedSpawnPoints.addAll(this.spawnPointDelegationBlockEntity.getDelegatedSpawnPoints());
 
-		this.removeListEntryButton0 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(0)));
-		this.removeListEntryButton1 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(1)));
-		this.removeListEntryButton2 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(2)));
-		this.removeListEntryButton3 = this.addDrawableChild(new TexturedButtonWidget(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(3)));
+		this.removeListEntryButton0 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 20, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(0)));
+		this.removeListEntryButton1 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 44, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(1)));
+		this.removeListEntryButton2 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 68, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(2)));
+		this.removeListEntryButton3 = this.addRenderableWidget(new ImageButton(this.width / 2 - 141, 92, 20, 20, REMOVE_ENTRY_BUTTON_TEXTURES, button -> this.removeDelegatedSpawnPoint(3)));
 
-		this.addDrawableChild(ButtonWidget.builder(ADD_NEW_DELEGATED_SPAWN_POINT_BUTTON_LABEL_TEXT, button -> this.addNewDelegatedSpawnPoint()).dimensions(this.width / 2 - 154, 116, 300, 20).build());
+		this.addRenderableWidget(Button.builder(ADD_NEW_DELEGATED_SPAWN_POINT_BUTTON_LABEL_TEXT, button -> this.addNewDelegatedSpawnPoint()).bounds(this.width / 2 - 154, 116, 300, 20).build());
 
-		this.newDelegatedSpawnPointPositionOffsetXField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 151, 100, 20, Text.empty());
+		this.newDelegatedSpawnPointPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 151, 100, 20, Component.empty());
 		this.newDelegatedSpawnPointPositionOffsetXField.setMaxLength(128);
-		this.addSelectableChild(this.newDelegatedSpawnPointPositionOffsetXField);
+		this.addWidget(this.newDelegatedSpawnPointPositionOffsetXField);
 
-		this.newDelegatedSpawnPointPositionOffsetYField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 151, 100, 20, Text.empty());
+		this.newDelegatedSpawnPointPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 151, 100, 20, Component.empty());
 		this.newDelegatedSpawnPointPositionOffsetYField.setMaxLength(128);
-		this.addSelectableChild(this.newDelegatedSpawnPointPositionOffsetYField);
+		this.addWidget(this.newDelegatedSpawnPointPositionOffsetYField);
 
-		this.newDelegatedSpawnPointPositionOffsetZField = new TextFieldWidget(this.textRenderer, this.width / 2 + 54, 151, 100, 20, Text.empty());
+		this.newDelegatedSpawnPointPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 151, 100, 20, Component.empty());
 		this.newDelegatedSpawnPointPositionOffsetZField.setMaxLength(128);
-		this.addSelectableChild(this.newDelegatedSpawnPointPositionOffsetZField);
+		this.addWidget(this.newDelegatedSpawnPointPositionOffsetZField);
 
-		this.newDelegatedSpawnPointOrientationYawField = new TextFieldWidget(this.textRenderer, this.width / 2 - 154, 186, 100, 20, Text.empty());
+		this.newDelegatedSpawnPointOrientationYawField = new EditBox(this.font, this.width / 2 - 154, 186, 100, 20, Component.empty());
 		this.newDelegatedSpawnPointOrientationYawField.setMaxLength(128);
-		this.addSelectableChild(this.newDelegatedSpawnPointOrientationYawField);
+		this.addWidget(this.newDelegatedSpawnPointOrientationYawField);
 
-		this.newDelegatedSpawnPointOrientationPitchField = new TextFieldWidget(this.textRenderer, this.width / 2 - 50, 186, 100, 20, Text.empty());
+		this.newDelegatedSpawnPointOrientationPitchField = new EditBox(this.font, this.width / 2 - 50, 186, 100, 20, Component.empty());
 		this.newDelegatedSpawnPointOrientationPitchField.setMaxLength(128);
-		this.addSelectableChild(this.newDelegatedSpawnPointOrientationPitchField);
+		this.addWidget(this.newDelegatedSpawnPointOrientationPitchField);
 
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, button -> this.done()).dimensions(this.width / 2 - 4 - 150, 210, 150, 20).build());
-		this.addDrawableChild(ButtonWidget.builder(ScreenTexts.CANCEL, button -> this.cancel()).dimensions(this.width / 2 + 4, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.cancel()).bounds(this.width / 2 + 4, 210, 150, 20).build());
 
 		this.updateWidgets();
 	}
@@ -198,21 +198,21 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 	}
 
 	@Override
-	public void resize(MinecraftClient client, int width, int height) {
+	public void resize(Minecraft client, int width, int height) {
 		List<MutablePair<BlockPos, MutablePair<Double, Double>>> list = new ArrayList<>(this.delegatedSpawnPoints);
-		String string = this.newDelegatedSpawnPointPositionOffsetXField.getText();
-		String string1 = this.newDelegatedSpawnPointPositionOffsetYField.getText();
-		String string2 = this.newDelegatedSpawnPointPositionOffsetZField.getText();
-		String string3 = this.newDelegatedSpawnPointOrientationYawField.getText();
-		String string4 = this.newDelegatedSpawnPointOrientationPitchField.getText();
+		String string = this.newDelegatedSpawnPointPositionOffsetXField.getValue();
+		String string1 = this.newDelegatedSpawnPointPositionOffsetYField.getValue();
+		String string2 = this.newDelegatedSpawnPointPositionOffsetZField.getValue();
+		String string3 = this.newDelegatedSpawnPointOrientationYawField.getValue();
+		String string4 = this.newDelegatedSpawnPointOrientationPitchField.getValue();
 		this.init(client, width, height);
 		this.delegatedSpawnPoints.clear();
 		this.delegatedSpawnPoints.addAll(list);
-		this.newDelegatedSpawnPointPositionOffsetXField.setText(string);
-		this.newDelegatedSpawnPointPositionOffsetYField.setText(string1);
-		this.newDelegatedSpawnPointPositionOffsetZField.setText(string2);
-		this.newDelegatedSpawnPointOrientationYawField.setText(string3);
-		this.newDelegatedSpawnPointOrientationPitchField.setText(string4);
+		this.newDelegatedSpawnPointPositionOffsetXField.setValue(string);
+		this.newDelegatedSpawnPointPositionOffsetYField.setValue(string1);
+		this.newDelegatedSpawnPointPositionOffsetZField.setValue(string2);
+		this.newDelegatedSpawnPointOrientationYawField.setValue(string3);
+		this.newDelegatedSpawnPointOrientationPitchField.setValue(string4);
 		this.updateWidgets();
 	}
 
@@ -235,7 +235,7 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 				&& this.mouseClicked) {
 			int i = this.delegatedSpawnPoints.size() - VISIBLE_LIST_ELEMENTS;
 			float f = (float) deltaY / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount + f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -248,7 +248,7 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 				&& mouseY >= 20 && mouseY <= 112) {
 			int i = this.delegatedSpawnPoints.size() - VISIBLE_LIST_ELEMENTS;
 			float f = (float) verticalAmount / (float) i;
-			this.scrollAmount = MathHelper.clamp(this.scrollAmount - f, 0.0f, 1.0f);
+			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
@@ -264,30 +264,30 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
 		super.render(context, mouseX, mouseY, delta);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.delegatedSpawnPoints.size()); i++) {
 			MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint = this.delegatedSpawnPoints.get(i);
 
-			context.drawTextWithShadow(this.textRenderer,
-					Text.translatable("gui.spawn_point_delegation_block.list.entry.1", delegatedSpawnPoint.left.getX(), delegatedSpawnPoint.left.getY(), delegatedSpawnPoint.left.getZ()),
+			context.drawString(this.font,
+					Component.translatable("gui.spawn_point_delegation_block.list.entry.1", delegatedSpawnPoint.left.getX(), delegatedSpawnPoint.left.getY(), delegatedSpawnPoint.left.getZ()),
 					this.width / 2 - 117, 21 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-			context.drawTextWithShadow(this.textRenderer,
-					Text.translatable("gui.spawn_point_delegation_block.list.entry.2", delegatedSpawnPoint.right.getLeft(), delegatedSpawnPoint.right.getRight()),
+			context.drawString(this.font,
+					Component.translatable("gui.spawn_point_delegation_block.list.entry.2", delegatedSpawnPoint.right.getLeft(), delegatedSpawnPoint.right.getRight()),
 					this.width / 2 - 117, 31 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.delegatedSpawnPoints.size() > VISIBLE_LIST_ELEMENTS) {
-			context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 20, 8, 92);
+			context.blitSprite(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 20, 8, 92);
 			int k = (int) (83.0f * this.scrollAmount);
-			context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
+			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
-		context.drawTextWithShadow(this.textRenderer, NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 141, 0xA0A0A0);
+		context.drawString(this.font, NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 141, 0xA0A0A0);
 		this.newDelegatedSpawnPointPositionOffsetXField.render(context, mouseX, mouseY, delta);
 		this.newDelegatedSpawnPointPositionOffsetYField.render(context, mouseX, mouseY, delta);
 		this.newDelegatedSpawnPointPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawTextWithShadow(this.textRenderer, NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+		context.drawString(this.font, NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
 		this.newDelegatedSpawnPointOrientationYawField.render(context, mouseX, mouseY, delta);
 		this.newDelegatedSpawnPointOrientationPitchField.render(context, mouseX, mouseY, delta);
 	}
