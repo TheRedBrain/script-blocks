@@ -40,7 +40,7 @@ public class LocationControlBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openLocationControlBlockScreen(locationControlBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

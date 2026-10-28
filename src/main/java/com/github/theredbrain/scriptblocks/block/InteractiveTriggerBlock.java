@@ -45,11 +45,11 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 			boolean bl = player.canUseGameMasterBlocks();
 			if (player.isShiftKeyDown() && bl) {
 				creativeSneakingInteraction(state, world, pos);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 			if (bl) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openInteractiveTriggerBlockScreen(interactiveTriggerBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				if (interactiveTriggerBlockEntity.isInteractionPrevented(player)) {
 					if (!interactiveTriggerBlockEntity.getInteractionPreventedMessage().isEmpty() && !world.isClientSide) {
@@ -86,7 +86,7 @@ public abstract class InteractiveTriggerBlock extends RotatedBlockWithEntity {
 						}
 					}
 				}
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		}
 		return InteractionResult.PASS;

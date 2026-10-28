@@ -41,7 +41,7 @@ public class StatusEffectManipulationBlock extends BaseEntityBlock {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openStatusEffectManipulationBlockScreen(statusEffectManipulationBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

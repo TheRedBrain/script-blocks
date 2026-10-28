@@ -40,7 +40,7 @@ public class TriggeredAdvancementCheckerBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

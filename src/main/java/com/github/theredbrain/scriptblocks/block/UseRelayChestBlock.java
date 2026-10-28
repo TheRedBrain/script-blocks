@@ -100,7 +100,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof UseRelayChestBlockEntity useRelayChestBlockEntity) {
 			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayChestBlockScreen(useRelayChestBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				if (!state.getValue(BlockStateProperties.OPEN)) {
 					if (useRelayChestBlockEntity.canTrigger(player)) {
@@ -127,7 +127,7 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 							}
 						}
 					}
-					return InteractionResult.success(world.isClientSide);
+					return InteractionResult.SUCCESS;
 				} else {
 					BlockPos relayBlockPosOffset = useRelayChestBlockEntity.getRelayBlockPositionOffset();
 					if (relayBlockPosOffset.equals(BlockPos.ZERO)) {

@@ -40,7 +40,7 @@ public class RelayTriggerBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openRelayTriggerBlockScreen(relayTriggerBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

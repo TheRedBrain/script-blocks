@@ -36,7 +36,7 @@ public class TeleporterBlock extends RotatedBlockWithEntity implements GameMaste
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else if (player instanceof ServerPlayer serverPlayerEntity) {
 				TeleporterBlockEntity.openNonCreativeScreen(world, serverPlayerEntity, pos, state, teleporterBlockEntity);
 			}

@@ -40,7 +40,7 @@ public class UUIDListMessagingBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof UUIDListMessagingBlockEntity uuidListMessagingBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openUUIDListMessagingBlockScreen(uuidListMessagingBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

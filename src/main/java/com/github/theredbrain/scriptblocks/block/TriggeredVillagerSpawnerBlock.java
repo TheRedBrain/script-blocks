@@ -37,7 +37,7 @@ public class TriggeredVillagerSpawnerBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlockEntity) {
 			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openTriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		}
 

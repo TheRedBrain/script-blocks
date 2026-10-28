@@ -37,11 +37,11 @@ public record VisibleLocation(
 					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
 					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
 					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
-					PacketCodecs.BOOL.decode(byteBuf),
+					ByteBufCodecs.BOOL.decode(byteBuf),
 					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
 					ByteBufCodecs.STRING_UTF8.decode(byteBuf),
-					PacketCodecs.BOOL.decode(byteBuf),
-					PacketCodecs.BOOL.decode(byteBuf)
+					ByteBufCodecs.BOOL.decode(byteBuf),
+					ByteBufCodecs.BOOL.decode(byteBuf)
 			);
 		}
 
@@ -50,11 +50,11 @@ public record VisibleLocation(
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.entrance);
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.displayName);
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.entranceDisplayName);
-			PacketCodecs.BOOL.encode(byteBuf, visibleLocation.isEntranceNameShownFirst);
+			ByteBufCodecs.BOOL.encode(byteBuf, visibleLocation.isEntranceNameShownFirst);
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.dataIdentifier);
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, visibleLocation.dataValue);
-			PacketCodecs.BOOL.encode(byteBuf, visibleLocation.isUnlocked);
-			PacketCodecs.BOOL.encode(byteBuf, visibleLocation.allowRegeneration);
+			ByteBufCodecs.BOOL.encode(byteBuf, visibleLocation.isUnlocked);
+			ByteBufCodecs.BOOL.encode(byteBuf, visibleLocation.allowRegeneration);
 		}
 	};
 

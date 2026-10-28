@@ -153,10 +153,10 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 					if (state.getValue(BlockStateProperties.WATERLOGGED)) {
 						world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 					}
-					return InteractionResult.success(world.isClientSide);
+					return InteractionResult.SUCCESS;
 				}
 				((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else if (player instanceof ServerPlayer serverPlayerEntity) {
 				TeleporterBlockEntity.openNonCreativeScreen(world, serverPlayerEntity, pos, state, teleporterBlockEntity);
 			}

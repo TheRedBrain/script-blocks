@@ -233,7 +233,7 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 		if (this.level != null) {
 			List<LivingEntity> entityList = new ArrayList<>();
 			if (this.selectionMode == SelectionMode.AREA) {
-				entityList.addAll(this.level.getEntitiesOfClass(LivingEntity.class, this.area, entity -> !(entity.getType().is(TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(this.exceptionTagIdentifierString))))));
+				entityList.addAll(this.level.getEntitiesOfClass(LivingEntity.class, this.area, entity -> !(entity.is(TagKey.create(Registries.ENTITY_TYPE, Identifier.parse(this.exceptionTagIdentifierString))))));
 			} else {
 				this.getUUIDListFromHandler().forEach((uuid) -> {
 					Player playerEntity = this.level.getPlayerByUUID(uuid);

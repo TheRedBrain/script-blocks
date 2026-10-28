@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
@@ -14,25 +15,18 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -50,8 +44,17 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class BossControllerBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
 
@@ -235,7 +238,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		String identifierString = bC.bossIdentifier;
 		if (!identifierString.isEmpty() && bC.level != null) {
-			Optional<Holder.Reference<Boss>> optionalBossReference = bC.level.registryAccess().get(ScriptBlocksDynamicRegistries.BOSS_REGISTRY_KEY).getEntry(Identifier.parse(identifierString));
+			Optional<Holder.Reference<Boss>> optionalBossReference = bC.level.registryAccess().get(ScriptBlocksDynamicRegistries.BOSS_REGISTRY_KEY).get().value().get(Identifier.parse(identifierString));
 			if (optionalBossReference.isPresent()) {
 				bC.boss = optionalBossReference.get().value();
 			}
@@ -437,7 +440,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		for (Boss.Phase.AttributeModifierEntry entityAttributeModifier : phase.entityAttributeModifiers()) {
 			Optional<Attribute> optional = BuiltInRegistries.ATTRIBUTE
-					.getOrEmpty(Identifier.parse(entityAttributeModifier.attributeIdentifier()));
+					.getOptional(Identifier.parse(entityAttributeModifier.attributeIdentifier()));
 			if (optional.isPresent()) {
 				Holder<Attribute> key = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(optional.get());
 				entityAttributeModifiers.put(key, new AttributeModifier(Identifier.parse(entityAttributeModifier.id()), entityAttributeModifier.amount(), AttributeModifier.Operation.valueOf(entityAttributeModifier.operation())));
@@ -448,77 +451,79 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	private static boolean spawnBossEntity(BossControllerBlockEntity bC) {
 		if (bC.level instanceof ServerLevel serverWorld) {
-			if (bC.bossEntityUuid != null) {
-				Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
-				if (entity != null) {
-					entity.discard();
+			try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(bC::toString, ScriptBlocks.LOGGER)) {
+				if (bC.bossEntityUuid != null) {
+					Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
+					if (entity != null) {
+						entity.discard();
+					}
 				}
-			}
-			Optional<EntityType<?>> optional = EntityType.fromNbt(bC.entityTypeCompound);
-			if (optional.isEmpty()) {
-				return false;
-			}
-			BlockPos blockPos = bC.worldPosition.offset(bC.bossSpawnPositionOffset.getX(), bC.bossSpawnPositionOffset.getY(), bC.bossSpawnPositionOffset.getZ());
-			double pitch = bC.bossSpawnOrientationPitch;
-			double yaw = bC.bossSpawnOrientationYaw;
-
-			if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
-
-				blockPos = entrance.getLeft();
-				yaw = entrance.getRight().getLeft();
-				pitch = entrance.getRight().getRight();
-			}
-			double d = blockPos.getX() + 0.5;
-			double e = blockPos.getY();
-			double f = blockPos.getZ() + 0.5;
-
-			if (!serverWorld.noCollision(optional.get().getSpawnAABB(d, e, f))) {
-
-				DebuggingHelper.sendBossControllerLogMessage("not enough space for spawning boss entity", null);
-
-				return false;
-			}
-			blockPos = BlockPos.containing(d, e, f);
-			Entity entity2 = EntityType.loadEntityRecursive(bC.entityTypeCompound, bC.level, entity -> {
-				entity.refreshPositionAndAngles(d, e, f, entity.getYaw(), entity.getPitch());
-				return entity;
-			});
-			if (entity2 == null) {
-				return false;
-			}
-			entity2.setYBodyRot((float) yaw);
-			entity2.setYHeadRot((float) yaw);
-			entity2.snapTo(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
-			if (entity2 instanceof Mob mobEntity) {
-				if (bC.entityTypeCompound.contains("id", Tag.TAG_STRING)) {
-					mobEntity.finalizeSpawn(serverWorld, serverWorld.getCurrentDifficultyAt(entity2.blockPosition()), EntitySpawnReason.SPAWNER, null);
-				}
-				if (!serverWorld.tryAddFreshEntityWithPassengers(entity2)) {
+				ValueInput input = TagValueInput.create(reporter, serverWorld.registryAccess(), bC.entityTypeCompound);
+				Optional<EntityType<?>> entityType = EntityType.by(input);
+				if (entityType.isEmpty()) {
 					return false;
 				}
-				if (bC.enableSpawnEffects) {
-					serverWorld.levelEvent(LevelEvent.PARTICLES_MOBBLOCK_SPAWN, bC.worldPosition, 0);
-				}
-				serverWorld.gameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
+				BlockPos blockPos = bC.worldPosition.offset(bC.bossSpawnPositionOffset.getX(), bC.bossSpawnPositionOffset.getY(), bC.bossSpawnPositionOffset.getZ());
+				double pitch = bC.bossSpawnOrientationPitch;
+				double yaw = bC.bossSpawnOrientationYaw;
 
-				bC.bossEntityUuid = entity2.getUUID();
-				if (bC.isPersistent) {
-					mobEntity.setPersistenceRequired();
-				}
-				if (bC.enableSpawnEffects) {
-					mobEntity.spawnAnim();
-				}
+				if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+					MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
 
-				mobEntity.setPersistenceRequired();
-				((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.worldPosition);
+					blockPos = entrance.getLeft();
+					yaw = entrance.getRight().getLeft();
+					pitch = entrance.getRight().getRight();
+				}
+				double d = blockPos.getX() + 0.5;
+				double e = blockPos.getY();
+				double f = blockPos.getZ() + 0.5;
+
+				if (!serverWorld.noCollision(entityType.get().getSpawnAABB(d, e, f))) {
+
+					DebuggingHelper.sendBossControllerLogMessage("not enough space for spawning boss entity", null);
+
+					return false;
+				}
+				blockPos = BlockPos.containing(d, e, f);
+				Entity entity2 = EntityType.loadEntityRecursive(input, bC.level, EntitySpawnReason.SPAWNER, entity -> {
+					entity.snapTo(d, e, f, entity.getYRot(), entity.getXRot());
+					return entity;
+				});
+				if (entity2 == null) {
+					return false;
+				}
+				entity2.setYBodyRot((float) yaw);
+				entity2.setYHeadRot((float) yaw);
+				entity2.snapTo(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
+				if (entity2 instanceof Mob mobEntity) {
+					if (bC.entityTypeCompound.getString("id").isPresent()) {
+						mobEntity.finalizeSpawn(serverWorld, serverWorld.getCurrentDifficultyAt(entity2.blockPosition()), EntitySpawnReason.SPAWNER, null);
+					}
+					if (!serverWorld.tryAddFreshEntityWithPassengers(entity2)) {
+						return false;
+					}
+					if (bC.enableSpawnEffects) {
+						serverWorld.levelEvent(LevelEvent.PARTICLES_MOBBLOCK_SPAWN, bC.worldPosition, 0);
+					}
+					serverWorld.gameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
+
+					bC.bossEntityUuid = entity2.getUUID();
+					if (bC.isPersistent) {
+						mobEntity.setPersistenceRequired();
+					}
+					if (bC.enableSpawnEffects) {
+						mobEntity.spawnAnim();
+					}
+
+					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.worldPosition);
+				}
+				bC.setChanged();
+				if (bC.level != null) {
+					BlockState blockState = bC.level.getBlockState(bC.worldPosition);
+					bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+				}
+				return true;
 			}
-			bC.setChanged();
-			if (bC.level != null) {
-				BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-				bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
-			}
-			return true;
 		}
 		return false;
 	}
@@ -574,8 +579,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 	}
 
 	public String getEntityTypeId() {
-		if (this.entityTypeCompound != null && this.entityTypeCompound.contains("id")) {
-			return this.entityTypeCompound.getString("id");
+		if (this.entityTypeCompound != null) {
+			return this.entityTypeCompound.getString("id").orElse("");
 		}
 		return "";
 	}

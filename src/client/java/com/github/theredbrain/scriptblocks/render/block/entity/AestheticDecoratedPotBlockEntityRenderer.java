@@ -88,11 +88,11 @@ public class AestheticDecoratedPotBlockEntityRenderer implements BlockEntityRend
 		this.neck.render(matrixStack, vertexConsumer, i, j);
 		this.top.render(matrixStack, vertexConsumer, i, j);
 		this.bottom.render(matrixStack, vertexConsumer, i, j);
-		PotDecorations sherds = aestheticDecoratedPotBlockEntity.getSherds();
-		this.renderDecoratedSide(this.front, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(sherds.front()));
-		this.renderDecoratedSide(this.back, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(sherds.back()));
-		this.renderDecoratedSide(this.left, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(sherds.left()));
-		this.renderDecoratedSide(this.right, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(sherds.right()));
+		PotDecorations decorations = aestheticDecoratedPotBlockEntity.getDecorations();
+		this.renderDecoratedSide(this.front, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(decorations.front()));
+		this.renderDecoratedSide(this.back, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(decorations.back()));
+		this.renderDecoratedSide(this.left, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(decorations.left()));
+		this.renderDecoratedSide(this.right, matrixStack, vertexConsumerProvider, i, j, getTextureIdFromSherd(decorations.right()));
 		matrixStack.popPose();
 	}
 

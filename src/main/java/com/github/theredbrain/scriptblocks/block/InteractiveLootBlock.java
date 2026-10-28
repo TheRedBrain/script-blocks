@@ -5,16 +5,13 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEnti
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +20,7 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -64,21 +62,17 @@ public class InteractiveLootBlock extends BaseEntityBlock {
 
 				if (player.canUseGameMasterBlocks()) {
 					((DuckPlayerEntityMixin) player).scriptblocks$openInteractiveLootBlockScreen(interactiveLootBlockEntity);
-					return InteractionResult.success(world.isClientSide);
+					return InteractionResult.SUCCESS;
 				} else if (world instanceof ServerLevel serverWorld && !serverWorld.isClientSide() && player instanceof ServerPlayer serverPlayerEntity) {
 					if (interactiveLootBlockEntity.isPlayerInSet(serverPlayerEntity)) {
 						String alreadyLootedSoundId = interactiveLootBlockEntity.getAlreadyLootedSoundId();
 						if (!alreadyLootedSoundId.isEmpty()) {
 							SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(Identifier.parse(alreadyLootedSoundId));
-							if (BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent) != null) {
-								serverPlayerEntity.playSoundToPlayer(soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
-							} else {
-								ScriptBlocks.info("No registered sound event of id '" + alreadyLootedSoundId + "' found.");
-							}
+							serverPlayerEntity.playSound(soundEvent, 1.0F, 1.0F);
 						}
 						String alreadyLootedMessage = interactiveLootBlockEntity.getAlreadyLootedMessage();
 						if (!alreadyLootedMessage.isEmpty()) {
-							serverPlayerEntity.displayClientMessage(Component.translatable(alreadyLootedMessage), true);
+							serverPlayerEntity.sendSystemMessage(Component.translatable(alreadyLootedMessage), true);
 						}
 					} else {
 						Vec3 lootPos = new Vec3(interactiveLootBlockEntity.getBlockPos().getX(), interactiveLootBlockEntity.getBlockPos().getY(), interactiveLootBlockEntity.getBlockPos().getZ());
@@ -108,15 +102,11 @@ public class InteractiveLootBlock extends BaseEntityBlock {
 		String lootAcquiredSoundId = interactiveLootBlockEntity.getLootAcquiredSoundId();
 		if (!lootAcquiredSoundId.isEmpty()) {
 			SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(Identifier.parse(lootAcquiredSoundId));
-			if (BuiltInRegistries.SOUND_EVENT.wrapAsHolder(soundEvent) != null) {
-				serverPlayerEntity.playSoundToPlayer(soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
-			} else {
-				ScriptBlocks.info("No registered sound event of id '" + lootAcquiredSoundId + "' found.");
-			}
+			serverPlayerEntity.playSound(soundEvent, 1.0F, 1.0F);
 		}
 		String lootAcquiredMessage = interactiveLootBlockEntity.getLootAcquiredMessage();
 		if (!lootAcquiredMessage.isEmpty()) {
-			serverPlayerEntity.displayClientMessage(Component.translatable(lootAcquiredMessage), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable(lootAcquiredMessage), true);
 		}
 	}
 
@@ -125,7 +115,8 @@ public class InteractiveLootBlock extends BaseEntityBlock {
 		Identifier lootTableIdentifier = Identifier.tryParse(interactiveLootBlockEntity.getLootTableIdentifierString());
 		if (lootTableIdentifier != null) {
 			LootTable lootTable = serverWorld.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableIdentifier));
-			list = lootTable.getRandomItems(new LootContextParameterSet.Builder(serverWorld).add(LootContextParams.ORIGIN, new Vec3(pos.getX(), pos.getY(), pos.getZ())).add(LootContextParams.THIS_ENTITY, player).build(LootContextParamSets.CHEST)); // TODO when changed to LootContextTypes.BLOCK, can do stuff depending on held item
+			LootParams params = new LootParams.Builder(serverWorld).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos)).withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.VAULT);
+			list = lootTable.getRandomItems(params);
 		}
 		return list;
 	}

@@ -79,7 +79,7 @@ public class UseRelayAnvilBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof UseRelayBlockEntity useRelayBlockEntity) {
 			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
 				if (relayBlockPosOffset.equals(BlockPos.ZERO)) {

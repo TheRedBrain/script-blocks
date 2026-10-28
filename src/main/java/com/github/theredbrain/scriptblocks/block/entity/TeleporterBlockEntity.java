@@ -10,11 +10,12 @@ import com.github.theredbrain.scriptblocks.data.VisibleLocation;
 import com.github.theredbrain.scriptblocks.entity.player.PlayerEntityHelper;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
 import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -24,7 +25,10 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -233,20 +237,20 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		this.spawnPointType = SpawnPointType.byName(view.getStringOr("spawn_point_type", "")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
 
 		this.locationsList.clear();
-				for (CompoundTag nbtCompound1 : view.listOrEmpty("locations", CompoundTag.CODEC)) {
-				this.locationsList.add(
-						new MutablePair<>(
-								new MutablePair<>(
-										nbtCompound1.getStringOr("identifier", ""),
-										nbtCompound1.getStringOr("entrance", "")
-								),
-								new MutablePair<>(
-										nbtCompound1.getStringOr("sent_data_id", ""),
-										nbtCompound1.getStringOr("sent_data", "")
-								)
-						)
-				);
-			}
+		for (CompoundTag nbtCompound1 : view.listOrEmpty("locations", CompoundTag.CODEC)) {
+			this.locationsList.add(
+					new MutablePair<>(
+							new MutablePair<>(
+									nbtCompound1.getStringOr("identifier", ""),
+									nbtCompound1.getStringOr("entrance", "")
+							),
+							new MutablePair<>(
+									nbtCompound1.getStringOr("sent_data_id", ""),
+									nbtCompound1.getStringOr("sent_data", "")
+							)
+					)
+			);
+		}
 
 		nbtCompound = view.read("location", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.location = new MutablePair<>(
@@ -342,14 +346,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUUID().toString().equals(world.dimension().identifier().getPath())) {
 			if (!teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage().isEmpty()) {
-				serverPlayerEntity.displayClientMessage(Component.translatable(teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage()), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable(teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage()), true);
 			}
 			return;
 		}
 
 		if (!teleporterBlockEntity.getPreventInteractionIdentifierString().isEmpty() && !PlayerEntityHelper.allowInteractions(serverPlayerEntity, teleporterBlockEntity.getPreventInteractionIdentifierString())) {
 			if (!teleporterBlockEntity.getInteractionPreventedMessage().isEmpty()) {
-				serverPlayerEntity.displayClientMessage(Component.translatable(teleporterBlockEntity.getInteractionPreventedMessage()), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable(teleporterBlockEntity.getInteractionPreventedMessage()), true);
 			}
 			return;
 		}
@@ -364,7 +368,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 					Location location = null;
 					if (world != null) {
-						Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.parse(entry.getLeft().getLeft()));
+						Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(Identifier.parse(entry.getLeft().getLeft()));
 						if (optionalLocationReference.isPresent()) {
 							location = optionalLocationReference.get().value();
 						}
@@ -384,7 +388,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 				MutablePair<MutablePair<String, String>, MutablePair<String, String>> dataDrivenLocation = teleporterBlockEntity.getDataDrivenLocation();
 				Location location = null;
 				if (world != null) {
-					Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.parse(dataDrivenLocation.getLeft().getLeft()));
+					Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(Identifier.parse(dataDrivenLocation.getLeft().getLeft()));
 					if (optionalLocationReference.isPresent()) {
 						location = optionalLocationReference.get().value();
 					}
@@ -402,28 +406,44 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			}
 		}
 
-		serverPlayerEntity.openMenu(new ExtendedScreenHandlerFactory<>() {
+		serverPlayerEntity.openMenu(createTeleporterMenuProvider(
+				world,
+				Component.translatable(teleporterBlockEntity.teleporterName),
+				teleporterBlockEntity.getBlockPos(),
+				visibleLocationsList
+		));
+	}
 
+	static MenuProvider createTeleporterMenuProvider(
+			Level level,
+			Component title,
+			BlockPos teleporterBlockPos,
+			List<VisibleLocation> visibleLocationsList
+	) {
+
+		return new ExtendedMenuProvider<>() {
 			@Override
-			public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayerEntity player) {
-				return new TeleporterBlockScreenHandler.TeleporterBlockData(
-						teleporterBlockEntity.pos,
-						visibleLocationsList
-				);
+			public ShopScreenHandler.ShopBlockData getScreenOpeningData(ServerPlayer player) {
+				return new ShopScreenHandler.ShopBlockData(teleporterBlockPos);
 			}
 
 			@Override
-			public Text getDisplayName() {
-				return Text.translatable(teleporterBlockEntity.teleporterName);
+			public Component getDisplayName() {
+				return title;
 			}
 
 			@Nullable
 			@Override
-			public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-				return new TeleporterBlockScreenHandler(syncId, playerInventory, ScreenHandlerContext.create(teleporterBlockEntity.world, teleporterBlockEntity.pos), teleporterBlockEntity.pos, visibleLocationsList);
+			public TeleporterBlockScreenHandler createMenu(int syncId, Inventory playerInventory, Player player) {
+				return new TeleporterBlockScreenHandler(
+						syncId,
+						playerInventory,
+						ContainerLevelAccess.create(level, teleporterBlockPos),
+						teleporterBlockPos,
+						visibleLocationsList
+				);
 			}
-
-		});
+		};
 	}
 
 	public void preTeleportTrigger() {

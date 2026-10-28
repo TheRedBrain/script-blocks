@@ -29,7 +29,7 @@ public record LootableVaultConfig(
 									Codec.BOOL.fieldOf("withChoice").forGetter(LootableVaultConfig::withChoice),
 									Codec.DOUBLE.fieldOf("activationRange").forGetter(LootableVaultConfig::activationRange),
 									Codec.DOUBLE.fieldOf("deactivationRange").forGetter(LootableVaultConfig::deactivationRange),
-									ItemStack.STRICT_CODEC.fieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
+									ItemStack.lenientOptionalFieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
 									Codec.STRING.fieldOf("displayLootTableIdentifier").forGetter(LootableVaultConfig::lootableIdentifier)
 							)
 							.apply(instance, LootableVaultConfig::new)

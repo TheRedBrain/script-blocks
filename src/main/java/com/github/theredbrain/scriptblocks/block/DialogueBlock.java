@@ -43,11 +43,11 @@ public class DialogueBlock extends RotatedBlockWithEntity {
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
 			if (player.canUseGameMasterBlocks()) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openDialogueBlockScreen(dialogueBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else if (player instanceof ServerPlayer serverPlayerEntity) {
 				String dialogue = DialogueAnchor.getDialogue(world, player, dialogueBlockEntity.getStartingDialogueList());
-				MinecraftServer server = serverPlayerEntity.getServer();
-				if (!dialogue.isEmpty() && server != null) {
+				MinecraftServer server = serverPlayerEntity.level().getServer();
+				if (!dialogue.isEmpty()) {
 					DialogueAnchor.openDialogueScreen(world, server, serverPlayerEntity, dialogue, dialogueBlockEntity.getDataBlockPos(), dialogueBlockEntity.getDialogueUsedBlocks(), dialogueBlockEntity.getDialogueTriggeredBlocks());
 					return InteractionResult.CONSUME;
 				}

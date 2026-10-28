@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -27,6 +26,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -48,11 +48,11 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks = payload.dialogueTriggeredBlocks();
 
 		Level world = serverPlayerEntity.level();
-		Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(answerIdentifier);
+		Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).get().value().get(answerIdentifier);
 
-		MinecraftServer server = serverPlayerEntity.getServer();
+		MinecraftServer server = serverPlayerEntity.level().getServer();
 
-		if (optionalDialogueAnswerReference.isPresent() && server != null) {
+		if (optionalDialogueAnswerReference.isPresent()) {
 			DialogueAnswer dialogueAnswer = optionalDialogueAnswerReference.get().value();
 
 			if (!dialogueAnswer.availability().itemCosts().isEmpty()) {
@@ -125,12 +125,12 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
 			if (!lootTable.isEmpty()) {
 				Identifier lootTableIdentifier = Identifier.parse(lootTable);
-				LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverPlayerEntity.getServerWorld()).add(LootContextParams.THIS_ENTITY, serverPlayerEntity).add(LootContextParams.ORIGIN, serverPlayerEntity.getPos()).build(LootContextParamSets.ADVANCEMENT_REWARD);
+				LootParams params = new LootParams.Builder(serverPlayerEntity.level()).withParameter(LootContextParams.THIS_ENTITY, serverPlayerEntity).withParameter(LootContextParams.ORIGIN, serverPlayerEntity.position()).create(LootContextParamSets.ADVANCEMENT_REWARD);
 				boolean bl = false;
-				for (ItemStack itemStack : server.reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableIdentifier)).getRandomItems(lootContextParameterSet)) {
+				for (ItemStack itemStack : server.reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootTableIdentifier)).getRandomItems(params)) {
 
 					if (serverPlayerEntity.addItem(itemStack)) {
-						serverPlayerEntity.getWorld().playSound(null, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
+						serverPlayerEntity.level().playSound(null, serverPlayerEntity.getX(), serverPlayerEntity.getY(), serverPlayerEntity.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2f, ((serverPlayerEntity.getRandom().nextFloat() - serverPlayerEntity.getRandom().nextFloat()) * 0.7f + 1.0f) * 2.0f);
 						bl = true;
 						continue;
 					}
@@ -164,7 +164,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				serverPlayerEntity.sendSystemMessage(Component.translatable(overlayMessage), true);
 			}
 
-			String responseDialogueIdentifierString = DialogueAnchor.getDialogue(serverPlayerEntity.getWorld(), serverPlayerEntity, dialogueAnswer.responseDialogues());
+			String responseDialogueIdentifierString = DialogueAnchor.getDialogue(serverPlayerEntity.level(), serverPlayerEntity, dialogueAnswer.responseDialogues());
 
 			if (responseDialogueIdentifierString.isEmpty()) {
 				serverPlayerEntity.closeContainer();
@@ -180,7 +180,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				for (MutablePair<String, MutablePair<BlockPos, Boolean>> entry : dialogueTriggeredBlocks) {
 
 					if (entry.getLeft().equals(triggeredBlock)) {
-						BlockEntity blockEntity = serverPlayerEntity.getWorld().getBlockEntity(entry.getRight().getLeft());
+						BlockEntity blockEntity = serverPlayerEntity.level().getBlockEntity(entry.getRight().getLeft());
 						boolean triggeredBlockResets = entry.getRight().getRight();
 
 						if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -200,7 +200,7 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				for (MutablePair<String, BlockPos> entry : dialogueUsedBlocks) {
 
 					if (entry.getLeft().equals(usedBlock)) {
-						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.getPos(), Direction.UP, entry.getRight(), false);
+						BlockHitResult blockHitResult = new BlockHitResult(serverPlayerEntity.position(), Direction.UP, entry.getRight(), false);
 						InteractionHand hand = serverPlayerEntity.getUsedItemHand();
 						ItemStack itemStack = serverPlayerEntity.getItemInHand(hand);
 

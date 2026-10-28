@@ -136,7 +136,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 
 	public boolean setBlockIdentifierString(String blockIdentifierString) {
 		if (this.level != null) {
-			Optional<Holder.Reference<Block>> optionalBlockReference = this.level.registryAccess().get(Registries.BLOCK).getEntry(Identifier.tryParse(blockIdentifierString));
+			Optional<Holder.Reference<Block>> optionalBlockReference = this.level.registryAccess().get(Registries.BLOCK).get().value().get(Identifier.tryParse(blockIdentifierString));
 			if (optionalBlockReference.isPresent()) {
 				this.blockIdentifierString = blockIdentifierString;
 				return true;
@@ -167,7 +167,7 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 				endPos = startPos.offset(pair.getRight().getX() - 1, pair.getRight().getY() - 1, pair.getRight().getZ() - 1);
 				String commandString = "/execute in " + this.level.dimension().identifier() + " run fill " + startPos.getX() + " " + startPos.getY() + " " + startPos.getZ() + " " + endPos.getX() + " " + endPos.getY() + " " + endPos.getZ() + " " + this.blockIdentifierString;
 				ScriptBlocks.info(commandString);
-				server.getCommands().executeWithPrefix(server.createCommandSourceStack(), commandString);
+				server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), commandString);
 			}
 		}
 	}

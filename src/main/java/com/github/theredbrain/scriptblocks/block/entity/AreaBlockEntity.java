@@ -271,10 +271,8 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 		this.showArea = view.getBooleanOr("showArea", true);
 
-		if (nbt.contains("areaMinX") && view.contains("areaMinY") && nbt.contains("areaMinZ") && nbt.contains("areaMaxX") && nbt.contains("areaMaxY") && nbt.contains("areaMaxZ")) {
-			this.area = new AABB(view.getDoubleOr("areaMinX"), view.getDoubleOr("areaMinY"), view.getDoubleOr("areaMinZ"), view.getDoubleOr("areaMaxX"), view.getDoubleOr("areaMaxY"), view.getDoubleOr("areaMaxZ"));
+		this.area = new AABB(view.getDoubleOr("areaMinX", 0), view.getDoubleOr("areaMinY", 0), view.getDoubleOr("areaMinZ", 0), view.getDoubleOr("areaMaxX", 0), view.getDoubleOr("areaMaxY", 0), view.getDoubleOr("areaMaxZ", 0));
 			this.calculateAreaBox = true;
-		}
 
 		int i = Mth.clamp(view.getIntOr("areaDimensionsX", 0), 0, 48);
 		int j = Mth.clamp(view.getIntOr("areaDimensionsY", 0), 0, 48);
@@ -291,11 +289,11 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 		this.appliedStatusEffectAmplifier = view.getIntOr("appliedStatusEffectAmplifier", 0);
 
-		this.appliedStatusEffectAmbient = view.getBooleanOr("appliedStatusEffectAmbient");
+		this.appliedStatusEffectAmbient = view.getBooleanOr("appliedStatusEffectAmbient", false);
 
-		this.appliedStatusEffectShowParticles = view.getBooleanOr("appliedStatusEffectShowParticles");
+		this.appliedStatusEffectShowParticles = view.getBooleanOr("appliedStatusEffectShowParticles", false);
 
-		this.appliedStatusEffectShowIcon = view.getBooleanOr("appliedStatusEffectShowIcon");
+		this.appliedStatusEffectShowIcon = view.getBooleanOr("appliedStatusEffectShowIcon", false);
 
 
 		this.messageMode = MessageMode.byName(view.getStringOr("messageMode", "")).orElse(MessageMode.OVERLAY);
@@ -307,22 +305,17 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 		this.triggeredMessage = view.getStringOr("triggeredMessage", "");
 
 
-		this.hasTriggered = view.getBooleanOr("hasTriggered");
+		this.hasTriggered = view.getBooleanOr("hasTriggered", false);
 
-		this.wasTriggered = view.getBooleanOr("wasTriggered");
+		this.wasTriggered = view.getBooleanOr("wasTriggered", false);
 
 		this.triggerMode = TriggerMode.byName(view.getStringOr("triggerMode", "")).orElse(TriggerMode.ALWAYS);
 
 		this.triggeredMode = TriggeredMode.byName(view.getStringOr("triggeredMode", "")).orElse(TriggeredMode.ONCE);
 
-		if (nbt.contains("maxTimer", Tag.TAG_INT)) {
-			this.maxTimer = view.getIntOr("maxTimer", 1);
-		} else {
-			this.maxTimer = 1;
-		}
+		this.maxTimer = view.getIntOr("maxTimer", 1);
 
-		if (nbt.contains("triggeredBlockPositionOffsetX", Tag.TAG_INT) && nbt.contains("triggeredBlockPositionOffsetY", Tag.TAG_INT) && nbt.contains("triggeredBlockPositionOffsetZ", Tag.TAG_INT) && nbt.contains("triggeredBlockResets", Tag.TAG_BYTE)) {
-			this.triggeredBlock = new MutablePair<>(
+		this.triggeredBlock = new MutablePair<>(
 					new BlockPos(
 							Mth.clamp(view.getIntOr("triggeredBlockPositionOffsetX", 0), -48, 48),
 							Mth.clamp(view.getIntOr("triggeredBlockPositionOffsetY", 0), -48, 48),
@@ -330,11 +323,10 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 					),
 					view.getBooleanOr("triggeredBlockResets", false)
 			);
-		}
 
 		int playerListSize = view.getIntOr("playerListSize", 0);
 		for (i = 0; i < playerListSize; i++) {
-			Optional<int[]> optionalUUID = view.getIntArray("playerListSize" + i);
+			Optional<int[]> optionalUUID = view.getIntArray("playerListEntry_" + i);
 			if (optionalUUID.isPresent()) {
 				this.playerList.add(UUIDUtil.uuidFromIntArray(optionalUUID.get()));
 			}
@@ -342,15 +334,21 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 
 		int playerList2Size = view.getIntOr("playerList2Size", 0);
 		for (i = 0; i < playerList2Size; i++) {
-			this.playerList2.add(view.read("playerList2Size" + i, UUIDUtil.AUTHLIB_CODEC));
+			Optional<int[]> optionalUUID = view.getIntArray("playerList2Entry_" + i);
+			if (optionalUUID.isPresent()) {
+				this.playerList2.add(UUIDUtil.uuidFromIntArray(optionalUUID.get()));
+			}
 		}
 
 		int playerMapSize = view.getIntOr("playerMapSize", 0);
 		this.playerMap = new HashMap<>();
 		for (i = 0; i < playerMapSize; i++) {
-			UUID key = view.getUuid("key_" + i);
-			int timer = view.getIntOr("timer_" + i);
-			this.playerMap.put(key, timer);
+//			UUID key = view.getUuid("key_" + i);
+			Optional<int[]> optionalUUID = view.getIntArray("key_" + i);
+			int timer = view.getIntOr("timer_" + i, 0);
+			if (optionalUUID.isPresent()) {
+				this.playerMap.put(UUIDUtil.uuidFromIntArray(optionalUUID.get()), timer);
+			}
 		}
 
 		super.loadAdditional(view);
@@ -421,7 +419,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 								if (areaBlockEntity.messageMode == MessageMode.ANNOUNCEMENT) {
 //									((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.leaveMessage));
 								} else {
-									playerEntity.displayClientMessage(Component.translatable(areaBlockEntity.leaveMessage), areaBlockEntity.messageMode == MessageMode.OVERLAY);
+//									playerEntity.sendSystemMessage(Component.translatable(areaBlockEntity.leaveMessage), areaBlockEntity.messageMode == MessageMode.OVERLAY);
 								}
 							}
 							if (areaBlockEntity.triggerMode != TriggerMode.ALWAYS) {
@@ -473,7 +471,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 						if (areaBlockEntity.messageMode == MessageMode.ANNOUNCEMENT) {
 //							((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(areaBlockEntity.joinMessage));
 						} else {
-							playerEntity.displayClientMessage(Component.translatable(areaBlockEntity.joinMessage), areaBlockEntity.messageMode == MessageMode.OVERLAY);
+//							playerEntity.sendSystemMessage(Component.translatable(areaBlockEntity.joinMessage), areaBlockEntity.messageMode == MessageMode.OVERLAY);
 						}
 					}
 					areaBlockEntity.playerList2.remove(playerEntity.getUUID());
@@ -528,7 +526,7 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 				if (this.messageMode == MessageMode.ANNOUNCEMENT) {
 //					((DuckPlayerEntityMixin) playerEntity).scriptblocks$sendAnnouncement(Text.translatable(message));
 				} else {
-					playerEntity.displayClientMessage(Component.translatable(message), this.messageMode == MessageMode.OVERLAY);
+//					playerEntity.sendSystemMessage(Component.translatable(message), this.messageMode == MessageMode.OVERLAY);
 				}
 			}
 		}

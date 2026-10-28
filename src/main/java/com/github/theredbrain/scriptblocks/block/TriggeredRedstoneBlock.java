@@ -69,7 +69,7 @@ public class TriggeredRedstoneBlock extends BaseEntityBlock {
 			for (Direction direction : Direction.values()) {
 				world.updateNeighborsAt(pos.relative(direction), this);
 			}
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

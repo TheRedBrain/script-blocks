@@ -73,7 +73,7 @@ public class AestheticVerticalPortalBlock extends Block {
 	@Override
 	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
 		if (this.soundEvent != null && random.nextInt(100) == 0) {
-			world.playSound(
+			world.playLocalSound(
 					(double) pos.getX() + 0.5,
 					(double) pos.getY() + 0.5,
 					(double) pos.getZ() + 0.5,

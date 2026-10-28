@@ -192,7 +192,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 			if (player.isShiftKeyDown() && bl) {
 				state = state.cycle(BlockStateProperties.OPEN);
 				world.setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_IMMEDIATE);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 			if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
 				BlockPos posDown = pos.below();
@@ -204,7 +204,7 @@ public class UseRelayDoorBlock extends RotatedBlockWithEntity {
 			}
 			if (bl) {
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
 				if (relayBlockPosOffset.equals(BlockPos.ZERO)) {

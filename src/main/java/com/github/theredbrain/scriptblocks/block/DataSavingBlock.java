@@ -41,7 +41,7 @@ public class DataSavingBlock extends BaseEntityBlock {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof DataSavingBlockEntity dataSavingBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openDataSavingBlockScreen(dataSavingBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

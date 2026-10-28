@@ -2,6 +2,9 @@ package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.block.entity.AestheticDecoratedPotBlockEntity;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -65,14 +68,21 @@ public class AestheticDecoratedPotBlock extends BaseEntityBlock implements Simpl
 	}
 
 	@Override
-	protected BlockState getStateForNeighborUpdate(
-			BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos
+	protected BlockState updateShape(
+			final BlockState state,
+			final LevelReader level,
+			final ScheduledTickAccess ticks,
+			final BlockPos pos,
+			final Direction directionToNeighbour,
+			final BlockPos neighbourPos,
+			final BlockState neighbourState,
+			final RandomSource random
 	) {
 		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
-			world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+			ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
 
-		return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
+		return super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
 	}
 
 	@Override
@@ -123,21 +133,13 @@ public class AestheticDecoratedPotBlock extends BaseEntityBlock implements Simpl
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag options) {
-		super.appendTooltip(stack, context, tooltip, options);
-		PotDecorations sherds = stack.getOrDefault(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY);
-		if (!sherds.equals(PotDecorations.EMPTY)) {
-			tooltip.add(CommonComponents.EMPTY);
-			Stream.of(sherds.front(), sherds.left(), sherds.right(), sherds.back())
-					.forEach(sherd -> tooltip.add(new ItemStack(sherd.orElse(Items.BRICK), 1).getHoverName().plainCopy().withStyle(ChatFormatting.GRAY)));
+	protected ItemStack getCloneItemStack(final LevelReader level, final BlockPos pos, final BlockState state, final boolean includeData) {
+		if (level.getBlockEntity(pos) instanceof AestheticDecoratedPotBlockEntity aestheticDecoratedPotBlockEntity) {
+			PotDecorations decorations = aestheticDecoratedPotBlockEntity.getDecorations();
+			return AestheticDecoratedPotBlockEntity.createDecoratedPotInstance(decorations);
+		} else {
+			return super.getCloneItemStack(level, pos, state, includeData);
 		}
-	}
-
-	@Override
-	public ItemStack getPickStack(LevelReader world, BlockPos pos, BlockState state) {
-		return world.getBlockEntity(pos) instanceof AestheticDecoratedPotBlockEntity aestheticDecoratedPotBlockEntity
-				? aestheticDecoratedPotBlockEntity.asStack()
-				: super.getCloneItemStack(world, pos, state);
 	}
 
 	@Override

@@ -120,10 +120,10 @@ public class UseRelayTrapdoorBlock extends RotatedBlockWithEntity {
 					if (state.getValue(BlockStateProperties.WATERLOGGED)) {
 						world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 					}
-					return InteractionResult.success(world.isClientSide);
+					return InteractionResult.SUCCESS;
 				}
 				((DuckPlayerEntityMixin) player).scriptblocks$openUseRelayBlockScreen(useRelayBlockEntity);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				BlockPos relayBlockPosOffset = useRelayBlockEntity.getRelayBlockPositionOffset();
 				if (relayBlockPosOffset.equals(BlockPos.ZERO)) {

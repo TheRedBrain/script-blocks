@@ -91,7 +91,7 @@ public class LootableVaultSharedData {
 		this.dirty = false;
 	}
 
-	public void copyFrom(LootableVaultSharedData data) {
+	public void set(LootableVaultSharedData data) {
 		this.displayItem = data.displayItem;
 		this.connectedPlayers = data.connectedPlayers;
 		this.connectedParticlesRange = data.connectedParticlesRange;

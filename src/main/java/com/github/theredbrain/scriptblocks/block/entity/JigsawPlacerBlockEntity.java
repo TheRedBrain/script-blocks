@@ -177,9 +177,9 @@ public class JigsawPlacerBlockEntity extends RotatedBlockEntity implements Trigg
 		if (this.level != null) {
 			if (this.level instanceof ServerLevel serverWorld) {
 				BlockPos blockPos = this.getBlockPos().relative(this.getBlockState().getValue(JigsawBlock.ORIENTATION).front());
-				Registry<StructureTemplatePool> registry = level.registryAccess().get(Registries.TEMPLATE_POOL);
+				Registry<StructureTemplatePool> registry = level.registryAccess().lookupOrThrow(Registries.TEMPLATE_POOL);
 				try {
-					Holder.Reference<StructureTemplatePool> registryEntry = registry.entryOf(this.getCurrentPool(serverWorld));
+					Holder.Reference<StructureTemplatePool> registryEntry = registry.getOrThrow(this.getCurrentPool(serverWorld));
 
 					Direction rotation = this.getBlockState().getValue(JigsawBlock.ORIENTATION).top();
 					Direction facing = this.getBlockState().getValue(JigsawBlock.ORIENTATION).front();

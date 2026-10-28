@@ -46,7 +46,7 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 
 		if (blockEntity instanceof TriggeredDisplayBlockEntity triggeredDisplayBlockEntity) {
 			triggeredDisplayBlockEntity.reset();
-			triggeredDisplayBlockEntity.setBillboardMode(billboardMode);
+			triggeredDisplayBlockEntity.setBillboardConstraints(billboardMode);
 			triggeredDisplayBlockEntity.setDisplayMode(displayMode);
 			triggeredDisplayBlockEntity.setIsTriggered(isTriggered);
 			triggeredDisplayBlockEntity.setDisplayOffset(displayOffset);

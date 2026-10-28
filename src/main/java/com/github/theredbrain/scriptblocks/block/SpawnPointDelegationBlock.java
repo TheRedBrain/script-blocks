@@ -40,7 +40,7 @@ public class SpawnPointDelegationBlock extends RotatedBlockWithEntity {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openSpawnPointDelegationBlockScreen(spawnPointDelegationBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

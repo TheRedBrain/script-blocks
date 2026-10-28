@@ -111,7 +111,7 @@ public class LootableVaultServerData {
 //		}
 //	}
 
-	public void copyFrom(LootableVaultServerData data) {
+	public void set(LootableVaultServerData data) {
 		this.stateUpdatingResumesAt = data.getStateUpdatingResumeTime();
 		this.rewardedPlayers.clear();
 		this.rewardedPlayers.addAll(data.rewardedPlayers);

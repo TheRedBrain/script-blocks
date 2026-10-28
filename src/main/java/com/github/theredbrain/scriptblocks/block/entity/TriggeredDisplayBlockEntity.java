@@ -17,14 +17,17 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Brightness;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.Util;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
@@ -36,7 +39,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +71,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	public static final String DISPLAY_OFFSET_X_NBT_KEY = "display_offset_x";
 	public static final String DISPLAY_OFFSET_Y_NBT_KEY = "display_offset_y";
 	public static final String DISPLAY_OFFSET_Z_NBT_KEY = "display_offset_z";
+	public static final String DISPLAY_OFFSET_NBT_KEY = "display_offset";
 	public static final String DISPLAY_YAW_NBT_KEY = "display_yaw";
 	public static final String DISPLAY_PITCH_NBT_KEY = "display_pitch";
 	public static final String DISPLAY_PREV_YAW_NBT_KEY = "display_prev_yaw";
@@ -79,9 +85,10 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	// text mode
 	public static final String TEXT_STRING_NBT_KEY = "text_string";
-	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY = "data_provider_block_pos_offset_x";
-	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY = "data_provider_block_pos_offset_y";
-	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY = "data_provider_block_pos_offset_z";
+//	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY = "data_provider_block_pos_offset_x";
+//	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY = "data_provider_block_pos_offset_y";
+//	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY = "data_provider_block_pos_offset_z";
+	public static final String DATA_PROVIDER_BLOCK_POS_OFFSET_NBT_KEY = "data_provider_block_pos_offset";
 	public static final String DATA_IDENTIFIER_NBT_KEY = "data_identifier";
 	public static final String TEXT_NBT_KEY = "text";
 	private static final String LINE_WIDTH_NBT_KEY = "line_width";
@@ -105,7 +112,6 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	private static final Vec3 DISPLAY_OFFSET_DEFAULT = new Vec3(0, 0, 0);
 	// text mode
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private static final Component INITIAL_TEXT = Component.literal("Loooooooooooooooooong test text");//Text.empty();
 	private static final int INITIAL_LINE_WIDTH = 200;
 	private static final byte INITIAL_TEXT_OPACITY = -1;
@@ -116,11 +122,11 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	private int teleportDuration = 0;
 	private int startInterpolation = 0;
 	private int interpolationDuration = 0;
-	private Vector3f translation = new Vector3f();
-	private Vector3f scale = new Vector3f(1, 1, 1);
-	private Quaternionf leftRotation = new Quaternionf();
-	private Quaternionf rightRotation = new Quaternionf();
-	private Byte billboard = BillboardMode.FIXED.getIndex();
+	private Vector3fc translation = new Vector3f();
+	private Vector3fc scale = new Vector3f(1, 1, 1);
+	private Quaternionfc leftRotation = new Quaternionf();
+	private Quaternionfc rightRotation = new Quaternionf();
+	private Byte billboard = BillboardConstraints.FIXED.getId();
 	private int brightness = -1;
 	private float viewRange = 1.0F;
 	private float shadowRadius = 0.0F;
@@ -150,7 +156,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	// text mode
 	private String textString = "";
-	private BlockPos dataProvidingBlockPosOffset = DATA_PROVIDING_BLOCK_POS_DEFAULT;
+	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 	private String dataIdentifierString = "";
 	private Component text = INITIAL_TEXT;
 	private int lineWidth = INITIAL_LINE_WIDTH;
@@ -179,18 +185,18 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	private static Transformation getTransformation(TriggeredDisplayBlockEntity blockEntity) {
-		Vector3f vector3f = blockEntity.getTranslation();
-		Quaternionf quaternionf = blockEntity.getLeftRotation();
-		Vector3f vector3f2 = blockEntity.getScale();
-		Quaternionf quaternionf2 = blockEntity.getRightRotation();
-		return new Transformation(vector3f, quaternionf, vector3f2, quaternionf2);
+		Vector3fc vector3f = blockEntity.getTranslation();
+		Quaternionfc quaternionfc = blockEntity.getLeftRotation();
+		Vector3fc vector3f1 = blockEntity.getScale();
+		Quaternionfc quaternionfc1 = blockEntity.getRightRotation();
+		return new Transformation(vector3f, quaternionfc, vector3f1, quaternionfc1);
 	}
 
 	private void setTransformation(Transformation transformation) {
-		this.setTranslation(transformation.getTranslation());
-		this.setLeftRotation(transformation.getLeftRotation());
-		this.setScale(transformation.getScale());
-		this.setRightRotation(transformation.getRightRotation());
+		this.setTranslation(transformation.translation());
+		this.setLeftRotation(transformation.leftRotation());
+		this.setScale(transformation.scale());
+		this.setRightRotation(transformation.rightRotation());
 	}
 
 	@Nullable
@@ -255,7 +261,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 //		}
 		blockEntity.age++;
 
-		if (world.isClientSide) {
+		if (world.isClientSide()) {
 			if (blockEntity.startInterpolationSet) {
 				blockEntity.startInterpolationSet = false;
 				int i = blockEntity.getStartInterpolation();
@@ -296,106 +302,50 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	private static byte readFlag(byte flags, ValueInput view, String nbtKey, byte flag) {
-		return view.getBooleanOr(nbtKey) ? (byte) (flags | flag) : flags;
+		return view.getBooleanOr(nbtKey, false) ? (byte) (flags | flag) : flags;
 	}
 
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
 		// common
-		if (nbt.contains("transformation")) {
-			Transformation.EXTENDED_CODEC
-					.decode(NbtOps.INSTANCE, view.get("transformation"))
-					.resultOrPartial(Util.prefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setTransformation((AffineTransformation) pair.getFirst()));
-		}
+		this.setTransformation(view.read(TRANSFORMATION_NBT_KEY, Transformation.EXTENDED_CODEC).orElse(Transformation.IDENTITY));
 
-		if (nbt.contains("interpolation_duration", NbtElement.NUMBER_TYPE)) {
-			int i = view.getIntOr("interpolation_duration");
-			this.setInterpolationDuration(i);
-		}
+		this.setInterpolationDuration(view.getIntOr(INTERPOLATION_DURATION_KEY, 0));
 
-		if (nbt.contains("start_interpolation", NbtElement.NUMBER_TYPE)) {
-			int i = view.getIntOr("start_interpolation");
-			this.setStartInterpolation(i);
-		}
+		this.setStartInterpolation(view.getIntOr(START_INTERPOLATION_KEY, 0));
 
-		if (nbt.contains("teleport_duration", NbtElement.NUMBER_TYPE)) {
-			int i = view.getIntOr("teleport_duration");
-			this.setTeleportDuration(Mth.clamp(i, 0, 59));
-		}
+		this.setTeleportDuration(Mth.clamp(view.getIntOr(TELEPORT_DURATION_KEY, 0), 0, 59));
 
-		if (nbt.contains("billboard", Tag.TAG_STRING)) {
-			BillboardMode.CODEC
-					.decode(NbtOps.INSTANCE, view.get("billboard"))
-					.resultOrPartial(Util.prefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setBillboardMode((BillboardMode) pair.getFirst()));
-		}
+		this.setBillboardConstraints(view.read(BILLBOARD_NBT_KEY, BillboardConstraints.CODEC).orElse(BillboardConstraints.FIXED));
 
-		if (nbt.contains("view_range", NbtElement.NUMBER_TYPE)) {
-			this.setViewRange(view.getFloatOr("view_range"));
-		}
+		this.setViewRange(view.getFloatOr(VIEW_RANGE_NBT_KEY, 1.0F));
 
-		if (nbt.contains("shadow_radius", NbtElement.NUMBER_TYPE)) {
-			this.setShadowRadius(view.getFloatOr("shadow_radius"));
-		}
+		this.setShadowRadius(view.getFloatOr(SHADOW_RADIUS_NBT_KEY, 0.0F));
 
-		if (nbt.contains("shadow_strength", NbtElement.NUMBER_TYPE)) {
-			this.setShadowStrength(view.getFloatOr("shadow_strength"));
-		}
+		this.setShadowStrength(view.getFloatOr(SHADOW_STRENGTH_NBT_KEY, 1.0F));
 
-		if (nbt.contains("width", NbtElement.NUMBER_TYPE)) {
-			this.setDisplayWidth(view.getFloatOr("width"));
-		}
+		this.setDisplayWidth(view.getFloatOr(WIDTH_NBT_KEY, 0.0F));
 
-		if (nbt.contains("height", NbtElement.NUMBER_TYPE)) {
-			this.setDisplayHeight(view.getFloatOr("height"));
-		}
+		this.setDisplayHeight(view.getFloatOr(HEIGHT_NBT_KEY, 0.0F));
 
-		if (nbt.contains("glow_color_override", NbtElement.NUMBER_TYPE)) {
-			this.setGlowColorOverride(view.getIntOr("glow_color_override"));
-		}
+		this.setGlowColorOverride(view.getIntOr(GLOW_COLOR_OVERRIDE_NBT_KEY, -1));
 
-		if (nbt.contains("brightness", Tag.TAG_COMPOUND)) {
-			Brightness.CODEC
-					.decode(NbtOps.INSTANCE, view.get("brightness"))
-					.resultOrPartial(Util.prefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setBrightness((Brightness) pair.getFirst()));
-		} else {
-			this.setBrightness(null);
-		}
+		this.setBrightnessOverride(view.read(BRIGHTNESS_NBT_KEY, Brightness.CODEC).orElse(null));
 
-		if (nbt.contains(DISPLAY_MODE_NBT_KEY, Tag.TAG_STRING)) {
-			DisplayMode.CODEC
-					.decode(NbtOps.INSTANCE, view.get(DISPLAY_MODE_NBT_KEY))
-					.resultOrPartial(Util.prefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-					.ifPresent(pair -> this.setDisplayMode((DisplayMode) pair.getFirst()));
-		}
+		this.setDisplayMode(view.read(DISPLAY_MODE_NBT_KEY, DisplayMode.CODEC).orElse(DisplayMode.TEXT));
 
-		if (nbt.contains(IS_TRIGGERED_NBT_KEY, Tag.TAG_BYTE)) {
-			this.isTriggered = view.getBooleanOr(IS_TRIGGERED_NBT_KEY);
-		}
+		this.isTriggered = view.getBooleanOr(IS_TRIGGERED_NBT_KEY, true);
 
-		if (nbt.contains(DISPLAY_OFFSET_X_NBT_KEY, NbtElement.NUMBER_TYPE) || nbt.contains(DISPLAY_OFFSET_Y_NBT_KEY, NbtElement.NUMBER_TYPE) || nbt.contains(DISPLAY_OFFSET_Z_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setDisplayOffset(new Vec3(
-					view.getDoubleOr(DISPLAY_OFFSET_X_NBT_KEY),
-					view.getDoubleOr(DISPLAY_OFFSET_Y_NBT_KEY),
-					view.getDoubleOr(DISPLAY_OFFSET_Z_NBT_KEY)
-			));
-		}
+		this.setDisplayOffset(view.read(DISPLAY_OFFSET_NBT_KEY, Vec3.CODEC).orElse(DISPLAY_OFFSET_DEFAULT));
 
-		if (nbt.contains(DISPLAY_YAW_NBT_KEY)) {
-			this.displayYaw = view.getFloatOr(DISPLAY_YAW_NBT_KEY);
-		}
-		if (nbt.contains(DISPLAY_PITCH_NBT_KEY)) {
-			this.displayPitch = view.getFloatOr(DISPLAY_PITCH_NBT_KEY);
-		}
-		if (nbt.contains(DISPLAY_PREV_YAW_NBT_KEY)) {
-			this.displayPrevYaw = view.getFloatOr(DISPLAY_PREV_YAW_NBT_KEY);
-		}
-		if (nbt.contains(DISPLAY_PREV_PITCH_NBT_KEY)) {
-			this.displayPrevPitch = view.getFloatOr(DISPLAY_PREV_PITCH_NBT_KEY);
-		}
+		this.displayYaw = view.getFloatOr(DISPLAY_YAW_NBT_KEY, 0.0F);
+
+		this.displayPitch = view.getFloatOr(DISPLAY_PITCH_NBT_KEY, 0.0F);
+
+		this.displayPrevYaw = view.getFloatOr(DISPLAY_PREV_YAW_NBT_KEY, 0.0F);
+
+		this.displayPrevPitch = view.getFloatOr(DISPLAY_PREV_PITCH_NBT_KEY, 0.0F);
 //		// item mode
 //		if (nbt.contains("item")) {
 //			this.setItemStack((ItemStack)ItemStack.fromNbt(registryLookup, view.getCompound("item")).orElse(ItemStack.EMPTY));
@@ -411,27 +361,18 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 //		}
 
 		// text mode
-		if (nbt.contains(LINE_WIDTH_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setLineWidth(view.getIntOr(LINE_WIDTH_NBT_KEY));
-		}
+		this.setLineWidth(view.getIntOr(LINE_WIDTH_NBT_KEY, INITIAL_LINE_WIDTH));
 
-		if (nbt.contains(TEXT_OPACITY_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setTextOpacity(view.getByteOr(TEXT_OPACITY_NBT_KEY));
-		}
+		this.setTextOpacity(view.getByteOr(TEXT_OPACITY_NBT_KEY, INITIAL_TEXT_OPACITY));
 
-		if (nbt.contains(BACKGROUND_NBT_KEY, NbtElement.NUMBER_TYPE)) {
-			this.setBackground(view.getIntOr(BACKGROUND_NBT_KEY));
-		}
+		this.setBackground(view.getIntOr(BACKGROUND_NBT_KEY, INITIAL_BACKGROUND));
 
-		byte b = readFlag((byte) 0, nbt, SHADOW_NBT_KEY, SHADOW_FLAG);
-		b = readFlag(b, nbt, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
-		b = readFlag(b, nbt, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
-		Optional<TextAlignment> optional = TextAlignment.CODEC
-				.decode(NbtOps.INSTANCE, view.get(ALIGNMENT_NBT_KEY))
-				.resultOrPartial(Util.prefix(ERROR_PREFIX, ScriptBlocks.LOGGER::error))
-				.map(Pair::getFirst);
+		byte b = readFlag((byte) 0, view, SHADOW_NBT_KEY, SHADOW_FLAG);
+		b = readFlag(b, view, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
+		b = readFlag(b, view, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
+		Optional<TextAlignment> optional = view.read(ALIGNMENT_NBT_KEY, TextAlignment.CODEC);
 		if (optional.isPresent()) {
-			b = switch ((TextAlignment) optional.get()) {
+			b = switch (optional.get()) {
 				case CENTER -> b;
 				case LEFT -> (byte) (b | LEFT_ALIGNMENT_FLAG);
 				case RIGHT -> (byte) (b | RIGHT_ALIGNMENT_FLAG);
@@ -439,33 +380,11 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		}
 		this.setDisplayFlags(b);
 
-		if (nbt.contains(TEXT_STRING_NBT_KEY, Tag.TAG_STRING)) {
-			this.setTextString(view.getStringOr(TEXT_STRING_NBT_KEY));
-		}
+		this.setTextString(view.getStringOr(TEXT_STRING_NBT_KEY, ""));
 
-		if (nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, Tag.TAG_INT) && nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, Tag.TAG_INT) && nbt.contains(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, Tag.TAG_INT)) {
-			this.setDataProvidingBlockPosOffset(new BlockPos(view.getIntOr(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY), view.getIntOr(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY), view.getIntOr(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY)));
-		}
+		this.setDataProvidingBlockPosOffset(view.read(DATA_PROVIDER_BLOCK_POS_OFFSET_NBT_KEY, BlockPos.CODEC).orElse(BlockPos.ZERO));
 
-		if (nbt.contains(DATA_IDENTIFIER_NBT_KEY, Tag.TAG_STRING)) {
-			this.setDataIdentifierString(view.getStringOr(DATA_IDENTIFIER_NBT_KEY));
-		}
-
-		if (nbt.contains(TEXT_NBT_KEY, Tag.TAG_STRING)) {
-			String string = view.getStringOr(TEXT_NBT_KEY);
-
-			try {
-				Component text = Text.Serialization.fromJson(string, registryLookup);
-				if (text != null) {
-					Component text2 = ComponentUtils.updateForEntity(null, text, null, 0);
-					this.setText(text2);
-				} else {
-					this.setText(Component.empty());
-				}
-			} catch (Exception var8) {
-				ScriptBlocks.LOGGER.warn("Failed to parse Triggered Display Block text {}", string, var8);
-			}
-		}
+		this.setDataIdentifierString(view.getStringOr(DATA_IDENTIFIER_NBT_KEY, ""));
 
 		super.loadAdditional(view);
 
@@ -479,31 +398,21 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	protected void saveAdditional(ValueOutput view) {
 
 		// common
-		Transformation.EXTENDED_CODEC
-				.encodeStart(NbtOps.INSTANCE, getTransformation(this))
-				.ifSuccess(transformations -> view.store("transformation", transformations));
-		BillboardMode.CODEC.encodeStart(NbtOps.INSTANCE, this.getBillboardMode()).ifSuccess(billboard -> view.store("billboard", billboard));
-		view.putInt("interpolation_duration", this.getInterpolationDuration());
-		view.putInt("teleport_duration", this.getTeleportDuration());
-		view.putFloat("view_range", this.getViewRange());
-		view.putFloat("shadow_radius", this.getShadowRadius());
-		view.putFloat("shadow_strength", this.getShadowStrength());
-		view.putFloat("width", this.getDisplayWidth());
-		view.putFloat("height", this.getDisplayHeight());
-		view.putInt("glow_color_override", this.getGlowColorOverride());
-		Brightness brightness = this.getBrightnessUnpacked();
-		if (brightness != null) {
-			Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).ifSuccess(brightnessx -> view.store("brightness", brightnessx));
-		}
+		view.store(TRANSFORMATION_NBT_KEY, Transformation.EXTENDED_CODEC, getTransformation(this));
+		view.store(BILLBOARD_NBT_KEY, BillboardConstraints.CODEC, this.getBillboardConstraints());
+		view.putInt(INTERPOLATION_DURATION_KEY, this.getInterpolationDuration());
+		view.putInt(START_INTERPOLATION_KEY, this.getStartInterpolation());
+		view.putInt(TELEPORT_DURATION_KEY, this.getTeleportDuration());
+		view.putFloat(VIEW_RANGE_NBT_KEY, this.getViewRange());
+		view.putFloat(SHADOW_RADIUS_NBT_KEY, this.getShadowRadius());
+		view.putFloat(SHADOW_STRENGTH_NBT_KEY, this.getShadowStrength());
+		view.putFloat(WIDTH_NBT_KEY, this.getDisplayWidth());
+		view.putFloat(HEIGHT_NBT_KEY, this.getDisplayHeight());
+		view.putInt(GLOW_COLOR_OVERRIDE_NBT_KEY, this.getGlowColorOverride());
+		view.storeNullable(BRIGHTNESS_NBT_KEY, Brightness.CODEC, this.getBrightnessOverride());
 
-		if (this.isTriggered) {
-			view.putBoolean(IS_TRIGGERED_NBT_KEY, this.isTriggered);
-		}
-		if (this.displayOffset != DISPLAY_OFFSET_DEFAULT) {
-			view.putDouble(DISPLAY_OFFSET_X_NBT_KEY, this.displayOffset.x);
-			view.putDouble(DISPLAY_OFFSET_Y_NBT_KEY, this.displayOffset.y);
-			view.putDouble(DISPLAY_OFFSET_Z_NBT_KEY, this.displayOffset.z);
-		}
+		view.putBoolean(IS_TRIGGERED_NBT_KEY, this.isTriggered);
+		view.store(DISPLAY_OFFSET_NBT_KEY, Vec3.CODEC, this.displayOffset);
 
 		view.putFloat(DISPLAY_YAW_NBT_KEY, this.displayYaw);
 		view.putFloat(DISPLAY_PITCH_NBT_KEY, this.displayPitch);
@@ -518,19 +427,16 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		// text mode
 		view.putString(TEXT_STRING_NBT_KEY, this.textString);
-		view.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_X_NBT_KEY, this.dataProvidingBlockPosOffset.getX());
-		view.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Y_NBT_KEY, this.dataProvidingBlockPosOffset.getY());
-		view.putInt(DATA_PROVIDER_BLOCK_POS_OFFSET_Z_NBT_KEY, this.dataProvidingBlockPosOffset.getZ());
+		view.store(DATA_PROVIDER_BLOCK_POS_OFFSET_NBT_KEY, BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 		view.putString(DATA_IDENTIFIER_NBT_KEY, this.dataIdentifierString);
-		view.putString(TEXT_NBT_KEY, Text.Serialization.toJsonString(this.getText(), registryLookup));
 		view.putInt(LINE_WIDTH_NBT_KEY, this.getLineWidth());
 		view.putByte(TEXT_OPACITY_NBT_KEY, this.getTextOpacity());
 		view.putInt(BACKGROUND_NBT_KEY, this.getBackground());
 		byte b = this.getDisplayFlags();
-		writeFlag(b, nbt, SHADOW_NBT_KEY, SHADOW_FLAG);
-		writeFlag(b, nbt, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
-		writeFlag(b, nbt, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
-		TextAlignment.CODEC.encodeStart(NbtOps.INSTANCE, getAlignment(b)).ifSuccess(nbtElement -> view.store(ALIGNMENT_NBT_KEY, nbtElement));
+		writeFlag(b, view, SHADOW_NBT_KEY, SHADOW_FLAG);
+		writeFlag(b, view, SEE_THROUGH_NBT_KEY, SEE_THROUGH_FLAG);
+		writeFlag(b, view, DEFAULT_BACKGROUND_NBT_KEY, DEFAULT_BACKGROUND_FLAG);
+		view.store(ALIGNMENT_NBT_KEY, TextAlignment.CODEC, getAlignment(b));
 
 		super.saveAdditional(view);
 
@@ -597,52 +503,52 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		this.interpolationDuration = interpolationDuration;
 	}
 
-	public Vector3f getTranslation() {
+	public Vector3fc getTranslation() {
 		return this.translation;
 	}
 
-	public void setTranslation(Vector3f translation) {
+	public void setTranslation(Vector3fc translation) {
 		this.translation = translation;
 	}
 
-	public Vector3f getScale() {
+	public Vector3fc getScale() {
 		return this.scale;
 	}
 
-	public void setScale(Vector3f scale) {
+	public void setScale(Vector3fc scale) {
 		this.scale = scale;
 	}
 
-	public Quaternionf getLeftRotation() {
+	public Quaternionfc getLeftRotation() {
 		return this.leftRotation;
 	}
 
-	public void setLeftRotation(Quaternionf leftRotation) {
+	public void setLeftRotation(Quaternionfc leftRotation) {
 		this.leftRotation = leftRotation;
 	}
 
-	public Quaternionf getRightRotation() {
+	public Quaternionfc getRightRotation() {
 		return this.rightRotation;
 	}
 
-	public void setRightRotation(Quaternionf rightRotation) {
+	public void setRightRotation(Quaternionfc rightRotation) {
 		this.rightRotation = rightRotation;
 	}
 
-	public void setBillboardMode(BillboardMode billboardMode) {
-		this.billboard = billboardMode.getIndex();
+	public void setBillboardConstraints(BillboardConstraints billboardConstraints) {
+		this.billboard = billboardConstraints.getId();
 	}
 
-	public BillboardMode getBillboardMode() {
-		return (BillboardMode) BillboardMode.FROM_INDEX.apply(this.billboard);
+	public BillboardConstraints getBillboardConstraints() {
+		return (BillboardConstraints) BillboardConstraints.BY_ID.apply(this.billboard);
 	}
 
-	public void setBrightness(@Nullable Brightness brightness) {
+	public void setBrightnessOverride(@Nullable Brightness brightness) {
 		this.brightness = brightness != null ? brightness.pack() : -1;
 	}
 
 	@Nullable
-	public Brightness getBrightnessUnpacked() {
+	public Brightness getBrightnessOverride() {
 		int i = this.brightness;
 		return i != -1 ? Brightness.unpack(i) : null;
 	}
@@ -764,6 +670,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 	public void setTextString(String textString) {
 		this.textString = textString;
+		this.renderingDataSet = true;
 	}
 
 	public BlockPos getDataProvidingBlockPosOffset() {
@@ -935,7 +842,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	private RenderState copyRenderState() {
 		return new RenderState(
 				AbstractInterpolator.constant(getTransformation(this)),
-				this.getBillboardMode(),
+				this.getBillboardConstraints(),
 				this.getBrightness(),
 				FloatLerper.constant(this.getShadowRadius()),
 				FloatLerper.constant(this.getShadowStrength()),
@@ -949,7 +856,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		float g = state.shadowStrength.lerp(lerpProgress);
 		return new RenderState(
 				new AffineTransformationInterpolator(affineTransformation, getTransformation(this)),
-				this.getBillboardMode(),
+				this.getBillboardConstraints(),
 				this.getBrightness(),
 				new FloatLerperImpl(f, this.getShadowRadius()),
 				new FloatLerperImpl(g, this.getShadowStrength()),
@@ -976,7 +883,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	static record ArgbLerper(int previous, int current) implements IntLerper {
 		@Override
 		public int lerp(float delta) {
-			return ColorHelper.Argb.lerp(delta, this.previous, this.current);
+			return ARGB.srgbLerp(delta, this.previous, this.current);
 		}
 	}
 
@@ -1012,7 +919,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		}
 	}
 
-	public static enum DisplayMode implements StringRepresentable {
+	public enum DisplayMode implements StringRepresentable {
 		BLOCK("block"),
 		TEXT("text"),
 		ITEM("item");
@@ -1039,22 +946,22 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		}
 	}
 
-	public static enum BillboardMode implements StringRepresentable {
+	public enum BillboardConstraints implements StringRepresentable {
 		FIXED((byte) 0, "fixed"),
 		VERTICAL((byte) 1, "vertical"),
 		HORIZONTAL((byte) 2, "horizontal"),
 		CENTER((byte) 3, "center");
 
-		public static final Codec<BillboardMode> CODEC = StringRepresentable.fromEnum(BillboardMode::values);
-		public static final IntFunction<BillboardMode> FROM_INDEX = ByIdMap.createIdToValueFunction(
-				BillboardMode::getIndex, values(), ByIdMap.OutOfBoundsStrategy.ZERO
+		public static final Codec<BillboardConstraints> CODEC = StringRepresentable.fromEnum(BillboardConstraints::values);
+		public static final IntFunction<BillboardConstraints> BY_ID = ByIdMap.continuous(
+				BillboardConstraints::getId, values(), ByIdMap.OutOfBoundsStrategy.ZERO
 		);
-		private final byte index;
+		private final byte id;
 		private final String name;
 
-		private BillboardMode(final byte index, final String name) {
+		BillboardConstraints(final byte id, final String name) {
 			this.name = name;
-			this.index = index;
+			this.id = id;
 		}
 
 		@Override
@@ -1062,22 +969,18 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 			return this.name;
 		}
 
-		byte getIndex() {
-			return this.index;
-		}
-
-		public static Optional<BillboardMode> byName(String name) {
-			return Arrays.stream(BillboardMode.values()).filter(billboardMode -> billboardMode.getSerializedName().equals(name)).findFirst();
+		private byte getId() {
+			return this.id;
 		}
 
 		public Component asText() {
-			return Component.translatable("gui.triggered_display_block.billboard_mode." + this.name);
+			return Component.translatable("gui.triggered_display_block.billboard_constraints." + this.name);
 		}
 	}
 
-	public static record RenderState(
+	public record RenderState(
 			AbstractInterpolator<Transformation> transformation,
-			BillboardMode billboardConstraints,
+			BillboardConstraints billboardConstraints,
 			int brightnessOverride,
 			FloatLerper shadowRadius,
 			FloatLerper shadowStrength,

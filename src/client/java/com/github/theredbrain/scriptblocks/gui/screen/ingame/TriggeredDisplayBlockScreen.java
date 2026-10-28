@@ -30,7 +30,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	private CycleButton<ScreenPage> cycleScreenPageButton;
 
 	// common
-	private CycleButton<TriggeredDisplayBlockEntity.BillboardMode> billboardModeButton;
+	private CycleButton<TriggeredDisplayBlockEntity.BillboardConstraints> billboardConstraintsButton;
 	private CycleButton<TriggeredDisplayBlockEntity.DisplayMode> displayModeButton;
 	private CycleButton<Boolean> toggleIsTriggeredButton;
 	private EditBox displayOffsetXField;
@@ -51,7 +51,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	private EditBox textBackgroundField;
 
 	private ScreenPage screenPage;
-	private TriggeredDisplayBlockEntity.BillboardMode billboardMode;
+	private TriggeredDisplayBlockEntity.BillboardConstraints billboardConstraints;
 	private TriggeredDisplayBlockEntity.DisplayMode displayMode;
 	private boolean isTriggered;
 
@@ -63,41 +63,41 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	@Override
 	protected void init() {
 		this.screenPage = ScreenPage.COMMON;
-		this.billboardMode = this.triggeredDisplayBlock.getBillboardMode();
+		this.billboardConstraints = this.triggeredDisplayBlock.getBillboardConstraints();
 		this.displayMode = this.triggeredDisplayBlock.getDisplayMode();
 		this.isTriggered = this.triggeredDisplayBlock.getIsTriggered();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues((ScreenPage[]) ScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- common ---
-		this.billboardModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.BillboardMode::asText).values((TriggeredDisplayBlockEntity.BillboardMode[]) TriggeredDisplayBlockEntity.BillboardMode.values()).initially(this.billboardMode).omitKeyText().build(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, billboardMode) -> {
-			this.billboardMode = billboardMode;
+		this.billboardConstraintsButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.BillboardConstraints::asText, this.billboardConstraints).withValues((TriggeredDisplayBlockEntity.BillboardConstraints[]) TriggeredDisplayBlockEntity.BillboardConstraints.values()).create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, billboardConstraints) -> {
+			this.billboardConstraints = billboardConstraints;
 		}));
 
-		this.displayModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.DisplayMode::asText).values((TriggeredDisplayBlockEntity.DisplayMode[]) TriggeredDisplayBlockEntity.DisplayMode.values()).initially(this.displayMode).omitKeyText().build(this.width / 2 - 154, 68, 300, 20, Component.empty(), (button, displayMode) -> {
+		this.displayModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.DisplayMode::asText, this.displayMode).withValues((TriggeredDisplayBlockEntity.DisplayMode[]) TriggeredDisplayBlockEntity.DisplayMode.values()).create(this.width / 2 - 154, 68, 300, 20, Component.empty(), (button, displayMode) -> {
 			this.displayMode = displayMode;
 		}));
 
-		this.toggleIsTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.on"), Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.off")).initially(this.isTriggered).omitKeyText().build(this.width / 2 - 154, 92, 300, 20, Component.empty(), (button, isTriggered) -> {
+		this.toggleIsTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.on"), Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.off"), this.isTriggered).create(this.width / 2 - 154, 92, 300, 20, Component.empty(), (button, isTriggered) -> {
 			this.isTriggered = isTriggered;
 		}));
 
 		this.displayOffsetXField = new EditBox(this.font, this.width / 2 - 154, 116, 50, 20, Component.empty());
 		this.displayOffsetXField.setMaxLength(128);
-		this.displayOffsetXField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getX()));
+		this.displayOffsetXField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().x()));
 		this.addWidget(this.displayOffsetXField);
 
 		this.displayOffsetYField = new EditBox(this.font, this.width / 2 - 100, 116, 50, 20, Component.empty());
 		this.displayOffsetYField.setMaxLength(128);
-		this.displayOffsetYField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getY()));
+		this.displayOffsetYField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().y()));
 		this.addWidget(this.displayOffsetYField);
 
 		this.displayOffsetZField = new EditBox(this.font, this.width / 2 - 46, 116, 50, 20, Component.empty());
 		this.displayOffsetZField.setMaxLength(128);
-		this.displayOffsetZField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().getZ()));
+		this.displayOffsetZField.setValue(Double.toString(this.triggeredDisplayBlock.getDisplayOffset().z()));
 		this.addWidget(this.displayOffsetZField);
 
 		this.displayYawField = new EditBox(this.font, this.width / 2 + 8, 116, 50, 20, Component.empty());
@@ -165,7 +165,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	@Override
 	protected void updateWidgets() {
 
-		this.billboardModeButton.visible = false;
+		this.billboardConstraintsButton.visible = false;
 		this.displayModeButton.visible = false;
 		this.toggleIsTriggeredButton.visible = false;
 		this.displayOffsetXField.setVisible(false);
@@ -185,7 +185,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 
 		if (this.screenPage == ScreenPage.COMMON) {
 
-			this.billboardModeButton.visible = true;
+			this.billboardConstraintsButton.visible = true;
 			this.displayModeButton.visible = true;
 			this.toggleIsTriggeredButton.visible = true;
 			this.displayOffsetXField.setVisible(true);
@@ -253,7 +253,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredDisplayBlockPacket(
 				this.triggeredDisplayBlock.getPos(),
-				this.billboardMode.asString(),
+				this.billboardConstraints.asString(),
 				this.displayMode.asString(),
 				this.isTriggered,
 				new Vec3(

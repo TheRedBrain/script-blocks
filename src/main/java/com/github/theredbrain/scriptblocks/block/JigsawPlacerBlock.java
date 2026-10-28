@@ -64,7 +64,7 @@ public class JigsawPlacerBlock extends RotatedBlockWithEntity implements GameMas
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity && player.canUseGameMasterBlocks()) {
 			((DuckPlayerEntityMixin) player).scriptblocks$openJigsawPlacerBlockScreen(jigsawPlacerBlockEntity);
-			return InteractionResult.success(world.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.HandlesUUIDList;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
@@ -8,6 +9,16 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
+import com.mojang.logging.LogUtils;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.ResolutionContext;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.phys.Vec2;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -250,7 +261,31 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	public Component getDisplayName(Level world) {
-		return Text.Serialization.fromLenientJson(this.displayNameString, world.registryAccess());
+//		return Text.Serialization.fromLenientJson(this.displayNameString, world.registryAccess());
+		Component component = Component.literal(this.displayNameString);
+		try {
+			if (world instanceof ServerLevel serverLevel) {
+				CommandSourceStack context = this.createCommandSourceStackForTeamComponentsResolution(serverLevel).withPermission(LevelBasedPermissionSet.GAMEMASTER);
+				return ComponentUtils.resolve(ResolutionContext.create(context), component);
+			}
+		} catch (Exception e) {
+			ScriptBlocks.LOGGER.warn("Failed to parse display entity text {}", component, e);
+		}
+		return Component.empty();
+	}
+
+	public CommandSourceStack createCommandSourceStackForTeamComponentsResolution(final ServerLevel level) {
+		return new CommandSourceStack(
+				CommandSource.NULL,
+				this.getBlockPos().getCenter(),
+				new Vec2(0, 0),
+				level,
+				LevelBasedPermissionSet.GAMEMASTER,
+				"",
+				Component.empty(),
+				level.getServer(),
+				null
+		);
 	}
 
 	public String getDisplayNameString() {
@@ -315,7 +350,17 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	public Component getPrefix(Level world) {
-		return Text.Serialization.fromLenientJson(this.prefixString, world.registryAccess());
+//		return Text.Serialization.fromLenientJson(this.prefixString, world.registryAccess());
+		Component component = Component.literal(this.prefixString);
+		try {
+			if (world instanceof ServerLevel serverLevel) {
+				CommandSourceStack context = this.createCommandSourceStackForTeamComponentsResolution(serverLevel).withPermission(LevelBasedPermissionSet.GAMEMASTER);
+				return ComponentUtils.resolve(ResolutionContext.create(context), component);
+			}
+		} catch (Exception e) {
+			ScriptBlocks.LOGGER.warn("Failed to parse display entity text {}", component, e);
+		}
+		return Component.empty();
 	}
 
 	public String getPrefixString() {
@@ -327,7 +372,17 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 	}
 
 	public Component getSuffix(Level world) {
-		return Text.Serialization.fromLenientJson(this.suffixString, world.registryAccess());
+//		return Text.Serialization.fromLenientJson(this.suffixString, world.registryAccess());
+		Component component = Component.literal(this.suffixString);
+		try {
+			if (world instanceof ServerLevel serverLevel) {
+				CommandSourceStack context = this.createCommandSourceStackForTeamComponentsResolution(serverLevel).withPermission(LevelBasedPermissionSet.GAMEMASTER);
+				return ComponentUtils.resolve(ResolutionContext.create(context), component);
+			}
+		} catch (Exception e) {
+			ScriptBlocks.LOGGER.warn("Failed to parse display entity text {}", component, e);
+		}
+		return Component.empty();
 	}
 
 	public String getSuffixString() {
@@ -403,11 +458,11 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 				}
 				this.team.setAllowFriendlyFire(this.friendlyFire);
 				this.team.setSeeFriendlyInvisibles(this.showFriendlyInvisibles);
-				Team.Visibility nametagVisibility = Team.Visibility.getRule(this.nametagVisibility);
+				Team.Visibility nametagVisibility = this.nametagVisibility;
 				this.team.setNameTagVisibility(nametagVisibility != null ? nametagVisibility : Team.Visibility.ALWAYS);
-				Team.Visibility deathMessageVisibility = Team.Visibility.getRule(this.deathMessageVisibility);
+				Team.Visibility deathMessageVisibility = this.deathMessageVisibility;
 				this.team.setDeathMessageVisibility(deathMessageVisibility != null ? deathMessageVisibility : Team.Visibility.ALWAYS);
-				Team.CollisionRule collisionRule = Team.CollisionRule.valueOf(this.collisionRule);
+				Team.CollisionRule collisionRule = this.collisionRule;
 				this.team.setCollisionRule(collisionRule != null ? collisionRule : Team.CollisionRule.ALWAYS);
 				this.team.setColor(this.teamColor);
 			}

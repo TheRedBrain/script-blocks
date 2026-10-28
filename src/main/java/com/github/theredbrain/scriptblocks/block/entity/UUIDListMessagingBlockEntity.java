@@ -207,7 +207,7 @@ public class UUIDListMessagingBlockEntity extends RotatedBlockEntity implements 
 						serverPlayerEntity.connection.send(new ClientboundSetSubtitleTextPacket(Component.translatable(this.subTitleLocalisationString)));
 						serverPlayerEntity.connection.send(new ClientboundSetTitleTextPacket(Component.translatable(this.messageLocalisationString)));
 					} else {
-						serverPlayerEntity.displayClientMessage(this.getMessageText(), this.messageMode == MessageMode.OVERLAY);
+						serverPlayerEntity.sendSystemMessage(this.getMessageText(), this.messageMode == MessageMode.OVERLAY);
 					}
 				}
 			}

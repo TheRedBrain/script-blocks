@@ -200,7 +200,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 			if (player.isShiftKeyDown() && bl) {
 				state = state.cycle(BlockStateProperties.OPEN);
 				world.setBlock(pos, state, 10);
-				return InteractionResult.success(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				BlockPos relayBlockPosOffset;
 				if (state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER) {
@@ -209,7 +209,7 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 					return stateDown.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.UPPER ? InteractionResult.PASS : stateDown.getBlock().useWithoutItem(stateDown, world, relayBlockPosOffset, player, hit);
 				} else if (bl) {
 					((DuckPlayerEntityMixin) player).scriptblocks$openCreativeTeleporterBlockScreen(teleporterBlockEntity);
-					return InteractionResult.success(world.isClientSide);
+					return InteractionResult.SUCCESS;
 				} else if (player instanceof ServerPlayer serverPlayerEntity) {
 					TeleporterBlockEntity.openNonCreativeScreen(world, serverPlayerEntity, pos, state, teleporterBlockEntity);
 				}

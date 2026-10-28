@@ -161,7 +161,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(newPVPArenaSettingsIdentifier);
 		if (identifier != null && this.level != null) {
-			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).get().value().get(identifier);
 			if (optionalPVPArenaSettingsReference.isPresent()) {
 				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
 			}
@@ -212,7 +212,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
 		if (identifier != null && this.level != null) {
-			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).getEntry(identifier);
+			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).get().value().get(identifier);
 			if (optionalPVPArenaSettingsReference.isPresent()) {
 				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
 			}
@@ -281,18 +281,18 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				}
 			}
 
-			Registry<DamageType> registry = level.registryAccess().get(Registries.DAMAGE_TYPE);
+			Registry<DamageType> registry = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE);
 
-			DamageSource damageSource = new DamageSource(registry.entryOf(ScriptBlocksDamageTypes.PVP_WINNING_DAMAGE_TYPE));
+			DamageSource damageSource = new DamageSource(registry.getOrThrow(ScriptBlocksDamageTypes.PVP_WINNING_DAMAGE_TYPE));
 
 			Iterator<UUID> iterator = this.playerUUIDSet.stream().iterator();
 			while (iterator.hasNext()) {
 				Player playerEntity = level.getPlayerByUUID(iterator.next());
 
-				if (playerEntity != null) {
+				if (playerEntity != null && this.level instanceof ServerLevel serverWorld) {
 
-					playerEntity.hurtServer(damageSource, 2048.0F);
-					if (!forceEnd && this.level instanceof ServerLevel serverWorld) {
+					playerEntity.hurtServer(serverWorld, damageSource, 2048.0F);
+					if (!forceEnd) {
 						serverWorld.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("hud.message.pvp_controller_block.player_won_match", playerEntity.getDisplayName()), false);
 					}
 				}
@@ -308,7 +308,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 	}
 
 	public static void tick(Level world, BlockPos pos, BlockState state, PVPControllerBlockEntity pvpControllerBlockEntity) {
-		if (!world.isClientSide && pvpControllerBlockEntity.matchIsActive) {
+		if (!world.isClientSide() && pvpControllerBlockEntity.matchIsActive) {
 			pvpControllerBlockEntity.matchTicker++;
 
 			if (pvpControllerBlockEntity.matchTicker > pvpControllerBlockEntity.matchDuration) {

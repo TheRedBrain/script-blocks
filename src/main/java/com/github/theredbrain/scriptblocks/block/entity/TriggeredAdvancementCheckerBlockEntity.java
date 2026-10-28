@@ -59,17 +59,17 @@ public class TriggeredAdvancementCheckerBlockEntity extends RotatedBlockEntity i
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		int x = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetX"), -48, 48);
-		int y = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetY"), -48, 48);
-		int z = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.firstTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBooleanOr("firstTriggeredBlockResets"));
+		int x = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetX", 0), -48, 48);
+		int y = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetY", 0), -48, 48);
+		int z = Mth.clamp(view.getIntOr("firstTriggeredBlockPositionOffsetZ", 0), -48, 48);
+		this.firstTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBooleanOr("firstTriggeredBlockResets", false));
 
-		x = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetX"), -48, 48);
-		y = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetY"), -48, 48);
-		z = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetZ"), -48, 48);
-		this.secondTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBooleanOr("secondTriggeredBlockResets"));
+		x = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetX", 0), -48, 48);
+		y = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetY", 0), -48, 48);
+		z = Mth.clamp(view.getIntOr("secondTriggeredBlockPositionOffsetZ", 0), -48, 48);
+		this.secondTriggeredBlock = new MutablePair<>(new BlockPos(x, y, z), view.getBooleanOr("secondTriggeredBlockResets", false));
 
-		this.checkedAdvancementIdentifier = view.getStringOr("checkedAdvancementIdentifier");
+		this.checkedAdvancementIdentifier = view.getStringOr("checkedAdvancementIdentifier", "");
 
 		super.loadAdditional(view);
 	}

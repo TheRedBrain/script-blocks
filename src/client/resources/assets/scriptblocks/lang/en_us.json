@@ -564,10 +564,10 @@
 	"gui.triggered_display_block.display_mode.text": "Display Mode: Text",
 	"gui.triggered_display_block.display_mode.item": "Display Mode: Item",
 
-	"gui.triggered_display_block.billboard_mode.fixed": "Billboard: Fixed",
-	"gui.triggered_display_block.billboard_mode.vertical": "Billboard: Vertical",
-	"gui.triggered_display_block.billboard_mode.horizontal": "Billboard: Horizontal",
-	"gui.triggered_display_block.billboard_mode.center": "Billboard: Center",
+	"gui.triggered_display_block.billboard_constraints.fixed": "Billboard: Fixed",
+	"gui.triggered_display_block.billboard_constraints.vertical": "Billboard: Vertical",
+	"gui.triggered_display_block.billboard_constraints.horizontal": "Billboard: Horizontal",
+	"gui.triggered_display_block.billboard_constraints.center": "Billboard: Center",
 
 	"gui.triggered_display_block.screen_page.common": "Common",
 	"gui.triggered_display_block.screen_page.block_mode": "Block Mode",
