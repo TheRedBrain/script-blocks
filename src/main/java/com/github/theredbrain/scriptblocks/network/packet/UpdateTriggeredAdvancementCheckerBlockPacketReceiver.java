@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredAdvancementChec
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,25 +34,25 @@ public class UpdateTriggeredAdvancementCheckerBlockPacketReceiver implements Ser
 
 		String checkedAdvancementIdentifier = payload.checkedAdvancementIdentifier();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(triggeredAdvancementCheckerBlockPosition);
-		BlockState blockState = world.getBlockState(triggeredAdvancementCheckerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(triggeredAdvancementCheckerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(triggeredAdvancementCheckerBlockPosition);
 
 		if (blockEntity instanceof TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlockEntity) {
 			triggeredAdvancementCheckerBlockEntity.setFirstTriggeredBlock(new MutablePair<>(firstTriggeredBlockPositionOffset, firstTriggeredBlockResets));
 			triggeredAdvancementCheckerBlockEntity.setSecondTriggeredBlock(new MutablePair<>(secondTriggeredBlockPositionOffset, secondTriggeredBlockResets));
 			if (!triggeredAdvancementCheckerBlockEntity.setCheckedAdvancementIdentifier(checkedAdvancementIdentifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("triggered_advancement_checker_block.checkedAdvancementIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			triggeredAdvancementCheckerBlockEntity.setChanged();
-			world.sendBlockUpdated(triggeredAdvancementCheckerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(triggeredAdvancementCheckerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

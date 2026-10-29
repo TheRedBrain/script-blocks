@@ -159,27 +159,28 @@ public abstract class MobEntityMixin extends LivingEntity implements DuckMobEnti
 	}
 
 	@Override
-	public void setHealth(float health) {
+	public void setHealth(final float health) {
 		float healthThreshold = this.scriptblocks$getBossHealthThreshold();
-		if (healthThreshold > BOSS_HEALTH_THRESHOLD_DEFAULT && health <= healthThreshold) {
-			health = healthThreshold;
+		float newHealth = health;
+		if (healthThreshold > BOSS_HEALTH_THRESHOLD_DEFAULT && newHealth <= healthThreshold) {
+			newHealth = healthThreshold;
 			BlockPos controllerBlockPos = this.scriptblocks$getControllerBlockPos();
-			if (this.getWorld() instanceof ServerLevel serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
-				BlockEntity blockEntity = serverWorld.getBlockEntity(controllerBlockPos);
+			if (this.level() instanceof ServerLevel serverLevel && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
+				BlockEntity blockEntity = serverLevel.getBlockEntity(controllerBlockPos);
 				if (blockEntity instanceof BossControllerBlockEntity bossControllerBlockEntity) {
 					BossControllerBlockEntity.bossReachedHealthThreshold(bossControllerBlockEntity, ((Mob) (Object) this));
 				}
 			}
 		}
-		super.setHealth(health);
+		super.setHealth(newHealth);
 	}
 
 	@Override
-	public void die(DamageSource damageSource) {
+	public void die(final DamageSource damageSource) {
 		super.die(damageSource);
 		BlockPos controllerBlockPos = this.scriptblocks$getControllerBlockPos();
-		if (this.getWorld() instanceof ServerLevel serverWorld && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
-			BlockEntity blockEntity = serverWorld.getBlockEntity(controllerBlockPos);
+		if (this.level() instanceof ServerLevel serverLevel && !Objects.equals(controllerBlockPos, CONTROLLER_BLOCK_POS_DEFAULT)) {
+			BlockEntity blockEntity = serverLevel.getBlockEntity(controllerBlockPos);
 			if (blockEntity instanceof TriggeredSpawnerBlockEntity triggeredSpawnerBlockEntity) {
 				triggeredSpawnerBlockEntity.onBoundEntityKilled();
 			}

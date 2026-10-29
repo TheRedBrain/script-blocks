@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEnt
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +25,7 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		BlockPos triggeredDisplayBlockPosition = payload.triggeredDisplayBlockPosition();
 
 		// common
-		TriggeredDisplayBlockEntity.BillboardMode billboardMode = TriggeredDisplayBlockEntity.BillboardMode.byName(payload.billboardModeString()).orElse(TriggeredDisplayBlockEntity.BillboardMode.FIXED);
+		TriggeredDisplayBlockEntity.BillboardConstraints billboardMode = TriggeredDisplayBlockEntity.BillboardConstraints.byName(payload.billboardModeString()).orElse(TriggeredDisplayBlockEntity.BillboardConstraints.FIXED);
 		TriggeredDisplayBlockEntity.DisplayMode displayMode = TriggeredDisplayBlockEntity.DisplayMode.byName(payload.displayModeString()).orElse(TriggeredDisplayBlockEntity.DisplayMode.TEXT);
 		boolean isTriggered = payload.isTriggered();
 		Vec3 displayOffset = payload.displayOffset();
@@ -39,10 +39,10 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		Byte textOpacity = payload.textOpacity();
 		int textBackground = payload.textBackground();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(triggeredDisplayBlockPosition);
-		BlockState blockState = world.getBlockState(triggeredDisplayBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(triggeredDisplayBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(triggeredDisplayBlockPosition);
 
 		if (blockEntity instanceof TriggeredDisplayBlockEntity triggeredDisplayBlockEntity) {
 			triggeredDisplayBlockEntity.reset();
@@ -57,9 +57,9 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 			triggeredDisplayBlockEntity.setLineWidth(lineWidth);
 			triggeredDisplayBlockEntity.setTextOpacity(textOpacity);
 			triggeredDisplayBlockEntity.setBackground(textBackground);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			triggeredDisplayBlockEntity.setChanged();
-			world.sendBlockUpdated(triggeredDisplayBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(triggeredDisplayBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

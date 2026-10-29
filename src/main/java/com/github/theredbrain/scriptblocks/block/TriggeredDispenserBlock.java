@@ -41,24 +41,12 @@ public class TriggeredDispenserBlock extends DispenserBlock {
 	}
 
 	@Override
-	protected void onStateReplaced(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
-		if (state.hasBlockEntity() && !state.is(newState.getBlock())) {
-			world.removeBlockEntity(pos);
-		}
-	}
-
-	@Override
-	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+	public InteractionResult useWithoutItem(final BlockState state, final Level level, final BlockPos pos, final Player player, final BlockHitResult hitResult) {
 		if (player.isCreative()) {
-			if (world.isClientSide) {
-				return InteractionResult.SUCCESS;
-			} else {
-				BlockEntity blockEntity = world.getBlockEntity(pos);
-				if (blockEntity instanceof TriggeredDispenserBlockEntity triggeredDispenserBlockEntity) {
-					player.openMenu(triggeredDispenserBlockEntity);
-				}
-				return InteractionResult.CONSUME;
+			if (!level.isClientSide() && level.getBlockEntity(pos) instanceof TriggeredDispenserBlockEntity triggeredDispenserBlockEntity) {
+				player.openMenu(triggeredDispenserBlockEntity);
 			}
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -71,7 +59,7 @@ public class TriggeredDispenserBlock extends DispenserBlock {
 			LOGGER.warn("Ignoring dispensing attempt for TriggeredDispenserBlock without matching block entity at {}", pos);
 		} else {
 			BlockSource blockPointer = new BlockSource(world, pos, state, dispenserBlockEntity);
-			int i = dispenserBlockEntity.getRandomSlot(world.random);
+			int i = dispenserBlockEntity.getRandomSlot(world.getRandom());
 			if (i < 0) {
 				world.levelEvent(LevelEvent.SOUND_DISPENSER_FAIL, pos, 0);
 				world.gameEvent(GameEvent.BLOCK_ACTIVATE, pos, GameEvent.Context.of(dispenserBlockEntity.getBlockState()));

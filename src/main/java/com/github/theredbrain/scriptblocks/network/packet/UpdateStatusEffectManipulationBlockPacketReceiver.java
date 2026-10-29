@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.StatusEffectManipulation
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,21 +34,21 @@ public class UpdateStatusEffectManipulationBlockPacketReceiver implements Server
 		int amplifierModification = payload.amplifierModification();
 		BlockPos uuidListHandlerPositionOffset = payload.uuidListHandlerPositionOffset();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(statusEffectManipulationBlockPosition);
-		BlockState blockState = world.getBlockState(statusEffectManipulationBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(statusEffectManipulationBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(statusEffectManipulationBlockPosition);
 
 		if (blockEntity instanceof StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
 			statusEffectManipulationBlockEntity.setManipulationMode(manipulationMode);
 			if (!statusEffectManipulationBlockEntity.setEffectIdentifier(effectIdentifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("status_effect_manipulation_block.effect_identifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("status_effect_manipulation_block.effect_identifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!statusEffectManipulationBlockEntity.setEffectAmplifier(effectAmplifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("status_effect_manipulation_block.effect_amplifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("status_effect_manipulation_block.effect_amplifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			statusEffectManipulationBlockEntity.setEffectDuration(effectDuration);
@@ -60,10 +60,10 @@ public class UpdateStatusEffectManipulationBlockPacketReceiver implements Server
 			statusEffectManipulationBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerPositionOffset);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			statusEffectManipulationBlockEntity.setChanged();
-			world.sendBlockUpdated(statusEffectManipulationBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(statusEffectManipulationBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

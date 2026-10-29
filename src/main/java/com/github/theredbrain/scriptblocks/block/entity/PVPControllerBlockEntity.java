@@ -11,6 +11,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +51,7 @@ import net.minecraft.world.scores.Scoreboard;
 public class PVPControllerBlockEntity extends RotatedBlockEntity implements Resetable, Triggerable {
 
 	private String pvpArenaSettingsIdentifier = "";
-	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions = new HashMap<>(Map.of());
+	private final HashMap<String, LevelData.RespawnData> respawnPositions = new HashMap<>(Map.of());
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 
@@ -173,11 +174,11 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		return false;
 	}
 
-	public HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> getRespawnPositions() {
+	public HashMap<String, LevelData.RespawnData> getRespawnPositions() {
 		return respawnPositions;
 	}
 
-	public void setRespawnPositions(HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> respawnPositions) {
+	public void setRespawnPositions(HashMap<String, LevelData.RespawnData> respawnPositions) {
 		this.respawnPositions.clear();
 		this.respawnPositions.putAll(respawnPositions);
 	}
@@ -208,7 +209,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 // endregion --- getter & setter ---
 
 	@Nullable
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTeamRespawnPosition(String teamId, boolean endOfBattle) {
+	public LevelData.RespawnData getTeamRespawnPosition(String teamId, boolean endOfBattle) {
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
 		if (identifier != null && this.level != null) {
@@ -393,8 +394,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> rotatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.respawnPositions.get(key), blockRotation);
-					this.respawnPositions.put(key, rotatedEntrance);
+					LevelData.RespawnData rotatedRespawnPosition = BlockRotationUtils.rotateSpawnPoint(this.respawnPositions.get(key), blockRotation);
+					this.respawnPositions.put(key, rotatedRespawnPosition);
 				}
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
@@ -407,8 +408,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), Mirror.FRONT_BACK);
-					this.respawnPositions.put(key, mirroredEntrance);
+					LevelData.RespawnData mirroredRespawnPosition = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), Mirror.FRONT_BACK);
+					this.respawnPositions.put(key, mirroredRespawnPosition);
 				}
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.FRONT_BACK));
@@ -421,8 +422,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 				int sideEntrancesSize = this.respawnPositions.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), Mirror.LEFT_RIGHT);
-					this.respawnPositions.put(key, mirroredEntrance);
+					LevelData.RespawnData mirroredRespawnPosition = BlockRotationUtils.mirrorSpawnPoint(this.respawnPositions.get(key), Mirror.LEFT_RIGHT);
+					this.respawnPositions.put(key, mirroredRespawnPosition);
 				}
 
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.LEFT_RIGHT));

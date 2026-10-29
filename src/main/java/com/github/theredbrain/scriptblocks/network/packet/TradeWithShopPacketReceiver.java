@@ -9,6 +9,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		List<Shop.Deal> dealsList = new ArrayList<>(List.of());
 		Shop shop = null;
 		if (!shopIdentifier.isEmpty()) {
-			Optional<Holder.Reference<Shop>> optionalShopReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.parse(shopIdentifier));
+			Optional<Holder.Reference<Shop>> optionalShopReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).get().value().get(Identifier.parse(shopIdentifier));
 			if (optionalShopReference.isPresent()) {
 				shop = optionalShopReference.get().value();
 			}

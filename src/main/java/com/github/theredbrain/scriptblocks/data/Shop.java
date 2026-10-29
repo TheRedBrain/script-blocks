@@ -37,8 +37,8 @@ public record Shop(
 	) {
 
 		public static final Codec<Deal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ItemStack.STRICT_CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
-				ItemStack.STRICT_CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
+				ItemStack.CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
+				ItemStack.CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
 				Codec.INT.optionalFieldOf("max_stock_count", 1).forGetter(x -> x.maxStockCount),
 				Codec.STRING.optionalFieldOf("unlock_advancement", "").forGetter(x -> x.unlockAdvancement),
 				Codec.STRING.optionalFieldOf("lock_advancement", "").forGetter(x -> x.lockAdvancement),

@@ -37,8 +37,8 @@ package com.github.theredbrain.scriptblocks.network.packet;
 //
 //		World world = serverPlayerEntity.getWorld();
 //
-//		BlockEntity blockEntity = world.getBlockEntity(dataAccessBlockPosition);
-//		BlockState blockState = world.getBlockState(dataAccessBlockPosition);
+//		BlockEntity blockEntity = serverLevel.getBlockEntity(dataAccessBlockPosition);
+//		BlockState blockState = serverLevel.getBlockState(dataAccessBlockPosition);
 //
 //		if (blockEntity instanceof DataAccessBlockEntity dataAccessBlockEntity) {
 //			dataAccessBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);

@@ -12,8 +12,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,12 +59,19 @@ public class InteractiveTriggerTorchBlock extends InteractiveTriggerBlock {
 	}
 
 	@Override // TODO allow floating torches?
-	protected BlockState getStateForNeighborUpdate(
-			BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos
+	protected BlockState updateShape(
+			final BlockState state,
+			final LevelReader level,
+			final ScheduledTickAccess ticks,
+			final BlockPos pos,
+			final Direction directionToNeighbour,
+			final BlockPos neighbourPos,
+			final BlockState neighbourState,
+			final RandomSource random
 	) {
-		return direction == Direction.DOWN && !this.canSurvive(state, world, pos)
+		return directionToNeighbour == Direction.DOWN && !this.canSurvive(state, level, pos)
 				? Blocks.AIR.defaultBlockState()
-				: super.updateShape(state, direction, neighborState, world, pos, neighborPos);
+				: super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
 	}
 
 	@Override

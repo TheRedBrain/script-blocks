@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredRNGBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,10 +41,10 @@ public class UpdateTriggeredRNGBlockPacketReceiver implements ServerPlayNetworki
 		boolean fallbackTriggeredBlockResets = payload.fallbackTriggeredBlockResets();
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = new ArrayList<>(payload.triggeredBlocks());
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(triggeredRNGBlockPosition);
-		BlockState blockState = world.getBlockState(triggeredRNGBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(triggeredRNGBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(triggeredRNGBlockPosition);
 
 		if (blockEntity instanceof TriggeredRNGBlockEntity triggeredRNGBlockEntity) {
 			triggeredRNGBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
@@ -58,9 +58,9 @@ public class UpdateTriggeredRNGBlockPacketReceiver implements ServerPlayNetworki
 			triggeredRNGBlockEntity.setRandomMaxValue(randomMaxValue);
 			triggeredRNGBlockEntity.setFallbackTriggeredBlock(new MutablePair<>(fallbackTriggeredBlockPosOffset, fallbackTriggeredBlockResets));
 			triggeredRNGBlockEntity.setTriggeredBlocks(triggeredBlocks);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			triggeredRNGBlockEntity.setChanged();
-			world.sendBlockUpdated(triggeredRNGBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(triggeredRNGBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

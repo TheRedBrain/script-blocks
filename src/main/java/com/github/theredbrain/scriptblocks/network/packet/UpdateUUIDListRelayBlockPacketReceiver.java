@@ -4,11 +4,13 @@ import com.github.theredbrain.scriptblocks.block.entity.UUIDListRelayBlockEntity
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
 import java.util.List;
 
 public class UpdateUUIDListRelayBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateUUIDListRelayBlockPacket> {
@@ -26,16 +28,16 @@ public class UpdateUUIDListRelayBlockPacketReceiver implements ServerPlayNetwork
 
 		List<BlockPos> uuidListProviderPositionOffsets = payload.uuidListProviderPositionOffsets();
 
-		Level world = serverPlayerEntity.level();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(uuidListRelayBlockPosition);
-		BlockState blockState = world.getBlockState(uuidListRelayBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(uuidListRelayBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(uuidListRelayBlockPosition);
 
 		if (blockEntity instanceof UUIDListRelayBlockEntity uuidListRelayBlockEntity) {
 			uuidListRelayBlockEntity.setUuidListHandlers(uuidListProviderPositionOffsets);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			uuidListRelayBlockEntity.setChanged();
-			world.sendBlockUpdated(uuidListRelayBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(uuidListRelayBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

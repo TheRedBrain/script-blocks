@@ -62,8 +62,8 @@ public class FixedStructurePlacement extends StructurePlacement {
 			while (var5.hasNext()) {
 				BlockPos pos = (BlockPos) var5.next();
 				if (!this.blacklist.contains(pos)) {
-					long x = (long) chunkPos.x * 16L;
-					long z = (long) chunkPos.z * 16L;
+					long x = (long) chunkPos.x() * 16L;
+					long z = (long) chunkPos.z() * 16L;
 					boolean bl1 = (long) pos.getX() >= x;
 					boolean bl2 = (long) pos.getX() <= x + 15L;
 					boolean bl3 = (long) pos.getZ() >= z;

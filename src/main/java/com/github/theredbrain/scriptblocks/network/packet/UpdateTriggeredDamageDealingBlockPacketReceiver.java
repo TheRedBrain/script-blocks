@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,10 +37,10 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 		String damageTypeIdentifierString = payload.damageTypeIdentifierString();
 		float damageAmount = payload.damageAmount();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(triggeredDamageDealingBlockPosition);
-		BlockState blockState = world.getBlockState(triggeredDamageDealingBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(triggeredDamageDealingBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(triggeredDamageDealingBlockPosition);
 
 		if (blockEntity instanceof TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
 			triggeredDamageDealingBlockEntity.setSelectionMode(selectionMode);
@@ -51,9 +51,9 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 			triggeredDamageDealingBlockEntity.setExceptionTagIdentifierString(exceptionTagIdentifierString);
 			triggeredDamageDealingBlockEntity.setDamageTypeIdentifierString(damageTypeIdentifierString);
 			triggeredDamageDealingBlockEntity.setDamageAmount(damageAmount);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			triggeredDamageDealingBlockEntity.setChanged();
-			world.sendBlockUpdated(triggeredDamageDealingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(triggeredDamageDealingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 
 	}

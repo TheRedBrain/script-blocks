@@ -57,7 +57,7 @@ public class HousingBlock extends RotatedBlockWithEntity {
 				DataAttachmentHelper.setCurrentHousingBlockPosition(player, Optional.of(housingBlockEntity.getBlockPos()));
 				((DuckPlayerEntityMixin) player).scriptblocks$openHousingScreen();
 			}
-			return InteractionResult.success(world.isClientSide());
+			return InteractionResult.SUCCESS;
 		}
 		return InteractionResult.PASS;
 	}

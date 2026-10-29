@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,30 +49,30 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 		AreaBlockEntity.TriggeredMode triggeredMode = AreaBlockEntity.TriggeredMode.byName(payload.triggeredMode()).orElse(AreaBlockEntity.TriggeredMode.CONTINUOUS);
 		int timer = payload.timer();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(areaBlockPosition);
-		BlockState blockState = world.getBlockState(areaBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(areaBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(areaBlockPosition);
 
 		if (blockEntity instanceof AreaBlockEntity areaBlockEntity) {
 			areaBlockEntity.reset();
 			areaBlockEntity.setShowArea(showArea);
 			if (!areaBlockEntity.setAreaDimensions(areaDimensions)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.areaDimensions.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("area_block.areaDimensions.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAreaPositionOffset(areaPositionOffset)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.areaPositionOffset.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("area_block.areaPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAppliedStatusEffectIdentifier(appliedStatusEffectIdentifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.appliedStatusEffectIdentifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("area_block.appliedStatusEffectIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!areaBlockEntity.setAppliedStatusEffectAmplifier(appliedStatusEffectAmplifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("area_block.appliedStatusEffectAmplifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("area_block.appliedStatusEffectAmplifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			areaBlockEntity.setAppliedStatusEffectAmbient(appliedStatusEffectAmbient);
@@ -92,10 +92,10 @@ public class UpdateAreaBlockPacketReceiver implements ServerPlayNetworking.PlayP
 			areaBlockEntity.setMaxTimer(timer);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			areaBlockEntity.setChanged();
-			world.sendBlockUpdated(areaBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(areaBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

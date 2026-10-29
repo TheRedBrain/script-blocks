@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -21,8 +22,10 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
@@ -99,23 +102,37 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		}
 	}
 
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
-		DoubleBlockHalf doubleBlockHalf = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
-		if (direction.getAxis() == Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
-			return neighborState.is(this) && neighborState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) != doubleBlockHalf ? state.setValue(HorizontalDirectionalBlock.FACING, neighborState.getValue(HorizontalDirectionalBlock.FACING)).setValue(BlockStateProperties.OPEN, neighborState.getValue(BlockStateProperties.OPEN)).setValue(BlockStateProperties.DOOR_HINGE, neighborState.getValue(BlockStateProperties.DOOR_HINGE)) : Blocks.AIR.defaultBlockState();
+	@Override
+	protected BlockState updateShape(
+			final BlockState state,
+			final LevelReader level,
+			final ScheduledTickAccess ticks,
+			final BlockPos pos,
+			final Direction directionToNeighbour,
+			final BlockPos neighbourPos,
+			final BlockState neighbourState,
+			final RandomSource random
+	) {
+		DoubleBlockHalf half = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
+		if (directionToNeighbour.getAxis() != Direction.Axis.Y || half == DoubleBlockHalf.LOWER != (directionToNeighbour == Direction.UP)) {
+			return half == DoubleBlockHalf.LOWER && directionToNeighbour == Direction.DOWN && !state.canSurvive(level, pos)
+					? Blocks.AIR.defaultBlockState()
+					: super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
 		} else {
-			return doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !state.canSurvive(world, pos) ? Blocks.AIR.defaultBlockState() : super.updateShape(state, direction, neighborState, world, pos, neighborPos);
+			return neighbourState.is(this) && neighbourState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) != half
+					? neighbourState.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, half)
+					: Blocks.AIR.defaultBlockState();
 		}
 	}
 
 	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
-		if (!world.isClientSide && (player.isCreative() || !player.hasCorrectToolForDrops(state))) {
+		if (!world.isClientSide() && (player.isCreative() || !player.hasCorrectToolForDrops(state))) {
 			onBreakInCreative(world, pos, state, player);
 		}
 
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
-			if (!world.isClientSide && !player.isCreative()) {
+			if (!world.isClientSide() && !player.isCreative()) {
 				Block block = state.getBlock();
 				ItemStack itemStack = block.getCloneItemStack(world, pos, state);
 				if (!itemStack.isEmpty()) {
@@ -159,32 +176,37 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		world.setBlock(pos.above(), state.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER), 3);
 	}
 
-	private DoorHingeSide getHinge(BlockPlaceContext ctx) {
-		Level blockView = ctx.getLevel();
-		BlockPos blockPos = ctx.getClickedPos();
-		Direction direction = ctx.getHorizontalDirection();
-		BlockPos blockPos2 = blockPos.above();
-		Direction direction2 = direction.getCounterClockWise();
-		BlockPos blockPos3 = blockPos.relative(direction2);
-		BlockState blockState = blockView.getBlockState(blockPos3);
-		BlockPos blockPos4 = blockPos2.relative(direction2);
-		BlockState blockState2 = blockView.getBlockState(blockPos4);
-		Direction direction3 = direction.getClockWise();
-		BlockPos blockPos5 = blockPos.relative(direction3);
-		BlockState blockState3 = blockView.getBlockState(blockPos5);
-		BlockPos blockPos6 = blockPos2.relative(direction3);
-		BlockState blockState4 = blockView.getBlockState(blockPos6);
-		int i = (blockState.isCollisionShapeFullBlock(blockView, blockPos3) ? -1 : 0) + (blockState2.isCollisionShapeFullBlock(blockView, blockPos4) ? -1 : 0) + (blockState3.isCollisionShapeFullBlock(blockView, blockPos5) ? 1 : 0) + (blockState4.isCollisionShapeFullBlock(blockView, blockPos6) ? 1 : 0);
-		boolean bl = blockState.is(this) && blockState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
-		boolean bl2 = blockState3.is(this) && blockState3.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
-		if ((!bl || bl2) && i <= 0) {
-			if ((!bl2 || bl) && i >= 0) {
-				int j = direction.getStepX();
-				int k = direction.getStepZ();
-				Vec3 vec3d = ctx.getClickLocation();
-				double d = vec3d.x - (double) blockPos.getX();
-				double e = vec3d.z - (double) blockPos.getZ();
-				return (j >= 0 || !(e < 0.5)) && (j <= 0 || !(e > 0.5)) && (k >= 0 || !(d > 0.5)) && (k <= 0 || !(d < 0.5)) ? DoorHingeSide.LEFT : DoorHingeSide.RIGHT;
+	private DoorHingeSide getHinge(final BlockPlaceContext context) {
+		BlockGetter level = context.getLevel();
+		BlockPos pos = context.getClickedPos();
+		Direction placeDirection = context.getHorizontalDirection();
+		BlockPos abovePos = pos.above();
+		Direction leftDirection = placeDirection.getCounterClockWise();
+		BlockPos leftPos = pos.relative(leftDirection);
+		BlockState leftState = level.getBlockState(leftPos);
+		BlockPos leftAbovePos = abovePos.relative(leftDirection);
+		BlockState leftAboveState = level.getBlockState(leftAbovePos);
+		Direction rightDirection = placeDirection.getClockWise();
+		BlockPos rightPos = pos.relative(rightDirection);
+		BlockState rightState = level.getBlockState(rightPos);
+		BlockPos rightAbovePos = abovePos.relative(rightDirection);
+		BlockState rightAboveState = level.getBlockState(rightAbovePos);
+		int solidBlockBalance = (leftState.isCollisionShapeFullBlock(level, leftPos) ? -1 : 0)
+				+ (leftAboveState.isCollisionShapeFullBlock(level, leftAbovePos) ? -1 : 0)
+				+ (rightState.isCollisionShapeFullBlock(level, rightPos) ? 1 : 0)
+				+ (rightAboveState.isCollisionShapeFullBlock(level, rightAbovePos) ? 1 : 0);
+		boolean doorLeft = leftState.is(this) && leftState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
+		boolean doorRight = rightState.is(this) && rightState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER;
+		if ((!doorLeft || doorRight) && solidBlockBalance <= 0) {
+			if ((!doorRight || doorLeft) && solidBlockBalance >= 0) {
+				int stepX = placeDirection.getStepX();
+				int stepZ = placeDirection.getStepZ();
+				Vec3 clickLocation = context.getClickLocation();
+				double clickX = clickLocation.x - pos.getX();
+				double clickZ = clickLocation.z - pos.getZ();
+				return (stepX >= 0 || !(clickZ < 0.5)) && (stepX <= 0 || !(clickZ > 0.5)) && (stepZ >= 0 || !(clickX > 0.5)) && (stepZ <= 0 || !(clickX < 0.5))
+						? DoorHingeSide.LEFT
+						: DoorHingeSide.RIGHT;
 			} else {
 				return DoorHingeSide.LEFT;
 			}

@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.entity.passive;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -14,15 +15,19 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerData;
 import net.minecraft.world.entity.npc.villager.VillagerDataHolder;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.npc.villager.VillagerType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.slf4j.Logger;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class FakeVillagerEntity extends Mob implements VillagerDataHolder {
 	private static final Logger LOGGER = LogUtils.getLogger();
@@ -107,30 +112,25 @@ public class FakeVillagerEntity extends Mob implements VillagerDataHolder {
 		super.defineSynchedData(builder);
 		builder.define(NO_INTERACTION_DISPLAY_TIME_LEFT, 0);
 		builder.define(HEAD_ROLLING_TIME_LEFT, 0);
-		builder.define(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
+		builder.define(VILLAGER_DATA, new VillagerData(BuiltInRegistries.VILLAGER_TYPE.getOrThrow(VillagerType.PLAINS), BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE), 1));
 	}
 
 	@Override
-	public void writeCustomDataToNbt(CompoundTag nbt) {
-		super.writeCustomDataToNbt(nbt);
+	protected void addAdditionalSaveData(final ValueOutput output) {
+		super.addAdditionalSaveData(output);
 
-		DataResult<Tag> var10000 = VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData());
-		Logger var10001 = LOGGER;
-		Objects.requireNonNull(var10001);
-		var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> {
-			nbt.put("VillagerData", nbtElement);
-		});
+		output.store("villager_data", VillagerData.CODEC, this.getVillagerData());
 
 	}
 
 	@Override
-	public void readCustomDataFromNbt(CompoundTag nbt) {
-		super.readCustomDataFromNbt(nbt);
-		if (nbt.contains("VillagerData", Tag.TAG_COMPOUND)) {
-			DataResult<VillagerData> dataResult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, nbt.get("VillagerData")));
-			Logger var10001 = LOGGER;
-			Objects.requireNonNull(var10001);
-			dataResult.resultOrPartial(var10001::error).ifPresent(this::setVillagerData);
+	protected void readAdditionalSaveData(final ValueInput input) {
+		super.readAdditionalSaveData(input);
+
+		Optional<VillagerData> villagerDataOptional = input.read("villager_data", VillagerData.CODEC);
+		if (villagerDataOptional.isPresent()) {
+			VillagerData villagerData = villagerDataOptional.orElseGet(Villager::createDefaultVillagerData);
+			this.setVillagerData(villagerData);
 		}
 	}
 
@@ -148,7 +148,7 @@ public class FakeVillagerEntity extends Mob implements VillagerDataHolder {
 	@Override
 	protected InteractionResult mobInteract(Player player, InteractionHand hand) {
 		InteractionResult actionResult = super.mobInteract(player, hand);
-		if (this.getNoInteractionDisplayTimeLeft() <= 0 && !this.getWorld().isClient) {
+		if (this.getNoInteractionDisplayTimeLeft() <= 0 && !this.level().isClientSide()) {
 			this.setNoInteractionDisplayTimeLeft(30);
 			if (actionResult.consumesAction()) {
 				this.makeSound(SoundEvents.VILLAGER_YES);
@@ -181,7 +181,7 @@ public class FakeVillagerEntity extends Mob implements VillagerDataHolder {
 	}
 
 	public VillagerData getVillagerData() {
-		return (VillagerData) this.entityData.get(VILLAGER_DATA);
+		return this.entityData.get(VILLAGER_DATA);
 	}
 
 	static {

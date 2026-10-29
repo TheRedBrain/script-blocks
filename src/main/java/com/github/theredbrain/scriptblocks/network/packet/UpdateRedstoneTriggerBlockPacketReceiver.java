@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.RedstoneTriggerBlockEnti
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,16 +28,16 @@ public class UpdateRedstoneTriggerBlockPacketReceiver implements ServerPlayNetwo
 
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(redstoneTriggerBlockPosition);
-		BlockState blockState = world.getBlockState(redstoneTriggerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(redstoneTriggerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(redstoneTriggerBlockPosition);
 
 		if (blockEntity instanceof RedstoneTriggerBlockEntity redstoneTriggerBlockEntity) {
 			redstoneTriggerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			redstoneTriggerBlockEntity.setChanged();
-			world.sendBlockUpdated(redstoneTriggerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(redstoneTriggerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

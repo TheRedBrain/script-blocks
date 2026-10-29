@@ -111,171 +111,169 @@ public class ScriptBlocksNetworkPackets {
 
 	public static void init() {
 
-//		PayloadTypeRegistry.configurationS2C().register(Packets.SpellRegistrySync.PACKET_ID, Packets.SpellRegistrySync.CODEC);
-
-		PayloadTypeRegistry.playC2S().register(UpdateDataWritingBlockPacket.PACKET_ID, UpdateDataWritingBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateDataWritingBlockPacket.PACKET_ID, UpdateDataWritingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataWritingBlockPacket.PACKET_ID, new UpdateDataWritingBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateCopyDataBlockPacket.PACKET_ID, UpdateCopyDataBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateCopyDataBlockPacket.PACKET_ID, UpdateCopyDataBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateCopyDataBlockPacket.PACKET_ID, new UpdateCopyDataBlockPacketReceiver());
 
-//		PayloadTypeRegistry.playC2S().register(UpdateDataAccessBlockPacket.PACKET_ID, UpdateDataAccessBlockPacket.PACKET_CODEC);
+//		PayloadTypeRegistry.serverboundPlay().register(UpdateDataAccessBlockPacket.PACKET_ID, UpdateDataAccessBlockPacket.PACKET_CODEC);
 //		ServerPlayNetworking.registerGlobalReceiver(UpdateDataAccessBlockPacket.PACKET_ID, new UpdateDataAccessBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateDataRelayBlockPacket.PACKET_ID, UpdateDataRelayBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateDataRelayBlockPacket.PACKET_ID, UpdateDataRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataRelayBlockPacket.PACKET_ID, new UpdateDataRelayBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateDataModificationBlockPacket.PACKET_ID, UpdateDataModificationBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateDataModificationBlockPacket.PACKET_ID, UpdateDataModificationBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataModificationBlockPacket.PACKET_ID, new UpdateDataModificationBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateDataSavingBlockPacket.PACKET_ID, UpdateDataSavingBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateDataSavingBlockPacket.PACKET_ID, UpdateDataSavingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDataSavingBlockPacket.PACKET_ID, new UpdateDataSavingBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(AddStatusEffectPacket.PACKET_ID, AddStatusEffectPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(AddStatusEffectPacket.PACKET_ID, AddStatusEffectPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(AddStatusEffectPacket.PACKET_ID, new AddStatusEffectPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateHousingBlockAdventurePacket.PACKET_ID, UpdateHousingBlockAdventurePacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateHousingBlockAdventurePacket.PACKET_ID, UpdateHousingBlockAdventurePacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateHousingBlockAdventurePacket.PACKET_ID, new UpdateHousingBlockAdventurePacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateHousingBlockCreativePacket.PACKET_ID, UpdateHousingBlockCreativePacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateHousingBlockCreativePacket.PACKET_ID, UpdateHousingBlockCreativePacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateHousingBlockCreativePacket.PACKET_ID, new UpdateHousingBlockCreativePacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(SetHousingBlockOwnerPacket.PACKET_ID, SetHousingBlockOwnerPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SetHousingBlockOwnerPacket.PACKET_ID, SetHousingBlockOwnerPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SetHousingBlockOwnerPacket.PACKET_ID, new SetHousingBlockOwnerPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(ResetHouseHousingBlockPacket.PACKET_ID, ResetHouseHousingBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ResetHouseHousingBlockPacket.PACKET_ID, ResetHouseHousingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(ResetHouseHousingBlockPacket.PACKET_ID, new ResetHouseHousingBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateJigsawPlacerBlockPacket.PACKET_ID, UpdateJigsawPlacerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateJigsawPlacerBlockPacket.PACKET_ID, UpdateJigsawPlacerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateJigsawPlacerBlockPacket.PACKET_ID, new UpdateJigsawPlacerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateRedstoneTriggerBlockPacket.PACKET_ID, UpdateRedstoneTriggerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateRedstoneTriggerBlockPacket.PACKET_ID, UpdateRedstoneTriggerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateRedstoneTriggerBlockPacket.PACKET_ID, new UpdateRedstoneTriggerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateRelayTriggerBlockPacket.PACKET_ID, UpdateRelayTriggerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateRelayTriggerBlockPacket.PACKET_ID, UpdateRelayTriggerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateRelayTriggerBlockPacket.PACKET_ID, new UpdateRelayTriggerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredCounterBlockPacket.PACKET_ID, UpdateTriggeredCounterBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredCounterBlockPacket.PACKET_ID, UpdateTriggeredCounterBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredCounterBlockPacket.PACKET_ID, new UpdateTriggeredCounterBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateDelayTriggerBlockPacket.PACKET_ID, UpdateDelayTriggerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateDelayTriggerBlockPacket.PACKET_ID, UpdateDelayTriggerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDelayTriggerBlockPacket.PACKET_ID, new UpdateDelayTriggerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredDamageDealingBlockPacket.PACKET_ID, UpdateTriggeredDamageDealingBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredDamageDealingBlockPacket.PACKET_ID, UpdateTriggeredDamageDealingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredDamageDealingBlockPacket.PACKET_ID, new UpdateTriggeredDamageDealingBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredDisplayBlockPacket.PACKET_ID, UpdateTriggeredDisplayBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredDisplayBlockPacket.PACKET_ID, UpdateTriggeredDisplayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredDisplayBlockPacket.PACKET_ID, new UpdateTriggeredDisplayBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredEntityRemoverBlockPacket.PACKET_ID, UpdateTriggeredEntityRemoverBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredEntityRemoverBlockPacket.PACKET_ID, UpdateTriggeredEntityRemoverBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredEntityRemoverBlockPacket.PACKET_ID, new UpdateTriggeredEntityRemoverBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredRNGBlockPacket.PACKET_ID, UpdateTriggeredRNGBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredRNGBlockPacket.PACKET_ID, UpdateTriggeredRNGBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredRNGBlockPacket.PACKET_ID, new UpdateTriggeredRNGBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateInteractiveLootBlockPacket.PACKET_ID, UpdateInteractiveLootBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateInteractiveLootBlockPacket.PACKET_ID, UpdateInteractiveLootBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveLootBlockPacket.PACKET_ID, new UpdateInteractiveLootBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateInteractiveTriggerBlockPacket.PACKET_ID, UpdateInteractiveTriggerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateInteractiveTriggerBlockPacket.PACKET_ID, UpdateInteractiveTriggerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateInteractiveTriggerBlockPacket.PACKET_ID, new UpdateInteractiveTriggerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateUseRelayBlockPacket.PACKET_ID, UpdateUseRelayBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateUseRelayBlockPacket.PACKET_ID, UpdateUseRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayBlockPacket.PACKET_ID, new UpdateUseRelayBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateUseRelayChestBlockPacket.PACKET_ID, UpdateUseRelayChestBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateUseRelayChestBlockPacket.PACKET_ID, UpdateUseRelayChestBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUseRelayChestBlockPacket.PACKET_ID, new UpdateUseRelayChestBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(LeaveHouseFromHousingScreenPacket.PACKET_ID, LeaveHouseFromHousingScreenPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(LeaveHouseFromHousingScreenPacket.PACKET_ID, LeaveHouseFromHousingScreenPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(LeaveHouseFromHousingScreenPacket.PACKET_ID, new LeaveHouseFromHousingScreenPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateMimicBlockPacket.PACKET_ID, UpdateMimicBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateMimicBlockPacket.PACKET_ID, UpdateMimicBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateMimicBlockPacket.PACKET_ID, new UpdateMimicBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdatePlayerDetectorBlockPacket.PACKET_ID, UpdatePlayerDetectorBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdatePlayerDetectorBlockPacket.PACKET_ID, UpdatePlayerDetectorBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdatePlayerDetectorBlockPacket.PACKET_ID, new UpdatePlayerDetectorBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdatePVPControllerBlockPacket.PACKET_ID, UpdatePVPControllerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdatePVPControllerBlockPacket.PACKET_ID, UpdatePVPControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdatePVPControllerBlockPacket.PACKET_ID, new UpdatePVPControllerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateBossControllerBlockPacket.PACKET_ID, UpdateBossControllerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateBossControllerBlockPacket.PACKET_ID, UpdateBossControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateBossControllerBlockPacket.PACKET_ID, new UpdateBossControllerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, UpdateTriggeredSpawnerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, UpdateTriggeredSpawnerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredSpawnerBlockPacket.PACKET_ID, new UpdateTriggeredSpawnerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_ID, UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_ID, UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredVillagerSpawnerBlockPacket.PACKET_ID, new UpdateTriggeredVillagerSpawnerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateLocationControlBlockPacket.PACKET_ID, UpdateLocationControlBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateLocationControlBlockPacket.PACKET_ID, UpdateLocationControlBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateLocationControlBlockPacket.PACKET_ID, new UpdateLocationControlBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateEntranceDelegationBlockPacket.PACKET_ID, UpdateEntranceDelegationBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateEntranceDelegationBlockPacket.PACKET_ID, UpdateEntranceDelegationBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateEntranceDelegationBlockPacket.PACKET_ID, new UpdateEntranceDelegationBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateAreaBlockPacket.PACKET_ID, UpdateAreaBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateAreaBlockPacket.PACKET_ID, UpdateAreaBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaBlockPacket.PACKET_ID, new UpdateAreaBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateAreaFillerBlockPacket.PACKET_ID, UpdateAreaFillerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateAreaFillerBlockPacket.PACKET_ID, UpdateAreaFillerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateAreaFillerBlockPacket.PACKET_ID, new UpdateAreaFillerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredBeaconBlockPacket.PACKET_ID, UpdateTriggeredBeaconBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredBeaconBlockPacket.PACKET_ID, UpdateTriggeredBeaconBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredBeaconBlockPacket.PACKET_ID, new UpdateTriggeredBeaconBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeredAdvancementCheckerBlockPacket.PACKET_ID, new UpdateTriggeredAdvancementCheckerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateSpawnPointDelegationBlockPacket.PACKET_ID, UpdateSpawnPointDelegationBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateSpawnPointDelegationBlockPacket.PACKET_ID, UpdateSpawnPointDelegationBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateSpawnPointDelegationBlockPacket.PACKET_ID, new UpdateSpawnPointDelegationBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTeamControllerBlockPacket.PACKET_ID, UpdateTeamControllerBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTeamControllerBlockPacket.PACKET_ID, UpdateTeamControllerBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTeamControllerBlockPacket.PACKET_ID, new UpdateTeamControllerBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, UpdateStatusEffectManipulationBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, UpdateStatusEffectManipulationBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateStatusEffectManipulationBlockPacket.PACKET_ID, new UpdateStatusEffectManipulationBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, UpdateTriggeringRespawnAnchorBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, UpdateTriggeringRespawnAnchorBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTriggeringRespawnAnchorBlockPacket.PACKET_ID, new UpdateTriggeringRespawnAnchorBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_ID, UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_ID, UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTwoAreasPlayerDetectorBlockPacket.PACKET_ID, new UpdateTwoAreasPlayerDetectorBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateUUIDListMessagingBlockPacket.PACKET_ID, UpdateUUIDListMessagingBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateUUIDListMessagingBlockPacket.PACKET_ID, UpdateUUIDListMessagingBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUUIDListMessagingBlockPacket.PACKET_ID, new UpdateUUIDListMessagingBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(UpdateUUIDListRelayBlockPacket.PACKET_ID, UpdateUUIDListRelayBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateUUIDListRelayBlockPacket.PACKET_ID, UpdateUUIDListRelayBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateUUIDListRelayBlockPacket.PACKET_ID, new UpdateUUIDListRelayBlockPacketReceiver());
 
 		// --- teleporter packets
 
-		PayloadTypeRegistry.playC2S().register(UpdateTeleporterBlockPacket.PACKET_ID, UpdateTeleporterBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateTeleporterBlockPacket.PACKET_ID, UpdateTeleporterBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateTeleporterBlockPacket.PACKET_ID, new UpdateTeleporterBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(SetManualResetLocationControlBlockPacket.PACKET_ID, SetManualResetLocationControlBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SetManualResetLocationControlBlockPacket.PACKET_ID, SetManualResetLocationControlBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(SetManualResetLocationControlBlockPacket.PACKET_ID, new SetManualResetLocationControlBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(TeleportFromTeleporterBlockPacket.PACKET_ID, TeleportFromTeleporterBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(TeleportFromTeleporterBlockPacket.PACKET_ID, TeleportFromTeleporterBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(TeleportFromTeleporterBlockPacket.PACKET_ID, new TeleportFromTeleporterBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(TeleportToTeamPacket.PACKET_ID, TeleportToTeamPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(TeleportToTeamPacket.PACKET_ID, TeleportToTeamPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(TeleportToTeamPacket.PACKET_ID, new TeleportToTeamPacketReceiver());
 
 		// --- shop packets
 
-		PayloadTypeRegistry.playC2S().register(UpdateShopBlockPacket.PACKET_ID, UpdateShopBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateShopBlockPacket.PACKET_ID, UpdateShopBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateShopBlockPacket.PACKET_ID, new UpdateShopBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(TradeWithShopPacket.PACKET_ID, TradeWithShopPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(TradeWithShopPacket.PACKET_ID, TradeWithShopPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(TradeWithShopPacket.PACKET_ID, new TradeWithShopPacketReceiver());
 
 		// --- dialogue packets
 
-		PayloadTypeRegistry.playC2S().register(UpdateDialogueBlockPacket.PACKET_ID, UpdateDialogueBlockPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(UpdateDialogueBlockPacket.PACKET_ID, UpdateDialogueBlockPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDialogueBlockPacket.PACKET_ID, new UpdateDialogueBlockPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(OpenDialogueScreenPacket.PACKET_ID, OpenDialogueScreenPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(OpenDialogueScreenPacket.PACKET_ID, OpenDialogueScreenPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(OpenDialogueScreenPacket.PACKET_ID, new OpenDialogueScreenPacketReceiver());
 
-		PayloadTypeRegistry.playC2S().register(DialogueAnswerPacket.PACKET_ID, DialogueAnswerPacket.PACKET_CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(DialogueAnswerPacket.PACKET_ID, DialogueAnswerPacket.PACKET_CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(DialogueAnswerPacket.PACKET_ID, new DialogueAnswerPacketReceiver());
 	}
 }

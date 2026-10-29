@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,14 +65,18 @@ public class RedstoneTriggerBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public void neighborUpdate(BlockState state, Level world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify) {
-		boolean bl = world.hasNeighborSignal(pos) || world.hasNeighborSignal(pos.above());
-		boolean bl2 = state.getValue(BlockStateProperties.TRIGGERED);
-		if (bl && !bl2) {
-			world.scheduleTick(pos, this, 4);
-			world.setBlock(pos, state.setValue(BlockStateProperties.TRIGGERED, true), Block.UPDATE_INVISIBLE);
-		} else if (!bl && bl2) {
-			world.setBlock(pos, state.setValue(BlockStateProperties.TRIGGERED, false), Block.UPDATE_INVISIBLE);
+	protected void neighborChanged(
+			final BlockState state, final Level level, final BlockPos pos, final Block block, final @org.jspecify.annotations.Nullable Orientation orientation, final boolean movedByPiston
+	) {
+		if (!level.isClientSide()) {
+			boolean bl = level.hasNeighborSignal(pos);
+			boolean bl2 = state.getValue(BlockStateProperties.TRIGGERED);
+			if (bl && !bl2) {
+				level.scheduleTick(pos, this, 4);
+				level.setBlock(pos, state.setValue(BlockStateProperties.TRIGGERED, true), Block.UPDATE_ALL);
+			} else if (!bl && bl2) {
+				level.setBlock(pos, state.setValue(BlockStateProperties.TRIGGERED, false), Block.UPDATE_ALL);
+			}
 		}
 	}
 

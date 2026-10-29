@@ -39,7 +39,7 @@ public class DebuggingHelper {
 			ScriptBlocks.LOGGER.info("[" + ScriptBlocks.MOD_ID + "] [info]: " + message);
 		}
 		if (ScriptBlocksConfigs.SERVER_CONFIG.enable_debug_messages && playerEntity != null) {
-			playerEntity.displayClientMessage(Component.nullToEmpty("[" + ScriptBlocks.MOD_ID + "] [info]: " + message));
+			playerEntity.sendOverlayMessage(Component.nullToEmpty("[" + ScriptBlocks.MOD_ID + "] [info]: " + message));
 		}
 	}
 }

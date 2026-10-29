@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEnti
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -50,10 +51,10 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 		int resetAreaMaxX = payload.resetAreaMaxX();
 		int resetAreaMaxZ = payload.resetAreaMaxZ();
 
-		Level world = serverPlayerEntity.level();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
-		BlockState blockState = world.getBlockState(locationControlBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(locationControlBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(locationControlBlockPosition);
 
 		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
 			locationControlBlockEntity.reset();
@@ -70,7 +71,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 
 			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			locationControlBlockEntity.setChanged();
-			world.sendBlockUpdated(locationControlBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(locationControlBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

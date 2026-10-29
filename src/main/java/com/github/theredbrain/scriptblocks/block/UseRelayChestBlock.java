@@ -104,26 +104,26 @@ public class UseRelayChestBlock extends RotatedBlockWithEntity {
 			} else {
 				if (!state.getValue(BlockStateProperties.OPEN)) {
 					if (useRelayChestBlockEntity.canTrigger(player)) {
-						if (!useRelayChestBlockEntity.getUnlockedMessage().isEmpty() && !world.isClientSide) {
-							player.displayClientMessage(Component.translatable(useRelayChestBlockEntity.getUnlockedMessage()), true);
+						if (!useRelayChestBlockEntity.getUnlockedMessage().isEmpty() && !world.isClientSide()) {
+							player.sendOverlayMessage(Component.translatable(useRelayChestBlockEntity.getUnlockedMessage()));
 						}
-						if (!useRelayChestBlockEntity.getUnlockedSound().isEmpty() && !world.isClientSide) {
+						if (!useRelayChestBlockEntity.getUnlockedSound().isEmpty() && !world.isClientSide()) {
 							SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.getValue(Identifier.parse(useRelayChestBlockEntity.getUnlockedSound()));
 							if (soundEvent != null) {
-								world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+								world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundSource.BLOCKS, 0.5F, world.getRandom().nextFloat() * 0.1F + 0.9F);
 							}
 						}
 						useRelayChestBlockEntity.tryToConsumeKeyItem(player);
 						world.setBlock(pos, state.setValue(BlockStateProperties.OPEN, true), Block.UPDATE_CLIENTS);
 						useRelayChestBlockEntity.trigger();
 					} else {
-						if (!useRelayChestBlockEntity.getLockedMessage().isEmpty() && !world.isClientSide) {
-							player.displayClientMessage(Component.translatable(useRelayChestBlockEntity.getLockedMessage()), true);
+						if (!useRelayChestBlockEntity.getLockedMessage().isEmpty() && !world.isClientSide()) {
+							player.sendOverlayMessage(Component.translatable(useRelayChestBlockEntity.getLockedMessage()));
 						}
-						if (!useRelayChestBlockEntity.getLockedSound().isEmpty() && !world.isClientSide) {
+						if (!useRelayChestBlockEntity.getLockedSound().isEmpty() && !world.isClientSide()) {
 							SoundEvent soundEvent = BuiltInRegistries.SOUND_EVENT.getValue(Identifier.parse(useRelayChestBlockEntity.getLockedSound()));
 							if (soundEvent != null) {
-								world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundSource.BLOCKS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+								world.playSound(null, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, soundEvent, SoundSource.BLOCKS, 0.5F, world.getRandom().nextFloat() * 0.1F + 0.9F);
 							}
 						}
 					}

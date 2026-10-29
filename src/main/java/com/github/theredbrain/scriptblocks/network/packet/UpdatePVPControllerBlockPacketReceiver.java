@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.PVPControllerBlockEntity
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,17 +42,17 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 
 		String matchDurationDataIdentifier = payload.matchDurationDataIdentifier();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(pvpControllerBlockPosition);
-		BlockState blockState = world.getBlockState(pvpControllerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(pvpControllerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(pvpControllerBlockPosition);
 
 		if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
 			pvpControllerBlockEntity.reset();
 			if (!pvpControllerBlockEntity.setPVPArenaSettingsIdentifier(pvpArenaSettingsIdentifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("pvp_controller_block.pvpArenaSettingsIdentifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("pvp_controller_block.pvpArenaSettingsIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 			pvpControllerBlockEntity.setRespawnPositions(sideEntrances);
@@ -61,10 +61,10 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 			pvpControllerBlockEntity.setMatchDurationDataIdentifier(matchDurationDataIdentifier);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			pvpControllerBlockEntity.setChanged();
-			world.sendBlockUpdated(pvpControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(pvpControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

@@ -103,7 +103,7 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
-			if (!world.isClientSide && !player.isCreative()) {
+			if (!world.isClientSide() && !player.isCreative()) {
 				Block block = state.getBlock();
 				ItemStack itemStack = block.getCloneItemStack(world, pos, state);
 				if (!itemStack.isEmpty()) {

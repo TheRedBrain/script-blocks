@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,10 +43,10 @@ public class UpdateTwoAreasPlayerDetectorBlockPacketReceiver implements ServerPl
 		BlockPos onEnteringFirstAreaUUIDListHandler = payload.onEnteringFirstAreaUUIDListHandler();
 		BlockPos onEnteringSecondAreaUUIDListHandler = payload.onEnteringSecondAreaUUIDListHandler();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(twoAreasPlayerDetectorBlockPosition);
-		BlockState blockState = world.getBlockState(twoAreasPlayerDetectorBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(twoAreasPlayerDetectorBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(twoAreasPlayerDetectorBlockPosition);
 
 		if (blockEntity instanceof TwoAreasPlayerDetectorBlockEntity twoAreasPlayerDetectorBlock) {
 			twoAreasPlayerDetectorBlock.reset();
@@ -61,9 +61,9 @@ public class UpdateTwoAreasPlayerDetectorBlockPacketReceiver implements ServerPl
 			twoAreasPlayerDetectorBlock.setOnEnteringFirstAreaUUIDListHandler(onEnteringFirstAreaUUIDListHandler);
 			twoAreasPlayerDetectorBlock.setOnEnteringSecondAreaUUIDListHandler(onEnteringSecondAreaUUIDListHandler);
 
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			twoAreasPlayerDetectorBlock.setChanged();
-			world.sendBlockUpdated(twoAreasPlayerDetectorBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(twoAreasPlayerDetectorBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.level.ScheduledTickAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -71,11 +72,6 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	}
 
 	@Override
-	public String getDescriptionId() {
-		return this.asItem().getDescriptionId();
-	}
-
-	@Override
 	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
 		return getBoundingShape(state);
 	}
@@ -117,10 +113,17 @@ public class InteractiveTriggerWallTorchBlock extends InteractiveTriggerTorchBlo
 	}
 
 	@Override
-	protected BlockState getStateForNeighborUpdate(
-			BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos
+	protected BlockState updateShape(
+			final BlockState state,
+			final LevelReader level,
+			final ScheduledTickAccess ticks,
+			final BlockPos pos,
+			final Direction directionToNeighbour,
+			final BlockPos neighbourPos,
+			final BlockState neighbourState,
+			final RandomSource random
 	) {
-		return direction.getOpposite() == state.getValue(HorizontalDirectionalBlock.FACING) && !state.canSurvive(world, pos) ? Blocks.AIR.defaultBlockState() : state;
+		return directionToNeighbour.getOpposite() == state.getValue(HorizontalDirectionalBlock.FACING) && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState() : state;
 	}
 
 	@Override

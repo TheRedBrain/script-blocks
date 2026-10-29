@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.DataSavingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,17 +28,17 @@ public class UpdateDataSavingBlockPacketReceiver implements ServerPlayNetworking
 
 		List<MutablePair<String, String>> dataList = payload.dataList();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(dataSavingBlockPosition);
-		BlockState blockState = world.getBlockState(dataSavingBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(dataSavingBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(dataSavingBlockPosition);
 
 		if (blockEntity instanceof DataSavingBlockEntity dataSavingBlockEntity) {
 			dataSavingBlockEntity.reset();
 			dataSavingBlockEntity.setDataList(dataList);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			dataSavingBlockEntity.setChanged();
-			world.sendBlockUpdated(dataSavingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(dataSavingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

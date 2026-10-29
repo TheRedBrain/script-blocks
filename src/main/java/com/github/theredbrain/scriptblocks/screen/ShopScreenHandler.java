@@ -68,7 +68,7 @@ public class ShopScreenHandler extends AbstractContainerMenu {
 	public ShopScreenHandler(int syncId, Inventory playerInventory, BlockPos blockPos) {
 		super(ScriptBlocksScreenHandlerTypes.SHOP_BLOCK_SCREEN_HANDLER, syncId);
 		this.playerInventory = playerInventory;
-		this.world = playerInventory.player.getWorld();
+		this.world = playerInventory.player.level();
 		this.blockPos = blockPos;
 		BlockEntity blockEntity = this.world.getBlockEntity(this.blockPos);
 		if (blockEntity instanceof ShopBlockEntity) {
@@ -76,7 +76,7 @@ public class ShopScreenHandler extends AbstractContainerMenu {
 			Shop shop = null;
 			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
 			if (!shopIdentifier.isEmpty()) {
-				Optional<Holder.Reference<Shop>> optionalShopReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).getEntry(Identifier.parse(shopIdentifier));
+				Optional<Holder.Reference<Shop>> optionalShopReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).get().value().get(Identifier.parse(shopIdentifier));
 				if (optionalShopReference.isPresent()) {
 					shop = optionalShopReference.get().value();
 				}
@@ -231,7 +231,7 @@ public class ShopScreenHandler extends AbstractContainerMenu {
 
 		if (this.playerInventory.player instanceof ServerPlayer serverPlayerEntity) {
 			playerAdvancementTracker = serverPlayerEntity.getAdvancements();
-			MinecraftServer minecraftServer = serverPlayerEntity.getServer();
+			MinecraftServer minecraftServer = serverPlayerEntity.level().getServer();
 			if (minecraftServer != null) {
 				serverAdvancementLoader = minecraftServer.getAdvancements();
 			}

@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.MimicBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,28 +26,28 @@ public class UpdateMimicBlockPacketReceiver implements ServerPlayNetworking.Play
 		BlockPos activeMimicBlockPositionOffset = payload.activeMimicBlockPositionOffset();
 		BlockPos inactiveMimicBlockPositionOffset = payload.inactiveMimicBlockPositionOffset();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(mimicBlockPosition);
-		BlockState blockState = world.getBlockState(mimicBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(mimicBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(mimicBlockPosition);
 
 		if (blockEntity instanceof MimicBlockEntity mimicBlockEntity) {
 			mimicBlockEntity.reset();
 			if (!mimicBlockEntity.setActiveMimicBlockPositionOffset(activeMimicBlockPositionOffset)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("mimic_block.activeMimicBlockPositionOffset.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("mimic_block.activeMimicBlockPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (!mimicBlockEntity.setInactiveMimicBlockPositionOffset(inactiveMimicBlockPositionOffset)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("mimic_block.inactiveMimicBlockPositionOffset.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("mimic_block.inactiveMimicBlockPositionOffset.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			mimicBlockEntity.setChanged();
-			world.sendBlockUpdated(mimicBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(mimicBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

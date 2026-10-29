@@ -114,15 +114,16 @@ public class LocationUtils {
 	public static long getRemainingCooldownForEntrance(ServerPlayer serverPlayerEntity, String locationIdentifier, String entrance) {
 
 		Location location = null;
-		Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.getLevel().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(locationIdentifier));
+		long cooldown = 0L;
+		Identifier identifier = Identifier.tryParse(locationIdentifier);
+		if (identifier == null) {
+			return cooldown;
+		}
+		Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
 		if (optionalLocationReference.isPresent()) {
 			location = optionalLocationReference.get().value();
 		}
-		long cooldown = 0L;
 		if (location == null) {
-			return cooldown;
-		}
-		if (serverPlayerEntity.getServer() == null) {
 			return cooldown;
 		}
 		if (entrance.isEmpty()) {
@@ -134,7 +135,7 @@ public class LocationUtils {
 				cooldown = sideEntrance.availability().cooldown();
 			}
 		}
-		long currentTime = serverPlayerEntity.getServer().getOverworld().getTime();
+		long currentTime = serverPlayerEntity.level().getServer().overworld().getGameTime();
 		long currentLocationCooldownStart = DataAttachmentHelper.getCurrentLocationCooldown(serverPlayerEntity, locationIdentifier);
 		if (currentLocationCooldownStart < 0) {
 			return 0;
@@ -145,11 +146,15 @@ public class LocationUtils {
 	public static long getCooldownForEntrance(Player playerEntity, String locationIdentifier, String entrance) {
 
 		Location location = null;
-		Optional<Holder.Reference<Location>> optionalLocationReference = playerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(locationIdentifier));
+		long cooldown = 0L;
+		Identifier identifier = Identifier.tryParse(locationIdentifier);
+		if (identifier == null) {
+			return cooldown;
+		}
+		Optional<Holder.Reference<Location>> optionalLocationReference = playerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
 		if (optionalLocationReference.isPresent()) {
 			location = optionalLocationReference.get().value();
 		}
-		long cooldown = 0L;
 		if (location == null) {
 			return cooldown;
 		}

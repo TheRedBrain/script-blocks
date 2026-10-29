@@ -178,7 +178,7 @@ public class InteractiveTriggerCandleBlock extends InteractiveTriggerBlock imple
 		if (f < 0.3F) {
 			world.addParticle(ParticleTypes.SMOKE, vec3d.x, vec3d.y, vec3d.z, 0.0, 0.0, 0.0);
 			if (f < 0.17F) {
-				world.playSound(
+				world.playLocalSound(
 						vec3d.x + 0.5,
 						vec3d.y + 0.5,
 						vec3d.z + 0.5,

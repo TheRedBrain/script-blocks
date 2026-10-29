@@ -1,16 +1,15 @@
 package com.github.theredbrain.scriptblocks.block;
 
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
@@ -54,25 +53,32 @@ public class InteractiveTriggerLanternBlock extends InteractiveTriggerBlock impl
 	}
 
 	@Override
-	protected BlockState getStateForNeighborUpdate(
-			BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos
+	protected BlockState updateShape(
+			final BlockState state,
+			final LevelReader level,
+			final ScheduledTickAccess ticks,
+			final BlockPos pos,
+			final Direction directionToNeighbour,
+			final BlockPos neighbourPos,
+			final BlockState neighbourState,
+			final RandomSource random
 	) {
 		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
-			world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+			ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
 
-		return attachedDirection(state).getOpposite() == direction && !state.canSurvive(world, pos)
+		return getConnectedDirection(state).getOpposite() == directionToNeighbour && !state.canSurvive(level, pos)
 				? Blocks.AIR.defaultBlockState()
-				: super.updateShape(state, direction, neighborState, world, pos, neighborPos);
+				: super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
 	}
 
 	@Override
 	protected boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
-		Direction direction = attachedDirection(state).getOpposite();
+		Direction direction = getConnectedDirection(state).getOpposite();
 		return Block.canSupportCenter(world, pos.relative(direction), direction.getOpposite());
 	}
 
-	protected static Direction attachedDirection(BlockState state) {
+	protected static Direction getConnectedDirection(BlockState state) {
 		return state.getValue(BlockStateProperties.HANGING) ? Direction.DOWN : Direction.UP;
 	}
 

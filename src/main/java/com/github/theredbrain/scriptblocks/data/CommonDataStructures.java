@@ -44,7 +44,7 @@ public class CommonDataStructures {
 	) {
 
 		public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ItemStack.STRICT_CODEC.fieldOf("item_stack").forGetter(x -> x.itemStack),
+				ItemStack.CODEC.fieldOf("item_stack").forGetter(x -> x.itemStack),
 				Codec.BOOL.optionalFieldOf("consume_stack", true).forGetter(x -> x.consumeStack)
 		).apply(instance, ItemCost::new));
 

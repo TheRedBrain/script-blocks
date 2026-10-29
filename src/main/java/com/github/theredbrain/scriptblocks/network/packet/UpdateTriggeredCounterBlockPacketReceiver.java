@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.TriggeredCounterBlockEnt
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,24 +34,24 @@ public class UpdateTriggeredCounterBlockPacketReceiver implements ServerPlayNetw
 			triggeredBlocks.put(usedBlock.getLeft(), usedBlock.getRight());
 		}
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(triggeredCounterBlockPosition);
-		BlockState blockState = world.getBlockState(triggeredCounterBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(triggeredCounterBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(triggeredCounterBlockPosition);
 
 		if (blockEntity instanceof TriggeredCounterBlockEntity triggeredCounterBlockEntity) {
 			triggeredCounterBlockEntity.reset();
 			if (!triggeredCounterBlockEntity.setTriggeredBlocks(triggeredBlocks)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("triggered_block.triggeredBlocks.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("triggered_block.triggeredBlocks.invalid"), false);
 				updateSuccessful = false;
 			}
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			triggeredCounterBlockEntity.setChanged();
-			world.sendBlockUpdated(triggeredCounterBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(triggeredCounterBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

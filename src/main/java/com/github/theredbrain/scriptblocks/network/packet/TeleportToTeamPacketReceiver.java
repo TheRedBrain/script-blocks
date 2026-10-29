@@ -11,6 +11,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
+import java.util.Set;
+
 public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportToTeamPacket> {
 	@Override
 	public void receive(TeleportToTeamPacket payload, ServerPlayNetworking.Context context) {
@@ -24,7 +26,8 @@ public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPa
 		double targetYaw = payload.targetYaw();
 		double targetPitch = payload.targetPitch();
 
-		MinecraftServer server = serverPlayerEntity.server;
+		ServerLevel serverLevel = serverPlayerEntity.level();
+		MinecraftServer server = serverLevel.getServer();
 
 		ResourceKey<Level> dimensionregistryKey = ResourceKey.create(Registries.DIMENSION, targetWorldIdentifier);
 		ServerLevel targetWorld = server.getLevel(dimensionregistryKey);
@@ -32,7 +35,7 @@ public class TeleportToTeamPacketReceiver implements ServerPlayNetworking.PlayPa
 		if (targetWorld != null) {
 
 			serverPlayerEntity.fallDistance = 0;
-			serverPlayerEntity.teleportTo(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), (float) targetYaw, (float) targetPitch);
+			serverPlayerEntity.teleportTo(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), Set.of(), (float) targetYaw, (float) targetPitch, true);
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 				DebuggingHelper.sendDebuggingMessage("Teleport to your team in world: " + targetWorld.dimension().identifier() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
 			}

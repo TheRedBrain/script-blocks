@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.JigsawPlacerBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
@@ -39,27 +39,27 @@ public class UpdateJigsawPlacerBlockPacketReceiver implements ServerPlayNetworki
 
 		boolean triggeredBlockResets = payload.triggeredBlockResets();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(jigsawPlacerBlockPosition);
-		BlockState blockState = world.getBlockState(jigsawPlacerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(jigsawPlacerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(jigsawPlacerBlockPosition);
 
 		if (blockEntity instanceof JigsawPlacerBlockEntity jigsawPlacerBlockEntity) {
 			jigsawPlacerBlockEntity.setStructurePoolString(structurePoolString);
 			jigsawPlacerBlockEntity.setStructurePoolStringAppendices(structurePoolStringAppendices);
 			if (!jigsawPlacerBlockEntity.setTarget(target)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("jigsaw_placer_block.target.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("jigsaw_placer_block.target.invalid"), false);
 				updateSuccessful = false;
 			}
 			jigsawPlacerBlockEntity.setJoint(joint);
 			jigsawPlacerBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			jigsawPlacerBlockEntity.setChanged();
-			world.sendBlockUpdated(jigsawPlacerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(jigsawPlacerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEn
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,10 +31,10 @@ public class UpdateUUIDListMessagingBlockPacketReceiver implements ServerPlayNet
 		int titleStay = payload.titleStay();
 		int titleFadeOut = payload.titleFadeOut();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(uuidListMessagingBlockPosition);
-		BlockState blockState = world.getBlockState(uuidListMessagingBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(uuidListMessagingBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(uuidListMessagingBlockPosition);
 
 		if (blockEntity instanceof UUIDListMessagingBlockEntity uuidListMessagingBlockEntity) {
 			uuidListMessagingBlockEntity.reset();
@@ -46,9 +46,9 @@ public class UpdateUUIDListMessagingBlockPacketReceiver implements ServerPlayNet
 			uuidListMessagingBlockEntity.setTitleStay(titleStay);
 			uuidListMessagingBlockEntity.setTitleFadeOut(titleFadeOut);
 
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			uuidListMessagingBlockEntity.setChanged();
-			world.sendBlockUpdated(uuidListMessagingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(uuidListMessagingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

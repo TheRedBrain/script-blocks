@@ -43,12 +43,12 @@ package com.github.theredbrain.scriptblocks.network.packet;
 //
 //		World world = serverPlayerEntity.getWorld();
 //
-//		BlockEntity blockEntity = world.getBlockEntity(lootableVaultBlockPosition);
-//		BlockState blockState = world.getBlockState(lootableVaultBlockPosition);
+//		BlockEntity blockEntity = serverLevel.getBlockEntity(lootableVaultBlockPosition);
+//		BlockState blockState = serverLevel.getBlockState(lootableVaultBlockPosition);
 //
 //		if (blockEntity instanceof LootableVaultBlockEntity lootableVaultBlockEntity && blockState.isOf(BlockRegistry.LOOTABLE_VAULT_BLOCK)) {
 //
-/// /			world.setBlockState(lootableVaultBlockPosition, blockState.with(LootableVaultBlock.OMINOUS, payload.isOminous()));
+/// /			serverLevel.setBlockState(lootableVaultBlockPosition, blockState.with(LootableVaultBlock.OMINOUS, payload.isOminous()));
 //
 //			lootableVaultBlockEntity.setConfig(config);
 //

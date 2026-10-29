@@ -22,7 +22,7 @@ public record InteractiveKeyComponent(
 					.apply(instance, InteractiveKeyComponent::new)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, InteractiveKeyComponent> PACKET_CODEC = StreamCodec.composite(
-			PacketCodecs.BOOL,
+			ByteBufCodecs.BOOL,
 			InteractiveKeyComponent::is_consumed,
 			Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()),
 			InteractiveKeyComponent::identifier_list,

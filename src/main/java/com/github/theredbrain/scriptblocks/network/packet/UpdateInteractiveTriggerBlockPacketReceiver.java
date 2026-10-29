@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveTriggerBlockE
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,10 +44,10 @@ public class UpdateInteractiveTriggerBlockPacketReceiver implements ServerPlayNe
 
 		String unlockedSound = payload.unlockedSound();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(interactiveTriggerBlockPosition);
-		BlockState blockState = world.getBlockState(interactiveTriggerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(interactiveTriggerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(interactiveTriggerBlockPosition);
 
 		if (blockEntity instanceof InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
 			interactiveTriggerBlockEntity.reset();
@@ -60,9 +60,9 @@ public class UpdateInteractiveTriggerBlockPacketReceiver implements ServerPlayNe
 			interactiveTriggerBlockEntity.setLockedSound(lockedSound);
 			interactiveTriggerBlockEntity.setUnlockedMessage(unlockedMessage);
 			interactiveTriggerBlockEntity.setUnlockedSound(unlockedSound);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			interactiveTriggerBlockEntity.setChanged();
-			world.sendBlockUpdated(interactiveTriggerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(interactiveTriggerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

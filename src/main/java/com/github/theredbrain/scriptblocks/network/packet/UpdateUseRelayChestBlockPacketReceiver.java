@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.UseRelayChestBlockEntity
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,10 +40,10 @@ public class UpdateUseRelayChestBlockPacketReceiver implements ServerPlayNetwork
 
 		BlockPos relayBlockPositionOffset = payload.relayBlockPositionOffset();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(useRelayChestBlockPosition);
-		BlockState blockState = world.getBlockState(useRelayChestBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(useRelayChestBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(useRelayChestBlockPosition);
 
 		if (blockEntity instanceof UseRelayChestBlockEntity useRelayChestBlockEntity) {
 			useRelayChestBlockEntity.reset();
@@ -54,9 +54,9 @@ public class UpdateUseRelayChestBlockPacketReceiver implements ServerPlayNetwork
 			useRelayChestBlockEntity.setUnlockedMessage(unlockedMessage);
 			useRelayChestBlockEntity.setUnlockedSound(unlockedSound);
 			useRelayChestBlockEntity.setRelayBlockPositionOffset(relayBlockPositionOffset);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			useRelayChestBlockEntity.setChanged();
-			world.sendBlockUpdated(useRelayChestBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(useRelayChestBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

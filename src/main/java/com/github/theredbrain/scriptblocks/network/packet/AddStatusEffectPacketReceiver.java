@@ -7,6 +7,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+
 import java.util.Optional;
 
 public class AddStatusEffectPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<AddStatusEffectPacket> {

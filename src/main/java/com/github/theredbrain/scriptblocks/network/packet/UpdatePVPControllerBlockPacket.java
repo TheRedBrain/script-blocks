@@ -2,13 +2,13 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
-import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import org.apache.commons.lang3.tuple.MutablePair;
+
+import java.util.List;
 
 public record UpdatePVPControllerBlockPacket(
 		BlockPos pvpControllerBlockPosition,

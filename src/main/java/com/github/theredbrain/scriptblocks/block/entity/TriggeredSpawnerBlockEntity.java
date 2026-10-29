@@ -96,7 +96,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 		view.store("use_relay_block_position_offset", BlockPos.CODEC, this.useRelayBlockPositionOffset);
 
-//		NbtList nbtList = new NbtList();
+//		NbtList nbtList = new NbtList(); // TODO
 //		WriteView.ListAppender<NbtCompound> listAppender = view.getListAppender("entity_attribute_modifiers", NbtCompound.CODEC);
 //		for (RegistryEntry<EntityAttribute> registryEntry : this.entityAttributeModifiers.keySet()) {
 //			nbtCompound = new NbtCompound();
@@ -160,7 +160,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.entityAttributeModifiers.clear();
+		this.entityAttributeModifiers.clear(); // TODO
 //				for (NbtCompound nbtCompound1 : view.getTypedListView("entity_attribute_modifiers", NbtCompound.CODEC)) {
 //				Optional<RegistryEntry.Reference<EntityAttribute>> optional = Registries.ATTRIBUTE.getEntry(Identifier.tryParse(nbtCompound1.getString("attribute", "")));
 //				if (optional.isPresent()) {

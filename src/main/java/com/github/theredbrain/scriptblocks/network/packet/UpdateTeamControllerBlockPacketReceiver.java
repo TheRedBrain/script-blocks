@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -42,10 +43,10 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 		String prefixString = payload.prefixString();
 		String suffixString = payload.suffixString();
 
-		Level world = serverPlayerEntity.level();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(teamControllerBlockPosition);
-		BlockState blockState = world.getBlockState(teamControllerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(teamControllerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(teamControllerBlockPosition);
 
 		if (blockEntity instanceof TeamControllerBlockEntity teamControllerBlockEntity) {
 			teamControllerBlockEntity.reset();
@@ -65,9 +66,9 @@ public class UpdateTeamControllerBlockPacketReceiver implements ServerPlayNetwor
 			teamControllerBlockEntity.setPrefixString(prefixString);
 			teamControllerBlockEntity.setSuffixString(suffixString);
 
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			teamControllerBlockEntity.setChanged();
-			world.sendBlockUpdated(teamControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(teamControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,10 +44,10 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 
 		int triggerAmount = payload.triggerAmount();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(relayTriggerBlockPos);
-		BlockState blockState = world.getBlockState(relayTriggerBlockPos);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(relayTriggerBlockPos);
+		BlockState blockState = serverLevel.getBlockState(relayTriggerBlockPos);
 
 		if (blockEntity instanceof RelayTriggerBlockEntity relayTriggerBlockEntity) {
 			relayTriggerBlockEntity.setSelectionMode(selectionMode);
@@ -61,10 +61,10 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 			relayTriggerBlockEntity.setDataProvidingBlockPosOffset(dataProvidingBlockPosOffset);
 			relayTriggerBlockEntity.setDataIdentifier(dataIdentifier);
 			relayTriggerBlockEntity.setTriggerAmount(triggerAmount);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 
 			relayTriggerBlockEntity.setChanged();
-			world.sendBlockUpdated(relayTriggerBlockPos, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(relayTriggerBlockPos, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

@@ -37,13 +37,13 @@ public class BlockPositionDistanceMeterItem extends Item {
 					root_pos = pos;
 					offset_pos = blockPositionDistanceMeterComponent.offset_pos();
 					if (playerEntity.level().isClientSide()) {
-						playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_block", pos.getX(), pos.getY(), pos.getZ()), false);
+						playerEntity.sendSystemMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_block", pos.getX(), pos.getY(), pos.getZ()));
 					}
 				} else {
 					root_pos = blockPositionDistanceMeterComponent.root_pos();
 					offset_pos = pos;
 					if (playerEntity.level().isClientSide()) {
-						playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.set_offset_block", pos.getX(), pos.getY(), pos.getZ()), false);
+						playerEntity.sendSystemMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.set_offset_block", pos.getX(), pos.getY(), pos.getZ()));
 					}
 				}
 				if (root_pos.getY() > -64 && offset_pos.getY() > -64) {
@@ -52,7 +52,7 @@ public class BlockPositionDistanceMeterItem extends Item {
 					int offset_z = offset_pos.getZ() - root_pos.getZ();
 					offset = new BlockPos(offset_pos.getX() - root_pos.getX(), offset_pos.getY() - root_pos.getY(), offset_pos.getZ() - root_pos.getZ());
 					if (playerEntity.level().isClientSide()) {
-						playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset_x, offset_y, offset_z), false);
+						playerEntity.sendSystemMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset_x, offset_y, offset_z));
 					}
 				} else {
 					offset = BlockPos.ZERO;
@@ -60,11 +60,11 @@ public class BlockPositionDistanceMeterItem extends Item {
 				itemStack.set(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(isRootMode, root_pos, offset_pos, offset));
 
 			} else if (playerEntity.level().isClientSide()) {
-				playerEntity.displayClientMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Component.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"), false);
+				playerEntity.sendSystemMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Component.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
 
 				offset = blockPositionDistanceMeterComponent.offset();
 				if (offset.getX() != 0 || offset.getY() != 0 || offset.getZ() != 0) {
-					playerEntity.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()), false);
+					playerEntity.sendSystemMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()));
 				}
 			}
 			return InteractionResult.SUCCESS;
@@ -82,14 +82,14 @@ public class BlockPositionDistanceMeterItem extends Item {
 
 				itemStack.set(ScriptBlocksDataComponents.BLOCK_POSITION_DISTANCE_METER, new BlockPositionDistanceMeterComponent(!isRootMode, blockPositionDistanceMeterComponent.root_pos(), blockPositionDistanceMeterComponent.offset_pos(), blockPositionDistanceMeterComponent.offset()));
 				if (world.isClientSide()) {
-					user.displayClientMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"), false);
+					user.sendSystemMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.false") : Component.translatable("item.scriptblocks.block_position_distance_meter.set_root_mode.true"));
 				}
 			} else if (user.level().isClientSide()) {
-				user.displayClientMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Component.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"), false);
+				user.sendSystemMessage(isRootMode ? Component.translatable("item.scriptblocks.block_position_distance_meter.root_mode") : Component.translatable("item.scriptblocks.block_position_distance_meter.offset_mode"));
 
 				BlockPos offset = blockPositionDistanceMeterComponent.offset();
 				if (offset.getX() != 0 || offset.getY() != 0 || offset.getZ() != 0) {
-					user.displayClientMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()), false);
+					user.sendSystemMessage(Component.translatable("item.scriptblocks.block_position_distance_meter.info", offset.getX(), offset.getY(), offset.getZ()));
 				}
 			}
 			return InteractionResult.CONSUME;

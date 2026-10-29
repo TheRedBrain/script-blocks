@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.InteractiveLootBlockEnti
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -41,10 +41,10 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 
 		String alreadyLootedSoundId = payload.alreadyLootedSoundId();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(interactiveLootBlockPosition);
-		BlockState blockState = world.getBlockState(interactiveLootBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(interactiveLootBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(interactiveLootBlockPosition);
 
 		if (blockEntity instanceof InteractiveLootBlockEntity interactiveLootBlockEntity) {
 			interactiveLootBlockEntity.reset();
@@ -57,9 +57,9 @@ public class UpdateInteractiveLootBlockPacketReceiver implements ServerPlayNetwo
 			interactiveLootBlockEntity.setLootAcquiredSoundId(lootAcquiredSoundId);
 			interactiveLootBlockEntity.setAlreadyLootedMessage(alreadyLootedMessage);
 			interactiveLootBlockEntity.setAlreadyLootedSoundId(alreadyLootedSoundId);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			interactiveLootBlockEntity.setChanged();
-			world.sendBlockUpdated(interactiveLootBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(interactiveLootBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

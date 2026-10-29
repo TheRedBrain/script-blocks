@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
 import java.util.Optional;
 
 public class SetManualResetLocationControlBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<SetManualResetLocationControlBlockPacket> {
@@ -42,9 +43,12 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 
 		ServerLevel targetWorld = null;
 		Location location = null;
-		Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
-		if (optionalLocationReference.isPresent()) {
-			location = optionalLocationReference.get().value();
+		Identifier identifier = Identifier.tryParse(targetLocation);
+		if (identifier != null) {
+			Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
+			if (optionalLocationReference.isPresent()) {
+				location = optionalLocationReference.get().value();
+			}
 		}
 
 		ServerPlayer targetDimensionOwner = server.getPlayerList().getPlayerByName(targetDimensionOwnerName);

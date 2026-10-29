@@ -4,11 +4,12 @@ import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,18 +25,18 @@ public class UpdateHousingBlockAdventurePacketReceiver implements ServerPlayNetw
 		List<String> trustedList = new ArrayList<>(payload.trustedList());
 		List<String> guestList = new ArrayList<>(payload.guestList());
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(housingBlockPosition);
-		BlockState blockState = world.getBlockState(housingBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(housingBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(housingBlockPosition);
 
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 			housingBlockEntity.setCoOwnerList(coOwnerList);
 			housingBlockEntity.setTrustedList(trustedList);
 			housingBlockEntity.setGuestList(guestList);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			housingBlockEntity.setChanged();
-			world.sendBlockUpdated(housingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(housingBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

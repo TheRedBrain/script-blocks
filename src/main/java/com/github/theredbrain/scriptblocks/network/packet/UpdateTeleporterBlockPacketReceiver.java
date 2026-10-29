@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -75,12 +76,12 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 		String teleportButtonLabel = payload.teleportButtonLabel();
 		String cancelTeleportButtonLabel = payload.cancelTeleportButtonLabel();
 
-		Level world = serverPlayerEntity.level();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(teleportBlockPosition);
-		BlockState blockState = world.getBlockState(teleportBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(teleportBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(teleportBlockPosition);
 
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
 			teleporterBlockEntity.setShowAdventureScreen(showAdventureScreen);
@@ -118,7 +119,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			teleporterBlockEntity.setChanged();
-			world.sendBlockUpdated(teleportBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(teleportBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

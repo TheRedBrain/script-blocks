@@ -25,7 +25,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,9 +32,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,27 +101,23 @@ public class ScriptBlocks implements ModInitializer {
 	}
 
 	@Nullable
-	public static MutablePair<ResourceKey<Level>, MutablePair<BlockPos, MutablePair<Double, Double>>> getPVPRespawnPosition(PlayerTeam team, ServerPlayer serverPlayerEntity, boolean endOfBattle) {
+	public static LevelData.RespawnData getPVPRespawnPosition(PlayerTeam team, ServerPlayer serverPlayerEntity, boolean endOfBattle) {
 		Optional<BlockPos> optionalBlockPos = DataAttachmentHelper.getCurrentPVPControllerBlockPosition(serverPlayerEntity);
-		Level world = serverPlayerEntity.level();
-		if (optionalBlockPos.isPresent() && team != null && world instanceof ServerLevel serverWorld) {
+		ServerLevel serverLevel = serverPlayerEntity.level();
+		if (optionalBlockPos.isPresent() && team != null) {
 			String teamId = team.getName();
-			BlockEntity blockEntity = serverWorld.getBlockEntity(optionalBlockPos.get());
+			BlockEntity blockEntity = serverLevel.getBlockEntity(optionalBlockPos.get());
 			if (blockEntity instanceof PVPControllerBlockEntity pvpControllerBlockEntity) {
-				MutablePair<BlockPos, MutablePair<Double, Double>> teamRespawnPos = pvpControllerBlockEntity.getTeamRespawnPosition(teamId, endOfBattle);
+				LevelData.RespawnData teamRespawnPos = pvpControllerBlockEntity.getTeamRespawnPosition(teamId, endOfBattle);
 				if (teamRespawnPos != null) {
 					if (endOfBattle) {
 						pvpControllerBlockEntity.removePlayer(serverPlayerEntity);
 					}
-					return new MutablePair<>(
-							serverWorld.dimension(),
-							new MutablePair<>(
-									teamRespawnPos.getLeft(),
-									new MutablePair<>(
-											teamRespawnPos.getRight().getLeft(),
-											teamRespawnPos.getRight().getRight()
-									)
-							)
+					return LevelData.RespawnData.of(
+							teamRespawnPos.dimension(),
+							teamRespawnPos.pos(),
+							teamRespawnPos.yaw(),
+							teamRespawnPos.pitch()
 					);
 				}
 			}

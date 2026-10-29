@@ -4,8 +4,8 @@ import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,10 +45,10 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 
 		BlockPos dataBlockOffset = payload.dataBlockOffset();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(dialogueBlockPosition);
-		BlockState blockState = world.getBlockState(dialogueBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(dialogueBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(dialogueBlockPosition);
 
 		if (blockEntity instanceof DialogueBlockEntity dialogueBlockEntity) {
 
@@ -56,9 +56,9 @@ public class UpdateDialogueBlockPacketReceiver implements ServerPlayNetworking.P
 			dialogueBlockEntity.setTriggeredBlocks(dialogueTriggeredBlocksMap);
 			dialogueBlockEntity.setStartingDialogueList(startingDialogueList);
 			dialogueBlockEntity.setDataProvidingBlockPosOffset(dataBlockOffset);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			dialogueBlockEntity.setChanged();
-			world.sendBlockUpdated(dialogueBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(dialogueBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 
 	}

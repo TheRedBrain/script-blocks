@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
@@ -29,7 +30,7 @@ public record BlockPositionDistanceMeterComponent(
 					.apply(instance, BlockPositionDistanceMeterComponent::new)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPositionDistanceMeterComponent> PACKET_CODEC = StreamCodec.composite(
-			PacketCodecs.BOOL,
+			ByteBufCodecs.BOOL,
 			BlockPositionDistanceMeterComponent::is_root_mode,
 			BlockPos.STREAM_CODEC,
 			BlockPositionDistanceMeterComponent::root_pos,

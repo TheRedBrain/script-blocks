@@ -42,18 +42,21 @@ public class DialogueScreenHandler extends AbstractContainerMenu {
 
 	public DialogueScreenHandler(int syncId, Inventory playerInventory, String dialogueIdentifierString, BlockPos dataBlockPos, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks, List<String> unlockedAnswersList, List<String> visibleAnswersList) {
 		super(ScriptBlocksScreenHandlerTypes.DIALOGUE_SCREEN_HANDLER, syncId);
-		this.world = playerInventory.player.getWorld();
+		this.world = playerInventory.player.level();
 		this.dataBlockPos = dataBlockPos;
 		this.dialogueUsedBlocksList = dialogueUsedBlocks;
 		this.dialogueTriggeredBlocksList = dialogueTriggeredBlocks;
 		this.unlockedAnswersList = unlockedAnswersList;
 		this.visibleAnswersList = visibleAnswersList;
-		Optional<Holder.Reference<Dialogue>> optionalDialogueReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).getEntry(Identifier.tryParse(dialogueIdentifierString));
-		if (optionalDialogueReference.isPresent()) {
-			this.dialogue = optionalDialogueReference.get().value();
-			this.dialogueTextList = this.dialogue.dialogueTextList();
-			this.dialogueTextsStartingIndex = this.dialogue.dialogueTextsStartingIndex();
-			this.answersStartingIndex = this.dialogue.answersStartingIndex();
+		Identifier identifier = Identifier.tryParse(dialogueIdentifierString);
+		if (identifier != null) {
+			Optional<Holder.Reference<Dialogue>> optionalDialogueReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(identifier);
+			if (optionalDialogueReference.isPresent()) {
+				this.dialogue = optionalDialogueReference.get().value();
+				this.dialogueTextList = this.dialogue.dialogueTextList();
+				this.dialogueTextsStartingIndex = this.dialogue.dialogueTextsStartingIndex();
+				this.answersStartingIndex = this.dialogue.answersStartingIndex();
+			}
 		}
 	}
 

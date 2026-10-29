@@ -36,13 +36,13 @@ public class PlayerEntityHelper {
 		}
 
 		Inventory playerInventory = serverPlayerEntity.getInventory();
-		for (int i = 0; i < playerInventory.items.size(); i++) {
-			ItemStack currentItemStack = playerInventory.items.get(i).copy();
+		for (int i = 0; i < playerInventory.getNonEquipmentItems().size(); i++) {
+			ItemStack currentItemStack = playerInventory.getNonEquipmentItems().get(i).copy();
 			RemovedOnInteractionsDataComponent removedOnTeleportDataComponent = currentItemStack.get(ScriptBlocksDataComponents.REMOVED_ON_INTERACTIONS);
 			if (removedOnTeleportDataComponent != null) {
 				for (String identifier : removedOnTeleportDataComponent.identifier_list()) {
 					if (Objects.equals(identifier, removedItemIdentifier)) {
-						playerInventory.items.set(i, ItemStack.EMPTY);
+						playerInventory.getNonEquipmentItems().set(i, ItemStack.EMPTY);
 					}
 				}
 			}
@@ -69,8 +69,8 @@ public class PlayerEntityHelper {
 		}
 
 		Inventory playerInventory = playerEntity.getInventory();
-		for (int i = 0; i < playerInventory.items.size(); i++) {
-			ItemStack currentItemStack = playerInventory.items.get(i).copy();
+		for (int i = 0; i < playerInventory.getNonEquipmentItems().size(); i++) {
+			ItemStack currentItemStack = playerInventory.getNonEquipmentItems().get(i).copy();
 			PreventInteractionsDataComponent preventInteractionsDataComponent = currentItemStack.get(ScriptBlocksDataComponents.PREVENT_INTERACTIONS);
 			if (preventInteractionsDataComponent != null) {
 				for (String identifier : preventInteractionsDataComponent.identifier_list()) {

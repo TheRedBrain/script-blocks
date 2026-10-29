@@ -134,25 +134,25 @@ public class MimicBlock extends RotatedBlockWithEntity {
 //		return mimicBlockState.getBlock().canPathfindThrough(mimicBlockState, type);
 //	}
 
-	@Override
-	public boolean isTransparent(BlockState state, BlockGetter world, BlockPos pos) {
-		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
-		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
-		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
-			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
-			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
-		}
-		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.defaultBlockState();
-		BlockPos mimicBlockPos;
-		if (state.getValue(BlockStateProperties.TRIGGERED)) {
-			mimicBlockPos = pos.offset(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
-		} else {
-			mimicBlockPos = pos.offset(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
-		}
-		BlockState blockState = world.getBlockState(mimicBlockPos);
-		if (!blockState.is(this) && !ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode) {
-			mimicBlockState = blockState;
-		}
-		return mimicBlockState.getBlock().propagatesSkylightDown(mimicBlockState, world, mimicBlockPos);
-	}
+//	@Override
+//	public boolean isTransparent(BlockState state, BlockGetter world, BlockPos pos) {
+//		BlockPos activeMimicBlockPos = new BlockPos(0, 1, 0);
+//		BlockPos inactiveMimicBlockPos = new BlockPos(0, -1, 0);
+//		if (world.getBlockEntity(pos) instanceof MimicBlockEntity mimicBlockEntity) {
+//			activeMimicBlockPos = mimicBlockEntity.getActiveMimicBlockPositionOffset();
+//			inactiveMimicBlockPos = mimicBlockEntity.getInactiveMimicBlockPositionOffset();
+//		}
+//		BlockState mimicBlockState = ScriptBlocksBlocks.MIMIC_FALLBACK_BLOCK.defaultBlockState();
+//		BlockPos mimicBlockPos;
+//		if (state.getValue(BlockStateProperties.TRIGGERED)) {
+//			mimicBlockPos = pos.offset(activeMimicBlockPos.getX(), activeMimicBlockPos.getY(), activeMimicBlockPos.getZ());
+//		} else {
+//			mimicBlockPos = pos.offset(inactiveMimicBlockPos.getX(), inactiveMimicBlockPos.getY(), inactiveMimicBlockPos.getZ());
+//		}
+//		BlockState blockState = world.getBlockState(mimicBlockPos);
+//		if (!blockState.is(this) && !ScriptBlocksConfigs.SERVER_CONFIG.enable_mimic_block_debug_mode) {
+//			mimicBlockState = blockState;
+//		}
+//		return mimicBlockState.getBlock().propagatesSkylightDown(mimicBlockState, world, mimicBlockPos);
+//	}
 }

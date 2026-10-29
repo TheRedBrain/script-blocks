@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,27 +30,27 @@ public class UpdateAreaFillerBlockPacketReceiver implements ServerPlayNetworking
 
 		String blockIdentifier = payload.blockIdentifier();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
 		boolean updateSuccessful = true;
 
-		BlockEntity blockEntity = world.getBlockEntity(areaFillerBlockPosition);
-		BlockState blockState = world.getBlockState(areaFillerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(areaFillerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(areaFillerBlockPosition);
 
 		if (blockEntity instanceof AreaFillerBlockEntity areaFillerBlockEntity) {
 			areaFillerBlockEntity.setShowArea(showArea);
 			areaFillerBlockEntity.setAreaDimensions(areaDimensions);
 			areaFillerBlockEntity.setAreaPositionOffset(areaPositionOffset);
 			if (!areaFillerBlockEntity.setBlockIdentifierString(blockIdentifier)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("area_filler_block.blockIdentifier.invalid"), false);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("area_filler_block.blockIdentifier.invalid"), false);
 				updateSuccessful = false;
 			}
 
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			areaFillerBlockEntity.setChanged();
-			world.sendBlockUpdated(areaFillerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(areaFillerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

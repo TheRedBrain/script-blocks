@@ -3,8 +3,8 @@ package com.github.theredbrain.scriptblocks.network.packet;
 import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ResetHouseHousingBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<ResetHouseHousingBlockPacket> {
@@ -15,9 +15,9 @@ public class ResetHouseHousingBlockPacketReceiver implements ServerPlayNetworkin
 
 		BlockPos housingBlockPosition = payload.housingBlockPosition();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(housingBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(housingBlockPosition);
 
 		if (blockEntity instanceof HousingBlockEntity housingBlockEntity) {
 			housingBlockEntity.trigger();
