@@ -6,11 +6,6 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
@@ -18,21 +13,28 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.apache.commons.lang3.tuple.MutablePair;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LocationControlBlockEntity extends RotatedBlockEntity implements Resetable {
 	private static final int RESET_AREA_MIN_X_DEFAULT = -16;
 	private static final int RESET_AREA_MIN_Z_DEFAULT = -16;
 	private static final int RESET_AREA_MAX_X_DEFAULT = 31;
 	private static final int RESET_AREA_MAX_Z_DEFAULT = 31;
-	private MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
-	private final HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
+	private LevelData.RespawnData mainEntrance = LevelData.RespawnData.DEFAULT;
+	private final HashMap<String, LevelData.RespawnData> sideEntrances = new HashMap<>(Map.of());
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 
@@ -52,23 +54,17 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		CompoundTag nbtCompound = new CompoundTag();
-		nbtCompound.store("position_offset", BlockPos.CODEC, this.mainEntrance.getLeft());
-		nbtCompound.putDouble("yaw", this.mainEntrance.getRight().getLeft());
-		nbtCompound.putDouble("pitch", this.mainEntrance.getRight().getRight());
-		view.store("main_entrance", CompoundTag.CODEC, nbtCompound.copy());
+		view.store("main_entrance", LevelData.RespawnData.CODEC, this.mainEntrance);
 
 		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("side_entrances", CompoundTag.CODEC);
 		this.sideEntrances.forEach((key, value) -> {
 			CompoundTag nbtCompound1 = new CompoundTag();
 			nbtCompound1.putString("key", key);
-			nbtCompound1.store("position_offset", BlockPos.CODEC, value.getLeft());
-			nbtCompound1.putDouble("yaw", value.getRight().getLeft());
-			nbtCompound1.putDouble("pitch", value.getRight().getRight());
+			nbtCompound1.store("spawn_point", LevelData.RespawnData.CODEC, value);
 			listAppender.add(nbtCompound1.copy());
 		});
 
-		nbtCompound = new CompoundTag();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
 		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
@@ -95,29 +91,33 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		CompoundTag nbtCompound = view.read("main_entrance", CompoundTag.CODEC).orElseGet(CompoundTag::new);
-		this.mainEntrance = new MutablePair<>(
-				nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-				new MutablePair<>(
-						Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
-						Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
-				)
+		this.mainEntrance = view.read("main_entrance", LevelData.RespawnData.CODEC).orElseGet(() -> {
+					CompoundTag nbtCompound = view.read("main_entrance", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+					return LevelData.RespawnData.of(
+							ServerLevel.OVERWORLD,
+							nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+							(float) Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
+							(float) Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
+					);
+				}
 		);
 
 		this.sideEntrances.clear();
 		for (CompoundTag nbtCompound1 : view.listOrEmpty("side_entrances", CompoundTag.CODEC)) {
 			this.sideEntrances.put(
 					nbtCompound1.getStringOr("key", ""),
-					new MutablePair<>(
-							nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-							new MutablePair<>(
-									Mth.clamp(nbtCompound1.getDoubleOr("yaw", 0), -180, 180),
-									Mth.clamp(nbtCompound1.getDoubleOr("pitch", 0), -90, 90)
+					nbtCompound1.read("spawn_point", LevelData.RespawnData.CODEC).orElseGet(
+							() -> LevelData.RespawnData.of(
+									ServerLevel.OVERWORLD,
+									nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+									(float) Mth.clamp(nbtCompound1.getDoubleOr("yaw", 0), -180, 180),
+									(float) Mth.clamp(nbtCompound1.getDoubleOr("pitch", 0), -90, 90)
 							)
-					));
+					)
+			);
 		}
 
-		nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		CompoundTag nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
@@ -197,39 +197,36 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	}
 
 	// region --- getter & setter ---
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getMainEntrance() {
+	public LevelData.RespawnData getMainEntrance() {
 		return mainEntrance;
 	}
 
-	public void setMainEntrance(MutablePair<BlockPos, MutablePair<Double, Double>> mainEntrance) {
+	public void setMainEntrance(LevelData.RespawnData mainEntrance) {
 		this.mainEntrance = mainEntrance;
 	}
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerLevel serverWorld, String entrance) {
-		BlockPos targetPos;
-		MutablePair<Double, Double> targetOrientation;
+	public LevelData.RespawnData getActualSpawnPoint(Level level, String entrance) {
+		LevelData.RespawnData spawnPoint = this.mainEntrance;
 
 		if (!entrance.isEmpty() && sideEntrances.containsKey(entrance)) {
-			MutablePair<BlockPos, MutablePair<Double, Double>> targetEntranceOffset = this.sideEntrances.get(entrance);
-			targetPos = new BlockPos(targetEntranceOffset.getLeft().getX() + this.getBlockPos().getX(), targetEntranceOffset.getLeft().getY() + this.getBlockPos().getY(), targetEntranceOffset.getLeft().getZ() + this.getBlockPos().getZ());
-			targetOrientation = targetEntranceOffset.getRight();
-		} else {
-			targetPos = new BlockPos(this.mainEntrance.getLeft().getX() + this.getBlockPos().getX(), this.mainEntrance.getLeft().getY() + this.getBlockPos().getY(), this.mainEntrance.getLeft().getZ() + this.getBlockPos().getZ());
-			targetOrientation = this.mainEntrance.getRight();
+			spawnPoint = this.sideEntrances.get(entrance);
 		}
 
-		if (serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
+		if (!spawnPoint.pos().equals(BlockPos.ZERO) && level.getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), spawnPoint.pos())) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			LevelData.RespawnData delegatedSpawnpoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(level);
+			if (delegatedSpawnpoint != null) {
+				spawnPoint = delegatedSpawnpoint;
+			}
 		}
 
-		return new MutablePair<>(targetPos, targetOrientation);
+		return spawnPoint;
 	}
 
-	public HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> getSideEntrances() {
+	public HashMap<String, LevelData.RespawnData> getSideEntrances() {
 		return sideEntrances;
 	}
 
-	public void setSideEntrances(HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances) {
+	public void setSideEntrances(HashMap<String, LevelData.RespawnData> sideEntrances) {
 		this.sideEntrances.clear();
 		this.sideEntrances.putAll(sideEntrances);
 	}
@@ -318,7 +315,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> rotatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.sideEntrances.get(key), blockRotation);
+					LevelData.RespawnData rotatedEntrance = BlockRotationUtils.rotateSpawnPoint(this.sideEntrances.get(key), blockRotation);
 					this.sideEntrances.put(key, rotatedEntrance);
 				}
 
@@ -341,7 +338,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), Mirror.FRONT_BACK);
+					LevelData.RespawnData mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), Mirror.FRONT_BACK);
 					this.sideEntrances.put(key, mirroredEntrance);
 				}
 
@@ -364,7 +361,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 				int sideEntrancesSize = this.sideEntrances.keySet().size();
 				for (int i = 0; i < sideEntrancesSize; i++) {
 					String key = keyList.get(i);
-					MutablePair<BlockPos, MutablePair<Double, Double>> mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), Mirror.LEFT_RIGHT);
+					LevelData.RespawnData mirroredEntrance = BlockRotationUtils.mirrorSpawnPoint(this.sideEntrances.get(key), Mirror.LEFT_RIGHT);
 					this.sideEntrances.put(key, mirroredEntrance);
 				}
 

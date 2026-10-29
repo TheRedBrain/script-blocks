@@ -33,6 +33,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Mirror;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -56,9 +58,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 
 	protected static final BlockPos POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
 
-	protected BlockPos entitySpawnPositionOffset = POSITION_OFFSET_DEFAULT;
-	protected double entitySpawnOrientationPitch = 0.0;
-	protected double entitySpawnOrientationYaw = 0.0;
+	private LevelData.RespawnData spawnPoint = LevelData.RespawnData.DEFAULT;
+
 	@Nullable
 	protected UUID boundEntityUuid = null;
 
@@ -86,13 +87,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		CompoundTag nbtCompound = new CompoundTag();
-		nbtCompound.store("position_offset", BlockPos.CODEC, this.entitySpawnPositionOffset);
-		nbtCompound.putDouble("yaw", this.entitySpawnOrientationYaw);
-		nbtCompound.putDouble("pitch", this.entitySpawnOrientationPitch);
-		view.store("entity_spawn", CompoundTag.CODEC, nbtCompound.copy());
+		view.store("spawn_point", LevelData.RespawnData.CODEC, this.spawnPoint);
 
-		nbtCompound = new CompoundTag();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
 		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
@@ -132,20 +129,18 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		CompoundTag nbtCompound = view.read("entity_spawn", CompoundTag.CODEC).orElseGet(CompoundTag::new);
-		this.entitySpawnPositionOffset = BlockPos.max(
-				BlockPos.min(
-						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-						new BlockPos(48, 48, 48)
-				),
-				new BlockPos(-48, -48, -48)
+		this.spawnPoint = view.read("spawn_point", LevelData.RespawnData.CODEC).orElseGet(() -> {
+					CompoundTag nbtCompound1 = view.read("entity_spawn", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+					return LevelData.RespawnData.of(
+							ServerLevel.OVERWORLD,
+							nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+							nbtCompound1.getFloatOr("yaw", 0),
+							nbtCompound1.getFloatOr("pitch", 0)
+					);
+				}
 		);
 
-		this.entitySpawnOrientationPitch = Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90.0, 90.0);
-
-		this.entitySpawnOrientationYaw = Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180.0, 180.0);
-
-		nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		CompoundTag nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
@@ -209,32 +204,12 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	}
 
 	// region --- getter & setter ---
-	public BlockPos getEntitySpawnPositionOffset() {
-		return this.entitySpawnPositionOffset;
+	public LevelData.RespawnData getSpawnPoint() {
+		return this.spawnPoint;
 	}
 
-	public void setEntitySpawnPositionOffset(BlockPos entitySpawnPositionOffset) {
-		this.entitySpawnPositionOffset = new BlockPos(entitySpawnPositionOffset);
-	}
-
-	public double getEntitySpawnOrientationPitch() {
-		return entitySpawnOrientationPitch;
-	}
-
-	// TODO check if input is valid
-	public boolean setEntitySpawnPositionPitch(double entitySpawnPositionPitch) {
-		this.entitySpawnOrientationPitch = entitySpawnPositionPitch;
-		return true;
-	}
-
-	public double getEntitySpawnOrientationYaw() {
-		return entitySpawnOrientationYaw;
-	}
-
-	// TODO check if input is valid
-	public boolean setEntitySpawnPositionYaw(double entitySpawnPositionYaw) {
-		this.entitySpawnOrientationYaw = entitySpawnPositionYaw;
-		return true;
+	public void setSpawnPoint(LevelData.RespawnData spawnPoint) {
+		this.spawnPoint = LevelData.RespawnData.of(spawnPoint.dimension(), spawnPoint.pos(), spawnPoint.yaw(), spawnPoint.pitch());
 	}
 
 	public Multimap<Holder<Attribute>, AttributeModifier> getEntityAttributeModifiers() {
@@ -309,24 +284,21 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		if (state.getBlock() instanceof RotatedBlockWithEntity) {
 			if (state.getValue(ScriptBlocksBlockProperties.ROTATED) != this.rotated) {
 				Rotation blockRotation = BlockRotationUtils.calculateRotationFromDifferentRotatedStates(state.getValue(ScriptBlocksBlockProperties.ROTATED), this.rotated);
-				this.entitySpawnPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.entitySpawnPositionOffset, blockRotation);
-				this.entitySpawnOrientationYaw = BlockRotationUtils.rotateYaw(this.entitySpawnOrientationYaw, blockRotation);
+				this.spawnPoint = BlockRotationUtils.rotateSpawnPoint(this.spawnPoint, blockRotation);
 				this.triggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.triggeredBlock.getLeft(), blockRotation));
 				this.useRelayBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.useRelayBlockPositionOffset, blockRotation);
 
 				this.rotated = state.getValue(ScriptBlocksBlockProperties.ROTATED);
 			}
 			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
-				this.entitySpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.entitySpawnPositionOffset, Mirror.FRONT_BACK);
-				this.entitySpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.entitySpawnOrientationYaw, Mirror.FRONT_BACK);
+				this.spawnPoint = BlockRotationUtils.mirrorSpawnPoint(this.spawnPoint, Mirror.FRONT_BACK);
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.FRONT_BACK));
 				this.useRelayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.useRelayBlockPositionOffset, Mirror.FRONT_BACK);
 
 				this.x_mirrored = state.getValue(ScriptBlocksBlockProperties.X_MIRRORED);
 			}
 			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
-				this.entitySpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.entitySpawnPositionOffset, Mirror.LEFT_RIGHT);
-				this.entitySpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.entitySpawnOrientationYaw, Mirror.LEFT_RIGHT);
+				this.spawnPoint = BlockRotationUtils.mirrorSpawnPoint(this.spawnPoint, Mirror.LEFT_RIGHT);
 				this.triggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.triggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 				this.useRelayBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.useRelayBlockPositionOffset, Mirror.LEFT_RIGHT);
 
@@ -396,26 +368,31 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		}
 	}
 
+	public LevelData.RespawnData getActualSpawnPoint(Level level) {
+		LevelData.RespawnData spawnPoint = this.spawnPoint;
+
+		if (!this.spawnPoint.pos().equals(BlockPos.ZERO) && level.getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.pos())) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			LevelData.RespawnData delegatedSpawnpoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(level);
+			if (delegatedSpawnpoint != null) {
+				spawnPoint = delegatedSpawnpoint;
+			}
+		}
+
+		return spawnPoint;
+	}
+
 	protected boolean spawnEntity() {
 		if (this.getLevel() instanceof ServerLevel serverWorld) {
 			try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(this::toString, ScriptBlocks.LOGGER)) {
-//			Optional<EntityType<?>> optional = EntityType.fromNbt(this.entityTypeCompound);
 				ValueInput input = TagValueInput.create(reporter, serverWorld.registryAccess(), this.entityTypeCompound);
 				Optional<EntityType<?>> entityType = EntityType.by(input);
 				if (entityType.isEmpty()) {
 					return false;
 				}
-				BlockPos blockPos = BlockRotationUtils.getActualOffsetBlockPosition(this.worldPosition, this.entitySpawnPositionOffset);
-				double pitch = this.entitySpawnOrientationPitch;
-				double yaw = this.entitySpawnOrientationYaw;
-
-				if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-					MutablePair<BlockPos, MutablePair<Double, Double>> targetSpawnPoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
-
-					blockPos = targetSpawnPoint.getLeft();
-					yaw = targetSpawnPoint.getRight().getLeft();
-					pitch = targetSpawnPoint.getRight().getRight();
-				}
+				LevelData.RespawnData spawnPoint = this.getActualSpawnPoint(serverWorld);
+				BlockPos blockPos = spawnPoint.pos();
+				float yaw = spawnPoint.yaw();
+				float pitch = spawnPoint.pitch();
 				double d = blockPos.getX() + 0.5;
 				double e = blockPos.getY();
 				double f = blockPos.getZ() + 0.5;
@@ -431,9 +408,9 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 				if (entity2 == null) {
 					return false;
 				}
-				entity2.setYBodyRot((float) yaw);
-				entity2.setYHeadRot((float) yaw);
-				entity2.snapTo(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
+				entity2.setYBodyRot(yaw);
+				entity2.setYHeadRot(yaw);
+				entity2.snapTo(entity2.getX(), entity2.getY(), entity2.getZ(), yaw, pitch);
 				if (entity2 instanceof Mob mobEntity) {
 					if (this.entityTypeCompound.getString("id").isPresent()) {
 						mobEntity.finalizeSpawn(serverWorld, serverWorld.getCurrentDifficultyAt(entity2.blockPosition()), EntitySpawnReason.SPAWNER, null);

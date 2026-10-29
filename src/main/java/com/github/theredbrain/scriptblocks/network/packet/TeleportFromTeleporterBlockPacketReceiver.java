@@ -3,7 +3,6 @@ package com.github.theredbrain.scriptblocks.network.packet;
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.entity.LocationControlBlockEntity;
-import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBlockEntity;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
@@ -28,14 +27,15 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.scores.PlayerTeam;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<TeleportFromTeleporterBlockPacket> {
@@ -46,8 +46,6 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
-		String accessPositionDimension = payload.accessPositionDimension();
-
 		String targetDimensionOwnerName = payload.targetDimensionOwnerName();
 		String targetLocation = payload.targetLocation();
 		String targetLocationEntrance = payload.targetLocationEntrance();
@@ -55,13 +53,14 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		String dataId = payload.dataId();
 		String data = payload.data();
 
-		ServerLevel serverWorld = serverPlayerEntity.getServerWorld();
-		MinecraftServer server = serverPlayerEntity.server;
+		ServerLevel serverLevel = serverPlayerEntity.level();
+		MinecraftServer server = serverLevel.getServer();
 
+		LevelData.RespawnData teleportTarget = null;
 		ServerLevel targetWorld = null;
 		BlockPos targetPos = null;
-		double targetYaw = 0.0;
-		double targetPitch = 0.0;
+		float targetYaw = 0.0F;
+		float targetPitch = 0.0F;
 
 		boolean locationWasGeneratedByOwner = true;
 		boolean playerHadKeyItem = true;
@@ -70,7 +69,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		boolean locationCooldownWasUp = true;
 		String locationToCoolDown = "";
 
-		BlockEntity blockEntity2 = serverWorld.getBlockEntity(teleportBlockPosition);
+		BlockEntity blockEntity2 = serverLevel.getBlockEntity(teleportBlockPosition);
 
 		if (!(blockEntity2 instanceof TeleporterBlockEntity teleporterBlockEntity)) {
 			return;
@@ -79,8 +78,8 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		// triggered as early as possible to allow the trigger results to influence the spawn point calculation
 		teleporterBlockEntity.preTeleportTrigger();
 
-		BlockPos accessPositionOffset = teleporterBlockEntity.getAccessPositionOffset();
-		boolean setAccessPosition = teleporterBlockEntity.getSetAccessPosition();
+		LevelData.RespawnData locationAccessPoint = teleporterBlockEntity.getActualLocationAccessPoint(serverLevel);
+		boolean enableLocationAccessPoint = teleporterBlockEntity.getEnableLocationAccessPoint();
 
 		boolean teleportTeam = teleporterBlockEntity.teleportTeam();
 
@@ -89,41 +88,36 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		TeleporterBlockEntity.SpawnPointType spawnPointType = teleporterBlockEntity.getSpawnPointType();
 
 		if (teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
-			targetWorld = serverWorld;
-			BlockPos directTeleportPositionOffset = teleporterBlockEntity.getDirectTeleportPositionOffset();
-			targetPos = new BlockPos(teleportBlockPosition.getX() + directTeleportPositionOffset.getX(), teleportBlockPosition.getY() + directTeleportPositionOffset.getY(), teleportBlockPosition.getZ() + directTeleportPositionOffset.getZ());
-			targetYaw = teleporterBlockEntity.getDirectTeleportOrientationYaw();
-			targetPitch = teleporterBlockEntity.getDirectTeleportOrientationPitch();
+			teleportTarget = teleporterBlockEntity.getActualDirectTeleportTarget(serverLevel);
 
-			if (targetWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-				MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
-
-				targetPos = entrance.getLeft();
-				targetYaw = entrance.getRight().getLeft();
-				targetPitch = entrance.getRight().getRight();
-			}
+			targetPos = teleportTarget.pos();
+			targetYaw = teleportTarget.yaw();
+			targetPitch = teleportTarget.pitch();
+			targetWorld = server.getLevel(teleportTarget.dimension());
 
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
-			MutablePair<String, BlockPos> location_access_pos = DataAttachmentHelper.getCurrentLocationAccess(serverPlayerEntity);
-			if (spawnPointType == TeleporterBlockEntity.SpawnPointType.LOCATION_ACCESS_POSITION && location_access_pos != null) {
-				targetWorld = server.getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(location_access_pos.getLeft())));
-				targetPos = location_access_pos.getRight();
-				if (targetWorld != null && targetPos != null) {
-					DataAttachmentHelper.setCurrentLocationAccess(serverPlayerEntity, null);
-				}
+			teleportTarget = server.overworld().getRespawnData();
+			LevelData.RespawnData location_access_point = DataAttachmentHelper.getCurrentLocationAccessPoint(serverPlayerEntity);
+			if (spawnPointType == TeleporterBlockEntity.SpawnPointType.LOCATION_ACCESS_POSITION && location_access_point != null) {
+				teleportTarget = location_access_point;
 			} else if (spawnPointType == TeleporterBlockEntity.SpawnPointType.PLAYER_SPAWN) {
-				targetWorld = server.getLevel(serverPlayerEntity.getSpawnPointDimension());
-				targetPos = serverPlayerEntity.getSpawnPointPosition();
-				targetYaw = serverPlayerEntity.getSpawnAngle();
-			} else {
-				targetWorld = server.overworld();
-				targetPos = server.overworld().getSpawnPos();
-				targetYaw = server.overworld().getSpawnAngle();
+				ServerPlayer.RespawnConfig respawnConfig = serverPlayerEntity.getRespawnConfig();
+				if (respawnConfig != null) {
+					teleportTarget = respawnConfig.respawnData();
+				}
 			}
+			targetWorld = server.getLevel(teleportTarget.dimension());
+			targetPos = teleportTarget.pos();
+			targetYaw = teleportTarget.yaw();
+			targetPitch = teleportTarget.pitch();
 		} else if (teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS || teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 
 			Location location = null;
-			Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.getWorld().getRegistryManager().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).getEntry(Identifier.tryParse(targetLocation));
+			Optional<Holder.Reference<Location>> optionalLocationReference = Optional.empty();
+			Identifier identifier = Identifier.tryParse(targetLocation);
+			if (identifier != null) {
+				optionalLocationReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
+			}
 			if (optionalLocationReference.isPresent()) {
 				location = optionalLocationReference.get().value();
 			}
@@ -185,13 +179,13 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 						// TODO don't execute commands, find a better way
 						String forceLoadAddCommand = "execute in " + targetWorld.dimension().identifier() + " run forceload add " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
-						server.getCommands().executeWithPrefix(server.createCommandSourceStack(), forceLoadAddCommand);
+						server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), forceLoadAddCommand);
 
 						String placeStructureCommand = "execute in " + targetWorld.dimension().identifier() + " run place structure " + location.structureIdentifier() + " " + blockPos.getX() + " " + blockPos.getY() + " " + blockPos.getZ();
-						server.getCommands().executeWithPrefix(server.createCommandSourceStack(), placeStructureCommand);
+						server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), placeStructureCommand);
 
 						String forceLoadRemoveAllCommand = "execute in " + targetWorld.dimension().identifier() + " run forceload remove " + (blockPos.getX() - 16) + " " + (blockPos.getZ() - 16) + " " + (blockPos.getX() + 31) + " " + (blockPos.getZ() + 31);
-						server.getCommands().executeWithPrefix(server.createCommandSourceStack(), forceLoadRemoveAllCommand);
+						server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), forceLoadRemoveAllCommand);
 
 						blockEntity = targetWorld.getBlockEntity(blockPos);
 						initialise = true;
@@ -207,7 +201,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							// TODO don't execute a command, find a better way
 							String forceLoadAddCommand = "execute in " + targetWorld.dimension().identifier() + " run forceload add " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
-							server.getCommands().executeWithPrefix(server.createCommandSourceStack(), forceLoadAddCommand);
+							server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), forceLoadAddCommand);
 
 							BlockPos dataBlockPos = locationControlBlock.getDataProvidingBlockPosOffset();
 							if (dataBlockPos != BlockPos.ZERO) {
@@ -226,7 +220,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 							// TODO don't execute a command, find a better way
 							String forceLoadRemoveAllCommand = "execute in " + targetWorld.dimension().identifier() + " run forceload remove " + resetAreaMinX + " " + resetAreaMinZ + " " + resetAreaMaxX + " " + resetAreaMaxZ;
-							server.getCommands().executeWithPrefix(server.createCommandSourceStack(), forceLoadRemoveAllCommand);
+							server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), forceLoadRemoveAllCommand);
 
 							locationWasReset = true;
 						}
@@ -234,10 +228,10 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 
 					if (blockEntity instanceof LocationControlBlockEntity locationControlBlock) {
 
-						MutablePair<BlockPos, MutablePair<Double, Double>> entrance = locationControlBlock.getTargetEntrance(targetWorld, targetLocationEntrance);
-						targetPos = entrance.getLeft();
-						targetYaw = entrance.getRight().getLeft();
-						targetPitch = entrance.getRight().getRight();
+						teleportTarget = locationControlBlock.getActualSpawnPoint(targetWorld, targetLocationEntrance);
+						targetPos = teleportTarget.pos();
+						targetYaw = teleportTarget.yaw();
+						targetPitch = teleportTarget.pitch();
 
 						long remainingCooldown = LocationUtils.getRemainingCooldownForEntrance(serverPlayerEntity, targetLocation, targetLocationEntrance);
 						if (remainingCooldown > 0) {
@@ -307,16 +301,13 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 			}
 		}
 
-		if (targetWorld != null && targetPos != null && playerHadKeyItem && locationCooldownWasUp) {
+		if (teleportTarget != null && targetWorld != null && playerHadKeyItem && locationCooldownWasUp) {
 
-			String validatedAccessPositionDimension = "";
-			BlockPos actualAccessPosition = null;
-			List<UUID> uuidList = new ArrayList<>();
-
-			if (setAccessPosition && Identifier.tryParse(accessPositionDimension) != null) {
-				validatedAccessPositionDimension = accessPositionDimension;
-				actualAccessPosition = teleportBlockPosition.offset(accessPositionOffset.getX(), accessPositionOffset.getY(), accessPositionOffset.getZ());
+			LevelData.RespawnData actualLocationAccessPoint = null;
+			if (enableLocationAccessPoint) {
+				actualLocationAccessPoint = locationAccessPoint;
 			}
+			List<UUID> uuidList = new ArrayList<>();
 
 			this.handleTeleport(
 					serverPlayerEntity,
@@ -326,8 +317,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 					targetPitch,
 					targetLocationIsPublic,
 					targetDimensionOwnerName,
-					validatedAccessPositionDimension,
-					actualAccessPosition,
+					actualLocationAccessPoint,
 					locationToCoolDown
 			);
 
@@ -348,8 +338,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 									targetPitch,
 									targetLocationIsPublic,
 									targetDimensionOwnerName,
-									validatedAccessPositionDimension,
-									actualAccessPosition,
+									actualLocationAccessPoint,
 									locationToCoolDown
 							);
 
@@ -387,19 +376,19 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 		}
 	}
 
-	private void handleTeleport(ServerPlayer serverPlayerEntity, ServerLevel targetWorld, BlockPos targetPos, double targetYaw, double targetPitch, boolean targetLocationIsPublic, String targetDimensionOwnerName, String accessPositionDimension, @Nullable BlockPos accessPosition, String locationToCoolDown) {
+	private void handleTeleport(ServerPlayer serverPlayerEntity, ServerLevel targetLevel, BlockPos targetPos, float targetYaw, float targetPitch, boolean targetLocationIsPublic, String targetDimensionOwnerName, @Nullable LevelData.RespawnData locationAccessPoint, String locationToCoolDown) {
 
 		serverPlayerEntity.fallDistance = 0;
-		serverPlayerEntity.teleportTo(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), EnumSet.noneOf(Relative.class), (float) targetYaw, (float) targetPitch);
+		serverPlayerEntity.teleportTo(targetLevel, (targetPos.getX() + 0.5), (targetPos.getY() + 0.01), (targetPos.getZ() + 0.5), Set.of(), targetYaw, targetPitch, true);
 		if (DebuggingHelper.isTeleporterLoggingEnabled()) {
-			DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld.dimension().identifier() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
+			DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetLevel.dimension().identifier() + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.01) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + targetYaw + " and pitch: " + targetPitch, serverPlayerEntity);
 			if (!targetLocationIsPublic) {
 				DebuggingHelper.sendDebuggingMessage("World owned by: " + targetDimensionOwnerName, serverPlayerEntity);
 			}
 		}
 
-		if (!accessPositionDimension.isEmpty() && accessPosition != null) {
-			DataAttachmentHelper.setCurrentLocationAccess(serverPlayerEntity, new MutablePair<>(accessPositionDimension, accessPosition));
+		if (locationAccessPoint != null) {
+			DataAttachmentHelper.setCurrentLocationAccessPoint(serverPlayerEntity, locationAccessPoint);
 		}
 
 		if (!locationToCoolDown.isEmpty()) {

@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -14,9 +15,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public record UpdateTriggeredSpawnerBlockPacket(
 		BlockPos triggeredSpawnerBlockPosition,
-		BlockPos entitySpawnPositionOffset,
-		double entitySpawnOrientationPitch,
-		double entitySpawnOrientationYaw,
+		LevelData.RespawnData spawnPoint,
 		String spawningMode,
 		boolean isPersistent,
 		boolean enableSpawnEffects,
@@ -32,9 +31,7 @@ public record UpdateTriggeredSpawnerBlockPacket(
 	public UpdateTriggeredSpawnerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readDouble(),
+				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
@@ -49,9 +46,7 @@ public record UpdateTriggeredSpawnerBlockPacket(
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredSpawnerBlockPosition);
 
-		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
-		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
-		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
+		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.spawnPoint);
 
 		registryByteBuf.writeUtf(this.spawningMode);
 

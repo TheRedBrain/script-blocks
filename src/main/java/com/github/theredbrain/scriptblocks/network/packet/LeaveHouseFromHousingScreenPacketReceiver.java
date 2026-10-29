@@ -4,13 +4,12 @@ import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import org.apache.commons.lang3.tuple.MutablePair;
+import net.minecraft.world.level.storage.LevelData;
+
+import java.util.Set;
 
 public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<LeaveHouseFromHousingScreenPacket> {
 	@Override
@@ -18,23 +17,20 @@ public class LeaveHouseFromHousingScreenPacketReceiver implements ServerPlayNetw
 
 		ServerPlayer serverPlayerEntity = context.player();
 
-		MinecraftServer server = serverPlayerEntity.server;
+		MinecraftServer server = serverPlayerEntity.level().getServer();
 		ServerLevel targetWorld = null;
 		BlockPos targetPos = null;
-		MutablePair<String, BlockPos> location_access_pos = DataAttachmentHelper.getCurrentLocationAccess(serverPlayerEntity);
-		if (location_access_pos != null) {
-			targetWorld = server.getLevel(ResourceKey.create(Registries.DIMENSION, Identifier.parse(location_access_pos.getLeft())));
-			targetPos = location_access_pos.getRight();
-			if (targetWorld != null && targetPos != null) {
-				DataAttachmentHelper.setCurrentLocationAccess(serverPlayerEntity, null);
+		LevelData.RespawnData location_access_point = DataAttachmentHelper.getCurrentLocationAccessPoint(serverPlayerEntity);
+		if (location_access_point != null) {
+			targetPos = location_access_point.pos();
+			targetWorld = server.getLevel(location_access_point.dimension());
+			if (targetWorld != null) {
+				DataAttachmentHelper.setCurrentLocationAccessPoint(serverPlayerEntity, null);
 			}
-		} else {
-			targetWorld = server.getLevel(serverPlayerEntity.getSpawnPointDimension());
-			targetPos = serverPlayerEntity.getSpawnPointPosition();
 		}
-		if (targetWorld != null && targetPos != null) {
+		if (targetPos != null && targetWorld != null) {
 
-			serverPlayerEntity.teleportTo(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.5), (targetPos.getZ() + 0.5), (float) 0.0, (float) 0.0);
+			serverPlayerEntity.teleportTo(targetWorld, (targetPos.getX() + 0.5), (targetPos.getY() + 0.5), (targetPos.getZ() + 0.5), Set.of(), (float) 0.0, (float) 0.0, true);
 			if (DebuggingHelper.isTeleporterLoggingEnabled()) {
 				DebuggingHelper.sendDebuggingMessage("Teleport to world: " + targetWorld + " at position: " + (targetPos.getX() + 0.5) + ", " + (targetPos.getY() + 0.5) + ", " + (targetPos.getZ() + 0.5) + ", with yaw: " + 0.0 + " and pitch: " + 0.0, serverPlayerEntity);
 			}

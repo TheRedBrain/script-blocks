@@ -26,6 +26,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -212,7 +213,7 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 	@Override
 	protected void cancel() {
 		this.teleporterBlock.setShowAdventureScreen(this.showAdventureScreen);
-		this.teleporterBlock.setSetAccessPosition(this.setAccessPosition);
+		this.teleporterBlock.setEnableLocationAccessPoint(this.setAccessPosition);
 		this.teleporterBlock.setOnlyTeleportDimensionOwner(this.onlyTeleportDimensionOwner);
 		this.teleporterBlock.setTeleportTeam(this.teleportTeam);
 		this.teleporterBlock.setShowCancelButton(this.showCancelButton);
@@ -273,20 +274,20 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 		this.accessPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 160, 50, 20, Component.empty());
 		this.accessPositionOffsetXField.setMaxLength(128);
-		this.accessPositionOffsetXField.setValue(Integer.toString(this.teleporterBlock.getAccessPositionOffset().getX()));
+		this.accessPositionOffsetXField.setValue(Integer.toString(this.teleporterBlock.getLocationAccessPoint().pos().getX()));
 		this.addWidget(this.accessPositionOffsetXField);
 
 		this.accessPositionOffsetYField = new EditBox(this.font, this.width / 2 - 100, 160, 50, 20, Component.empty());
 		this.accessPositionOffsetYField.setMaxLength(128);
-		this.accessPositionOffsetYField.setValue(Integer.toString(this.teleporterBlock.getAccessPositionOffset().getY()));
+		this.accessPositionOffsetYField.setValue(Integer.toString(this.teleporterBlock.getLocationAccessPoint().pos().getY()));
 		this.addWidget(this.accessPositionOffsetYField);
 
 		this.accessPositionOffsetZField = new EditBox(this.font, this.width / 2 - 46, 160, 50, 20, Component.empty());
 		this.accessPositionOffsetZField.setMaxLength(128);
-		this.accessPositionOffsetZField.setValue(Integer.toString(this.teleporterBlock.getAccessPositionOffset().getZ()));
+		this.accessPositionOffsetZField.setValue(Integer.toString(this.teleporterBlock.getLocationAccessPoint().pos().getZ()));
 		this.addWidget(this.accessPositionOffsetZField);
 
-		this.setAccessPosition = this.teleporterBlock.getSetAccessPosition();
+		this.setAccessPosition = this.teleporterBlock.getEnableLocationAccessPoint();
 		this.toggleSetAccessPositionButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SET_ACCESS_POSITION_BUTTON_LABEL_TEXT_ON, TOGGLE_SET_ACCESS_POSITION_BUTTON_LABEL_TEXT_OFF).initially(this.setAccessPosition).omitKeyText().build(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, setAccessPosition) -> {
 			this.setAccessPosition = setAccessPosition;
 		}));
@@ -314,27 +315,27 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 		this.directTeleportPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 80, 100, 20, Component.empty());
 		this.directTeleportPositionOffsetXField.setMaxLength(128);
-		this.directTeleportPositionOffsetXField.setValue(Integer.toString(this.teleporterBlock.getDirectTeleportPositionOffset().getX()));
+		this.directTeleportPositionOffsetXField.setValue(Integer.toString(this.teleporterBlock.getDirectTeleportTarget().pos().getX()));
 		this.addWidget(this.directTeleportPositionOffsetXField);
 
 		this.directTeleportPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 80, 100, 20, Component.empty());
 		this.directTeleportPositionOffsetYField.setMaxLength(128);
-		this.directTeleportPositionOffsetYField.setValue(Integer.toString(this.teleporterBlock.getDirectTeleportPositionOffset().getY()));
+		this.directTeleportPositionOffsetYField.setValue(Integer.toString(this.teleporterBlock.getDirectTeleportTarget().pos().getY()));
 		this.addWidget(this.directTeleportPositionOffsetYField);
 
 		this.directTeleportPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 80, 100, 20, Component.empty());
 		this.directTeleportPositionOffsetZField.setMaxLength(128);
-		this.directTeleportPositionOffsetZField.setValue(Integer.toString(this.teleporterBlock.getDirectTeleportPositionOffset().getZ()));
+		this.directTeleportPositionOffsetZField.setValue(Integer.toString(this.teleporterBlock.getDirectTeleportTarget().pos().getZ()));
 		this.addWidget(this.directTeleportPositionOffsetZField);
 
 		this.directTeleportOrientationYawField = new EditBox(this.font, this.width / 2 - 154, 115, 100, 20, Component.empty());
 		this.directTeleportOrientationYawField.setMaxLength(128);
-		this.directTeleportOrientationYawField.setValue(Double.toString(this.teleporterBlock.getDirectTeleportOrientationYaw()));
+		this.directTeleportOrientationYawField.setValue(Double.toString(this.teleporterBlock.getDirectTeleportTarget().yaw()));
 		this.addWidget(this.directTeleportOrientationYawField);
 
 		this.directTeleportOrientationPitchField = new EditBox(this.font, this.width / 2 - 50, 115, 100, 20, Component.empty());
 		this.directTeleportOrientationPitchField.setMaxLength(128);
-		this.directTeleportOrientationPitchField.setValue(Double.toString(this.teleporterBlock.getDirectTeleportOrientationPitch()));
+		this.directTeleportOrientationPitchField.setValue(Double.toString(this.teleporterBlock.getDirectTeleportTarget().pitch()));
 		this.addWidget(this.directTeleportOrientationPitchField);
 
 		// teleportation mode: spawn_points
@@ -1043,9 +1044,11 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 	@Override
 	protected boolean updateBlock() {
-
+		if (this.teleporterBlock.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(new UpdateTeleporterBlockPacket(
-				this.teleporterBlock.getPos(),
+				this.teleporterBlock.getBlockPos(),
 				this.creativeScreenPage.asString(),
 				this.showAdventureScreen,
 				this.preventInteractionIdentifierStringField.getValue(),
@@ -1055,23 +1058,31 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 						ItemUtils.parseInt(this.uuidListProviderBlockPositionOffsetYField.getValue()),
 						ItemUtils.parseInt(this.uuidListProviderBlockPositionOffsetZField.getValue())
 				),
+				LevelData.RespawnData.of(
+						this.teleporterBlock.getLevel().dimension(),
 				new BlockPos(
 						ItemUtils.parseInt(this.accessPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.accessPositionOffsetYField.getValue()),
 						ItemUtils.parseInt(this.accessPositionOffsetZField.getValue())
+				),
+						0.0F,//ItemUtils.parseFloat(this.directTeleportOrientationYawField.getValue()),
+						0.0F//ItemUtils.parseFloat(this.directTeleportOrientationPitchField.getValue())
 				),
 				this.setAccessPosition,
 				this.onlyTeleportDimensionOwner,
 				this.onlyDimensionOwnerCanTeleportMessageField.getValue(),
 				this.teleportTeam,
 				this.teleportationMode.asString(),
-				new BlockPos(
-						ItemUtils.parseInt(this.directTeleportPositionOffsetXField.getValue()),
-						ItemUtils.parseInt(this.directTeleportPositionOffsetYField.getValue()),
-						ItemUtils.parseInt(this.directTeleportPositionOffsetZField.getValue())
+				LevelData.RespawnData.of(
+						this.teleporterBlock.getLevel().dimension(),
+						new BlockPos(
+								ItemUtils.parseInt(this.directTeleportPositionOffsetXField.getValue()),
+								ItemUtils.parseInt(this.directTeleportPositionOffsetYField.getValue()),
+								ItemUtils.parseInt(this.directTeleportPositionOffsetZField.getValue())
+						),
+						ItemUtils.parseFloat(this.directTeleportOrientationYawField.getValue()),
+						ItemUtils.parseFloat(this.directTeleportOrientationPitchField.getValue())
 				),
-				ItemUtils.parseDouble(this.directTeleportOrientationYawField.getValue()),
-				ItemUtils.parseDouble(this.directTeleportOrientationPitchField.getValue()),
 				this.spawnPointType.asString(),
 				new ArrayList<>(this.locationsList),
 				new MutablePair<>(new MutablePair<>(this.locationIdentifierField.getValue(), this.locationEntranceField.getValue()), new MutablePair<>(this.locationDataIdField.getValue(), this.locationDataField.getValue())),

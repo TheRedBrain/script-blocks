@@ -8,13 +8,14 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.world.level.storage.LevelData;
+
 import java.util.Optional;
 
 public class ScriptBlocksDataAttachments {
 	public static AttachmentType<LocationCooldowns> LOCATION_COOLDOWNS;
 	public static AttachmentType<OptionalBlockPosition> CURRENT_HOUSING_BLOCK_POS;
-	public static AttachmentType<OptionalBlockPosition> CURRENT_LOCATION_ACCESS_BLOCK_POS;
-	public static AttachmentType<String> CURRENT_LOCATION_ACCESS_DIMENSION;
+	public static AttachmentType<LevelData.RespawnData> CURRENT_LOCATION_ACCESS_POINT;
 	public static AttachmentType<OptionalBlockPosition> CURRENT_PVP_CONTROLLER_BLOCK_POS;
 
 	public static void bootstrap() {
@@ -31,15 +32,10 @@ public class ScriptBlocksDataAttachments {
 				.copyOnDeath()
 				.syncWith(OptionalBlockPosition.PACKET_CODEC, AttachmentSyncPredicate.all())
 		);
-		CURRENT_LOCATION_ACCESS_BLOCK_POS = AttachmentRegistry.create(ScriptBlocks.identifier("current_location_access_block_pos"), builder -> builder
-				.persistent(OptionalBlockPosition.CODEC)
+		CURRENT_LOCATION_ACCESS_POINT = AttachmentRegistry.create(ScriptBlocks.identifier("current_location_access_point"), builder -> builder
+				.persistent(LevelData.RespawnData.CODEC)
 				.copyOnDeath()
-				.syncWith(OptionalBlockPosition.PACKET_CODEC, AttachmentSyncPredicate.all())
-		);
-		CURRENT_LOCATION_ACCESS_DIMENSION = AttachmentRegistry.create(ScriptBlocks.identifier("current_location_access_dimension"), builder -> builder
-				.persistent(Codec.STRING)
-				.copyOnDeath()
-				.syncWith(ByteBufCodecs.STRING_UTF8, AttachmentSyncPredicate.all())
+				.syncWith(LevelData.RespawnData.STREAM_CODEC, AttachmentSyncPredicate.all())
 		);
 		CURRENT_PVP_CONTROLLER_BLOCK_POS = AttachmentRegistry.create(ScriptBlocks.identifier("current_pvp_controller_block_pos"), builder -> builder
 				.persistent(OptionalBlockPosition.CODEC)

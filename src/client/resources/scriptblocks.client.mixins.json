@@ -3,6 +3,7 @@
   "package": "com.github.theredbrain.scriptblocks.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "multiplayer.ClientLevelMixin",
     "network.ClientPlayerEntityMixin",
     "network.ClientPlayerInteractionManagerMixin",
     "render.GameRendererMixin",

@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -194,20 +195,20 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.bossIdentifierField);
 
 		this.entitySpawnPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 90, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.bossControllerBlock.getBossSpawnPositionOffset().getX()));
+		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.bossControllerBlock.getSpawnPoint().pos().getX()));
 		this.addWidget(this.entitySpawnPositionOffsetXField);
 		this.entitySpawnPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 90, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.bossControllerBlock.getBossSpawnPositionOffset().getY()));
+		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.bossControllerBlock.getSpawnPoint().pos().getY()));
 		this.addWidget(this.entitySpawnPositionOffsetYField);
 		this.entitySpawnPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 90, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.bossControllerBlock.getBossSpawnPositionOffset().getZ()));
+		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.bossControllerBlock.getSpawnPoint().pos().getZ()));
 		this.addWidget(this.entitySpawnPositionOffsetZField);
 
 		this.entitySpawnOrientationPitchField = new EditBox(this.font, this.width / 2 - 154, 125, 150, 20, Component.empty());
-		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.bossControllerBlock.getBossSpawnOrientationPitch()));
+		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.bossControllerBlock.getSpawnPoint().pitch()));
 		this.addWidget(this.entitySpawnOrientationPitchField);
 		this.entitySpawnOrientationYawField = new EditBox(this.font, this.width / 2 + 4, 125, 150, 20, Component.empty());
-		this.entitySpawnOrientationYawField.setValue(Double.toString(this.bossControllerBlock.getBossSpawnOrientationYaw()));
+		this.entitySpawnOrientationYawField.setValue(Double.toString(this.bossControllerBlock.getSpawnPoint().yaw()));
 		this.addWidget(this.entitySpawnOrientationYawField);
 
 		this.isPersistent = this.bossControllerBlock.isPersistent();
@@ -508,8 +509,11 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 	@Override
 	protected boolean updateBlock() {
+		if (this.bossControllerBlock.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(new UpdateBossControllerBlockPacket(
-				this.bossControllerBlock.getPos(),
+				this.bossControllerBlock.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.uuidListHandlerBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.uuidListHandlerBlockPositionOffsetYField.getValue()),
@@ -522,13 +526,16 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 				),
 				this.noPlayersAroundTriggeredBlockResets,
 				this.bossIdentifierField.getValue(),
-				new BlockPos(
-						ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
-						ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
-						ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+				LevelData.RespawnData.of(
+						this.bossControllerBlock.getLevel().dimension(),
+						new BlockPos(
+								ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
+								ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
+								ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+						),
+						ItemUtils.parseFloat(this.entitySpawnOrientationPitchField.getValue()),
+						ItemUtils.parseFloat(this.entitySpawnOrientationYawField.getValue())
 				),
-				ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getValue()),
-				ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getValue()),
 				this.isPersistent,
 				this.enableSpawnEffects,
 				this.bossTriggeredBlocksList

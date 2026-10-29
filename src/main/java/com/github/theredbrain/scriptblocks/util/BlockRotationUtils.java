@@ -2,9 +2,11 @@ package com.github.theredbrain.scriptblocks.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class BlockRotationUtils {
@@ -93,8 +95,8 @@ public class BlockRotationUtils {
 		}
 	}
 
-	public static double rotateYaw(double yaw, Rotation rotation) {
-		double tempYaw = yaw + 180;
+	public static float rotateYaw(float yaw, Rotation rotation) {
+		float tempYaw = yaw + 180;
 		if (rotation == Rotation.CLOCKWISE_90) {
 			tempYaw = (tempYaw + 90) % 360;
 			return tempYaw - 180;
@@ -110,7 +112,7 @@ public class BlockRotationUtils {
 
 	}
 
-	public static double mirrorYaw(double yaw, Mirror mirror) {
+	public static float mirrorYaw(float yaw, Mirror mirror) {
 		if (mirror == Mirror.FRONT_BACK) {
 			return -yaw;
 		} else if (mirror == Mirror.LEFT_RIGHT) {
@@ -152,12 +154,12 @@ public class BlockRotationUtils {
 		}
 	}
 
-	public static MutablePair<BlockPos, MutablePair<Double, Double>> rotateSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, Rotation rotation) {
-		return new MutablePair<>(BlockRotationUtils.rotateOffsetBlockPos(spawnPoint.getLeft(), rotation), new MutablePair<>(BlockRotationUtils.rotateYaw(spawnPoint.getRight().getLeft(), rotation), spawnPoint.getRight().getRight()));
+	public static LevelData.RespawnData rotateSpawnPoint(LevelData.RespawnData spawnPoint, Rotation rotation) {
+		return new LevelData.RespawnData(new GlobalPos(spawnPoint.dimension(), BlockRotationUtils.rotateOffsetBlockPos(spawnPoint.pos(), rotation)), BlockRotationUtils.rotateYaw(spawnPoint.yaw(), rotation), spawnPoint.pitch());
 	}
 
-	public static MutablePair<BlockPos, MutablePair<Double, Double>> mirrorSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint, Mirror mirror) {
-		return new MutablePair<>(BlockRotationUtils.mirrorOffsetBlockPos(spawnPoint.getLeft(), mirror), new MutablePair<>(BlockRotationUtils.mirrorYaw(spawnPoint.getRight().getLeft(), mirror), spawnPoint.getRight().getRight()));
+	public static LevelData.RespawnData mirrorSpawnPoint(LevelData.RespawnData spawnPoint, Mirror mirror) {
+		return new LevelData.RespawnData(new GlobalPos(spawnPoint.dimension(), BlockRotationUtils.mirrorOffsetBlockPos(spawnPoint.pos(), mirror)), BlockRotationUtils.mirrorYaw(spawnPoint.yaw(), mirror), spawnPoint.pitch());
 	}
 
 	public static MutablePair<BlockPos, Vec3i> rotateOffsetArea(BlockPos positionOffset, Vec3i areaDimensions, Rotation rotation) {

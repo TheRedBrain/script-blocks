@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -34,8 +35,8 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		BlockPos uuidListHandlerBlockPositionOffset = payload.uuidListHandlerBlockPositionOffset();
 
-		BlockPos accessPositionOffset = payload.accessPositionOffset();
-		boolean setAccessPosition = payload.setAccessPosition();
+		LevelData.RespawnData locationAccessPoint = payload.locationAccessPoint();
+		boolean enableLocationAccessPoint = payload.enableLocationAccessPoint();
 
 		boolean onlyTeleportDimensionOwner = payload.onlyTeleportDimensionOwner();
 		String onlyDimensionOwnerCanTeleportMessage = payload.onlyDimensionOwnerCanTeleportMessage();
@@ -44,9 +45,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.byName(payload.teleportationMode()).orElse(TeleporterBlockEntity.TeleportationMode.DIRECT);
 
-		BlockPos directTeleportPositionOffset = payload.directTeleportPositionOffset();
-		double directTeleportOrientationYaw = payload.directTeleportOrientationYaw();
-		double directTeleportOrientationPitch = payload.directTeleportOrientationPitch();
+		LevelData.RespawnData directTeleportTarget = payload.directTeleportTarget();
 
 		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.byName(payload.spawnPointType()).orElse(TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN);
 
@@ -89,21 +88,13 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setPreventInteractionIdentifierString(preventInteractionIdentifierString);
 			teleporterBlockEntity.setInteractionPreventedMessage(interactionPreventedMessage);
 			teleporterBlockEntity.setUuidListHandlerPositionOffset(uuidListHandlerBlockPositionOffset);
-			teleporterBlockEntity.setAccessPositionOffset(accessPositionOffset);
-			teleporterBlockEntity.setSetAccessPosition(setAccessPosition);
+			teleporterBlockEntity.setLocationAccessPoint(locationAccessPoint);
+			teleporterBlockEntity.setEnableLocationAccessPoint(enableLocationAccessPoint);
 			teleporterBlockEntity.setOnlyTeleportDimensionOwner(onlyTeleportDimensionOwner);
 			teleporterBlockEntity.setOnlyDimensionOwnerCanTeleportMessage(onlyDimensionOwnerCanTeleportMessage);
 			teleporterBlockEntity.setTeleportTeam(teleportTeam);
 			teleporterBlockEntity.setTeleportationMode(teleportationMode);
-			teleporterBlockEntity.setDirectTeleportPositionOffset(directTeleportPositionOffset);
-			if (!teleporterBlockEntity.setDirectTeleportOrientationYaw(directTeleportOrientationYaw)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("teleporter_block.directTeleportOrientationYaw.invalid"), false);
-				updateSuccessful = false;
-			}
-			if (!teleporterBlockEntity.setDirectTeleportOrientationPitch(directTeleportOrientationPitch)) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("teleporter_block.directTeleportOrientationPitch.invalid"), false);
-				updateSuccessful = false;
-			}
+			teleporterBlockEntity.setDirectTeleportTarget(directTeleportTarget);
 			teleporterBlockEntity.setSpawnPointType(spawnPointType);
 			teleporterBlockEntity.setLocationsList(locationsList);
 			teleporterBlockEntity.setLocation(location);
@@ -124,7 +115,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 			teleporterBlockEntity.setCancelTeleportButtonLabel(cancelTeleportButtonLabel);
 
 			if (updateSuccessful) {
-				serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+				serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			}
 			teleporterBlockEntity.setChanged();
 			world.sendBlockUpdated(teleportBlockPosition, blockState, blockState, Block.UPDATE_ALL);

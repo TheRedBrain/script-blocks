@@ -15,7 +15,6 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -37,6 +36,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Mirror;
@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -76,9 +77,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	private String bossIdentifier = "";
 
-	private BlockPos bossSpawnPositionOffset = BlockPos.ZERO;
-	private double bossSpawnOrientationPitch = 0.0;
-	private double bossSpawnOrientationYaw = 0.0;
+	private LevelData.RespawnData spawnPoint = LevelData.RespawnData.DEFAULT;
 
 	protected boolean isPersistent = false;
 	protected boolean enableSpawnEffects = true;
@@ -112,11 +111,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		view.putString("boss_identifier", this.bossIdentifier);
 
-		nbtCompound = new CompoundTag();
-		nbtCompound.store("position_offset", BlockPos.CODEC, this.bossSpawnPositionOffset);
-		nbtCompound.putDouble("yaw", this.bossSpawnOrientationYaw);
-		nbtCompound.putDouble("pitch", this.bossSpawnOrientationPitch);
-		view.store("boss_spawn_point", CompoundTag.CODEC, nbtCompound.copy());
+		view.store("spawn_point", LevelData.RespawnData.CODEC, this.spawnPoint);
 
 		view.putBoolean("is_persistent", this.isPersistent);
 
@@ -164,22 +159,20 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 		this.bossIdentifier = view.getStringOr("boss_identifier", "");
 
-		nbtCompound = view.read("boss_spawn_point", CompoundTag.CODEC).orElseGet(CompoundTag::new);
-		this.bossSpawnPositionOffset = BlockPos.max(
-				BlockPos.min(
-						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-						new BlockPos(48, 48, 48)
-				),
-				new BlockPos(-48, -48, -48)
+		this.spawnPoint = view.read("spawn_point", LevelData.RespawnData.CODEC).orElseGet(() -> {
+					CompoundTag nbtCompound1 = view.read("boss_spawn_point", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+					return LevelData.RespawnData.of(
+							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
+							nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+							nbtCompound1.getFloatOr("yaw", 0),
+							nbtCompound1.getFloatOr("pitch", 0)
+					);
+				}
 		);
 
 		this.isPersistent = view.getBooleanOr("is_persistent", false);
 
 		this.enableSpawnEffects = view.getBooleanOr("enable_spawn_effects", true);
-
-		this.bossSpawnOrientationPitch = Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90);
-
-		this.bossSpawnOrientationYaw = Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180);
 
 		this.bossTriggeredBlocks.clear();
 		for (CompoundTag nbtCompound1 : view.listOrEmpty("boss_triggered_blocks", CompoundTag.CODEC)) {
@@ -449,6 +442,21 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		return entityAttributeModifiers;
 	}
 
+	private static BlockPos getActualOffsetBlockPosition(BlockPos originalBlockPos, BlockPos offsetBlockPos) {
+		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
+	}
+
+	public LevelData.RespawnData getActualSpawnPoint(ServerLevel serverWorld) {
+
+		BlockPos targetPos = getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.pos());
+
+		if (!this.spawnPoint.pos().equals(BlockPos.ZERO) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
+		}
+
+		return this.spawnPoint;
+	}
+
 	private static boolean spawnBossEntity(BossControllerBlockEntity bC) {
 		if (bC.level instanceof ServerLevel serverWorld) {
 			try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(bC::toString, ScriptBlocks.LOGGER)) {
@@ -463,17 +471,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				if (entityType.isEmpty()) {
 					return false;
 				}
-				BlockPos blockPos = bC.worldPosition.offset(bC.bossSpawnPositionOffset.getX(), bC.bossSpawnPositionOffset.getY(), bC.bossSpawnPositionOffset.getZ());
-				double pitch = bC.bossSpawnOrientationPitch;
-				double yaw = bC.bossSpawnOrientationYaw;
-
-				if (serverWorld.getBlockEntity(blockPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-					MutablePair<BlockPos, MutablePair<Double, Double>> entrance = spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
-
-					blockPos = entrance.getLeft();
-					yaw = entrance.getRight().getLeft();
-					pitch = entrance.getRight().getRight();
-				}
+				LevelData.RespawnData spawnPoint = bC.getActualSpawnPoint(serverWorld);
+				BlockPos blockPos = spawnPoint.pos();
+				float yaw = spawnPoint.yaw();
+				float pitch = spawnPoint.pitch();
 				double d = blockPos.getX() + 0.5;
 				double e = blockPos.getY();
 				double f = blockPos.getZ() + 0.5;
@@ -492,9 +493,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 				if (entity2 == null) {
 					return false;
 				}
-				entity2.setYBodyRot((float) yaw);
-				entity2.setYHeadRot((float) yaw);
-				entity2.snapTo(entity2.getX(), entity2.getY(), entity2.getZ(), (float) yaw, (float) pitch);
+				entity2.setYBodyRot(yaw);
+				entity2.setYHeadRot(yaw);
+				entity2.snapTo(entity2.getX(), entity2.getY(), entity2.getZ(), yaw, pitch);
 				if (entity2 instanceof Mob mobEntity) {
 					if (bC.entityTypeCompound.getString("id").isPresent()) {
 						mobEntity.finalizeSpawn(serverWorld, serverWorld.getCurrentDifficultyAt(entity2.blockPosition()), EntitySpawnReason.SPAWNER, null);
@@ -503,7 +504,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 						return false;
 					}
 					if (bC.enableSpawnEffects) {
-						serverWorld.levelEvent(LevelEvent.PARTICLES_MOBBLOCK_SPAWN, bC.worldPosition, 0);
+						serverWorld.levelEvent(LevelEvent.PARTICLES_MOBBLOCK_SPAWN, bC.getBlockPos(), 0);
 					}
 					serverWorld.gameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
 
@@ -515,12 +516,12 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 						mobEntity.spawnAnim();
 					}
 
-					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.worldPosition);
+					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.getBlockPos());
 				}
 				bC.setChanged();
 				if (bC.level != null) {
-					BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-					bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+					BlockState blockState = bC.level.getBlockState(bC.getBlockPos());
+					bC.level.sendBlockUpdated(bC.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 				}
 				return true;
 			}
@@ -595,7 +596,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		return entityTypeId.isEmpty();
 	}
 
-	// endregion --- getter & setter ---
+	// region --- getter & setter ---
 	public BlockPos getUUIDListHandlerBlockPositionOffset() {
 		return this.uuidListHandlerBlockPositionOffset;
 	}
@@ -627,35 +628,12 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		);
 	}
 
-	public BlockPos getBossSpawnPositionOffset() {
-		return this.bossSpawnPositionOffset;
+	public LevelData.RespawnData getSpawnPoint() {
+		return this.spawnPoint;
 	}
 
-	public void setBossSpawnPositionOffset(BlockPos bossSpawnPositionOffset) {
-		this.bossSpawnPositionOffset = BlockPos.max(
-				BlockPos.min(
-						bossSpawnPositionOffset,
-						new BlockPos(48, 48, 48)
-				),
-				new BlockPos(-48, -48, -48)
-		);
-	}
-
-	public double getBossSpawnOrientationPitch() {
-		return bossSpawnOrientationPitch;
-	}
-
-	public void setBossSpawnPositionPitch(double bossSpawnPositionPitch) {
-		this.bossSpawnOrientationPitch = Mth.clamp(bossSpawnPositionPitch, -90, 90);
-		;
-	}
-
-	public double getBossSpawnOrientationYaw() {
-		return bossSpawnOrientationYaw;
-	}
-
-	public void setBossSpawnPositionYaw(double bossSpawnPositionYaw) {
-		this.bossSpawnOrientationYaw = Mth.clamp(bossSpawnPositionYaw, -180, 180);
+	public void setSpawnPoint(LevelData.RespawnData spawnPoint) {
+		this.spawnPoint = LevelData.RespawnData.of(spawnPoint.dimension(), spawnPoint.pos(), spawnPoint.yaw(), spawnPoint.pitch());
 	}
 
 	public boolean isPersistent() {
@@ -710,8 +688,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, blockRotation);
 
-				this.bossSpawnPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.bossSpawnPositionOffset, blockRotation);
-				this.bossSpawnOrientationYaw = BlockRotationUtils.rotateYaw(this.bossSpawnOrientationYaw, blockRotation);
+				this.spawnPoint = BlockRotationUtils.rotateSpawnPoint(this.spawnPoint, blockRotation);
 
 				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.rotateOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), blockRotation));
 
@@ -727,8 +704,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			if (state.getValue(ScriptBlocksBlockProperties.X_MIRRORED) != this.x_mirrored) {
 				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, Mirror.FRONT_BACK);
 
-				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, Mirror.FRONT_BACK);
-				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, Mirror.FRONT_BACK);
+				this.spawnPoint = BlockRotationUtils.mirrorSpawnPoint(this.spawnPoint, Mirror.FRONT_BACK);
 
 				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), Mirror.FRONT_BACK));
 
@@ -744,8 +720,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			if (state.getValue(ScriptBlocksBlockProperties.Z_MIRRORED) != this.z_mirrored) {
 				this.uuidListHandlerBlockPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.uuidListHandlerBlockPositionOffset, Mirror.LEFT_RIGHT);
 
-				this.bossSpawnPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.bossSpawnPositionOffset, Mirror.LEFT_RIGHT);
-				this.bossSpawnOrientationYaw = BlockRotationUtils.mirrorYaw(this.bossSpawnOrientationYaw, Mirror.LEFT_RIGHT);
+				this.spawnPoint = BlockRotationUtils.mirrorSpawnPoint(this.spawnPoint, Mirror.LEFT_RIGHT);
 
 				this.noPlayersAroundTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.noPlayersAroundTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 

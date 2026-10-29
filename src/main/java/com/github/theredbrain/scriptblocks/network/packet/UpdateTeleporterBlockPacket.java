@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -17,15 +18,13 @@ public record UpdateTeleporterBlockPacket(
 		String preventInteractionIdentifierString,
 		String interactionPreventedMessage,
 		BlockPos uuidListHandlerBlockPositionOffset,
-		BlockPos accessPositionOffset,
-		boolean setAccessPosition,
+		LevelData.RespawnData locationAccessPoint,
+		boolean enableLocationAccessPoint,
 		boolean onlyTeleportDimensionOwner,
 		String onlyDimensionOwnerCanTeleportMessage,
 		boolean teleportTeam,
 		String teleportationMode,
-		BlockPos directTeleportPositionOffset,
-		double directTeleportOrientationYaw,
-		double directTeleportOrientationPitch,
+		LevelData.RespawnData directTeleportTarget,
 		String spawnPointType,
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList,
 		MutablePair<MutablePair<String, String>, MutablePair<String, String>> location,
@@ -58,15 +57,13 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBlockPos(),
+				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readDouble(),
+				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
 				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
@@ -102,8 +99,8 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBlockPos(this.uuidListHandlerBlockPositionOffset);
 
-		registryByteBuf.writeBlockPos(this.accessPositionOffset);
-		registryByteBuf.writeBoolean(this.setAccessPosition);
+		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.locationAccessPoint);
+		registryByteBuf.writeBoolean(this.enableLocationAccessPoint);
 
 		registryByteBuf.writeBoolean(this.onlyTeleportDimensionOwner);
 		registryByteBuf.writeUtf(this.onlyDimensionOwnerCanTeleportMessage);
@@ -112,9 +109,7 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeUtf(this.teleportationMode);
 
-		registryByteBuf.writeBlockPos(this.directTeleportPositionOffset);
-		registryByteBuf.writeDouble(this.directTeleportOrientationYaw);
-		registryByteBuf.writeDouble(this.directTeleportOrientationPitch);
+		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.directTeleportTarget);
 
 		registryByteBuf.writeUtf(this.spawnPointType);
 

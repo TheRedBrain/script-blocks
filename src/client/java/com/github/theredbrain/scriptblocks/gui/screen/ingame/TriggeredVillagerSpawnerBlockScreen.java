@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.npc.villager.VillagerData;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.npc.villager.VillagerType;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -190,20 +191,20 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		// --- misc page ---
 
 		this.entitySpawnPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 60, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.triggeredVillagerSpawnerBlock.getEntitySpawnPositionOffset().getX()));
+		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.triggeredVillagerSpawnerBlock.getSpawnPoint().pos().getX()));
 		this.addWidget(this.entitySpawnPositionOffsetXField);
 		this.entitySpawnPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 60, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.triggeredVillagerSpawnerBlock.getEntitySpawnPositionOffset().getY()));
+		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.triggeredVillagerSpawnerBlock.getSpawnPoint().pos().getY()));
 		this.addWidget(this.entitySpawnPositionOffsetYField);
 		this.entitySpawnPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 60, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.triggeredVillagerSpawnerBlock.getEntitySpawnPositionOffset().getZ()));
+		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.triggeredVillagerSpawnerBlock.getSpawnPoint().pos().getZ()));
 		this.addWidget(this.entitySpawnPositionOffsetZField);
 
 		this.entitySpawnOrientationPitchField = new EditBox(this.font, this.width / 2 - 154, 95, 150, 20, Component.empty());
-		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.triggeredVillagerSpawnerBlock.getEntitySpawnOrientationPitch()));
+		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.triggeredVillagerSpawnerBlock.getSpawnPoint().pitch()));
 		this.addWidget(this.entitySpawnOrientationPitchField);
 		this.entitySpawnOrientationYawField = new EditBox(this.font, this.width / 2 + 4, 95, 150, 20, Component.empty());
-		this.entitySpawnOrientationYawField.setValue(Double.toString(this.triggeredVillagerSpawnerBlock.getEntitySpawnOrientationYaw()));
+		this.entitySpawnOrientationYawField.setValue(Double.toString(this.triggeredVillagerSpawnerBlock.getSpawnPoint().yaw()));
 		this.addWidget(this.entitySpawnOrientationYawField);
 
 		this.spawningMode = this.triggeredVillagerSpawnerBlock.getSpawningMode();
@@ -615,16 +616,22 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 
 	@Override
 	protected boolean updateBlock() {
+		if (this.triggeredVillagerSpawnerBlock.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(
 				new UpdateTriggeredVillagerSpawnerBlockPacket(
-						this.triggeredVillagerSpawnerBlock.getPos(),
-						new BlockPos(
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+						this.triggeredVillagerSpawnerBlock.getBlockPos(),
+						LevelData.RespawnData.of(
+								this.triggeredVillagerSpawnerBlock.getLevel().dimension(),
+								new BlockPos(
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+								),
+								ItemUtils.parseFloat(this.entitySpawnOrientationPitchField.getValue()),
+								ItemUtils.parseFloat(this.entitySpawnOrientationYawField.getValue())
 						),
-						ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getValue()),
-						ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getValue()),
 						this.spawningMode.asString(),
 						this.isPersistent,
 						this.enableSpawnEffects,

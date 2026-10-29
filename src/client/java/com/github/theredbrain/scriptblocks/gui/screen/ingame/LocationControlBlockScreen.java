@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -75,7 +76,7 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 	private EditBox resetAreaMaxXField;
 	private EditBox resetAreaMaxZField;
 	private ScreenPage screenPage;
-	private final List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntranceList = new ArrayList<>();
+	private final List<MutablePair<String, LevelData.RespawnData>> sideEntranceList = new ArrayList<>();
 	private boolean shouldAlwaysReset;
 	private boolean manualReset;
 	private int scrollPosition = 0;
@@ -94,32 +95,34 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 			return;
 		}
 		boolean bl = true;
-		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> stringMutablePairMutablePair : this.sideEntranceList) {
+		for (MutablePair<String, LevelData.RespawnData> stringMutablePairMutablePair : this.sideEntranceList) {
 			if (stringMutablePairMutablePair.getLeft().equals(newEntranceName)) {
 				bl = false;
 				break;
 			}
 		}
+		if (this.locationControlBlock.getLevel() == null) {
+			return;
+		}
 		if (bl) {
 			this.sideEntranceList.add(new MutablePair<>(
 					this.newSideEntranceNameField.getValue(),
-					new MutablePair<>(
+					LevelData.RespawnData.of(
+							this.locationControlBlock.getLevel().dimension(),
 							new BlockPos(
 									ItemUtils.parseInt(this.newSideEntrancePositionOffsetXField.getValue()),
 									ItemUtils.parseInt(this.newSideEntrancePositionOffsetYField.getValue()),
 									ItemUtils.parseInt(this.newSideEntrancePositionOffsetZField.getValue())
 							),
-							new MutablePair<>(
-									ItemUtils.parseDouble(this.newSideEntranceOrientationYawField.getValue()),
-									ItemUtils.parseDouble(this.newSideEntranceOrientationPitchField.getValue())
-							)
+							ItemUtils.parseFloat(this.newSideEntranceOrientationYawField.getValue()),
+							ItemUtils.parseFloat(this.newSideEntranceOrientationPitchField.getValue())
 					)
 			));
 			this.scrollPosition = 0;
 			this.scrollAmount = 0.0f;
 			this.updateWidgets();
-		} else if (this.minecraft != null && this.minecraft.player != null) {
-			this.minecraft.player.displayClientMessage(Component.translatable("gui.teleporter_block.location_already_in_list"));
+		} else if (this.minecraft.player != null) {
+			this.minecraft.player.sendSystemMessage(Component.translatable("gui.teleporter_block.location_already_in_list"));
 		}
 	}
 
@@ -554,15 +557,21 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 
 	@Override
 	protected boolean updateBlock() {
+		if (this.locationControlBlock.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(new UpdateLocationControlBlockPacket(
-				this.locationControlBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.mainEntrancePositionOffsetXField.getValue()),
-						ItemUtils.parseInt(this.mainEntrancePositionOffsetYField.getValue()),
-						ItemUtils.parseInt(this.mainEntrancePositionOffsetZField.getValue())
+				this.locationControlBlock.getBlockPos(),
+				LevelData.RespawnData.of(
+						this.locationControlBlock.getLevel().dimension(),
+						new BlockPos(
+								ItemUtils.parseInt(this.mainEntrancePositionOffsetXField.getValue()),
+								ItemUtils.parseInt(this.mainEntrancePositionOffsetYField.getValue()),
+								ItemUtils.parseInt(this.mainEntrancePositionOffsetZField.getValue())
+						),
+						ItemUtils.parseFloat(this.mainEntranceOrientationYawField.getValue()),
+						ItemUtils.parseFloat(this.mainEntranceOrientationPitchField.getValue())
 				),
-				ItemUtils.parseDouble(this.mainEntranceOrientationYawField.getValue()),
-				ItemUtils.parseDouble(this.mainEntranceOrientationPitchField.getValue()),
 				this.sideEntranceList,
 				new BlockPos(
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getValue()),

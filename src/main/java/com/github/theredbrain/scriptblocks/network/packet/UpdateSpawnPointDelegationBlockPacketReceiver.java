@@ -4,12 +4,12 @@ import com.github.theredbrain.scriptblocks.block.entity.SpawnPointDelegationBloc
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.tuple.MutablePair;
+import net.minecraft.world.level.storage.LevelData;
 
 import java.util.List;
 
@@ -26,17 +26,18 @@ public class UpdateSpawnPointDelegationBlockPacketReceiver implements ServerPlay
 
 		BlockPos spawnPointDelegationBlockPosition = payload.spawnPointDelegationBlockPosition();
 
-		List<MutablePair<BlockPos, MutablePair<Double, Double>>> delegatedSpawnPoints = payload.delegatedSpawnPoints();
+		List<LevelData.RespawnData> delegatedSpawnPoints = payload.delegatedSpawnPoints();
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(spawnPointDelegationBlockPosition);
-		BlockState blockState = world.getBlockState(spawnPointDelegationBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(spawnPointDelegationBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(spawnPointDelegationBlockPosition);
 
 		if (blockEntity instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 			spawnPointDelegationBlockEntity.setDelegatedSpawnPoints(delegatedSpawnPoints);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			spawnPointDelegationBlockEntity.setChanged();
-			world.sendBlockUpdated(spawnPointDelegationBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(spawnPointDelegationBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 }

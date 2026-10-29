@@ -23,6 +23,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.MenuProvider;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -54,8 +56,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 	private BlockPos uuidListHandlerPositionOffset = BlockPos.ZERO;
 
+	private LevelData.RespawnData locationAccessPoint = LevelData.RespawnData.DEFAULT;
 	private BlockPos accessPositionOffset = BlockPos.ZERO;
-	private boolean setAccessPosition = false;
+	private boolean enableLocationAccessPoint = false;
 
 	private boolean onlyTeleportDimensionOwner = false;
 	private String onlyDimensionOwnerCanTeleportMessage = "hud.message.only_dimension_owner_can_teleport";
@@ -66,9 +69,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	private TeleportationMode teleportationMode = TeleportationMode.DIRECT;
 
 	// direct teleportation mode
-	private BlockPos directTeleportPositionOffset = BlockPos.ZERO;
-	private double directTeleportOrientationYaw = 0.0;
-	private double directTeleportOrientationPitch = 0.0;
+	private LevelData.RespawnData directTeleportTarget = LevelData.RespawnData.DEFAULT;
 
 	// spawn point mode
 	private SpawnPointType spawnPointType = SpawnPointType.WORLD_SPAWN;
@@ -113,10 +114,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		view.store("uuid_list_handler_position_offset", BlockPos.CODEC, this.uuidListHandlerPositionOffset);
 
-		CompoundTag nbtCompound = new CompoundTag();
-		nbtCompound.store("position_offset", BlockPos.CODEC, this.accessPositionOffset);
-		nbtCompound.putBoolean("is_enabled", this.setAccessPosition);
-		view.store("location_access", CompoundTag.CODEC, nbtCompound.copy());
+		view.store("location_access_point", LevelData.RespawnData.CODEC, this.locationAccessPoint);
+
+		view.putBoolean("set_location_access_point", this.enableLocationAccessPoint);
 
 		view.putBoolean("only_teleport_dimension_owner", this.onlyTeleportDimensionOwner);
 
@@ -126,14 +126,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		view.putString("teleportation_mode", this.teleportationMode.getSerializedName());
 
-		nbtCompound = new CompoundTag();
-		nbtCompound.store("position_offset", BlockPos.CODEC, this.directTeleportPositionOffset);
-		nbtCompound.putDouble("yaw", this.directTeleportOrientationYaw);
-		nbtCompound.putDouble("pitch", this.directTeleportOrientationPitch);
-		view.store("direct_teleport", CompoundTag.CODEC, nbtCompound.copy());
+		view.store("direct_teleport_target", LevelData.RespawnData.CODEC, this.directTeleportTarget);
 
 		view.putString("spawn_point_type", this.spawnPointType.getSerializedName());
 
+		CompoundTag nbtCompound;
 		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("locations", CompoundTag.CODEC);
 		for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> location : this.locationsList) {
 			nbtCompound = new CompoundTag();
@@ -202,16 +199,24 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 				new BlockPos(-48, -48, -48)
 		);
 
-		CompoundTag nbtCompound = view.read("location_access", CompoundTag.CODEC).orElseGet(CompoundTag::new);
-		this.accessPositionOffset = BlockPos.max(
-				BlockPos.min(
-						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-						new BlockPos(48, 48, 48)
-				),
-				new BlockPos(-48, -48, -48)
+		this.locationAccessPoint = view.read("location_access_point", LevelData.RespawnData.CODEC).orElseGet(() -> {
+					CompoundTag nbtCompound1 = view.read("location_access", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+					return LevelData.RespawnData.of(
+							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
+							BlockPos.max(
+									BlockPos.min(
+											nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+											new BlockPos(48, 48, 48)
+									),
+									new BlockPos(-48, -48, -48)
+							),
+							0,
+							0
+					);
+				}
 		);
 
-		this.setAccessPosition = nbtCompound.getBooleanOr("is_enabled", false);
+		this.enableLocationAccessPoint = view.getBooleanOr("set_location_access_point", false);
 
 		this.onlyTeleportDimensionOwner = view.getBooleanOr("only_teleport_dimension_owner", false);
 
@@ -221,18 +226,22 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		this.teleportationMode = TeleportationMode.byName(view.getStringOr("teleportation_mode", "")).orElseGet(() -> TeleportationMode.DIRECT);
 
-		nbtCompound = view.read("direct_teleport", CompoundTag.CODEC).orElseGet(CompoundTag::new);
-		this.directTeleportPositionOffset = BlockPos.max(
-				BlockPos.min(
-						nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-						new BlockPos(48, 48, 48)
-				),
-				new BlockPos(-48, -48, -48)
+		this.directTeleportTarget = view.read("direct_teleport_target", LevelData.RespawnData.CODEC).orElseGet(() -> {
+					CompoundTag nbtCompound1 = view.read("direct_teleport", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+					return LevelData.RespawnData.of(
+							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
+							BlockPos.max(
+									BlockPos.min(
+											nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+											new BlockPos(48, 48, 48)
+									),
+									new BlockPos(-48, -48, -48)
+							),
+							nbtCompound1.getFloatOr("yaw", 0),
+							nbtCompound1.getFloatOr("pitch", 0)
+					);
+				}
 		);
-
-		this.directTeleportOrientationYaw = nbtCompound.getDoubleOr("yaw", 0);
-
-		this.directTeleportOrientationPitch = nbtCompound.getDoubleOr("pitch", 0);
 
 		this.spawnPointType = SpawnPointType.byName(view.getStringOr("spawn_point_type", "")).orElseGet(() -> SpawnPointType.WORLD_SPAWN);
 
@@ -252,7 +261,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			);
 		}
 
-		nbtCompound = view.read("location", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		CompoundTag nbtCompound = view.read("location", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.location = new MutablePair<>(
 				new MutablePair<>(
 						nbtCompound.getStringOr("identifier", ""),
@@ -446,6 +455,32 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		};
 	}
 
+	public LevelData.RespawnData getActualDirectTeleportTarget(Level level) {
+		LevelData.RespawnData spawnPoint = this.directTeleportTarget;
+
+		if (!this.directTeleportTarget.pos().equals(BlockPos.ZERO) && level.getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.directTeleportTarget.pos())) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			LevelData.RespawnData delegatedSpawnpoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(level);
+			if (delegatedSpawnpoint != null) {
+				spawnPoint = delegatedSpawnpoint;
+			}
+		}
+
+		return spawnPoint;
+	}
+
+	public LevelData.RespawnData getActualLocationAccessPoint(Level level) {
+		LevelData.RespawnData spawnPoint = this.directTeleportTarget;
+
+		if (!this.directTeleportTarget.pos().equals(BlockPos.ZERO) && level.getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.directTeleportTarget.pos())) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			LevelData.RespawnData delegatedSpawnpoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(level);
+			if (delegatedSpawnpoint != null) {
+				spawnPoint = delegatedSpawnpoint;
+			}
+		}
+
+		return spawnPoint;
+	}
+
 	public void preTeleportTrigger() {
 		if (this.level != null && !this.preTeleportTriggeredBlock.getLeft().equals(BlockPos.ZERO)) {
 			BlockEntity blockEntity = level.getBlockEntity(new BlockPos(this.worldPosition.getX() + this.preTeleportTriggeredBlock.getLeft().getX(), this.worldPosition.getY() + this.preTeleportTriggeredBlock.getLeft().getY(), this.worldPosition.getZ() + this.preTeleportTriggeredBlock.getLeft().getZ()));
@@ -607,24 +642,24 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		this.interactionPreventedMessage = interactionPreventedMessage;
 	}
 
-	public BlockPos getAccessPositionOffset() {
-		return this.accessPositionOffset;
+	public LevelData.RespawnData getLocationAccessPoint() {
+		return this.locationAccessPoint;
 	}
 
-	public void setAccessPositionOffset(BlockPos accessPositionOffset) {
-		this.accessPositionOffset = accessPositionOffset;
+	public void setLocationAccessPoint(LevelData.RespawnData locationAccessPoint) {
+		this.locationAccessPoint = LevelData.RespawnData.of(locationAccessPoint.dimension(), locationAccessPoint.pos(), locationAccessPoint.yaw(), locationAccessPoint.pitch());
 	}
 
 	/**
 	 * Determines whether the access position of the player should be updated.
 	 * Has an effect only in some modes
 	 */
-	public boolean getSetAccessPosition() {
-		return this.setAccessPosition;
+	public boolean getEnableLocationAccessPoint() {
+		return this.enableLocationAccessPoint;
 	}
 
-	public void setSetAccessPosition(boolean setAccessPosition) {
-		this.setAccessPosition = setAccessPosition;
+	public void setEnableLocationAccessPoint(boolean enableLocationAccessPoint) {
+		this.enableLocationAccessPoint = enableLocationAccessPoint;
 	}
 
 	public boolean onlyTeleportDimensionOwner() {
@@ -659,32 +694,12 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		this.teleportationMode = teleportationMode;
 	}
 
-	public BlockPos getDirectTeleportPositionOffset() {
-		return this.directTeleportPositionOffset;
+	public LevelData.RespawnData getDirectTeleportTarget() {
+		return this.directTeleportTarget;
 	}
 
-	public void setDirectTeleportPositionOffset(BlockPos directTeleportPositionOffset) {
-		this.directTeleportPositionOffset = directTeleportPositionOffset;
-	}
-
-	public double getDirectTeleportOrientationYaw() {
-		return this.directTeleportOrientationYaw;
-	}
-
-	// TODO check if input is valid
-	public boolean setDirectTeleportOrientationYaw(double directTeleportOrientationYaw) {
-		this.directTeleportOrientationYaw = directTeleportOrientationYaw;
-		return true;
-	}
-
-	public double getDirectTeleportOrientationPitch() {
-		return this.directTeleportOrientationPitch;
-	}
-
-	// TODO check if input is valid
-	public boolean setDirectTeleportOrientationPitch(double directTeleportOrientationPitch) {
-		this.directTeleportOrientationPitch = directTeleportOrientationPitch;
-		return true;
+	public void setDirectTeleportTarget(LevelData.RespawnData directTeleportTarget) {
+		this.directTeleportTarget = LevelData.RespawnData.of(directTeleportTarget.dimension(), directTeleportTarget.pos(), directTeleportTarget.yaw(), directTeleportTarget.pitch());
 	}
 
 	public SpawnPointType getSpawnPointType() {
@@ -835,8 +850,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 				this.accessPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.accessPositionOffset, blockRotation);
 
-				this.directTeleportPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.directTeleportPositionOffset, blockRotation);
-				this.directTeleportOrientationYaw = BlockRotationUtils.rotateYaw(this.directTeleportOrientationYaw, blockRotation);
+				this.locationAccessPoint = BlockRotationUtils.rotateSpawnPoint(this.locationAccessPoint, blockRotation);
+				this.directTeleportTarget = BlockRotationUtils.rotateSpawnPoint(this.directTeleportTarget, blockRotation);
 
 				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.rotateOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, blockRotation);
@@ -850,8 +865,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, Mirror.FRONT_BACK);
 
-				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, Mirror.FRONT_BACK);
-				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, Mirror.FRONT_BACK);
+				this.locationAccessPoint = BlockRotationUtils.mirrorSpawnPoint(this.locationAccessPoint, Mirror.FRONT_BACK);
+				this.directTeleportTarget = BlockRotationUtils.mirrorSpawnPoint(this.directTeleportTarget, Mirror.FRONT_BACK);
 
 				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, Mirror.FRONT_BACK);
@@ -865,8 +880,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 				this.accessPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.accessPositionOffset, Mirror.LEFT_RIGHT);
 
-				this.directTeleportPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.directTeleportPositionOffset, Mirror.LEFT_RIGHT);
-				this.directTeleportOrientationYaw = BlockRotationUtils.mirrorYaw(this.directTeleportOrientationYaw, Mirror.LEFT_RIGHT);
+				this.locationAccessPoint = BlockRotationUtils.mirrorSpawnPoint(this.locationAccessPoint, Mirror.LEFT_RIGHT);
+				this.directTeleportTarget = BlockRotationUtils.mirrorSpawnPoint(this.directTeleportTarget, Mirror.LEFT_RIGHT);
 
 				this.preTeleportTriggeredBlock.setLeft(BlockRotationUtils.mirrorOffsetBlockPos(this.preTeleportTriggeredBlock.getLeft(), Mirror.LEFT_RIGHT));
 				this.onTeleportUUIDListHandlerPositionOffset = BlockRotationUtils.mirrorOffsetBlockPos(this.onTeleportUUIDListHandlerPositionOffset, Mirror.LEFT_RIGHT);

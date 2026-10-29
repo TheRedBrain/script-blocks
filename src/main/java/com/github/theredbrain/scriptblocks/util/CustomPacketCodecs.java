@@ -6,6 +6,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 public class CustomPacketCodecs {
@@ -71,7 +72,7 @@ public class CustomPacketCodecs {
 
 	public static final StreamCodec<ByteBuf, MutablePair<MutablePair<MutablePair<String, String>, MutablePair<String, String>>, Boolean>> MUTABLE_PAIR_MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING_BOOLEAN = new StreamCodec<>() {
 		public MutablePair<MutablePair<MutablePair<String, String>, MutablePair<String, String>>, Boolean> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(new MutablePair<>(new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), ByteBufCodecs.STRING_UTF8.decode(byteBuf)), new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), ByteBufCodecs.STRING_UTF8.decode(byteBuf))), PacketCodecs.BOOL.decode(byteBuf));
+			return new MutablePair<>(new MutablePair<>(new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), ByteBufCodecs.STRING_UTF8.decode(byteBuf)), new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), ByteBufCodecs.STRING_UTF8.decode(byteBuf))), ByteBufCodecs.BOOL.decode(byteBuf));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<MutablePair<MutablePair<String, String>, MutablePair<String, String>>, Boolean> pairStringString) {
@@ -79,7 +80,7 @@ public class CustomPacketCodecs {
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, pairStringString.getLeft().getLeft().getRight());
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, pairStringString.getLeft().getRight().getLeft());
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, pairStringString.getLeft().getRight().getRight());
-			PacketCodecs.BOOL.encode(byteBuf, pairStringString.getRight());
+			ByteBufCodecs.BOOL.encode(byteBuf, pairStringString.getRight());
 		}
 	};
 
@@ -96,6 +97,17 @@ public class CustomPacketCodecs {
 		}
 	};
 
+	public static final StreamCodec<ByteBuf, MutablePair<String, LevelData.RespawnData>> MUTABLE_PAIR_STRING_RESPAWN_DATA = new StreamCodec<>() {
+		public MutablePair<String, LevelData.RespawnData> decode(ByteBuf byteBuf) {
+			return new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), LevelData.RespawnData.STREAM_CODEC.decode(byteBuf));
+		}
+
+		public void encode(ByteBuf byteBuf, MutablePair<String, LevelData.RespawnData> pairStringRespawnData) {
+			ByteBufCodecs.STRING_UTF8.encode(byteBuf, pairStringRespawnData.getLeft());
+			LevelData.RespawnData.STREAM_CODEC.encode(byteBuf, pairStringRespawnData.getRight());
+		}
+	};
+
 	public static final StreamCodec<ByteBuf, MutablePair<String, BlockPos>> MUTABLE_PAIR_STRING_BLOCK_POS = new StreamCodec<>() {
 		public MutablePair<String, BlockPos> decode(ByteBuf byteBuf) {
 			return new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), BlockPos.STREAM_CODEC.decode(byteBuf));
@@ -109,47 +121,47 @@ public class CustomPacketCodecs {
 
 	public static final StreamCodec<ByteBuf, MutablePair<String, MutablePair<BlockPos, Boolean>>> MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN = new StreamCodec<>() {
 		public MutablePair<String, MutablePair<BlockPos, Boolean>> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), PacketCodecs.BOOL.decode(byteBuf)));
+			return new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), ByteBufCodecs.BOOL.decode(byteBuf)));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<String, MutablePair<BlockPos, Boolean>> pairStringPairBlockPosPairBoolean) {
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, pairStringPairBlockPosPairBoolean.getLeft());
 			BlockPos.STREAM_CODEC.encode(byteBuf, pairStringPairBlockPosPairBoolean.getRight().getLeft());
-			PacketCodecs.BOOL.encode(byteBuf, pairStringPairBlockPosPairBoolean.getRight().getRight());
+			ByteBufCodecs.BOOL.encode(byteBuf, pairStringPairBlockPosPairBoolean.getRight().getRight());
 		}
 	};
 
 	public static final StreamCodec<ByteBuf, MutablePair<Integer, MutablePair<BlockPos, Boolean>>> MUTABLE_PAIR_INTEGER_MUTABLE_PAIR_BLOCK_POS_BOOLEAN = new StreamCodec<>() {
 		public MutablePair<Integer, MutablePair<BlockPos, Boolean>> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(ByteBufCodecs.INT.decode(byteBuf), new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), PacketCodecs.BOOL.decode(byteBuf)));
+			return new MutablePair<>(ByteBufCodecs.INT.decode(byteBuf), new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), ByteBufCodecs.BOOL.decode(byteBuf)));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<Integer, MutablePair<BlockPos, Boolean>> pairIntegerPairBlockPosBoolean) {
 			ByteBufCodecs.INT.encode(byteBuf, pairIntegerPairBlockPosBoolean.getLeft());
 			BlockPos.STREAM_CODEC.encode(byteBuf, pairIntegerPairBlockPosBoolean.getRight().getLeft());
-			PacketCodecs.BOOL.encode(byteBuf, pairIntegerPairBlockPosBoolean.getRight().getRight());
+			ByteBufCodecs.BOOL.encode(byteBuf, pairIntegerPairBlockPosBoolean.getRight().getRight());
 		}
 	};
 
 	public static final StreamCodec<ByteBuf, MutablePair<BlockPos, Boolean>> MUTABLE_PAIR_BLOCK_POS_BOOLEAN = new StreamCodec<>() {
 		public MutablePair<BlockPos, Boolean> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), PacketCodecs.BOOL.decode(byteBuf));
+			return new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), ByteBufCodecs.BOOL.decode(byteBuf));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<BlockPos, Boolean> pairBlockPosBoolean) {
 			BlockPos.STREAM_CODEC.encode(byteBuf, pairBlockPosBoolean.getLeft());
-			PacketCodecs.BOOL.encode(byteBuf, pairBlockPosBoolean.getRight());
+			ByteBufCodecs.BOOL.encode(byteBuf, pairBlockPosBoolean.getRight());
 		}
 	};
 
 	public static final StreamCodec<ByteBuf, MutablePair<MutablePair<BlockPos, Boolean>, Integer>> MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER = new StreamCodec<>() {
 		public MutablePair<MutablePair<BlockPos, Boolean>, Integer> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), PacketCodecs.BOOL.decode(byteBuf)), ByteBufCodecs.INT.decode(byteBuf));
+			return new MutablePair<>(new MutablePair<>(BlockPos.STREAM_CODEC.decode(byteBuf), ByteBufCodecs.BOOL.decode(byteBuf)), ByteBufCodecs.INT.decode(byteBuf));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<MutablePair<BlockPos, Boolean>, Integer> mutablePairMutablePairBlockPosBooleanInteger) {
 			BlockPos.STREAM_CODEC.encode(byteBuf, mutablePairMutablePairBlockPosBooleanInteger.getLeft().getLeft());
-			PacketCodecs.BOOL.encode(byteBuf, mutablePairMutablePairBlockPosBooleanInteger.getLeft().getRight());
+			ByteBufCodecs.BOOL.encode(byteBuf, mutablePairMutablePairBlockPosBooleanInteger.getLeft().getRight());
 			ByteBufCodecs.INT.encode(byteBuf, mutablePairMutablePairBlockPosBooleanInteger.getRight());
 		}
 	};

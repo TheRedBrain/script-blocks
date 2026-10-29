@@ -28,6 +28,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -156,20 +157,20 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 		// --- misc page ---
 
 		this.entitySpawnPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 60, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.triggeredSpawnerBlock.getEntitySpawnPositionOffset().getX()));
+		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.triggeredSpawnerBlock.getSpawnPoint().pos().getX()));
 		this.addWidget(this.entitySpawnPositionOffsetXField);
 		this.entitySpawnPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 60, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.triggeredSpawnerBlock.getEntitySpawnPositionOffset().getY()));
+		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.triggeredSpawnerBlock.getSpawnPoint().pos().getY()));
 		this.addWidget(this.entitySpawnPositionOffsetYField);
 		this.entitySpawnPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 60, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.triggeredSpawnerBlock.getEntitySpawnPositionOffset().getZ()));
+		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.triggeredSpawnerBlock.getSpawnPoint().pos().getZ()));
 		this.addWidget(this.entitySpawnPositionOffsetZField);
 
 		this.entitySpawnOrientationPitchField = new EditBox(this.font, this.width / 2 - 154, 95, 150, 20, Component.empty());
-		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.triggeredSpawnerBlock.getEntitySpawnOrientationPitch()));
+		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.triggeredSpawnerBlock.getSpawnPoint().pitch()));
 		this.addWidget(this.entitySpawnOrientationPitchField);
 		this.entitySpawnOrientationYawField = new EditBox(this.font, this.width / 2 + 4, 95, 150, 20, Component.empty());
-		this.entitySpawnOrientationYawField.setValue(Double.toString(this.triggeredSpawnerBlock.getEntitySpawnOrientationYaw()));
+		this.entitySpawnOrientationYawField.setValue(Double.toString(this.triggeredSpawnerBlock.getSpawnPoint().yaw()));
 		this.addWidget(this.entitySpawnOrientationYawField);
 
 		this.spawningMode = this.triggeredSpawnerBlock.getSpawningMode();
@@ -503,16 +504,22 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 
 	@Override
 	protected boolean updateBlock() {
+		if (this.triggeredSpawnerBlock.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(
 				new UpdateTriggeredSpawnerBlockPacket(
-						this.triggeredSpawnerBlock.getPos(),
-						new BlockPos(
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+						this.triggeredSpawnerBlock.getBlockPos(),
+						LevelData.RespawnData.of(
+								this.triggeredSpawnerBlock.getLevel().dimension(),
+								new BlockPos(
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+								),
+								ItemUtils.parseFloat(this.entitySpawnOrientationPitchField.getValue()),
+								ItemUtils.parseFloat(this.entitySpawnOrientationYawField.getValue())
 						),
-						ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getValue()),
-						ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getValue()),
 						this.spawningMode.asString(),
 						this.isPersistent,
 						this.enableSpawnEffects,

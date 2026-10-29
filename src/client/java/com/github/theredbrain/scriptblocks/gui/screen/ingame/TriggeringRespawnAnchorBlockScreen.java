@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelData;
 
 @Environment(value = EnvType.CLIENT)
 public class TriggeringRespawnAnchorBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -52,20 +53,20 @@ public class TriggeringRespawnAnchorBlockScreen extends AbstractCreativeBlockSet
 	protected void init() {
 
 		this.entitySpawnPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 50, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().getLeft().getX()));
+		this.entitySpawnPositionOffsetXField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().pos().getX()));
 		this.addWidget(this.entitySpawnPositionOffsetXField);
 		this.entitySpawnPositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 50, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().getLeft().getY()));
+		this.entitySpawnPositionOffsetYField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().pos().getY()));
 		this.addWidget(this.entitySpawnPositionOffsetYField);
 		this.entitySpawnPositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 50, 100, 20, Component.empty());
-		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().getLeft().getZ()));
+		this.entitySpawnPositionOffsetZField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().pos().getZ()));
 		this.addWidget(this.entitySpawnPositionOffsetZField);
 
 		this.entitySpawnOrientationYawField = new EditBox(this.font, this.width / 2 - 154, 85, 150, 20, Component.empty());
-		this.entitySpawnOrientationYawField.setValue(Double.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().getRight().getLeft()));
+		this.entitySpawnOrientationYawField.setValue(Float.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().yaw()));
 		this.addWidget(this.entitySpawnOrientationYawField);
 		this.entitySpawnOrientationPitchField = new EditBox(this.font, this.width / 2 + 4, 85, 150, 20, Component.empty());
-		this.entitySpawnOrientationPitchField.setValue(Double.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().getRight().getRight()));
+		this.entitySpawnOrientationPitchField.setValue(Float.toString(this.triggeringRespawnAnchorBlockEntity.getSpawnPoint().pitch()));
 		this.addWidget(this.entitySpawnOrientationPitchField);
 
 		this.triggeredBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 130, 50, 20, Component.empty());
@@ -153,16 +154,22 @@ public class TriggeringRespawnAnchorBlockScreen extends AbstractCreativeBlockSet
 
 	@Override
 	protected boolean updateBlock() {
+		if (this.triggeringRespawnAnchorBlockEntity.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(
 				new UpdateTriggeringRespawnAnchorBlockPacket(
-						this.triggeringRespawnAnchorBlockEntity.getPos(),
-						new BlockPos(
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
-								ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
-						),
-						ItemUtils.parseDouble(this.entitySpawnOrientationYawField.getValue()),
-						ItemUtils.parseDouble(this.entitySpawnOrientationPitchField.getValue()),
+						this.triggeringRespawnAnchorBlockEntity.getBlockPos(),
+						LevelData.RespawnData.of(
+								this.triggeringRespawnAnchorBlockEntity.getLevel().dimension(),
+								new BlockPos(
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetXField.getValue()),
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetYField.getValue()),
+										ItemUtils.parseInt(this.entitySpawnPositionOffsetZField.getValue())
+								),
+								ItemUtils.parseFloat(this.entitySpawnOrientationYawField.getValue()),
+								ItemUtils.parseFloat(this.entitySpawnOrientationPitchField.getValue())
+								),
 						new BlockPos(
 								ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getValue()),
 								ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getValue()),

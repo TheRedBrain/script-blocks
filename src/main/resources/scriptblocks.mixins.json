@@ -7,9 +7,9 @@
     "entity.player.PlayerEntityMixin",
     "item.ItemStackMixin",
     "server.PlayerManagerMixin",
+    "server.level.ServerLevelMixin",
     "server.network.ServerPlayerEntityMixin",
-    "server.network.ServerPlayerInteractionManagerMixin",
-    "world.WorldMixin"
+    "server.network.ServerPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

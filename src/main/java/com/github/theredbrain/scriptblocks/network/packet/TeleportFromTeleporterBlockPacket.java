@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record TeleportFromTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
-		String accessPositionDimension,
 		String targetDimensionOwnerName,
 		String targetLocation,
 		String targetLocationEntrance,
@@ -25,14 +24,12 @@ public record TeleportFromTeleporterBlockPacket(
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
-				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf()
 		);
 	}
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
-		registryByteBuf.writeUtf(this.accessPositionDimension);
 		registryByteBuf.writeUtf(this.targetDimensionOwnerName);
 		registryByteBuf.writeUtf(this.targetLocation);
 		registryByteBuf.writeUtf(this.targetLocationEntrance);

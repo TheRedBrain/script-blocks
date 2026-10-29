@@ -5,12 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.level.storage.LevelData;
 
 public record UpdateTriggeringRespawnAnchorBlockPacket(
 		BlockPos triggeringRespawnAnchorBlockPosition,
-		BlockPos spawnPointPositionOffset,
-		double spawnPointYaw,
-		double spawnPointPitch,
+		LevelData.RespawnData spawnPoint,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		boolean sendMessage
@@ -21,9 +20,7 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 	public UpdateTriggeringRespawnAnchorBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readDouble(),
+				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean()
@@ -32,9 +29,7 @@ public record UpdateTriggeringRespawnAnchorBlockPacket(
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeringRespawnAnchorBlockPosition);
-		registryByteBuf.writeBlockPos(this.spawnPointPositionOffset);
-		registryByteBuf.writeDouble(this.spawnPointYaw);
-		registryByteBuf.writeDouble(this.spawnPointPitch);
+		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.spawnPoint);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBoolean(this.sendMessage);

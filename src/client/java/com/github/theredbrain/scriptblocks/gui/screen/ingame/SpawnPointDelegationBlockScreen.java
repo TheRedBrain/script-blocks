@@ -19,6 +19,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -46,7 +47,7 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 	private EditBox newDelegatedSpawnPointPositionOffsetZField;
 	private EditBox newDelegatedSpawnPointOrientationYawField;
 	private EditBox newDelegatedSpawnPointOrientationPitchField;
-	private final List<MutablePair<BlockPos, MutablePair<Double, Double>>> delegatedSpawnPoints = new ArrayList<>(List.of());
+	private final List<LevelData.RespawnData> delegatedSpawnPoints = new ArrayList<>(List.of());
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
@@ -88,30 +89,32 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 			this.newDelegatedSpawnPointOrientationPitchField.setValue(Integer.toString(pitch));
 			bl = true;
 		}
-		if (bl && this.minecraft != null && this.minecraft.player != null) {
-			this.minecraft.player.displayClientMessage(Component.translatable("gui.spawn_point_delegation_block.invalid_entry_was_corrected"));
+		if (bl && this.minecraft.player != null) {
+			this.minecraft.player.sendSystemMessage(Component.translatable("gui.spawn_point_delegation_block.invalid_entry_was_corrected"));
 			return;
 		}
-		MutablePair<BlockPos, MutablePair<Double, Double>> newDelegatedSpawnPoint = new MutablePair<>(
+		if (this.spawnPointDelegationBlockEntity.getLevel() == null) {
+			return;
+		}
+		LevelData.RespawnData newDelegatedSpawnPoint = LevelData.RespawnData.of(
+				this.spawnPointDelegationBlockEntity.getLevel().dimension(),
 				new BlockPos(
 						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetYField.getValue()),
 						ItemUtils.parseInt(this.newDelegatedSpawnPointPositionOffsetZField.getValue())
 				),
-				new MutablePair<>(
-						ItemUtils.parseDouble(this.newDelegatedSpawnPointOrientationYawField.getValue()),
-						ItemUtils.parseDouble(this.newDelegatedSpawnPointOrientationPitchField.getValue())
-				)
+				ItemUtils.parseFloat(this.newDelegatedSpawnPointOrientationYawField.getValue()),
+				ItemUtils.parseFloat(this.newDelegatedSpawnPointOrientationPitchField.getValue())
 		);
 		bl = false;
-		for (MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint : this.delegatedSpawnPoints) {
+		for (LevelData.RespawnData delegatedSpawnPoint : this.delegatedSpawnPoints) {
 			if (delegatedSpawnPoint.equals(newDelegatedSpawnPoint)) {
 				bl = true;
 				break;
 			}
 		}
-		if (bl && this.minecraft != null && this.minecraft.player != null) {
-			this.minecraft.player.displayClientMessage(Component.translatable("gui.spawn_point_delegation_block.spawn_point_already_in_list"));
+		if (bl && this.minecraft.player != null) {
+			this.minecraft.player.sendSystemMessage(Component.translatable("gui.spawn_point_delegation_block.spawn_point_already_in_list"));
 		} else {
 			this.delegatedSpawnPoints.add(newDelegatedSpawnPoint);
 			this.scrollPosition = 0;
@@ -295,7 +298,7 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateSpawnPointDelegationBlockPacket(
-				this.spawnPointDelegationBlockEntity.getPos(),
+				this.spawnPointDelegationBlockEntity.getBlockPos(),
 				this.delegatedSpawnPoints
 		));
 		return true;

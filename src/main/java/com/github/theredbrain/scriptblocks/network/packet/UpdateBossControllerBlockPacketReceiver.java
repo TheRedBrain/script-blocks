@@ -4,11 +4,13 @@ import com.github.theredbrain.scriptblocks.block.entity.BossControllerBlockEntit
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
@@ -34,9 +36,7 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 		boolean noPlayersAroundTriggeredBlockResets = payload.noPlayersAroundTriggeredBlockResets();
 
 		String bossIdentifier = payload.bossIdentifier();
-		BlockPos entitySpawnPositionOffset = payload.entitySpawnPositionOffset();
-		double entitySpawnOrientationPitch = payload.entitySpawnOrientationPitch();
-		double entitySpawnOrientationYaw = payload.entitySpawnOrientationYaw();
+		LevelData.RespawnData spawnPoint = payload.spawnPoint();
 
 		boolean isPersistent = payload.isPersistent();
 		boolean enableSpawnEffects = payload.enableSpawnEffects();
@@ -47,25 +47,23 @@ public class UpdateBossControllerBlockPacketReceiver implements ServerPlayNetwor
 			bossTriggeredBlocksMap.put(triggeredBlock.getLeft(), triggeredBlock.getRight());
 		}
 
-		Level world = serverPlayerEntity.getWorld();
+		ServerLevel serverLevel = serverPlayerEntity.level();
 
-		BlockEntity blockEntity = world.getBlockEntity(bossControllerBlockPosition);
-		BlockState blockState = world.getBlockState(bossControllerBlockPosition);
+		BlockEntity blockEntity = serverLevel.getBlockEntity(bossControllerBlockPosition);
+		BlockState blockState = serverLevel.getBlockState(bossControllerBlockPosition);
 
 		if (blockEntity instanceof BossControllerBlockEntity bossControllerBlockEntity) {
 			bossControllerBlockEntity.reset();
 			bossControllerBlockEntity.setUUIDListHandlerBlockPositionOffset(uuidListHandlerBlockPositionOffset);
 			bossControllerBlockEntity.setNoPlayersAroundTriggeredBlock(new MutablePair<>(noPlayersAroundTriggeredBlockPositionOffset, noPlayersAroundTriggeredBlockResets));
 			bossControllerBlockEntity.setBossIdentifier(bossIdentifier);
-			bossControllerBlockEntity.setBossSpawnPositionOffset(entitySpawnPositionOffset);
-			bossControllerBlockEntity.setBossSpawnPositionPitch(entitySpawnOrientationPitch);
-			bossControllerBlockEntity.setBossSpawnPositionYaw(entitySpawnOrientationYaw);
+			bossControllerBlockEntity.setSpawnPoint(spawnPoint);
 			bossControllerBlockEntity.setIsPersistent(isPersistent);
 			bossControllerBlockEntity.setEnableSpawnEffects(enableSpawnEffects);
 			bossControllerBlockEntity.setBossTriggeredBlocks(bossTriggeredBlocksMap);
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			bossControllerBlockEntity.setChanged();
-			world.sendBlockUpdated(bossControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
+			serverLevel.sendBlockUpdated(bossControllerBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
 
 	}

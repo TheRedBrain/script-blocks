@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -16,9 +17,7 @@ public record UpdateBossControllerBlockPacket(
 		BlockPos noPlayersAroundTriggeredBlockPositionOffset,
 		boolean noPlayersAroundTriggeredBlockResets,
 		String bossIdentifier,
-		BlockPos entitySpawnPositionOffset,
-		double entitySpawnOrientationPitch,
-		double entitySpawnOrientationYaw,
+		LevelData.RespawnData spawnPoint,
 		boolean isPersistent,
 		boolean enableSpawnEffects,
 		List<MutablePair<String, MutablePair<BlockPos, Boolean>>> bossTriggeredBlocksList
@@ -33,9 +32,7 @@ public record UpdateBossControllerBlockPacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readDouble(),
+				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_BOOLEAN)
@@ -51,9 +48,7 @@ public record UpdateBossControllerBlockPacket(
 		registryByteBuf.writeBoolean(this.noPlayersAroundTriggeredBlockResets);
 
 		registryByteBuf.writeUtf(this.bossIdentifier);
-		registryByteBuf.writeBlockPos(this.entitySpawnPositionOffset);
-		registryByteBuf.writeDouble(this.entitySpawnOrientationPitch);
-		registryByteBuf.writeDouble(this.entitySpawnOrientationYaw);
+		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.spawnPoint);
 
 		registryByteBuf.writeBoolean(this.isPersistent);
 		registryByteBuf.writeBoolean(this.enableSpawnEffects);

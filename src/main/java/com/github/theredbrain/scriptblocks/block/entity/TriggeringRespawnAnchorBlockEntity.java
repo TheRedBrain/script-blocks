@@ -7,13 +7,6 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
@@ -21,19 +14,27 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.apache.commons.lang3.tuple.MutablePair;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity implements HandlesUUIDList {
-	private MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint = new MutablePair<>(BlockPos.ZERO, new MutablePair<>(0.0, 0.0));
+	private LevelData.RespawnData spawnPoint = LevelData.RespawnData.DEFAULT;
 	private MutablePair<BlockPos, Boolean> triggeredBlock = new MutablePair<>(BlockPos.ZERO, false);
 	private final Set<UUID> uuidList = new HashSet<>();
 	private boolean sendMessage = true;
@@ -49,13 +50,9 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		CompoundTag nbtCompound = new CompoundTag();
-		nbtCompound.store("position_offset", BlockPos.CODEC, this.spawnPoint.getLeft());
-		nbtCompound.putDouble("yaw", this.spawnPoint.getRight().getLeft());
-		nbtCompound.putDouble("pitch", this.spawnPoint.getRight().getRight());
-		view.store("spawn_point", CompoundTag.CODEC, nbtCompound.copy());
+		view.store("spawn_point", LevelData.RespawnData.CODEC, this.spawnPoint);
 
-		nbtCompound = new CompoundTag();
+		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
 		view.store("triggered_block", CompoundTag.CODEC, nbtCompound.copy());
@@ -73,16 +70,18 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		CompoundTag nbtCompound = view.read("spawn_point", CompoundTag.CODEC).orElseGet(CompoundTag::new);
-		this.spawnPoint = new MutablePair<>(
-				nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-				new MutablePair<>(
-						Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
-						Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
-				)
+		this.spawnPoint = view.read("spawn_point", LevelData.RespawnData.CODEC).orElseGet(() -> {
+					CompoundTag nbtCompound = view.read("spawn_point", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+					return LevelData.RespawnData.of(
+							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
+							nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
+							nbtCompound.getFloatOr("yaw", 0),
+							nbtCompound.getFloatOr("pitch", 0)
+					);
+				}
 		);
 
-		nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
+		CompoundTag nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
 				BlockPos.max(
 						BlockPos.min(
@@ -114,11 +113,11 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	}
 
 	// region --- getter & setter ---
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getSpawnPoint() {
+	public LevelData.RespawnData getSpawnPoint() {
 		return this.spawnPoint;
 	}
 
-	public void setSpawnPoint(MutablePair<BlockPos, MutablePair<Double, Double>> spawnPoint) {
+	public void setSpawnPoint(LevelData.RespawnData spawnPoint) {
 		this.spawnPoint = spawnPoint;
 	}
 
@@ -139,20 +138,17 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	}
 	// endregion --- getter & setter ---
 
-	public static BlockPos getActualOffsetBlockPosition(BlockPos originalBlockPos, BlockPos offsetBlockPos) {
-		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
-	}
+	public LevelData.RespawnData getActualSpawnPoint(Level level) {
+		LevelData.RespawnData spawnPoint = this.spawnPoint;
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getActualSpawnPoint(ServerLevel serverWorld) {
-		MutablePair<Double, Double> targetOrientation = this.spawnPoint.getRight();
-
-		BlockPos targetPos = getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.getLeft());
-
-		if (!this.spawnPoint.getLeft().equals(BlockPos.ZERO) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
+		if (!this.spawnPoint.pos().equals(BlockPos.ZERO) && level.getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.pos())) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			LevelData.RespawnData delegatedSpawnpoint = spawnPointDelegationBlockEntity.getTargetSpawnPoint(level);
+			if (delegatedSpawnpoint != null) {
+				spawnPoint = delegatedSpawnpoint;
+			}
 		}
 
-		return new MutablePair<>(targetPos, targetOrientation);
+		return spawnPoint;
 	}
 
 	public void trigger() {
@@ -186,7 +182,7 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 				playerEntity = this.getLevel().getPlayerByUUID(uuid);
 
 				if (playerEntity instanceof ServerPlayer serverPlayerEntity) {
-					serverPlayerEntity.setRespawnPosition(this.getLevel().dimension(), remove ? null : this.worldPosition, 0.0F, false, !remove && this.sendMessage);
+					serverPlayerEntity.setRespawnPosition(remove ? null : new ServerPlayer.RespawnConfig(LevelData.RespawnData.of(this.getLevel().dimension(), this.worldPosition, 0.0F, 0.0F), false), !remove && this.sendMessage);
 				}
 			}
 		}
@@ -210,13 +206,13 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 		Iterator<UUID> listIterator = this.uuidList.iterator();
 		Player playerEntity;
 		UUID uuid;
-		if (this.getLevel() != null) {
+		if (this.getLevel() instanceof ServerLevel serverLevel) {
 			while (listIterator.hasNext()) {
 				uuid = listIterator.next();
-				playerEntity = this.getLevel().getPlayerByUUID(uuid);
+				playerEntity = serverLevel.getPlayerByUUID(uuid);
 
 				if (playerEntity instanceof ServerPlayer serverPlayerEntity) {
-					serverPlayerEntity.setRespawnPosition(this.getLevel().dimension(), null, 0.0F, false, false);
+					serverPlayerEntity.setRespawnPosition(new ServerPlayer.RespawnConfig(this.getActualSpawnPoint(serverLevel), false), false);
 				}
 			}
 		}

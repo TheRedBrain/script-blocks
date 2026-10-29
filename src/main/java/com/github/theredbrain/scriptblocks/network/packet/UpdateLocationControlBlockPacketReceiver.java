@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
@@ -27,13 +28,12 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 
 		BlockPos locationControlBlockPosition = payload.locationControlBlockPosition();
 
-		BlockPos mainEntrancePositionOffset = payload.mainEntrancePositionOffset();
-		double mainEntranceYaw = payload.mainEntranceYaw();
-		double mainEntrancePitch = payload.mainEntrancePitch();
 
-		HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
+		LevelData.RespawnData mainEntrance = payload.mainEntrance();
 
-		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrance : payload.sideEntrancesList()) {
+		HashMap<String, LevelData.RespawnData> sideEntrances = new HashMap<>(Map.of());
+
+		for (MutablePair<String, LevelData.RespawnData> sideEntrance : payload.sideEntrancesList()) {
 			sideEntrances.put(sideEntrance.getLeft(), sideEntrance.getRight());
 		}
 
@@ -50,14 +50,14 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 		int resetAreaMaxX = payload.resetAreaMaxX();
 		int resetAreaMaxZ = payload.resetAreaMaxZ();
 
-		Level world = serverPlayerEntity.getWorld();
+		Level world = serverPlayerEntity.level();
 
 		BlockEntity blockEntity = world.getBlockEntity(locationControlBlockPosition);
 		BlockState blockState = world.getBlockState(locationControlBlockPosition);
 
 		if (blockEntity instanceof LocationControlBlockEntity locationControlBlockEntity) {
 			locationControlBlockEntity.reset();
-			locationControlBlockEntity.setMainEntrance(new MutablePair<>(mainEntrancePositionOffset, new MutablePair<>(mainEntranceYaw, mainEntrancePitch)));
+			locationControlBlockEntity.setMainEntrance(mainEntrance);
 			locationControlBlockEntity.setSideEntrances(sideEntrances);
 			locationControlBlockEntity.setTriggeredBlock(new MutablePair<>(triggeredBlockPositionOffset, triggeredBlockResets));
 			locationControlBlockEntity.setDataProvidingBlockPosOffset(dataSavingBlockPosOffset);
@@ -68,7 +68,7 @@ public class UpdateLocationControlBlockPacketReceiver implements ServerPlayNetwo
 			locationControlBlockEntity.setResetAreaMaxX(resetAreaMaxX);
 			locationControlBlockEntity.setResetAreaMaxZ(resetAreaMaxZ);
 
-			serverPlayerEntity.displayClientMessage(Component.translatable("hud.message.script_block.update_successful"), true);
+			serverPlayerEntity.sendSystemMessage(Component.translatable("hud.message.script_block.update_successful"), true);
 			locationControlBlockEntity.setChanged();
 			world.sendBlockUpdated(locationControlBlockPosition, blockState, blockState, Block.UPDATE_ALL);
 		}

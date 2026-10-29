@@ -2,6 +2,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -12,10 +13,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateLocationControlBlockPacket(
 		BlockPos locationControlBlockPosition,
-		BlockPos mainEntrancePositionOffset,
-		double mainEntranceYaw,
-		double mainEntrancePitch,
-		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList,
+		LevelData.RespawnData mainEntrance,
+		List<MutablePair<String, LevelData.RespawnData>> sideEntrancesList,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		BlockPos dataSavingBlockPosOffset,
@@ -32,10 +31,8 @@ public record UpdateLocationControlBlockPacket(
 	public UpdateLocationControlBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readBlockPos(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readDouble(),
-				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE),
+				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_RESPAWN_DATA),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
@@ -50,10 +47,8 @@ public record UpdateLocationControlBlockPacket(
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.locationControlBlockPosition);
-		registryByteBuf.writeBlockPos(this.mainEntrancePositionOffset);
-		registryByteBuf.writeDouble(this.mainEntranceYaw);
-		registryByteBuf.writeDouble(this.mainEntrancePitch);
-		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE);
+		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.mainEntrance);
+		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_RESPAWN_DATA);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBlockPos(this.dataSavingBlockPosOffset);
