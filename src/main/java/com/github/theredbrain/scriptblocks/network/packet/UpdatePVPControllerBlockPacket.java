@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 public record UpdatePVPControllerBlockPacket(
 		BlockPos pvpControllerBlockPosition,
 		String pvpArenaSettingsIdentifier,
-		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> sideEntrancesList,
+		List<MutablePair<String, LevelData.RespawnData>> sideEntrancesList,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
 		BlockPos dataProvidingBlockPositionOffset,
@@ -26,7 +27,7 @@ public record UpdatePVPControllerBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readUtf(),
-				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE),
+				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_STRING_RESPAWN_DATA),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
@@ -37,7 +38,7 @@ public record UpdatePVPControllerBlockPacket(
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.pvpControllerBlockPosition);
 		registryByteBuf.writeUtf(this.pvpArenaSettingsIdentifier);
-		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_DOUBLE_DOUBLE);
+		registryByteBuf.writeCollection(this.sideEntrancesList, CustomPacketCodecs.MUTABLE_PAIR_STRING_RESPAWN_DATA);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPositionOffset);

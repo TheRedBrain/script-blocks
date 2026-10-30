@@ -11,7 +11,30 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,30 +46,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageType;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
 
 public class PVPControllerBlockEntity extends RotatedBlockEntity implements Resetable, Triggerable {
 
@@ -76,9 +75,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		this.respawnPositions.forEach((key, entry) -> {
 			CompoundTag nbtCompound = new CompoundTag();
 			nbtCompound.putString("key", key);
-			nbtCompound.store("position_offset", BlockPos.CODEC, this.respawnPositions.get(key).getLeft());
-			nbtCompound.putDouble("yaw", this.respawnPositions.get(key).getRight().getLeft());
-			nbtCompound.putDouble("pitch", this.respawnPositions.get(key).getRight().getRight());
+			nbtCompound.store("location_access_point", LevelData.RespawnData.CODEC, entry);
 			listAppender.add(nbtCompound.copy());
 		});
 
@@ -103,7 +100,8 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		for (CompoundTag nbtCompound : view.listOrEmpty("respawn_positions", CompoundTag.CODEC)) {
 			this.respawnPositions.put(
 					nbtCompound.getStringOr("key", ""),
-					new MutablePair<>(
+					view.read("spawn_point", LevelData.RespawnData.CODEC).orElseGet(() -> LevelData.RespawnData.of(
+							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
 							BlockPos.max(
 									BlockPos.min(
 											nbtCompound.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
@@ -111,11 +109,9 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 									),
 									new BlockPos(-48, -48, -48)
 							),
-							new MutablePair<>(
-									Mth.clamp(nbtCompound.getDoubleOr("yaw", 0), -180, 180),
-									Mth.clamp(nbtCompound.getDoubleOr("pitch", 0), -90, 90)
-							)
-					)
+							(float) nbtCompound.getDoubleOr("yaw", 0),
+							(float) nbtCompound.getDoubleOr("pitch", 0)
+					))
 			);
 		}
 

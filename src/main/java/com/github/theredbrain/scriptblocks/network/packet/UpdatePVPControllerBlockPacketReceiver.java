@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.HashMap;
@@ -29,9 +30,9 @@ public class UpdatePVPControllerBlockPacketReceiver implements ServerPlayNetwork
 
 		String pvpArenaSettingsIdentifier = payload.pvpArenaSettingsIdentifier();
 
-		HashMap<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrances = new HashMap<>(Map.of());
+		HashMap<String, LevelData.RespawnData> sideEntrances = new HashMap<>(Map.of());
 
-		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> sideEntrance : payload.sideEntrancesList()) {
+		for (MutablePair<String, LevelData.RespawnData> sideEntrance : payload.sideEntrancesList()) {
 			sideEntrances.put(sideEntrance.getLeft(), sideEntrance.getRight());
 		}
 

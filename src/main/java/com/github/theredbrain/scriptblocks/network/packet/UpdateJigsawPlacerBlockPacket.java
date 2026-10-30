@@ -29,7 +29,7 @@ public record UpdateJigsawPlacerBlockPacket(
 				registryByteBuf.readUtf(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_BLOCK_POS_MUTABLE_PAIR_STRING_STRING),
 				registryByteBuf.readUtf(),
-				JigsawBlockEntity.JointType.byName(registryByteBuf.readUtf()).orElse(JigsawBlockEntity.JointType.ALIGNED),
+				JigsawBlockEntity.JointType.CODEC.byName(registryByteBuf.readUtf(), JigsawBlockEntity.JointType.ALIGNED),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean()
 		);

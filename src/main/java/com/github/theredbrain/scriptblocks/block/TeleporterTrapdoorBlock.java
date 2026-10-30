@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -7,30 +8,40 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -99,25 +110,24 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 		return EAST_SHAPE;
 	}
 
-	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
-
-		BlockEntity blockEntity = world.getBlockEntity(pos);
+	@Override
+	public BlockState playerWillDestroy(final Level level, final BlockPos pos, final BlockState state, final Player player) {
+		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
-			if (!world.isClientSide() && !player.isCreative()) {
-				Block block = state.getBlock();
-				ItemStack itemStack = block.getCloneItemStack(world, pos, state);
-				if (!itemStack.isEmpty()) {
-					CompoundTag nbtCompound = teleporterBlockEntity.createComponentlessNbtWithIdentifyingData(world.registryAccess());
-					BlockItem.setBlockEntityData(itemStack, teleporterBlockEntity.getType(), nbtCompound);
+			if (!level.isClientSide() && !player.isCreative()) {
+				ItemStack itemStack = new ItemStack(this);
+				try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(blockEntity.problemPath(), ScriptBlocks.LOGGER)) {
+					TagValueOutput output = TagValueOutput.createWithContext(reporter, level.registryAccess());
+					BlockItem.setBlockEntityData(itemStack, teleporterBlockEntity.getType(), output);
 					itemStack.applyComponents(teleporterBlockEntity.collectComponents());
-					ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
+					ItemEntity itemEntity = new ItemEntity(level, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
 					itemEntity.setDefaultPickUpDelay();
-					world.addFreshEntity(itemEntity);
+					level.addFreshEntity(itemEntity);
 				}
 			}
 		}
 
-		return super.playerWillDestroy(world, pos, state, player);
+		return super.playerWillDestroy(level, pos, state, player);
 	}
 
 	@Override
@@ -173,11 +183,12 @@ public class TeleporterTrapdoorBlock extends RotatedBlockWithEntity {
 	}
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, LevelAccessor world, BlockPos pos, BlockPos neighborPos) {
+	protected BlockState updateShape(final BlockState state, final LevelReader level, final ScheduledTickAccess ticks, final BlockPos pos, final Direction directionToNeighbour, final BlockPos neighbourPos, final BlockState neighbourState, final RandomSource random) {
 		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
-			world.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
+			ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
-		return super.updateShape(state, direction, neighborState, world, pos, neighborPos);
+
+		return super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelData;
 
 @Deprecated
 @Environment(value = EnvType.CLIENT)
@@ -109,15 +110,21 @@ public class EntranceDelegationBlockScreen extends Screen {
 	}
 
 	private boolean updateEntranceDelegationBlock() {
+		if (this.entranceDelegationBlock.getLevel() == null) {
+			return false;
+		}
 		ClientPlayNetworking.send(new UpdateEntranceDelegationBlockPacket(
-				this.entranceDelegationBlock.getPos(),
-				new BlockPos(
-						ItemUtils.parseInt(this.mainEntrancePositionOffsetXField.getValue()),
-						ItemUtils.parseInt(this.mainEntrancePositionOffsetYField.getValue()),
-						ItemUtils.parseInt(this.mainEntrancePositionOffsetZField.getValue())
-				),
-				ItemUtils.parseDouble(this.mainEntranceOrientationYawField.getValue()),
-				ItemUtils.parseDouble(this.mainEntranceOrientationPitchField.getValue())
+				this.entranceDelegationBlock.getBlockPos(),
+				LevelData.RespawnData.of(
+						this.entranceDelegationBlock.getLevel().dimension(),
+						new BlockPos(
+								ItemUtils.parseInt(this.mainEntrancePositionOffsetXField.getValue()),
+								ItemUtils.parseInt(this.mainEntrancePositionOffsetYField.getValue()),
+								ItemUtils.parseInt(this.mainEntrancePositionOffsetZField.getValue())
+						),
+						ItemUtils.parseFloat(this.mainEntranceOrientationYawField.getValue()),
+						ItemUtils.parseFloat(this.mainEntranceOrientationPitchField.getValue())
+				)
 		));
 		return true;
 	}

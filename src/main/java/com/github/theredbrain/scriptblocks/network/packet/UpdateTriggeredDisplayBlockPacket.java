@@ -31,7 +31,7 @@ public record UpdateTriggeredDisplayBlockPacket(
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readVec3(),
+				Vec3.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readFloat(),
 				registryByteBuf.readFloat(),
 				registryByteBuf.readUtf(),
@@ -48,7 +48,7 @@ public record UpdateTriggeredDisplayBlockPacket(
 		registryByteBuf.writeUtf(this.billboardModeString);
 		registryByteBuf.writeUtf(this.displayModeString);
 		registryByteBuf.writeBoolean(this.isTriggered);
-		registryByteBuf.writeVec3(this.displayOffset);
+		Vec3.STREAM_CODEC.encode(registryByteBuf, this.displayOffset);
 		registryByteBuf.writeFloat(this.displayYaw);
 		registryByteBuf.writeFloat(this.displayPitch);
 		registryByteBuf.writeUtf(this.displayTextString);

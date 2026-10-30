@@ -13,13 +13,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 @Deprecated
 public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
-	private MutablePair<BlockPos, MutablePair<Double, Double>> delegatedEntrance = new MutablePair<>(new BlockPos(0, 1, 0), new MutablePair<>(0.0, 0.0));
+	private LevelData.RespawnData delegatedEntrance = LevelData.RespawnData.DEFAULT;
 
 	public EntranceDelegationBlockEntity(BlockPos pos, BlockState state) {
 		super(ScriptBlocksEntities.ENTRANCE_DELEGATION_BLOCK_ENTITY, pos, state);
@@ -28,11 +29,7 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.putInt("delegatedEntrance_X", this.delegatedEntrance.getLeft().getX());
-		view.putInt("delegatedEntrance_Y", this.delegatedEntrance.getLeft().getY());
-		view.putInt("delegatedEntrance_Z", this.delegatedEntrance.getLeft().getZ());
-		view.putDouble("delegatedEntrance_Yaw", this.delegatedEntrance.getRight().getLeft());
-		view.putDouble("delegatedEntrance_Pitch", this.delegatedEntrance.getRight().getRight());
+		view.store("delegated_entrance", LevelData.RespawnData.CODEC, this.delegatedEntrance);
 
 
 		ScriptBlocks.sendDeprecatedFeatureInfo("Deprecated Entrance Delegation Block detected at: " + this.worldPosition.toString() + ". This block will be removed in the future and should be replaced with a Spawn Point Delegation Block.", this.level != null ? this.level.getServer() : null);
@@ -43,13 +40,18 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		int delegatedEntrance_X = view.getIntOr("delegatedEntrance_X", 0);
-		int delegatedEntrance_Y = view.getIntOr("delegatedEntrance_Y", 0);
-		int delegatedEntrance_Z = view.getIntOr("delegatedEntrance_Z", 0);
-		this.delegatedEntrance.setLeft(new BlockPos(delegatedEntrance_X, delegatedEntrance_Y, delegatedEntrance_Z));
-		double delegatedEntrance_Yaw = view.getDoubleOr("delegatedEntrance_Yaw", 0);
-		double delegatedEntrance_Pitch = view.getDoubleOr("delegatedEntrance_Pitch", 0);
-		this.delegatedEntrance.setRight(new MutablePair<>(delegatedEntrance_Yaw, delegatedEntrance_Pitch));
+		this.delegatedEntrance = view.read("delegated_entrance", LevelData.RespawnData.CODEC).orElseGet(
+				() -> LevelData.RespawnData.of(
+						this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
+						new BlockPos(
+								view.getIntOr("delegatedEntrance_X", 0),
+								view.getIntOr("delegatedEntrance_Y", 0),
+								view.getIntOr("delegatedEntrance_Z", 0)
+						),
+						(float) view.getDoubleOr("delegatedEntrance_Yaw", 0),
+						(float) view.getDoubleOr("delegatedEntrance_Pitch", 0)
+				)
+		);
 
 		super.loadAdditional(view);
 	}
@@ -64,28 +66,25 @@ public class EntranceDelegationBlockEntity extends RotatedBlockEntity {
 	}
 
 	// region --- getter & setter ---
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getDelegatedEntrance() {
+	public LevelData.RespawnData getDelegatedEntrance() {
 		return this.delegatedEntrance;
 	}
 
-	public boolean setDelegatedEntrance(MutablePair<BlockPos, MutablePair<Double, Double>> delegatedEntrance) {
-		this.delegatedEntrance = delegatedEntrance;
+	public boolean setDelegatedEntrance(LevelData.RespawnData delegatedEntrance) {
+		this.delegatedEntrance = LevelData.RespawnData.of(delegatedEntrance.dimension(), delegatedEntrance.pos(), delegatedEntrance.yaw(), delegatedEntrance.pitch());
 		return true;
 	}
 	// endregion --- getter & setter ---
 
-	public MutablePair<BlockPos, MutablePair<Double, Double>> getTargetEntrance(ServerLevel serverWorld) {
-		BlockPos targetPos;
-		MutablePair<Double, Double> targetOrientation;
+	public LevelData.RespawnData getTargetEntrance(ServerLevel serverWorld) {
 
-		targetPos = new BlockPos(this.delegatedEntrance.getLeft().getX() + this.getBlockPos().getX(), this.delegatedEntrance.getLeft().getY() + this.getBlockPos().getY(), this.delegatedEntrance.getLeft().getZ() + this.getBlockPos().getZ());
-		targetOrientation = this.delegatedEntrance.getRight();
+		BlockPos targetPos = BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.delegatedEntrance.pos());
 
-		if (this.delegatedEntrance.getLeft() != BlockPos.ZERO && serverWorld.getBlockEntity(targetPos) instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
-			return entranceDelegationBlockEntity.getTargetEntrance(serverWorld);
+		if (!this.delegatedEntrance.pos().equals(BlockPos.ZERO) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
+			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
 		}
 
-		return new MutablePair<>(targetPos, targetOrientation);
+		return this.delegatedEntrance;
 	}
 
 	@Override

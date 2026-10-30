@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block;
 
+import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.entity.player.DuckPlayerEntityMixin;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
@@ -10,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,6 +41,7 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -125,28 +128,24 @@ public class TeleporterDoorBlock extends RotatedBlockWithEntity {
 		}
 	}
 
-	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
-		if (!world.isClientSide() && (player.isCreative() || !player.hasCorrectToolForDrops(state))) {
-			onBreakInCreative(world, pos, state, player);
-		}
-
-		BlockEntity blockEntity = world.getBlockEntity(pos);
+	@Override
+	public BlockState playerWillDestroy(final Level level, final BlockPos pos, final BlockState state, final Player player) {
+		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if (blockEntity instanceof TeleporterBlockEntity teleporterBlockEntity) {
-			if (!world.isClientSide() && !player.isCreative()) {
-				Block block = state.getBlock();
-				ItemStack itemStack = block.getCloneItemStack(world, pos, state);
-				if (!itemStack.isEmpty()) {
-					CompoundTag nbtCompound = teleporterBlockEntity.createComponentlessNbtWithIdentifyingData(world.registryAccess());
-					BlockItem.setBlockEntityData(itemStack, teleporterBlockEntity.getType(), nbtCompound);
+			if (!level.isClientSide() && !player.isCreative()) {
+				ItemStack itemStack = new ItemStack(this);
+				try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(blockEntity.problemPath(), ScriptBlocks.LOGGER)) {
+					TagValueOutput output = TagValueOutput.createWithContext(reporter, level.registryAccess());
+					BlockItem.setBlockEntityData(itemStack, teleporterBlockEntity.getType(), output);
 					itemStack.applyComponents(teleporterBlockEntity.collectComponents());
-					ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
+					ItemEntity itemEntity = new ItemEntity(level, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, itemStack);
 					itemEntity.setDefaultPickUpDelay();
-					world.addFreshEntity(itemEntity);
+					level.addFreshEntity(itemEntity);
 				}
 			}
 		}
 
-		return super.playerWillDestroy(world, pos, state, player);
+		return super.playerWillDestroy(level, pos, state, player);
 	}
 
 	public boolean isPathfindable(BlockState state, PathComputationType type) {

@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.tuple.MutablePair;
+import net.minecraft.world.level.storage.LevelData;
 
 @Deprecated
 public class UpdateEntranceDelegationBlockPacketReceiver implements ServerPlayNetworking.PlayPayloadHandler<UpdateEntranceDelegationBlockPacket> {
@@ -24,9 +24,7 @@ public class UpdateEntranceDelegationBlockPacketReceiver implements ServerPlayNe
 
 		BlockPos entranceDelegationBlockPosition = payload.entranceDelegationBlockPosition();
 
-		BlockPos delegatedEntrancePositionOffset = payload.delegatedEntrancePositionOffset();
-		double delegatedEntranceYaw = payload.delegatedEntranceYaw();
-		double delegatedEntrancePitch = payload.delegatedEntrancePitch();
+		LevelData.RespawnData delegatedEntrance = payload.delegatedEntrance();
 
 		ServerLevel serverLevel = serverPlayerEntity.level();
 
@@ -36,7 +34,7 @@ public class UpdateEntranceDelegationBlockPacketReceiver implements ServerPlayNe
 		BlockState blockState = serverLevel.getBlockState(entranceDelegationBlockPosition);
 
 		if (blockEntity instanceof EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
-			if (!entranceDelegationBlockEntity.setDelegatedEntrance(new MutablePair<>(delegatedEntrancePositionOffset, new MutablePair<>(delegatedEntranceYaw, delegatedEntrancePitch)))) {
+			if (!entranceDelegationBlockEntity.setDelegatedEntrance(delegatedEntrance)) {
 				serverPlayerEntity.sendSystemMessage(Component.translatable("entrance_delegation_block.delegatedEntrance.invalid"), false);
 				updateSuccessful = false;
 			}

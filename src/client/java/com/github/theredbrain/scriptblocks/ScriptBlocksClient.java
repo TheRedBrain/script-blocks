@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScre
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDispenserBlockScreen;
 import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksClientEvents;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.render.block.entity.AestheticDecoratedPotBlockEntityRenderer;
@@ -38,6 +39,8 @@ public class ScriptBlocksClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
+
+		ScriptBlocksClientEvents.initializeEvents();
 
 		// Registry
 		registerEntityRenderer();

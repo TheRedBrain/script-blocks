@@ -164,8 +164,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					return LevelData.RespawnData.of(
 							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
 							nbtCompound1.read("position_offset", BlockPos.CODEC).orElse(BlockPos.ZERO),
-							nbtCompound1.getFloatOr("yaw", 0),
-							nbtCompound1.getFloatOr("pitch", 0)
+							(float) nbtCompound1.getDoubleOr("yaw", 0),
+							(float) nbtCompound1.getDoubleOr("pitch", 0)
 					);
 				}
 		);
@@ -442,13 +442,9 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		return entityAttributeModifiers;
 	}
 
-	private static BlockPos getActualOffsetBlockPosition(BlockPos originalBlockPos, BlockPos offsetBlockPos) {
-		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
-	}
-
 	public LevelData.RespawnData getActualSpawnPoint(ServerLevel serverWorld) {
 
-		BlockPos targetPos = getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.pos());
+		BlockPos targetPos = BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.pos());
 
 		if (!this.spawnPoint.pos().equals(BlockPos.ZERO) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);

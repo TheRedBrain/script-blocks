@@ -13,23 +13,23 @@ public class CustomPacketCodecs {
 
 	public static final StreamCodec<ByteBuf, MutablePair<String, AttributeModifier>> MUTABLE_PAIR_STRING_ENTITY_ATTRIBUTE_MODIFIER = new StreamCodec<>() {
 		public MutablePair<String, AttributeModifier> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), AttributeModifier.fromNbt(ByteBufCodecs.COMPOUND_TAG.decode(byteBuf)));
+			return new MutablePair<>(ByteBufCodecs.STRING_UTF8.decode(byteBuf), AttributeModifier.STREAM_CODEC.decode(byteBuf));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<String, AttributeModifier> pairStringEntityAttributeModifier) {
 			ByteBufCodecs.STRING_UTF8.encode(byteBuf, pairStringEntityAttributeModifier.getLeft());
-			ByteBufCodecs.COMPOUND_TAG.encode(byteBuf, pairStringEntityAttributeModifier.getRight().toNbt());
+			AttributeModifier.STREAM_CODEC.encode(byteBuf, pairStringEntityAttributeModifier.getRight());
 		}
 	};
 
 	public static final StreamCodec<ByteBuf, MutablePair<Identifier, AttributeModifier>> MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER = new StreamCodec<>() {
 		public MutablePair<Identifier, AttributeModifier> decode(ByteBuf byteBuf) {
-			return new MutablePair<>(Identifier.STREAM_CODEC.decode(byteBuf), AttributeModifier.fromNbt(ByteBufCodecs.COMPOUND_TAG.decode(byteBuf)));
+			return new MutablePair<>(Identifier.STREAM_CODEC.decode(byteBuf), AttributeModifier.STREAM_CODEC.decode(byteBuf));
 		}
 
 		public void encode(ByteBuf byteBuf, MutablePair<Identifier, AttributeModifier> pairIdentifierEntityAttributeModifier) {
 			Identifier.STREAM_CODEC.encode(byteBuf, pairIdentifierEntityAttributeModifier.getLeft());
-			ByteBufCodecs.COMPOUND_TAG.encode(byteBuf, pairIdentifierEntityAttributeModifier.getRight().toNbt());
+			AttributeModifier.STREAM_CODEC.encode(byteBuf, pairIdentifierEntityAttributeModifier.getRight());
 		}
 	};
 

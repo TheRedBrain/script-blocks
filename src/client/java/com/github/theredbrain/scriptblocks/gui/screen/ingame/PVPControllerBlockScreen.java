@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.lwjgl.glfw.GLFW;
 
@@ -63,7 +64,7 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 	private EditBox newRespawnPositionNameField;
 	private Button addNewRespawnPositionButton;
 	private ScreenPage screenPage;
-	private final List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> respawnPositionsList = new ArrayList<>();
+	private final List<MutablePair<String, LevelData.RespawnData>> respawnPositionsList = new ArrayList<>();
 	private int scrollPosition = 0;
 	private float scrollAmount = 0.0f;
 	private boolean mouseClicked = false;
@@ -80,32 +81,31 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 			return;
 		}
 		boolean bl = true;
-		for (MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>> stringMutablePairMutablePair : this.respawnPositionsList) {
+		for (MutablePair<String, LevelData.RespawnData> stringMutablePairMutablePair : this.respawnPositionsList) {
 			if (stringMutablePairMutablePair.getLeft().equals(newRespawnPositionName)) {
 				bl = false;
 				break;
 			}
 		}
-		if (bl) {
+		if (bl && this.pvpControllerBlockEntity.getLevel() != null) {
 			this.respawnPositionsList.add(new MutablePair<>(
 					this.newRespawnPositionNameField.getValue(),
-					new MutablePair<>(
+					LevelData.RespawnData.of(
+							this.pvpControllerBlockEntity.getLevel().dimension(),
 							new BlockPos(
 									ItemUtils.parseInt(this.newRespawnPositionOffsetXField.getValue()),
 									ItemUtils.parseInt(this.newRespawnPositionOffsetYField.getValue()),
 									ItemUtils.parseInt(this.newRespawnPositionOffsetZField.getValue())
 							),
-							new MutablePair<>(
-									ItemUtils.parseDouble(this.newRespawnOrientationYawField.getValue()),
-									ItemUtils.parseDouble(this.newRespawnOrientationPitchField.getValue())
-							)
+									ItemUtils.parseFloat(this.newRespawnOrientationYawField.getValue()),
+									ItemUtils.parseFloat(this.newRespawnOrientationPitchField.getValue())
 					)
 			));
 			this.scrollPosition = 0;
 			this.scrollAmount = 0.0f;
 			this.updateWidgets();
-		} else if (this.minecraft != null && this.minecraft.player != null) {
-			this.minecraft.player.displayClientMessage(Component.translatable("gui.teleporter_block.location_already_in_list"));
+		} else if (this.minecraft.player != null) {
+			this.minecraft.player.sendSystemMessage(Component.translatable("gui.teleporter_block.location_already_in_list"));
 		}
 	}
 
@@ -125,7 +125,7 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 		}
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -150,7 +150,7 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.pvpControllerBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.pvpControllerBlockEntity.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 115, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 115, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -437,7 +437,7 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdatePVPControllerBlockPacket(
-				this.pvpControllerBlockEntity.getPos(),
+				this.pvpControllerBlockEntity.getBlockPos(),
 				this.pvpArenaSettingsIdentifierField.getValue(),
 				this.respawnPositionsList,
 				new BlockPos(
