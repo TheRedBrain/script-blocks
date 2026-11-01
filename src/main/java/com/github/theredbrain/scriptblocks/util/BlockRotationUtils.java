@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 public class BlockRotationUtils {
 
+	@Deprecated // TODO replace with blockPos.offset()
 	public static BlockPos getActualOffsetBlockPosition(BlockPos originalBlockPos, BlockPos offsetBlockPos) {
 		return new BlockPos(originalBlockPos.getX() + offsetBlockPos.getX(), originalBlockPos.getY() + offsetBlockPos.getY(), originalBlockPos.getZ() + offsetBlockPos.getZ());
 	}

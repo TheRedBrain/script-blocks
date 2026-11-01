@@ -14,7 +14,7 @@ public record OptionalBlockPosition(Optional<BlockPos> optionalBlockPos) {
 	public static final Codec<OptionalBlockPosition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			BlockPos.CODEC.optionalFieldOf("cooldowns").forGetter(x -> x.optionalBlockPos)
 	).apply(instance, OptionalBlockPosition::new));
-	public static final StreamCodec<RegistryFriendlyByteBuf, OptionalBlockPosition> PACKET_CODEC = StreamCodec.composite(
+	public static final StreamCodec<RegistryFriendlyByteBuf, OptionalBlockPosition> STREAM_CODEC = StreamCodec.composite(
 			BlockPos.STREAM_CODEC.apply(ByteBufCodecs::optional),
 			OptionalBlockPosition::optionalBlockPos,
 			OptionalBlockPosition::new

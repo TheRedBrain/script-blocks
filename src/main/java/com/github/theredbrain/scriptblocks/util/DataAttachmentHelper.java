@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.util;
 import com.github.theredbrain.scriptblocks.data.LocationCooldowns;
 import com.github.theredbrain.scriptblocks.data.OptionalBlockPosition;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDataAttachments;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class DataAttachmentHelper {
 
+	// region getter/setter
 	public static LocationCooldowns getLocationCooldowns(Player playerEntity) {
 		return playerEntity.getAttachedOrElse(ScriptBlocksDataAttachments.LOCATION_COOLDOWNS, LocationCooldowns.DEFAULT);
 	}
@@ -49,6 +51,40 @@ public class DataAttachmentHelper {
 		playerEntity.setAttached(ScriptBlocksDataAttachments.CURRENT_PVP_CONTROLLER_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
 	}
 
+	public static float getBossHealthThreshold(Mob mob) {
+		return mob.getAttachedOrElse(ScriptBlocksDataAttachments.BOSS_HEALTH_THRESHOLD, -1.0F);
+	}
+
+	public static void setBossHealthThreshold(Mob mob, float healthThreshold) {
+		mob.setAttached(ScriptBlocksDataAttachments.BOSS_HEALTH_THRESHOLD, healthThreshold);
+	}
+
+	public static int getBossPhase(Mob mob) {
+		return mob.getAttachedOrElse(ScriptBlocksDataAttachments.BOSS_PHASE, -1);
+	}
+
+	public static void setBossPhase(Mob mob, int phaseIndex) {
+		mob.setAttached(ScriptBlocksDataAttachments.BOSS_PHASE, phaseIndex);
+	}
+
+	public static Optional<BlockPos> getControllerBlockPosition(Mob mob) {
+		return mob.getAttachedOrElse(ScriptBlocksDataAttachments.CONTROLLER_BLOCK_POS, OptionalBlockPosition.DEFAULT).optionalBlockPos();
+	}
+
+	public static void setControllerBlockPosition(Mob mob, Optional<BlockPos> optionalBlockPosition) {
+		mob.setAttached(ScriptBlocksDataAttachments.CONTROLLER_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
+	}
+
+	public static Optional<BlockPos> getUseRelayBlockPosition(Mob mob) {
+		return mob.getAttachedOrElse(ScriptBlocksDataAttachments.USE_RELAY_BLOCK_POS, OptionalBlockPosition.DEFAULT).optionalBlockPos();
+	}
+
+	public static void setUseRelayBlockPosition(Mob mob, Optional<BlockPos> optionalBlockPosition) {
+		mob.setAttached(ScriptBlocksDataAttachments.USE_RELAY_BLOCK_POS, new OptionalBlockPosition(optionalBlockPosition));
+	}
+	// endregion getter/setter
+
+	// region helper
 	public static void playerEntersLocation(ServerPlayer player, String locationIdentifier) {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
 		Map<String, Long> cooldowns = new HashMap<>(locationCooldowns.cooldowns());
@@ -74,5 +110,6 @@ public class DataAttachmentHelper {
 		LocationCooldowns locationCooldowns = DataAttachmentHelper.getLocationCooldowns(player);
 		return locationCooldowns.cooldowns().getOrDefault(locationIdentifier, -2L);
 	}
+	// endregion helper
 
 }

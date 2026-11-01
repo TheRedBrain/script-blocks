@@ -6,10 +6,10 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.Boss;
-import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.Maps;
@@ -24,7 +24,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -36,7 +35,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.Mirror;
@@ -206,7 +204,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 			if (bC.boss.triggersBlockWhenNoPlayersAround() && bC.noPlayersPresentInArea()) {
 				MutablePair<BlockPos, Boolean> noPlayersAroundTriggeredBlock = bC.getNoPlayersAroundTriggeredBlock();
-				BlockEntity blockEntity = world.getBlockEntity(new BlockPos(bC.worldPosition.getX() + noPlayersAroundTriggeredBlock.getLeft().getX(), bC.worldPosition.getY() + noPlayersAroundTriggeredBlock.getLeft().getY(), bC.worldPosition.getZ() + noPlayersAroundTriggeredBlock.getLeft().getZ()));
+				BlockEntity blockEntity = world.getBlockEntity(bC.getBlockPos().offset(noPlayersAroundTriggeredBlock.getLeft()));
 				if (blockEntity != bC) {
 					boolean noPlayersAroundTriggeredBlockResets = noPlayersAroundTriggeredBlock.getRight();
 					if (noPlayersAroundTriggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -218,8 +216,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 			}
 			bC.setChanged();
 			if (bC.level != null) {
-				BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-				bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+				BlockState blockState = bC.level.getBlockState(bC.getBlockPos());
+				bC.level.sendBlockUpdated(bC.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 			}
 		}
 	}
@@ -254,8 +252,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 		bC.setChanged();
 		if (bC.level != null) {
-			BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-			bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = bC.level.getBlockState(bC.getBlockPos());
+			bC.level.sendBlockUpdated(bC.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -280,8 +278,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 		bC.setChanged();
 		if (bC.level != null) {
-			BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-			bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = bC.level.getBlockState(bC.getBlockPos());
+			bC.level.sendBlockUpdated(bC.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -297,8 +295,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 		bC.setChanged();
 		if (bC.level != null) {
-			BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-			bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = bC.level.getBlockState(bC.getBlockPos());
+			bC.level.sendBlockUpdated(bC.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -324,7 +322,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					Level world = bC.getLevel();
 					BlockEntity blockEntity = null;
 					if (world != null) {
-						blockEntity = world.getBlockEntity(entry.getRight().getLeft().offset(bC.worldPosition));
+						blockEntity = world.getBlockEntity(entry.getRight().getLeft().offset(bC.getBlockPos()));
 					}
 
 					if (blockEntity != null && blockEntity != bC) {
@@ -344,14 +342,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		if (bC.bossEntityUuid != null && bC.level instanceof ServerLevel serverWorld) {
 			Entity entity = serverWorld.getEntity(bC.bossEntityUuid);
 			if (entity instanceof Mob mobEntity) {
-				((DuckMobEntityMixin) mobEntity).scriptblocks$setBossHealthThreshold(bC.currentPhase.bossHealthThreshold());
-				((DuckMobEntityMixin) mobEntity).scriptblocks$setBossPhase(bC.currentPhaseId);
+				DataAttachmentHelper.setBossHealthThreshold(mobEntity, bC.currentPhase.bossHealthThreshold());
+				DataAttachmentHelper.setBossPhase(mobEntity, bC.currentPhaseId);
 				if (!bC.entityAttributeModifiers.isEmpty()) {
 					AttributeMap attributeContainer = mobEntity.getAttributes();
 					bC.entityAttributeModifiers.forEach((attribute, attributeModifier) -> {
 						AttributeInstance entityAttributeInstance = attributeContainer.getInstance(attribute);
 						if (entityAttributeInstance != null) {
-							entityAttributeInstance.addPermanentModifier((AttributeModifier) attributeModifier);
+							entityAttributeInstance.addPermanentModifier(attributeModifier);
 						}
 					});
 				}
@@ -362,8 +360,8 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 		bC.setChanged();
 		if (bC.level != null) {
-			BlockState blockState = bC.level.getBlockState(bC.worldPosition);
-			bC.level.sendBlockUpdated(bC.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = bC.level.getBlockState(bC.getBlockPos());
+			bC.level.sendBlockUpdated(bC.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -386,7 +384,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 					Level world = bC.getLevel();
 					BlockEntity blockEntity = null;
 					if (world != null) {
-						blockEntity = world.getBlockEntity(entry.getRight().getLeft().offset(bC.worldPosition));
+						blockEntity = world.getBlockEntity(entry.getRight().getLeft().offset(bC.getBlockPos()));
 					}
 
 					if (blockEntity != null && blockEntity != bC) {
@@ -444,7 +442,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 
 	public LevelData.RespawnData getActualSpawnPoint(ServerLevel serverWorld) {
 
-		BlockPos targetPos = BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.spawnPoint.pos());
+		BlockPos targetPos = this.getBlockPos().offset(this.spawnPoint.pos());
 
 		if (!this.spawnPoint.pos().equals(BlockPos.ZERO) && serverWorld.getBlockEntity(targetPos) instanceof SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
 			return spawnPointDelegationBlockEntity.getTargetSpawnPoint(serverWorld);
@@ -512,7 +510,7 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 						mobEntity.spawnAnim();
 					}
 
-					((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(bC.getBlockPos());
+					DataAttachmentHelper.setControllerBlockPosition(mobEntity, Optional.of(bC.getBlockPos()));
 				}
 				bC.setChanged();
 				if (bC.level != null) {
@@ -558,14 +556,14 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		}
 		this.setChanged();
 		if (this.level != null) {
-			BlockState blockState = this.level.getBlockState(this.worldPosition);
-			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = this.level.getBlockState(this.getBlockPos());
+			this.level.sendBlockUpdated(this.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
 	public boolean noPlayersPresentInArea() {
 		if (this.level != null) {
-			BlockPos uuidListHandlerBlockPos = new BlockPos(this.worldPosition.getX() + this.uuidListHandlerBlockPositionOffset.getX(), this.worldPosition.getY() + this.uuidListHandlerBlockPositionOffset.getY(), this.worldPosition.getZ() + this.uuidListHandlerBlockPositionOffset.getZ());
+			BlockPos uuidListHandlerBlockPos = this.getBlockPos().offset(this.getUUIDListHandlerBlockPositionOffset());
 
 			BlockEntity blockEntity = level.getBlockEntity(uuidListHandlerBlockPos);
 			if (blockEntity instanceof HandlesUUIDList handlesUUIDList) {
