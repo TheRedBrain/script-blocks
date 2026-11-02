@@ -76,9 +76,9 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 		LevelHeightAccessor heightLimitView = context.heightAccessor();
 		WorldgenRandom chunkRandom = context.random(); // generates always same jigsaw combination in the same chunk/position
 		chunkRandom.setSeed(random.nextLong()); // this randomizes the jigsaw generation even in the same chunk/position
-		Registry<StructureTemplatePool> registry = dynamicRegistryManager.get(Registries.TEMPLATE_POOL);
+		Registry<StructureTemplatePool> registry = dynamicRegistryManager.lookupOrThrow(Registries.TEMPLATE_POOL);
 		StructureTemplatePool structurePool2 = (StructureTemplatePool) structurePool.unwrapKey()
-				.flatMap(key -> registry.getOrEmpty(aliasLookup.lookup(key)))
+				.flatMap(key -> registry.getOptional(aliasLookup.lookup(key)))
 				.orElse(structurePool.value());
 		StructurePoolElement structurePoolElement = structurePool2.getRandomTemplate(chunkRandom);
 		if (structurePoolElement == EmptyPoolElement.INSTANCE) {
@@ -136,7 +136,7 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 											(double) Math.max(m - maxDistanceFromCenter, heightLimitView.getMinY() + dimensionPadding.bottom()),
 											(double) (j - maxDistanceFromCenter),
 											(double) (i + maxDistanceFromCenter + 1),
-											(double) Math.min(m + maxDistanceFromCenter + 1, heightLimitView.getTopY() - dimensionPadding.top()),
+											(double) Math.min(m + maxDistanceFromCenter + 1, heightLimitView.getMaxY() - dimensionPadding.top()),
 											(double) (j + maxDistanceFromCenter + 1)
 									);
 									VoxelShape voxelShape = Shapes.join(Shapes.create(box), Shapes.create(AABB.of(blockBox)), BooleanOp.ONLY_FIRST);
@@ -163,23 +163,21 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 		}
 	}
 
-	public static Optional<BlockPos> getRandomNamedJigsaw(
-			StructurePoolElement pool, Identifier id, BlockPos pos, Rotation rotation, StructureTemplateManager structureManager, WorldgenRandom random
+	private static Optional<BlockPos> getRandomNamedJigsaw(
+			final StructurePoolElement element,
+			final Identifier targetJigsawId,
+			final BlockPos position,
+			final Rotation rotation,
+			final StructureTemplateManager structureTemplateManager,
+			final WorldgenRandom random
 	) {
-		List<StructureTemplate.StructureBlockInfo> list = pool.getShuffledJigsawBlocks(structureManager, pos, rotation, random);
-		Optional<BlockPos> optional = Optional.empty();
-
-		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
-			Identifier identifier = Identifier.tryParse(
-					((CompoundTag) Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null")).getString("name")
-			);
-			if (id.equals(identifier)) {
-				optional = Optional.of(structureBlockInfo.pos());
-				break;
+		for (StructureTemplate.JigsawBlockInfo jigsaw : element.getShuffledJigsawBlocks(structureTemplateManager, position, rotation, random)) {
+			if (targetJigsawId.equals(jigsaw.name())) {
+				return Optional.of(jigsaw.info().pos());
 			}
 		}
 
-		return optional;
+		return Optional.empty();
 	}
 
 	private static void addPieces(
@@ -231,7 +229,7 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 				world.getChunkSource().randomState(),
 				structureTemplateManager,
 				world.getSeed(),
-				new ChunkPos(pos),
+				ChunkPos.containing(pos),
 				world,
 				biome -> true
 		);
@@ -313,15 +311,16 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 			int i = blockBox.minY();
 
 			label134:
-			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
+			for (StructureTemplate.JigsawBlockInfo sourceJigsaw : structurePoolElement.getShuffledJigsawBlocks(
 					this.structureTemplateManager, blockPos, blockRotation, this.random
 			)) {
-				Direction direction = JigsawBlock.getFrontFacing(structureBlockInfo.state());
-				BlockPos blockPos2 = structureBlockInfo.pos();
+				StructureTemplate.StructureBlockInfo sourceJigsawInfo = sourceJigsaw.info();
+				Direction direction = JigsawBlock.getFrontFacing(sourceJigsawInfo.state());
+				BlockPos blockPos2 = sourceJigsawInfo.pos();
 				BlockPos blockPos3 = blockPos2.relative(direction);
 				int j = blockPos2.getY() - i;
 				int k = -1;
-				ResourceKey<StructureTemplatePool> registryKey = lookupPool(structureBlockInfo, aliasLookup);
+				ResourceKey<StructureTemplatePool> registryKey = aliasLookup.lookup(sourceJigsaw.pool());
 				Optional<? extends Holder<StructureTemplatePool>> optional = this.registry.get(registryKey);
 				if (optional.isEmpty()) {
 					LOGGER.warn("Empty or non-existent pool: {}", registryKey.identifier());
@@ -352,7 +351,7 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 							}
 
 							list.addAll(registryEntry2.value().getShuffledTemplates(this.random));
-							int l = structureBlockInfo.nbt() != null ? structureBlockInfo.nbt().getInt("placement_priority") : 0;
+							int placementPriority = sourceJigsaw.placementPriority();
 
 							for (StructurePoolElement structurePoolElement2 : list) {
 								if (structurePoolElement2 == EmptyPoolElement.INSTANCE) {
@@ -360,17 +359,18 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 								}
 
 								for (Rotation blockRotation2 : Rotation.getShuffled(this.random)) {
-									List<StructureTemplate.StructureBlockInfo> list2 = structurePoolElement2.getShuffledJigsawBlocks(
+									List<StructureTemplate.JigsawBlockInfo> list2 = structurePoolElement2.getShuffledJigsawBlocks(
 											this.structureTemplateManager, BlockPos.ZERO, blockRotation2, this.random
 									);
 									BoundingBox blockBox2 = structurePoolElement2.getBoundingBox(this.structureTemplateManager, BlockPos.ZERO, blockRotation2);
 									int m;
 									if (modifyBoundingBox && blockBox2.getYSpan() <= 16) {
-										m = list2.stream().mapToInt(structureBlockInfox -> {
-											if (!blockBox2.isInside(structureBlockInfox.pos().relative(JigsawBlock.getFrontFacing(structureBlockInfox.state())))) {
+										m = list2.stream().mapToInt(targetJigsawx -> {
+											StructureTemplate.StructureBlockInfo targetJigsawInfo = targetJigsawx.info();
+											if (!blockBox2.isInside(targetJigsawInfo.pos().relative(JigsawBlock.getFrontFacing(targetJigsawInfo.state())))) {
 												return 0;
 											} else {
-												ResourceKey<StructureTemplatePool> registryKeyx = lookupPool(structureBlockInfox, aliasLookup);
+												ResourceKey<StructureTemplatePool> registryKeyx = aliasLookup.lookup(sourceJigsaw.pool());
 												Optional<? extends Holder<StructureTemplatePool>> optionalx = this.registry.get(registryKeyx);
 												Optional<Holder<StructureTemplatePool>> optional2 = optionalx.map(entry -> ((StructureTemplatePool) entry.value()).getFallback());
 												int ix = (Integer) optionalx.map(entry -> ((StructureTemplatePool) entry.value()).getMaxSize(this.structureTemplateManager)).orElse(0);
@@ -382,16 +382,16 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 										m = 0;
 									}
 
-									for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : list2) {
-										if (JigsawBlock.canAttach(structureBlockInfo, structureBlockInfo2)) {
-											BlockPos blockPos4 = structureBlockInfo2.pos();
+									for (StructureTemplate.JigsawBlockInfo structureBlockInfo2 : list2) {
+										if (JigsawBlock.canAttach(sourceJigsaw, structureBlockInfo2)) {
+											BlockPos blockPos4 = structureBlockInfo2.info().pos();
 											BlockPos blockPos5 = blockPos3.subtract(blockPos4);
 											BoundingBox blockBox3 = structurePoolElement2.getBoundingBox(this.structureTemplateManager, blockPos5, blockRotation2);
 											int n = blockBox3.minY();
 											StructureTemplatePool.Projection projection2 = structurePoolElement2.getProjection();
 											boolean bl3 = projection2 == StructureTemplatePool.Projection.RIGID;
 											int o = blockPos4.getY();
-											int p = j - o + JigsawBlock.getFrontFacing(structureBlockInfo.state()).getStepY();
+											int p = j - o + JigsawBlock.getFrontFacing(sourceJigsawInfo.state()).getStepY();
 											int q;
 											if (bl && bl3) {
 												q = i + p;
@@ -444,7 +444,7 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 													ShapedPoolStructurePiece shapedPoolStructurePiece = new ShapedPoolStructurePiece(
 															poolStructurePiece, mutableObject2, minY + 1
 													);
-													this.structurePieces.add(shapedPoolStructurePiece, l);
+													this.structurePieces.add(shapedPoolStructurePiece, placementPriority);
 												}
 												continue label134;
 											}
@@ -456,12 +456,6 @@ public class FixedRotationStructurePoolBasedGenerator extends JigsawPlacement {
 					}
 				}
 			}
-		}
-
-		private static ResourceKey<StructureTemplatePool> lookupPool(StructureTemplate.StructureBlockInfo structureBlockInfo, PoolAliasLookup aliasLookup) {
-			CompoundTag nbtCompound = (CompoundTag) Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null");
-			ResourceKey<StructureTemplatePool> registryKey = Pools.createKey(nbtCompound.getString("pool"));
-			return aliasLookup.lookup(registryKey);
 		}
 	}
 }
