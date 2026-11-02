@@ -119,7 +119,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 
 		this.triggered = view.getBooleanOr("triggered", false);
 
-		this.triggeredMode = view.read("triggered_mode", TriggeredMode.CODEC).orElse(TriggeredMode.byName(view.getStringOr("triggered_mode", "")).orElse(TriggeredMode.ONCE);
+		this.triggeredMode = view.read("triggered_mode", TriggeredMode.CODEC).orElse(TriggeredMode.byName(view.getStringOr("triggered_mode", "")).orElse(TriggeredMode.ONCE));
 
 		super.loadAdditional(view);
 

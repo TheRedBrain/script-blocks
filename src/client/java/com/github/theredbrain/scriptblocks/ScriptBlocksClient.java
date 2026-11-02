@@ -5,7 +5,6 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDispenserBlockScreen;
 import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksClientEvents;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
@@ -28,11 +27,9 @@ import com.github.theredbrain.scriptblocks.render.renderer.FakeVillagerEntityRen
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.client.renderer.rendertype.RenderType;
 
 @Environment(value = EnvType.CLIENT)
 public class ScriptBlocksClient implements ClientModInitializer {
@@ -45,131 +42,8 @@ public class ScriptBlocksClient implements ClientModInitializer {
 		// Registry
 		registerEntityRenderer();
 		KeyBindingsRegistry.registerKeyBindings();
-		registerTransparency();
 		registerBlockEntityRenderer();
 		registerScreens();
-	}
-
-	private void registerTransparency() {
-		RenderType renderLayer = RenderType.getCutout();
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_OAK_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_IRON_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SPRUCE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BIRCH_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_JUNGLE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_ACACIA_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_CHERRY_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_DARK_OAK_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_MANGROVE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BAMBOO_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_CRIMSON_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WARPED_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_EXPOSED_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WEATHERED_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_OXIDIZED_COPPER_DOOR, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_OAK_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_IRON_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SPRUCE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BIRCH_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_JUNGLE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_ACACIA_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_CHERRY_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_DARK_OAK_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_MANGROVE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_BAMBOO_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_CRIMSON_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WARPED_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_EXPOSED_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WEATHERED_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_OXIDIZED_COPPER_TRAPDOOR, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_OAK_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_IRON_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_SPRUCE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_BIRCH_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_JUNGLE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_ACACIA_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_CHERRY_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_DARK_OAK_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_MANGROVE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_BAMBOO_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_CRIMSON_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_WARPED_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_EXPOSED_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_WEATHERED_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_OXIDIZED_COPPER_DOOR, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_OAK_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_IRON_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_SPRUCE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_BIRCH_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_JUNGLE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_ACACIA_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_CHERRY_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_DARK_OAK_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_MANGROVE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_BAMBOO_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_CRIMSON_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_WARPED_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_EXPOSED_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_WEATHERED_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TELEPORTER_OXIDIZED_COPPER_TRAPDOOR, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_ANVIL, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_OAK_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_IRON_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_SPRUCE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_BIRCH_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_JUNGLE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_ACACIA_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_CHERRY_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_DARK_OAK_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_MANGROVE_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_BAMBOO_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_CRIMSON_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_WARPED_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_EXPOSED_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_WEATHERED_COPPER_DOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_OXIDIZED_COPPER_DOOR, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_OAK_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_IRON_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_SPRUCE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_BIRCH_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_JUNGLE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_ACACIA_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_CHERRY_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_DARK_OAK_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_MANGROVE_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_BAMBOO_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_CRIMSON_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_WARPED_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_EXPOSED_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_WEATHERED_COPPER_TRAPDOOR, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.USE_RELAY_OXIDIZED_COPPER_TRAPDOOR, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_TORCH, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_WALL_TORCH, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_TORCH, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_WALL_TORCH, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_LANTERN, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.INTERACTIVE_TRIGGER_SOUL_LANTERN, renderLayer);
-
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TRIGGERED_SPAWNER_BLOCK, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TRIGGERED_VILLAGER_SPAWNER_BLOCK, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.BOSS_CONTROLLER_BLOCK, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.LOOTABLE_VAULT_BLOCK, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlock(ScriptBlocksBlocks.TRIGGERING_TRIAL_SPAWNER_BLOCK, renderLayer);
-		BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.getTranslucent(),
-				ScriptBlocksBlocks.AESTHETIC_NETHER_PORTAL
-		);
 	}
 
 	private void registerBlockEntityRenderer() {
