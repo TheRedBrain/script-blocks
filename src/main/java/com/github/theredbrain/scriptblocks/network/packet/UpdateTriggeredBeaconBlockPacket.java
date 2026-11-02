@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredBeaconBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -19,7 +20,7 @@ public record UpdateTriggeredBeaconBlockPacket(
 		boolean appliedStatusEffectShowParticles,
 		boolean appliedStatusEffectShowIcon,
 		boolean triggered,
-		String triggeredMode
+		TriggeredBeaconBlockEntity.TriggeredMode triggeredMode
 ) implements CustomPacketPayload {
 	public static final Type<UpdateTriggeredBeaconBlockPacket> PACKET_ID = new Type<>(ScriptBlocks.identifier("update_triggered_beacon_block"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateTriggeredBeaconBlockPacket> PACKET_CODEC = StreamCodec.ofMember(UpdateTriggeredBeaconBlockPacket::write, UpdateTriggeredBeaconBlockPacket::new);
@@ -41,7 +42,7 @@ public record UpdateTriggeredBeaconBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readUtf()
+				registryByteBuf.readEnum(TriggeredBeaconBlockEntity.TriggeredMode.class)
 		);
 	}
 
@@ -59,7 +60,7 @@ public record UpdateTriggeredBeaconBlockPacket(
 		registryByteBuf.writeBoolean(this.appliedStatusEffectShowParticles);
 		registryByteBuf.writeBoolean(this.appliedStatusEffectShowIcon);
 		registryByteBuf.writeBoolean(this.triggered);
-		registryByteBuf.writeUtf(this.triggeredMode);
+		registryByteBuf.writeEnum(this.triggeredMode);
 	}
 
 	@Override

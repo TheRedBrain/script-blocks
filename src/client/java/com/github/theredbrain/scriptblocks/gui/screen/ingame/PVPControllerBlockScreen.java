@@ -471,10 +471,6 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 			return this.name;
 		}
 
-		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
-		}
-
 		public Component asText() {
 			return Component.translatable("gui.pvp_controller_block.screen_page." + this.name);
 		}

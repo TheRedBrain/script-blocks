@@ -272,7 +272,7 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 	protected boolean updateBlock() {
 		BlockPos housingBlockPos = new BlockPos(0, 0, 0);
 		if (this.housingBlockEntity != null) {
-			housingBlockPos = this.housingBlockEntity.getPos();
+			housingBlockPos = this.housingBlockEntity.getBlockPos();
 		}
 		ClientPlayNetworking.send(new UpdateHousingBlockCreativePacket(
 				housingBlockPos,
@@ -293,7 +293,7 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetZField.getValue())
 				),
 				this.triggeredBlockResets,
-				this.ownerMode.asString()
+				this.ownerMode
 		));
 		return true;
 	}

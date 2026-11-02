@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.DataModificationBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public record UpdateDataModificationBlockPacket(
 		BlockPos dataAccessBlockPosition,
 		BlockPos dataProvidingBlockPositionOffset,
-		String dataModificationMode,
+		DataModificationBlockEntity.DataModificationMode dataModificationMode,
 		int addedIntegerValue,
 		int integerModulusValue
 ) implements CustomPacketPayload {
@@ -20,7 +21,7 @@ public record UpdateDataModificationBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(DataModificationBlockEntity.DataModificationMode.class),
 				registryByteBuf.readInt(),
 				registryByteBuf.readInt()
 		);
@@ -29,7 +30,7 @@ public record UpdateDataModificationBlockPacket(
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.dataAccessBlockPosition);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPositionOffset);
-		registryByteBuf.writeUtf(this.dataModificationMode);
+		registryByteBuf.writeEnum(this.dataModificationMode);
 		registryByteBuf.writeInt(this.addedIntegerValue);
 		registryByteBuf.writeInt(this.integerModulusValue);
 	}

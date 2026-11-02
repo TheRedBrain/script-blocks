@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
+import com.mojang.serialization.Codec;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 
 		view.putBoolean("triggered", true);
 
-		view.putString("triggered_mode", this.triggeredMode.getSerializedName());
+		view.store("triggered_mode", TriggeredMode.CODEC, this.triggeredMode);
 
 		super.saveAdditional(view);
 
@@ -118,7 +119,7 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 
 		this.triggered = view.getBooleanOr("triggered", false);
 
-		this.triggeredMode = TriggeredMode.byName(view.getStringOr("triggered_mode", "")).orElse(TriggeredMode.ONCE);
+		this.triggeredMode = view.read("triggered_mode", TriggeredMode.CODEC).orElse(TriggeredMode.byName(view.getStringOr("triggered_mode", "")).orElse(TriggeredMode.ONCE);
 
 		super.loadAdditional(view);
 
@@ -353,6 +354,8 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 	public enum TriggeredMode implements StringRepresentable {
 		CONTINUOUS("continuous"),
 		ONCE("once");
+
+		public static final Codec<TriggeredMode> CODEC = StringRepresentable.fromEnum(TriggeredMode::values);
 
 		private final String name;
 

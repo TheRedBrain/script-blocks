@@ -28,7 +28,7 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 
 		BlockPos relayTriggerBlockPos = payload.relayTriggerBlockPosition();
 
-		RelayTriggerBlockEntity.SelectionMode selectionMode = RelayTriggerBlockEntity.SelectionMode.byName(payload.selectionMode()).orElse(RelayTriggerBlockEntity.SelectionMode.LIST);
+		RelayTriggerBlockEntity.SelectionMode selectionMode = payload.selectionMode();
 
 		boolean showArea = payload.showArea();
 		boolean resetsArea = payload.resetsArea();
@@ -36,7 +36,7 @@ public class UpdateRelayTriggerBlockPacketReceiver implements ServerPlayNetworki
 		BlockPos areaPositionOffset = payload.areaPositionOffset();
 
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks = payload.triggeredBlocks();
-		RelayTriggerBlockEntity.TriggerMode triggerMode = RelayTriggerBlockEntity.TriggerMode.byName(payload.triggerMode()).orElse(RelayTriggerBlockEntity.TriggerMode.NORMAL);
+		RelayTriggerBlockEntity.TriggerMode triggerMode = payload.triggerMode();
 
 		boolean isTriggerAmountDataDriven = payload.isTriggerAmountDataDriven();
 		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPosOffset();

@@ -38,7 +38,7 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
-				registryByteBuf.readLenientJsonWithCodec(VillagerData.CODEC),
+				VillagerData.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
@@ -58,7 +58,7 @@ public record UpdateTriggeredVillagerSpawnerBlockPacket(
 
 		registryByteBuf.writeUtf(this.entityTypeId);
 
-		registryByteBuf.writeJsonWithCodec(VillagerData.CODEC, this.villagerData);
+		VillagerData.STREAM_CODEC.encode(registryByteBuf, this.villagerData);
 
 		registryByteBuf.writeCollection(this.entityAttributeModifiersList, CustomPacketCodecs.MUTABLE_PAIR_IDENTIFIER_ENTITY_ATTRIBUTE_MODIFIER);
 

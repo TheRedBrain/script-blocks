@@ -25,7 +25,7 @@ public class UpdateTriggeredDamageDealingBlockPacketReceiver implements ServerPl
 
 		BlockPos triggeredDamageDealingBlockPosition = payload.triggeredDamageDealingBlockPosition();
 
-		TriggeredDamageDealingBlockEntity.SelectionMode selectionMode = TriggeredDamageDealingBlockEntity.SelectionMode.byName(payload.selectionMode()).orElse(TriggeredDamageDealingBlockEntity.SelectionMode.AREA);
+		TriggeredDamageDealingBlockEntity.SelectionMode selectionMode = payload.selectionMode();
 
 		boolean showArea = payload.showArea();
 		Vec3i areaDimensions = payload.areaDimensions();

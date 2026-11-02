@@ -282,7 +282,7 @@ public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScr
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredBeaconBlockPacket(
-				this.triggeredBeaconBlock.getPos(),
+				this.triggeredBeaconBlock.getBlockPos(),
 				this.showArea,
 				new Vec3i(
 						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),
@@ -301,7 +301,7 @@ public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScr
 				this.appliedStatusEffectShowParticles,
 				this.appliedStatusEffectShowIcon,
 				this.triggered,
-				this.triggeredMode.asString()
+				this.triggeredMode
 		));
 		return true;
 	}
@@ -320,10 +320,6 @@ public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScr
 		@Override
 		public String getSerializedName() {
 			return this.name;
-		}
-
-		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
 		public Component asText() {

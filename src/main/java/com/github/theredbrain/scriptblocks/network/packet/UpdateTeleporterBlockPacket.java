@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.TeleporterBlockEntity;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public record UpdateTeleporterBlockPacket(
 		BlockPos teleportBlockPosition,
-		String creativeScreenPage,
+		TeleporterBlockEntity.CreativeScreenPage creativeScreenPage,
 		boolean showAdventureScreen,
 		String preventInteractionIdentifierString,
 		String interactionPreventedMessage,
@@ -23,9 +24,9 @@ public record UpdateTeleporterBlockPacket(
 		boolean onlyTeleportDimensionOwner,
 		String onlyDimensionOwnerCanTeleportMessage,
 		boolean teleportTeam,
-		String teleportationMode,
+		TeleporterBlockEntity.TeleportationMode teleportationMode,
 		LevelData.RespawnData directTeleportTarget,
-		String spawnPointType,
+		TeleporterBlockEntity.SpawnPointType spawnPointType,
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList,
 		MutablePair<MutablePair<String, String>, MutablePair<String, String>> location,
 		BlockPos dataProvidingBlockPosOffset,
@@ -52,7 +53,7 @@ public record UpdateTeleporterBlockPacket(
 	public UpdateTeleporterBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(TeleporterBlockEntity.CreativeScreenPage.class),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
@@ -62,9 +63,9 @@ public record UpdateTeleporterBlockPacket(
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(TeleporterBlockEntity.TeleportationMode.class),
 				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(TeleporterBlockEntity.SpawnPointType.class),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING),
 				CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING.decode(registryByteBuf),
 				registryByteBuf.readBlockPos(),
@@ -90,7 +91,7 @@ public record UpdateTeleporterBlockPacket(
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.teleportBlockPosition);
 
-		registryByteBuf.writeUtf(this.creativeScreenPage);
+		registryByteBuf.writeEnum(this.creativeScreenPage);
 
 		registryByteBuf.writeBoolean(this.showAdventureScreen);
 
@@ -107,11 +108,11 @@ public record UpdateTeleporterBlockPacket(
 
 		registryByteBuf.writeBoolean(this.teleportTeam);
 
-		registryByteBuf.writeUtf(this.teleportationMode);
+		registryByteBuf.writeEnum(this.teleportationMode);
 
 		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.directTeleportTarget);
 
-		registryByteBuf.writeUtf(this.spawnPointType);
+		registryByteBuf.writeEnum(this.spawnPointType);
 
 		registryByteBuf.writeCollection(this.locationsList, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_STRING_STRING_MUTABLE_PAIR_STRING_STRING);
 

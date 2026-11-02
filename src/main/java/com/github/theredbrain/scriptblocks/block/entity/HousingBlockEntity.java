@@ -89,6 +89,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 
 		view.putString("owner_mode", this.ownerMode.getSerializedName());
 
+		view.store("owner_mode", OwnerMode.CODEC, this.ownerMode);
+
 		nbtCompound = new CompoundTag();
 		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
 		nbtCompound.putBoolean("resets", this.triggeredBlock.getRight());
@@ -132,7 +134,7 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.ownerMode = OwnerMode.byName(view.getStringOr("owner_mode", "")).orElseGet(() -> OwnerMode.DIMENSION_OWNER);
+		this.ownerMode = view.read("owner_mode", OwnerMode.CODEC).orElse(OwnerMode.byName(view.getStringOr("owner_mode", "")).orElse(OwnerMode.DIMENSION_OWNER));
 
 		nbtCompound = view.read("triggered_block", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.triggeredBlock = new MutablePair<>(
@@ -370,6 +372,8 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 	public enum OwnerMode implements StringRepresentable {
 		DIMENSION_OWNER("dimension_owner"),
 		INTERACTION("interaction");
+
+		public static final Codec<OwnerMode> CODEC = StringRepresentable.fromEnum(OwnerMode::values);
 
 		private final String name;
 

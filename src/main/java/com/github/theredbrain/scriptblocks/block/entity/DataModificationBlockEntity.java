@@ -6,8 +6,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import java.util.Arrays;
-import java.util.Optional;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -21,8 +20,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public class DataModificationBlockEntity extends RotatedBlockEntity implements ProvidesData {
-	private static final BlockPos DATA_PROVIDING_BLOCK_POS_DEFAULT = new BlockPos(0, -1, 0);
 	private BlockPos dataProvidingBlockPosOffset = BlockPos.ZERO;
 	private DataModificationMode dataModificationMode = DataModificationMode.INTEGER_ADDITION;
 	private int addedIntegerValue = 0;
@@ -37,7 +38,7 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 
 		view.store("data_providing_block_pos_offset", BlockPos.CODEC, this.dataProvidingBlockPosOffset);
 
-		view.putString("data_modification_mode", this.dataModificationMode.getSerializedName());
+		view.store("data_modification_mode", DataModificationMode.CODEC, this.dataModificationMode);
 
 		view.putInt("added_integer_value", this.addedIntegerValue);
 
@@ -57,7 +58,7 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 				new BlockPos(-48, -48, -48)
 		);
 
-		this.dataModificationMode = DataModificationMode.byName(view.getStringOr("data_modification_mode", "")).orElseGet(() -> DataModificationMode.INTEGER_ADDITION);
+		this.dataModificationMode = view.read("data_modification_mode", DataModificationMode.CODEC).orElse(DataModificationMode.byName(view.getStringOr("data_modification_mode", "")).orElse(DataModificationMode.INTEGER_ADDITION));
 
 		this.addedIntegerValue = view.getIntOr("added_integer_value", 0);
 
@@ -186,9 +187,11 @@ public class DataModificationBlockEntity extends RotatedBlockEntity implements P
 		INTEGER_ADDITION("integer_addition"),
 		INTEGER_MODULO("integer_modulo");
 
+		public static final Codec<DataModificationMode> CODEC = StringRepresentable.fromEnum(DataModificationMode::values);
+
 		private final String name;
 
-		private DataModificationMode(String name) {
+		DataModificationMode(String name) {
 			this.name = name;
 		}
 

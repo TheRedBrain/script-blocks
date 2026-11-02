@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
+import com.mojang.serialization.Codec;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("selection_mode", this.selectionMode.getSerializedName());
+		view.store("selection_mode", SelectionMode.CODEC, this.selectionMode);
 
 		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("visible", this.showArea);
@@ -69,7 +70,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 			listAppender.add(nbtCompound.copy());
 		}
 
-		view.putString("trigger_mode", this.triggerMode.getSerializedName());
+		view.store("trigger_mode", TriggerMode.CODEC, this.triggerMode);
 
 		view.putBoolean("is_trigger_amount_data_driven", this.isTriggerAmountDataDriven);
 
@@ -85,7 +86,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.selectionMode = SelectionMode.byName(view.getStringOr("selection_mode", "")).orElseGet(() -> SelectionMode.LIST);
+		this.selectionMode = view.read("selection_mode", SelectionMode.CODEC).orElse(SelectionMode.byName(view.getStringOr("selection_mode", "")).orElse(SelectionMode.LIST));
 
 		CompoundTag nbtCompound = view.read("area", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.showArea = nbtCompound.getBooleanOr("visible", false);
@@ -115,7 +116,7 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 			);
 		}
 
-		this.triggerMode = TriggerMode.byName(view.getStringOr("trigger_mode", "")).orElseGet(() -> TriggerMode.NORMAL);
+		this.triggerMode = view.read("trigger_mode", TriggerMode.CODEC).orElse(TriggerMode.byName(view.getStringOr("trigger_mode", "")).orElse(TriggerMode.NORMAL));
 
 		this.isTriggerAmountDataDriven = view.getBooleanOr("is_trigger_amount_data_driven", true);
 
@@ -429,13 +430,15 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 	}
 
-	public static enum SelectionMode implements StringRepresentable {
+	public enum SelectionMode implements StringRepresentable {
 		LIST("list"),
 		AREA("area");
 
+		public static final Codec<SelectionMode> CODEC = StringRepresentable.fromEnum(SelectionMode::values);
+
 		private final String name;
 
-		private SelectionMode(String name) {
+		SelectionMode(String name) {
 			this.name = name;
 		}
 
@@ -453,15 +456,17 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 		}
 	}
 
-	public static enum TriggerMode implements StringRepresentable {
+	public enum TriggerMode implements StringRepresentable {
 		NORMAL("normal"),
 		RANDOM("random"),
 		BINOMIAL("binomial"),
 		HYPER_GEOMETRIC("hyper_geometric");
 
+		public static final Codec<TriggerMode> CODEC = StringRepresentable.fromEnum(TriggerMode::values);
+
 		private final String name;
 
-		private TriggerMode(String name) {
+		TriggerMode(String name) {
 			this.name = name;
 		}
 

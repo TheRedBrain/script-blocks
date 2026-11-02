@@ -632,7 +632,7 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 								ItemUtils.parseFloat(this.entitySpawnOrientationPitchField.getValue()),
 								ItemUtils.parseFloat(this.entitySpawnOrientationYawField.getValue())
 						),
-						this.spawningMode.asString(),
+						this.spawningMode,
 						this.isPersistent,
 						this.enableSpawnEffects,
 						this.entityTypeIdField.getValue(),
@@ -670,10 +670,6 @@ public class TriggeredVillagerSpawnerBlockScreen extends AbstractCreativeBlockSe
 		@Override
 		public String getSerializedName() {
 			return this.name;
-		}
-
-		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
 		public Component asText() {

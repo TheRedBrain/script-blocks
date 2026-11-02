@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -49,7 +51,7 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("manipulation_mode", this.manipulationMode.getSerializedName());
+		view.store("manipulation_mode", ManipulationMode.CODEC, this.manipulationMode);
 
 		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putString("identifier", this.effectIdentifier);
@@ -72,7 +74,7 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.manipulationMode = ManipulationMode.byName(view.getStringOr("manipulation_mode", "")).orElse(ManipulationMode.APPLY);
+		this.manipulationMode = view.read("manipulation_mode", ManipulationMode.CODEC).orElse(ManipulationMode.byName(view.getStringOr("manipulation_mode", "")).orElse(ManipulationMode.APPLY));
 
 		CompoundTag nbtCompound = view.read("applied_status_effect", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.effectIdentifier = nbtCompound.getStringOr("identifier", "");
@@ -308,9 +310,11 @@ public class StatusEffectManipulationBlockEntity extends BlockEntity implements 
 		REMOVE("remove"),
 		DECREMENT_AMPLIFIER("decrement_amplifier");
 
+		public static final Codec<ManipulationMode> CODEC = StringRepresentable.fromEnum(ManipulationMode::values);
+
 		private final String name;
 
-		private ManipulationMode(String name) {
+		ManipulationMode(String name) {
 			this.name = name;
 		}
 

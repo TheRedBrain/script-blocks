@@ -38,7 +38,7 @@ public class UpdateTriggeredBeaconBlockPacketReceiver implements ServerPlayNetwo
 
 		boolean triggered = payload.triggered();
 
-		TriggeredBeaconBlockEntity.TriggeredMode triggeredMode = TriggeredBeaconBlockEntity.TriggeredMode.byName(payload.triggeredMode()).orElse(TriggeredBeaconBlockEntity.TriggeredMode.CONTINUOUS);
+		TriggeredBeaconBlockEntity.TriggeredMode triggeredMode = payload.triggeredMode();
 
 		ServerLevel serverLevel = serverPlayerEntity.level();
 

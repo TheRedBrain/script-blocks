@@ -24,7 +24,7 @@ public class UpdateDataModificationBlockPacketReceiver implements ServerPlayNetw
 		BlockPos dataAccessBlockPosition = payload.dataAccessBlockPosition();
 
 		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPositionOffset();
-		DataModificationBlockEntity.DataModificationMode dataModificationMode = DataModificationBlockEntity.DataModificationMode.byName(payload.dataModificationMode()).orElse(DataModificationBlockEntity.DataModificationMode.INTEGER_ADDITION);
+		DataModificationBlockEntity.DataModificationMode dataModificationMode = payload.dataModificationMode();
 		int addedIntegerValue = payload.addedIntegerValue();
 		int integerModulusValue = payload.integerModulusValue();
 

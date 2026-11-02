@@ -132,13 +132,13 @@ public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsSc
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataModificationBlockPacket(
-				this.dataModificationBlockEntity.getPos(),
+				this.dataModificationBlockEntity.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getValue()),
 						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetZField.getValue())
 				),
-				this.dataModificationMode.asString(),
+				this.dataModificationMode,
 				ItemUtils.parseInt(this.addedIntegerValueField.getValue()),
 				ItemUtils.parseInt(this.integerModulusValueField.getValue())
 		));

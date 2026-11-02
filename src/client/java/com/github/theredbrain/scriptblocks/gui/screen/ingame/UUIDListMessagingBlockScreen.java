@@ -192,8 +192,8 @@ public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsS
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateUUIDListMessagingBlockPacket(
-				this.uuidListMessagingBlock.getPos(),
-				this.messageMode.asString(),
+				this.uuidListMessagingBlock.getBlockPos(),
+				this.messageMode,
 				this.messageLocalisationStringField.getValue(),
 				this.subTitleLocalisationStringField.getValue(),
 				ItemUtils.parseInt(this.titleFadeInField.getValue()),

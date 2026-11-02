@@ -63,7 +63,7 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	@Override
 	protected void init() {
 		this.screenPage = ScreenPage.COMMON;
-		this.billboardConstraints = this.triggeredDisplayBlock.getBillboardConstraints();
+		this.billboardConstraints = this.triggeredDisplayBlock.getBillboardConstraint();
 		this.displayMode = this.triggeredDisplayBlock.getDisplayMode();
 		this.isTriggered = this.triggeredDisplayBlock.getIsTriggered();
 
@@ -252,9 +252,9 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredDisplayBlockPacket(
-				this.triggeredDisplayBlock.getPos(),
-				this.billboardConstraints.asString(),
-				this.displayMode.asString(),
+				this.triggeredDisplayBlock.getBlockPos(),
+				this.billboardConstraints,
+				this.displayMode,
 				this.isTriggered,
 				new Vec3(
 						ItemUtils.parseDouble(this.displayOffsetXField.getValue()),

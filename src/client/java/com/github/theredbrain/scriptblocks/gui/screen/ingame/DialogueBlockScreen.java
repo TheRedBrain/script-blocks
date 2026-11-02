@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDialogueBlockPacket;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.mojang.serialization.Codec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -678,7 +679,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDialogueBlockPacket(
-				this.dialogueBlockEntity.getPos(),
+				this.dialogueBlockEntity.getBlockPos(),
 				this.dialogueUsedBlocksList,
 				this.dialogueTriggeredBlocksList,
 				this.startingDialogueList,
@@ -706,10 +707,6 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		@Override
 		public String getSerializedName() {
 			return this.name;
-		}
-
-		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
 		public Component asText() {

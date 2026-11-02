@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredDisplayBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,8 +10,8 @@ import net.minecraft.world.phys.Vec3;
 
 public record UpdateTriggeredDisplayBlockPacket(
 		BlockPos triggeredDisplayBlockPosition,
-		String billboardModeString,
-		String displayModeString,
+		TriggeredDisplayBlockEntity.BillboardConstraints billboardConstraint,
+		TriggeredDisplayBlockEntity.DisplayMode displayMode,
 		boolean isTriggered,
 		Vec3 displayOffset,
 		float displayYaw,
@@ -28,8 +29,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 	public UpdateTriggeredDisplayBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readUtf(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(TriggeredDisplayBlockEntity.BillboardConstraints.class),
+				registryByteBuf.readEnum(TriggeredDisplayBlockEntity.DisplayMode.class),
 				registryByteBuf.readBoolean(),
 				Vec3.STREAM_CODEC.decode(registryByteBuf),
 				registryByteBuf.readFloat(),
@@ -45,8 +46,8 @@ public record UpdateTriggeredDisplayBlockPacket(
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredDisplayBlockPosition);
-		registryByteBuf.writeUtf(this.billboardModeString);
-		registryByteBuf.writeUtf(this.displayModeString);
+		registryByteBuf.writeEnum(this.billboardConstraint);
+		registryByteBuf.writeEnum(this.displayMode);
 		registryByteBuf.writeBoolean(this.isTriggered);
 		Vec3.STREAM_CODEC.encode(registryByteBuf, this.displayOffset);
 		registryByteBuf.writeFloat(this.displayYaw);

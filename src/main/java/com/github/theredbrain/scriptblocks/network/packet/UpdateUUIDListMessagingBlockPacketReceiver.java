@@ -24,7 +24,7 @@ public class UpdateUUIDListMessagingBlockPacketReceiver implements ServerPlayNet
 		BlockPos uuidListMessagingBlockPosition = payload.uuidListMessagingBlockPosition();
 
 		BlockPos dataProvidingBlockPosOffset = payload.dataProvidingBlockPosOffset();
-		UUIDListMessagingBlockEntity.MessageMode messageMode = UUIDListMessagingBlockEntity.MessageMode.byName(payload.messageMode()).orElse(UUIDListMessagingBlockEntity.MessageMode.CHAT);
+		UUIDListMessagingBlockEntity.MessageMode messageMode = payload.messageMode();
 		String messageLocalisationString = payload.messageLocalisationString();
 		String subTitleLocalisationString = payload.subTitleLocalisationString();
 		int titleFadeIn = payload.titleFadeIn();

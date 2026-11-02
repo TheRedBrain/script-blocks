@@ -15,6 +15,7 @@ import com.github.theredbrain.scriptblocks.screen.TeleporterBlockScreenHandler;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -25,6 +26,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -46,6 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.IntFunction;
 
 public class TeleporterBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
@@ -106,7 +109,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("screen_page", this.creativeScreenPage.getSerializedName());
+		view.store("screen_page", CreativeScreenPage.CODEC, this.creativeScreenPage);
 
 		view.putString("prevent_interaction_identifier_string", this.preventInteractionIdentifierString);
 
@@ -185,7 +188,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.creativeScreenPage = CreativeScreenPage.byName(view.getStringOr("screen_page", "")).orElseGet(() -> CreativeScreenPage.ACTIVATION);
+		this.creativeScreenPage = view.read("screen_page", CreativeScreenPage.CODEC).orElse(CreativeScreenPage.byName(view.getStringOr("screen_page", "")).orElseGet(() -> CreativeScreenPage.ACTIVATION));
 
 		this.preventInteractionIdentifierString = view.getStringOr("prevent_interaction_identifier_string", "");
 
@@ -948,6 +951,8 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		TELEPORTATION_MODE("teleportation_mode"),
 		ON_TELEPORT_EVENTS("on_teleport_events"),
 		ADVENTURE_SCREEN_CUSTOMIZATION("adventure_screen_customization");
+
+		public static final Codec<CreativeScreenPage> CODEC = StringRepresentable.fromEnum(CreativeScreenPage::values);
 
 		private final String name;
 

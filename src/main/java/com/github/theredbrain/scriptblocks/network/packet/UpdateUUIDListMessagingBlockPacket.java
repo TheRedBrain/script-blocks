@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.UUIDListMessagingBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -8,7 +9,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateUUIDListMessagingBlockPacket(
 		BlockPos uuidListMessagingBlockPosition,
-		String messageMode,
+		UUIDListMessagingBlockEntity.MessageMode messageMode,
 		String messageLocalisationString,
 		String subTitleLocalisationString,
 		int titleFadeIn,
@@ -23,7 +24,7 @@ public record UpdateUUIDListMessagingBlockPacket(
 	public UpdateUUIDListMessagingBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(UUIDListMessagingBlockEntity.MessageMode.class),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readInt(),
@@ -36,7 +37,7 @@ public record UpdateUUIDListMessagingBlockPacket(
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.uuidListMessagingBlockPosition);
-		registryByteBuf.writeUtf(this.messageMode);
+		registryByteBuf.writeEnum(this.messageMode);
 		registryByteBuf.writeUtf(this.messageLocalisationString);
 		registryByteBuf.writeUtf(this.subTitleLocalisationString);
 		registryByteBuf.writeInt(this.titleFadeIn);

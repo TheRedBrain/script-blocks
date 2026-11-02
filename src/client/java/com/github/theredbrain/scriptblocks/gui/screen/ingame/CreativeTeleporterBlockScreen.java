@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.network.packet.UpdateTeleporterBlockP
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import com.github.theredbrain.scriptblocks.util.LocationUtils;
+import com.mojang.serialization.Codec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -1049,7 +1050,7 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		}
 		ClientPlayNetworking.send(new UpdateTeleporterBlockPacket(
 				this.teleporterBlock.getBlockPos(),
-				this.creativeScreenPage.asString(),
+				this.creativeScreenPage,
 				this.showAdventureScreen,
 				this.preventInteractionIdentifierStringField.getValue(),
 				this.interactionPreventedMessageField.getValue(),
@@ -1065,14 +1066,15 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 						ItemUtils.parseInt(this.accessPositionOffsetYField.getValue()),
 						ItemUtils.parseInt(this.accessPositionOffsetZField.getValue())
 				),
-						0.0F,//ItemUtils.parseFloat(this.directTeleportOrientationYawField.getValue()),
-						0.0F//ItemUtils.parseFloat(this.directTeleportOrientationPitchField.getValue())
+						0.0F,//ItemUtils.parseFloat(this.directTeleportOrientationYawField.getValue()), // TODO
+						0.0F//ItemUtils.parseFloat(this.directTeleportOrientationPitchField.getValue()) // TODO
 				),
 				this.setAccessPosition,
 				this.onlyTeleportDimensionOwner,
 				this.onlyDimensionOwnerCanTeleportMessageField.getValue(),
 				this.teleportTeam,
 				this.teleportationMode.asString(),
+				this.teleportationMode,
 				LevelData.RespawnData.of(
 						this.teleporterBlock.getLevel().dimension(),
 						new BlockPos(
@@ -1083,7 +1085,7 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 						ItemUtils.parseFloat(this.directTeleportOrientationYawField.getValue()),
 						ItemUtils.parseFloat(this.directTeleportOrientationPitchField.getValue())
 				),
-				this.spawnPointType.asString(),
+				this.spawnPointType,
 				new ArrayList<>(this.locationsList),
 				new MutablePair<>(new MutablePair<>(this.locationIdentifierField.getValue(), this.locationEntranceField.getValue()), new MutablePair<>(this.locationDataIdField.getValue(), this.locationDataField.getValue())),
 				new BlockPos(

@@ -23,7 +23,7 @@ public class UpdateStatusEffectManipulationBlockPacketReceiver implements Server
 
 		BlockPos statusEffectManipulationBlockPosition = payload.statusEffectManipulationBlockPosition();
 
-		StatusEffectManipulationBlockEntity.ManipulationMode manipulationMode = StatusEffectManipulationBlockEntity.ManipulationMode.byName(payload.manipulationMode()).orElse(StatusEffectManipulationBlockEntity.ManipulationMode.APPLY);
+		StatusEffectManipulationBlockEntity.ManipulationMode manipulationMode = payload.manipulationMode();
 		String effectIdentifier = payload.effectIdentifier();
 		int effectAmplifier = payload.effectAmplifier();
 		int effectDuration = payload.effectDuration();

@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdatePlayerDetectorBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
+import com.mojang.serialization.Codec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -16,9 +17,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.IntFunction;
 
 @Environment(value = EnvType.CLIENT)
 public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -519,10 +522,6 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		@Override
 		public String getSerializedName() {
 			return this.name;
-		}
-
-		public static Optional<ScreenPage> byName(String name) {
-			return Arrays.stream(ScreenPage.values()).filter(screenPage -> screenPage.getSerializedName().equals(name)).findFirst();
 		}
 
 		public Component asText() {

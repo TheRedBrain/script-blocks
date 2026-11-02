@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.RelayTriggerBlockEntity;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -13,13 +14,13 @@ import java.util.List;
 
 public record UpdateRelayTriggerBlockPacket(
 		BlockPos relayTriggerBlockPosition,
-		String selectionMode,
+		RelayTriggerBlockEntity.SelectionMode selectionMode,
 		boolean showArea,
 		boolean resetsArea,
 		Vec3i areaDimensions,
 		BlockPos areaPositionOffset,
 		List<MutablePair<MutablePair<BlockPos, Boolean>, Integer>> triggeredBlocks,
-		String triggerMode,
+		RelayTriggerBlockEntity.TriggerMode triggerMode,
 		boolean isTriggerAmountDataDriven,
 		BlockPos dataProvidingBlockPosOffset,
 		String dataIdentifier,
@@ -31,7 +32,7 @@ public record UpdateRelayTriggerBlockPacket(
 	public UpdateRelayTriggerBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(RelayTriggerBlockEntity.SelectionMode.class),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
@@ -41,7 +42,7 @@ public record UpdateRelayTriggerBlockPacket(
 				),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readList(CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(RelayTriggerBlockEntity.TriggerMode.class),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readUtf(),
@@ -50,7 +51,7 @@ public record UpdateRelayTriggerBlockPacket(
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.relayTriggerBlockPosition);
-		registryByteBuf.writeUtf(this.selectionMode);
+		registryByteBuf.writeEnum(this.selectionMode);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeBoolean(this.resetsArea);
 
@@ -60,7 +61,7 @@ public record UpdateRelayTriggerBlockPacket(
 		registryByteBuf.writeBlockPos(this.areaPositionOffset);
 
 		registryByteBuf.writeCollection(this.triggeredBlocks, CustomPacketCodecs.MUTABLE_PAIR_MUTABLE_PAIR_BLOCK_POS_BOOLEAN_INTEGER);
-		registryByteBuf.writeUtf(this.triggerMode);
+		registryByteBuf.writeEnum(this.triggerMode);
 		registryByteBuf.writeBoolean(this.isTriggerAmountDataDriven);
 		registryByteBuf.writeBlockPos(this.dataProvidingBlockPosOffset);
 		registryByteBuf.writeUtf(this.dataIdentifier);

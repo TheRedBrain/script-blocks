@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredDamageDealingBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -9,7 +10,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public record UpdateTriggeredDamageDealingBlockPacket(
 		BlockPos triggeredDamageDealingBlockPosition,
-		String selectionMode,
+		TriggeredDamageDealingBlockEntity.SelectionMode selectionMode,
 		boolean showArea,
 		Vec3i areaDimensions,
 		BlockPos areaPositionOffset,
@@ -24,7 +25,7 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 	public UpdateTriggeredDamageDealingBlockPacket(RegistryFriendlyByteBuf registryByteBuf) {
 		this(
 				registryByteBuf.readBlockPos(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(TriggeredDamageDealingBlockEntity.SelectionMode.class),
 				registryByteBuf.readBoolean(),
 				new Vec3i(
 						registryByteBuf.readInt(),
@@ -41,7 +42,7 @@ public record UpdateTriggeredDamageDealingBlockPacket(
 
 	private void write(RegistryFriendlyByteBuf registryByteBuf) {
 		registryByteBuf.writeBlockPos(this.triggeredDamageDealingBlockPosition);
-		registryByteBuf.writeUtf(this.selectionMode);
+		registryByteBuf.writeEnum(this.selectionMode);
 		registryByteBuf.writeBoolean(this.showArea);
 		registryByteBuf.writeInt(this.areaDimensions.getX());
 		registryByteBuf.writeInt(this.areaDimensions.getY());

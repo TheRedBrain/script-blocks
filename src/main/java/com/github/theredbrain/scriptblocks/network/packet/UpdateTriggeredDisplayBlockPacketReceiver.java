@@ -25,8 +25,8 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 		BlockPos triggeredDisplayBlockPosition = payload.triggeredDisplayBlockPosition();
 
 		// common
-		TriggeredDisplayBlockEntity.BillboardConstraints billboardMode = TriggeredDisplayBlockEntity.BillboardConstraints.byName(payload.billboardModeString()).orElse(TriggeredDisplayBlockEntity.BillboardConstraints.FIXED);
-		TriggeredDisplayBlockEntity.DisplayMode displayMode = TriggeredDisplayBlockEntity.DisplayMode.byName(payload.displayModeString()).orElse(TriggeredDisplayBlockEntity.DisplayMode.TEXT);
+		TriggeredDisplayBlockEntity.BillboardConstraints billboardConstraint = payload.billboardConstraint();
+		TriggeredDisplayBlockEntity.DisplayMode displayMode = payload.displayMode();
 		boolean isTriggered = payload.isTriggered();
 		Vec3 displayOffset = payload.displayOffset();
 		float displayYaw = payload.displayYaw();
@@ -46,7 +46,7 @@ public class UpdateTriggeredDisplayBlockPacketReceiver implements ServerPlayNetw
 
 		if (blockEntity instanceof TriggeredDisplayBlockEntity triggeredDisplayBlockEntity) {
 			triggeredDisplayBlockEntity.reset();
-			triggeredDisplayBlockEntity.setBillboardConstraints(billboardMode);
+			triggeredDisplayBlockEntity.setBillboardConstraint(billboardConstraint);
 			triggeredDisplayBlockEntity.setDisplayMode(displayMode);
 			triggeredDisplayBlockEntity.setIsTriggered(isTriggered);
 			triggeredDisplayBlockEntity.setDisplayOffset(displayOffset);

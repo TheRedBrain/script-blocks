@@ -542,8 +542,8 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(
 				new UpdateRelayTriggerBlockPacket(
-						this.relayTriggerBlock.getPos(),
-						this.selectionMode.asString(),
+						this.relayTriggerBlock.getBlockPos(),
+						this.selectionMode,
 						this.showArea,
 						this.resetsArea,
 						new Vec3i(
@@ -557,7 +557,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 								ItemUtils.parseInt(this.areaPositionOffsetZField.getValue())
 						),
 						this.triggeredBlocks,
-						this.triggerMode.asString(),
+						this.triggerMode,
 						this.isTriggerAmountDataDriven,
 						new BlockPos(
 								ItemUtils.parseInt(this.dataProvidingBlockPosOffsetXField.getValue()),

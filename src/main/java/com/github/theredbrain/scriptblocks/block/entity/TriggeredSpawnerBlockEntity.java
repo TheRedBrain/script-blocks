@@ -4,9 +4,9 @@ import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
-import com.github.theredbrain.scriptblocks.entity.mob.DuckMobEntityMixin;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -20,7 +20,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
@@ -324,8 +323,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 		}
 		this.setChanged();
 		if (this.level != null) {
-			BlockState blockState = this.level.getBlockState(this.worldPosition);
-			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = this.level.getBlockState(this.getBlockPos());
+			this.level.sendBlockUpdated(this.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -341,8 +340,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 			}
 			this.setChanged();
 			if (this.level != null) {
-				BlockState blockState = this.level.getBlockState(this.worldPosition);
-				this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+				BlockState blockState = this.level.getBlockState(this.getBlockPos());
+				this.level.sendBlockUpdated(this.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 			}
 		}
 	}
@@ -350,7 +349,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 	public void onBoundEntityKilled() {
 		if (this.getLevel() != null) {
 			this.boundEntityUuid = null;
-			BlockEntity blockEntity = this.getLevel().getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.worldPosition, this.triggeredBlock.getLeft()));
+			BlockEntity blockEntity = this.getLevel().getBlockEntity(BlockRotationUtils.getActualOffsetBlockPosition(this.getBlockPos(), this.triggeredBlock.getLeft()));
 			if (blockEntity != this) {
 				boolean triggeredBlockResets = this.triggeredBlock.getRight();
 				if (triggeredBlockResets && blockEntity instanceof Resetable resetable) {
@@ -363,8 +362,8 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 				this.trigger();
 			}
 			this.setChanged();
-			BlockState blockState = this.getLevel().getBlockState(this.worldPosition);
-			this.getLevel().sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+			BlockState blockState = this.getLevel().getBlockState(this.getBlockPos());
+			this.getLevel().sendBlockUpdated(this.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 		}
 	}
 
@@ -419,7 +418,7 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 						return false;
 					}
 					if (this.enableSpawnEffects) {
-						serverWorld.levelEvent(LevelEvent.PARTICLES_MOBBLOCK_SPAWN, this.worldPosition, 0);
+						serverWorld.levelEvent(LevelEvent.PARTICLES_MOBBLOCK_SPAWN, this.getBlockPos(), 0);
 					}
 					serverWorld.gameEvent(entity2, GameEvent.ENTITY_PLACE, blockPos);
 
@@ -448,15 +447,15 @@ public class TriggeredSpawnerBlockEntity extends RotatedBlockEntity implements T
 					}
 					if (this.spawningMode == SpawningMode.BOUND || this.spawningMode == SpawningMode.BOUND_RESPAWN) {
 						mobEntity.setPersistenceRequired();
-						((DuckMobEntityMixin) mobEntity).scriptblocks$setControllerBlockPos(this.worldPosition);
+						DataAttachmentHelper.setControllerBlockPosition(mobEntity, Optional.of(this.getBlockPos()));
 					}
 					if (!this.useRelayBlockPositionOffset.equals(POSITION_OFFSET_DEFAULT)) {
-						((DuckMobEntityMixin) mobEntity).scriptblocks$setUseRelayBlockPos(this.worldPosition.offset(this.useRelayBlockPositionOffset));
+						DataAttachmentHelper.setUseRelayBlockPosition(mobEntity, Optional.of(this.getBlockPos().offset(this.useRelayBlockPositionOffset)));
 					}
 					this.setChanged();
 					if (this.level != null) {
-						BlockState blockState = this.level.getBlockState(this.worldPosition);
-						this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
+						BlockState blockState = this.level.getBlockState(this.getBlockPos());
+						this.level.sendBlockUpdated(this.getBlockPos(), blockState, blockState, Block.UPDATE_ALL);
 					}
 					return true;
 				}

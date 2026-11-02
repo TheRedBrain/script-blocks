@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +27,7 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		BlockPos teleportBlockPosition = payload.teleportBlockPosition();
 
-		TeleporterBlockEntity.CreativeScreenPage creativeScreenPage = TeleporterBlockEntity.CreativeScreenPage.byName(payload.creativeScreenPage()).orElse(TeleporterBlockEntity.CreativeScreenPage.ACTIVATION);
+		TeleporterBlockEntity.CreativeScreenPage creativeScreenPage = payload.creativeScreenPage();
 		boolean showAdventureScreen = payload.showAdventureScreen();
 
 		String preventInteractionIdentifierString = payload.preventInteractionIdentifierString();
@@ -44,11 +43,11 @@ public class UpdateTeleporterBlockPacketReceiver implements ServerPlayNetworking
 
 		boolean teleportTeam = payload.teleportTeam();
 
-		TeleporterBlockEntity.TeleportationMode teleportationMode = TeleporterBlockEntity.TeleportationMode.byName(payload.teleportationMode()).orElse(TeleporterBlockEntity.TeleportationMode.DIRECT);
+		TeleporterBlockEntity.TeleportationMode teleportationMode = payload.teleportationMode();
 
 		LevelData.RespawnData directTeleportTarget = payload.directTeleportTarget();
 
-		TeleporterBlockEntity.SpawnPointType spawnPointType = TeleporterBlockEntity.SpawnPointType.byName(payload.spawnPointType()).orElse(TeleporterBlockEntity.SpawnPointType.WORLD_SPAWN);
+		TeleporterBlockEntity.SpawnPointType spawnPointType = payload.spawnPointType();
 
 		List<MutablePair<MutablePair<String, String>, MutablePair<String, String>>> locationsList = payload.locationsList();
 

@@ -234,8 +234,8 @@ public class StatusEffectManipulationBlockScreen extends AbstractCreativeBlockSe
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateStatusEffectManipulationBlockPacket(
-				this.statusEffectManipulationBlock.getPos(),
-				this.manipulationMode.asString(),
+				this.statusEffectManipulationBlock.getBlockPos(),
+				this.manipulationMode,
 				this.effectIdentifierField.getValue(),
 				ItemUtils.parseInt(this.effectAmplifierField.getValue()),
 				ItemUtils.parseInt(this.effectDurationField.getValue()),

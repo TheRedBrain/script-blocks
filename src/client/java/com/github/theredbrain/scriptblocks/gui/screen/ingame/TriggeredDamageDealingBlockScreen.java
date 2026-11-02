@@ -209,8 +209,8 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredDamageDealingBlockPacket(
-				this.triggeredDamageDealingBlockEntity.getPos(),
-				this.selectionMode.asString(),
+				this.triggeredDamageDealingBlockEntity.getBlockPos(),
+				this.selectionMode,
 				this.showArea,
 				new Vec3i(
 						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),

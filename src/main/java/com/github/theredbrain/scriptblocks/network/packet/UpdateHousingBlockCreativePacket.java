@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.HousingBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,7 +15,7 @@ public record UpdateHousingBlockCreativePacket(
 		BlockPos restrictBlockBreakingAreaPositionOffset,
 		BlockPos triggeredBlockPositionOffset,
 		boolean triggeredBlockResets,
-		String ownerMode
+		HousingBlockEntity.OwnerMode ownerMode
 ) implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<UpdateHousingBlockCreativePacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_housing_block_creative"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, UpdateHousingBlockCreativePacket> PACKET_CODEC = StreamCodec.ofMember(UpdateHousingBlockCreativePacket::write, UpdateHousingBlockCreativePacket::new);
@@ -31,7 +32,7 @@ public record UpdateHousingBlockCreativePacket(
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBlockPos(),
 				registryByteBuf.readBoolean(),
-				registryByteBuf.readUtf()
+				registryByteBuf.readEnum(HousingBlockEntity.OwnerMode.class)
 		);
 	}
 
@@ -44,7 +45,7 @@ public record UpdateHousingBlockCreativePacket(
 		registryByteBuf.writeBlockPos(this.restrictBlockBreakingAreaPositionOffset);
 		registryByteBuf.writeBlockPos(this.triggeredBlockPositionOffset);
 		registryByteBuf.writeBoolean(this.triggeredBlockResets);
-		registryByteBuf.writeUtf(this.ownerMode);
+		registryByteBuf.writeEnum(this.ownerMode);
 	}
 
 	@Override

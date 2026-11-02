@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -50,7 +52,7 @@ public class UUIDListMessagingBlockEntity extends RotatedBlockEntity implements 
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("message_mode", this.messageMode.getSerializedName());
+		view.store("message_mode", MessageMode.CODEC, this.messageMode);
 
 		view.putString("message_localisation_string", this.messageLocalisationString);
 
@@ -73,7 +75,7 @@ public class UUIDListMessagingBlockEntity extends RotatedBlockEntity implements 
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.messageMode = MessageMode.byName(view.getStringOr("message_mode", "")).orElse(MessageMode.CHAT);
+		this.messageMode = view.read("message_mode", MessageMode.CODEC).orElse(MessageMode.byName(view.getStringOr("message_mode", "")).orElseGet(() -> MessageMode.CHAT));
 
 		this.messageLocalisationString = view.getStringOr("message_localisation_string", "");
 
@@ -241,6 +243,8 @@ public class UUIDListMessagingBlockEntity extends RotatedBlockEntity implements 
 		CHAT("chat"),
 		OVERLAY("overlay"),
 		TITLE("title");
+
+		public static final Codec<MessageMode> CODEC = StringRepresentable.fromEnum(MessageMode::values);
 
 		private final String name;
 

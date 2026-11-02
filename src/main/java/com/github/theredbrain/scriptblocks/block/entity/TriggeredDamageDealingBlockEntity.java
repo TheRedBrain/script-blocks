@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
+import com.mojang.serialization.Codec;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.putString("selection_mode", this.selectionMode.getSerializedName());
+		view.store("selection_mode", SelectionMode.CODEC, this.selectionMode);
 
 		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.putBoolean("visible", this.showArea);
@@ -87,7 +88,7 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.selectionMode = SelectionMode.byName(view.getStringOr("selection_mode", "")).orElse(SelectionMode.AREA);
+		this.selectionMode = view.read("selection_mode", SelectionMode.CODEC).orElse(SelectionMode.byName(view.getStringOr("selection_mode", "")).orElse(SelectionMode.AREA));
 
 		CompoundTag nbtCompound = view.read("area", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		this.showArea = nbtCompound.getBooleanOr("visible", false);
@@ -331,6 +332,8 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 	public enum SelectionMode implements StringRepresentable {
 		AREA("area"),
 		UUID_LIST("uuid_list");
+
+		public static final Codec<SelectionMode> CODEC = StringRepresentable.fromEnum(SelectionMode::values);
 
 		private final String name;
 

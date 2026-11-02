@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
-import com.github.theredbrain.scriptblocks.ScriptBlocks;
 import com.github.theredbrain.scriptblocks.block.ProvidesData;
 import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
@@ -8,17 +7,12 @@ import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Brightness;
@@ -26,8 +20,6 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.util.Util;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
@@ -317,7 +309,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		this.setTeleportDuration(Mth.clamp(view.getIntOr(TELEPORT_DURATION_KEY, 0), 0, 59));
 
-		this.setBillboardConstraints(view.read(BILLBOARD_NBT_KEY, BillboardConstraints.CODEC).orElse(BillboardConstraints.FIXED));
+		this.setBillboardConstraint(view.read(BILLBOARD_NBT_KEY, BillboardConstraints.CODEC).orElse(BillboardConstraints.FIXED));
 
 		this.setViewRange(view.getFloatOr(VIEW_RANGE_NBT_KEY, 1.0F));
 
@@ -399,7 +391,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		// common
 		view.store(TRANSFORMATION_NBT_KEY, Transformation.EXTENDED_CODEC, getTransformation(this));
-		view.store(BILLBOARD_NBT_KEY, BillboardConstraints.CODEC, this.getBillboardConstraints());
+		view.store(BILLBOARD_NBT_KEY, BillboardConstraints.CODEC, this.getBillboardConstraint());
 		view.putInt(INTERPOLATION_DURATION_KEY, this.getInterpolationDuration());
 		view.putInt(START_INTERPOLATION_KEY, this.getStartInterpolation());
 		view.putInt(TELEPORT_DURATION_KEY, this.getTeleportDuration());
@@ -535,12 +527,12 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		this.rightRotation = rightRotation;
 	}
 
-	public void setBillboardConstraints(BillboardConstraints billboardConstraints) {
-		this.billboard = billboardConstraints.getId();
+	public void setBillboardConstraint(BillboardConstraints billboardConstraint) {
+		this.billboard = billboardConstraint.getId();
 	}
 
-	public BillboardConstraints getBillboardConstraints() {
-		return (BillboardConstraints) BillboardConstraints.BY_ID.apply(this.billboard);
+	public BillboardConstraints getBillboardConstraint() {
+		return BillboardConstraints.BY_ID.apply(this.billboard);
 	}
 
 	public void setBrightnessOverride(@Nullable Brightness brightness) {
@@ -842,7 +834,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 	private RenderState copyRenderState() {
 		return new RenderState(
 				AbstractInterpolator.constant(getTransformation(this)),
-				this.getBillboardConstraints(),
+				this.getBillboardConstraint(),
 				this.getBrightness(),
 				FloatLerper.constant(this.getShadowRadius()),
 				FloatLerper.constant(this.getShadowStrength()),
@@ -856,7 +848,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		float g = state.shadowStrength.lerp(lerpProgress);
 		return new RenderState(
 				new AffineTransformationInterpolator(affineTransformation, getTransformation(this)),
-				this.getBillboardConstraints(),
+				this.getBillboardConstraint(),
 				this.getBrightness(),
 				new FloatLerperImpl(f, this.getShadowRadius()),
 				new FloatLerperImpl(g, this.getShadowStrength()),
@@ -926,7 +918,7 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 
 		private final String name;
 
-		private DisplayMode(String name) {
+		DisplayMode(String name) {
 			this.name = name;
 		}
 
@@ -936,10 +928,6 @@ public class TriggeredDisplayBlockEntity extends RotatedBlockEntity implements T
 		}
 
 		public static final Codec<DisplayMode> CODEC = StringRepresentable.fromEnum(DisplayMode::values);
-
-		public static Optional<DisplayMode> byName(String name) {
-			return Arrays.stream(DisplayMode.values()).filter(displayMode -> displayMode.getSerializedName().equals(name)).findFirst();
-		}
 
 		public Component asText() {
 			return Component.translatable("gui.triggered_display_block.display_mode." + this.name);
