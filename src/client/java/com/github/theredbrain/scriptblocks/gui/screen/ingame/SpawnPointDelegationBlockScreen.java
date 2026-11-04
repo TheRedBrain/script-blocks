@@ -8,20 +8,20 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelData;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,14 +201,14 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
-		List<MutablePair<BlockPos, MutablePair<Double, Double>>> list = new ArrayList<>(this.delegatedSpawnPoints);
+	public void resize(final int width, final int height) {
+		List<LevelData.RespawnData> list = new ArrayList<>(this.delegatedSpawnPoints);
 		String string = this.newDelegatedSpawnPointPositionOffsetXField.getValue();
 		String string1 = this.newDelegatedSpawnPointPositionOffsetYField.getValue();
 		String string2 = this.newDelegatedSpawnPointPositionOffsetZField.getValue();
 		String string3 = this.newDelegatedSpawnPointOrientationYawField.getValue();
 		String string4 = this.newDelegatedSpawnPointOrientationPitchField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.delegatedSpawnPoints.clear();
 		this.delegatedSpawnPoints.addAll(list);
 		this.newDelegatedSpawnPointPositionOffsetXField.setValue(string);
@@ -220,79 +220,79 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (this.delegatedSpawnPoints.size() > VISIBLE_LIST_ELEMENTS) {
 			int i = this.width / 2 - 152;
 			int j = 20;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 92)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 92)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.delegatedSpawnPoints.size() > VISIBLE_LIST_ELEMENTS
 				&& this.mouseClicked) {
 			int i = this.delegatedSpawnPoints.size() - VISIBLE_LIST_ELEMENTS;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.delegatedSpawnPoints.size() > VISIBLE_LIST_ELEMENTS
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 154)
-				&& mouseY >= 20 && mouseY <= 112) {
+				&& x >= (double) (this.width / 2 - 152) && x <= (double) (this.width / 2 + 154)
+				&& y >= 20 && y <= 112) {
 			int i = this.delegatedSpawnPoints.size() - VISIBLE_LIST_ELEMENTS;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.delegatedSpawnPoints.size()); i++) {
-			MutablePair<BlockPos, MutablePair<Double, Double>> delegatedSpawnPoint = this.delegatedSpawnPoints.get(i);
+			LevelData.RespawnData delegatedSpawnPoint = this.delegatedSpawnPoints.get(i);
 
-			context.drawString(this.font,
-					Component.translatable("gui.spawn_point_delegation_block.list.entry.1", delegatedSpawnPoint.left.getX(), delegatedSpawnPoint.left.getY(), delegatedSpawnPoint.left.getZ()),
+			graphics.text(this.font,
+					Component.translatable("gui.spawn_point_delegation_block.list.entry.1", delegatedSpawnPoint.pos().getX(), delegatedSpawnPoint.pos().getY(), delegatedSpawnPoint.pos().getZ()),
 					this.width / 2 - 117, 21 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-			context.drawString(this.font,
-					Component.translatable("gui.spawn_point_delegation_block.list.entry.2", delegatedSpawnPoint.right.getLeft(), delegatedSpawnPoint.right.getRight()),
+			graphics.text(this.font,
+					Component.translatable("gui.spawn_point_delegation_block.list.entry.2", delegatedSpawnPoint.yaw(), delegatedSpawnPoint.pitch()),
 					this.width / 2 - 117, 31 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.delegatedSpawnPoints.size() > VISIBLE_LIST_ELEMENTS) {
-			context.blitSprite(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 20, 8, 92);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 20, 8, 92);
 			int k = (int) (83.0f * this.scrollAmount);
-			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
-		context.drawString(this.font, NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 141, 0xA0A0A0);
-		this.newDelegatedSpawnPointPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.newDelegatedSpawnPointPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.newDelegatedSpawnPointPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
-		this.newDelegatedSpawnPointOrientationYawField.render(context, mouseX, mouseY, delta);
-		this.newDelegatedSpawnPointOrientationPitchField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 141, 0xA0A0A0);
+		this.newDelegatedSpawnPointPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newDelegatedSpawnPointPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newDelegatedSpawnPointPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+		this.newDelegatedSpawnPointOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newDelegatedSpawnPointOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override

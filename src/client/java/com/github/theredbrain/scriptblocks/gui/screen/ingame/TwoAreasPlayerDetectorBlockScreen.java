@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -17,8 +16,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
-import java.util.Arrays;
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -83,18 +80,18 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 	@Override
 	protected void init() {
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values(ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.showFirstArea = this.twoAreasPlayerDetectorBlock.showFirstArea();
-		this.toggleShowFirstAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_FIRST_AREA_LABEL_TRUE_TEXT, SHOW_FIRST_AREA_LABEL_FALSE_TEXT).initially(this.showFirstArea).omitKeyText().build(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, showFirstArea) -> {
+		this.toggleShowFirstAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_FIRST_AREA_LABEL_TRUE_TEXT, SHOW_FIRST_AREA_LABEL_FALSE_TEXT, this.showFirstArea).create(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, showFirstArea) -> {
 			this.showFirstArea = showFirstArea;
 		}));
 
 		this.showSecondArea = this.twoAreasPlayerDetectorBlock.showSecondArea();
-		this.toggleShowSecondAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_SECOND_AREA_LABEL_TRUE_TEXT, SHOW_SECOND_AREA_LABEL_FALSE_TEXT).initially(this.showSecondArea).omitKeyText().build(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showSecondArea) -> {
+		this.toggleShowSecondAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_SECOND_AREA_LABEL_TRUE_TEXT, SHOW_SECOND_AREA_LABEL_FALSE_TEXT, this.showSecondArea).create(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showSecondArea) -> {
 			this.showSecondArea = showSecondArea;
 		}));
 
@@ -174,7 +171,7 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 		this.addWidget(this.onEnteringFirstAreaTriggeredBlockPositionOffsetZField);
 
 		this.onEnteringFirstAreaTriggeredBlockResets = this.twoAreasPlayerDetectorBlock.getOnEnteringFirstAreaTriggeredBlock().getRight();
-		this.toggleOnEnteringFirstAreaTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.onEnteringFirstAreaTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleOnEnteringFirstAreaTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.onEnteringFirstAreaTriggeredBlockResets).create(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.onEnteringFirstAreaTriggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -192,7 +189,7 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 		this.addWidget(this.onEnteringSecondAreaTriggeredBlockPositionOffsetZField);
 
 		this.onEnteringSecondAreaTriggeredBlockResets = this.twoAreasPlayerDetectorBlock.getOnEnteringSecondAreaTriggeredBlock().getRight();
-		this.toggleOnEnteringSecondAreaTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.onEnteringSecondAreaTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleOnEnteringSecondAreaTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.onEnteringSecondAreaTriggeredBlockResets).create(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.onEnteringSecondAreaTriggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -321,7 +318,7 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		ScreenPage var = this.screenPage;
 		boolean bool = this.showFirstArea;
 		boolean bool1 = this.showFirstArea;
@@ -351,7 +348,7 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 		String string21 = this.onEnteringSecondAreaUUIDListHandlerPositionOffsetXField.getValue();
 		String string22 = this.onEnteringSecondAreaUUIDListHandlerPositionOffsetYField.getValue();
 		String string23 = this.onEnteringSecondAreaUUIDListHandlerPositionOffsetZField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.showFirstArea = bool;
@@ -389,51 +386,51 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
 
-			context.drawString(this.font, FIRST_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
-			this.firstAreaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.firstAreaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.firstAreaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, FIRST_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
-			this.firstAreaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.firstAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.firstAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, FIRST_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			this.firstAreaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.firstAreaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.firstAreaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, FIRST_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			this.firstAreaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.firstAreaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.firstAreaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, SECOND_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
-			this.secondAreaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.secondAreaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.secondAreaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, SECOND_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 174, 0xA0A0A0);
-			this.secondAreaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.secondAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.secondAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, SECOND_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			this.secondAreaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.secondAreaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.secondAreaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, SECOND_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 174, 0xA0A0A0);
+			this.secondAreaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.secondAreaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.secondAreaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.EVENTS) {
 
-			context.drawString(this.font, ON_ENTERING_FIRST_AREA_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-			this.onEnteringFirstAreaTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.onEnteringFirstAreaTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.onEnteringFirstAreaTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ON_ENTERING_FIRST_AREA_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			this.onEnteringFirstAreaTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringFirstAreaTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringFirstAreaTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, ON_ENTERING_SECOND_AREA_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-			this.onEnteringSecondAreaTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.onEnteringSecondAreaTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.onEnteringSecondAreaTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ON_ENTERING_SECOND_AREA_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			this.onEnteringSecondAreaTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringSecondAreaTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringSecondAreaTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, ON_ENTERING_FIRST_AREA_UUID_LIST_HANDLER_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			this.onEnteringFirstAreaUUIDListHandlerPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.onEnteringFirstAreaUUIDListHandlerPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.onEnteringFirstAreaUUIDListHandlerPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ON_ENTERING_FIRST_AREA_UUID_LIST_HANDLER_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.onEnteringFirstAreaUUIDListHandlerPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringFirstAreaUUIDListHandlerPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringFirstAreaUUIDListHandlerPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, ON_ENTERING_SECOND_AREA_UUID_LIST_HANDLER_POSITION_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-			this.onEnteringSecondAreaUUIDListHandlerPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.onEnteringSecondAreaUUIDListHandlerPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.onEnteringSecondAreaUUIDListHandlerPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ON_ENTERING_SECOND_AREA_UUID_LIST_HANDLER_POSITION_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			this.onEnteringSecondAreaUUIDListHandlerPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringSecondAreaUUIDListHandlerPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.onEnteringSecondAreaUUIDListHandlerPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		}
 	}
@@ -441,7 +438,7 @@ public class TwoAreasPlayerDetectorBlockScreen extends AbstractCreativeBlockSett
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTwoAreasPlayerDetectorBlockPacket(
-				this.twoAreasPlayerDetectorBlock.getPos(),
+				this.twoAreasPlayerDetectorBlock.getBlockPos(),
 				this.showFirstArea,
 				this.showSecondArea,
 				new Vec3i(

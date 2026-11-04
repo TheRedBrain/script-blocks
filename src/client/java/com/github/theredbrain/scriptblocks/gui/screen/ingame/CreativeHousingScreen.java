@@ -8,18 +8,17 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -62,9 +61,9 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	private void resetHouseOwner() {
-		if (this.housingBlockEntity != null && this.minecraft != null && this.minecraft.player != null) {
+		if (this.housingBlockEntity != null && this.minecraft.player != null) {
 			ClientPlayNetworking.send(new SetHousingBlockOwnerPacket(
-					this.housingBlockEntity.getPos(),
+					this.housingBlockEntity.getBlockPos(),
 					""
 			));
 		}
@@ -79,14 +78,14 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 		}
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values(ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- influence area page ---
 
-		this.showInfluenceAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_INFLUENCE_AREA_LABEL_TEXT, SHOW_INFLUENCE_AREA_LABEL_TEXT).initially(this.showInfluenceArea).omitKeyText().build(this.width / 2 - 153, 45, 300, 20, Component.empty(), (button, showInfluenceArea) -> {
+		this.showInfluenceAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_INFLUENCE_AREA_LABEL_TEXT, SHOW_INFLUENCE_AREA_LABEL_TEXT, this.showInfluenceArea).create(this.width / 2 - 153, 45, 300, 20, Component.empty(), (button, showInfluenceArea) -> {
 			this.showInfluenceArea = showInfluenceArea;
 		}));
 
@@ -138,12 +137,12 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = this.housingBlockEntity != null ? this.housingBlockEntity.getTriggeredBlock().getRight() : false;
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 		// --- owner page ---
 
-		this.toggleOwnerModeButton = this.addRenderableWidget(CycleButton.builder(HousingBlockEntity.OwnerMode::asText).values((HousingBlockEntity.OwnerMode[]) HousingBlockEntity.OwnerMode.values()).initially(this.ownerMode).omitKeyText().build(this.width / 2 - 153, 70, 300, 20, Component.empty(), (button, ownerMode) -> {
+		this.toggleOwnerModeButton = this.addRenderableWidget(CycleButton.builder(HousingBlockEntity.OwnerMode::asText, this.ownerMode).withValues(HousingBlockEntity.OwnerMode.values()).create(this.width / 2 - 153, 70, 300, 20, Component.empty(), (button, ownerMode) -> {
 			this.ownerMode = ownerMode;
 		}));
 
@@ -205,7 +204,7 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		boolean bool = this.showInfluenceArea;
 		boolean boolean1 = this.triggeredBlockResets;
 		HousingBlockEntity.OwnerMode var = this.ownerMode;
@@ -218,7 +217,7 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 		String string9 = this.triggeredBlockPositionOffsetXField.getValue();
 		String string10 = this.triggeredBlockPositionOffsetYField.getValue();
 		String string11 = this.triggeredBlockPositionOffsetZField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.showInfluenceArea = bool;
 		this.showInfluenceAreaButton.setValue(this.showInfluenceArea);
 		this.triggeredBlockResets = boolean1;
@@ -238,33 +237,33 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.INFLUENCE) {
-			context.drawString(this.font, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-			this.restrictBlockBreakingAreaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.restrictBlockBreakingAreaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.restrictBlockBreakingAreaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-			this.restrictBlockBreakingAreaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.restrictBlockBreakingAreaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.restrictBlockBreakingAreaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.restrictBlockBreakingAreaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.restrictBlockBreakingAreaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.restrictBlockBreakingAreaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.restrictBlockBreakingAreaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.restrictBlockBreakingAreaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.restrictBlockBreakingAreaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
-			context.drawString(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}
 

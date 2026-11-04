@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
@@ -67,13 +66,13 @@ public class DataWritingBlockScreen extends AbstractCreativeBlockSettingsScreen 
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.dataProvidingBlockPositionOffsetXField.getValue();
 		String string1 = this.dataProvidingBlockPositionOffsetYField.getValue();
 		String string2 = this.dataProvidingBlockPositionOffsetZField.getValue();
 		String string3 = this.dataIdentifierField.getValue();
 		String string4 = this.newDataValueField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.dataProvidingBlockPositionOffsetXField.setValue(string);
 		this.dataProvidingBlockPositionOffsetYField.setValue(string1);
 		this.dataProvidingBlockPositionOffsetZField.setValue(string2);
@@ -82,25 +81,25 @@ public class DataWritingBlockScreen extends AbstractCreativeBlockSettingsScreen 
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-		this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		this.dataIdentifierField.render(context, mouseX, mouseY, delta);
+		this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		this.newDataValueField.render(context, mouseX, mouseY, delta);
+		this.newDataValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataWritingBlockPacket(
-				this.dataWritingBlock.getPos(),
+				this.dataWritingBlock.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.dataProvidingBlockPositionOffsetYField.getValue()),

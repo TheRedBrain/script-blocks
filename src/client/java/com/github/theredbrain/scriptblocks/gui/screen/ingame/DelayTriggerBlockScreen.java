@@ -7,15 +7,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -49,7 +48,7 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.delayTriggerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -67,13 +66,13 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.triggeredBlockPositionOffsetXField.getValue();
 		String string1 = this.triggeredBlockPositionOffsetYField.getValue();
 		String string2 = this.triggeredBlockPositionOffsetZField.getValue();
 		String string3 = this.triggerDelayField.getValue();
 		boolean bl = this.triggeredBlockResets;
-		this.init(client, width, height);
+		this.init(width, height);
 		this.triggeredBlockPositionOffsetXField.setValue(string);
 		this.triggeredBlockPositionOffsetYField.setValue(string1);
 		this.triggeredBlockPositionOffsetZField.setValue(string2);
@@ -83,31 +82,31 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-		this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, TRIGGER_DELAY_LABEL_TEXT, this.width / 2 - 49, 105, 0xA0A0A0);
-		this.triggerDelayField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, TRIGGER_DELAY_LABEL_TEXT, this.width / 2 - 49, 105, 0xA0A0A0);
+		this.triggerDelayField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDelayTriggerBlockPacket(
-				this.delayTriggerBlock.getPos(),
+				this.delayTriggerBlock.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.triggeredBlockPositionOffsetYField.getValue()),

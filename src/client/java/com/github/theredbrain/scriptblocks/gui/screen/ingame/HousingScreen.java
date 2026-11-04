@@ -12,17 +12,19 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -442,7 +444,7 @@ public class HousingScreen extends Screen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		List<String> list = new ArrayList<>(this.coOwnerList);
 		List<String> list1 = new ArrayList<>(this.trustedPersonsList);
 		List<String> list2 = new ArrayList<>(this.guestList);
@@ -452,7 +454,7 @@ public class HousingScreen extends Screen {
 		String string = this.newCoOwnerField.getValue();
 		String string1 = this.newTrustedPersonField.getValue();
 		String string2 = this.newGuestField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.coOwnerList.clear();
 		this.trustedPersonsList.clear();
 		this.guestList.clear();
@@ -469,27 +471,27 @@ public class HousingScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (((this.showCoOwnerListScreen && this.coOwnerList.size() > 5)
 				|| (this.showTrustedListScreen && this.coOwnerList.size() > 5)
 				|| (this.showGuestListScreen && this.coOwnerList.size() > 5))) {
 			int i = this.x + 8;
 			int j = this.y + 34;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 115)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 115)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.showCoOwnerListScreen
 				&& this.coOwnerList.size() > 5
 				&& this.mouseClicked) {
 			int i = this.coOwnerList.size() - 5;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
@@ -497,7 +499,7 @@ public class HousingScreen extends Screen {
 				&& this.trustedPersonsList.size() > 5
 				&& this.mouseClicked) {
 			int i = this.trustedPersonsList.size() - 5;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
@@ -505,101 +507,101 @@ public class HousingScreen extends Screen {
 				&& this.guestList.size() > 5
 				&& this.mouseClicked) {
 			int i = this.guestList.size() - 5;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.showCoOwnerListScreen
 				&& this.coOwnerList.size() > 5
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 61)
-				&& mouseY >= 34 && mouseY <= 148) {
+				&& x >= (double) (this.x + 7) && x <= (double) (this.x + this.backgroundWidth - 61)
+				&& y >= 34 && y <= 148) {
 			int i = this.coOwnerList.size() - 5;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		if (this.showTrustedListScreen
 				&& this.trustedPersonsList.size() > 5
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 61)
-				&& mouseY >= 34 && mouseY <= 148) {
+				&& x >= (double) (this.x + 7) && x <= (double) (this.x + this.backgroundWidth - 61)
+				&& y >= 34 && y <= 148) {
 			int i = this.trustedPersonsList.size() - 5;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
 		if (this.showGuestListScreen
 				&& this.guestList.size() > 5
-				&& mouseX >= (double) (this.x + 7) && mouseX <= (double) (this.x + this.backgroundWidth - 61)
-				&& mouseY >= 34 && mouseY <= 148) {
+				&& x >= (double) (this.x + 7) && x <= (double) (this.x + this.backgroundWidth - 61)
+				&& y >= 34 && y <= 148) {
 			int i = this.guestList.size() - 5;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.showResetHouseScreen) {
 		} else if (this.showCoOwnerListScreen) {
-			context.drawString(this.font, TITLE_CO_OWNER_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-			context.drawString(this.font, TITLE_CO_OWNER_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
+			graphics.text(this.font, TITLE_CO_OWNER_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			graphics.text(this.font, TITLE_CO_OWNER_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.coOwnerList.size()); i++) {
 				String text = this.coOwnerList.get(i);
-				context.drawString(this.font, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
+				graphics.text(this.font, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
 			}
 			if (this.coOwnerList.size() > 5) {
-				context.blitSprite(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-				context.blitSprite(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
 			}
-			this.newCoOwnerField.render(context, mouseX, mouseY, delta);
+			this.newCoOwnerField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.showTrustedListScreen) {
-			context.drawString(this.font, TITLE_TRUSTED_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-			context.drawString(this.font, TITLE_TRUSTED_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
+			graphics.text(this.font, TITLE_TRUSTED_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			graphics.text(this.font, TITLE_TRUSTED_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.trustedPersonsList.size()); i++) {
 				String text = this.trustedPersonsList.get(i);
-				context.drawString(this.font, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
+				graphics.text(this.font, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
 			}
 			if (this.trustedPersonsList.size() > 5) {
-				context.blitSprite(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-				context.blitSprite(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
 			}
-			this.newTrustedPersonField.render(context, mouseX, mouseY, delta);
+			this.newTrustedPersonField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.showGuestListScreen) {
-			context.drawString(this.font, TITLE_GUEST_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
-			context.drawString(this.font, TITLE_GUEST_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
+			graphics.text(this.font, TITLE_GUEST_LIST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+			graphics.text(this.font, TITLE_GUEST_LIST_DESCRIPTION_LABEL_TEXT, this.x + 8, this.y + 20, 0x404040, false);
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.guestList.size()); i++) {
 				String text = this.guestList.get(i);
-				context.drawString(this.font, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
+				graphics.text(this.font, text, this.x + 19, this.y + 39 + ((i - this.scrollPosition) * 24), 0x404040, false);
 			}
 			if (this.guestList.size() > 5) {
-				context.blitSprite(PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PLAYER_LISTS_SCROLLER_BACKGROUND_TEXTURE, this.x + 7, this.y + 33, 8, 116);
 				int k = (int) (107.0f * this.scrollAmount);
-				context.blitSprite(SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.x + 8, this.y + 33 + 1 + k, 6, 7);
 			}
-			this.newGuestField.render(context, mouseX, mouseY, delta);
+			this.newGuestField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else {
 			if (this.currentPermissionLevel == 0) {
-				context.drawString(this.font, TITLE_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+				graphics.text(this.font, TITLE_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
 			} else if (this.currentPermissionLevel == 1) {
-				context.drawString(this.font, TITLE_CO_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+				graphics.text(this.font, TITLE_CO_OWNER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
 			} else if (this.currentPermissionLevel == 2) {
-				context.drawString(this.font, TITLE_TRUSTED_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+				graphics.text(this.font, TITLE_TRUSTED_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
 			} else if (this.currentPermissionLevel == 3) {
-				context.drawString(this.font, TITLE_GUEST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+				graphics.text(this.font, TITLE_GUEST_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
 			} else if (this.currentPermissionLevel == 4) {
-				context.drawString(this.font, TITLE_STRANGER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
+				graphics.text(this.font, TITLE_STRANGER_LABEL_TEXT, this.x + 8, this.y + 7, 0x404040, false);
 			}
 
 		}
@@ -611,27 +613,29 @@ public class HousingScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.renderBackground(context, mouseX, mouseY, delta);
-		this.drawBackground(context, mouseX, mouseY, delta);
+	public boolean isInGameUi() {
+		return true;
 	}
 
-	public void drawBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	@Override
+	public void extractBackground(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
+		super.extractBackground(graphics, mouseX, mouseY, a);
+
 		int i = this.x;
 		int j = this.y;
 		if (this.currentPermissionLevel == 0) {
-			context.blit(BACKGROUND_218_215_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+			graphics.blit(BACKGROUND_218_215_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 		} else if (this.currentPermissionLevel == 1 || this.ownerMode == HousingBlockEntity.OwnerMode.INTERACTION) {
-			context.blit(BACKGROUND_218_95_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+			graphics.blit(BACKGROUND_218_95_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 		} else {
-			context.blit(BACKGROUND_218_71_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
+			graphics.blit(BACKGROUND_218_71_TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight, this.backgroundWidth, this.backgroundHeight);
 		}
 	}
 
 	private void updateHousingBlockAdventure() {
 		if (this.housingBlockEntity != null) {
 			ClientPlayNetworking.send(new UpdateHousingBlockAdventurePacket(
-					this.housingBlockEntity.getPos(),
+					this.housingBlockEntity.getBlockPos(),
 					this.coOwnerList,
 					this.trustedPersonsList,
 					this.guestList
@@ -655,16 +659,16 @@ public class HousingScreen extends Screen {
 	private void resetHouse() {
 		if (this.housingBlockEntity != null) {
 			ClientPlayNetworking.send(new ResetHouseHousingBlockPacket(
-					this.housingBlockEntity.getPos()
+					this.housingBlockEntity.getBlockPos()
 			));
 		}
 		this.onClose();
 	}
 
 	private void trySetHouseOwner(boolean claim) {
-		if (this.housingBlockEntity != null && this.minecraft != null && this.minecraft.player != null) {
+		if (this.housingBlockEntity != null && this.minecraft.player != null) {
 			ClientPlayNetworking.send(new SetHousingBlockOwnerPacket(
-					this.housingBlockEntity.getPos(),
+					this.housingBlockEntity.getBlockPos(),
 					claim ? this.minecraft.player.getStringUUID() : ""
 			));
 		}

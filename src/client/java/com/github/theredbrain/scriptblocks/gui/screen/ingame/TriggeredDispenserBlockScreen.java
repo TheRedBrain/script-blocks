@@ -3,8 +3,9 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.screen.TriggeredDispenserBlockScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,15 +25,15 @@ public class TriggeredDispenserBlockScreen extends AbstractContainerScreen<Trigg
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.render(context, mouseX, mouseY, delta);
-		this.renderTooltip(context, mouseX, mouseY);
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
-	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
-		int i = (this.width - this.imageWidth) / 2;
-		int j = (this.height - this.imageHeight) / 2;
-		context.blit(TEXTURE, i, j, 0, 0, this.imageWidth, this.imageHeight);
+	public void extractBackground(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
+		super.extractBackground(graphics, mouseX, mouseY, a);
+		int xo = (this.width - this.imageWidth) / 2;
+		int yo = (this.height - this.imageHeight) / 2;
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, xo, yo, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 	}
 }

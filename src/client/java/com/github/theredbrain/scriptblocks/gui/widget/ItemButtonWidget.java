@@ -2,9 +2,10 @@ package com.github.theredbrain.scriptblocks.gui.widget;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,7 @@ public class ItemButtonWidget extends Button {
 	protected final ItemStack itemStack;
 
 	ItemButtonWidget(int x, int y, int width, int height, ItemStack itemStack, Button.OnPress onPress) {
-		super(x, y, width, height, Plain.empty(), onPress, DEFAULT_NARRATION);
+		super(x, y, width, height, Component.empty(), onPress, DEFAULT_NARRATION);
 		this.itemStack = itemStack;
 	}
 
@@ -22,12 +23,12 @@ public class ItemButtonWidget extends Button {
 		return new Builder(itemStack, onPress);
 	}
 
-	public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.renderWidget(context, mouseX, mouseY, delta);
+	@Override
+	protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		if (this.visible) {
 			int i = this.getX() + this.getWidth() / 2 - 8;
 			int j = this.getY() + this.getHeight() / 2 - 8;
-			context.renderFakeItem(this.itemStack, i, j);
+			graphics.fakeItem(this.itemStack, i, j);
 		}
 	}
 

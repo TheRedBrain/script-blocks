@@ -8,19 +8,20 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,12 +150,12 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		List<BlockPos> list = new ArrayList<>(this.dataProvidingBlockPosOffsetList);
 		String string = this.newDataProvidingBlockPosOffsetXField.getValue();
 		String string1 = this.newDataProvidingBlockPosOffsetYField.getValue();
 		String string2 = this.newDataProvidingBlockPosOffsetZField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.dataProvidingBlockPosOffsetList.clear();
 		this.dataProvidingBlockPosOffsetList.addAll(list);
 		this.newDataProvidingBlockPosOffsetXField.setValue(string);
@@ -163,80 +164,80 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		int i;
 		int j;
 		if (this.dataProvidingBlockPosOffsetList.size() > VISIBLE_LIST_ENTRIES) {
 			i = this.width / 2 - 152;
 			j = 20;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 136)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 136)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.dataProvidingBlockPosOffsetList.size() > VISIBLE_LIST_ENTRIES
 				&& this.mouseClicked) {
 			int i = this.dataProvidingBlockPosOffsetList.size() - VISIBLE_LIST_ENTRIES;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.dataProvidingBlockPosOffsetList.size() > VISIBLE_LIST_ENTRIES
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 154)
-				&& mouseY >= 20 && mouseY <= 136) {
+				&& x >= (double) (this.width / 2 - 152) && x <= (double) (this.width / 2 + 154)
+				&& y >= 20 && y <= 136) {
 			int i = this.dataProvidingBlockPosOffsetList.size() - VISIBLE_LIST_ENTRIES;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ENTRIES, this.dataProvidingBlockPosOffsetList.size()); i++) {
 			BlockPos blockPos = this.dataProvidingBlockPosOffsetList.get(i);
 			MutableComponent text = Component.translatable("gui.triggered_block.list.entry", blockPos.getX(), blockPos.getY(), blockPos.getZ());
-			context.drawString(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			graphics.text(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 		}
 		if (this.dataProvidingBlockPosOffsetList.size() > VISIBLE_LIST_ENTRIES) {
-			context.blitSprite(SCROLL_BAR_BACKGROUND_8_140_TEXTURE, this.width / 2 - 153, 20, 8, 140);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_140_TEXTURE, this.width / 2 - 153, 20, 8, 140);
 			int k = (int) (131.0f * this.scrollAmount);
-			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
 
-		context.drawString(this.font, NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
-		this.newDataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
-		this.newDataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
-		this.newDataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+		this.newDataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newDataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newDataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateDataRelayBlockPacket(
-				this.dataRelayBlockEntity.getPos(),
+				this.dataRelayBlockEntity.getBlockPos(),
 				this.dataProvidingBlockPosOffsetList
 		));
 		return true;

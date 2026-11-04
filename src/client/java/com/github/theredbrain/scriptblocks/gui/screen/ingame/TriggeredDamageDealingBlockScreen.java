@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -64,15 +63,15 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 		super.init();
 
 		this.selectionMode = this.triggeredDamageDealingBlockEntity.getSelectionMode();
-		this.cycleSelectionModeButton = CycleButton.builder(TriggeredDamageDealingBlockEntity.SelectionMode::asText).values(TriggeredDamageDealingBlockEntity.SelectionMode.values()).initially(this.selectionMode).omitKeyText().build(this.width / 2 - 154, 20, 150, 20, Component.empty(), (button, selectionMode) -> {
+		this.cycleSelectionModeButton = CycleButton.builder(TriggeredDamageDealingBlockEntity.SelectionMode::asText, this.selectionMode).withValues(TriggeredDamageDealingBlockEntity.SelectionMode.values()).create(this.width / 2 - 154, 20, 150, 20, Component.empty(), (button, selectionMode) -> {
 			this.selectionMode = selectionMode;
-			button.setTooltip(Tooltip.of(CYCLE_SELECTION_MODE_TOOLTIP_TEXT));
+			button.setTooltip(Tooltip.create(CYCLE_SELECTION_MODE_TOOLTIP_TEXT));
 		});
 		this.cycleSelectionModeButton.setTooltip(Tooltip.create(CYCLE_SELECTION_MODE_TOOLTIP_TEXT));
 		this.addRenderableWidget(this.cycleSelectionModeButton);
 
 		this.showArea = this.triggeredDamageDealingBlockEntity.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_TRUE_LABEL_TEXT, SHOW_AREA_FALSE_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 + 4, 20, 150, 20, Component.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_TRUE_LABEL_TEXT, SHOW_AREA_FALSE_LABEL_TEXT, this.showArea).create(this.width / 2 + 4, 20, 150, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -146,7 +145,7 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		boolean bool = this.showArea;
 		TriggeredDamageDealingBlockEntity.SelectionMode var = this.selectionMode;
 		String string = this.areaDimensionsXField.getValue();
@@ -161,7 +160,7 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 		String string9 = this.exceptionTagIdentifierField.getValue();
 		String string10 = this.damageTypeIdentifierField.getValue();
 		String string11 = this.damageAmountField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.showArea = bool;
 		this.toggleShowAreaButton.setValue(this.showArea);
 		this.selectionMode = var;
@@ -181,28 +180,28 @@ public class TriggeredDamageDealingBlockScreen extends AbstractCreativeBlockSett
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-		this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-		this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-		this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-		this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-		this.uuidListHandlerPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.uuidListHandlerPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.uuidListHandlerPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, EXCEPTION_TAG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-		this.exceptionTagIdentifierField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, DAMAGE_TYPE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
-		this.damageTypeIdentifierField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, DAMAGE_AMOUNT_LABEL_TEXT, this.width / 2 + 105, 185, 0xA0A0A0);
-		this.damageAmountField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+		this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+		this.uuidListHandlerPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.uuidListHandlerPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.uuidListHandlerPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, EXCEPTION_TAG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+		this.exceptionTagIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, DAMAGE_TYPE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+		this.damageTypeIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, DAMAGE_AMOUNT_LABEL_TEXT, this.width / 2 + 105, 185, 0xA0A0A0);
+		this.damageAmountField.extractRenderState(graphics, mouseX, mouseY, a);
 
 	}
 

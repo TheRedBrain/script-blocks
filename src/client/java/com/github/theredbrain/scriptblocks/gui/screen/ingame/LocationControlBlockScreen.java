@@ -8,11 +8,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,12 +23,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -142,7 +141,7 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		}
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -151,36 +150,36 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 
 		this.mainEntrancePositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 80, 100, 20, Component.empty());
 		this.mainEntrancePositionOffsetXField.setMaxLength(128);
-		this.mainEntrancePositionOffsetXField.setValue(Integer.toString(this.locationControlBlock.getMainEntrance().getLeft().getX()));
+		this.mainEntrancePositionOffsetXField.setValue(Integer.toString(this.locationControlBlock.getMainEntrance().pos().getX()));
 		this.addWidget(this.mainEntrancePositionOffsetXField);
 
 		this.mainEntrancePositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 80, 100, 20, Component.empty());
 		this.mainEntrancePositionOffsetYField.setMaxLength(128);
-		this.mainEntrancePositionOffsetYField.setValue(Integer.toString(this.locationControlBlock.getMainEntrance().getLeft().getY()));
+		this.mainEntrancePositionOffsetYField.setValue(Integer.toString(this.locationControlBlock.getMainEntrance().pos().getY()));
 		this.addWidget(this.mainEntrancePositionOffsetYField);
 
 		this.mainEntrancePositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 80, 100, 20, Component.empty());
 		this.mainEntrancePositionOffsetZField.setMaxLength(128);
-		this.mainEntrancePositionOffsetZField.setValue(Integer.toString(this.locationControlBlock.getMainEntrance().getLeft().getZ()));
+		this.mainEntrancePositionOffsetZField.setValue(Integer.toString(this.locationControlBlock.getMainEntrance().pos().getZ()));
 		this.addWidget(this.mainEntrancePositionOffsetZField);
 
 		this.mainEntranceOrientationYawField = new EditBox(this.font, this.width / 2 - 154, 115, 100, 20, Component.empty());
 		this.mainEntranceOrientationYawField.setMaxLength(128);
-		this.mainEntranceOrientationYawField.setValue(Double.toString(this.locationControlBlock.getMainEntrance().getRight().getLeft()));
+		this.mainEntranceOrientationYawField.setValue(Double.toString(this.locationControlBlock.getMainEntrance().yaw()));
 		this.addWidget(this.mainEntranceOrientationYawField);
 
 		this.mainEntranceOrientationPitchField = new EditBox(this.font, this.width / 2 - 50, 115, 100, 20, Component.empty());
 		this.mainEntranceOrientationPitchField.setMaxLength(128);
-		this.mainEntranceOrientationPitchField.setValue(Double.toString(this.locationControlBlock.getMainEntrance().getRight().getRight()));
+		this.mainEntranceOrientationPitchField.setValue(Double.toString(this.locationControlBlock.getMainEntrance().pitch()));
 		this.addWidget(this.mainEntranceOrientationPitchField);
 
 		this.shouldAlwaysReset = this.locationControlBlock.shouldAlwaysReset();
-		this.toggleShouldAlwaysResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.off")).initially(this.shouldAlwaysReset).omitKeyText().build(this.width / 2 - 154, 150, 150, 20, Component.empty(), (button, shouldAlwaysReset) -> {
+		this.toggleShouldAlwaysResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.off"), this.shouldAlwaysReset).create(this.width / 2 - 154, 150, 150, 20, Component.empty(), (button, shouldAlwaysReset) -> {
 			this.shouldAlwaysReset = shouldAlwaysReset;
 		}));
 
 		this.manualReset = this.locationControlBlock.getManualReset();
-		this.toggleManualResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.off")).initially(this.manualReset).omitKeyText().build(this.width / 2 + 4, 150, 150, 20, Component.empty(), (button, manualReset) -> {
+		this.toggleManualResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.off"), this.manualReset).create(this.width / 2 + 4, 150, 150, 20, Component.empty(), (button, manualReset) -> {
 			this.manualReset = manualReset;
 		}));
 
@@ -234,7 +233,7 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = this.locationControlBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -381,8 +380,8 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
-		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> list = new ArrayList<>(this.sideEntranceList);
+	public void resize(final int width, final int height) {
+		List<MutablePair<String, LevelData.RespawnData>> list = new ArrayList<>(this.sideEntranceList);
 		ScreenPage var = this.screenPage;
 		int number = this.scrollPosition;
 		float number1 = this.scrollAmount;
@@ -410,7 +409,7 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		String string18 = this.resetAreaMinZField.getValue();
 		String string19 = this.resetAreaMaxXField.getValue();
 		String string20 = this.resetAreaMaxZField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.sideEntranceList.clear();
 		this.sideEntranceList.addAll(list);
 		this.screenPage = var;
@@ -448,110 +447,110 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (this.screenPage == ScreenPage.SIDE_ENTRANCES
 				&& this.sideEntranceList.size() > 3) {
 			int i = this.width / 2 - 152;
 			int j = 45;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 68)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 68)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.screenPage == ScreenPage.SIDE_ENTRANCES
 				&& this.sideEntranceList.size() > 3
 				&& this.mouseClicked) {
 			int i = this.sideEntranceList.size() - 3;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.screenPage == ScreenPage.SIDE_ENTRANCES
 				&& this.sideEntranceList.size() > 3
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 100)
-				&& mouseY >= 44 && mouseY <= 114) {
+				&& x >= (double) (this.width / 2 - 152) && x <= (double) (this.width / 2 + 100)
+				&& y >= 44 && y <= 114) {
 			int i = this.sideEntranceList.size() - 3;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if ((keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)) {
+	public boolean keyPressed(final KeyEvent event) {
+		if ((event.isConfirmation())) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.MAIN_ENTRANCE) {
-			context.drawString(this.font, MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-			this.mainEntrancePositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.mainEntrancePositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.mainEntrancePositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, MAIN_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-			this.mainEntranceOrientationYawField.render(context, mouseX, mouseY, delta);
-			this.mainEntranceOrientationPitchField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.mainEntrancePositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.mainEntrancePositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.mainEntrancePositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, MAIN_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.mainEntranceOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.mainEntranceOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.SIDE_ENTRANCES) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.sideEntranceList.size()); i++) {
 				String text = this.sideEntranceList.get(i).getLeft();
 				if (!this.sideEntranceList.get(i).getLeft().equals("")) {
 					text = this.sideEntranceList.get(i).getLeft() + ", " + this.sideEntranceList.get(i).getRight();
 				}
-				context.drawString(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.sideEntranceList.size() > 3) {
 //                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
-				context.blit(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 0, 0, 8, 70);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
 				int k = (int) (61.0f * this.scrollAmount);
 //                context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
-				context.blit(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 0, 0, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
-			context.drawString(this.font, NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
-			this.newSideEntrancePositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.newSideEntrancePositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.newSideEntrancePositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
-			context.drawString(this.font, NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
-			this.newSideEntranceOrientationYawField.render(context, mouseX, mouseY, delta);
-			this.newSideEntranceOrientationPitchField.render(context, mouseX, mouseY, delta);
-			this.newSideEntranceNameField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
+			this.newSideEntrancePositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newSideEntrancePositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newSideEntrancePositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
+			graphics.text(this.font, NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
+			this.newSideEntranceOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newSideEntranceOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newSideEntranceNameField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.INTERACTED_BLOCKS) {
-			context.drawString(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-			this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.dataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.RESET_AREA) {
-			context.drawString(this.font, RESET_AREA_MIN_X_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
-			this.resetAreaMinXField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, RESET_AREA_MIN_Z_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
-			this.resetAreaMinZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, RESET_AREA_MAX_X_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
-			this.resetAreaMaxXField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, RESET_AREA_MAX_Z_LABEL_TEXT, this.width / 2 - 153, 160, 0xA0A0A0);
-			this.resetAreaMaxZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, RESET_AREA_MIN_X_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			this.resetAreaMinXField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, RESET_AREA_MIN_Z_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			this.resetAreaMinZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, RESET_AREA_MAX_X_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
+			this.resetAreaMaxXField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, RESET_AREA_MAX_Z_LABEL_TEXT, this.width / 2 - 153, 160, 0xA0A0A0);
+			this.resetAreaMaxZField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}
 

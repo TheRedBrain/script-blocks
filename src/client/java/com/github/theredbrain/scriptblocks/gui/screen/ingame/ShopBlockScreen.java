@@ -6,13 +6,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -43,33 +42,33 @@ public class ShopBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.shopIdentifierField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.shopIdentifierField.setValue(string);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		this.shopIdentifierField.render(context, mouseX, mouseY, delta);
+		this.shopIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateShopBlockPacket(
-				this.shopBlockEntity.getPos(),
+				this.shopBlockEntity.getBlockPos(),
 				this.shopIdentifierField.getValue()
 		));
 		return true;

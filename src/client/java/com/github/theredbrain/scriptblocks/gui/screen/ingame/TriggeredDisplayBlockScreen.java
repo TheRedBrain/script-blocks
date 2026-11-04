@@ -7,17 +7,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -209,43 +208,43 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		// TODO
-		this.init(client, width, height);
+		this.init(width, height);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.COMMON) {
 
-			this.displayOffsetXField.render(context, mouseX, mouseY, delta);
-			this.displayOffsetYField.render(context, mouseX, mouseY, delta);
-			this.displayOffsetZField.render(context, mouseX, mouseY, delta);
-			this.displayYawField.render(context, mouseX, mouseY, delta);
-			this.displayPitchField.render(context, mouseX, mouseY, delta);
+			this.displayOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.displayOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.displayOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.displayYawField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.displayPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.TEXT_MODE) {
 
-			this.displayTextField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
-			this.dataIdentifierTextField.render(context, mouseX, mouseY, delta);
-			this.lineWidthField.render(context, mouseX, mouseY, delta);
-			this.textOpacityField.render(context, mouseX, mouseY, delta);
-			this.textBackgroundField.render(context, mouseX, mouseY, delta);
+			this.displayTextField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataIdentifierTextField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.lineWidthField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.textOpacityField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.textBackgroundField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}
 

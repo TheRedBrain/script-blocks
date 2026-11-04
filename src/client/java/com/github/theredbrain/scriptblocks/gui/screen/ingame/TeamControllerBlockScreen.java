@@ -8,8 +8,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -19,8 +18,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.scores.Team;
-import java.util.Arrays;
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -278,7 +275,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		ScreenPage var = this.screenPage;
 		Team.Visibility var1 = this.nametagVisibility;
 		Team.Visibility var2 = this.deathMessageVisibility;
@@ -301,7 +298,7 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		String string10 = this.displayNameField.getValue();
 		String string11 = this.prefixField.getValue();
 		String string12 = this.suffixField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.nametagVisibility = var1;
@@ -336,45 +333,45 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
-			context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
-			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
-			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
-			this.pvpControllerBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.pvpControllerBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.pvpControllerBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			this.pvpControllerBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.pvpControllerBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.pvpControllerBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TEAM) {
-			context.drawString(this.font, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-			this.teamIdentifierField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-			this.displayNameField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			context.drawString(this.font, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
-			context.drawString(this.font, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
-			context.drawString(this.font, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-			context.drawString(this.font, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, 0xA0A0A0);
-			context.drawString(this.font, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, 0xA0A0A0);
-			context.drawString(this.font, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
-			context.drawString(this.font, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
-			this.prefixField.render(context, mouseX, mouseY, delta);
-			this.suffixField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			this.teamIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			this.displayNameField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
+			graphics.text(this.font, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
+			graphics.text(this.font, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			graphics.text(this.font, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, 0xA0A0A0);
+			graphics.text(this.font, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, 0xA0A0A0);
+			graphics.text(this.font, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+			graphics.text(this.font, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
+			this.prefixField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.suffixField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateTeamControllerBlockPacket(
-				this.teamControllerBlockEntity.getPos(),
+				this.teamControllerBlockEntity.getBlockPos(),
 				this.enableTicking,
 				this.showArea,
 				new Vec3i(

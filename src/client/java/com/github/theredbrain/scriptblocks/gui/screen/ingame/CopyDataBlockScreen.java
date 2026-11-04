@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
@@ -79,7 +78,7 @@ public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.firstDataProvidingBlockPositionOffsetXField.getValue();
 		String string1 = this.firstDataProvidingBlockPositionOffsetYField.getValue();
 		String string2 = this.firstDataProvidingBlockPositionOffsetZField.getValue();
@@ -87,7 +86,7 @@ public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		String string4 = this.secondDataProvidingBlockPositionOffsetYField.getValue();
 		String string5 = this.secondDataProvidingBlockPositionOffsetZField.getValue();
 		String string6 = this.dataIdentifierField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.firstDataProvidingBlockPositionOffsetXField.setValue(string);
 		this.firstDataProvidingBlockPositionOffsetYField.setValue(string1);
 		this.firstDataProvidingBlockPositionOffsetZField.setValue(string2);
@@ -98,29 +97,29 @@ public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-		this.firstDataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.firstDataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.firstDataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		this.firstDataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.firstDataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.firstDataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-		this.secondDataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.secondDataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.secondDataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+		this.secondDataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.secondDataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.secondDataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-		this.dataIdentifierField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+		this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateCopyDataBlockPacket(
-				this.copyDataBlock.getPos(),
+				this.copyDataBlock.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.firstDataProvidingBlockPositionOffsetYField.getValue()),

@@ -8,15 +8,17 @@ import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+
 import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
@@ -48,7 +50,7 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 	private boolean answersMouseClicked = false;
 
 	public DialogueScreen(DialogueScreenHandler handler, Inventory inventory, Component title) {
-		super(handler, inventory, title);
+		super(handler, inventory, title, 218, 222);
 	}
 
 	private void answer(int index) {
@@ -70,15 +72,10 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 
 	@Override
 	protected void init() {
-		if (this.menu.dialogue == null && this.minecraft != null) {
+		if (this.menu.dialogue == null) {
 			this.minecraft.setScreen(null);
 			return;
 		}
-
-		this.imageWidth = 218;
-		this.imageHeight = 222;
-		this.leftPos = (this.width - this.imageWidth) / 2;
-		this.topPos = (this.height - this.imageHeight) / 2;
 
 		super.init();
 
@@ -156,12 +153,12 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		int number = this.dialogueTextScrollPosition;
 		float number1 = this.dialogueTextScrollAmount;
 		int number2 = this.answersScrollPosition;
 		float number3 = this.answersScrollAmount;
-		this.init(client, width, height);
+		this.init(width, height);
 		this.dialogueTextScrollPosition = number;
 		this.dialogueTextScrollAmount = number1;
 		this.answersScrollPosition = number2;
@@ -174,7 +171,7 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.dialogueTextMouseClicked = false;
 		this.answersMouseClicked = false;
 		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.menu.getAnswersStartingIndex() - this.menu.getDialogueTextsStartingIndex());
@@ -187,27 +184,27 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 				&& this.menu.getDialogueTextsStartingIndex() < TOTAL_LINE_AMOUNT
 				&& this.menu.dialogueTextList.size() > visibleDialogueTextAmount) {
 			int i = this.leftPos + this.imageWidth - 14;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= dialogueLinesMinY && mouseY < dialogueLinesMaxY) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= dialogueLinesMinY && event.y() < dialogueLinesMaxY) {
 				this.dialogueTextMouseClicked = true;
 			}
 		}
 		if (this.menu.getAnswersStartingIndex() < TOTAL_LINE_AMOUNT
 				&& this.menu.visibleAnswersList.size() > visibleAnswersAmount) {
 			int i = this.leftPos + this.imageWidth - 14;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= visibleAnswersMinY && mouseY < visibleAnswersMaxY) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= visibleAnswersMinY && event.y() < visibleAnswersMaxY) {
 				this.answersMouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		boolean updateWidgets = false;
 		if (this.menu.dialogueTextList.size() > this.menu.getAnswersStartingIndex()
 				&& this.dialogueTextMouseClicked) {
 			int i = this.menu.dialogueTextList.size() - (Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.getAnswersStartingIndex()));
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.dialogueTextScrollAmount = Mth.clamp(this.dialogueTextScrollAmount + f, 0.0f, 1.0f);
 			this.dialogueTextScrollPosition = (int) ((double) (this.dialogueTextScrollAmount * (float) i));
 			updateWidgets = true;
@@ -215,7 +212,7 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 		if (this.menu.visibleAnswersList.size() > TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex()
 				&& this.answersMouseClicked) {
 			int i = this.menu.visibleAnswersList.size() - TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.answersScrollAmount = Mth.clamp(this.answersScrollAmount + f, 0.0f, 1.0f);
 			this.answersScrollPosition = (int) ((double) (this.answersScrollAmount * (float) i));
 			updateWidgets = true;
@@ -223,11 +220,11 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 		if (updateWidgets) {
 			updateWidgets();
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		boolean updateWidgets = false;
 		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.menu.getAnswersStartingIndex() - this.menu.getDialogueTextsStartingIndex());
 		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
@@ -236,19 +233,19 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 		double dialogueLinesMaxY = Math.min(dialogueLinesMinY + visibleDialogueTextAmount * LINE_HEIGHT, visibleAnswersMinY);
 		double visibleAnswersMaxY = visibleAnswersMinY + visibleAnswersAmount * LINE_HEIGHT;
 		if (this.menu.dialogueTextList.size() > visibleDialogueTextAmount
-				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
-				&& mouseY >= dialogueLinesMinY && mouseY <= dialogueLinesMaxY) {
+				&& x >= (double) (this.leftPos + 7) && x <= (double) (this.leftPos + this.imageWidth - 7)
+				&& y >= dialogueLinesMinY && y <= dialogueLinesMaxY) {
 			int i = this.menu.dialogueTextList.size() - visibleDialogueTextAmount;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.dialogueTextScrollAmount = Mth.clamp(this.dialogueTextScrollAmount - f, 0.0f, 1.0f);
 			this.dialogueTextScrollPosition = (int) ((double) (this.dialogueTextScrollAmount * (float) i));
 			updateWidgets = true;
 		}
 		if (this.menu.visibleAnswersList.size() > visibleAnswersAmount
-				&& mouseX >= (double) (this.leftPos + 7) && mouseX <= (double) (this.leftPos + this.imageWidth - 7)
-				&& mouseY >= visibleAnswersMinY && mouseY <= visibleAnswersMaxY) {
+				&& x >= (double) (this.leftPos + 7) && x <= (double) (this.leftPos + this.imageWidth - 7)
+				&& y >= visibleAnswersMinY && y <= visibleAnswersMaxY) {
 			int i = this.menu.visibleAnswersList.size() - visibleAnswersAmount;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.answersScrollAmount = Mth.clamp(this.answersScrollAmount - f, 0.0f, 1.0f);
 			this.answersScrollPosition = (int) ((double) (this.answersScrollAmount * (float) i));
 			updateWidgets = true;
@@ -256,19 +253,19 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 		if (updateWidgets) {
 			updateWidgets();
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		super.renderBackground(context, mouseX, mouseY, delta);
-		this.renderBg(context, delta, mouseX, mouseY);
+	public void extractBackground(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
+		super.extractBackground(graphics, mouseX, mouseY, a);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, GENERIC_BACKGROUND_TEXTURE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		int visibleDialogueTextAmount = Math.min(TOTAL_LINE_AMOUNT - this.menu.getDialogueTextsStartingIndex(), this.menu.visibleAnswersList.isEmpty() ? TOTAL_LINE_AMOUNT : this.menu.getAnswersStartingIndex() - this.menu.getDialogueTextsStartingIndex());
 		int visibleAnswersAmount = TOTAL_LINE_AMOUNT - this.menu.getAnswersStartingIndex();
@@ -281,13 +278,13 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 			for (int i = this.dialogueTextScrollPosition; i < Math.min(this.dialogueTextScrollPosition + visibleDialogueTextAmount, this.menu.dialogueTextList.size()); i++) {
 				String text = this.menu.dialogueTextList.get(i);
 				if (!text.isEmpty()) {
-					context.drawString(this.font, Component.translatable(text), this.leftPos + 8, this.topPos + 7 + 8 + ((i - this.dialogueTextScrollPosition + this.menu.getDialogueTextsStartingIndex()) * LINE_HEIGHT), 0x404040, false);
+					graphics.text(this.font, Component.translatable(text), this.leftPos + 8, this.topPos + 7 + 8 + ((i - this.dialogueTextScrollPosition + this.menu.getDialogueTextsStartingIndex()) * LINE_HEIGHT), 0x404040, false);
 				}
 			}
 			if (this.menu.dialogueTextList.size() > visibleDialogueTextAmount) {
-				context.blitSprite(SCROLL_BAR_BACKGROUND_TEXTURE, this.leftPos + this.imageWidth - 15, dialogueLinesMinY, 8, visibleDialogueTextAmount * LINE_HEIGHT);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_TEXTURE, this.leftPos + this.imageWidth - 15, dialogueLinesMinY, 8, visibleDialogueTextAmount * LINE_HEIGHT);
 				int k = (int) ((visibleDialogueTextAmount * LINE_HEIGHT - 9) * this.dialogueTextScrollAmount);
-				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + this.imageWidth - 14, dialogueLinesMinY + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + this.imageWidth - 14, dialogueLinesMinY + 1 + k, 6, 7);
 			}
 		}
 		int index = this.menu.getAnswersStartingIndex();
@@ -298,7 +295,7 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 			if (!answerIdentifier.isEmpty()) {
 				DialogueAnswer dialogueAnswer = null;
 				if (this.menu.world != null) {
-					Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.menu.world.getRegistryManager().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).getEntry(Identifier.parse(answerIdentifier));
+					Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.menu.world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).get().value().get(Identifier.parse(answerIdentifier));
 					if (optionalDialogueAnswerReference.isPresent()) {
 						dialogueAnswer = optionalDialogueAnswerReference.get().value();
 					}
@@ -328,19 +325,10 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 			index++;
 		}
 		if (this.menu.visibleAnswersList.size() > visibleAnswersAmount) {
-			context.blitSprite(SCROLL_BAR_BACKGROUND_TEXTURE, this.leftPos + this.imageWidth - 15, visibleAnswersMinY, 8, visibleAnswersAmount * LINE_HEIGHT);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_TEXTURE, this.leftPos + this.imageWidth - 15, visibleAnswersMinY, 8, visibleAnswersAmount * LINE_HEIGHT);
 			int k = (int) ((visibleAnswersAmount * LINE_HEIGHT - 9) * this.answersScrollAmount);
-			context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + this.imageWidth - 14, visibleAnswersMinY + 1 + k, 6, 7);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_VERTICAL_6_7_TEXTURE, this.leftPos + this.imageWidth - 14, visibleAnswersMinY + 1 + k, 6, 7);
 		}
-	}
-
-	@Override
-	protected void renderLabels(GuiGraphics context, int mouseX, int mouseY) {
-	}
-
-	@Override
-	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
-		context.blitSprite(GENERIC_BACKGROUND_TEXTURE, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
 	}
 
 	@Override

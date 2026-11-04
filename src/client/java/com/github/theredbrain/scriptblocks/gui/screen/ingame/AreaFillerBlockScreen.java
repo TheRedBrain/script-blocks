@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -46,7 +45,7 @@ public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	protected void init() {
 
 		this.showArea = this.areaFillerBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -96,7 +95,7 @@ public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		boolean bool = this.showArea;
 		String string = this.areaDimensionsXField.getValue();
 		String string1 = this.areaDimensionsYField.getValue();
@@ -105,7 +104,7 @@ public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		String string4 = this.areaPositionOffsetYField.getValue();
 		String string5 = this.areaPositionOffsetZField.getValue();
 		String string6 = this.blockIdentifierField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.showArea = bool;
 		this.toggleShowAreaButton.setValue(this.showArea);
 		this.areaDimensionsXField.setValue(string);
@@ -118,28 +117,28 @@ public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
-		this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-		this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-		this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+		this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
-		this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+		this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, BLOCK_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
-		this.blockIdentifierField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, BLOCK_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
+		this.blockIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateAreaFillerBlockPacket(
-				this.areaFillerBlock.getPos(),
+				this.areaFillerBlock.getBlockPos(),
 				this.showArea,
 				new Vec3i(
 						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),

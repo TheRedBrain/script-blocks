@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -18,6 +17,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -101,13 +101,13 @@ public class AreaBlockScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 30, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 30, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.showArea = this.areaBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -152,17 +152,17 @@ public class AreaBlockScreen extends Screen {
 		this.addWidget(this.appliedStatusEffectAmplifierField);
 
 		this.appliedStatusEffectAmbient = this.areaBlock.getAppliedStatusEffectAmbient();
-		this.toggleAppliedStatusEffectAmbientButton = this.addRenderableWidget(CycleButton.booleanBuilder(AMBIENT_TRUE_LABEL_TEXT, AMBIENT_FALSE_LABEL_TEXT).initially(this.appliedStatusEffectAmbient).omitKeyText().build(this.width / 2 + 4, 100, 150, 20, Component.empty(), (button, appliedStatusEffectAmbient) -> {
+		this.toggleAppliedStatusEffectAmbientButton = this.addRenderableWidget(CycleButton.booleanBuilder(AMBIENT_TRUE_LABEL_TEXT, AMBIENT_FALSE_LABEL_TEXT, this.appliedStatusEffectAmbient).create(this.width / 2 + 4, 100, 150, 20, Component.empty(), (button, appliedStatusEffectAmbient) -> {
 			this.appliedStatusEffectAmbient = appliedStatusEffectAmbient;
 		}));
 
 		this.appliedStatusEffectShowParticles = this.areaBlock.getAppliedStatusEffectShowParticles();
-		this.toggleAppliedStatusEffectShowParticlesButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_PARTICLES_LABEL_TEXT, HIDE_PARTICLES_LABEL_TEXT).initially(this.appliedStatusEffectShowParticles).omitKeyText().build(this.width / 2 - 154, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowParticles) -> {
+		this.toggleAppliedStatusEffectShowParticlesButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_PARTICLES_LABEL_TEXT, HIDE_PARTICLES_LABEL_TEXT, this.appliedStatusEffectShowParticles).create(this.width / 2 - 154, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowParticles) -> {
 			this.appliedStatusEffectShowParticles = appliedStatusEffectShowParticles;
 		}));
 
 		this.appliedStatusEffectShowIcon = this.areaBlock.getAppliedStatusEffectShowIcon();
-		this.toggleAppliedStatusEffectShowIconButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_ICON_LABEL_TEXT, HIDE_ICON_LABEL_TEXT).initially(this.appliedStatusEffectShowIcon).omitKeyText().build(this.width / 2 + 4, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowIcon) -> {
+		this.toggleAppliedStatusEffectShowIconButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_ICON_LABEL_TEXT, HIDE_ICON_LABEL_TEXT, this.appliedStatusEffectShowIcon).create(this.width / 2 + 4, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowIcon) -> {
 			this.appliedStatusEffectShowIcon = appliedStatusEffectShowIcon;
 		}));
 
@@ -183,7 +183,7 @@ public class AreaBlockScreen extends Screen {
 		this.addWidget(this.triggeredMessageField);
 
 		this.messageMode = this.areaBlock.getMessageMode();
-		this.cycleMessageModeButton = this.addRenderableWidget(CycleButton.builder(AreaBlockEntity.MessageMode::asText).values((AreaBlockEntity.MessageMode[]) AreaBlockEntity.MessageMode.values()).initially(this.messageMode).omitKeyText().build(this.width / 2 - 154, 159, 300, 20, Component.empty(), (button, messageMode) -> {
+		this.cycleMessageModeButton = this.addRenderableWidget(CycleButton.builder(AreaBlockEntity.MessageMode::asText, this.messageMode).withValues((AreaBlockEntity.MessageMode[]) AreaBlockEntity.MessageMode.values()).create(this.width / 2 - 154, 159, 300, 20, Component.empty(), (button, messageMode) -> {
 			this.messageMode = messageMode;
 			this.updateWidgets();
 		}));
@@ -202,23 +202,23 @@ public class AreaBlockScreen extends Screen {
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.areaBlock.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.areaBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 65, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 65, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
 		this.wasTriggered = this.areaBlock.getWasTriggered();
-		this.toggleWasTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(TRIGGERED_TRUE_LABEL_TEXT, TRIGGERED_FALSE_LABEL_TEXT).initially(this.wasTriggered).omitKeyText().build(this.width / 2 - 154, 89, 300, 20, Component.empty(), (button, triggered) -> {
+		this.toggleWasTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(TRIGGERED_TRUE_LABEL_TEXT, TRIGGERED_FALSE_LABEL_TEXT, this.wasTriggered).create(this.width / 2 - 154, 89, 300, 20, Component.empty(), (button, triggered) -> {
 			this.wasTriggered = triggered;
 		}));
 
 		this.triggeredMode = this.areaBlock.getTriggeredMode();
-		this.cycleTriggeredModeButton = this.addRenderableWidget(CycleButton.builder(AreaBlockEntity.TriggeredMode::asText).values((AreaBlockEntity.TriggeredMode[]) AreaBlockEntity.TriggeredMode.values()).initially(this.triggeredMode).omitKeyText().build(this.width / 2 - 154, 113, 300, 20, Component.empty(), (button, triggeredMode) -> {
+		this.cycleTriggeredModeButton = this.addRenderableWidget(CycleButton.builder(AreaBlockEntity.TriggeredMode::asText, this.triggeredMode).withValues(AreaBlockEntity.TriggeredMode.values()).create(this.width / 2 - 154, 113, 300, 20, Component.empty(), (button, triggeredMode) -> {
 			this.triggeredMode = triggeredMode;
 			this.updateWidgets();
 		}));
 
 		this.triggerMode = this.areaBlock.getTriggerMode();
-		this.cycleTriggerModeButton = this.addRenderableWidget(CycleButton.builder(AreaBlockEntity.TriggerMode::asText).values((AreaBlockEntity.TriggerMode[]) AreaBlockEntity.TriggerMode.values()).initially(this.triggerMode).omitKeyText().build(this.width / 2 - 154, 137, 300, 20, Component.empty(), (button, triggerMode) -> {
+		this.cycleTriggerModeButton = this.addRenderableWidget(CycleButton.builder(AreaBlockEntity.TriggerMode::asText, this.triggerMode).withValues(AreaBlockEntity.TriggerMode.values()).create(this.width / 2 - 154, 137, 300, 20, Component.empty(), (button, triggerMode) -> {
 			this.triggerMode = triggerMode;
 			this.updateWidgets();
 		}));
@@ -307,7 +307,7 @@ public class AreaBlockScreen extends Screen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		ScreenPage var = this.screenPage;
 		AreaBlockEntity.TriggerMode var1 = this.triggerMode;
 		AreaBlockEntity.TriggeredMode var2 = this.triggeredMode;
@@ -332,7 +332,7 @@ public class AreaBlockScreen extends Screen {
 		String string12 = this.triggeredBlockPositionOffsetYField.getValue();
 		String string13 = this.triggeredBlockPositionOffsetZField.getValue();
 		String string14 = this.timerField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.screenPage = var;
 		this.triggerMode = var1;
 		this.triggeredMode = var2;
@@ -360,41 +360,41 @@ public class AreaBlockScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
-			context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
-			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
-			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.APPLIED_EFFECT) {
-			context.drawString(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
-			this.appliedStatusEffectIdentifierField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
-			this.appliedStatusEffectAmplifierField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			this.appliedStatusEffectIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			this.appliedStatusEffectAmplifierField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.MESSAGES) {
-			context.drawString(this.font, JOIN_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
-			this.joinMessageField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, LEAVE_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
-			this.leaveMessageField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, TRIGGERED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
-			this.triggeredMessageField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, JOIN_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			this.joinMessageField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, LEAVE_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			this.leaveMessageField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, TRIGGERED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
+			this.triggeredMessageField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TRIGGER_SETTINGS) {
-			context.drawString(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
-			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 			if (this.triggerMode == AreaBlockEntity.TriggerMode.TIMED) {
-				context.drawString(this.font, PRE_TIMER_LABEL_TEXT, this.width / 2 - 153, 167, 0xA0A0A0);
-				this.timerField.render(context, mouseX, mouseY, delta);
+				graphics.text(this.font, PRE_TIMER_LABEL_TEXT, this.width / 2 - 153, 167, 0xA0A0A0);
+				this.timerField.extractRenderState(graphics, mouseX, mouseY, a);
 				int i = this.timerField.getX() + 60;
-				context.drawString(this.font, POST_TIMER_LABEL_TEXT, i, 167, 0xA0A0A0);
+				graphics.text(this.font, POST_TIMER_LABEL_TEXT, i, 167, 0xA0A0A0);
 			}
 		}
 	}
@@ -406,7 +406,7 @@ public class AreaBlockScreen extends Screen {
 
 	private boolean updateAreaBlock() {
 		ClientPlayNetworking.send(new UpdateAreaBlockPacket(
-				this.areaBlock.getPos(),
+				this.areaBlock.getBlockPos(),
 				this.showArea,
 				new Vec3i(
 						ItemUtils.parseInt(this.areaDimensionsXField.getValue()),
@@ -433,9 +433,9 @@ public class AreaBlockScreen extends Screen {
 				this.joinMessageField.getValue(),
 				this.leaveMessageField.getValue(),
 				this.triggeredMessageField.getValue(),
-				this.messageMode.asString(),
-				this.triggerMode.asString(),
-				this.triggeredMode.asString(),
+				this.messageMode,
+				this.triggerMode,
+				this.triggeredMode,
 				ItemUtils.parseInt(this.timerField.getValue())
 		));
 		return true;

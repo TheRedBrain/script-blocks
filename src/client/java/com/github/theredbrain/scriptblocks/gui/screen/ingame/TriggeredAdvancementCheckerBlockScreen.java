@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -26,12 +25,10 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 	private EditBox firstTriggeredBlockPositionOffsetXField;
 	private EditBox firstTriggeredBlockPositionOffsetYField;
 	private EditBox firstTriggeredBlockPositionOffsetZField;
-	private CycleButton<Boolean> toggleFirstTriggeredBlockResetsButton;
 	private boolean firstTriggeredBlockResets;
 	private EditBox secondTriggeredBlockPositionOffsetXField;
 	private EditBox secondTriggeredBlockPositionOffsetYField;
 	private EditBox secondTriggeredBlockPositionOffsetZField;
-	private CycleButton<Boolean> toggleSecondTriggeredBlockResetsButton;
 	private boolean secondTriggeredBlockResets;
 	private EditBox checkedAdvancementIdentifierField;
 
@@ -65,7 +62,7 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 		this.firstTriggeredBlockPositionOffsetZField.setValue(Integer.toString(this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.firstTriggeredBlockPositionOffsetZField);
 		this.firstTriggeredBlockResets = this.triggeredAdvancementCheckerBlock.getFirstTriggeredBlock().getRight();
-		this.toggleFirstTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.firstTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 70, 150, 20, Component.empty(), (button, firstTriggeredBlockResets) -> {
+		this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.firstTriggeredBlockResets).create(this.width / 2 + 8, 70, 150, 20, Component.empty(), (button, firstTriggeredBlockResets) -> {
 			this.firstTriggeredBlockResets = firstTriggeredBlockResets;
 		}));
 
@@ -82,7 +79,7 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 		this.secondTriggeredBlockPositionOffsetZField.setValue(Integer.toString(this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.secondTriggeredBlockPositionOffsetZField);
 		this.secondTriggeredBlockResets = this.triggeredAdvancementCheckerBlock.getSecondTriggeredBlock().getRight();
-		this.toggleSecondTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.secondTriggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 105, 150, 20, Component.empty(), (button, secondTriggeredBlockResets) -> {
+		this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.secondTriggeredBlockResets).create(this.width / 2 + 8, 105, 150, 20, Component.empty(), (button, secondTriggeredBlockResets) -> {
 			this.secondTriggeredBlockResets = secondTriggeredBlockResets;
 		}));
 
@@ -96,7 +93,7 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.firstTriggeredBlockPositionOffsetXField.getValue();
 		String string1 = this.firstTriggeredBlockPositionOffsetYField.getValue();
 		String string2 = this.firstTriggeredBlockPositionOffsetZField.getValue();
@@ -106,7 +103,7 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 		String string6 = this.checkedAdvancementIdentifierField.getValue();
 		boolean bl = this.firstTriggeredBlockResets;
 		boolean bl2 = this.secondTriggeredBlockResets;
-		this.init(client, width, height);
+		this.init(width, height);
 		this.firstTriggeredBlockPositionOffsetXField.setValue(string);
 		this.firstTriggeredBlockPositionOffsetYField.setValue(string1);
 		this.firstTriggeredBlockPositionOffsetZField.setValue(string2);
@@ -120,7 +117,7 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 
 	private boolean updateTriggeredAdvancementCheckerBlock() {
 		ClientPlayNetworking.send(new UpdateTriggeredAdvancementCheckerBlockPacket(
-				this.triggeredAdvancementCheckerBlock.getPos(),
+				this.triggeredAdvancementCheckerBlock.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.firstTriggeredBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.firstTriggeredBlockPositionOffsetYField.getValue()),
@@ -139,20 +136,20 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 60, 0xA0A0A0);
-		this.firstTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.firstTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.firstTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 95, 0xA0A0A0);
-		this.secondTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.secondTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.secondTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, 0xA0A0A0);
-		this.checkedAdvancementIdentifierField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 60, 0xA0A0A0);
+		this.firstTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.firstTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.firstTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 95, 0xA0A0A0);
+		this.secondTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.secondTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.secondTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, 0xA0A0A0);
+		this.checkedAdvancementIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override

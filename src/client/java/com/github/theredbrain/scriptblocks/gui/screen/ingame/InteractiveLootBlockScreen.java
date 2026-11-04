@@ -7,15 +7,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 @Deprecated
 @Environment(value = EnvType.CLIENT)
@@ -65,7 +64,7 @@ public class InteractiveLootBlockScreen extends Screen {
 
 		this.lootBlockMode = this.interactiveLootBlockEntity.getMode();
 
-		this.lootBlockModeCycleButton = this.addRenderableWidget(CycleButton.builder(InteractiveLootBlockEntity.Mode::asText).values((InteractiveLootBlockEntity.Mode[]) InteractiveLootBlockEntity.Mode.values()).initially(this.lootBlockMode).omitKeyText().build(this.width / 2 - 154, 54, 308, 20, Component.empty(), (button, lootBlockMode) -> {
+		this.lootBlockModeCycleButton = this.addRenderableWidget(CycleButton.builder(InteractiveLootBlockEntity.Mode::asText, this.lootBlockMode).withValues(InteractiveLootBlockEntity.Mode.values()).create(this.width / 2 - 154, 54, 308, 20, Component.empty(), (button, lootBlockMode) -> {
 			this.lootBlockMode = lootBlockMode;
 			this.updateWidgets();
 		}));
@@ -82,7 +81,7 @@ public class InteractiveLootBlockScreen extends Screen {
 
 		this.trackPlayers = this.interactiveLootBlockEntity.getTrackPlayers();
 
-		this.trackPlayersCycleButton = this.addRenderableWidget(CycleButton.onOffBuilder().initially(this.trackPlayers).omitKeyText().build(this.width / 2 + 54, 89, 100, 20, Component.empty(), (button, trackPlayers) -> {
+		this.trackPlayersCycleButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.trackPlayers).create(this.width / 2 + 54, 89, 100, 20, Component.empty(), (button, trackPlayers) -> {
 			this.trackPlayers = trackPlayers;
 		}));
 
@@ -136,7 +135,7 @@ public class InteractiveLootBlockScreen extends Screen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		boolean bool = this.trackPlayers;
 		String string = this.lootTableIdentifierStringField.getValue();
 		String string1 = this.rollsField.getValue();
@@ -146,7 +145,7 @@ public class InteractiveLootBlockScreen extends Screen {
 		String string5 = this.alreadyLootedMessageField.getValue();
 		String string6 = this.alreadyLootedSoundIdField.getValue();
 		InteractiveLootBlockEntity.Mode var = this.lootBlockMode;
-		this.init(client, width, height);
+		this.init(width, height);
 		this.trackPlayers = bool;
 		this.lootTableIdentifierStringField.setValue(string);
 		this.rollsField.setValue(string1);
@@ -162,19 +161,19 @@ public class InteractiveLootBlockScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	private void updateInteractiveLootBlock() {
 		ClientPlayNetworking.send(new UpdateInteractiveLootBlockPacket(
-				this.interactiveLootBlockEntity.getPos(),
+				this.interactiveLootBlockEntity.getBlockPos(),
 				this.lootTableIdentifierStringField.getValue(),
-				this.lootBlockMode.asString(),
+				this.lootBlockMode.getSerializedName(),
 				ItemUtils.parseInt(this.rollsField.getValue()),
 				ItemUtils.parseInt(this.choicesField.getValue()),
 				this.trackPlayers,
@@ -186,31 +185,31 @@ public class InteractiveLootBlockScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.lootBlockMode == InteractiveLootBlockEntity.Mode.VANILLA) {
-			context.drawString(this.font, LOOT_TABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
+			graphics.text(this.font, LOOT_TABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
 		} else {
-			context.drawString(this.font, LOOTABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
+			graphics.text(this.font, LOOTABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
 		}
-		this.lootTableIdentifierStringField.render(context, mouseX, mouseY, delta);
+		this.lootTableIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.lootBlockMode != InteractiveLootBlockEntity.Mode.VANILLA) {
-			context.drawString(this.font, ROLLS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
-			this.rollsField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ROLLS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+			this.rollsField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 
 		if (this.lootBlockMode == InteractiveLootBlockEntity.Mode.CHOICE) {
-			context.drawString(this.font, CHOICES_LABEL_TEXT, this.width / 2 - 49, 79, 0xA0A0A0);
-			this.choicesField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, CHOICES_LABEL_TEXT, this.width / 2 - 49, 79, 0xA0A0A0);
+			this.choicesField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
-		context.drawString(this.font, TRACK_PLAYERS_LABEL_TEXT, this.width / 2 + 55, 79, 0xA0A0A0);
-		this.lootAcquiredMessageField.render(context, mouseX, mouseY, delta);
-		this.lootAcquiredSoundIdField.render(context, mouseX, mouseY, delta);
-		this.alreadyLootedMessageField.render(context, mouseX, mouseY, delta);
-		this.alreadyLootedSoundIdField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, TRACK_PLAYERS_LABEL_TEXT, this.width / 2 + 55, 79, 0xA0A0A0);
+		this.lootAcquiredMessageField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.lootAcquiredSoundIdField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.alreadyLootedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.alreadyLootedSoundIdField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override

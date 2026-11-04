@@ -8,13 +8,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
@@ -23,7 +25,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +141,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		super.init();
 
 		this.selectionMode = this.relayTriggerBlock.getSelectionMode();
-		this.selectionModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.SelectionMode::asText).values((RelayTriggerBlockEntity.SelectionMode[]) RelayTriggerBlockEntity.SelectionMode.values()).initially(this.selectionMode).omitKeyText().build(this.width / 2 - 154, 10, 300, 20, Component.empty(), (button, selectionMode) -> {
+		this.selectionModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.SelectionMode::asText, this.selectionMode).withValues(RelayTriggerBlockEntity.SelectionMode.values()).create(this.width / 2 - 154, 10, 300, 20, Component.empty(), (button, selectionMode) -> {
 			this.selectionMode = selectionMode;
 			this.updateWidgets();
 		}));
@@ -148,7 +149,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		// Area Selection
 
 		this.showArea = this.relayTriggerBlock.getShowArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 - 154, 34, 300, 20, Component.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 34, 300, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -183,7 +184,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.areaPositionOffsetZField);
 
 		this.resetsArea = this.relayTriggerBlock.getResetsArea();
-		this.toggleResetsAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(RESETS_AREA_LABEL_TEXT, TRIGGERS_AREA_LABEL_TEXT).initially(this.resetsArea).omitKeyText().build(this.width / 2 - 154, 128, 300, 20, Component.empty(), (button, resetsArea) -> {
+		this.toggleResetsAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(RESETS_AREA_LABEL_TEXT, TRIGGERS_AREA_LABEL_TEXT, this.resetsArea).create(this.width / 2 - 154, 128, 300, 20, Component.empty(), (button, resetsArea) -> {
 			this.resetsArea = resetsArea;
 		}));
 
@@ -209,7 +210,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.newTriggeredBlockPositionOffsetZField);
 
 		this.newTriggeredBlockResets = false;
-		this.toggleNewTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.newTriggeredBlockResets).omitKeyText().build(this.width / 2 + 4, 117, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleNewTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newTriggeredBlockResets).create(this.width / 2 + 4, 117, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.newTriggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -220,13 +221,13 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addNewTriggeredBlockPositionOffsetButton = this.addRenderableWidget(Button.builder(ADD_NEW_TRIGGERED_BLOCK_BUTTON_LABEL_TEXT, button -> this.addNewTriggeredBlock()).bounds(this.width / 2 - 80, 152, 100, 20).build());
 
 		this.triggerMode = this.relayTriggerBlock.getTriggerMode();
-		this.cycleTriggerModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.TriggerMode::asText).values((RelayTriggerBlockEntity.TriggerMode[]) RelayTriggerBlockEntity.TriggerMode.values()).initially(this.triggerMode).omitKeyText().build(this.width / 2 + 24, 152, 130, 20, Component.empty(), (button, triggerMode) -> {
+		this.cycleTriggerModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.TriggerMode::asText, this.triggerMode).withValues(RelayTriggerBlockEntity.TriggerMode.values()).create(this.width / 2 + 24, 152, 130, 20, Component.empty(), (button, triggerMode) -> {
 			this.triggerMode = triggerMode;
 			this.updateWidgets();
 		}));
 
 		this.isTriggerAmountDataDriven = this.relayTriggerBlock.isTriggerAmountDataDriven();
-		this.toggleIsTriggerAmountDataDrivenButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.on"), Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.off")).initially(this.isTriggerAmountDataDriven).omitKeyText().build(this.width / 2 - 154, 187, 100, 20, Component.empty(), (button, isTriggerAmountDataDriven) -> {
+		this.toggleIsTriggerAmountDataDrivenButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.on"), Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.off"), this.isTriggerAmountDataDriven).create(this.width / 2 - 154, 187, 100, 20, Component.empty(), (button, isTriggerAmountDataDriven) -> {
 			this.isTriggerAmountDataDriven = isTriggerAmountDataDriven;
 			this.updateWidgets();
 		}));
@@ -362,7 +363,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		RelayTriggerBlockEntity.SelectionMode var = this.selectionMode;
 		RelayTriggerBlockEntity.TriggerMode var1 = this.triggerMode;
 		boolean bool = this.showArea;
@@ -385,7 +386,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		String string12 = this.dataProvidingBlockPosOffsetZField.getValue();
 		String string13 = this.dataIdentifierField.getValue();
 		String string14 = this.triggerAmountField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.selectionMode = var;
 		this.triggerMode = var1;
 		this.showArea = bool;
@@ -419,68 +420,68 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS) {
 			int i = this.width / 2 - 152;
 			int j = 34;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 68)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 68)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS
 				&& this.mouseClicked) {
 			int i = this.triggeredBlocks.size() - VISIBLE_LIST_ELEMENTS;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 154)
-				&& mouseY >= 34 && mouseY <= 102) {
+				&& x >= (double) (this.width / 2 - 152) && x <= (double) (this.width / 2 + 154)
+				&& y >= 34 && y <= 102) {
 			int i = this.triggeredBlocks.size() - VISIBLE_LIST_ELEMENTS;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.selectionMode == RelayTriggerBlockEntity.SelectionMode.AREA) {
 
-			context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 59, 0xA0A0A0);
-			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 59, 0xA0A0A0);
+			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 94, 0xA0A0A0);
-			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 94, 0xA0A0A0);
+			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.selectionMode == RelayTriggerBlockEntity.SelectionMode.LIST) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.triggeredBlocks.size()); i++) {
@@ -489,7 +490,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 				MutableComponent text = Component.translatable("gui.triggered_block.list.entry", triggeredBlockPos.getX(), triggeredBlockPos.getY(), triggeredBlockPos.getZ());
 				if (this.triggerMode == RelayTriggerBlockEntity.TriggerMode.NORMAL) {
 					text.append(triggeredBlock.left.right ? Component.translatable("gui.triggered_block.list.is_reset") : Component.translatable("gui.triggered_block.list.is_triggered"));
-					context.drawString(this.font, text, this.width / 2 - 117, 40 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					graphics.text(this.font, text, this.width / 2 - 117, 40 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 				} else {
 					Component text1;
 					if (this.triggerMode == RelayTriggerBlockEntity.TriggerMode.RANDOM) {
@@ -497,40 +498,40 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 					} else {
 						text1 = Component.translatable("gui.triggered_block.list.weight", triggeredBlock.right);
 					}
-					context.drawString(this.font, text, this.width / 2 - 117, 35 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-					context.drawString(this.font, text1, this.width / 2 - 117, 45 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					graphics.text(this.font, text, this.width / 2 - 117, 35 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					graphics.text(this.font, text1, this.width / 2 - 117, 45 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 				}
 			}
 			if (this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS) {
-				context.blitSprite(SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.width / 2 - 153, 34, 8, 68);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_68_TEXTURE, this.width / 2 - 153, 34, 8, 68);
 				int k = (int) (59.0f * this.scrollAmount);
-				context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 34 + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 34 + 1 + k, 6, 7);
 			}
-			context.drawString(this.font, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 107, 0xA0A0A0);
-			this.newTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.newTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.newTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 107, 0xA0A0A0);
+			this.newTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 			if (this.triggerMode != RelayTriggerBlockEntity.TriggerMode.NORMAL) {
-				context.drawString(this.font, NEW_POSITION_CHANCE_FIELD_LABEL_TEXT, this.width / 2 - 153, 142, 0xA0A0A0);
-				this.newTriggeredBlockChanceField.render(context, mouseX, mouseY, delta);
+				graphics.text(this.font, NEW_POSITION_CHANCE_FIELD_LABEL_TEXT, this.width / 2 - 153, 142, 0xA0A0A0);
+				this.newTriggeredBlockChanceField.extractRenderState(graphics, mouseX, mouseY, a);
 
 				if (this.triggerMode != RelayTriggerBlockEntity.TriggerMode.RANDOM) {
 
 					if (this.isTriggerAmountDataDriven) {
 
-						context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 49, 177, 0xA0A0A0);
-						this.dataProvidingBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
-						this.dataProvidingBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
-						this.dataProvidingBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
+						graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 49, 177, 0xA0A0A0);
+						this.dataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+						this.dataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+						this.dataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-						context.drawString(this.font, DATA_IDENTIFIER_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, 0xA0A0A0);
-						this.dataIdentifierField.render(context, mouseX, mouseY, delta);
+						graphics.text(this.font, DATA_IDENTIFIER_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, 0xA0A0A0);
+						this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 					} else {
 
-						context.drawString(this.font, TRIGGER_AMOUNT_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, 0xA0A0A0);
-						this.triggerAmountField.render(context, mouseX, mouseY, delta);
+						graphics.text(this.font, TRIGGER_AMOUNT_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, 0xA0A0A0);
+						this.triggerAmountField.extractRenderState(graphics, mouseX, mouseY, a);
 
 					}
 				}

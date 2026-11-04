@@ -276,29 +276,29 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 //	@Override
 //	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 //
-//		super.render(context, mouseX, mouseY, delta);
+//		super.extractRenderState(graphics, mouseX, mouseY, a);
 //
 //		if (this.screenPage == ScreenPage.BLOCK_OFFSETS) {
 //			context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-//			this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-//			this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-//			this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+//			this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+//			this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+//			this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 //			context.drawTextWithShadow(this.textRenderer, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-//			this.firstTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-//			this.firstTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-//			this.firstTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+//			this.firstTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+//			this.firstTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+//			this.firstTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 //			context.drawTextWithShadow(this.textRenderer, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-//			this.secondTriggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-//			this.secondTriggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-//			this.secondTriggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+//			this.secondTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+//			this.secondTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+//			this.secondTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 //		} else if (this.screenPage == ScreenPage.INTERACTION) {
-//			this.dataIdentifierField.render(context, mouseX, mouseY, delta);
+//			this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 //			if (this.isWriting) {
 //
-//				this.newDataValueField.render(context, mouseX, mouseY, delta);
+//				this.newDataValueField.extractRenderState(graphics, mouseX, mouseY, a);
 //			} else {
 //
-//				this.comparedDataValueField.render(context, mouseX, mouseY, delta);
+//				this.comparedDataValueField.extractRenderState(graphics, mouseX, mouseY, a);
 //			}
 //		}
 //	}

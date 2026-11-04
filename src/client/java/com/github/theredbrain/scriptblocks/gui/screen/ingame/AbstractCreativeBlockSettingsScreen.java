@@ -1,6 +1,5 @@
 package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -28,8 +27,8 @@ public abstract class AbstractCreativeBlockSettingsScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		this.renderTransparentBackground(context);
+	public boolean isInGameUi() {
+		return true;
 	}
 
 	@Override

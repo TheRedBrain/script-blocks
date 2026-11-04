@@ -3,13 +3,11 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 import com.github.theredbrain.scriptblocks.block.entity.PlayerDetectorBlockEntity;
 import com.github.theredbrain.scriptblocks.network.packet.UpdatePlayerDetectorBlockPacket;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
-import com.mojang.serialization.Codec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -17,11 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.IntFunction;
 
 @Environment(value = EnvType.CLIENT)
 public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -90,18 +84,18 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	@Override
 	protected void init() {
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.enableTicking = this.playerDetectorBlock.enableTicking();
-		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT).initially(this.enableTicking).omitKeyText().build(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, enableTicking) -> {
+		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking).create(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, enableTicking) -> {
 			this.enableTicking = enableTicking;
 		}));
 
 		this.showArea = this.playerDetectorBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_LABEL_TRUE_TEXT, SHOW_AREA_LABEL_FALSE_TEXT).initially(this.showArea).omitKeyText().build(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_LABEL_TRUE_TEXT, SHOW_AREA_LABEL_FALSE_TEXT, this.showArea).create(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -150,7 +144,7 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.triggeredBlockOnEnteringPositionOffsetZField);
 
 		this.triggeredBlockOnEnteringResets = this.playerDetectorBlock.getOnEnteringTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnEnteringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnEnteringResets).omitKeyText().build(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnEnteringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnEnteringResets).create(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnEnteringResets = triggeredBlockResets;
 		}));
 
@@ -168,7 +162,7 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.triggeredBlockOnLeavingPositionOffsetZField);
 
 		this.triggeredBlockOnLeavingResets = this.playerDetectorBlock.getOnLeavingTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnLeavingResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnLeavingResets).omitKeyText().build(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnLeavingResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnLeavingResets).create(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnLeavingResets = triggeredBlockResets;
 		}));
 
@@ -186,7 +180,7 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.triggeredBlockOnTriggeringPositionOffsetZField);
 
 		this.triggeredBlockOnTriggeringResets = this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnTriggeringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockOnTriggeringResets).omitKeyText().build(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnTriggeringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnTriggeringResets).create(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnTriggeringResets = triggeredBlockResets;
 		}));
 
@@ -332,7 +326,7 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		ScreenPage var = this.screenPage;
 		boolean bool = this.enableTicking;
 		boolean bool1 = this.showArea;
@@ -363,7 +357,7 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		String string21 = this.uuidListHandlerOnTriggeringPositionOffsetXField.getValue();
 		String string22 = this.uuidListHandlerOnTriggeringPositionOffsetYField.getValue();
 		String string23 = this.uuidListHandlerOnTriggeringPositionOffsetZField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.enableTicking = bool;
@@ -403,54 +397,54 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
 
-			context.drawString(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
-			this.areaDimensionsXField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsYField.render(context, mouseX, mouseY, delta);
-			this.areaDimensionsZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
-			this.areaPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.areaPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK_OFFSETS) {
 
-			context.drawString(this.font, TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-			this.triggeredBlockOnEnteringPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockOnEnteringPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockOnEnteringPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			this.triggeredBlockOnEnteringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockOnEnteringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockOnEnteringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-			this.triggeredBlockOnLeavingPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockOnLeavingPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockOnLeavingPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			this.triggeredBlockOnLeavingPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockOnLeavingPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockOnLeavingPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			this.triggeredBlockOnTriggeringPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockOnTriggeringPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockOnTriggeringPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.triggeredBlockOnTriggeringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockOnTriggeringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockOnTriggeringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.UUID_LIST_HANDLER_OFFSETS) {
 
-			context.drawString(this.font, UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-			this.uuidListHandlerOnEnteringPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.uuidListHandlerOnEnteringPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.uuidListHandlerOnEnteringPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			this.uuidListHandlerOnEnteringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.uuidListHandlerOnEnteringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.uuidListHandlerOnEnteringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
-			this.uuidListHandlerOnLeavingPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.uuidListHandlerOnLeavingPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.uuidListHandlerOnLeavingPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			this.uuidListHandlerOnLeavingPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.uuidListHandlerOnLeavingPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.uuidListHandlerOnLeavingPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			this.uuidListHandlerOnTriggeringPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.uuidListHandlerOnTriggeringPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.uuidListHandlerOnTriggeringPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.uuidListHandlerOnTriggeringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.uuidListHandlerOnTriggeringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.uuidListHandlerOnTriggeringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		}
 	}
@@ -458,7 +452,7 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdatePlayerDetectorBlockPacket(
-				this.playerDetectorBlock.getPos(),
+				this.playerDetectorBlock.getBlockPos(),
 				this.enableTicking,
 				this.showArea,
 				new Vec3i(

@@ -7,14 +7,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
 
 @Environment(value = EnvType.CLIENT)
 public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -53,40 +52,40 @@ public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.relayBlockPositionOffsetXField.getValue();
 		String string1 = this.relayBlockPositionOffsetYField.getValue();
 		String string2 = this.relayBlockPositionOffsetZField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.relayBlockPositionOffsetXField.setValue(string);
 		this.relayBlockPositionOffsetYField.setValue(string1);
 		this.relayBlockPositionOffsetZField.setValue(string2);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-		this.relayBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.relayBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.relayBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		this.relayBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.relayBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.relayBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateUseRelayBlockPacket(
-				this.useRelayBlock.getPos(),
+				this.useRelayBlock.getBlockPos(),
 				new BlockPos(
 						ItemUtils.parseInt(this.relayBlockPositionOffsetXField.getValue()),
 						ItemUtils.parseInt(this.relayBlockPositionOffsetYField.getValue()),

@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -52,7 +51,7 @@ public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.addWidget(this.dataProvidingBlockPositionOffsetZField);
 
 		this.dataModificationMode = this.dataModificationBlockEntity.getDataModificationMode();
-		this.cycleDataModificationModeButton = this.addRenderableWidget(CycleButton.builder(DataModificationBlockEntity.DataModificationMode::asText).values((DataModificationBlockEntity.DataModificationMode[]) DataModificationBlockEntity.DataModificationMode.values()).initially(this.dataModificationMode).omitKeyText().build(this.width / 2 - 154, 90, 300, 20, Component.empty(), (button, dataModificationMode) -> {
+		this.cycleDataModificationModeButton = this.addRenderableWidget(CycleButton.builder(DataModificationBlockEntity.DataModificationMode::asText, this.dataModificationMode).withValues(DataModificationBlockEntity.DataModificationMode.values()).create(this.width / 2 - 154, 90, 300, 20, Component.empty(), (button, dataModificationMode) -> {
 			this.dataModificationMode = dataModificationMode;
 			this.updateWidgets();
 		}));
@@ -91,13 +90,13 @@ public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		DataModificationBlockEntity.DataModificationMode var = this.dataModificationMode;
 		String string = this.dataProvidingBlockPositionOffsetXField.getValue();
 		String string1 = this.dataProvidingBlockPositionOffsetYField.getValue();
 		String string2 = this.dataProvidingBlockPositionOffsetZField.getValue();
 		String string3 = this.addedIntegerValueField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.dataModificationMode = var;
 		this.cycleDataModificationModeButton.setValue(this.dataModificationMode);
 		this.dataProvidingBlockPositionOffsetXField.setValue(string);
@@ -107,24 +106,24 @@ public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
-		this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_ADDITION)) {
 
-			context.drawString(this.font, ADDED_INTEGER_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			this.addedIntegerValueField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ADDED_INTEGER_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.addedIntegerValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_MODULO)) {
 
-			context.drawString(this.font, INTEGER_MODULUS_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			this.integerModulusValueField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, INTEGER_MODULUS_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			this.integerModulusValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		}
 	}

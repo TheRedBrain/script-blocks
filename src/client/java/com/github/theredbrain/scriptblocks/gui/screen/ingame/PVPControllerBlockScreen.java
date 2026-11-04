@@ -8,11 +8,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,12 +23,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -97,8 +96,8 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 									ItemUtils.parseInt(this.newRespawnPositionOffsetYField.getValue()),
 									ItemUtils.parseInt(this.newRespawnPositionOffsetZField.getValue())
 							),
-									ItemUtils.parseFloat(this.newRespawnOrientationYawField.getValue()),
-									ItemUtils.parseFloat(this.newRespawnOrientationPitchField.getValue())
+							ItemUtils.parseFloat(this.newRespawnOrientationYawField.getValue()),
+							ItemUtils.parseFloat(this.newRespawnOrientationPitchField.getValue())
 					)
 			));
 			this.scrollPosition = 0;
@@ -292,8 +291,8 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
-		List<MutablePair<String, MutablePair<BlockPos, MutablePair<Double, Double>>>> list = new ArrayList<>(this.respawnPositionsList);
+	public void resize(final int width, final int height) {
+		List<MutablePair<String, LevelData.RespawnData>> list = new ArrayList<>(this.respawnPositionsList);
 		ScreenPage var = this.screenPage;
 		boolean bl = this.triggeredBlockResets;
 		int number = this.scrollPosition;
@@ -312,7 +311,7 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 		String string15 = this.dataProvidingBlockPositionOffsetYField.getValue();
 		String string16 = this.dataProvidingBlockPositionOffsetZField.getValue();
 		String string17 = this.matchDurationDataIdentifierField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.respawnPositionsList.clear();
 		this.respawnPositionsList.addAll(list);
 		this.screenPage = var;
@@ -339,98 +338,98 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (this.screenPage == ScreenPage.RESPAWN_POSITIONS
 				&& this.respawnPositionsList.size() > 3) {
 			int i = this.width / 2 - 152;
 			int j = 45;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 68)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 68)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.screenPage == ScreenPage.RESPAWN_POSITIONS
 				&& this.respawnPositionsList.size() > 3
 				&& this.mouseClicked) {
 			int i = this.respawnPositionsList.size() - 3;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.screenPage == ScreenPage.RESPAWN_POSITIONS
 				&& this.respawnPositionsList.size() > 3
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 100)
-				&& mouseY >= 44 && mouseY <= 114) {
+				&& x >= (double) (this.width / 2 - 152) && x <= (double) (this.width / 2 + 100)
+				&& y >= 44 && y <= 114) {
 			int i = this.respawnPositionsList.size() - 3;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if ((keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)) {
+	public boolean keyPressed(final KeyEvent event) {
+		if ((event.isConfirmation())) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.SETTINGS_ID) {
-			context.drawString(this.font, PVP_ARENA_SETTINGS_ID_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-			this.pvpArenaSettingsIdentifierField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, PVP_ARENA_SETTINGS_ID_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			this.pvpArenaSettingsIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, DATA_PROVIDING_BLOCK_POSITION_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
-			this.dataProvidingBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.dataProvidingBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
+			this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, MATCH_DURATION_DATA_IDENTIFIER_TEXT, this.width / 2 + 9, 140, 0xA0A0A0);
-			this.matchDurationDataIdentifierField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, MATCH_DURATION_DATA_IDENTIFIER_TEXT, this.width / 2 + 9, 140, 0xA0A0A0);
+			this.matchDurationDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.respawnPositionsList.size()); i++) {
 				String text = this.respawnPositionsList.get(i).getLeft();
 				if (!this.respawnPositionsList.get(i).getLeft().isEmpty()) {
 					text = this.respawnPositionsList.get(i).getLeft() + ", " + this.respawnPositionsList.get(i).getRight();
 				}
-				context.drawString(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
 			}
 			if (this.respawnPositionsList.size() > 3) {
-				context.blitSprite(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
 				int k = (int) (61.0f * this.scrollAmount);
-				context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
-			context.drawString(this.font, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
-			this.newRespawnPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.newRespawnPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.newRespawnPositionOffsetZField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, NEW_RESPAWN_POSITION_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
-			context.drawString(this.font, NEW_RESPAWN_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
-			this.newRespawnOrientationYawField.render(context, mouseX, mouseY, delta);
-			this.newRespawnOrientationPitchField.render(context, mouseX, mouseY, delta);
-			this.newRespawnPositionNameField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
+			this.newRespawnPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newRespawnPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newRespawnPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, NEW_RESPAWN_POSITION_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
+			graphics.text(this.font, NEW_RESPAWN_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
+			this.newRespawnOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newRespawnOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.newRespawnPositionNameField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}
 

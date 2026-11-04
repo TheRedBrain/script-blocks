@@ -11,13 +11,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -30,13 +32,10 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.level.storage.LevelData;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Environment(value = EnvType.CLIENT)
 public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsScreen {
@@ -149,7 +148,7 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 			}
 		}
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText).values((ScreenPage[]) ScreenPage.values()).initially(this.screenPage).omitKeyText().build(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -174,17 +173,17 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.addWidget(this.entitySpawnOrientationYawField);
 
 		this.spawningMode = this.triggeredSpawnerBlock.getSpawningMode();
-		this.cycleSpawningModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredSpawnerBlockEntity.SpawningMode::asText).values(TriggeredSpawnerBlockEntity.SpawningMode.values()).initially(this.spawningMode).omitKeyText().build(this.width / 2 - 154, 130, 100, 20, Component.empty(), (button, spawningMode) -> {
+		this.cycleSpawningModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredSpawnerBlockEntity.SpawningMode::asText, this.spawningMode).withValues(TriggeredSpawnerBlockEntity.SpawningMode.values()).create(this.width / 2 - 154, 130, 100, 20, Component.empty(), (button, spawningMode) -> {
 			this.spawningMode = spawningMode;
 		}));
 
 		this.isPersistent = this.triggeredSpawnerBlock.isPersistent();
-		this.toggleIsPersistentButton = this.addRenderableWidget(CycleButton.onOffBuilder().initially(this.isPersistent).omitKeyText().build(this.width / 2 - 50, 130, 100, 20, Component.empty(), (button, isPersistent) -> {
+		this.toggleIsPersistentButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.isPersistent).create(this.width / 2 - 50, 130, 100, 20, Component.empty(), (button, isPersistent) -> {
 			this.isPersistent = isPersistent;
 		}));
 
 		this.enableSpawnEffects = this.triggeredSpawnerBlock.enableSpawnEffects();
-		this.toggleEnableSpawnEffectsButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT, TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT).initially(this.enableSpawnEffects).omitKeyText().build(this.width / 2 + 54, 130, 100, 20, Component.empty(), (button, enableSpawnEffects) -> {
+		this.toggleEnableSpawnEffectsButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT, TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT, this.enableSpawnEffects).create(this.width / 2 + 54, 130, 100, 20, Component.empty(), (button, enableSpawnEffects) -> {
 			this.enableSpawnEffects = enableSpawnEffects;
 		}));
 
@@ -207,7 +206,7 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.entityAttributeModifierValueField = new EditBox(this.font, this.width / 2 - 154, 188, 100, 20, Component.empty());
 		this.entityAttributeModifierValueField.setHint(ENTITY_ATTRIBUTE_MODIFIER_VALUE_FIELD_PLACEHOLDER_TEXT);
 		this.addWidget(this.entityAttributeModifierValueField);
-		this.cycleEntityAttributeModifierOperationButton = this.addRenderableWidget(CycleButton.builder(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation::asText).values(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation.values()).initially(this.newEntityAttributeModifierOperation).omitKeyText().build(this.width / 2 - 50, 188, 100, 20, Component.empty(), (button, newEntityAttributeModifierOperationButton) -> {
+		this.cycleEntityAttributeModifierOperationButton = this.addRenderableWidget(CycleButton.builder(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation::asText, this.newEntityAttributeModifierOperation).withValues(TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation.values()).create(this.width / 2 - 50, 188, 100, 20, Component.empty(), (button, newEntityAttributeModifierOperationButton) -> {
 			this.newEntityAttributeModifierOperation = newEntityAttributeModifierOperationButton;
 			this.updateWidgets();
 		}));
@@ -243,7 +242,7 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.triggeredSpawnerBlock.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.triggeredSpawnerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 8, 95, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 95, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -344,7 +343,7 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		ScreenPage var = this.screenPage;
 		TriggeredSpawnerBlockEntity.SpawningMode var1 = this.spawningMode;
 		TriggeredSpawnerBlockEntity.VisualEntityAttributeModifierOperation var2 = this.newEntityAttributeModifierOperation;
@@ -367,7 +366,7 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 		boolean bl = this.triggeredBlockResets;
 		boolean bl1 = this.isPersistent;
 		boolean bl2 = this.enableSpawnEffects;
-		this.init(client, width, height);
+		this.init(width, height);
 		this.screenPage = var;
 		this.cycleScreenPageButton.setValue(this.screenPage);
 		this.spawningMode = var1;
@@ -400,105 +399,105 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER
 				&& this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES) {
 			int i = this.width / 2 - 152;
 			int j = 46;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 90)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 90)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER
 				&& this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES
 				&& this.mouseClicked) {
 			int i = this.entityAttributeModifiersList.size() - VISIBLE_LIST_ENTRIES;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER
 				&& this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES
-				&& mouseX >= (double) (this.width / 2 - 152) && mouseX <= (double) (this.width / 2 + 154)
-				&& mouseY >= 45 && mouseY <= 137) {
+				&& x >= (double) (this.width / 2 - 152) && x <= (double) (this.width / 2 + 154)
+				&& y >= 45 && y <= 137) {
 			int i = this.entityAttributeModifiersList.size() - VISIBLE_LIST_ENTRIES;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.MISC) {
-			context.drawString(this.font, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 50, 0xA0A0A0);
-			this.entitySpawnPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.entitySpawnPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.entitySpawnPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 50, 0xA0A0A0);
+			this.entitySpawnPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.entitySpawnPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.entitySpawnPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
-			this.entitySpawnOrientationPitchField.render(context, mouseX, mouseY, delta);
-			context.drawString(this.font, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 + 5, 85, 0xA0A0A0);
-			this.entitySpawnOrientationYawField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
+			this.entitySpawnOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
+			graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 + 5, 85, 0xA0A0A0);
+			this.entitySpawnOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			context.drawString(this.font, SPAWNING_MODE_LABEL_TEXT, this.width / 2 - 153, 120, 0xA0A0A0);
-			context.drawString(this.font, IS_PERSISTENT_LABEL_TEXT, this.width / 2 - 49, 120, 0xA0A0A0);
-			context.drawString(this.font, ENABLE_SPAWN_EFFECTS_LABEL_TEXT, this.width / 2 + 55, 120, 0xA0A0A0);
+			graphics.text(this.font, SPAWNING_MODE_LABEL_TEXT, this.width / 2 - 153, 120, 0xA0A0A0);
+			graphics.text(this.font, IS_PERSISTENT_LABEL_TEXT, this.width / 2 - 49, 120, 0xA0A0A0);
+			graphics.text(this.font, ENABLE_SPAWN_EFFECTS_LABEL_TEXT, this.width / 2 + 55, 120, 0xA0A0A0);
 
-			context.drawString(this.font, ENTITY_TYPE_LABEL_TEXT, this.width / 2 - 153, 155, 0xA0A0A0);
-			this.entityTypeIdField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, ENTITY_TYPE_LABEL_TEXT, this.width / 2 - 153, 155, 0xA0A0A0);
+			this.entityTypeIdField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.ENTITY_ATTRIBUTE_MODIFIER) {
 
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ENTRIES, this.entityAttributeModifiersList.size()); i++) {
 				AttributeModifier entityAttributeModifier = this.entityAttributeModifiersList.get(i).getRight();
 
-				context.drawString(this.font, this.entityAttributeModifiersList.get(i).getLeft().toString(), this.width / 2 - 117, 46 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
-				context.drawString(this.font, entityAttributeModifier.amount() + ", " + entityAttributeModifier.operation(), this.width / 2 - 117, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+				graphics.text(this.font, this.entityAttributeModifiersList.get(i).getLeft().toString(), this.width / 2 - 117, 46 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+				graphics.text(this.font, entityAttributeModifier.amount() + ", " + entityAttributeModifier.operation(), this.width / 2 - 117, 59 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
 			}
 			if (this.entityAttributeModifiersList.size() > VISIBLE_LIST_ENTRIES) {
-				context.blitSprite(SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 45, 8, 92);
 				int k = (int) (83.0f * this.scrollAmount);
-				context.blitSprite(SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_VERTICAL_6_7_TEXTURE, this.width / 2 - 152, 45 + 1 + k, 6, 7);
 			}
 
-			this.entityAttributeIdentifierField.render(context, mouseX, mouseY, delta);
-			this.entityAttributeModifierIdentifierField.render(context, mouseX, mouseY, delta);
-			this.entityAttributeModifierValueField.render(context, mouseX, mouseY, delta);
+			this.entityAttributeIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.entityAttributeModifierIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.entityAttributeModifierValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.USE_RELAY_BLOCK) {
-			context.drawString(this.font, USE_RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
-			this.useRelayBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.useRelayBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.useRelayBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, USE_RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
+			this.useRelayBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.useRelayBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.useRelayBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
-			context.drawString(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
-			this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-			this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 85, 0xA0A0A0);
+			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}
 
@@ -520,7 +519,7 @@ public class TriggeredSpawnerBlockScreen extends AbstractCreativeBlockSettingsSc
 								ItemUtils.parseFloat(this.entitySpawnOrientationPitchField.getValue()),
 								ItemUtils.parseFloat(this.entitySpawnOrientationYawField.getValue())
 						),
-						this.spawningMode.asString(),
+						this.spawningMode,
 						this.isPersistent,
 						this.enableSpawnEffects,
 						this.entityTypeIdField.getValue(),

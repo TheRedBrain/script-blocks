@@ -8,13 +8,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -24,7 +26,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import org.apache.commons.lang3.tuple.MutablePair;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,15 +98,15 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 				)
 		);
 		if (newStructurePoolStringAppendix.getLeft().equals(BlockPos.ZERO)) {
-			if (this.minecraft != null && this.minecraft.player != null) {
-				this.minecraft.player.displayClientMessage(Component.translatable("gui.jigsaw_placer_block.appendix_offset_is_origin"));
+			if (this.minecraft.player != null) {
+				this.minecraft.player.sendSystemMessage(Component.translatable("gui.jigsaw_placer_block.appendix_offset_is_origin"));
 			}
 			return;
 		}
 		for (MutablePair<BlockPos, MutablePair<String, String>> structurePoolStringAppendix : this.structurePoolStringAppendices) {
 			if (structurePoolStringAppendix.equals(newStructurePoolStringAppendix)) {
-				if (this.minecraft != null && this.minecraft.player != null) {
-					this.minecraft.player.displayClientMessage(Component.translatable("gui.jigsaw_placer_block.structure_pool_string_appendix_is_duplicate"));
+				if (this.minecraft.player != null) {
+					this.minecraft.player.sendSystemMessage(Component.translatable("gui.jigsaw_placer_block.structure_pool_string_appendix_is_duplicate"));
 				}
 				return;
 			}
@@ -165,14 +166,11 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		int jointTextWidth = this.font.width(JOINT_LABEL_TEXT);
 		this.joint = this.jigsawPlacerBlock.getJoint();
 		this.jointRotationButton = this.addRenderableWidget(
-				CycleButton.<JigsawBlockEntity.JointType>builder(JigsawBlockEntity.JointType::asText)
-						.values(JigsawBlockEntity.JointType.values())
-						.initially(this.joint)
-						.omitKeyText()
-						.build(this.width / 2 + 5 + jointTextWidth + 4, 162, 200 - 5 - jointTextWidth, 20, JOINT_LABEL_TEXT, (button, joint) -> this.joint = joint)
+				CycleButton.builder(JigsawBlockEntity.JointType::getTranslatedName, this.joint)
+						.create(this.width / 2 + 5 + jointTextWidth + 4, 162, 200 - 5 - jointTextWidth, 20, JOINT_LABEL_TEXT, (button, joint) -> this.joint = joint)
 		);
 		boolean bl;
-		this.jointRotationButton.active = bl = JigsawBlock.getFrontFacing(this.jigsawPlacerBlock.getCachedState()).getAxis().isVertical();
+		this.jointRotationButton.active = bl = JigsawBlock.getFrontFacing(this.jigsawPlacerBlock.getBlockState()).getAxis().isVertical();
 		this.jointRotationButton.visible = bl;
 
 		this.triggeredBlockPositionOffsetXField = new EditBox(this.font, this.width / 2 - 94, 186, 30, 20, Component.empty());
@@ -192,7 +190,7 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = this.jigsawPlacerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.off")).initially(this.triggeredBlockResets).omitKeyText().build(this.width / 2 + 4, 186, 200, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 4, 186, 200, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -225,7 +223,7 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		List<MutablePair<BlockPos, MutablePair<String, String>>> list = new ArrayList<>(this.structurePoolStringAppendices);
 		String string = this.structurePoolStringField.getValue();
 		String string5 = this.newStaticAppendixStringField.getValue();
@@ -239,7 +237,7 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		String string13 = this.triggeredBlockPositionOffsetZField.getValue();
 		JigsawBlockEntity.JointType joint = this.joint;
 		boolean bl = this.triggeredBlockResets;
-		this.init(client, width, height);
+		this.init(width, height);
 		this.structurePoolStringAppendices.clear();
 		this.structurePoolStringAppendices.addAll(list);
 		this.structurePoolStringField.setValue(string);
@@ -259,59 +257,59 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(final MouseButtonEvent event, final boolean doubleClick) {
 		this.mouseClicked = false;
 		if (this.structurePoolStringAppendices.size() > VISIBLE_LIST_ELEMENTS) {
 			int i = this.width / 2 - 202;
 			int j = 40;
-			if (mouseX >= (double) i && mouseX < (double) (i + 6) && mouseY >= (double) j && mouseY < (double) (j + 54)) {
+			if (event.x() >= (double) i && event.x() < (double) (i + 6) && event.y() >= (double) j && event.y() < (double) (j + 54)) {
 				this.mouseClicked = true;
 			}
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+	public boolean mouseDragged(final MouseButtonEvent event, final double dx, final double dy) {
 		if (this.structurePoolStringAppendices.size() > VISIBLE_LIST_ELEMENTS
 				&& this.mouseClicked) {
 			int i = this.structurePoolStringAppendices.size() - VISIBLE_LIST_ELEMENTS;
-			float f = (float) deltaY / (float) i;
+			float f = (float) dy / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount + f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+	public boolean mouseScrolled(final double x, final double y, final double scrollX, final double scrollY) {
 		if (this.structurePoolStringAppendices.size() > VISIBLE_LIST_ELEMENTS
-				&& mouseX >= (double) (this.width / 2 - 202) && mouseX <= (double) (this.width / 2 + 204)
-				&& mouseY >= 40 && mouseY <= 94) {
+				&& x >= (double) (this.width / 2 - 202) && x <= (double) (this.width / 2 + 204)
+				&& y >= 40 && y <= 94) {
 			int i = this.structurePoolStringAppendices.size() - VISIBLE_LIST_ELEMENTS;
-			float f = (float) verticalAmount / (float) i;
+			float f = (float) scrollY / (float) i;
 			this.scrollAmount = Mth.clamp(this.scrollAmount - f, 0.0f, 1.0f);
 			this.scrollPosition = (int) ((double) (this.scrollAmount * (float) i));
 		}
-		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+		return super.mouseScrolled(x, y, scrollX, scrollY);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+	public boolean keyPressed(final KeyEvent event) {
+		if (event.isConfirmation()) {
 			this.done();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, STRUCTURE_POOL_STRING_FIELD_TEXT, this.width / 2 - 203, 17, 0xA0A0A0);
-		this.structurePoolStringField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, STRUCTURE_POOL_STRING_FIELD_TEXT, this.width / 2 - 203, 17, 0xA0A0A0);
+		this.structurePoolStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.structurePoolStringAppendices.size()); i++) {
 			MutablePair<BlockPos, MutablePair<String, String>> structurePoolStringAppendix = this.structurePoolStringAppendices.get(i);
@@ -319,39 +317,39 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 			MutableComponent text1 = Component.translatable("gui.jigsaw_placer_block.structure_pool_string_appendices.entry.1", dataBlockPositionOffset.getX(), dataBlockPositionOffset.getY(), dataBlockPositionOffset.getZ(), structurePoolStringAppendix.getRight().getLeft());
 			MutableComponent text2 = Component.translatable("gui.jigsaw_placer_block.structure_pool_string_appendices.entry.2", structurePoolStringAppendix.getRight().getRight());
 
-			context.drawString(this.font, text1, this.width / 2 - 167, 41 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
-			context.drawString(this.font, text2, this.width / 2 - 167, 51 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+			graphics.text(this.font, text1, this.width / 2 - 167, 41 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+			graphics.text(this.font, text2, this.width / 2 - 167, 51 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
 		}
 		if (this.structurePoolStringAppendices.size() > VISIBLE_LIST_ELEMENTS) {
-			context.blitSprite(SCROLL_BAR_BACKGROUND_8_54_TEXTURE, this.width / 2 - 203, 40, 8, 54);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_54_TEXTURE, this.width / 2 - 203, 40, 8, 54);
 			int k = (int) (45.0f * this.scrollAmount);
-			context.blitSprite(SCROLLER_TEXTURE, this.width / 2 - 202, 40 + 1 + k, 6, 7);
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 202, 40 + 1 + k, 6, 7);
 		}
 
-		context.drawString(this.font, NEW_DATA_BLOCK_LABEL_TEXT, this.width / 2 - 203, 128, 0xA0A0A0);
-		this.newAppendixBlockPosOffsetXField.render(context, mouseX, mouseY, delta);
-		this.newAppendixBlockPosOffsetYField.render(context, mouseX, mouseY, delta);
-		this.newAppendixBlockPosOffsetZField.render(context, mouseX, mouseY, delta);
-		this.newAppendixDataIdField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, NEW_STATIC_APPENDIX_LABEL_TEXT, this.width / 2 + 5, 128, 0xA0A0A0);
-		this.newStaticAppendixStringField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, NEW_DATA_BLOCK_LABEL_TEXT, this.width / 2 - 203, 128, 0xA0A0A0);
+		this.newAppendixBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newAppendixBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newAppendixBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.newAppendixDataIdField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, NEW_STATIC_APPENDIX_LABEL_TEXT, this.width / 2 + 5, 128, 0xA0A0A0);
+		this.newStaticAppendixStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, TARGET_LABEL_TEXT, this.width / 2 - 203, 168, 0xA0A0A0);
-		this.targetField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, TARGET_LABEL_TEXT, this.width / 2 - 203, 168, 0xA0A0A0);
+		this.targetField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, JOINT_LABEL_TEXT, this.width / 2 + 5, 168, 0xA0A0A0);
+		graphics.text(this.font, JOINT_LABEL_TEXT, this.width / 2 + 5, 168, 0xA0A0A0);
 
 		int textWidth = this.font.width(TRIGGERED_BLOCK_POSITION_TEXT);
-		context.drawString(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 94 - 4 - textWidth, 192, 0xA0A0A0);
-		this.triggeredBlockPositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.triggeredBlockPositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.triggeredBlockPositionOffsetZField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 94 - 4 - textWidth, 192, 0xA0A0A0);
+		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
 	protected boolean updateBlock() {
 		ClientPlayNetworking.send(new UpdateJigsawPlacerBlockPacket(
-				this.jigsawPlacerBlock.getPos(),
+				this.jigsawPlacerBlock.getBlockPos(),
 				this.structurePoolStringField.getValue(),
 				this.structurePoolStringAppendices,
 				this.targetField.getValue(),

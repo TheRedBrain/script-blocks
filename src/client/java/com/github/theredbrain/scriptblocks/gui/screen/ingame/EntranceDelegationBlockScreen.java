@@ -7,8 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.GameNarrator;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -48,27 +47,27 @@ public class EntranceDelegationBlockScreen extends Screen {
 	protected void init() {
 		this.mainEntrancePositionOffsetXField = new EditBox(this.font, this.width / 2 - 154, 80, 100, 20, Component.empty());
 		this.mainEntrancePositionOffsetXField.setMaxLength(128);
-		this.mainEntrancePositionOffsetXField.setValue(Integer.toString(this.entranceDelegationBlock.getDelegatedEntrance().getLeft().getX()));
+		this.mainEntrancePositionOffsetXField.setValue(Integer.toString(this.entranceDelegationBlock.getDelegatedEntrance().pos().getX()));
 		this.addWidget(this.mainEntrancePositionOffsetXField);
 
 		this.mainEntrancePositionOffsetYField = new EditBox(this.font, this.width / 2 - 50, 80, 100, 20, Component.empty());
 		this.mainEntrancePositionOffsetYField.setMaxLength(128);
-		this.mainEntrancePositionOffsetYField.setValue(Integer.toString(this.entranceDelegationBlock.getDelegatedEntrance().getLeft().getY()));
+		this.mainEntrancePositionOffsetYField.setValue(Integer.toString(this.entranceDelegationBlock.getDelegatedEntrance().pos().getY()));
 		this.addWidget(this.mainEntrancePositionOffsetYField);
 
 		this.mainEntrancePositionOffsetZField = new EditBox(this.font, this.width / 2 + 54, 80, 100, 20, Component.empty());
 		this.mainEntrancePositionOffsetZField.setMaxLength(128);
-		this.mainEntrancePositionOffsetZField.setValue(Integer.toString(this.entranceDelegationBlock.getDelegatedEntrance().getLeft().getZ()));
+		this.mainEntrancePositionOffsetZField.setValue(Integer.toString(this.entranceDelegationBlock.getDelegatedEntrance().pos().getZ()));
 		this.addWidget(this.mainEntrancePositionOffsetZField);
 
 		this.mainEntranceOrientationYawField = new EditBox(this.font, this.width / 2 - 154, 115, 100, 20, Component.empty());
 		this.mainEntranceOrientationYawField.setMaxLength(128);
-		this.mainEntranceOrientationYawField.setValue(Double.toString(this.entranceDelegationBlock.getDelegatedEntrance().getRight().getLeft()));
+		this.mainEntranceOrientationYawField.setValue(Double.toString(this.entranceDelegationBlock.getDelegatedEntrance().yaw()));
 		this.addWidget(this.mainEntranceOrientationYawField);
 
 		this.mainEntranceOrientationPitchField = new EditBox(this.font, this.width / 2 - 50, 115, 100, 20, Component.empty());
 		this.mainEntranceOrientationPitchField.setMaxLength(128);
-		this.mainEntranceOrientationPitchField.setValue(Double.toString(this.entranceDelegationBlock.getDelegatedEntrance().getRight().getRight()));
+		this.mainEntranceOrientationPitchField.setValue(Double.toString(this.entranceDelegationBlock.getDelegatedEntrance().pitch()));
 		this.addWidget(this.mainEntranceOrientationPitchField);
 
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.done()).bounds(this.width / 2 - 4 - 150, 210, 150, 20).build());
@@ -76,13 +75,13 @@ public class EntranceDelegationBlockScreen extends Screen {
 	}
 
 	@Override
-	public void resize(Minecraft client, int width, int height) {
+	public void resize(final int width, final int height) {
 		String string = this.mainEntrancePositionOffsetXField.getValue();
 		String string1 = this.mainEntrancePositionOffsetYField.getValue();
 		String string2 = this.mainEntrancePositionOffsetZField.getValue();
 		String string3 = this.mainEntranceOrientationYawField.getValue();
 		String string4 = this.mainEntranceOrientationPitchField.getValue();
-		this.init(client, width, height);
+		this.init(width, height);
 		this.mainEntrancePositionOffsetXField.setValue(string);
 		this.mainEntrancePositionOffsetYField.setValue(string1);
 		this.mainEntrancePositionOffsetZField.setValue(string2);
@@ -91,17 +90,17 @@ public class EntranceDelegationBlockScreen extends Screen {
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
 
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		context.drawString(this.font, DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
-		this.mainEntrancePositionOffsetXField.render(context, mouseX, mouseY, delta);
-		this.mainEntrancePositionOffsetYField.render(context, mouseX, mouseY, delta);
-		this.mainEntrancePositionOffsetZField.render(context, mouseX, mouseY, delta);
-		context.drawString(this.font, DELEGATED_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
-		this.mainEntranceOrientationYawField.render(context, mouseX, mouseY, delta);
-		this.mainEntranceOrientationPitchField.render(context, mouseX, mouseY, delta);
+		graphics.text(this.font, DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		this.mainEntrancePositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.mainEntrancePositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.mainEntrancePositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
+		graphics.text(this.font, DELEGATED_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+		this.mainEntranceOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
+		this.mainEntranceOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override
