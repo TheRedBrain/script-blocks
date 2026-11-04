@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 public record Shop(
 		String shopTitle,
@@ -28,8 +28,8 @@ public record Shop(
 	).apply(instance, Shop::new));
 
 	public record Deal(
-			List<ItemStack> offer,
-			List<ItemStack> price,
+			List<ItemStackTemplate> offer,
+			List<ItemStackTemplate> price,
 			int maxStockCount,
 			String unlockAdvancement,
 			String lockAdvancement,
@@ -37,8 +37,8 @@ public record Shop(
 	) {
 
 		public static final Codec<Deal> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-				ItemStack.CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
-				ItemStack.CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
+				ItemStackTemplate.CODEC.listOf().optionalFieldOf("offer", List.of()).forGetter(x -> x.offer),
+				ItemStackTemplate.CODEC.listOf().optionalFieldOf("price", List.of()).forGetter(x -> x.price),
 				Codec.INT.optionalFieldOf("max_stock_count", 1).forGetter(x -> x.maxStockCount),
 				Codec.STRING.optionalFieldOf("unlock_advancement", "").forGetter(x -> x.unlockAdvancement),
 				Codec.STRING.optionalFieldOf("lock_advancement", "").forGetter(x -> x.lockAdvancement),
@@ -46,8 +46,8 @@ public record Shop(
 		).apply(instance, Deal::new));
 
 		public Deal(
-				List<ItemStack> offer,
-				List<ItemStack> price,
+				List<ItemStackTemplate> offer,
+				List<ItemStackTemplate> price,
 				int maxStockCount,
 				String unlockAdvancement,
 				String lockAdvancement,

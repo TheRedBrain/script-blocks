@@ -261,7 +261,7 @@ public class TeleportFromTeleporterBlockPacketReceiver implements ServerPlayNetw
 						if (locationCooldownWasUp) {
 							for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, targetLocationEntrance)) {
 
-								ItemStack keyStack = itemCost.itemStack();
+								ItemStack keyStack = itemCost.itemStack().create();
 								int keyCount = keyStack.getCount();
 								Inventory playerInventory = serverPlayerEntity.getInventory();
 

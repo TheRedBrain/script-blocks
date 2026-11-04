@@ -9,6 +9,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,8 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 		Shop.Deal currentDeal = dealsList.get(id);
 		if (currentDeal != null && screenHandler instanceof ShopScreenHandler shopScreenHandler) {
 			boolean bl = true;
-			for (ItemStack priceStack : currentDeal.price()) {
+			for (ItemStackTemplate priceStackTemplate : currentDeal.price()) {
+				ItemStack priceStack = priceStackTemplate.create();
 				int priceCount = priceStack.getCount();
 				for (int j = 0; j < shopScreenHandler.inventory.getContainerSize(); j++) {
 					if (ItemStack.isSameItemSameComponents(shopScreenHandler.inventory.getItem(j), priceStack)) {
@@ -62,7 +64,7 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 			}
 			if (bl) {
 				for (int j = 0; j < currentDeal.offer().size(); j++) {
-					ItemStack offerStack = currentDeal.offer().get(j);
+					ItemStack offerStack = currentDeal.offer().get(j).create();
 					serverPlayerEntity.getInventory().placeItemBackInInventory(offerStack);
 				}
 			}

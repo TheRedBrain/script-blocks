@@ -3,7 +3,7 @@ package com.github.theredbrain.scriptblocks.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 
 @Deprecated
@@ -14,7 +14,7 @@ public record LootableVaultConfig(
 		boolean withChoice,
 		double activationRange,
 		double deactivationRange,
-		ItemStack keyItem,
+		ItemStackTemplate keyItem,
 		String displayLootTableIdentifier/*,
 		EntityDetector playerDetector,
 		EntityDetector.Selector entitySelector*/
@@ -29,7 +29,7 @@ public record LootableVaultConfig(
 									Codec.BOOL.fieldOf("withChoice").forGetter(LootableVaultConfig::withChoice),
 									Codec.DOUBLE.fieldOf("activationRange").forGetter(LootableVaultConfig::activationRange),
 									Codec.DOUBLE.fieldOf("deactivationRange").forGetter(LootableVaultConfig::deactivationRange),
-									ItemStack.lenientOptionalFieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
+									ItemStackTemplate.CODEC.fieldOf("keyItem").forGetter(LootableVaultConfig::keyItem),
 									Codec.STRING.fieldOf("displayLootTableIdentifier").forGetter(LootableVaultConfig::lootableIdentifier)
 							)
 							.apply(instance, LootableVaultConfig::new)
@@ -44,7 +44,7 @@ public record LootableVaultConfig(
 				true,
 				4.0,
 				4.5,
-				new ItemStack(Items.TRIAL_KEY),
+				new ItemStackTemplate(Items.TRIAL_KEY),
 				""//,
 //				EntityDetector.NON_SPECTATOR_PLAYERS,
 //				EntityDetector.Selector.IN_WORLD
@@ -58,7 +58,7 @@ public record LootableVaultConfig(
 //			boolean withChoice,
 //			double activationRange,
 //			double deactivationRange/*,
-//			ItemStack keyItem,
+//			ItemStackTemplate keyItem,
 //			Optional<RegistryKey<LootTable>> overrideLootTableToDisplay*/
 //	) {
 //		this(
@@ -69,7 +69,7 @@ public record LootableVaultConfig(
 //				activationRange,
 //				deactivationRange//,
 
-	/// /				ItemStack.EMPTY,
+	/// /				ItemStackTemplate.EMPTY,
 	/// /				overrideLootTableToDisplay,
 	/// /				DEFAULT.playerDetector(),
 	/// /				DEFAULT.entitySelector()

@@ -12,7 +12,6 @@ import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -43,8 +42,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.VaultBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.vault.VaultServerData;
-import net.minecraft.world.level.block.entity.vault.VaultSharedData;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -158,7 +155,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			if (serverData != null && sharedData != null) {
 //				ScriptBlocks.info("loot supplied");
 				serverPlayerEntity.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
-				itemStack.consume(config.keyItem().getCount(), serverPlayerEntity);
+				itemStack.consume(config.keyItem().create().getCount(), serverPlayerEntity);
 				Server.unlock(serverWorld, serverWorld.getBlockState(this.worldPosition), this.worldPosition, config, serverData, sharedData);
 				serverData.markPlayerAsRewarded(serverPlayerEntity);
 				sharedData.updateConnectedPlayers(serverWorld, this.worldPosition, serverData, config, config.deactivationRange());
@@ -215,46 +212,46 @@ public class LootableVaultBlockEntity extends BlockEntity {
 		public static void tick(Level world, BlockPos pos, BlockState state, LootableVaultClientData clientData, LootableVaultSharedData sharedData) {
 			clientData.rotateDisplay();
 			if (world.getGameTime() % 20L == 0L) {
-				spawnConnectedParticles(world, pos, state, sharedData);
+				emitConnectionParticlesForNearbyPlayers(world, pos, state, sharedData);
 			}
 
-			spawnAmbientParticles(world, pos, sharedData, state.getValue(VaultBlock.OMINOUS) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.SMALL_FLAME);
-			playAmbientSound(world, pos, sharedData);
+			emitIdleParticles(world, pos, sharedData, state.getValue(VaultBlock.OMINOUS) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.SMALL_FLAME);
+			playIdleSounds(world, pos, sharedData);
 		}
 
-		public static void spawnActivateParticles(Level world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData, ParticleOptions particle) {
-			spawnConnectedParticles(world, pos, state, sharedData);
+		public static void emitActivationParticles(Level world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData, ParticleOptions particle) {
+			emitConnectionParticlesForNearbyPlayers(world, pos, state, sharedData);
 			RandomSource random = world.getRandom();
 
 			for (int i = 0; i < 20; i++) {
-				Vec3 vec3d = getRegularParticlesPos(pos, random);
+				Vec3 vec3d = randomPosInsideCage(pos, random);
 				world.addParticle(ParticleTypes.SMOKE, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
 				world.addParticle(particle, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
 			}
 		}
 
-		public static void spawnDeactivateParticles(Level world, BlockPos pos, ParticleOptions particle) {
+		public static void emitDeactivationParticles(Level world, BlockPos pos, ParticleOptions particle) {
 			RandomSource random = world.getRandom();
 
 			for (int i = 0; i < 20; i++) {
-				Vec3 vec3d = getDeactivateParticlesPos(pos, random);
+				Vec3 vec3d = randomPosCenterOfCage(pos, random);
 				Vec3 vec3d2 = new Vec3(random.nextGaussian() * 0.02, random.nextGaussian() * 0.02, random.nextGaussian() * 0.02);
 				world.addParticle(particle, vec3d.x(), vec3d.y(), vec3d.z(), vec3d2.x(), vec3d2.y(), vec3d2.z());
 			}
 		}
 
-		private static void spawnAmbientParticles(Level world, BlockPos pos, LootableVaultSharedData sharedData, ParticleOptions particle) {
+		private static void emitIdleParticles(Level world, BlockPos pos, LootableVaultSharedData sharedData, ParticleOptions particle) {
 			RandomSource random = world.getRandom();
 			if (random.nextFloat() <= 0.5F) {
-				Vec3 vec3d = getRegularParticlesPos(pos, random);
+				Vec3 vec3d = randomPosInsideCage(pos, random);
 				world.addParticle(ParticleTypes.SMOKE, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
-				if (hasDisplayItem(sharedData)) {
+				if (shouldDisplayActiveEffects(sharedData)) {
 					world.addParticle(particle, vec3d.x(), vec3d.y(), vec3d.z(), 0.0, 0.0, 0.0);
 				}
 			}
 		}
 
-		private static void spawnConnectedParticlesFor(Level world, Vec3 pos, Player player) {
+		private static void emitConnectionParticlesForPlayer(Level world, Vec3 pos, Player player) {
 			RandomSource random = world.getRandom();
 			Vec3 vec3d = pos.vectorTo(player.position().add(0.0, (double) (player.getBbHeight() / 2.0F), 0.0));
 			int i = Mth.nextInt(random, 2, 5);
@@ -265,26 +262,26 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			}
 		}
 
-		private static void spawnConnectedParticles(Level world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData) {
+		private static void emitConnectionParticlesForNearbyPlayers(Level world, BlockPos pos, BlockState state, LootableVaultSharedData sharedData) {
 			Set<UUID> set = sharedData.getConnectedPlayers();
 			if (!set.isEmpty()) {
-				Vec3 vec3d = getConnectedParticlesOrigin(pos, state.getValue(VaultBlock.FACING));
+				Vec3 vec3d = keyholePos(pos, state.getValue(VaultBlock.FACING));
 
 				for (UUID uUID : set) {
 					Player playerEntity = world.getPlayerByUUID(uUID);
-					if (playerEntity != null && isPlayerWithinConnectedParticlesRange(pos, sharedData, playerEntity)) {
-						spawnConnectedParticlesFor(world, vec3d, playerEntity);
+					if (playerEntity != null && isWithinConnectionRange(pos, sharedData, playerEntity)) {
+						emitConnectionParticlesForPlayer(world, vec3d, playerEntity);
 					}
 				}
 			}
 		}
 
-		private static boolean isPlayerWithinConnectedParticlesRange(BlockPos pos, LootableVaultSharedData sharedData, Player player) {
+		private static boolean isWithinConnectionRange(BlockPos pos, LootableVaultSharedData sharedData, Player player) {
 			return player.blockPosition().distSqr(pos) <= Mth.square(sharedData.getConnectedParticlesRange());
 		}
 
-		private static void playAmbientSound(Level world, BlockPos pos, LootableVaultSharedData sharedData) {
-			if (hasDisplayItem(sharedData)) {
+		private static void playIdleSounds(Level world, BlockPos pos, LootableVaultSharedData sharedData) {
+			if (shouldDisplayActiveEffects(sharedData)) {
 				RandomSource random = world.getRandom();
 				if (random.nextFloat() <= 0.02F) {
 					world.playLocalSound(
@@ -294,19 +291,19 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			}
 		}
 
-		public static boolean hasDisplayItem(LootableVaultSharedData sharedData) {
+		public static boolean shouldDisplayActiveEffects(LootableVaultSharedData sharedData) {
 			return sharedData.hasDisplayItem();
 		}
 
-		private static Vec3 getDeactivateParticlesPos(BlockPos pos, RandomSource random) {
+		private static Vec3 randomPosCenterOfCage(BlockPos pos, RandomSource random) {
 			return Vec3.atLowerCornerOf(pos).add(Mth.nextDouble(random, 0.4, 0.6), Mth.nextDouble(random, 0.4, 0.6), Mth.nextDouble(random, 0.4, 0.6));
 		}
 
-		private static Vec3 getRegularParticlesPos(BlockPos pos, RandomSource random) {
+		private static Vec3 randomPosInsideCage(BlockPos pos, RandomSource random) {
 			return Vec3.atLowerCornerOf(pos).add(Mth.nextDouble(random, 0.1, 0.9), Mth.nextDouble(random, 0.25, 0.75), Mth.nextDouble(random, 0.1, 0.9));
 		}
 
-		private static Vec3 getConnectedParticlesOrigin(BlockPos pos, Direction direction) {
+		private static Vec3 keyholePos(BlockPos pos, Direction direction) {
 			return Vec3.atBottomCenterOf(pos).add((double) direction.getStepX() * 0.5, 1.75, (double) direction.getStepZ() * 0.5);
 		}
 	}
@@ -318,15 +315,15 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 		public static void tick(ServerLevel world, BlockPos pos, BlockState state, LootableVaultConfig config, LootableVaultServerData serverData, LootableVaultSharedData sharedData) {
 			LootableVaultState vaultState = state.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
-			if (shouldUpdateDisplayItem(world.getGameTime(), vaultState)) {
-				updateDisplayItem(world, vaultState, config, sharedData, pos);
+			if (shouldCycleDisplayItem(world.getGameTime(), vaultState)) {
+				cycleDisplayItemFromLootTable(world, vaultState, config, sharedData, pos);
 			}
 
 			BlockState blockState = state;
 			if (world.getGameTime() >= serverData.getStateUpdatingResumeTime()) {
 				blockState = state.setValue(LootableVaultBlock.LOOTABLE_VAULT_STATE, vaultState.update(world, pos, config, serverData, sharedData));
 				if (!state.equals(blockState)) {
-					changeVaultState(world, pos, state, blockState, config, sharedData);
+					setVaultState(world, pos, state, blockState, config, sharedData);
 				}
 			}
 
@@ -341,7 +338,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			}
 		}
 
-		public static void tryUnlock(
+		public static void tryInsertKey(
 				ServerLevel world,
 				BlockPos pos,
 				BlockState state,
@@ -352,13 +349,13 @@ public class LootableVaultBlockEntity extends BlockEntity {
 				ItemStack stack
 		) {
 			LootableVaultState vaultState = state.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
-			if (canBeUnlocked(config, vaultState)) {
-				if (!isValidKey(config, stack)) {
+			if (canEjectReward(config, vaultState)) {
+				if (!isValidToInsert(config, stack)) {
 					ScriptBlocks.info("invalid key");
-					playFailedUnlockSound(world, serverData, pos, SoundEvents.VAULT_INSERT_ITEM_FAIL);
+					playInsertFailSound(world, serverData, pos, SoundEvents.VAULT_INSERT_ITEM_FAIL);
 				} else if (serverData.hasRewardedPlayer(player)) {
 					ScriptBlocks.info("player already rewarded");
-					playFailedUnlockSound(world, serverData, pos, SoundEvents.VAULT_REJECT_REWARDED_PLAYER);
+					playInsertFailSound(world, serverData, pos, SoundEvents.VAULT_REJECT_REWARDED_PLAYER);
 				} else if (player instanceof ServerPlayer serverPlayerEntity) {
 					// TODO loot
 //					Vec3d lootPos = new Vec3d(this.getPos().getX(), interactiveLootBlockEntity.getPos().getY(), interactiveLootBlockEntity.getPos().getZ());
@@ -378,15 +375,15 @@ public class LootableVaultBlockEntity extends BlockEntity {
 			}
 		}
 
-		static void changeVaultState(ServerLevel world, BlockPos pos, BlockState oldState, BlockState newState, LootableVaultConfig config, LootableVaultSharedData sharedData) {
+		static void setVaultState(ServerLevel world, BlockPos pos, BlockState oldState, BlockState newState, LootableVaultConfig config, LootableVaultSharedData sharedData) {
 			LootableVaultState vaultState = oldState.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
 			LootableVaultState vaultState2 = newState.getValue(LootableVaultBlock.LOOTABLE_VAULT_STATE);
 			world.setBlock(pos, newState, Block.UPDATE_ALL);
 			vaultState.onStateChange(world, pos, vaultState2, config, sharedData, (Boolean) newState.getValue(VaultBlock.OMINOUS));
 		}
 
-		public static void updateDisplayItem(ServerLevel world, LootableVaultState state, LootableVaultConfig config, LootableVaultSharedData sharedData, BlockPos pos) {
-			if (!canBeUnlocked(config, state)) {
+		public static void cycleDisplayItemFromLootTable(ServerLevel world, LootableVaultState state, LootableVaultConfig config, LootableVaultSharedData sharedData, BlockPos pos) {
+			if (!canEjectReward(config, state)) {
 				sharedData.setDisplayItem(ItemStack.EMPTY);
 			} else {
 				ItemStack itemStack = ItemStack.EMPTY;
@@ -410,7 +407,7 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //			serverData.setItemsToEject(itemsToEject);
 			sharedData.setDisplayItem(ItemStack.EMPTY);
 			serverData.setStateUpdatingResumeTime(world.getGameTime() + 14L);
-			changeVaultState(world, pos, state, state.setValue(LootableVaultBlock.LOOTABLE_VAULT_STATE, LootableVaultState.UNLOCKING), config, sharedData);
+			setVaultState(world, pos, state, state.setValue(LootableVaultBlock.LOOTABLE_VAULT_STATE, LootableVaultState.UNLOCKING), config, sharedData);
 		}
 
 //		private static List<ItemStack> generateLoot(ServerWorld world, LootableVaultConfig config, BlockPos pos, PlayerEntity player) {
@@ -423,19 +420,19 @@ public class LootableVaultBlockEntity extends BlockEntity {
 //			return lootTable.generateLoot(lootContextParameterSet);
 //		}
 
-		private static boolean canBeUnlocked(LootableVaultConfig config, LootableVaultState state) {
-			return !Objects.equals(config.lootableIdentifier(), "") && !config.keyItem().isEmpty() && state != LootableVaultState.INACTIVE;
+		private static boolean canEjectReward(LootableVaultConfig config, LootableVaultState state) {
+			return !Objects.equals(config.lootableIdentifier(), "") && !config.keyItem().create().isEmpty() && state != LootableVaultState.INACTIVE;
 		}
 
-		private static boolean isValidKey(LootableVaultConfig config, ItemStack stack) {
-			return ItemStack.isSameItemSameComponents(stack, config.keyItem()) && stack.getCount() >= config.keyItem().getCount();
+		private static boolean isValidToInsert(LootableVaultConfig config, ItemStack stack) {
+			return ItemStack.isSameItemSameComponents(stack, config.keyItem().create()) && stack.getCount() >= config.keyItem().create().getCount();
 		}
 
-		private static boolean shouldUpdateDisplayItem(long time, LootableVaultState state) {
+		private static boolean shouldCycleDisplayItem(long time, LootableVaultState state) {
 			return time % 20L == 0L && state == LootableVaultState.ACTIVE;
 		}
 
-		private static void playFailedUnlockSound(ServerLevel world, LootableVaultServerData serverData, BlockPos pos, SoundEvent sound) {
+		private static void playInsertFailSound(ServerLevel world, LootableVaultServerData serverData, BlockPos pos, SoundEvent sound) {
 			if (world.getGameTime() >= serverData.getLastFailedUnlockTime() + 15L) {
 				world.playSound(null, pos, sound, SoundSource.BLOCKS);
 				serverData.setLastFailedUnlockTime(world.getGameTime());

@@ -25,6 +25,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.List;
@@ -90,8 +91,8 @@ public class ShopScreen extends AbstractContainerScreen<ShopScreenHandler> {
 						inventory.setItem(k, itemStack.copy());
 					}
 					boolean bl = true;
-					List<ItemStack> priceList = deal.price();
-					for (ItemStack priceStack : priceList) {
+					for (ItemStackTemplate priceStackTemplate : deal.price()) {
+						ItemStack priceStack = priceStackTemplate.create();
 						int priceCount = priceStack.getCount();
 						for (int j = 0; j < inventory.getContainerSize(); j++) {
 							if (ItemStack.isSameItemSameComponents(inventory.getItem(j), priceStack)) {
@@ -263,7 +264,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopScreenHandler> {
 			Shop.Deal deal = this.menu.getUnlockedDealsList().get(i);
 			if (deal != null) {
 				for (int j = 0; j < deal.offer().size(); j++) {
-					ItemStack offerStack = deal.offer().get(j);
+					ItemStack offerStack = deal.offer().get(j).create();
 					x = this.leftPos + 85 + (j * 18);
 					y = this.topPos + 18 + (index * 24);
 					k = x + y * this.imageWidth;
@@ -271,7 +272,7 @@ public class ShopScreen extends AbstractContainerScreen<ShopScreenHandler> {
 					graphics.itemDecorations(this.font, offerStack, x, y, String.valueOf(offerStack.count()));
 				}
 				for (int j = 0; j < deal.price().size(); j++) {
-					ItemStack priceStack = deal.price().get(j);
+					ItemStack priceStack = deal.price().get(j).create();
 					x = this.leftPos + 8 + (j * 18);
 					y = this.topPos + 18 + (index * 24);
 					k = x + y * this.imageWidth;

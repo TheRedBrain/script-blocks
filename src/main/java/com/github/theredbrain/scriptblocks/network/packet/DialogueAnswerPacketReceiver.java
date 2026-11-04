@@ -67,10 +67,10 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 
 				// check for itemCosts
 				for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
-					int itemCount = itemCost.itemStack().getCount();
+					int itemCount = itemCost.itemStack().create().getCount();
 					for (int j = 0; j < playerInventorySize; j++) {
 
-						if (ItemStack.isSameItemSameComponents(playerInventoryCopy.getItem(j), itemCost.itemStack())) {
+						if (ItemStack.isSameItemSameComponents(playerInventoryCopy.getItem(j), itemCost.itemStack().create())) {
 							itemStack = playerInventoryCopy.getItem(j).copy();
 							int stackCount = itemStack.getCount();
 
@@ -95,10 +95,10 @@ public class DialogueAnswerPacketReceiver implements ServerPlayNetworking.PlayPa
 				for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
 
 					if (itemCost.consumeStack()) {
-						int ingredientCount = itemCost.itemStack().getCount();
+						int ingredientCount = itemCost.itemStack().create().getCount();
 						for (int j = 0; j < playerInventorySize; j++) {
 
-							if (ItemStack.isSameItemSameComponents(serverPlayerEntity.getInventory().getItem(j), itemCost.itemStack())) {
+							if (ItemStack.isSameItemSameComponents(serverPlayerEntity.getInventory().getItem(j), itemCost.itemStack().create())) {
 								itemStack = serverPlayerEntity.getInventory().getItem(j).copy();
 								int stackCount = itemStack.getCount();
 

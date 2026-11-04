@@ -106,7 +106,7 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 
 			for (CommonDataStructures.ItemCost itemCost : LocationUtils.getResetCostForEntrance(location, targetEntrance)) {
 
-				ItemStack keyStack = itemCost.itemStack();
+				ItemStack keyStack = itemCost.itemStack().create();
 				int keyCount = keyStack.getCount();
 				Inventory playerInventory = serverPlayerEntity.getInventory();
 

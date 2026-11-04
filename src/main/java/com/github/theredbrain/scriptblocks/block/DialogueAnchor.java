@@ -121,7 +121,7 @@ public interface DialogueAnchor {
 						}
 
 						for (CommonDataStructures.ItemCost itemCost : dialogueAnswer.availability().itemCosts()) {
-							ItemStack costStack = itemCost.itemStack();
+							ItemStack costStack = itemCost.itemStack().create();
 							int itemCount = costStack.getCount();
 							if (!costStack.isEmpty()) {
 								for (j = 0; j < inventorySize; j++) {

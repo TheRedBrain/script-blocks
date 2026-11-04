@@ -431,7 +431,7 @@ public class TeleporterBlockScreen extends AbstractContainerScreen<TeleporterBlo
 			}
 			this.areCurrentLocationKeysPresent = true;
 			for (CommonDataStructures.ItemCost itemCost : LocationUtils.getKeyForEntrance(location, this.currentTarget.entrance())) {
-				ItemStack currentKeyItemStack = itemCost.itemStack();
+				ItemStack currentKeyItemStack = itemCost.itemStack().create();
 				int keyCount = currentKeyItemStack.getCount();
 				for (int j = 0; j < inventory.getContainerSize(); j++) {
 					ItemStack itemStack = inventory.getItem(j);
@@ -453,7 +453,7 @@ public class TeleporterBlockScreen extends AbstractContainerScreen<TeleporterBlo
 			}
 			this.canLocationBeRegenerated = true;
 			for (CommonDataStructures.ItemCost regenerationItemCost : LocationUtils.getResetCostForEntrance(location, this.currentTarget.entrance())) {
-				ItemStack currentKeyItemStack = regenerationItemCost.itemStack();
+				ItemStack currentKeyItemStack = regenerationItemCost.itemStack().create();
 				int keyCount = currentKeyItemStack.getCount();
 				for (int j = 0; j < inventory.getContainerSize(); j++) {
 					ItemStack itemStack = inventory.getItem(j);
