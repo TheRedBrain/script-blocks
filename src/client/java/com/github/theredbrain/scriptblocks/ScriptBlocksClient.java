@@ -4,9 +4,9 @@ import com.github.theredbrain.scriptblocks.gui.screen.ingame.DialogueScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.ShopScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TeleporterBlockScreen;
 import com.github.theredbrain.scriptblocks.gui.screen.ingame.TriggeredDispenserBlockScreen;
-import com.github.theredbrain.scriptblocks.registry.KeyBindingsRegistry;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksClientEvents;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksKeyMappings;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.render.block.entity.AestheticDecoratedPotBlockEntityRenderer;
 import com.github.theredbrain.scriptblocks.render.block.entity.AreaFillerBlockEntityRenderer;
@@ -41,7 +41,7 @@ public class ScriptBlocksClient implements ClientModInitializer {
 
 		// Registry
 		registerEntityRenderer();
-		KeyBindingsRegistry.registerKeyBindings();
+		ScriptBlocksKeyMappings.registerKeyBindings();
 		registerBlockEntityRenderer();
 		registerScreens();
 	}
