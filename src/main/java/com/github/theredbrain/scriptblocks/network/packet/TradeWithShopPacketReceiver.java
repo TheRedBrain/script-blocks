@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.network.packet;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.ShopScreenHandler;
+import com.github.theredbrain.scriptblocks.util.ShopHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
@@ -21,16 +22,16 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 
 		ServerPlayer serverPlayerEntity = context.player();
 
-		String shopIdentifier = payload.shopIdentifier();
+		String shopIdentifierString = payload.shopIdentifier();
 		int id = payload.id();
 
 		AbstractContainerMenu screenHandler = serverPlayerEntity.containerMenu;
 		List<Shop.Deal> dealsList = new ArrayList<>(List.of());
 		Shop shop = null;
-		if (!shopIdentifier.isEmpty()) {
-			Optional<Holder.Reference<Shop>> optionalShopReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).get().value().get(Identifier.parse(shopIdentifier));
-			if (optionalShopReference.isPresent()) {
-				shop = optionalShopReference.get().value();
+		if (!shopIdentifierString.isEmpty()) {
+			Identifier identifier = Identifier.tryParse(shopIdentifierString);
+			if (identifier != null) {
+				shop = ShopHelper.getShop(serverPlayerEntity.level().registryAccess(), identifier);
 			}
 		}
 		if (shop != null) {

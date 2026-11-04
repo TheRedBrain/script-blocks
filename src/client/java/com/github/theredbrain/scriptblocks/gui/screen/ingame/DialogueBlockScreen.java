@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.entity.DialogueBlockEntity;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.network.packet.UpdateDialogueBlockPacket;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
+import com.github.theredbrain.scriptblocks.util.DialogueHelper;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -200,11 +201,9 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		Dialogue newStartingDialogue = null;
 		Level world = this.dialogueBlockEntity.getLevel();
-		if (world != null) {
-			Optional<Holder.Reference<Dialogue>> optionalDialogueReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(Identifier.tryParse(newStartingDialogueIdentifier));
-			if (optionalDialogueReference.isPresent()) {
-				newStartingDialogue = optionalDialogueReference.get().value();
-			}
+		Identifier identifier = Identifier.tryParse(newStartingDialogueIdentifier);
+		if (world != null && identifier != null) {
+			newStartingDialogue = DialogueHelper.getDialogue(world.registryAccess(), identifier);
 		}
 
 		if (newStartingDialogue == null) {
@@ -218,7 +217,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 				}
 			}
 		}
-		if (this.minecraft != null && this.minecraft.player != null && !message.isEmpty()) {
+		if (this.minecraft.player != null && !message.isEmpty()) {
 			this.minecraft.player.sendSystemMessage(Component.translatable(message));
 			return;
 		}

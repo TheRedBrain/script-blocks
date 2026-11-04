@@ -404,16 +404,10 @@ public class TeleporterBlockScreen extends AbstractContainerScreen<TeleporterBlo
 		this.isCurrentLocationUnlocked = this.currentTarget.isUnlocked();
 
 		Location location = null;
-		Level world = this.teleporterBlock.getLevel();
-		if (world != null) {
-			Optional<Holder.Reference<Registry<Location>>> optional = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY);
-			Identifier identifier = Identifier.tryParse(this.currentTarget.identifier());
-			if (optional.isPresent() && identifier != null) {
-				Optional<Holder.Reference<Location>> optionalLocationReference = optional.get().value().get(identifier);
-				if (optionalLocationReference.isPresent()) {
-					location = optionalLocationReference.get().value();
-				}
-			}
+		Level level = this.teleporterBlock.getLevel();
+		Identifier identifier = Identifier.tryParse(this.currentTarget.identifier());
+		if (level != null && identifier != null) {
+			location = LocationUtils.getLocation(level.registryAccess(), identifier);
 		}
 
 		if (location != null) {

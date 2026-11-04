@@ -20,13 +20,13 @@ import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -48,7 +48,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.IntFunction;
 
 public class TeleporterBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
 
@@ -354,9 +353,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		return this.saveCustomOnly(registryLookup);
 	}
 
-	public static void openNonCreativeScreen(Level world, ServerPlayer serverPlayerEntity, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
+	public static void openNonCreativeScreen(Level level, ServerPlayer serverPlayerEntity, BlockPos pos, BlockState state, TeleporterBlockEntity teleporterBlockEntity) {
 
-		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUUID().toString().equals(world.dimension().identifier().getPath())) {
+		if (teleporterBlockEntity.onlyTeleportDimensionOwner && !serverPlayerEntity.getUUID().toString().equals(level.dimension().identifier().getPath())) {
 			if (!teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage().isEmpty()) {
 				serverPlayerEntity.sendSystemMessage(Component.translatable(teleporterBlockEntity.getOnlyDimensionOwnerCanTeleportMessage()), true);
 			}
@@ -379,11 +378,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 				for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> entry : teleporterBlockEntity.locationsList) {
 
 					Location location = null;
-					if (world != null) {
-						Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(Identifier.parse(entry.getLeft().getLeft()));
-						if (optionalLocationReference.isPresent()) {
-							location = optionalLocationReference.get().value();
-						}
+					Identifier identifier = Identifier.tryParse(entry.getLeft().getLeft());
+					if (level != null && identifier != null) {
+						location = LocationUtils.getLocation(level.registryAccess(), identifier);
 					}
 					if (location != null) {
 						String entranceDisplayName = LocationUtils.getEntranceDisplayName(location, entry.getLeft().getRight());
@@ -399,11 +396,9 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 			} else if (teleporterBlockEntity.getTeleportationMode() == TeleportationMode.LOCATION) {
 				MutablePair<MutablePair<String, String>, MutablePair<String, String>> dataDrivenLocation = teleporterBlockEntity.getDataDrivenLocation();
 				Location location = null;
-				if (world != null) {
-					Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(Identifier.parse(dataDrivenLocation.getLeft().getLeft()));
-					if (optionalLocationReference.isPresent()) {
-						location = optionalLocationReference.get().value();
-					}
+				Identifier identifier = Identifier.tryParse(dataDrivenLocation.getLeft().getLeft());
+				if (level != null && identifier != null) {
+					location = LocationUtils.getLocation(level.registryAccess(), identifier);
 				}
 				if (location != null) {
 					String entranceDisplayName = LocationUtils.getEntranceDisplayName(location, dataDrivenLocation.getLeft().getRight());
@@ -419,7 +414,7 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 		}
 
 		serverPlayerEntity.openMenu(createTeleporterMenuProvider(
-				world,
+				level,
 				Component.translatable(teleporterBlockEntity.teleporterName),
 				teleporterBlockEntity.getBlockPos(),
 				visibleLocationsList
@@ -557,14 +552,14 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 	@Override
 	public void handleUUIDList(List<UUID> list, boolean remove) {
-		if (this.level != null) {
-			list.forEach((uuid) -> {
+		list.forEach((uuid) -> {
+			if (this.level != null) {
 				Player playerEntity = this.level.getPlayerByUUID(uuid);
 				if (playerEntity instanceof ServerPlayer serverPlayerEntity && !playerEntity.isCreative()) {
 					openNonCreativeScreen(this.level, serverPlayerEntity, this.worldPosition, this.level.getBlockState(this.worldPosition), this);
 				}
-			});
-		}
+			}
+		});
 	}
 
 	@Override

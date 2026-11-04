@@ -3,14 +3,12 @@ package com.github.theredbrain.scriptblocks.block;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
+import com.github.theredbrain.scriptblocks.util.DialogueHelper;
 import com.github.theredbrain.scriptblocks.util.ItemUtils;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
-import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -31,8 +29,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 
 public interface DialogueAnchor {
 
@@ -51,17 +47,22 @@ public interface DialogueAnchor {
 
 		if (player instanceof ServerPlayer serverPlayerEntity) {
 			playerAdvancementTracker = serverPlayerEntity.getAdvancements();
-				MinecraftServer minecraftServer = serverPlayerEntity.level().getServer();
-				serverAdvancementLoader = minecraftServer.getAdvancements();
+			MinecraftServer minecraftServer = serverPlayerEntity.level().getServer();
+			serverAdvancementLoader = minecraftServer.getAdvancements();
 		}
 		String lockAdvancement;
 		String unlockAdvancement;
 
 		for (String dialogueEntry : dialogueList) {
-			Optional<Holder.Reference<Dialogue>> optionalDialogueReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(Identifier.tryParse(dialogueEntry));
-			if (optionalDialogueReference.isPresent()) {
-				lockAdvancement = optionalDialogueReference.get().value().lockAdvancement();
-				unlockAdvancement = optionalDialogueReference.get().value().unlockAdvancement();
+			Identifier identifier = Identifier.tryParse(dialogueEntry);
+			if (identifier == null) {
+				continue;
+			}
+
+			Dialogue dialogue = DialogueHelper.getDialogue(world.registryAccess(), identifier);
+			if (dialogue != null) {
+				lockAdvancement = dialogue.lockAdvancement();
+				unlockAdvancement = dialogue.unlockAdvancement();
 
 				AdvancementHolder lockAdvancementEntry = null;
 				AdvancementHolder unlockAdvancementEntry = null;
@@ -85,10 +86,13 @@ public interface DialogueAnchor {
 	}
 
 	static void openDialogueScreen(Level world, MinecraftServer server, ServerPlayer serverPlayerEntity, String dialogueIdentifierString, BlockPos dataBlockPos, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
-		Optional<Holder.Reference<Dialogue>> optionalDialogueReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(Identifier.tryParse(dialogueIdentifierString));
+		Identifier identifier = Identifier.tryParse(dialogueIdentifierString);
+		if (identifier == null) {
+			return;
+		}
 
-		if (optionalDialogueReference.isPresent()) {
-			Dialogue dialogue = optionalDialogueReference.get().value();
+		Dialogue dialogue = DialogueHelper.getDialogue(world.registryAccess(), identifier);
+		if (dialogue != null) {
 			List<String> unlockedAnswersList = new ArrayList<>(List.of());
 			List<String> visibleAnswersList = new ArrayList<>(List.of());
 			PlayerAdvancements playerAdvancementTracker = serverPlayerEntity.getAdvancements();
@@ -97,13 +101,12 @@ public interface DialogueAnchor {
 			for (String answerIdentifierString : dialogue.answerList()) {
 
 				if (!answerIdentifierString.isEmpty()) {
-
-					DialogueAnswer dialogueAnswer = null;
-					Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference1 = world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).get().value().get(Identifier.parse(answerIdentifierString));
-					if (optionalDialogueAnswerReference1.isPresent()) {
-						dialogueAnswer = optionalDialogueAnswerReference1.get().value();
+					Identifier answerIdentifier = Identifier.tryParse(answerIdentifierString);
+					if (answerIdentifier == null) {
+						continue;
 					}
 
+					DialogueAnswer dialogueAnswer = DialogueHelper.getDialogueAnswer(world.registryAccess(), answerIdentifier);
 					if (dialogueAnswer == null) {
 						continue;
 					}

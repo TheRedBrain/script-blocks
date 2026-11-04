@@ -11,6 +11,7 @@ import com.github.theredbrain.scriptblocks.world.DimensionsManager;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -45,10 +46,7 @@ public class SetManualResetLocationControlBlockPacketReceiver implements ServerP
 		Location location = null;
 		Identifier identifier = Identifier.tryParse(targetLocation);
 		if (identifier != null) {
-			Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
-			if (optionalLocationReference.isPresent()) {
-				location = optionalLocationReference.get().value();
-			}
+			location = LocationUtils.getLocation(serverPlayerEntity.level().registryAccess(), identifier);
 		}
 
 		ServerPlayer targetDimensionOwner = server.getPlayerList().getPlayerByName(targetDimensionOwnerName);

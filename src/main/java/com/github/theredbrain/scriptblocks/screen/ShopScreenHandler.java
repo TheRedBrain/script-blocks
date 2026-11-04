@@ -6,6 +6,7 @@ import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.network.packet.TradeWithShopPacket;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
+import com.github.theredbrain.scriptblocks.util.ShopHelper;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -73,17 +74,15 @@ public class ShopScreenHandler extends AbstractContainerMenu {
 		BlockEntity blockEntity = this.world.getBlockEntity(this.blockPos);
 		if (blockEntity instanceof ShopBlockEntity) {
 			this.shopBlockEntity = (ShopBlockEntity) blockEntity;
-			Shop shop = null;
-			String shopIdentifier = this.shopBlockEntity.getShopIdentifier();
-			if (!shopIdentifier.isEmpty()) {
-				Optional<Holder.Reference<Shop>> optionalShopReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).get().value().get(Identifier.parse(shopIdentifier));
-				if (optionalShopReference.isPresent()) {
-					shop = optionalShopReference.get().value();
+			String shopIdentifierString = this.shopBlockEntity.getShopIdentifier();
+			if (!shopIdentifierString.isEmpty()) {
+				Identifier identifier = Identifier.tryParse(shopIdentifierString);
+				if (identifier != null) {
+					this.shop = ShopHelper.getShop(this.world.registryAccess(), identifier);
 				}
 			}
-			this.shop = shop;
-			if (shop != null) {
-				this.dealsList = shop.dealList();
+			if (this.shop != null) {
+				this.dealsList = this.shop.dealList();
 			}
 		}
 		int i;

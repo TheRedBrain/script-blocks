@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.data.DialogueAnswer;
 import com.github.theredbrain.scriptblocks.network.packet.DialogueAnswerPacket;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.screen.DialogueScreenHandler;
+import com.github.theredbrain.scriptblocks.util.DialogueHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -294,11 +295,9 @@ public class DialogueScreen extends AbstractContainerScreen<DialogueScreenHandle
 
 			if (!answerIdentifier.isEmpty()) {
 				DialogueAnswer dialogueAnswer = null;
-				if (this.menu.world != null) {
-					Optional<Holder.Reference<DialogueAnswer>> optionalDialogueAnswerReference = this.menu.world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_ANSWER_REGISTRY_KEY).get().value().get(Identifier.parse(answerIdentifier));
-					if (optionalDialogueAnswerReference.isPresent()) {
-						dialogueAnswer = optionalDialogueAnswerReference.get().value();
-					}
+				Identifier identifier = Identifier.tryParse(answerIdentifier);
+				if (this.menu.world != null && identifier != null) {
+					dialogueAnswer = DialogueHelper.getDialogueAnswer(this.menu.world.registryAccess(), identifier);
 				}
 
 				if (dialogueAnswer != null) {

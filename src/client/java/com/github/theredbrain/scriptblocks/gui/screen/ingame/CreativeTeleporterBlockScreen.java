@@ -167,16 +167,14 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.teleporterBlock = teleporterBlock;
 	}
 
-	private void addLocationToList(String identifier, String entrance, String dataId, String data) {
+	private void addLocationToList(String identifierString, String entrance, String dataId, String data) {
 		Component message = Component.literal("");
 
 		Location location = null;
-		Level world = this.teleporterBlock.getLevel();
-		if (world != null) {
-			Optional<Holder.Reference<Location>> optionalLocationReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(Identifier.tryParse(identifier));
-			if (optionalLocationReference.isPresent()) {
-				location = optionalLocationReference.get().value();
-			}
+		Level level = this.teleporterBlock.getLevel();
+		Identifier identifier = Identifier.tryParse(identifierString);
+		if (level != null && identifier != null) {
+			location = LocationUtils.getLocation(level.registryAccess(), identifier);
 		}
 
 		if (location != null) {
@@ -185,7 +183,7 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 			}
 			boolean bl = false;
 			for (MutablePair<MutablePair<String, String>, MutablePair<String, String>> locationsListEntry : this.locationsList) {
-				if (locationsListEntry.getLeft().getLeft().equals(identifier) && locationsListEntry.getLeft().getRight().equals(entrance) && locationsListEntry.getRight().getLeft().equals(dataId) && locationsListEntry.getRight().getRight().equals(data)) {
+				if (locationsListEntry.getLeft().getLeft().equals(identifierString) && locationsListEntry.getLeft().getRight().equals(entrance) && locationsListEntry.getRight().getLeft().equals(dataId) && locationsListEntry.getRight().getRight().equals(data)) {
 					bl = true;
 					break;
 				}
@@ -193,7 +191,7 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 			if (bl) {
 				message = Component.translatable("gui.teleporter_block.location_already_in_list");
 			} else {
-				this.locationsList.add(new MutablePair<>(new MutablePair<>(identifier, entrance), new MutablePair<>(dataId, data)));
+				this.locationsList.add(new MutablePair<>(new MutablePair<>(identifierString, entrance), new MutablePair<>(dataId, data)));
 			}
 		} else {
 			message = Component.translatable("gui.teleporter_block.location_not_found");

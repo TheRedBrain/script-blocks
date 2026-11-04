@@ -3,6 +3,7 @@ package com.github.theredbrain.scriptblocks.block.entity;
 import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
+import com.github.theredbrain.scriptblocks.util.ShopHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -61,10 +62,7 @@ public class ShopBlockEntity extends BlockEntity {
 		Shop shop = null;
 		Identifier identifier = Identifier.tryParse(newShopIdentifier);
 		if (identifier != null && this.level != null) {
-			Optional<Holder.Reference<Shop>> optionalShopReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.SHOP_REGISTRY_KEY).get().value().get(identifier);
-			if (optionalShopReference.isPresent()) {
-				shop = optionalShopReference.get().value();
-			}
+			shop = ShopHelper.getShop(this.level.registryAccess(), identifier);
 		}
 		if (newShopIdentifier.isEmpty() || shop != null) {
 			this.shopIdentifier = newShopIdentifier;

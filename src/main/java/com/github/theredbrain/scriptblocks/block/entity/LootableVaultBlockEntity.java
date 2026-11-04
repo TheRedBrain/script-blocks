@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSer
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultSharedData;
 import com.github.theredbrain.scriptblocks.block.lootable_vault.LootableVaultState;
 import com.github.theredbrain.scriptblocks.data.LootableVaultConfig;
+import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
@@ -16,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -187,9 +189,13 @@ public class LootableVaultBlockEntity extends BlockEntity {
 
 	public LootableVaultConfig getConfig(Level world) {
 //		return this.config;
-		Optional<Holder.Reference<LootableVaultConfig>> lootableVaultConfig = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY).get().value().get(Identifier.parse(this.lootableVaultConfigIdentifier));
-		if (lootableVaultConfig.isPresent()) {
-			return lootableVaultConfig.get().value();
+		Identifier identifier = Identifier.tryParse(this.lootableVaultConfigIdentifier);
+		Optional<Holder.Reference<Registry<LootableVaultConfig>>> optionalLootableVaultConfigRegistryReference = world.registryAccess().get(ScriptBlocksDynamicRegistries.LOOTABLE_VAULT_CONFIG_REGISTRY_KEY);
+		if (optionalLootableVaultConfigRegistryReference.isPresent()) {
+			Optional<Holder.Reference<LootableVaultConfig>> optionalLootableVaultConfigReference = optionalLootableVaultConfigRegistryReference.get().value().get(identifier);
+			if (optionalLootableVaultConfigReference.isPresent()) {
+				return optionalLootableVaultConfigReference.get().value();
+			}
 		}
 		DebuggingHelper.sendLootableVaultLogMessage("Config not valid: " + this.lootableVaultConfigIdentifier, null);
 		return LootableVaultConfig.DEFAULT;

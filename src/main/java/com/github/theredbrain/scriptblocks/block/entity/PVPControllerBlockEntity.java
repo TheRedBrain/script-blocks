@@ -5,6 +5,7 @@ import com.github.theredbrain.scriptblocks.block.Resetable;
 import com.github.theredbrain.scriptblocks.block.RotatedBlockWithEntity;
 import com.github.theredbrain.scriptblocks.block.Triggerable;
 import com.github.theredbrain.scriptblocks.data.PVPArenaSettings;
+import com.github.theredbrain.scriptblocks.data.Shop;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDamageTypes;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
@@ -15,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -158,10 +160,7 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(newPVPArenaSettingsIdentifier);
 		if (identifier != null && this.level != null) {
-			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).get().value().get(identifier);
-			if (optionalPVPArenaSettingsReference.isPresent()) {
-				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
-			}
+			pvpArenaSettings = getPVPArenaSettings(this.level.registryAccess(), identifier);
 		}
 		if (newPVPArenaSettingsIdentifier.isEmpty() || pvpArenaSettings != null) {
 			this.pvpArenaSettingsIdentifier = newPVPArenaSettingsIdentifier;
@@ -205,14 +204,24 @@ public class PVPControllerBlockEntity extends RotatedBlockEntity implements Rese
 // endregion --- getter & setter ---
 
 	@Nullable
+	public static PVPArenaSettings getPVPArenaSettings(RegistryAccess registryAccess, Identifier identifier) {
+		PVPArenaSettings pvpArenaSettings = null;
+		Optional<Holder.Reference<Registry<PVPArenaSettings>>> optionalPVPArenaSettingsRegistryReference = registryAccess.get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY);
+		if (optionalPVPArenaSettingsRegistryReference.isPresent()) {
+			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = optionalPVPArenaSettingsRegistryReference.get().value().get(identifier);
+			if (optionalPVPArenaSettingsReference.isPresent()) {
+				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
+			}
+		}
+		return pvpArenaSettings;
+	}
+	
+	@Nullable
 	public LevelData.RespawnData getTeamRespawnPosition(String teamId, boolean endOfBattle) {
 		PVPArenaSettings pvpArenaSettings = null;
 		Identifier identifier = Identifier.tryParse(this.pvpArenaSettingsIdentifier);
 		if (identifier != null && this.level != null) {
-			Optional<Holder.Reference<PVPArenaSettings>> optionalPVPArenaSettingsReference = this.level.registryAccess().get(ScriptBlocksDynamicRegistries.PVP_ARENA_SETTINGS_REGISTRY_KEY).get().value().get(identifier);
-			if (optionalPVPArenaSettingsReference.isPresent()) {
-				pvpArenaSettings = optionalPVPArenaSettingsReference.get().value();
-			}
+			pvpArenaSettings = getPVPArenaSettings(this.level.registryAccess(), identifier);
 		}
 		if (pvpArenaSettings != null) {
 			PVPArenaSettings.TeamSettings teamSettings = pvpArenaSettings.team_settings().get(teamId);

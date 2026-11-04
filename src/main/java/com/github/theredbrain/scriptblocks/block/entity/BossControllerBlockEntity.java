@@ -9,6 +9,7 @@ import com.github.theredbrain.scriptblocks.data.Boss;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import com.github.theredbrain.scriptblocks.util.BlockRotationUtils;
+import com.github.theredbrain.scriptblocks.util.BossHelper;
 import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import com.github.theredbrain.scriptblocks.util.DebuggingHelper;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
@@ -228,10 +229,10 @@ public class BossControllerBlockEntity extends RotatedBlockEntity implements Tri
 		DebuggingHelper.sendBossControllerLogMessage("startBattle", null);
 
 		String identifierString = bC.bossIdentifier;
-		if (!identifierString.isEmpty() && bC.level != null) {
-			Optional<Holder.Reference<Boss>> optionalBossReference = bC.level.registryAccess().get(ScriptBlocksDynamicRegistries.BOSS_REGISTRY_KEY).get().value().get(Identifier.parse(identifierString));
-			if (optionalBossReference.isPresent()) {
-				bC.boss = optionalBossReference.get().value();
+		if (!identifierString.isEmpty()) {
+			Identifier identifier = Identifier.tryParse(identifierString);
+			if (bC.level != null && identifier != null) {
+				bC.boss = BossHelper.getBoss(bC.level.registryAccess(), identifier);
 			}
 		}
 

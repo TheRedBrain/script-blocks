@@ -4,6 +4,7 @@ import com.github.theredbrain.scriptblocks.data.Dialogue;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksScreenHandlerTypes;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
+import com.github.theredbrain.scriptblocks.util.DialogueHelper;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +27,7 @@ public class DialogueScreenHandler extends AbstractContainerMenu {
 
 	public Level world;
 	@Nullable
-	public Dialogue dialogue;
+	public Dialogue dialogue = null;
 	public BlockPos dataBlockPos;
 	public List<MutablePair<String, BlockPos>> dialogueUsedBlocksList;
 	public List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocksList;
@@ -50,12 +51,12 @@ public class DialogueScreenHandler extends AbstractContainerMenu {
 		this.visibleAnswersList = visibleAnswersList;
 		Identifier identifier = Identifier.tryParse(dialogueIdentifierString);
 		if (identifier != null) {
-			Optional<Holder.Reference<Dialogue>> optionalDialogueReference = this.world.registryAccess().get(ScriptBlocksDynamicRegistries.DIALOGUE_REGISTRY_KEY).get().value().get(identifier);
-			if (optionalDialogueReference.isPresent()) {
-				this.dialogue = optionalDialogueReference.get().value();
-				this.dialogueTextList = this.dialogue.dialogueTextList();
-				this.dialogueTextsStartingIndex = this.dialogue.dialogueTextsStartingIndex();
-				this.answersStartingIndex = this.dialogue.answersStartingIndex();
+			Dialogue dialogue = DialogueHelper.getDialogue(this.world.registryAccess(), identifier);
+			this.dialogue = dialogue;
+			if (dialogue != null) {
+				this.dialogueTextList = dialogue.dialogueTextList();
+				this.dialogueTextsStartingIndex = dialogue.dialogueTextsStartingIndex();
+				this.answersStartingIndex = dialogue.answersStartingIndex();
 			}
 		}
 	}

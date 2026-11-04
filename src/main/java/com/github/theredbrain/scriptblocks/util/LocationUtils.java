@@ -3,19 +3,37 @@ package com.github.theredbrain.scriptblocks.util;
 import com.github.theredbrain.scriptblocks.data.CommonDataStructures;
 import com.github.theredbrain.scriptblocks.data.Location;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksDynamicRegistries;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import net.minecraft.advancements.criterion.ContextAwarePredicate;
 import net.minecraft.advancements.criterion.EntityPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.jspecify.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class LocationUtils {
+
+	@Nullable
+	public static Location getLocation(RegistryAccess registryAccess, Identifier identifier) {
+		Location location = null;
+		Optional<Holder.Reference<Registry<Location>>> optionalLocationRegistryReference = registryAccess.get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY);
+		if (optionalLocationRegistryReference.isPresent()) {
+			Optional<Holder.Reference<Location>> optionalLocationReference = optionalLocationRegistryReference.get().value().get(identifier);
+			if (optionalLocationReference.isPresent()) {
+				location = optionalLocationReference.get().value();
+			}
+		}
+		return location;
+	}
+
 	public static BlockPos getControlBlockPosForLocation(Location location) {
 		return new BlockPos(location.controlBlockPos());
 	}
@@ -113,16 +131,12 @@ public class LocationUtils {
 
 	public static long getRemainingCooldownForEntrance(ServerPlayer serverPlayerEntity, String locationIdentifier, String entrance) {
 
-		Location location = null;
 		long cooldown = 0L;
 		Identifier identifier = Identifier.tryParse(locationIdentifier);
 		if (identifier == null) {
 			return cooldown;
 		}
-		Optional<Holder.Reference<Location>> optionalLocationReference = serverPlayerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
-		if (optionalLocationReference.isPresent()) {
-			location = optionalLocationReference.get().value();
-		}
+		Location location = getLocation(serverPlayerEntity.level().registryAccess(), identifier);
 		if (location == null) {
 			return cooldown;
 		}
@@ -145,16 +159,12 @@ public class LocationUtils {
 
 	public static long getCooldownForEntrance(Player playerEntity, String locationIdentifier, String entrance) {
 
-		Location location = null;
 		long cooldown = 0L;
 		Identifier identifier = Identifier.tryParse(locationIdentifier);
 		if (identifier == null) {
 			return cooldown;
 		}
-		Optional<Holder.Reference<Location>> optionalLocationReference = playerEntity.level().registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
-		if (optionalLocationReference.isPresent()) {
-			location = optionalLocationReference.get().value();
-		}
+		Location location = getLocation(playerEntity.level().registryAccess(), identifier);
 		if (location == null) {
 			return cooldown;
 		}

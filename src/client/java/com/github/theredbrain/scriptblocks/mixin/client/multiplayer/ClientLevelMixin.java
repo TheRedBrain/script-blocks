@@ -56,12 +56,7 @@ public abstract class ClientLevelMixin extends Level {
 			if (identifier == null) {
 				return original.call();
 			}
-			Optional<Holder.Reference<Location>> optionalLocationReference = this.registryAccess().get(ScriptBlocksDynamicRegistries.LOCATION_REGISTRY_KEY).get().value().get(identifier);
-
-			Location location = null;
-			if (optionalLocationReference.isPresent()) {
-				location = optionalLocationReference.get().value();
-			}
+			Location location = LocationUtils.getLocation(this.registryAccess(), identifier);
 
 			if (location != null) {
 				BlockEntity blockEntity = this.getBlockEntity(LocationUtils.getControlBlockPosForLocation(location));
