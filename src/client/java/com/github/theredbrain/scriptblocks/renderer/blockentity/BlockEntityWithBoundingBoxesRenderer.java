@@ -23,6 +23,7 @@ import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlockEntityWithBoundingBoxesRenderer<T extends BlockEntity & BoundingBoxesRenderable> implements BlockEntityRenderer<T, BlockEntityWithBoundingBoxesRenderState> {
@@ -46,7 +47,7 @@ public class BlockEntityWithBoundingBoxesRenderer<T extends BlockEntity & Boundi
 	public static <T extends BlockEntity & BoundingBoxesRenderable> void extract(final T blockEntity, final BlockEntityWithBoundingBoxesRenderState state) {
 		LocalPlayer player = Minecraft.getInstance().player;
 		state.isVisible = player.canUseGameMasterBlocks() || player.isSpectator();
-		state.boundingBoxes = List.of();
+		state.boundingBoxes = new ArrayList<>();
 		BlockPos entityPos = state.blockPos;
 
 		for (BoundingBoxesRenderable.RenderableBox renderableBox : blockEntity.getRenderableBoxes()) {

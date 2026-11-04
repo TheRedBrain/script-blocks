@@ -34,8 +34,8 @@ public class DialogueScreenHandler extends AbstractContainerMenu {
 	public List<String> unlockedAnswersList;
 	public List<String> visibleAnswersList;
 	public List<String> dialogueTextList = new ArrayList<>(List.of());
-	public int dialogueTextsStartingIndex;
-	public int answersStartingIndex;
+	public int dialogueTextsStartingIndex = 0;
+	public int answersStartingIndex = 0;
 
 	public DialogueScreenHandler(int syncId, Inventory playerInventory, DialogueData data) {
 		this(syncId, playerInventory, data.dialogueIdentifierString, data.dataBlockPos, data.dialogueUsedBlocks, data.dialogueTriggeredBlocks, data.unlockedAnswersList, data.visibleAnswersList);
@@ -72,11 +72,11 @@ public class DialogueScreenHandler extends AbstractContainerMenu {
 	}
 
 	public int getDialogueTextsStartingIndex() {
-		return Math.max(0, Math.min(7, this.dialogueTextsStartingIndex));
+		return Math.clamp(this.dialogueTextsStartingIndex, 0, 7);
 	}
 
 	public int getAnswersStartingIndex() {
-		return Math.max(0, Math.min(7, this.answersStartingIndex));
+		return Math.clamp(this.answersStartingIndex, 0, 7);
 	}
 
 	public record DialogueData(

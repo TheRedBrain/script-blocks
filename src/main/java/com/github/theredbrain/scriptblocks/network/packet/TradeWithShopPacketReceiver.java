@@ -38,6 +38,9 @@ public class TradeWithShopPacketReceiver implements ServerPlayNetworking.PlayPay
 			dealsList = shop.dealList();
 		}
 
+		if (id > dealsList.size()) {
+			return;
+		}
 		Shop.Deal currentDeal = dealsList.get(id);
 		if (currentDeal != null && screenHandler instanceof ShopScreenHandler shopScreenHandler) {
 			boolean bl = true;
