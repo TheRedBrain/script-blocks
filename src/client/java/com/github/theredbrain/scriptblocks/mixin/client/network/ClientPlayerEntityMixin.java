@@ -107,16 +107,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 
 	@Shadow
 	@Final
-	protected Minecraft client;
-
-	@Shadow
-	public abstract boolean isUsingItem();
-
-	@Shadow
-	public abstract float getViewXRot(float tickDelta);
-
-	@Shadow
-	public abstract void displayClientMessage(Component message, boolean overlay);
+	protected Minecraft minecraft;
 
 	public ClientPlayerEntityMixin(ClientLevel world, GameProfile profile) {
 		super(world, profile);
@@ -124,13 +115,13 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 
 	@Override
 	public void scriptblocks$openCreativeHousingScreen(HousingBlockEntity housingBlockEntity) {
-		this.client.setScreen(new CreativeHousingScreen(housingBlockEntity));
+		this.minecraft.setScreen(new CreativeHousingScreen(housingBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openHousingScreen() {
 		Optional<BlockPos> optionalBlockPos = DataAttachmentHelper.getCurrentHousingBlockPosition(this);
-		if (optionalBlockPos.isPresent() && this.client.getSingleplayerServer() != null && this.client.level != null && this.client.level.getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
+		if (optionalBlockPos.isPresent() && this.minecraft.getSingleplayerServer() != null && this.level().getBlockEntity(optionalBlockPos.get()) instanceof HousingBlockEntity housingBlockEntity) {
 			int currentPermissionLevel;
 
 			if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_OWNER_EFFECT)) {
@@ -144,230 +135,230 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayer imple
 			} else if (this.hasEffect(ScriptBlocksStatusEffects.HOUSING_STRANGER_EFFECT)) {
 				currentPermissionLevel = 4;
 			} else {
-				this.displayClientMessage(Component.translatable("gui.housing_screen.not_in_a_house"), true);
+				this.sendOverlayMessage(Component.translatable("gui.housing_screen.not_in_a_house"));
 				return;
 			}
-			this.client.setScreen(new HousingScreen(housingBlockEntity, currentPermissionLevel));
+			this.minecraft.setScreen(new HousingScreen(housingBlockEntity, currentPermissionLevel));
 		} else {
-			this.displayClientMessage(Component.translatable("gui.housing_screen.not_in_a_house"), true);
+			this.sendOverlayMessage(Component.translatable("gui.housing_screen.not_in_a_house"));
 		}
 	}
 
 	@Override
 	public void scriptblocks$openTeamControllerBlockScreen(TeamControllerBlockEntity teamControllerBlockEntity) {
-		this.client.setScreen(new TeamControllerBlockScreen(teamControllerBlockEntity));
+		this.minecraft.setScreen(new TeamControllerBlockScreen(teamControllerBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredBeaconBlockScreen(TriggeredBeaconBlockEntity triggeredBeaconBlockEntity) {
-		this.client.setScreen(new TriggeredBeaconBlockScreen(triggeredBeaconBlockEntity));
+		this.minecraft.setScreen(new TriggeredBeaconBlockScreen(triggeredBeaconBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openShopBlockScreen(ShopBlockEntity shopBlockEntity) {
-		this.client.setScreen(new ShopBlockScreen(shopBlockEntity));
+		this.minecraft.setScreen(new ShopBlockScreen(shopBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openDialogueBlockScreen(DialogueBlockEntity dialogueBlockEntity) {
-		this.client.setScreen(new DialogueBlockScreen(dialogueBlockEntity));
+		this.minecraft.setScreen(new DialogueBlockScreen(dialogueBlockEntity));
 	}
 
 //	@Override
 //	public void scriptblocks$openDialogueScreen(Dialogue dialogue, List<MutablePair<String, BlockPos>> dialogueUsedBlocks, List<MutablePair<String, MutablePair<BlockPos, Boolean>>> dialogueTriggeredBlocks) {
-//		this.client.setScreen(new DialogueScreen(dialogue, dialogueUsedBlocks, dialogueTriggeredBlocks));
+//		this.minecraft.setScreen(new DialogueScreen(dialogue, dialogueUsedBlocks, dialogueTriggeredBlocks));
 //	}
 
 	@Override
 	public void scriptblocks$openJigsawPlacerBlockScreen(JigsawPlacerBlockEntity jigsawPlacerBlock) {
-		this.client.setScreen(new JigsawPlacerBlockScreen(jigsawPlacerBlock));
+		this.minecraft.setScreen(new JigsawPlacerBlockScreen(jigsawPlacerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openRedstoneTriggerBlockScreen(RedstoneTriggerBlockEntity redstoneTriggerBlock) {
-		this.client.setScreen(new RedstoneTriggerBlockScreen(redstoneTriggerBlock));
+		this.minecraft.setScreen(new RedstoneTriggerBlockScreen(redstoneTriggerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openRelayTriggerBlockScreen(RelayTriggerBlockEntity relayTriggerBlock) {
-		this.client.setScreen(new RelayTriggerBlockScreen(relayTriggerBlock));
+		this.minecraft.setScreen(new RelayTriggerBlockScreen(relayTriggerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredCounterBlockScreen(TriggeredCounterBlockEntity triggeredCounterBlock) {
-		this.client.setScreen(new TriggeredCounterBlockScreen(triggeredCounterBlock));
+		this.minecraft.setScreen(new TriggeredCounterBlockScreen(triggeredCounterBlock));
 	}
 
 	@Override
 	public void scriptblocks$openDelayTriggerBlockScreen(DelayTriggerBlockEntity delayTriggerBlock) {
-		this.client.setScreen(new DelayTriggerBlockScreen(delayTriggerBlock));
+		this.minecraft.setScreen(new DelayTriggerBlockScreen(delayTriggerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredDisplayBlockScreen(TriggeredDisplayBlockEntity triggeredDisplayBlockEntity) {
-		this.client.setScreen(new TriggeredDisplayBlockScreen(triggeredDisplayBlockEntity));
+		this.minecraft.setScreen(new TriggeredDisplayBlockScreen(triggeredDisplayBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openCreativeTeleporterBlockScreen(TeleporterBlockEntity teleporterBlockEntity) {
-		this.client.setScreen(new CreativeTeleporterBlockScreen(teleporterBlockEntity));
+		this.minecraft.setScreen(new CreativeTeleporterBlockScreen(teleporterBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openUseRelayBlockScreen(UseRelayBlockEntity useRelayBlock) {
-		this.client.setScreen(new UseRelayBlockScreen(useRelayBlock));
+		this.minecraft.setScreen(new UseRelayBlockScreen(useRelayBlock));
 	}
 
 	@Override
 	public void scriptblocks$openUseRelayChestBlockScreen(UseRelayChestBlockEntity useRelayChestBlock) {
-		this.client.setScreen(new UseRelayChestBlockScreen(useRelayChestBlock));
+		this.minecraft.setScreen(new UseRelayChestBlockScreen(useRelayChestBlock));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredSpawnerBlockScreen(TriggeredSpawnerBlockEntity triggeredSpawnerBlock) {
-		this.client.setScreen(new TriggeredSpawnerBlockScreen(triggeredSpawnerBlock));
+		this.minecraft.setScreen(new TriggeredSpawnerBlockScreen(triggeredSpawnerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredVillagerSpawnerBlockScreen(TriggeredVillagerSpawnerBlockEntity triggeredVillagerSpawnerBlock) {
-		this.client.setScreen(new TriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlock));
+		this.minecraft.setScreen(new TriggeredVillagerSpawnerBlockScreen(triggeredVillagerSpawnerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openMimicBlockScreen(MimicBlockEntity mimicBlock) {
-		this.client.setScreen(new MimicBlockScreen(mimicBlock));
+		this.minecraft.setScreen(new MimicBlockScreen(mimicBlock));
 	}
 
 	@Override
 	public void scriptblocks$openLocationControlBlockScreen(LocationControlBlockEntity locationControlBlock) {
-		this.client.setScreen(new LocationControlBlockScreen(locationControlBlock));
+		this.minecraft.setScreen(new LocationControlBlockScreen(locationControlBlock));
 	}
 
 	@Override
 	public void scriptblocks$openSpawnPointDelegationBlockScreen(SpawnPointDelegationBlockEntity spawnPointDelegationBlockEntity) {
-		this.client.setScreen(new SpawnPointDelegationBlockScreen(spawnPointDelegationBlockEntity));
+		this.minecraft.setScreen(new SpawnPointDelegationBlockScreen(spawnPointDelegationBlockEntity));
 	}
 
 	@Deprecated
 	@Override
 	public void scriptblocks$openEntranceDelegationBlockScreen(EntranceDelegationBlockEntity entranceDelegationBlockEntity) {
-		this.client.setScreen(new EntranceDelegationBlockScreen(entranceDelegationBlockEntity));
+		this.minecraft.setScreen(new EntranceDelegationBlockScreen(entranceDelegationBlockEntity));
 	}
 
 	@Deprecated
 	@Override
 	public void scriptblocks$openAreaBlockScreen(AreaBlockEntity areaBlockEntity) {
-		this.client.setScreen(new AreaBlockScreen(areaBlockEntity));
+		this.minecraft.setScreen(new AreaBlockScreen(areaBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openAreaFillerBlockScreen(AreaFillerBlockEntity areaFillerBlockEntity) {
-		this.client.setScreen(new AreaFillerBlockScreen(areaFillerBlockEntity));
+		this.minecraft.setScreen(new AreaFillerBlockScreen(areaFillerBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openBossControllerBlockScreen(BossControllerBlockEntity bossControllerBlockEntity) {
-		this.client.setScreen(new BossControllerBlockScreen(bossControllerBlockEntity));
+		this.minecraft.setScreen(new BossControllerBlockScreen(bossControllerBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredAdvancementCheckerBlockScreen(TriggeredAdvancementCheckerBlockEntity triggeredAdvancementCheckerBlock) {
-		this.client.setScreen(new TriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlock));
+		this.minecraft.setScreen(new TriggeredAdvancementCheckerBlockScreen(triggeredAdvancementCheckerBlock));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredRNGBlockScreen(TriggeredRNGBlockEntity triggeredRNGBlockEntity) {
-		this.client.setScreen(new TriggeredRNGBlockScreen(triggeredRNGBlockEntity));
+		this.minecraft.setScreen(new TriggeredRNGBlockScreen(triggeredRNGBlockEntity));
 	}
 
 	@Deprecated
 	@Override
 	public void scriptblocks$openInteractiveLootBlockScreen(InteractiveLootBlockEntity interactiveLootBlockEntity) {
-		this.client.setScreen(new InteractiveLootBlockScreen(interactiveLootBlockEntity));
+		this.minecraft.setScreen(new InteractiveLootBlockScreen(interactiveLootBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openInteractiveTriggerBlockScreen(InteractiveTriggerBlockEntity interactiveTriggerBlockEntity) {
-		this.client.setScreen(new InteractiveTriggerBlockScreen(interactiveTriggerBlockEntity));
+		this.minecraft.setScreen(new InteractiveTriggerBlockScreen(interactiveTriggerBlockEntity));
 	}
 
 //	@Override
 //	public void scriptblocks$openDataAccessBlockScreen(DataAccessBlockEntity dataAccessBlockEntity) {
-//		this.client.setScreen(new DataAccessBlockScreen(dataAccessBlockEntity));
+//		this.minecraft.setScreen(new DataAccessBlockScreen(dataAccessBlockEntity));
 //	}
 
 	@Override
 	public void scriptblocks$openCopyDataBlockScreen(CopyDataBlockEntity copyDataBlockEntity) {
-		this.client.setScreen(new CopyDataBlockScreen(copyDataBlockEntity));
+		this.minecraft.setScreen(new CopyDataBlockScreen(copyDataBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openDataWritingBlockScreen(DataWritingBlockEntity dataWritingBlockEntity) {
-		this.client.setScreen(new DataWritingBlockScreen(dataWritingBlockEntity));
+		this.minecraft.setScreen(new DataWritingBlockScreen(dataWritingBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openDataModificationBlockScreen(DataModificationBlockEntity dataModificationBlockEntity) {
-		this.client.setScreen(new DataModificationBlockScreen(dataModificationBlockEntity));
+		this.minecraft.setScreen(new DataModificationBlockScreen(dataModificationBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openDataRelayBlockScreen(DataRelayBlockEntity dataRelayBlockEntity) {
-		this.client.setScreen(new DataRelayBlockScreen(dataRelayBlockEntity));
+		this.minecraft.setScreen(new DataRelayBlockScreen(dataRelayBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openDataSavingBlockScreen(DataSavingBlockEntity dataSavingBlockEntity) {
-		this.client.setScreen(new DataSavingBlockScreen(dataSavingBlockEntity));
+		this.minecraft.setScreen(new DataSavingBlockScreen(dataSavingBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredDamageDealingBlockScreen(TriggeredDamageDealingBlockEntity triggeredDamageDealingBlockEntity) {
-		this.client.setScreen(new TriggeredDamageDealingBlockScreen(triggeredDamageDealingBlockEntity));
+		this.minecraft.setScreen(new TriggeredDamageDealingBlockScreen(triggeredDamageDealingBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeredEntityRemoverBlockScreen(TriggeredEntityRemoverBlockEntity triggeredEntityRemoverBlockEntity) {
-		this.client.setScreen(new TriggeredEntityRemoverBlockScreen(triggeredEntityRemoverBlockEntity));
+		this.minecraft.setScreen(new TriggeredEntityRemoverBlockScreen(triggeredEntityRemoverBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openTriggeringRespawnAnchorBlockScreen(TriggeringRespawnAnchorBlockEntity triggeringRespawnAnchorBlockEntity) {
-		this.client.setScreen(new TriggeringRespawnAnchorBlockScreen(triggeringRespawnAnchorBlockEntity));
+		this.minecraft.setScreen(new TriggeringRespawnAnchorBlockScreen(triggeringRespawnAnchorBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openPlayerDetectorBlockScreen(PlayerDetectorBlockEntity playerDetectorBlockEntity) {
-		this.client.setScreen(new PlayerDetectorBlockScreen(playerDetectorBlockEntity));
+		this.minecraft.setScreen(new PlayerDetectorBlockScreen(playerDetectorBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openTwoAreasPlayerDetectorBlockScreen(TwoAreasPlayerDetectorBlockEntity twoAreasPlayerDetectorBlockEntity) {
-		this.client.setScreen(new TwoAreasPlayerDetectorBlockScreen(twoAreasPlayerDetectorBlockEntity));
+		this.minecraft.setScreen(new TwoAreasPlayerDetectorBlockScreen(twoAreasPlayerDetectorBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openPVPControllerBlockScreen(PVPControllerBlockEntity pvpControllerBlockEntity) {
-		this.client.setScreen(new PVPControllerBlockScreen(pvpControllerBlockEntity));
+		this.minecraft.setScreen(new PVPControllerBlockScreen(pvpControllerBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openStatusEffectManipulationBlockScreen(StatusEffectManipulationBlockEntity statusEffectManipulationBlockEntity) {
-		this.client.setScreen(new StatusEffectManipulationBlockScreen(statusEffectManipulationBlockEntity));
+		this.minecraft.setScreen(new StatusEffectManipulationBlockScreen(statusEffectManipulationBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openUUIDListMessagingBlockScreen(UUIDListMessagingBlockEntity uuidListMessagingBlockEntity) {
-		this.client.setScreen(new UUIDListMessagingBlockScreen(uuidListMessagingBlockEntity));
+		this.minecraft.setScreen(new UUIDListMessagingBlockScreen(uuidListMessagingBlockEntity));
 	}
 
 	@Override
 	public void scriptblocks$openUUIDListRelayBlockScreen(UUIDListRelayBlockEntity uuidListRelayBlockEntity) {
-		this.client.setScreen(new UUIDListRelayBlockScreen(uuidListRelayBlockEntity));
+		this.minecraft.setScreen(new UUIDListRelayBlockScreen(uuidListRelayBlockEntity));
 	}
 
 //	@Override
 //	public void scriptblocks$openLootableVaultBlockScreen(LootableVaultBlockEntity lootableVaultBlockEntity) {
-//		this.client.setScreen(new LootableVaultBlockScreen(lootableVaultBlockEntity));
+//		this.minecraft.setScreen(new LootableVaultBlockScreen(lootableVaultBlockEntity));
 //	}
 }

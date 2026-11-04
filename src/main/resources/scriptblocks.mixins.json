@@ -4,11 +4,9 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "entity.player.PlayerEntityMixin",
-    "item.ItemStackMixin",
-    "server.PlayerManagerMixin",
+    "server.PlayerListMixin",
     "server.level.ServerLevelMixin",
-    "server.network.ServerPlayerEntityMixin",
-    "server.network.ServerPlayerInteractionManagerMixin"
+    "server.network.ServerPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

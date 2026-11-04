@@ -7,6 +7,7 @@ import com.github.theredbrain.scriptblocks.util.DataAttachmentHelper;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.BlockEvents;
+import net.fabricmc.fabric.api.event.player.ItemEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.minecraft.core.BlockPos;
@@ -14,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -22,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import java.util.Optional;
 
 public class EventsRegistry {
-	public static void initializeEvents() {
+	public static void initializeEvents() {// TODO check for housing effects + building effect
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, entity) -> {
 			if (((!player.isSpectator() && !player.isCreative()) || player.hasEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) && player.hasEffect(ScriptBlocksStatusEffects.BUILDING_MODE)) {
 				return true;
@@ -137,5 +139,11 @@ public class EventsRegistry {
 				DataAttachmentHelper.setActiveLocationCooldowns(serverPlayerEntity);
 			}
 		});
+		ItemEvents.USE_ON.register((useOnContext) -> {
+
+					Player playerEntity = useOnContext.getPlayer();
+					return (playerEntity != null && (playerEntity.isCreative() || !playerEntity.hasEffect(ScriptBlocksStatusEffects.ADVENTURE_EFFECT)) || (playerEntity != null && playerEntity.hasEffect(ScriptBlocksStatusEffects.BUILDING_MODE))) ? InteractionResult.PASS : null;
+				}
+		);
 	}
 }
