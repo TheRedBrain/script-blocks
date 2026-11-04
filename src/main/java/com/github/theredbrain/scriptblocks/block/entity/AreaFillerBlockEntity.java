@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AreaFillerBlockEntity extends RotatedBlockEntity implements Triggerable {
+public class AreaFillerBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, Triggerable {
 
 	private boolean showArea = false;
 	private Vec3i areaDimensions = Vec3i.ZERO;
@@ -217,6 +217,11 @@ public class AreaFillerBlockEntity extends RotatedBlockEntity implements Trigger
 			ScriptBlocks.info("AreaFillerBlock in " + this.level.dimension().identifier() + " at " + this.worldPosition.toShortString() + " ran out of iteration attempts!");
 		}
 		return list;
+	}
+
+	@Override
+	public List<RenderableBox> getRenderableBoxes() {
+		return List.of(new RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? Mode.BOX : Mode.NONE));
 	}
 
 	@Override

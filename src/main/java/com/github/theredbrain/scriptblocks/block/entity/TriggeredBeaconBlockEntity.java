@@ -39,7 +39,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
+public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, Triggerable, Resetable {
 
 	private boolean calculateAreaBox = true;
 	private AABB area = null;
@@ -318,6 +318,11 @@ public class TriggeredBeaconBlockEntity extends RotatedBlockEntity implements Tr
 		} else if (this.triggeredMode == TriggeredMode.ONCE && this.level != null) {
 			this.applyStatusEffect(this.level);
 		}
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(new BoundingBoxesRenderable.RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE));
 	}
 
 	@Override

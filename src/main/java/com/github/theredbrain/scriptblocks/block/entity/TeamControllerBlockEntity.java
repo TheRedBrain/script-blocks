@@ -46,7 +46,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Team;
 
-public class TeamControllerBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
+public class TeamControllerBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, HandlesUUIDList, Triggerable {
 
 	private boolean enableTicking = true;
 
@@ -472,6 +472,11 @@ public class TeamControllerBlockEntity extends RotatedBlockEntity implements Han
 			BlockState blockState = this.level.getBlockState(this.worldPosition);
 			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
+	}
+
+	@Override
+	public List<RenderableBox> getRenderableBoxes() {
+		return List.of(new RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? Mode.BOX_AND_INVISIBLE_BLOCKS : Mode.NONE));
 	}
 
 	@Override

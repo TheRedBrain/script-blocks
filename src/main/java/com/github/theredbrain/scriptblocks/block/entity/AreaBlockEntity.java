@@ -45,7 +45,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 @Deprecated
-public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, Resetable {
+public class AreaBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, Triggerable, Resetable {
 
 	private static final BlockPos TRIGGERED_BLOCK_POS_DEFAULT = new BlockPos(0, 0, 0);
 	private boolean calculateAreaBox = true;
@@ -703,6 +703,11 @@ public class AreaBlockEntity extends RotatedBlockEntity implements Triggerable, 
 			this.sendMessage(this.triggeredMessage);
 			this.wasTriggered = true;
 		}
+	}
+
+	@Override
+	public List<RenderableBox> getRenderableBoxes() {
+		return List.of(new RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? Mode.BOX : Mode.NONE));
 	}
 
 	@Override

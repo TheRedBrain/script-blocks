@@ -1,5 +1,6 @@
 package com.github.theredbrain.scriptblocks.block.entity;
 
+import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
 import com.github.theredbrain.scriptblocks.registry.ScriptBlocksEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +11,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
@@ -20,12 +22,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class AestheticDecoratedPotBlockEntity extends BlockEntity {
-	public long lastWobbleTime;
-	@Nullable
-	public DecoratedPotBlockEntity.WobbleStyle lastWobbleType;
+	public long wobbleStartedAtTick;
+	public DecoratedPotBlockEntity.@Nullable WobbleStyle lastWobbleStyle;
 	private PotDecorations decorations;
 
 	public AestheticDecoratedPotBlockEntity(BlockPos pos, BlockState state) {
@@ -34,15 +35,15 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(ValueOutput view) {
-		super.saveAdditional(view);
-		view.store("sherds", PotDecorations.CODEC, this.decorations);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.store("sherds", PotDecorations.CODEC, this.decorations);
 	}
 
 	@Override
-	protected void loadAdditional(ValueInput view) {
-		super.loadAdditional(view);
-		this.decorations = view.read("sherds", PotDecorations.CODEC).orElse(PotDecorations.EMPTY);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		this.decorations = input.read("sherds", PotDecorations.CODEC).orElse(PotDecorations.EMPTY);
 	}
 
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -54,7 +55,7 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 		return this.saveCustomOnly(registryLookup);
 	}
 
-	public Direction getHorizontalFacing() {
+	public Direction getDirection() {
 		return this.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
 	}
 
@@ -63,7 +64,7 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	}
 
 	public static ItemStackTemplate createDecoratedPotTemplate(final PotDecorations decorations) {
-		return new ItemStackTemplate(Items.DECORATED_POT, DataComponentPatch.builder().set(DataComponents.POT_DECORATIONS, decorations).build());
+		return new ItemStackTemplate(ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.asItem(), DataComponentPatch.builder().set(DataComponents.POT_DECORATIONS, decorations).build());
 	}
 
 	public static ItemStack createDecoratedPotInstance(final PotDecorations decorations) {
@@ -97,8 +98,8 @@ public class AestheticDecoratedPotBlockEntity extends BlockEntity {
 	@Override
 	public boolean triggerEvent(int type, int data) {
 		if (this.level != null && type == 1 && data >= 0 && data < DecoratedPotBlockEntity.WobbleStyle.values().length) {
-			this.lastWobbleTime = this.level.getGameTime();
-			this.lastWobbleType = DecoratedPotBlockEntity.WobbleStyle.values()[data];
+			this.wobbleStartedAtTick = this.level.getGameTime();
+			this.lastWobbleStyle = DecoratedPotBlockEntity.WobbleStyle.values()[data];
 			return true;
 		} else {
 			return super.triggerEvent(type, data);

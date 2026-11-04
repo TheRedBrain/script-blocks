@@ -26,7 +26,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implements Triggerable {
+public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, Triggerable {
 
 	private static final BlockPos AREA_POSITION_OFFSET_DEFAULT = new BlockPos(0, 0, 0);
 
@@ -135,6 +135,11 @@ public class TriggeredEntityRemoverBlockEntity extends RotatedBlockEntity implem
 			BlockState blockState = this.level.getBlockState(this.worldPosition);
 			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(new BoundingBoxesRenderable.RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE));
 	}
 
 	@Override

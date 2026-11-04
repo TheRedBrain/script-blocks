@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Triggerable {
+public class RelayTriggerBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, Triggerable {
 	private SelectionMode selectionMode = SelectionMode.LIST;
 	private boolean showArea = false;
 	private boolean resetsArea = false;
@@ -376,6 +376,11 @@ public class RelayTriggerBlockEntity extends RotatedBlockEntity implements Trigg
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(new BoundingBoxesRenderable.RenderableBox(this.areaPositionOffset, this.areaDimensions, (this.showArea && this.selectionMode == SelectionMode.AREA) ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE));
 	}
 
 	@Override

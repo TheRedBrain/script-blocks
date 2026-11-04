@@ -42,7 +42,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
+public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, HandlesUUIDList, Triggerable {
 
 	private SelectionMode selectionMode = SelectionMode.AREA;
 
@@ -290,6 +290,11 @@ public class TriggeredDamageDealingBlockEntity extends RotatedBlockEntity implem
 
 	@Override
 	public void reset() {
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(new BoundingBoxesRenderable.RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE));
 	}
 
 	@Override

@@ -32,7 +32,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements HandlesUUIDList, Triggerable {
+public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, HandlesUUIDList, Triggerable {
 
 	private boolean enableTicking = true;
 
@@ -471,6 +471,11 @@ public class PlayerDetectorBlockEntity extends RotatedBlockEntity implements Han
 			BlockState blockState = this.level.getBlockState(this.worldPosition);
 			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(new BoundingBoxesRenderable.RenderableBox(this.areaPositionOffset, this.areaDimensions, this.showArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE));
 	}
 
 	@Override

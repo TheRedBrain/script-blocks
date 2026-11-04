@@ -32,7 +32,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class TwoAreasPlayerDetectorBlockEntity extends RotatedBlockEntity implements Resetable {
+public class TwoAreasPlayerDetectorBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable, Resetable {
 
 	private boolean calculateFirstAreaBox = true;
 	private AABB firstArea = null;
@@ -424,6 +424,14 @@ public class TwoAreasPlayerDetectorBlockEntity extends RotatedBlockEntity implem
 			BlockState blockState = this.level.getBlockState(this.worldPosition);
 			this.level.sendBlockUpdated(this.worldPosition, blockState, blockState, Block.UPDATE_ALL);
 		}
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(
+				new BoundingBoxesRenderable.RenderableBox(this.firstAreaPositionOffset, this.firstAreaDimensions, this.showFirstArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE),
+				new BoundingBoxesRenderable.RenderableBox(this.secondAreaPositionOffset, this.secondAreaDimensions, this.showSecondArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE)
+		);
 	}
 
 	@Override

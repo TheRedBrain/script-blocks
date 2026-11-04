@@ -11,15 +11,6 @@ import com.github.theredbrain.scriptblocks.util.ScriptBlocksBlockProperties;
 import com.github.theredbrain.scriptblocks.util.ScriptBlocksNBTHelper;
 import com.github.theredbrain.scriptblocks.util.UUIDUtilities;
 import com.mojang.serialization.Codec;
-import org.apache.commons.lang3.tuple.MutablePair;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
@@ -38,8 +29,17 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.PlayerTeam;
+import org.apache.commons.lang3.tuple.MutablePair;
 
-public class HousingBlockEntity extends RotatedBlockEntity {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
+public class HousingBlockEntity extends RotatedBlockEntity implements BoundingBoxesRenderable {
 	private String ownerUuid = "";
 	private boolean isOwnerSet;
 	private final List<String> coOwnerList = new ArrayList<>(List.of());
@@ -339,6 +339,11 @@ public class HousingBlockEntity extends RotatedBlockEntity {
 				}
 			}
 		}
+	}
+
+	@Override
+	public List<BoundingBoxesRenderable.RenderableBox> getRenderableBoxes() {
+		return List.of(new BoundingBoxesRenderable.RenderableBox(this.influenceAreaPositionOffset, this.influenceAreaDimensions, this.showInfluenceArea ? BoundingBoxesRenderable.Mode.BOX_AND_INVISIBLE_BLOCKS : BoundingBoxesRenderable.Mode.NONE));
 	}
 
 	@Override
