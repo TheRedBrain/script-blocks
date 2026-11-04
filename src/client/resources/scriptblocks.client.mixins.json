@@ -5,9 +5,7 @@
   "client": [
     "multiplayer.ClientLevelMixin",
     "network.ClientPlayerEntityMixin",
-    "network.ClientPlayerInteractionManagerMixin",
-    "render.GameRendererMixin",
-    "render.item.BuiltinModelItemRendererMixin"
+    "render.GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

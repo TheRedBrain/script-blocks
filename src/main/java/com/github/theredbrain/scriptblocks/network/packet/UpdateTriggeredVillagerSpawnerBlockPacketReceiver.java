@@ -41,7 +41,7 @@ public class UpdateTriggeredVillagerSpawnerBlockPacketReceiver implements Server
 
 		LevelData.RespawnData spawnPoint = payload.spawnPoint();
 
-		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = TriggeredSpawnerBlockEntity.SpawningMode.byName(payload.spawningMode()).orElse(TriggeredSpawnerBlockEntity.SpawningMode.BOUND);
+		TriggeredSpawnerBlockEntity.SpawningMode spawningMode = payload.spawningMode();
 
 		boolean isPersistent = payload.isPersistent();
 		boolean enableSpawnEffects = payload.enableSpawnEffects();

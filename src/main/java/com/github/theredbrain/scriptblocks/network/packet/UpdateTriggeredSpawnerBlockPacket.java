@@ -1,6 +1,7 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.entity.TriggeredSpawnerBlockEntity;
 import com.github.theredbrain.scriptblocks.util.CustomPacketCodecs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -16,7 +17,7 @@ import java.util.List;
 public record UpdateTriggeredSpawnerBlockPacket(
 		BlockPos triggeredSpawnerBlockPosition,
 		LevelData.RespawnData spawnPoint,
-		String spawningMode,
+		TriggeredSpawnerBlockEntity.SpawningMode spawningMode,
 		boolean isPersistent,
 		boolean enableSpawnEffects,
 		String entityTypeId,
@@ -32,7 +33,7 @@ public record UpdateTriggeredSpawnerBlockPacket(
 		this(
 				registryByteBuf.readBlockPos(),
 				LevelData.RespawnData.STREAM_CODEC.decode(registryByteBuf),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(TriggeredSpawnerBlockEntity.SpawningMode.class),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readBoolean(),
 				registryByteBuf.readUtf(),
@@ -48,7 +49,7 @@ public record UpdateTriggeredSpawnerBlockPacket(
 
 		LevelData.RespawnData.STREAM_CODEC.encode(registryByteBuf, this.spawnPoint);
 
-		registryByteBuf.writeUtf(this.spawningMode);
+		registryByteBuf.writeEnum(this.spawningMode);
 
 		registryByteBuf.writeBoolean(this.isPersistent);
 		registryByteBuf.writeBoolean(this.enableSpawnEffects);

@@ -1,38 +1,36 @@
 package com.github.theredbrain.scriptblocks.mixin.client.render.item;
-
-import com.github.theredbrain.scriptblocks.block.entity.AestheticDecoratedPotBlockEntity;
-import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.item.BuiltinModelItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-@Mixin(BuiltinModelItemRenderer.class)
-public class BuiltinModelItemRendererMixin {
-
-	@Shadow
-	@Final
-	private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
-	@Unique
-	private final AestheticDecoratedPotBlockEntity renderDecoratedPot = new AestheticDecoratedPotBlockEntity(BlockPos.ZERO, ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.getDefaultState());
-
-	@Inject(method = "render(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformationMode;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("HEAD"), cancellable = true)
-	private void scriptblocks$render(ItemStack stack, ModelTransformationMode mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay, CallbackInfo ci) {
-		if (stack.is(ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.asItem())) {
-			renderDecoratedPot.readFrom(stack);
-			this.blockEntityRenderDispatcher.renderEntity(renderDecoratedPot, matrices, vertexConsumers, light, overlay);
-			ci.cancel();
-		}
-	}
-
-}
+//
+//import com.github.theredbrain.scriptblocks.block.entity.AestheticDecoratedPotBlockEntity;
+//import com.github.theredbrain.scriptblocks.registry.ScriptBlocksBlocks;
+//import com.mojang.blaze3d.vertex.PoseStack;
+//import net.minecraft.client.renderer.MultiBufferSource;
+//import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+//import net.minecraft.core.BlockPos;
+//import net.minecraft.world.item.ItemStack;
+//import org.spongepowered.asm.mixin.Final;
+//import org.spongepowered.asm.mixin.Mixin;
+//import org.spongepowered.asm.mixin.Shadow;
+//import org.spongepowered.asm.mixin.Unique;
+//import org.spongepowered.asm.mixin.injection.At;
+//import org.spongepowered.asm.mixin.injection.Inject;
+//import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+//
+//@Mixin(BuiltinModelItemRenderer.class)
+//public class BuiltinModelItemRendererMixin {
+//
+//	@Shadow
+//	@Final
+//	private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+//	@Unique
+//	private final AestheticDecoratedPotBlockEntity renderDecoratedPot = new AestheticDecoratedPotBlockEntity(BlockPos.ZERO, ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.getDefaultState());
+//
+//	@Inject(method = "render(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformationMode;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("HEAD"), cancellable = true)
+//	private void scriptblocks$render(ItemStack stack, ModelTransformationMode mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay, CallbackInfo ci) {
+//		if (stack.is(ScriptBlocksBlocks.AESTHETIC_DECORATED_POT.asItem())) {
+//			renderDecoratedPot.readFrom(stack);
+//			this.blockEntityRenderDispatcher.renderEntity(renderDecoratedPot, matrices, vertexConsumers, light, overlay);
+//			ci.cancel();
+//		}
+//	}
+//
+//}

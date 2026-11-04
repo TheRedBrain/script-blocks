@@ -1,6 +1,8 @@
 package com.github.theredbrain.scriptblocks.network.packet;
 
 import com.github.theredbrain.scriptblocks.ScriptBlocks;
+import com.github.theredbrain.scriptblocks.block.AreaBlock;
+import com.github.theredbrain.scriptblocks.block.entity.AreaBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -24,9 +26,9 @@ public record UpdateAreaBlockPacket(
 		String joinMessage,
 		String leaveMessage,
 		String triggeredMessage,
-		String messageMode,
-		String triggerMode,
-		String triggeredMode,
+		AreaBlockEntity.MessageMode messageMode,
+		AreaBlockEntity.TriggerMode triggerMode,
+		AreaBlockEntity.TriggeredMode triggeredMode,
 		int timer
 ) implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<UpdateAreaBlockPacket> PACKET_ID = new CustomPacketPayload.Type<>(ScriptBlocks.identifier("update_area_block"));
@@ -53,9 +55,9 @@ public record UpdateAreaBlockPacket(
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
 				registryByteBuf.readUtf(),
-				registryByteBuf.readUtf(),
-				registryByteBuf.readUtf(),
-				registryByteBuf.readUtf(),
+				registryByteBuf.readEnum(AreaBlockEntity.MessageMode.class),
+				registryByteBuf.readEnum(AreaBlockEntity.TriggerMode.class),
+				registryByteBuf.readEnum(AreaBlockEntity.TriggeredMode.class),
 				registryByteBuf.readInt()
 		);
 	}
@@ -78,9 +80,9 @@ public record UpdateAreaBlockPacket(
 		registryByteBuf.writeUtf(this.joinMessage);
 		registryByteBuf.writeUtf(this.leaveMessage);
 		registryByteBuf.writeUtf(this.triggeredMessage);
-		registryByteBuf.writeUtf(this.messageMode);
-		registryByteBuf.writeUtf(this.triggerMode);
-		registryByteBuf.writeUtf(this.triggeredMode);
+		registryByteBuf.writeEnum(this.messageMode);
+		registryByteBuf.writeEnum(this.triggerMode);
+		registryByteBuf.writeEnum(this.triggeredMode);
 		registryByteBuf.writeInt(this.timer);
 	}
 
