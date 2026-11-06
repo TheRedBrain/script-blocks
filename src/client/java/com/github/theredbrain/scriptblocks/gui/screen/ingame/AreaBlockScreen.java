@@ -365,36 +365,36 @@ public class AreaBlockScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
-			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, -6250336);
 			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, -6250336);
 			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.APPLIED_EFFECT) {
-			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 55, -6250336);
 			this.appliedStatusEffectIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, -6250336);
 			this.appliedStatusEffectAmplifierField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.MESSAGES) {
-			graphics.text(this.font, JOIN_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			graphics.text(this.font, JOIN_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 55, -6250336);
 			this.joinMessageField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, LEAVE_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			graphics.text(this.font, LEAVE_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 90, -6250336);
 			this.leaveMessageField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, TRIGGERED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 125, -6250336);
 			this.triggeredMessageField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TRIGGER_SETTINGS) {
-			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 55, -6250336);
 			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 			if (this.triggerMode == AreaBlockEntity.TriggerMode.TIMED) {
-				graphics.text(this.font, PRE_TIMER_LABEL_TEXT, this.width / 2 - 153, 167, 0xA0A0A0);
+				graphics.text(this.font, PRE_TIMER_LABEL_TEXT, this.width / 2 - 153, 167, -6250336);
 				this.timerField.extractRenderState(graphics, mouseX, mouseY, a);
 				int i = this.timerField.getX() + 60;
-				graphics.text(this.font, POST_TIMER_LABEL_TEXT, i, 167, 0xA0A0A0);
+				graphics.text(this.font, POST_TIMER_LABEL_TEXT, i, 167, -6250336);
 			}
 		}
 	}

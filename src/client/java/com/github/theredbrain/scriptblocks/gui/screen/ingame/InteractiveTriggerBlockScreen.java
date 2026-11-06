@@ -63,7 +63,9 @@ public class InteractiveTriggerBlockScreen extends AbstractCreativeBlockSettings
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.interactiveTriggerBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.interactiveTriggerBlockEntity.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 30, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 30, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -161,29 +163,29 @@ public class InteractiveTriggerBlockScreen extends AbstractCreativeBlockSettings
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 20, -6250336);
 		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, PREVENT_INTERACTION_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+		graphics.text(this.font, PREVENT_INTERACTION_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 55, -6250336);
 		this.preventInteractionIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, KEY_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 + 5, 55, 0xA0A0A0);
+		graphics.text(this.font, KEY_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 + 5, 55, -6250336);
 		this.keyIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, INTERACTION_PREVENTED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+		graphics.text(this.font, INTERACTION_PREVENTED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 90, -6250336);
 		this.interactionPreventedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, INTERACTION_PREVENTED_SOUND_LABEL_TEXT, this.width / 2 + 5, 90, 0xA0A0A0);
+		graphics.text(this.font, INTERACTION_PREVENTED_SOUND_LABEL_TEXT, this.width / 2 + 5, 90, -6250336);
 		this.interactionPreventedSoundField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, LOCKED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
+		graphics.text(this.font, LOCKED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 125, -6250336);
 		this.lockedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, LOCKED_SOUND_LABEL_TEXT, this.width / 2 + 5, 125, 0xA0A0A0);
+		graphics.text(this.font, LOCKED_SOUND_LABEL_TEXT, this.width / 2 + 5, 125, -6250336);
 		this.lockedSoundField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, UNLOCK_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 160, 0xA0A0A0);
+		graphics.text(this.font, UNLOCK_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 160, -6250336);
 		this.unlockedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, UNLOCK_SOUND_LABEL_TEXT, this.width / 2 + 5, 160, 0xA0A0A0);
+		graphics.text(this.font, UNLOCK_SOUND_LABEL_TEXT, this.width / 2 + 5, 160, -6250336);
 		this.unlockedSoundField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 

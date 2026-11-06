@@ -52,7 +52,10 @@ public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsS
 		super.init();
 
 		this.messageMode = this.uuidListMessagingBlock.getMessageMode();
-		this.cycleMessageModeButton = this.addRenderableWidget(CycleButton.builder(UUIDListMessagingBlockEntity.MessageMode::asText, this.messageMode).withValues(UUIDListMessagingBlockEntity.MessageMode.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, messageMode) -> {
+		this.cycleMessageModeButton = this.addRenderableWidget(CycleButton.builder(UUIDListMessagingBlockEntity.MessageMode::asText, this.messageMode)
+				.withValues(UUIDListMessagingBlockEntity.MessageMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, messageMode) -> {
 			this.messageMode = messageMode;
 			this.updateWidgets();
 		}));
@@ -159,31 +162,31 @@ public class UUIDListMessagingBlockScreen extends AbstractCreativeBlockSettingsS
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, MESSAGE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		graphics.text(this.font, MESSAGE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 		this.messageLocalisationStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.messageMode == UUIDListMessagingBlockEntity.MessageMode.TITLE) {
 
-			graphics.text(this.font, SUBTITLE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, SUBTITLE_LOCALISATION_STRING_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.subTitleLocalisationStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, TITLE_FADE_IN_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, TITLE_FADE_IN_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.titleFadeInField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, TITLE_STAY_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
+			graphics.text(this.font, TITLE_STAY_LABEL_TEXT, this.width / 2 - 49, 115, -6250336);
 			this.titleStayField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, TITLE_FADE_OUT_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
+			graphics.text(this.font, TITLE_FADE_OUT_LABEL_TEXT, this.width / 2 + 55, 115, -6250336);
 			this.titleFadeOutField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		}
 
-		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, -6250336);
 		this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
+		graphics.text(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 185, -6250336);
 		this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 	}

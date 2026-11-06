@@ -51,7 +51,10 @@ public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.addWidget(this.dataProvidingBlockPositionOffsetZField);
 
 		this.dataModificationMode = this.dataModificationBlockEntity.getDataModificationMode();
-		this.cycleDataModificationModeButton = this.addRenderableWidget(CycleButton.builder(DataModificationBlockEntity.DataModificationMode::asText, this.dataModificationMode).withValues(DataModificationBlockEntity.DataModificationMode.values()).create(this.width / 2 - 154, 90, 300, 20, Component.empty(), (button, dataModificationMode) -> {
+		this.cycleDataModificationModeButton = this.addRenderableWidget(CycleButton.builder(DataModificationBlockEntity.DataModificationMode::asText, this.dataModificationMode)
+				.withValues(DataModificationBlockEntity.DataModificationMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 90, 300, 20, Component.empty(), (button, dataModificationMode) -> {
 			this.dataModificationMode = dataModificationMode;
 			this.updateWidgets();
 		}));
@@ -110,19 +113,19 @@ public class DataModificationBlockScreen extends AbstractCreativeBlockSettingsSc
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 		this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_ADDITION)) {
 
-			graphics.text(this.font, ADDED_INTEGER_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, ADDED_INTEGER_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.addedIntegerValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.dataModificationMode.equals(DataModificationBlockEntity.DataModificationMode.INTEGER_MODULO)) {
 
-			graphics.text(this.font, INTEGER_MODULUS_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, INTEGER_MODULUS_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.integerModulusValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		}

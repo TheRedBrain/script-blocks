@@ -101,17 +101,17 @@ public class CopyDataBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		graphics.text(this.font, FIRST_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 		this.firstDataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.firstDataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.firstDataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+		graphics.text(this.font, SECOND_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 		this.secondDataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.secondDataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.secondDataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+		graphics.text(this.font, DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 		this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 	}

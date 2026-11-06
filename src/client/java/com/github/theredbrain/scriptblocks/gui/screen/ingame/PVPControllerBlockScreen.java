@@ -124,7 +124,10 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 		}
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -149,7 +152,9 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.pvpControllerBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.pvpControllerBlockEntity.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 115, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 115, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -393,20 +398,20 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.SETTINGS_ID) {
-			graphics.text(this.font, PVP_ARENA_SETTINGS_ID_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			graphics.text(this.font, PVP_ARENA_SETTINGS_ID_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 			this.pvpArenaSettingsIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, -6250336);
 			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_TEXT, this.width / 2 - 153, 140, 0xA0A0A0);
+			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_TEXT, this.width / 2 - 153, 140, -6250336);
 			this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, MATCH_DURATION_DATA_IDENTIFIER_TEXT, this.width / 2 + 9, 140, 0xA0A0A0);
+			graphics.text(this.font, MATCH_DURATION_DATA_IDENTIFIER_TEXT, this.width / 2 + 9, 140, -6250336);
 			this.matchDurationDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.RESPAWN_POSITIONS) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 3, this.respawnPositionsList.size()); i++) {
@@ -414,19 +419,19 @@ public class PVPControllerBlockScreen extends AbstractCreativeBlockSettingsScree
 				if (!this.respawnPositionsList.get(i).getLeft().isEmpty()) {
 					text = this.respawnPositionsList.get(i).getLeft() + ", " + this.respawnPositionsList.get(i).getRight();
 				}
-				graphics.text(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.respawnPositionsList.size() > 3) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
 				int k = (int) (61.0f * this.scrollAmount);
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
-			graphics.text(this.font, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
+			graphics.text(this.font, NEW_RESPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, -6250336);
 			this.newRespawnPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newRespawnPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newRespawnPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, NEW_RESPAWN_POSITION_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
-			graphics.text(this.font, NEW_RESPAWN_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
+			graphics.text(this.font, NEW_RESPAWN_POSITION_NAME_LABEL_TEXT, this.width / 2 - 153, 151, -6250336);
+			graphics.text(this.font, NEW_RESPAWN_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, -6250336);
 			this.newRespawnOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newRespawnOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newRespawnPositionNameField.extractRenderState(graphics, mouseX, mouseY, a);

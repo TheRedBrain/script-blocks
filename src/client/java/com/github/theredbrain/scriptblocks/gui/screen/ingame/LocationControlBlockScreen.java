@@ -141,7 +141,9 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		}
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 18, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -174,12 +176,16 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		this.addWidget(this.mainEntranceOrientationPitchField);
 
 		this.shouldAlwaysReset = this.locationControlBlock.shouldAlwaysReset();
-		this.toggleShouldAlwaysResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.off"), this.shouldAlwaysReset).create(this.width / 2 - 154, 150, 150, 20, Component.empty(), (button, shouldAlwaysReset) -> {
+		this.toggleShouldAlwaysResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_should_always_reset_button_label.off"), this.shouldAlwaysReset)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 150, 150, 20, Component.empty(), (button, shouldAlwaysReset) -> {
 			this.shouldAlwaysReset = shouldAlwaysReset;
 		}));
 
 		this.manualReset = this.locationControlBlock.getManualReset();
-		this.toggleManualResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.off"), this.manualReset).create(this.width / 2 + 4, 150, 150, 20, Component.empty(), (button, manualReset) -> {
+		this.toggleManualResetButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.on"), Component.translatable("gui.location_controller_block.toggle_manual_reset_button_label.off"), this.manualReset)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 150, 150, 20, Component.empty(), (button, manualReset) -> {
 			this.manualReset = manualReset;
 		}));
 
@@ -233,7 +239,9 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = this.locationControlBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -502,11 +510,11 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.MAIN_ENTRANCE) {
-			graphics.text(this.font, MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			graphics.text(this.font, MAIN_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 			this.mainEntrancePositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.mainEntrancePositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.mainEntrancePositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, MAIN_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			graphics.text(this.font, MAIN_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, -6250336);
 			this.mainEntranceOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.mainEntranceOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.SIDE_ENTRANCES) {
@@ -515,7 +523,7 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 				if (!this.sideEntranceList.get(i).getLeft().equals("")) {
 					text = this.sideEntranceList.get(i).getLeft() + ", " + this.sideEntranceList.get(i).getRight();
 				}
-				graphics.text(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 141, 50 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.sideEntranceList.size() > 3) {
 //                context.drawGuiTexture(SCROLL_BAR_BACKGROUND_8_70_TEXTURE, this.width / 2 - 153, 44, 8, 70);
@@ -524,32 +532,32 @@ public class LocationControlBlockScreen extends AbstractCreativeBlockSettingsScr
 //                context.drawGuiTexture(SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
-			graphics.text(this.font, NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, 0xA0A0A0);
+			graphics.text(this.font, NEW_SIDE_ENTRANCE_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 116, -6250336);
 			this.newSideEntrancePositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newSideEntrancePositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newSideEntrancePositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT, this.width / 2 - 153, 151, 0xA0A0A0);
-			graphics.text(this.font, NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, 0xA0A0A0);
+			graphics.text(this.font, NEW_SIDE_ENTRANCE_NAME_LABEL_TEXT, this.width / 2 - 153, 151, -6250336);
+			graphics.text(this.font, NEW_SIDE_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 + 55, 151, -6250336);
 			this.newSideEntranceOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newSideEntranceOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newSideEntranceNameField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.INTERACTED_BLOCKS) {
-			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 105, -6250336);
 			this.dataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.RESET_AREA) {
-			graphics.text(this.font, RESET_AREA_MIN_X_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			graphics.text(this.font, RESET_AREA_MIN_X_LABEL_TEXT, this.width / 2 - 153, 55, -6250336);
 			this.resetAreaMinXField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, RESET_AREA_MIN_Z_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			graphics.text(this.font, RESET_AREA_MIN_Z_LABEL_TEXT, this.width / 2 - 153, 90, -6250336);
 			this.resetAreaMinZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, RESET_AREA_MAX_X_LABEL_TEXT, this.width / 2 - 153, 125, 0xA0A0A0);
+			graphics.text(this.font, RESET_AREA_MAX_X_LABEL_TEXT, this.width / 2 - 153, 125, -6250336);
 			this.resetAreaMaxXField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, RESET_AREA_MAX_Z_LABEL_TEXT, this.width / 2 - 153, 160, 0xA0A0A0);
+			graphics.text(this.font, RESET_AREA_MAX_Z_LABEL_TEXT, this.width / 2 - 153, 160, -6250336);
 			this.resetAreaMaxZField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}

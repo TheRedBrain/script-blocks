@@ -61,7 +61,9 @@ public class UseRelayChestBlockScreen extends AbstractCreativeBlockSettingsScree
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.useRelayChestBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.useRelayChestBlockEntity.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 40, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 40, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -157,27 +159,27 @@ public class UseRelayChestBlockScreen extends AbstractCreativeBlockSettingsScree
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 30, 0xA0A0A0);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 30, -6250336);
 		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, KEY_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 65, 0xA0A0A0);
+		graphics.text(this.font, KEY_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 65, -6250336);
 		this.keyIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, LOCKED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 100, 0xA0A0A0);
+		graphics.text(this.font, LOCKED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 100, -6250336);
 		this.lockedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, LOCKED_SOUND_LABEL_TEXT, this.width / 2 + 5, 100, 0xA0A0A0);
+		graphics.text(this.font, LOCKED_SOUND_LABEL_TEXT, this.width / 2 + 5, 100, -6250336);
 		this.lockedSoundField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, UNLOCK_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 135, 0xA0A0A0);
+		graphics.text(this.font, UNLOCK_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 135, -6250336);
 		this.unlockedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, UNLOCK_SOUND_LABEL_TEXT, this.width / 2 + 5, 135, 0xA0A0A0);
+		graphics.text(this.font, UNLOCK_SOUND_LABEL_TEXT, this.width / 2 + 5, 135, -6250336);
 		this.unlockedSoundField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 175, 0xA0A0A0);
+		graphics.text(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 175, -6250336);
 		this.relayBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.relayBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.relayBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

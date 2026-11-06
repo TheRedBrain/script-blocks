@@ -81,13 +81,17 @@ public class TriggeringRespawnAnchorBlockScreen extends AbstractCreativeBlockSet
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.triggeringRespawnAnchorBlockEntity.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.triggeringRespawnAnchorBlockEntity.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 130, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 130, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
 		this.sendMessage = this.triggeringRespawnAnchorBlockEntity.sendMessage();
 		int i = this.font.width(SEND_MESSAGE_LABEL_TEXT) + 10;
-		this.toggleSendMessageButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SEND_MESSAGE_BUTTON_TRUE_LABEL_TEXT, TOGGLE_SEND_MESSAGE_BUTTON_FALSE_LABEL_TEXT, this.sendMessage).create(this.width / 2 - 152 + i, 164, 300 - i, 20, Component.empty(), (button, sendMessage) -> {
+		this.toggleSendMessageButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SEND_MESSAGE_BUTTON_TRUE_LABEL_TEXT, TOGGLE_SEND_MESSAGE_BUTTON_FALSE_LABEL_TEXT, this.sendMessage)
+				.displayOnlyValue()
+				.create(this.width / 2 - 152 + i, 164, 300 - i, 20, Component.empty(), (button, sendMessage) -> {
 			this.sendMessage = sendMessage;
 		}));
 
@@ -133,22 +137,22 @@ public class TriggeringRespawnAnchorBlockScreen extends AbstractCreativeBlockSet
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 40, 0xA0A0A0);
+		graphics.text(this.font, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 40, -6250336);
 		this.entitySpawnPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.entitySpawnPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.entitySpawnPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 - 153, 75, 0xA0A0A0);
+		graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 - 153, 75, -6250336);
 		this.entitySpawnOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT, this.width / 2 + 5, 75, 0xA0A0A0);
+		graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT, this.width / 2 + 5, 75, -6250336);
 		this.entitySpawnOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 120, 0xA0A0A0);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 120, -6250336);
 		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, SEND_MESSAGE_LABEL_TEXT, this.width / 2 - 152, 170, 0xA0A0A0);
+		graphics.text(this.font, SEND_MESSAGE_LABEL_TEXT, this.width / 2 - 152, 170, -6250336);
 	}
 
 	@Override

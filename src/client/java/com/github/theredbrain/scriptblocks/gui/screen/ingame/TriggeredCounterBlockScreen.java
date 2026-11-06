@@ -123,7 +123,9 @@ public class TriggeredCounterBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.addWidget(this.newTriggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = false;
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 62, 153, 100, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 62, 153, 100, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -247,14 +249,14 @@ public class TriggeredCounterBlockScreen extends AbstractCreativeBlockSettingsSc
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 5, this.triggeredBlocksList.size()); i++) {
-			graphics.text(this.font, this.triggeredBlocksList.get(i).toString(), this.width / 2 - 141, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			graphics.text(this.font, this.triggeredBlocksList.get(i).toString(), this.width / 2 - 141, 26 + ((i - this.scrollPosition) * 24), -6250336);
 		}
 		if (this.triggeredBlocksList.size() > 5) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, TRIGGERED_BLOCKS_LIST_SCROLLER_BACKGROUND_TEXTURE, this.width / 2 - 153, 20, 8, 116);
 			int k = (int) (107.0f * this.scrollAmount);
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
-		graphics.text(this.font, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 99, 140, 0xA0A0A0);
+		graphics.text(this.font, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 99, 140, -6250336);
 		this.newTriggeredBlockCounterField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);

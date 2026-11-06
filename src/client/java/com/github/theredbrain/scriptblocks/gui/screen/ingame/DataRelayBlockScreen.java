@@ -220,7 +220,7 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ENTRIES, this.dataProvidingBlockPosOffsetList.size()); i++) {
 			BlockPos blockPos = this.dataProvidingBlockPosOffsetList.get(i);
 			MutableComponent text = Component.translatable("gui.triggered_block.list.entry", blockPos.getX(), blockPos.getY(), blockPos.getZ());
-			graphics.text(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			graphics.text(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), -6250336);
 		}
 		if (this.dataProvidingBlockPosOffsetList.size() > VISIBLE_LIST_ENTRIES) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_140_TEXTURE, this.width / 2 - 153, 20, 8, 140);
@@ -228,7 +228,7 @@ public class DataRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
 
-		graphics.text(this.font, NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+		graphics.text(this.font, NEW_DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 176, -6250336);
 		this.newDataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newDataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newDataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

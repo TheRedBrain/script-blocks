@@ -85,7 +85,7 @@ public class DataWritingBlockScreen extends AbstractCreativeBlockSettingsScreen 
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+		graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 		this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

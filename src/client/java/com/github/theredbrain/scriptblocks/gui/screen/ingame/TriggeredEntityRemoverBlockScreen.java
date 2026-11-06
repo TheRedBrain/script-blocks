@@ -45,7 +45,9 @@ public class TriggeredEntityRemoverBlockScreen extends AbstractCreativeBlockSett
 		super.init();
 
 		this.showArea = this.triggeredEntityRemoverBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -113,11 +115,11 @@ public class TriggeredEntityRemoverBlockScreen extends AbstractCreativeBlockSett
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+		graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, -6250336);
 		this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+		graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, -6250336);
 		this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

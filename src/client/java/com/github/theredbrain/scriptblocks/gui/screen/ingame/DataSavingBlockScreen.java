@@ -205,8 +205,8 @@ public class DataSavingBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_DATA_LIST_ENTRIES, this.dataList.size()); i++) {
-			graphics.text(this.font, this.dataList.get(i).left, this.width / 2 - 117, 20 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-			graphics.text(this.font, this.dataList.get(i).right, this.width / 2 - 117, 30 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			graphics.text(this.font, this.dataList.get(i).left, this.width / 2 - 117, 20 + ((i - this.scrollPosition) * 24), -6250336);
+			graphics.text(this.font, this.dataList.get(i).right, this.width / 2 - 117, 30 + ((i - this.scrollPosition) * 24), -6250336);
 		}
 		if (this.dataList.size() > VISIBLE_DATA_LIST_ENTRIES) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 20, 8, 116);

@@ -78,14 +78,18 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 		}
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- influence area page ---
 
-		this.showInfluenceAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_INFLUENCE_AREA_LABEL_TEXT, SHOW_INFLUENCE_AREA_LABEL_TEXT, this.showInfluenceArea).create(this.width / 2 - 153, 45, 300, 20, Component.empty(), (button, showInfluenceArea) -> {
+		this.showInfluenceAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_INFLUENCE_AREA_LABEL_TEXT, SHOW_INFLUENCE_AREA_LABEL_TEXT, this.showInfluenceArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 153, 45, 300, 20, Component.empty(), (button, showInfluenceArea) -> {
 			this.showInfluenceArea = showInfluenceArea;
 		}));
 
@@ -137,12 +141,17 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = this.housingBlockEntity != null ? this.housingBlockEntity.getTriggeredBlock().getRight() : false;
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 		// --- owner page ---
 
-		this.toggleOwnerModeButton = this.addRenderableWidget(CycleButton.builder(HousingBlockEntity.OwnerMode::asText, this.ownerMode).withValues(HousingBlockEntity.OwnerMode.values()).create(this.width / 2 - 153, 70, 300, 20, Component.empty(), (button, ownerMode) -> {
+		this.toggleOwnerModeButton = this.addRenderableWidget(CycleButton.builder(HousingBlockEntity.OwnerMode::asText, this.ownerMode)
+				.withValues(HousingBlockEntity.OwnerMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 153, 70, 300, 20, Component.empty(), (button, ownerMode) -> {
 			this.ownerMode = ownerMode;
 		}));
 
@@ -251,16 +260,16 @@ public class CreativeHousingScreen extends AbstractCreativeBlockSettingsScreen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.INFLUENCE) {
-			graphics.text(this.font, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			graphics.text(this.font, INFLUENCE_AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 			this.restrictBlockBreakingAreaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.restrictBlockBreakingAreaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.restrictBlockBreakingAreaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+			graphics.text(this.font, INFLUENCE_AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 105, -6250336);
 			this.restrictBlockBreakingAreaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.restrictBlockBreakingAreaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.restrictBlockBreakingAreaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK) {
-			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 			this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

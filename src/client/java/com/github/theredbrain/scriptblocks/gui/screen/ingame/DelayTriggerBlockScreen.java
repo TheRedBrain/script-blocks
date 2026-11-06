@@ -48,7 +48,9 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.delayTriggerBlock.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.delayTriggerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 80, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -95,11 +97,11 @@ public class DelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, TRIGGER_DELAY_LABEL_TEXT, this.width / 2 - 49, 105, 0xA0A0A0);
+		graphics.text(this.font, TRIGGER_DELAY_LABEL_TEXT, this.width / 2 - 49, 105, -6250336);
 		this.triggerDelayField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 

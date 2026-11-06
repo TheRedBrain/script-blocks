@@ -143,7 +143,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -182,7 +184,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.noPlayersAroundTriggeredBlockPositionOffsetZField);
 
 		this.noPlayersAroundTriggeredBlockResets = noPlayersAroundTriggeredBlock.getRight();
-		this.toggleNoPlayersAroundTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.noPlayersAroundTriggeredBlockResets).create(this.width / 2 + 8, 159, 150, 20, Component.empty(), (button, noPlayersAroundTriggeredBlockResets) -> {
+		this.toggleNoPlayersAroundTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.noPlayersAroundTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 159, 150, 20, Component.empty(), (button, noPlayersAroundTriggeredBlockResets) -> {
 			this.noPlayersAroundTriggeredBlockResets = noPlayersAroundTriggeredBlockResets;
 		}));
 
@@ -211,12 +215,16 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.entitySpawnOrientationYawField);
 
 		this.isPersistent = this.bossControllerBlock.isPersistent();
-		this.toggleIsPersistentButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.isPersistent).create(this.width / 2 - 154, 160, 150, 20, Component.empty(), (button, isPersistent) -> {
+		this.toggleIsPersistentButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.isPersistent)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 160, 150, 20, Component.empty(), (button, isPersistent) -> {
 			this.isPersistent = isPersistent;
 		}));
 
 		this.enableSpawnEffects = this.bossControllerBlock.enableSpawnEffects();
-		this.toggleEnableSpawnEffectsButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT, TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT, this.enableSpawnEffects).create(this.width / 2 + 4, 160, 150, 20, Component.empty(), (button, enableSpawnEffects) -> {
+		this.toggleEnableSpawnEffectsButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_ON_LABEL_TEXT, TOGGLE_ENABLE_SPAWN_EFFECTS_BUTTON_OFF_LABEL_TEXT, this.enableSpawnEffects)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 160, 150, 20, Component.empty(), (button, enableSpawnEffects) -> {
 			this.enableSpawnEffects = enableSpawnEffects;
 		}));
 
@@ -244,7 +252,9 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.newBossTriggeredBlockPositionOffsetZField);
 
 		this.newBossTriggeredBlockResets = false;
-		this.toggleNewBossTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newBossTriggeredBlockResets).create(this.width / 2 + 8, 162, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleNewBossTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newBossTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 162, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.newBossTriggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -466,33 +476,33 @@ public class BossControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.PLAYERS) {
-			graphics.text(this.font, UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+			graphics.text(this.font, UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 114, -6250336);
 			this.uuidListHandlerBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, NO_PLAYERS_AROUND_TRIGGERED_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
+			graphics.text(this.font, NO_PLAYERS_AROUND_TRIGGERED_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 149, -6250336);
 			this.noPlayersAroundTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.noPlayersAroundTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.noPlayersAroundTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.SPAWN_POSITION) {
-			graphics.text(this.font, BOSS_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, BOSS_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.bossIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, ENTITY_SPAWN_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.entitySpawnPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.entitySpawnPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.entitySpawnPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_PITCH_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.entitySpawnOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 + 5, 115, 0xA0A0A0);
+			graphics.text(this.font, ENTITY_SPAWN_ORIENTATION_YAW_LABEL_TEXT, this.width / 2 + 5, 115, -6250336);
 			this.entitySpawnOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, IS_PERSISTENT_LABEL_TEXT, this.width / 2 - 152, 150, 0xA0A0A0);
-			graphics.text(this.font, ENABLE_SPAWN_EFFECTS_LABEL_TEXT, this.width / 2 + 6, 150, 0xA0A0A0);
+			graphics.text(this.font, IS_PERSISTENT_LABEL_TEXT, this.width / 2 - 152, 150, -6250336);
+			graphics.text(this.font, ENABLE_SPAWN_EFFECTS_LABEL_TEXT, this.width / 2 + 6, 150, -6250336);
 		} else if (this.screenPage == ScreenPage.BOSS_TRIGGERED_BLOCKS) {
 			int x = this.bossTriggeredBlocksList.size() > 4 ? this.width / 2 - 142 : this.width / 2 - 153;
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + 4, this.bossTriggeredBlocksList.size()); i++) {
-				graphics.text(this.font, this.bossTriggeredBlocksList.get(i).getLeft() + ": " + this.bossTriggeredBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, this.bossTriggeredBlocksList.get(i).getLeft() + ": " + this.bossTriggeredBlocksList.get(i).getRight().toString(), x, 48 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.bossTriggeredBlocksList.size() > 4) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_96_TEXTURE, this.width / 2 - 154, 42, 8, 96);

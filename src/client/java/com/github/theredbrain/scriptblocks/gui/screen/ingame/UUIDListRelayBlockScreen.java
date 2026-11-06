@@ -216,7 +216,7 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.uuidListHandlers.size()); i++) {
 			BlockPos uuidListHandler = this.uuidListHandlers.get(i);
 			MutableComponent text = Component.translatable("gui.uuid_list_relay_block.list_entry", uuidListHandler.getX(), uuidListHandler.getY(), uuidListHandler.getZ());
-			graphics.text(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+			graphics.text(this.font, text, this.width / 2 - 117, 26 + ((i - this.scrollPosition) * 24), -6250336);
 		}
 		if (this.uuidListHandlers.size() > VISIBLE_LIST_ELEMENTS) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 20, 8, 116);
@@ -224,7 +224,7 @@ public class UUIDListRelayBlockScreen extends AbstractCreativeBlockSettingsScree
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
 
-		graphics.text(this.font, NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 165, 0xA0A0A0);
+		graphics.text(this.font, NEW_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 165, -6250336);
 		this.newUUIDListProviderPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newUUIDListProviderPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newUUIDListProviderPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

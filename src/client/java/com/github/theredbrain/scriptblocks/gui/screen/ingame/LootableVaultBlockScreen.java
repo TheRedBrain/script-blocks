@@ -91,10 +91,10 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 //
 //		super.extractRenderState(graphics, mouseX, mouseY, a);
 //
-//		context.drawTextWithShadow(this.textRenderer, LOOTABLE_VAULT_CONFIG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+//		context.drawTextWithShadow(this.textRenderer, LOOTABLE_VAULT_CONFIG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 //		this.newLootableVaultConfigIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 //
-//		context.drawTextWithShadow(this.textRenderer, this.isOminous ? IS_OMINOUS_LABEL_TEXT : IS_NOT_OMINOUS_LABEL_TEXT, this.width / 2 - 153, 121, 0xA0A0A0);
+//		context.drawTextWithShadow(this.textRenderer, this.isOminous ? IS_OMINOUS_LABEL_TEXT : IS_NOT_OMINOUS_LABEL_TEXT, this.width / 2 - 153, 121, -6250336);
 //	}
 //
 //	@Override

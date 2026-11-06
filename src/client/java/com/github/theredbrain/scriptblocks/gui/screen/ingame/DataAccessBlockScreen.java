@@ -279,15 +279,15 @@ package com.github.theredbrain.scriptblocks.gui.screen.ingame;
 //		super.extractRenderState(graphics, mouseX, mouseY, a);
 //
 //		if (this.screenPage == ScreenPage.BLOCK_OFFSETS) {
-//			context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+//			context.drawTextWithShadow(this.textRenderer, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 //			this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 //			this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 //			this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-//			context.drawTextWithShadow(this.textRenderer, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+//			context.drawTextWithShadow(this.textRenderer, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 //			this.firstTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 //			this.firstTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 //			this.firstTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-//			context.drawTextWithShadow(this.textRenderer, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+//			context.drawTextWithShadow(this.textRenderer, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 //			this.secondTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 //			this.secondTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 //			this.secondTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

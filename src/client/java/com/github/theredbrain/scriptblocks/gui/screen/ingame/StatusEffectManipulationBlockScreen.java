@@ -57,7 +57,10 @@ public class StatusEffectManipulationBlockScreen extends AbstractCreativeBlockSe
 
 		int i = this.font.width(MANIPULATION_MODE_LABEL_TEXT) + 10;
 		this.manipulationMode = this.statusEffectManipulationBlock.getManipulationMode();
-		this.cycleManipulationModeButton = this.addRenderableWidget(CycleButton.builder(StatusEffectManipulationBlockEntity.ManipulationMode::asText, this.manipulationMode).withValues((StatusEffectManipulationBlockEntity.ManipulationMode[]) StatusEffectManipulationBlockEntity.ManipulationMode.values()).create(this.width / 2 - 152 + i, 20, 300 - i, 20, Component.empty(), (button, manipulationMode) -> {
+		this.cycleManipulationModeButton = this.addRenderableWidget(CycleButton.builder(StatusEffectManipulationBlockEntity.ManipulationMode::asText, this.manipulationMode)
+				.withValues(StatusEffectManipulationBlockEntity.ManipulationMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 152 + i, 20, 300 - i, 20, Component.empty(), (button, manipulationMode) -> {
 			this.manipulationMode = manipulationMode;
 			this.updateWidgets();
 		}));
@@ -77,19 +80,25 @@ public class StatusEffectManipulationBlockScreen extends AbstractCreativeBlockSe
 
 		i = this.font.width(IS_AMBIENT_LABEL_TEXT) + 10;
 		this.effectIsAmbient = this.statusEffectManipulationBlock.getEffectIsAmbient();
-		this.toggleEffectIsAmbientButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.effectIsAmbient).create(this.width / 2 + 6 + i, 100, 150 - i, 20, Component.empty(), (button, appliedStatusEffectAmbient) -> {
+		this.toggleEffectIsAmbientButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.effectIsAmbient)
+				.displayOnlyValue()
+				.create(this.width / 2 + 6 + i, 100, 150 - i, 20, Component.empty(), (button, appliedStatusEffectAmbient) -> {
 			this.effectIsAmbient = appliedStatusEffectAmbient;
 		}));
 
 		i = this.font.width(SHOWS_PARTICLES_LABEL_TEXT) + 10;
 		this.effectShowsParticles = this.statusEffectManipulationBlock.getEffectShowsParticles();
-		this.toggleEffectShowsParticlesButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.effectShowsParticles).create(this.width / 2 - 152 + i, 124, 150 - i, 20, Component.empty(), (button, appliedStatusEffectShowParticles) -> {
+		this.toggleEffectShowsParticlesButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.effectShowsParticles)
+				.displayOnlyValue()
+				.create(this.width / 2 - 152 + i, 124, 150 - i, 20, Component.empty(), (button, appliedStatusEffectShowParticles) -> {
 			this.effectShowsParticles = appliedStatusEffectShowParticles;
 		}));
 
 		i = this.font.width(SHOWS_ICON_LABEL_TEXT) + 10;
 		this.effectShowsIcon = this.statusEffectManipulationBlock.getEffectShowsIcon();
-		this.toggleEffectShowsIconButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.effectShowsIcon).create(this.width / 2 + 6 + i, 124, 150 - i, 20, Component.empty(), (button, appliedStatusEffectShowIcon) -> {
+		this.toggleEffectShowsIconButton = this.addRenderableWidget(CycleButton.onOffBuilder(this.effectShowsIcon)
+				.displayOnlyValue()
+				.create(this.width / 2 + 6 + i, 124, 150 - i, 20, Component.empty(), (button, appliedStatusEffectShowIcon) -> {
 			this.effectShowsIcon = appliedStatusEffectShowIcon;
 		}));
 
@@ -197,34 +206,34 @@ public class StatusEffectManipulationBlockScreen extends AbstractCreativeBlockSe
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, MANIPULATION_MODE_LABEL_TEXT, this.width / 2 - 152, 26, 0xA0A0A0);
+		graphics.text(this.font, MANIPULATION_MODE_LABEL_TEXT, this.width / 2 - 152, 26, -6250336);
 
 		if (this.manipulationMode == StatusEffectManipulationBlockEntity.ManipulationMode.APPLY) {
 
-			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 152, 55, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 152, 55, -6250336);
 			this.effectIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 152, 90, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 152, 90, -6250336);
 			this.effectAmplifierField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, STATUS_EFFECT_DURATION_LABEL_TEXT, this.width / 2 - 74, 90, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_DURATION_LABEL_TEXT, this.width / 2 - 74, 90, -6250336);
 			this.effectDurationField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, IS_AMBIENT_LABEL_TEXT, this.width / 2 + 6, 106, 0xA0A0A0);
-			graphics.text(this.font, SHOWS_PARTICLES_LABEL_TEXT, this.width / 2 - 152, 130, 0xA0A0A0);
-			graphics.text(this.font, SHOWS_ICON_LABEL_TEXT, this.width / 2 + 6, 130, 0xA0A0A0);
+			graphics.text(this.font, IS_AMBIENT_LABEL_TEXT, this.width / 2 + 6, 106, -6250336);
+			graphics.text(this.font, SHOWS_PARTICLES_LABEL_TEXT, this.width / 2 - 152, 130, -6250336);
+			graphics.text(this.font, SHOWS_ICON_LABEL_TEXT, this.width / 2 + 6, 130, -6250336);
 
 		} else {
 
-			graphics.text(this.font, MANIPULATED_EFFECT_TAG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 152, 55, 0xA0A0A0);
+			graphics.text(this.font, MANIPULATED_EFFECT_TAG_IDENTIFIER_LABEL_TEXT, this.width / 2 - 152, 55, -6250336);
 			this.manipulatedEffectTagIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
 			if (this.manipulationMode == StatusEffectManipulationBlockEntity.ManipulationMode.DECREMENT_AMPLIFIER) {
 
-				graphics.text(this.font, AMPLIFIER_MODIFICATION_LABEL_TEXT, this.width / 2 - 152, 90, 0xA0A0A0);
+				graphics.text(this.font, AMPLIFIER_MODIFICATION_LABEL_TEXT, this.width / 2 - 152, 90, -6250336);
 				this.amplifierModificationField.extractRenderState(graphics, mouseX, mouseY, a);
 
 			}
 		}
 
-		graphics.text(this.font, UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 152, 159, 0xA0A0A0);
+		graphics.text(this.font, UUID_LIST_HANDLER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 152, 159, -6250336);
 		this.uuidListHandlerPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.uuidListHandlerPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.uuidListHandlerPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

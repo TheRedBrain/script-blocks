@@ -70,13 +70,18 @@ public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScr
 
 	@Override
 	protected void init() {
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 30, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 30, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.showArea = this.triggeredBeaconBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -125,28 +130,39 @@ public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScr
 		this.addWidget(this.appliedStatusEffectDurationField);
 
 		this.appliedStatusEffectAmbient = this.triggeredBeaconBlock.getAppliedStatusEffectAmbient();
-		this.toggleAppliedStatusEffectAmbientButton = this.addRenderableWidget(CycleButton.booleanBuilder(AMBIENT_TRUE_LABEL_TEXT, AMBIENT_FALSE_LABEL_TEXT, this.appliedStatusEffectAmbient).create(this.width / 2 + 4, 100, 150, 20, Component.empty(), (button, appliedStatusEffectAmbient) -> {
+		this.toggleAppliedStatusEffectAmbientButton = this.addRenderableWidget(CycleButton.booleanBuilder(AMBIENT_TRUE_LABEL_TEXT, AMBIENT_FALSE_LABEL_TEXT, this.appliedStatusEffectAmbient)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 100, 150, 20, Component.empty(), (button, appliedStatusEffectAmbient) -> {
 			this.appliedStatusEffectAmbient = appliedStatusEffectAmbient;
 		}));
 
 		this.appliedStatusEffectShowParticles = this.triggeredBeaconBlock.getAppliedStatusEffectShowParticles();
-		this.toggleAppliedStatusEffectShowParticlesButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_PARTICLES_LABEL_TEXT, HIDE_PARTICLES_LABEL_TEXT, this.appliedStatusEffectShowParticles).create(this.width / 2 - 154, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowParticles) -> {
+		this.toggleAppliedStatusEffectShowParticlesButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_PARTICLES_LABEL_TEXT, HIDE_PARTICLES_LABEL_TEXT, this.appliedStatusEffectShowParticles)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowParticles) -> {
 			this.appliedStatusEffectShowParticles = appliedStatusEffectShowParticles;
 		}));
 
 		this.appliedStatusEffectShowIcon = this.triggeredBeaconBlock.getAppliedStatusEffectShowIcon();
-		this.toggleAppliedStatusEffectShowIconButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_ICON_LABEL_TEXT, HIDE_ICON_LABEL_TEXT, this.appliedStatusEffectShowIcon).create(this.width / 2 + 4, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowIcon) -> {
+		this.toggleAppliedStatusEffectShowIconButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_ICON_LABEL_TEXT, HIDE_ICON_LABEL_TEXT, this.appliedStatusEffectShowIcon)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 124, 150, 20, Component.empty(), (button, appliedStatusEffectShowIcon) -> {
 			this.appliedStatusEffectShowIcon = appliedStatusEffectShowIcon;
 		}));
 
 
 		this.triggered = this.triggeredBeaconBlock.getTriggered();
-		this.toggleWasTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(TRIGGERED_TRUE_LABEL_TEXT, TRIGGERED_FALSE_LABEL_TEXT, this.triggered).create(this.width / 2 - 154, 89, 300, 20, Component.empty(), (button, triggered) -> {
+		this.toggleWasTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(TRIGGERED_TRUE_LABEL_TEXT, TRIGGERED_FALSE_LABEL_TEXT, this.triggered)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 89, 300, 20, Component.empty(), (button, triggered) -> {
 			this.triggered = triggered;
 		}));
 
 		this.triggeredMode = this.triggeredBeaconBlock.getTriggeredMode();
-		this.cycleTriggeredModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredBeaconBlockEntity.TriggeredMode::asText, this.triggeredMode).withValues(TriggeredBeaconBlockEntity.TriggeredMode.values()).create(this.width / 2 - 154, 113, 300, 20, Component.empty(), (button, triggeredMode) -> {
+		this.cycleTriggeredModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredBeaconBlockEntity.TriggeredMode::asText, this.triggeredMode)
+				.withValues(TriggeredBeaconBlockEntity.TriggeredMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 113, 300, 20, Component.empty(), (button, triggeredMode) -> {
 			this.triggeredMode = triggeredMode;
 			this.updateWidgets();
 		}));
@@ -257,20 +273,20 @@ public class TriggeredBeaconBlockScreen extends AbstractCreativeBlockSettingsScr
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
-			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, -6250336);
 			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, -6250336);
 			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.APPLIED_EFFECT) {
-			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 55, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 55, -6250336);
 			this.appliedStatusEffectIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_AMPLIFIER_LABEL_TEXT, this.width / 2 - 153, 90, -6250336);
 			this.appliedStatusEffectAmplifierField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, STATUS_EFFECT_DURATION_LABEL_TEXT, this.width / 2 - 74, 90, 0xA0A0A0);
+			graphics.text(this.font, STATUS_EFFECT_DURATION_LABEL_TEXT, this.width / 2 - 74, 90, -6250336);
 			this.appliedStatusEffectDurationField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TRIGGER_SETTINGS) {
 		}

@@ -66,21 +66,32 @@ public class TriggeredDisplayBlockScreen extends AbstractCreativeBlockSettingsSc
 		this.displayMode = this.triggeredDisplayBlock.getDisplayMode();
 		this.isTriggered = this.triggeredDisplayBlock.getIsTriggered();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues((ScreenPage[]) ScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		// --- common ---
-		this.billboardConstraintsButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.BillboardConstraints::asText, this.billboardConstraints).withValues((TriggeredDisplayBlockEntity.BillboardConstraints[]) TriggeredDisplayBlockEntity.BillboardConstraints.values()).create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, billboardConstraints) -> {
+		this.billboardConstraintsButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.BillboardConstraints::asText, this.billboardConstraints)
+				.withValues(TriggeredDisplayBlockEntity.BillboardConstraints.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, billboardConstraints) -> {
 			this.billboardConstraints = billboardConstraints;
 		}));
 
-		this.displayModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.DisplayMode::asText, this.displayMode).withValues((TriggeredDisplayBlockEntity.DisplayMode[]) TriggeredDisplayBlockEntity.DisplayMode.values()).create(this.width / 2 - 154, 68, 300, 20, Component.empty(), (button, displayMode) -> {
+		this.displayModeButton = this.addRenderableWidget(CycleButton.builder(TriggeredDisplayBlockEntity.DisplayMode::asText, this.displayMode)
+				.withValues(TriggeredDisplayBlockEntity.DisplayMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 68, 300, 20, Component.empty(), (button, displayMode) -> {
 			this.displayMode = displayMode;
 		}));
 
-		this.toggleIsTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.on"), Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.off"), this.isTriggered).create(this.width / 2 - 154, 92, 300, 20, Component.empty(), (button, isTriggered) -> {
+		this.toggleIsTriggeredButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.on"), Component.translatable("gui.triggered_display_block.toggle_is_triggered_button_label.off"), this.isTriggered)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 92, 300, 20, Component.empty(), (button, isTriggered) -> {
 			this.isTriggered = isTriggered;
 		}));
 

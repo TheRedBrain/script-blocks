@@ -234,7 +234,10 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(TeleporterBlockEntity.CreativeScreenPage::asText, this.creativeScreenPage).withValues((TeleporterBlockEntity.CreativeScreenPage[]) TeleporterBlockEntity.CreativeScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, creativeScreenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(TeleporterBlockEntity.CreativeScreenPage::asText, this.creativeScreenPage)
+				.withValues(TeleporterBlockEntity.CreativeScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, creativeScreenPage) -> {
 			this.creativeScreenPage = creativeScreenPage;
 			this.updateWidgets();
 		}));
@@ -267,7 +270,9 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.addWidget(this.uuidListProviderBlockPositionOffsetZField);
 
 		this.teleportTeam = this.teleporterBlock.teleportTeam();
-		this.toggleTeleportTeamButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_TELEPORT_TEAM_BUTTON_LABEL_TEXT_ON, TOGGLE_TELEPORT_TEAM_BUTTON_LABEL_TEXT_OFF, this.teleportTeam).create(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, teleportTeam) -> {
+		this.toggleTeleportTeamButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_TELEPORT_TEAM_BUTTON_LABEL_TEXT_ON, TOGGLE_TELEPORT_TEAM_BUTTON_LABEL_TEXT_OFF, this.teleportTeam)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, teleportTeam) -> {
 			this.teleportTeam = teleportTeam;
 		}));
 
@@ -287,12 +292,16 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.addWidget(this.accessPositionOffsetZField);
 
 		this.setAccessPosition = this.teleporterBlock.getEnableLocationAccessPoint();
-		this.toggleSetAccessPositionButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SET_ACCESS_POSITION_BUTTON_LABEL_TEXT_ON, TOGGLE_SET_ACCESS_POSITION_BUTTON_LABEL_TEXT_OFF, this.setAccessPosition).create(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, setAccessPosition) -> {
+		this.toggleSetAccessPositionButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SET_ACCESS_POSITION_BUTTON_LABEL_TEXT_ON, TOGGLE_SET_ACCESS_POSITION_BUTTON_LABEL_TEXT_OFF, this.setAccessPosition)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, setAccessPosition) -> {
 			this.setAccessPosition = setAccessPosition;
 		}));
 
 		this.onlyTeleportDimensionOwner = this.teleporterBlock.onlyTeleportDimensionOwner();
-		this.toggleOnlyTeleportDimensionOwnerButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_ONLY_TELEPORT_DIMENSION_OWNER_BUTTON_LABEL_TEXT_ON, TOGGLE_ONLY_TELEPORT_DIMENSION_OWNER_BUTTON_LABEL_TEXT_OFF, this.onlyTeleportDimensionOwner).create(this.width / 2 - 154, 195, 150, 20, Component.empty(), (button, onlyTeleportDimensionOwner) -> {
+		this.toggleOnlyTeleportDimensionOwnerButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_ONLY_TELEPORT_DIMENSION_OWNER_BUTTON_LABEL_TEXT_ON, TOGGLE_ONLY_TELEPORT_DIMENSION_OWNER_BUTTON_LABEL_TEXT_OFF, this.onlyTeleportDimensionOwner)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 195, 150, 20, Component.empty(), (button, onlyTeleportDimensionOwner) -> {
 			this.onlyTeleportDimensionOwner = onlyTeleportDimensionOwner;
 		}));
 
@@ -305,7 +314,10 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		// --- teleportation mode page ---
 
 		int i = this.font.width(TELEPORTATION_MODE_LABEL_TEXT) + 10;
-		this.teleportationModeButton = this.addRenderableWidget(CycleButton.builder(TeleporterBlockEntity.TeleportationMode::asText, this.teleportationMode).withValues((TeleporterBlockEntity.TeleportationMode[]) TeleporterBlockEntity.TeleportationMode.values()).create(this.width / 2 - 152 + i, 45, 300 - i, 20, TELEPORTATION_MODE_LABEL_TEXT, (button, teleportationMode) -> {
+		this.teleportationModeButton = this.addRenderableWidget(CycleButton.builder(TeleporterBlockEntity.TeleportationMode::asText, this.teleportationMode)
+				.withValues(TeleporterBlockEntity.TeleportationMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 152 + i, 45, 300 - i, 20, TELEPORTATION_MODE_LABEL_TEXT, (button, teleportationMode) -> {
 			this.teleportationMode = teleportationMode;
 			this.updateWidgets();
 		}));
@@ -341,7 +353,10 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 		this.spawnPointType = this.teleporterBlock.getSpawnPointType();
 		i = this.font.width(SPAWN_POINT_TYPE_LABEL_TEXT) + 10;
-		this.spawnPointTypeButton = this.addRenderableWidget(CycleButton.builder(TeleporterBlockEntity.SpawnPointType::asText, this.spawnPointType).withValues(TeleporterBlockEntity.SpawnPointType.values()).create(this.width / 2 - 152 + i, 70, 300 - i, 20, SPAWN_POINT_TYPE_LABEL_TEXT, (button, locationType) -> {
+		this.spawnPointTypeButton = this.addRenderableWidget(CycleButton.builder(TeleporterBlockEntity.SpawnPointType::asText, this.spawnPointType)
+				.withValues(TeleporterBlockEntity.SpawnPointType.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 152 + i, 70, 300 - i, 20, SPAWN_POINT_TYPE_LABEL_TEXT, (button, locationType) -> {
 			this.spawnPointType = locationType;
 		}));
 
@@ -375,7 +390,10 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 
 		// teleportation mode: location
 
-		this.locationModeScreenPageButton = this.addRenderableWidget(CycleButton.builder(LocationModeScreenPage::asText, this.locationModeScreenPage).withValues(LocationModeScreenPage.values()).create(this.width / 2 - 154, 69, 300, 20, Component.empty(), (button, locationModeScreenPage) -> {
+		this.locationModeScreenPageButton = this.addRenderableWidget(CycleButton.builder(LocationModeScreenPage::asText, this.locationModeScreenPage)
+				.withValues(LocationModeScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 69, 300, 20, Component.empty(), (button, locationModeScreenPage) -> {
 			this.locationModeScreenPage = locationModeScreenPage;
 			this.updateWidgets();
 		}));
@@ -455,7 +473,9 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.preTeleportTriggeredBlockPositionOffsetZField.setValue(Integer.toString(this.teleporterBlock.getPreTeleportTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.preTeleportTriggeredBlockPositionOffsetZField);
 		this.preTeleportTriggeredBlockResets = this.teleporterBlock.getPreTeleportTriggeredBlock().getRight();
-		this.preTeleportToggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.preTeleportTriggeredBlockResets).create(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, preTeleportTriggeredBlockResets) -> {
+		this.preTeleportToggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.preTeleportTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, preTeleportTriggeredBlockResets) -> {
 			this.preTeleportTriggeredBlockResets = preTeleportTriggeredBlockResets;
 		}));
 
@@ -485,13 +505,17 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.postTeleportTriggeredBlockPositionOffsetZField.setValue(Integer.toString(this.teleporterBlock.getPostTeleportTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.postTeleportTriggeredBlockPositionOffsetZField);
 		this.postTeleportTriggeredBlockResets = this.teleporterBlock.getPostTeleportTriggeredBlock().getRight();
-		this.postTeleportToggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.postTeleportTriggeredBlockResets).create(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, postTeleportTriggeredBlockResets) -> {
+		this.postTeleportToggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.postTeleportTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, postTeleportTriggeredBlockResets) -> {
 			this.postTeleportTriggeredBlockResets = postTeleportTriggeredBlockResets;
 		}));
 
 		// --- adventure screen customization page ---
 
-		this.toggleShowAdventureScreenButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_ADVENTURE_SCREEN_TRUE_LABEL_TEXT, SHOW_ADVENTURE_SCREEN_FALSE_LABEL_TEXT, this.showAdventureScreen).create(this.width / 2 - 154, 44, 300, 20, SHOW_ADVENTURE_SCREEN_TRUE_LABEL_TEXT, (button, showAdventureScreen) -> {
+		this.toggleShowAdventureScreenButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_ADVENTURE_SCREEN_TRUE_LABEL_TEXT, SHOW_ADVENTURE_SCREEN_FALSE_LABEL_TEXT, this.showAdventureScreen)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 44, 300, 20, SHOW_ADVENTURE_SCREEN_TRUE_LABEL_TEXT, (button, showAdventureScreen) -> {
 			this.showAdventureScreen = showAdventureScreen;
 		}));
 
@@ -513,7 +537,9 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.currentTargetIdentifierLabelField.setValue(this.teleporterBlock.getCurrentTargetIdentifierLabel());
 		this.addWidget(this.currentTargetIdentifierLabelField);
 
-		this.toggleCanOwnerBeChosenButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON, TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF, this.canOwnerBeChosen).create(this.width / 2 + 4, 140, 150, 20, Component.empty(), (button, canOwnerBeChosen) -> {
+		this.toggleCanOwnerBeChosenButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_ON, TOGGLE_CAN_OWNER_BE_CHOSEN_BUTTON_LABEL_TEXT_OFF, this.canOwnerBeChosen)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 140, 150, 20, Component.empty(), (button, canOwnerBeChosen) -> {
 			this.canOwnerBeChosen = canOwnerBeChosen;
 		}));
 
@@ -529,7 +555,9 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		this.cancelTeleportButtonLabelField.setValue(this.teleporterBlock.getCancelTeleportButtonLabel());
 		this.addWidget(this.cancelTeleportButtonLabelField);
 
-		this.toggleShowCancelButtonButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF, this.showCancelButton).create(this.width / 2 + 4, 188, 150, 20, Component.empty(), (button, showCancelButton) -> {
+		this.toggleShowCancelButtonButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_ON, TOGGLE_SHOW_CANCEL_BUTTON_BUTTON_LABEL_TEXT_OFF, this.showCancelButton)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 188, 150, 20, Component.empty(), (button, showCancelButton) -> {
 			this.showCancelButton = showCancelButton;
 		}));
 
@@ -915,35 +943,35 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ACTIVATION) {
-			graphics.text(this.font, PREVENT_INTERACTION_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, PREVENT_INTERACTION_IDENTIFIER_STRING_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.preventInteractionIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, INTERACTION_PREVENTED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, INTERACTION_PREVENTED_MESSAGE_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.interactionPreventedMessageField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.uuidListProviderBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListProviderBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListProviderBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 			if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS
 					|| this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
-				graphics.text(this.font, ACCESS_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+				graphics.text(this.font, ACCESS_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, -6250336);
 				this.accessPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.accessPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.accessPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 			}
-			graphics.text(this.font, ONLY_DIMENSION_OWNER_CAN_TELEPORT_MESSAGE_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
+			graphics.text(this.font, ONLY_DIMENSION_OWNER_CAN_TELEPORT_MESSAGE_LABEL_TEXT, this.width / 2 + 5, 185, -6250336);
 			this.onlyDimensionOwnerCanTeleportMessageField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.TELEPORTATION_MODE) {
-			graphics.text(this.font, TELEPORTATION_MODE_LABEL_TEXT, this.width / 2 - 153, 51, 0xA0A0A0);
+			graphics.text(this.font, TELEPORTATION_MODE_LABEL_TEXT, this.width / 2 - 153, 51, -6250336);
 			if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.DIRECT) {
-				graphics.text(this.font, DIRECT_TELEPORT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+				graphics.text(this.font, DIRECT_TELEPORT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 				this.directTeleportPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.directTeleportPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.directTeleportPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-				graphics.text(this.font, DIRECT_TELEPORT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+				graphics.text(this.font, DIRECT_TELEPORT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, -6250336);
 				this.directTeleportOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.directTeleportOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 			} else if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.SPAWN_POINTS) {
-				graphics.text(this.font, SPAWN_POINT_TYPE_LABEL_TEXT, this.width / 2 - 153, 76, 0xA0A0A0);
+				graphics.text(this.font, SPAWN_POINT_TYPE_LABEL_TEXT, this.width / 2 - 153, 76, -6250336);
 			} else if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATIONS) {
 				for (int i = this.creativeLocationsListScrollPosition; i < Math.min(this.creativeLocationsListScrollPosition + 3, this.locationsList.size()); i++) {
 					String text = this.locationsList.get(i).getLeft().getLeft();
@@ -957,11 +985,11 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 						text2 = this.locationsList.get(i).getRight().getLeft() + ", " + this.locationsList.get(i).getRight().getRight();
 					}
 					if (text2.isEmpty()) {
-						graphics.text(this.font, text, this.width / 2 - 117, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), 0xA0A0A0);
+						graphics.text(this.font, text, this.width / 2 - 117, 76 + ((i - this.creativeLocationsListScrollPosition) * 25), -6250336);
 					} else {
 						int y = 76 + ((i - this.creativeLocationsListScrollPosition) * 25);
-						graphics.text(this.font, text, this.width / 2 - 117, y - 7, 0xA0A0A0);
-						graphics.text(this.font, text2, this.width / 2 - 117, y + 6, 0xA0A0A0);
+						graphics.text(this.font, text, this.width / 2 - 117, y - 7, -6250336);
+						graphics.text(this.font, text2, this.width / 2 - 117, y + 6, -6250336);
 
 					}
 				}
@@ -976,51 +1004,51 @@ public class CreativeTeleporterBlockScreen extends AbstractCreativeBlockSettings
 				this.newDataField.extractRenderState(graphics, mouseX, mouseY, a);
 			} else if (this.teleportationMode == TeleporterBlockEntity.TeleportationMode.LOCATION) {
 
-				graphics.text(this.font, DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 94, 0xA0A0A0);
+				graphics.text(this.font, DATA_PROVIDING_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 94, -6250336);
 				this.dataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.dataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 				this.dataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 				if (this.locationModeScreenPage == LocationModeScreenPage.PAGE_1) {
 
-					graphics.text(this.font, LOCATION_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 129, 0xA0A0A0);
+					graphics.text(this.font, LOCATION_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 129, -6250336);
 					this.locationIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
-					graphics.text(this.font, LOCATION_ENTRANCE_LABEL_TEXT, this.width / 2 - 153, 164, 0xA0A0A0);
+					graphics.text(this.font, LOCATION_ENTRANCE_LABEL_TEXT, this.width / 2 - 153, 164, -6250336);
 					this.locationEntranceField.extractRenderState(graphics, mouseX, mouseY, a);
 
-					graphics.text(this.font, LOCATION_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 129, 0xA0A0A0);
+					graphics.text(this.font, LOCATION_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 129, -6250336);
 					this.locationDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-					graphics.text(this.font, LOCATION_ENTRANCE_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 164, 0xA0A0A0);
+					graphics.text(this.font, LOCATION_ENTRANCE_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 164, -6250336);
 					this.entranceDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 				} else if (this.locationModeScreenPage == LocationModeScreenPage.PAGE_2) {
 
-					graphics.text(this.font, LOCATION_DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 129, 0xA0A0A0);
+					graphics.text(this.font, LOCATION_DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 129, -6250336);
 					this.locationDataIdField.extractRenderState(graphics, mouseX, mouseY, a);
-					graphics.text(this.font, LOCATION_DATA_LABEL_TEXT, this.width / 2 - 153, 164, 0xA0A0A0);
+					graphics.text(this.font, LOCATION_DATA_LABEL_TEXT, this.width / 2 - 153, 164, -6250336);
 					this.locationDataField.extractRenderState(graphics, mouseX, mouseY, a);
 
-					graphics.text(this.font, SEND_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 129, 0xA0A0A0);
+					graphics.text(this.font, SEND_DATA_ID_LABEL_TEXT, this.width / 2 + 5, 129, -6250336);
 					this.sendDataIdentifierDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
-					graphics.text(this.font, SEND_DATA_VALUE_LABEL_TEXT, this.width / 2 + 5, 164, 0xA0A0A0);
+					graphics.text(this.font, SEND_DATA_VALUE_LABEL_TEXT, this.width / 2 + 5, 164, -6250336);
 					this.sendDataValueDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 				}
 			}
 		} else if (this.creativeScreenPage == TeleporterBlockEntity.CreativeScreenPage.ON_TELEPORT_EVENTS) {
 
-			graphics.text(this.font, PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, PRE_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.preTeleportTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.preTeleportTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.preTeleportTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, ON_TELEPORT_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, ON_TELEPORT_UUID_LIST_PROVIDER_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.onTeleportUUIDListHandlerPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.onTeleportUUIDListHandlerPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.onTeleportUUIDListHandlerPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			graphics.text(this.font, POST_TELEPORT_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 150, -6250336);
 			this.postTeleportTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.postTeleportTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.postTeleportTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

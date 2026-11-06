@@ -190,22 +190,22 @@ public class InteractiveLootBlockScreen extends Screen {
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.lootBlockMode == InteractiveLootBlockEntity.Mode.VANILLA) {
-			graphics.text(this.font, LOOT_TABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
+			graphics.text(this.font, LOOT_TABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, -6250336);
 		} else {
-			graphics.text(this.font, LOOTABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, 0xA0A0A0);
+			graphics.text(this.font, LOOTABLE_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 20, -6250336);
 		}
 		this.lootTableIdentifierStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.lootBlockMode != InteractiveLootBlockEntity.Mode.VANILLA) {
-			graphics.text(this.font, ROLLS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+			graphics.text(this.font, ROLLS_LABEL_TEXT, this.width / 2 - 153, 79, -6250336);
 			this.rollsField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 
 		if (this.lootBlockMode == InteractiveLootBlockEntity.Mode.CHOICE) {
-			graphics.text(this.font, CHOICES_LABEL_TEXT, this.width / 2 - 49, 79, 0xA0A0A0);
+			graphics.text(this.font, CHOICES_LABEL_TEXT, this.width / 2 - 49, 79, -6250336);
 			this.choicesField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
-		graphics.text(this.font, TRACK_PLAYERS_LABEL_TEXT, this.width / 2 + 55, 79, 0xA0A0A0);
+		graphics.text(this.font, TRACK_PLAYERS_LABEL_TEXT, this.width / 2 + 55, 79, -6250336);
 		this.lootAcquiredMessageField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.lootAcquiredSoundIdField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.alreadyLootedMessageField.extractRenderState(graphics, mouseX, mouseY, a);

@@ -47,7 +47,9 @@ public class RedstoneTriggerBlockScreen extends AbstractCreativeBlockSettingsScr
 		this.triggeredBlockPositionOffsetZField.setValue(Integer.toString(this.redstoneTriggerBlock.getTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 		this.triggeredBlockResets = this.redstoneTriggerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 8, 115, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 115, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -88,7 +90,7 @@ public class RedstoneTriggerBlockScreen extends AbstractCreativeBlockSettingsScr
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 105, -6250336);
 		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

@@ -147,7 +147,10 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 		super.init();
 
 		this.screenPage = ScreenPage.MISC;
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -190,7 +193,9 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.overrideTriggeredBlockPosOffsetZField.setValue(Integer.toString(this.triggeredRNGBlock.getOverrideTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.overrideTriggeredBlockPosOffsetZField);
 		this.overrideTriggeredBlockResets = this.triggeredRNGBlock.getOverrideTriggeredBlock().getRight();
-		this.toggleOverrideTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.overrideTriggeredBlockResets).create(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, overrideTriggeredBlockResets) -> {
+		this.toggleOverrideTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.overrideTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 160, 150, 20, Component.empty(), (button, overrideTriggeredBlockResets) -> {
 			this.overrideTriggeredBlockResets = overrideTriggeredBlockResets;
 		}));
 
@@ -202,11 +207,15 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.influencingAttributeIdentifierField);
 
 		this.checksTeamAttributes = this.triggeredRNGBlock.checksTeamAttributes();
-		this.toggleChecksTeamAttributesButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_CHECKS_TEAM_ATTRIBUTES_BUTTON_LABEL_TEXT_ON, TOGGLE_CHECKS_TEAM_ATTRIBUTES_BUTTON_LABEL_TEXT_OFF, this.checksTeamAttributes).create(this.width / 2 - 154, 79, 150, 20, Component.empty(), (button, checksTeamAttributes) -> {
+		this.toggleChecksTeamAttributesButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_CHECKS_TEAM_ATTRIBUTES_BUTTON_LABEL_TEXT_ON, TOGGLE_CHECKS_TEAM_ATTRIBUTES_BUTTON_LABEL_TEXT_OFF, this.checksTeamAttributes)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 79, 150, 20, Component.empty(), (button, checksTeamAttributes) -> {
 			this.checksTeamAttributes = checksTeamAttributes;
 		}));
 		this.isAffectedByLuck = this.triggeredRNGBlock.isAffectedByLuck();
-		this.toggleIsAffectedByLuckButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_IS_AFFECTED_BY_LUCK_BUTTON_LABEL_TEXT_ON, TOGGLE_IS_AFFECTED_BY_LUCK_BUTTON_LABEL_TEXT_OFF, this.isAffectedByLuck).create(this.width / 2 + 8, 79, 150, 20, Component.empty(), (button, isAffectedByLuck) -> {
+		this.toggleIsAffectedByLuckButton = this.addRenderableWidget(CycleButton.booleanBuilder(TOGGLE_IS_AFFECTED_BY_LUCK_BUTTON_LABEL_TEXT_ON, TOGGLE_IS_AFFECTED_BY_LUCK_BUTTON_LABEL_TEXT_OFF, this.isAffectedByLuck)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 79, 150, 20, Component.empty(), (button, isAffectedByLuck) -> {
 			this.isAffectedByLuck = isAffectedByLuck;
 		}));
 
@@ -232,7 +241,9 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.fallbackTriggeredBlockPosOffsetZField.setValue(Integer.toString(this.triggeredRNGBlock.getFallbackTriggeredBlock().getLeft().getZ()));
 		this.addWidget(this.fallbackTriggeredBlockPosOffsetZField);
 		this.fallbackTriggeredBlockResets = this.triggeredRNGBlock.getFallbackTriggeredBlock().getRight();
-		this.toggleFallbackTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.fallbackTriggeredBlockResets).create(this.width / 2 + 8, 149, 150, 20, Component.empty(), (button, fallbackTriggeredBlockResets) -> {
+		this.toggleFallbackTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.fallbackTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 149, 150, 20, Component.empty(), (button, fallbackTriggeredBlockResets) -> {
 			this.fallbackTriggeredBlockResets = fallbackTriggeredBlockResets;
 		}));
 
@@ -260,7 +271,9 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.newTriggeredBlockPositionOffsetZField);
 
 		this.newTriggeredBlockResets = false;
-		this.toggleNewTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newTriggeredBlockResets).create(this.width / 2 + 4, 151, 150, 20, Component.empty(), (button, newTriggeredBlockResets) -> {
+		this.toggleNewTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 151, 150, 20, Component.empty(), (button, newTriggeredBlockResets) -> {
 			this.newTriggeredBlockResets = newTriggeredBlockResets;
 		}));
 
@@ -485,34 +498,34 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 
 		if (this.screenPage == ScreenPage.DATA_DRIVEN_OVERRIDE) {
 
-			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, OVERRIDE_DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, OVERRIDE_DATA_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.overrideDataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, OVERRIDE_DATA_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, OVERRIDE_DATA_VALUE_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.overrideDataValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, OVERRIDE_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
+			graphics.text(this.font, OVERRIDE_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 150, -6250336);
 			this.overrideTriggeredBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.overrideTriggeredBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.overrideTriggeredBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.MISC) {
 
-			graphics.text(this.font, INFLUENCING_ATTRIBUTE_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, INFLUENCING_ATTRIBUTE_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.influencingAttributeIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, RANDOM_MIN_VALUE_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			graphics.text(this.font, RANDOM_MIN_VALUE_LABEL_TEXT, this.width / 2 - 153, 104, -6250336);
 			this.randomMinValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, RANDOM_MAX_VALUE_LABEL_TEXT, this.width / 2 + 5, 104, 0xA0A0A0);
+			graphics.text(this.font, RANDOM_MAX_VALUE_LABEL_TEXT, this.width / 2 + 5, 104, -6250336);
 			this.randomMaxValueField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, FALLBACK_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			graphics.text(this.font, FALLBACK_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 139, -6250336);
 			this.fallbackTriggeredBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.fallbackTriggeredBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.fallbackTriggeredBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
@@ -523,19 +536,19 @@ public class TriggeredRNGBlockScreen extends AbstractCreativeBlockSettingsScreen
 				MutablePair<MutablePair<BlockPos, Boolean>, Integer> triggeredBlock = this.triggeredBlocks.get(i);
 				BlockPos triggeredBlockPos = triggeredBlock.left.left;
 				MutableComponent text = Component.translatable("gui.triggered_block.list.entry", triggeredBlockPos.getX(), triggeredBlockPos.getY(), triggeredBlockPos.getZ()).append(triggeredBlock.left.right ? Component.translatable("gui.triggered_block.list.is_reset") : Component.translatable("gui.triggered_block.list.is_triggered")).append(Component.translatable("gui.triggered_block.list.threshold", triggeredBlock.right));
-				graphics.text(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
 				int k = (int) (79.0f * this.scrollAmount);
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 44 + 1 + k, 6, 7);
 			}
-			graphics.text(this.font, NEW_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 141, 0xA0A0A0);
+			graphics.text(this.font, NEW_TRIGGERED_BLOCK_POS_OFFSET_LABEL_TEXT, this.width / 2 - 153, 141, -6250336);
 			this.newTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, NEW_TRIGGERED_BLOCK_THRESHOLD_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+			graphics.text(this.font, NEW_TRIGGERED_BLOCK_THRESHOLD_LABEL_TEXT, this.width / 2 - 153, 176, -6250336);
 			this.newTriggeredBlockThresholdField.extractRenderState(graphics, mouseX, mouseY, a);
 		}
 	}

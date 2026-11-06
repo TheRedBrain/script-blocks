@@ -76,7 +76,7 @@ public class UseRelayBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		graphics.text(this.font, RELAY_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 		this.relayBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.relayBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.relayBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

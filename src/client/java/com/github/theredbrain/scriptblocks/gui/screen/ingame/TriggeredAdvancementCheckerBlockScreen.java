@@ -140,15 +140,15 @@ public class TriggeredAdvancementCheckerBlockScreen extends Screen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 60, 0xA0A0A0);
+		graphics.text(this.font, FIRST_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 60, -6250336);
 		this.firstTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.firstTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.firstTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 95, 0xA0A0A0);
+		graphics.text(this.font, SECOND_TRIGGERED_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 95, -6250336);
 		this.secondTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.secondTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.secondTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, 0xA0A0A0);
+		graphics.text(this.font, CHECKED_ADVANCEMENT_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 130, -6250336);
 		this.checkedAdvancementIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 

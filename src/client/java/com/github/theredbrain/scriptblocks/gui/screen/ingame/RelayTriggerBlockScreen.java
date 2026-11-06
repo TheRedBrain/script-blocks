@@ -141,7 +141,10 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		super.init();
 
 		this.selectionMode = this.relayTriggerBlock.getSelectionMode();
-		this.selectionModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.SelectionMode::asText, this.selectionMode).withValues(RelayTriggerBlockEntity.SelectionMode.values()).create(this.width / 2 - 154, 10, 300, 20, Component.empty(), (button, selectionMode) -> {
+		this.selectionModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.SelectionMode::asText, this.selectionMode)
+				.withValues(RelayTriggerBlockEntity.SelectionMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 10, 300, 20, Component.empty(), (button, selectionMode) -> {
 			this.selectionMode = selectionMode;
 			this.updateWidgets();
 		}));
@@ -149,7 +152,9 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		// Area Selection
 
 		this.showArea = this.relayTriggerBlock.getShowArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 34, 300, 20, Component.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 34, 300, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -184,7 +189,9 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.areaPositionOffsetZField);
 
 		this.resetsArea = this.relayTriggerBlock.getResetsArea();
-		this.toggleResetsAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(RESETS_AREA_LABEL_TEXT, TRIGGERS_AREA_LABEL_TEXT, this.resetsArea).create(this.width / 2 - 154, 128, 300, 20, Component.empty(), (button, resetsArea) -> {
+		this.toggleResetsAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(RESETS_AREA_LABEL_TEXT, TRIGGERS_AREA_LABEL_TEXT, this.resetsArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 128, 300, 20, Component.empty(), (button, resetsArea) -> {
 			this.resetsArea = resetsArea;
 		}));
 
@@ -210,7 +217,9 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.newTriggeredBlockPositionOffsetZField);
 
 		this.newTriggeredBlockResets = false;
-		this.toggleNewTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newTriggeredBlockResets).create(this.width / 2 + 4, 117, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleNewTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 117, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.newTriggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -221,13 +230,18 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addNewTriggeredBlockPositionOffsetButton = this.addRenderableWidget(Button.builder(ADD_NEW_TRIGGERED_BLOCK_BUTTON_LABEL_TEXT, button -> this.addNewTriggeredBlock()).bounds(this.width / 2 - 80, 152, 100, 20).build());
 
 		this.triggerMode = this.relayTriggerBlock.getTriggerMode();
-		this.cycleTriggerModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.TriggerMode::asText, this.triggerMode).withValues(RelayTriggerBlockEntity.TriggerMode.values()).create(this.width / 2 + 24, 152, 130, 20, Component.empty(), (button, triggerMode) -> {
+		this.cycleTriggerModeButton = this.addRenderableWidget(CycleButton.builder(RelayTriggerBlockEntity.TriggerMode::asText, this.triggerMode)
+				.withValues(RelayTriggerBlockEntity.TriggerMode.values())
+				.displayOnlyValue()
+				.create(this.width / 2 + 24, 152, 130, 20, Component.empty(), (button, triggerMode) -> {
 			this.triggerMode = triggerMode;
 			this.updateWidgets();
 		}));
 
 		this.isTriggerAmountDataDriven = this.relayTriggerBlock.isTriggerAmountDataDriven();
-		this.toggleIsTriggerAmountDataDrivenButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.on"), Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.off"), this.isTriggerAmountDataDriven).create(this.width / 2 - 154, 187, 100, 20, Component.empty(), (button, isTriggerAmountDataDriven) -> {
+		this.toggleIsTriggerAmountDataDrivenButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.on"), Component.translatable("gui.relay_trigger_block.toggle_is_trigger_amount_data_driven_button_label.off"), this.isTriggerAmountDataDriven)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 187, 100, 20, Component.empty(), (button, isTriggerAmountDataDriven) -> {
 			this.isTriggerAmountDataDriven = isTriggerAmountDataDriven;
 			this.updateWidgets();
 		}));
@@ -473,12 +487,12 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 
 		if (this.selectionMode == RelayTriggerBlockEntity.SelectionMode.AREA) {
 
-			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 59, 0xA0A0A0);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 59, -6250336);
 			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 94, 0xA0A0A0);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 94, -6250336);
 			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
@@ -490,7 +504,7 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 				MutableComponent text = Component.translatable("gui.triggered_block.list.entry", triggeredBlockPos.getX(), triggeredBlockPos.getY(), triggeredBlockPos.getZ());
 				if (this.triggerMode == RelayTriggerBlockEntity.TriggerMode.NORMAL) {
 					text.append(triggeredBlock.left.right ? Component.translatable("gui.triggered_block.list.is_reset") : Component.translatable("gui.triggered_block.list.is_triggered"));
-					graphics.text(this.font, text, this.width / 2 - 117, 40 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					graphics.text(this.font, text, this.width / 2 - 117, 40 + ((i - this.scrollPosition) * 24), -6250336);
 				} else {
 					Component text1;
 					if (this.triggerMode == RelayTriggerBlockEntity.TriggerMode.RANDOM) {
@@ -498,8 +512,8 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 					} else {
 						text1 = Component.translatable("gui.triggered_block.list.weight", triggeredBlock.right);
 					}
-					graphics.text(this.font, text, this.width / 2 - 117, 35 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
-					graphics.text(this.font, text1, this.width / 2 - 117, 45 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					graphics.text(this.font, text, this.width / 2 - 117, 35 + ((i - this.scrollPosition) * 24), -6250336);
+					graphics.text(this.font, text1, this.width / 2 - 117, 45 + ((i - this.scrollPosition) * 24), -6250336);
 				}
 			}
 			if (this.triggeredBlocks.size() > VISIBLE_LIST_ELEMENTS) {
@@ -507,30 +521,30 @@ public class RelayTriggerBlockScreen extends AbstractCreativeBlockSettingsScreen
 				int k = (int) (59.0f * this.scrollAmount);
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 34 + 1 + k, 6, 7);
 			}
-			graphics.text(this.font, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 107, 0xA0A0A0);
+			graphics.text(this.font, NEW_TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 153, 107, -6250336);
 			this.newTriggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newTriggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.newTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 			if (this.triggerMode != RelayTriggerBlockEntity.TriggerMode.NORMAL) {
-				graphics.text(this.font, NEW_POSITION_CHANCE_FIELD_LABEL_TEXT, this.width / 2 - 153, 142, 0xA0A0A0);
+				graphics.text(this.font, NEW_POSITION_CHANCE_FIELD_LABEL_TEXT, this.width / 2 - 153, 142, -6250336);
 				this.newTriggeredBlockChanceField.extractRenderState(graphics, mouseX, mouseY, a);
 
 				if (this.triggerMode != RelayTriggerBlockEntity.TriggerMode.RANDOM) {
 
 					if (this.isTriggerAmountDataDriven) {
 
-						graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 49, 177, 0xA0A0A0);
+						graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 49, 177, -6250336);
 						this.dataProvidingBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 						this.dataProvidingBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 						this.dataProvidingBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-						graphics.text(this.font, DATA_IDENTIFIER_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, 0xA0A0A0);
+						graphics.text(this.font, DATA_IDENTIFIER_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, -6250336);
 						this.dataIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 
 					} else {
 
-						graphics.text(this.font, TRIGGER_AMOUNT_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, 0xA0A0A0);
+						graphics.text(this.font, TRIGGER_AMOUNT_FIELD_LABEL_TEXT, this.width / 2 + 75, 177, -6250336);
 						this.triggerAmountField.extractRenderState(graphics, mouseX, mouseY, a);
 
 					}

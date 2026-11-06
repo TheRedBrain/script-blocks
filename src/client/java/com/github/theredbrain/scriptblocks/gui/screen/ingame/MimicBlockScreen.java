@@ -94,12 +94,12 @@ public class MimicBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 71, 0xA0A0A0);
+		graphics.text(this.font, ACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 71, -6250336);
 		this.activeMimicBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.activeMimicBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.activeMimicBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+		graphics.text(this.font, INACTIVE_MIMIC_BLOCK_POSITION_LABEL_TEXT, this.width / 2 - 153, 104, -6250336);
 		this.inactiveMimicBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.inactiveMimicBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.inactiveMimicBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

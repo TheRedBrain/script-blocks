@@ -96,13 +96,18 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 
 	@Override
 	protected void init() {
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).displayOnlyValue().create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values()).displayOnlyValue()
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.showArea = this.teamControllerBlockEntity.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).displayOnlyValue().create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -152,7 +157,9 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.pvpControllerBlockPositionOffsetZField);
 
 		this.enableTicking = this.teamControllerBlockEntity.enableTicking();
-		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking).displayOnlyValue().create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, enableTicking) -> {
+		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 44, 300, 20, Component.empty(), (button, enableTicking) -> {
 			this.enableTicking = enableTicking;
 		}));
 
@@ -171,30 +178,43 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.cycleTeamColorButton = this.addRenderableWidget(Button.builder(getTeamColorLabel(this.teamColor), (button) -> this.cycleTeamColor()).bounds(this.width / 2 - 154, 125, 100, 20).build());
 
 		this.friendlyFire = this.teamControllerBlockEntity.friendlyFire();
-		this.toggleFriendlyFireButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.literal("True"), Component.literal("False"), this.friendlyFire).displayOnlyValue().create(this.width / 2 - 50, 125, 100, 20, Component.empty(), (button, friendlyFire) -> {
+		this.toggleFriendlyFireButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.literal("True"), Component.literal("False"), this.friendlyFire)
+				.displayOnlyValue()
+				.create(this.width / 2 - 50, 125, 100, 20, Component.empty(), (button, friendlyFire) -> {
 			this.friendlyFire = friendlyFire;
 		}));
 
 		this.showFriendlyInvisibles = this.teamControllerBlockEntity.showFriendlyInvisibles();
-		this.toggleShowFriendlyInvisiblesButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.literal("True"), Component.literal("False"), this.showFriendlyInvisibles).displayOnlyValue().create(this.width / 2 + 54, 125, 100, 20, Component.empty(), (button, showFriendlyInvisibles) -> {
+		this.toggleShowFriendlyInvisiblesButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.literal("True"), Component.literal("False"), this.showFriendlyInvisibles)
+				.displayOnlyValue()
+				.create(this.width / 2 + 54, 125, 100, 20, Component.empty(), (button, showFriendlyInvisibles) -> {
 			this.showFriendlyInvisibles = showFriendlyInvisibles;
 		}));
 
 		Team.Visibility var = this.teamControllerBlockEntity.getNametagVisibility();
 		this.nametagVisibility = var != null ? var : Team.Visibility.ALWAYS;
-		this.cycleNametagVisibilityButton = this.addRenderableWidget(CycleButton.builder(Team.Visibility::getDisplayName, this.nametagVisibility).withValues(Team.Visibility.values()).displayOnlyValue().create(this.width / 2 - 154, 160, 100, 20, Component.empty(), (button, nametagVisibility) -> {
+		this.cycleNametagVisibilityButton = this.addRenderableWidget(CycleButton.builder(Team.Visibility::getDisplayName, this.nametagVisibility)
+				.withValues(Team.Visibility.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 160, 100, 20, Component.empty(), (button, nametagVisibility) -> {
 			this.nametagVisibility = nametagVisibility;
 		}));
 
 		Team.Visibility var1 = this.teamControllerBlockEntity.getDeathMessageVisibility();
 		this.deathMessageVisibility = var1 != null ? var1 : Team.Visibility.ALWAYS;
-		this.cycleDeathMessageVisibilityButton = this.addRenderableWidget(CycleButton.builder(Team.Visibility::getDisplayName, this.deathMessageVisibility).withValues(Team.Visibility.values()).displayOnlyValue().create(this.width / 2 - 50, 160, 100, 20, Component.empty(), (button, deathMessageVisibility) -> {
+		this.cycleDeathMessageVisibilityButton = this.addRenderableWidget(CycleButton.builder(Team.Visibility::getDisplayName, this.deathMessageVisibility)
+				.withValues(Team.Visibility.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 50, 160, 100, 20, Component.empty(), (button, deathMessageVisibility) -> {
 			this.deathMessageVisibility = deathMessageVisibility;
 		}));
 
 		Team.CollisionRule var2 = this.teamControllerBlockEntity.getCollisionRule();
 		this.collisionRule = var2 != null ? var2 : Team.CollisionRule.ALWAYS;
-		this.cycleCollisionRuleButton = this.addRenderableWidget(CycleButton.builder(Team.CollisionRule::getDisplayName, this.collisionRule).withValues(Team.CollisionRule.values()).displayOnlyValue().create(this.width / 2 + 54, 160, 100, 20, Component.empty(), (button, collisionRule) -> {
+		this.cycleCollisionRuleButton = this.addRenderableWidget(CycleButton.builder(Team.CollisionRule::getDisplayName, this.collisionRule)
+				.withValues(Team.CollisionRule.values())
+				.displayOnlyValue()
+				.create(this.width / 2 + 54, 160, 100, 20, Component.empty(), (button, collisionRule) -> {
 			this.collisionRule = collisionRule;
 		}));
 
@@ -338,31 +358,31 @@ public class TeamControllerBlockScreen extends AbstractCreativeBlockSettingsScre
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
 		if (this.screenPage == ScreenPage.AREA) {
-			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, -6250336);
 			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, -6250336);
 			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, 0xA0A0A0);
+			graphics.text(this.font, PVP_CONTROLLER_BLOCK_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 139, -6250336);
 			this.pvpControllerBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.pvpControllerBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.pvpControllerBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.TEAM) {
-			graphics.text(this.font, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, TEAM_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.teamIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, DISPLAY_NAME_LABEL_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.displayNameField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
-			graphics.text(this.font, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, 0xA0A0A0);
-			graphics.text(this.font, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, 0xA0A0A0);
-			graphics.text(this.font, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, 0xA0A0A0);
-			graphics.text(this.font, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, 0xA0A0A0);
-			graphics.text(this.font, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, 0xA0A0A0);
-			graphics.text(this.font, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, 0xA0A0A0);
-			graphics.text(this.font, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, 0xA0A0A0);
+			graphics.text(this.font, TEAM_COLOR_LABEL_TEXT, this.width / 2 - 153, 115, -6250336);
+			graphics.text(this.font, FRIENDLY_FIRE_LABEL_TEXT, this.width / 2 - 49, 115, -6250336);
+			graphics.text(this.font, FRIENDLY_INVISIBLES_LABEL_TEXT, this.width / 2 + 55, 115, -6250336);
+			graphics.text(this.font, NAME_TAG_VISIBILITY_LABEL_TEXT, this.width / 2 - 153, 150, -6250336);
+			graphics.text(this.font, DEATH_MESSAGE_VISIBILITY_LABEL_TEXT, this.width / 2 - 49, 150, -6250336);
+			graphics.text(this.font, COLLISION_RULE_LABEL_TEXT, this.width / 2 + 55, 150, -6250336);
+			graphics.text(this.font, PREFIX_LABEL_TEXT, this.width / 2 - 153, 185, -6250336);
+			graphics.text(this.font, SUFFIX_LABEL_TEXT, this.width / 2 + 5, 185, -6250336);
 			this.prefixField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.suffixField.extractRenderState(graphics, mouseX, mouseY, a);
 		}

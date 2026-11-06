@@ -276,21 +276,21 @@ public class SpawnPointDelegationBlockScreen extends AbstractCreativeBlockSettin
 
 			graphics.text(this.font,
 					Component.translatable("gui.spawn_point_delegation_block.list.entry.1", delegatedSpawnPoint.pos().getX(), delegatedSpawnPoint.pos().getY(), delegatedSpawnPoint.pos().getZ()),
-					this.width / 2 - 117, 21 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					this.width / 2 - 117, 21 + ((i - this.scrollPosition) * 24), -6250336);
 			graphics.text(this.font,
 					Component.translatable("gui.spawn_point_delegation_block.list.entry.2", delegatedSpawnPoint.yaw(), delegatedSpawnPoint.pitch()),
-					this.width / 2 - 117, 31 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+					this.width / 2 - 117, 31 + ((i - this.scrollPosition) * 24), -6250336);
 		}
 		if (this.delegatedSpawnPoints.size() > VISIBLE_LIST_ELEMENTS) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 20, 8, 92);
 			int k = (int) (83.0f * this.scrollAmount);
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 152, 20 + 1 + k, 6, 7);
 		}
-		graphics.text(this.font, NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 141, 0xA0A0A0);
+		graphics.text(this.font, NEW_DELEGATED_SPAWN_POINT_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 141, -6250336);
 		this.newDelegatedSpawnPointPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newDelegatedSpawnPointPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newDelegatedSpawnPointPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 176, 0xA0A0A0);
+		graphics.text(this.font, NEW_DELEGATED_SPAWN_POINT_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 176, -6250336);
 		this.newDelegatedSpawnPointOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newDelegatedSpawnPointOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 	}

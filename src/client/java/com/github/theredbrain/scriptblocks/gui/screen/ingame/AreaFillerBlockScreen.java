@@ -45,7 +45,9 @@ public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 	protected void init() {
 
 		this.showArea = this.areaFillerBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea).create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(HIDE_AREA_LABEL_TEXT, SHOW_AREA_LABEL_TEXT, this.showArea)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 54, 300, 20, Component.empty(), (button, showApplicationArea) -> {
 			this.showArea = showApplicationArea;
 		}));
 
@@ -121,17 +123,17 @@ public class AreaFillerBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, 0xA0A0A0);
+		graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 79, -6250336);
 		this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, 0xA0A0A0);
+		graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 114, -6250336);
 		this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, BLOCK_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 149, 0xA0A0A0);
+		graphics.text(this.font, BLOCK_IDENTIFIER_LABEL_TEXT, this.width / 2 - 153, 149, -6250336);
 		this.blockIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 

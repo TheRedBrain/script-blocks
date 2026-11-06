@@ -84,18 +84,25 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 	@Override
 	protected void init() {
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 308, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
 
 		this.enableTicking = this.playerDetectorBlock.enableTicking();
-		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking).create(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, enableTicking) -> {
+		this.toggleEnableTickingButton = this.addRenderableWidget(CycleButton.booleanBuilder(ENABLE_TICKING_TRUE_LABEL_TEXT, ENABLE_TICKING_FALSE_LABEL_TEXT, this.enableTicking)
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 44, 150, 20, Component.empty(), (button, enableTicking) -> {
 			this.enableTicking = enableTicking;
 		}));
 
 		this.showArea = this.playerDetectorBlock.showArea();
-		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_LABEL_TRUE_TEXT, SHOW_AREA_LABEL_FALSE_TEXT, this.showArea).create(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showArea) -> {
+		this.toggleShowAreaButton = this.addRenderableWidget(CycleButton.booleanBuilder(SHOW_AREA_LABEL_TRUE_TEXT, SHOW_AREA_LABEL_FALSE_TEXT, this.showArea)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 44, 150, 20, Component.empty(), (button, showArea) -> {
 			this.showArea = showArea;
 		}));
 
@@ -144,7 +151,9 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.triggeredBlockOnEnteringPositionOffsetZField);
 
 		this.triggeredBlockOnEnteringResets = this.playerDetectorBlock.getOnEnteringTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnEnteringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnEnteringResets).create(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnEnteringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnEnteringResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 55, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnEnteringResets = triggeredBlockResets;
 		}));
 
@@ -162,7 +171,9 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.triggeredBlockOnLeavingPositionOffsetZField);
 
 		this.triggeredBlockOnLeavingResets = this.playerDetectorBlock.getOnLeavingTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnLeavingResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnLeavingResets).create(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnLeavingResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnLeavingResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 90, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnLeavingResets = triggeredBlockResets;
 		}));
 
@@ -180,7 +191,9 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 		this.addWidget(this.triggeredBlockOnTriggeringPositionOffsetZField);
 
 		this.triggeredBlockOnTriggeringResets = this.playerDetectorBlock.getOnTriggeringTriggeredBlock().getRight();
-		this.toggleTriggeredBlockOnTriggeringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnTriggeringResets).create(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockOnTriggeringResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockOnTriggeringResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 125, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockOnTriggeringResets = triggeredBlockResets;
 		}));
 
@@ -403,45 +416,45 @@ public class PlayerDetectorBlockScreen extends AbstractCreativeBlockSettingsScre
 
 		if (this.screenPage == ScreenPage.AREA) {
 
-			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, 0xA0A0A0);
+			graphics.text(this.font, AREA_DIMENSIONS_LABEL_TEXT, this.width / 2 - 153, 69, -6250336);
 			this.areaDimensionsXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaDimensionsZField.extractRenderState(graphics, mouseX, mouseY, a);
-			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, 0xA0A0A0);
+			graphics.text(this.font, AREA_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 104, -6250336);
 			this.areaPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.areaPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.TRIGGERED_BLOCK_OFFSETS) {
 
-			graphics.text(this.font, TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.triggeredBlockOnEnteringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockOnEnteringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockOnEnteringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.triggeredBlockOnLeavingPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockOnLeavingPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockOnLeavingPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, TRIGGERED_BLOCK_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.triggeredBlockOnTriggeringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockOnTriggeringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.triggeredBlockOnTriggeringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		} else if (this.screenPage == ScreenPage.UUID_LIST_HANDLER_OFFSETS) {
 
-			graphics.text(this.font, UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, 0xA0A0A0);
+			graphics.text(this.font, UUID_LIST_HANDLER_ON_ENTERING_POSITION_TEXT, this.width / 2 - 153, 45, -6250336);
 			this.uuidListHandlerOnEnteringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerOnEnteringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerOnEnteringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, 0xA0A0A0);
+			graphics.text(this.font, UUID_LIST_HANDLER_ON_LEAVING_POSITION_TEXT, this.width / 2 - 153, 80, -6250336);
 			this.uuidListHandlerOnLeavingPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerOnLeavingPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerOnLeavingPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 
-			graphics.text(this.font, UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, 0xA0A0A0);
+			graphics.text(this.font, UUID_LIST_HANDLER_ON_TRIGGERING_POSITION_TEXT, this.width / 2 - 153, 115, -6250336);
 			this.uuidListHandlerOnTriggeringPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerOnTriggeringPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.uuidListHandlerOnTriggeringPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

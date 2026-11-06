@@ -94,11 +94,11 @@ public class EntranceDelegationBlockScreen extends Screen {
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, 0xA0A0A0);
+		graphics.text(this.font, DELEGATED_ENTRANCE_POSITION_OFFET_LABEL_TEXT, this.width / 2 - 153, 70, -6250336);
 		this.mainEntrancePositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.mainEntrancePositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.mainEntrancePositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, DELEGATED_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, 0xA0A0A0);
+		graphics.text(this.font, DELEGATED_ENTRANCE_ORIENTATION_LABEL_TEXT, this.width / 2 - 153, 105, -6250336);
 		this.mainEntranceOrientationYawField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.mainEntranceOrientationPitchField.extractRenderState(graphics, mouseX, mouseY, a);
 	}

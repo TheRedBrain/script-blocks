@@ -244,7 +244,10 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 
 		super.init();
 
-		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage).withValues(ScreenPage.values()).create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
+		this.cycleScreenPageButton = this.addRenderableWidget(CycleButton.builder(ScreenPage::asText, this.screenPage)
+				.withValues(ScreenPage.values())
+				.displayOnlyValue()
+				.create(this.width / 2 - 154, 20, 300, 20, Component.empty(), (button, screenPage) -> {
 			this.screenPage = screenPage;
 			this.updateWidgets();
 		}));
@@ -308,7 +311,9 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 		this.addWidget(this.newDialogueTriggeredBlockPositionOffsetZField);
 
 		this.newDialogueTriggeredBlockResets = false;
-		this.toggleNewDialogueTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newDialogueTriggeredBlockResets).create(this.width / 2 + 8, 188, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleNewDialogueTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.triggered_block.toggle_triggered_block_resets_button_label.off"), this.newDialogueTriggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 8, 188, 150, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.newDialogueTriggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -629,7 +634,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_SMALL_LIST_ENTRIES, this.dialogueUsedBlocksList.size()); i++) {
 				BlockPos usedBlockPos = this.dialogueUsedBlocksList.get(i).getRight();
 				MutableComponent text = Component.translatable("gui.dialogue_block.used_blocks_list.entry", this.dialogueUsedBlocksList.get(i).getLeft(), usedBlockPos.getX(), usedBlockPos.getY(), usedBlockPos.getZ());
-				graphics.text(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.dialogueUsedBlocksList.size() > VISIBLE_SMALL_LIST_ENTRIES) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
@@ -644,7 +649,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_SMALL_LIST_ENTRIES, this.dialogueTriggeredBlocksList.size()); i++) {
 				BlockPos usedBlockPos = this.dialogueTriggeredBlocksList.get(i).getRight().getLeft();
 				MutableComponent text = Component.translatable("gui.dialogue_block.triggered_blocks_list.entry", this.dialogueTriggeredBlocksList.get(i).getLeft(), this.dialogueTriggeredBlocksList.get(i).getRight().getRight() ? Component.translatable("gui.dialogue_block.triggered_blocks_list.resets") : Component.translatable("gui.dialogue_block.triggered_blocks_list.triggers"), usedBlockPos.getX(), usedBlockPos.getY(), usedBlockPos.getZ());
-				graphics.text(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, text, this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.dialogueTriggeredBlocksList.size() > VISIBLE_SMALL_LIST_ENTRIES) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_92_TEXTURE, this.width / 2 - 153, 44, 8, 92);
@@ -657,7 +662,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 			this.newDialogueTriggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.STARTING_DIALOGUES) {
 			for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LARGE_LIST_ENTRIES, this.startingDialogueList.size()); i++) {
-				graphics.text(this.font, Component.translatable(this.startingDialogueList.get(i)), this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), 0xA0A0A0);
+				graphics.text(this.font, Component.translatable(this.startingDialogueList.get(i)), this.width / 2 - 117, 50 + ((i - this.scrollPosition) * 24), -6250336);
 			}
 			if (this.startingDialogueList.size() > VISIBLE_LARGE_LIST_ENTRIES) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_116_TEXTURE, this.width / 2 - 153, 44, 8, 116);
@@ -667,7 +672,7 @@ public class DialogueBlockScreen extends AbstractCreativeBlockSettingsScreen {
 			this.newStartingDialogueIdentifierField.extractRenderState(graphics, mouseX, mouseY, a);
 		} else if (this.screenPage == ScreenPage.DATA_BLOCK_OFFSET) {
 
-			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 106, 0xA0A0A0);
+			graphics.text(this.font, DATA_PROVIDING_BLOCK_POSITION_OFFSET_LABEL_TEXT, this.width / 2 - 153, 106, -6250336);
 			this.dataProvidingBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 			this.dataProvidingBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);

@@ -167,6 +167,8 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.joint = this.jigsawPlacerBlock.getJoint();
 		this.jointRotationButton = this.addRenderableWidget(
 				CycleButton.builder(JigsawBlockEntity.JointType::getTranslatedName, this.joint)
+						.withValues(JigsawBlockEntity.JointType.values())
+						.displayOnlyValue()
 						.create(this.width / 2 + 5 + jointTextWidth + 4, 162, 200 - 5 - jointTextWidth, 20, JOINT_LABEL_TEXT, (button, joint) -> this.joint = joint)
 		);
 		boolean bl;
@@ -190,7 +192,9 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 		this.addWidget(this.triggeredBlockPositionOffsetZField);
 
 		this.triggeredBlockResets = this.jigsawPlacerBlock.getTriggeredBlock().getRight();
-		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets).create(this.width / 2 + 4, 186, 200, 20, Component.empty(), (button, triggeredBlockResets) -> {
+		this.toggleTriggeredBlockResetsButton = this.addRenderableWidget(CycleButton.booleanBuilder(Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.on"), Component.translatable("gui.jigsaw_placer_block.toggle_triggered_block_resets_button_label.off"), this.triggeredBlockResets)
+				.displayOnlyValue()
+				.create(this.width / 2 + 4, 186, 200, 20, Component.empty(), (button, triggeredBlockResets) -> {
 			this.triggeredBlockResets = triggeredBlockResets;
 		}));
 
@@ -308,7 +312,7 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 
 		super.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, STRUCTURE_POOL_STRING_FIELD_TEXT, this.width / 2 - 203, 17, 0xA0A0A0);
+		graphics.text(this.font, STRUCTURE_POOL_STRING_FIELD_TEXT, this.width / 2 - 203, 17, -6250336);
 		this.structurePoolStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
 		for (int i = this.scrollPosition; i < Math.min(this.scrollPosition + VISIBLE_LIST_ELEMENTS, this.structurePoolStringAppendices.size()); i++) {
@@ -317,8 +321,8 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 			MutableComponent text1 = Component.translatable("gui.jigsaw_placer_block.structure_pool_string_appendices.entry.1", dataBlockPositionOffset.getX(), dataBlockPositionOffset.getY(), dataBlockPositionOffset.getZ(), structurePoolStringAppendix.getRight().getLeft());
 			MutableComponent text2 = Component.translatable("gui.jigsaw_placer_block.structure_pool_string_appendices.entry.2", structurePoolStringAppendix.getRight().getRight());
 
-			graphics.text(this.font, text1, this.width / 2 - 167, 41 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
-			graphics.text(this.font, text2, this.width / 2 - 167, 51 + ((i - this.scrollPosition) * 34), 0xA0A0A0);
+			graphics.text(this.font, text1, this.width / 2 - 167, 41 + ((i - this.scrollPosition) * 34), -6250336);
+			graphics.text(this.font, text2, this.width / 2 - 167, 51 + ((i - this.scrollPosition) * 34), -6250336);
 		}
 		if (this.structurePoolStringAppendices.size() > VISIBLE_LIST_ELEMENTS) {
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLL_BAR_BACKGROUND_8_54_TEXTURE, this.width / 2 - 203, 40, 8, 54);
@@ -326,21 +330,21 @@ public class JigsawPlacerBlockScreen extends AbstractCreativeBlockSettingsScreen
 			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, this.width / 2 - 202, 40 + 1 + k, 6, 7);
 		}
 
-		graphics.text(this.font, NEW_DATA_BLOCK_LABEL_TEXT, this.width / 2 - 203, 128, 0xA0A0A0);
+		graphics.text(this.font, NEW_DATA_BLOCK_LABEL_TEXT, this.width / 2 - 203, 128, -6250336);
 		this.newAppendixBlockPosOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newAppendixBlockPosOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newAppendixBlockPosOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.newAppendixDataIdField.extractRenderState(graphics, mouseX, mouseY, a);
-		graphics.text(this.font, NEW_STATIC_APPENDIX_LABEL_TEXT, this.width / 2 + 5, 128, 0xA0A0A0);
+		graphics.text(this.font, NEW_STATIC_APPENDIX_LABEL_TEXT, this.width / 2 + 5, 128, -6250336);
 		this.newStaticAppendixStringField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, TARGET_LABEL_TEXT, this.width / 2 - 203, 168, 0xA0A0A0);
+		graphics.text(this.font, TARGET_LABEL_TEXT, this.width / 2 - 203, 168, -6250336);
 		this.targetField.extractRenderState(graphics, mouseX, mouseY, a);
 
-		graphics.text(this.font, JOINT_LABEL_TEXT, this.width / 2 + 5, 168, 0xA0A0A0);
+		graphics.text(this.font, JOINT_LABEL_TEXT, this.width / 2 + 5, 168, -6250336);
 
 		int textWidth = this.font.width(TRIGGERED_BLOCK_POSITION_TEXT);
-		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 94 - 4 - textWidth, 192, 0xA0A0A0);
+		graphics.text(this.font, TRIGGERED_BLOCK_POSITION_TEXT, this.width / 2 - 94 - 4 - textWidth, 192, -6250336);
 		this.triggeredBlockPositionOffsetXField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetYField.extractRenderState(graphics, mouseX, mouseY, a);
 		this.triggeredBlockPositionOffsetZField.extractRenderState(graphics, mouseX, mouseY, a);
