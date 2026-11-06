@@ -30,7 +30,7 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		ValueOutput.TypedOutputList<LevelData.RespawnData> listAppender = view.list("delegated_spawn_points", LevelData.RespawnData.CODEC);
+		ValueOutput.TypedOutputList<LevelData.RespawnData> listAppender = view.list("delegated_spawn_points_v2", LevelData.RespawnData.CODEC);
 		for (LevelData.RespawnData spawnPoint : this.delegatedSpawnPoints) {
 			listAppender.add(spawnPoint);
 		}
@@ -43,7 +43,7 @@ public class SpawnPointDelegationBlockEntity extends RotatedBlockEntity {
 	protected void loadAdditional(ValueInput view) {
 
 		this.delegatedSpawnPoints.clear();
-		ValueInput.TypedInputList<LevelData.RespawnData> list = view.listOrEmpty("delegated_spawn_points", LevelData.RespawnData.CODEC);
+		ValueInput.TypedInputList<LevelData.RespawnData> list = view.listOrEmpty("delegated_spawn_points_v2", LevelData.RespawnData.CODEC);
 		if (!list.isEmpty()) {
 			for (LevelData.RespawnData spawnPoint : list) {
 				this.delegatedSpawnPoints.add(spawnPoint);

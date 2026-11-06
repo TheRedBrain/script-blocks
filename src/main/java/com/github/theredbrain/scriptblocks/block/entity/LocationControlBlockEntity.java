@@ -54,7 +54,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.store("main_entrance", LevelData.RespawnData.CODEC, this.mainEntrance);
+		view.store("main_entrance_v2", LevelData.RespawnData.CODEC, this.mainEntrance);
 
 		ValueOutput.TypedOutputList<CompoundTag> listAppender = view.list("side_entrances", CompoundTag.CODEC);
 		this.sideEntrances.forEach((key, value) -> {
@@ -91,7 +91,7 @@ public class LocationControlBlockEntity extends RotatedBlockEntity implements Re
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.mainEntrance = view.read("main_entrance", LevelData.RespawnData.CODEC).orElseGet(() -> {
+		this.mainEntrance = view.read("main_entrance_v2", LevelData.RespawnData.CODEC).orElseGet(() -> {
 					CompoundTag nbtCompound = view.read("main_entrance", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 					return LevelData.RespawnData.of(
 							ServerLevel.OVERWORLD,

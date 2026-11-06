@@ -430,8 +430,11 @@ public class TeleporterBlockEntity extends RotatedBlockEntity implements Handles
 
 		return new ExtendedMenuProvider<>() {
 			@Override
-			public ShopScreenHandler.ShopBlockData getScreenOpeningData(ServerPlayer player) {
-				return new ShopScreenHandler.ShopBlockData(teleporterBlockPos);
+			public TeleporterBlockScreenHandler.TeleporterBlockData getScreenOpeningData(ServerPlayer player) {
+				return new TeleporterBlockScreenHandler.TeleporterBlockData(
+						teleporterBlockPos,
+						visibleLocationsList
+				);
 			}
 
 			@Override

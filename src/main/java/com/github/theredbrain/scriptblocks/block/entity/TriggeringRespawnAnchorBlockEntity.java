@@ -50,7 +50,7 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	@Override
 	protected void saveAdditional(ValueOutput view) {
 
-		view.store("spawn_point", LevelData.RespawnData.CODEC, this.spawnPoint);
+		view.store("spawn_point_v2", LevelData.RespawnData.CODEC, this.spawnPoint);
 
 		CompoundTag nbtCompound = new CompoundTag();
 		nbtCompound.store("position_offset", BlockPos.CODEC, this.triggeredBlock.getLeft());
@@ -70,7 +70,7 @@ public class TriggeringRespawnAnchorBlockEntity extends RotatedBlockEntity imple
 	@Override
 	protected void loadAdditional(ValueInput view) {
 
-		this.spawnPoint = view.read("spawn_point", LevelData.RespawnData.CODEC).orElseGet(() -> {
+		this.spawnPoint = view.read("spawn_point_v2", LevelData.RespawnData.CODEC).orElseGet(() -> {
 					CompoundTag nbtCompound = view.read("spawn_point", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 					return LevelData.RespawnData.of(
 							this.getLevel() != null ? this.getLevel().dimension() : ServerLevel.OVERWORLD,
